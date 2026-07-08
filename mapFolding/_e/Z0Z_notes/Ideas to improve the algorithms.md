@@ -23,6 +23,6 @@ advantageous to divide the `PermutationSpace` into four dictionaries:
 
 Then other effects would cascade through the four dictionaries due to other functions.
 
-## Make a 2^n-dimensional version of `thisLeafFoldingIsValid`
+## Make a 2^n-dimensional version of `foldingValid吗`
 
 The math is far less complex with 2^n-dimensional maps: the computational savings might be multiple orders of magnitude.

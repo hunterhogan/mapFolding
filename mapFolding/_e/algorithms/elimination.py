@@ -4,7 +4,7 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
-from mapFolding._e.algorithms.iff import thisLeafFoldingIsValid
+from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
@@ -23,7 +23,7 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
-	return sum(map(thisLeafFoldingIsValid
+	return sum(map(foldingValid吗
 			, map(makeFolding, repeat(permutationSpace)
 		, filter(allUnique吗
 		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(extractUndeterminedPiles(permutationSpace)))))))

@@ -1,3 +1,4 @@
+# ruff: noqa: PLR0911
 # pyright: reportUnknownArgumentType=false
 # pyright: reportUnknownVariableType=false
 """Verify that a folding sequence is possible.
@@ -38,8 +39,8 @@ are non-crease-crossing. This reduction allows multidimensional validation to be
 checking each dimension independently.
 
 This module implements Lunnon's theorem by projecting each dimension axis and testing crease
-pairs for forbidden orderings using the pile-position predicates `thisIsAViolation` and
-`thisIsAViolationComplicated`.
+pairs for forbidden orderings using the pile-position predicates `creaseViolation吗` and
+`creaseViolationComplicated吗`.
 
 Forbidden inequalities
 ----------------------
@@ -90,7 +91,7 @@ if TYPE_CHECKING:
 
 #======== Forbidden inequalities ============================
 
-def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: CallableFunction[[], Leaf | None], getComparandCrease: CallableFunction[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:  # noqa: PLR0911
+def creaseViolationComplicated吗(pile: Pile, pileComparand: Pile, getLeafCrease: CallableFunction[[], Leaf | None], getComparandCrease: CallableFunction[[], Leaf | None], pileOf: Callable[[Leaf], Pile | None]) -> bool:
 	"""Validate that two creases do not cross by checking forbidden pile orderings.
 
 	Mathematics
@@ -170,7 +171,7 @@ def thisIsAViolationComplicated(pile: Pile, pileComparand: Pile, getLeafCrease: 
 			return True
 	return False
 
-def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComparandCrease: Pile) -> bool:
+def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComparandCrease: Pile) -> bool:
 	"""Validate that two creases do not cross using Legendre's simplified inequalities.
 
 	Mathematics
@@ -194,11 +195,11 @@ def thisIsAViolation(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComp
 
 #======== Functions for a `Folding` =============================
 
-def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
+def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	"""You can validate a concrete `Folding` by checking for crease crossings in every dimension.
 
 	This function is the leaf-level validator used after a candidate `Folding` is constructed.
-	For example, `mapFolding._e.algorithms.eliminationCrease` uses `thisLeafFoldingIsValid` [1]
+	For example, `mapFolding._e.algorithms.eliminationCrease` uses `foldingValid吗` [1]
 	to post-filter candidate foldings that already satisfy arithmetic invariants such as
 	`state.foldingCheckSum`.
 
@@ -212,22 +213,22 @@ def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 
 	Algorithm Details
 	-----------------
-	`thisLeafFoldingIsValid` treats each dimension of `mapShape` as a one-dimensional strip
+	`foldingValid吗` treats each dimension of `mapShape` as a one-dimensional strip
 	projection and checks that no pair of potentially-crossing creases violates the forbidden
-	inequalities encoded by `thisIsAViolationComplicated` [3].
+	inequalities encoded by `creaseViolationComplicated吗` [3].
 
-	The leaf-boundary filter in `thisLeafFoldingIsValid` uses a cached leaf count derived from
+	The leaf-boundary filter in `foldingValid吗` uses a cached leaf count derived from
 	`mapFolding.getLeavesTotal` [2].
 
-	`thisLeafFoldingIsValid` enumerates each pair of `(pile, leaf)` positions from `folding`
+	`foldingValid吗` enumerates each pair of `(pile, leaf)` positions from `folding`
 	and combines each pair with each `dimension` index. The parity filter from
 	`matchingParityLeaf` reduces work by skipping pairs that cannot cross in the selected
 	`dimension`.
 
 	Performance Considerations
 	--------------------------
-	`thisLeafFoldingIsValid` defers crease computation by passing thunk functions returned by
-	`callGetCreasePost` into `thisIsAViolationComplicated`. This design avoids computing
+	`foldingValid吗` defers crease computation by passing thunk functions returned by
+	`callGetCreasePost` into `creaseViolationComplicated吗`. This design avoids computing
 	`Leaf` creases for pairs that are rejected by earlier comparisons.
 
 	Parameters
@@ -248,16 +249,16 @@ def thisLeafFoldingIsValid(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 
 	[2] mapFolding.getLeavesTotal
 
-	[3] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
+	[3] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
 	"""
 	foldingFiltered: filterfalse[tuple[int, int]] = filterfalse(lambda pileLeaf: pileLeaf[1] == _leavesTotal(mapShape) - 1, enumerate(folding))  # leafNPlus1 does not exist.
 	leafAndComparand: combinations[tuple[tuple[int, int], tuple[int, int]]] = combinations(foldingFiltered, 2)
 
 	leafAndComparandAcrossDimensions: CartesianProduct[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = CartesianProduct(leafAndComparand, range(_dimensionsTotal(mapShape)))
-	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = matchingParityLeaf(mapShape)
+	parityInThisDimension: Callable[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool] = sameParityLeaf吗(mapShape)
 	leafAndComparandAcrossDimensionsFiltered: filter[tuple[tuple[tuple[int, int], tuple[int, int]], int]] = filter(parityInThisDimension, leafAndComparandAcrossDimensions)
 
-	return all(not thisIsAViolationComplicated(pile, pileComparand, callGetCreasePost(mapShape, leaf, aDimension), callGetCreasePost(mapShape, comparand, aDimension), inThis_pileOf(folding))
+	return all(not creaseViolationComplicated吗(pile, pileComparand, callGetCreasePost(mapShape, leaf, aDimension), callGetCreasePost(mapShape, comparand, aDimension), inThis_pileOf(folding))
 			for ((pile, leaf), (pileComparand, comparand)), aDimension in leafAndComparandAcrossDimensionsFiltered)
 
 @cache
@@ -267,7 +268,7 @@ def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 	(AI generated docstring)
 
 	`_leavesTotal` exists to centralize leaf-count computation for hot validation paths such as
-	`thisLeafFoldingIsValid`. The `functools.cache` decorator memoizes the result per
+	`foldingValid吗`. The `functools.cache` decorator memoizes the result per
 	`mapShape` value [1]. The leaf-count computation uses `mapFolding.getLeavesTotal` [2].
 
 	Parameters
@@ -308,18 +309,18 @@ def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 
 	References
 	----------
-	[1] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+	[1] mapFolding._e.algorithms.iff.foldingValid吗
 	"""
 	return len(mapShape)
 
-def matchingParityLeaf(mapShape: tuple[int, ...]) -> CallableFunction[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
+def sameParityLeaf吗(mapShape: tuple[int, ...]) -> CallableFunction[[tuple[tuple[tuple[int, int], tuple[int, int]], int]], bool]:
 	"""You can build a parity predicate for `Leaf` pairs in a selected `dimension`.
 
 	(AI generated docstring)
 
-	`matchingParityLeaf` returns a predicate that matches the tuple shape produced by
-	`itertools.product` [1] over `(leafAndComparand, dimension)` in `thisLeafFoldingIsValid` [3].
-	The returned predicate delegates to `_matchingParityLeaf` [2].
+	`sameParityLeaf吗` returns a predicate that matches the tuple shape produced by
+	`itertools.product` [1] over `(leafAndComparand, dimension)` in `foldingValid吗` [3].
+	The returned predicate delegates to `_sameParityLeaf吗` [2].
 
 	Parameters
 	----------
@@ -336,22 +337,17 @@ def matchingParityLeaf(mapShape: tuple[int, ...]) -> CallableFunction[[tuple[tup
 	----------
 	[1] itertools.product
 		https://docs.python.org/3/library/itertools.html#itertools.product
-	[2] mapFolding._e.algorithms.iff._matchingParityLeaf
+	[2] mapFolding._e.algorithms.iff._sameParityLeaf吗
 
-	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+	[3] mapFolding._e.algorithms.iff.foldingValid吗
 	"""
 	def repack(aCartesianProduct: tuple[tuple[tuple[int, int], tuple[int, int]], int]) -> bool:
 		((_pile, leaf), (_pileComparand, comparand)), dimension = aCartesianProduct
-		return _matchingParityLeaf(mapShape, leaf, comparand, dimension)
+		return _sameParityLeaf吗(mapShape, leaf, comparand, dimension)
 	return repack
 
-def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, dimension: int) -> bool:
+def _sameParityLeaf吗(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, dimension: int) -> bool:
 	"""You can check whether `leaf` and `comparand` have matching parity in `dimension`.
-
-	(AI generated docstring)
-
-	`_matchingParityLeaf` is a small utility used to skip crease comparisons that cannot cross
-	in `thisLeafFoldingIsValid` [2].
 
 	Parameters
 	----------
@@ -368,17 +364,11 @@ def _matchingParityLeaf(mapShape: tuple[int, ...], leaf: Leaf, comparand: Leaf, 
 	-------
 	hasMatchingParity : bool
 		`True` when `leaf` and `comparand` have matching parity in `dimension`.
-
-	References
-	----------
-	[1] mapFolding._e.algorithms.iff.ImaOddLeaf
-
-	[2] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
 	"""
-	return ImaOddLeaf(mapShape, leaf, dimension) == ImaOddLeaf(mapShape, comparand, dimension)
+	return oddLeaf吗(mapShape, leaf, dimension) == oddLeaf吗(mapShape, comparand, dimension)
 
 @cache
-def ImaOddLeaf(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
+def oddLeaf吗(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 	r"""Compute and memoize the parity bit of `leaf` in `dimension`.
 
 	(AI generated docstring)
@@ -464,7 +454,7 @@ def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> 
 
 	`callGetCreasePost` returns a zero-argument callable that computes the same result as
 	`getCreasePost(mapShape, leaf, dimension)` [1] when the callable is invoked. This thunk shape
-	matches the interface required by `thisIsAViolationComplicated` [2]. `thisLeafFoldingIsValid`
+	matches the interface required by `creaseViolationComplicated吗` [2]. `foldingValid吗`
 	constructs this thunk as part of crease validation [3].
 
 	Parameters
@@ -486,9 +476,9 @@ def callGetCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> 
 	----------
 	[1] mapFolding._e.algorithms.iff.getCreasePost
 
-	[2] mapFolding._e.algorithms.iff.thisIsAViolationComplicated
+	[2] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
 
-	[3] mapFolding._e.algorithms.iff.thisLeafFoldingIsValid
+	[3] mapFolding._e.algorithms.iff.foldingValid吗
 	"""
 	return lambda: getCreasePost(mapShape, leaf, dimension)
 
@@ -565,7 +555,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 	- derives the crease-post leaf using `getCreasePost` [4],
 	- looks up the crease-post leaf pile using pinned assignments,
 	- groups crease pairs by parity using `ImaOddLeaf`,
-	- checks each pair of crease pairs with `thisIsAViolation` [3].
+	- checks each pair of crease pairs with `creaseViolation吗` [3].
 
 	Parameters
 	----------
@@ -584,7 +574,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	[2] mapFolding._e.filters.between
 
-	[3] mapFolding._e.algorithms.iff.thisIsAViolation
+	[3] mapFolding._e.algorithms.iff.creaseViolation吗
 
 	[4] mapFolding._e.algorithms.iff.getCreasePost
 
@@ -603,12 +593,12 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 			pileCrease: int | None = leafToPile.get(leafCrease)
 			if pileCrease is None:
 				continue
-			listPileCreaseByParity[ImaOddLeaf(state.mapShape, leaf, dimension)].append((pile, pileCrease))
+			listPileCreaseByParity[oddLeaf吗(state.mapShape, leaf, dimension)].append((pile, pileCrease))
 		for groupedParity in listPileCreaseByParity:
 			if len(groupedParity) < 2:
 				continue
 			for (pilePrimary, pilePrimaryCrease), (pileComparand, pileComparandCrease) in combinations(groupedParity, 2):
-				if thisIsAViolation(pilePrimary, pileComparand, pilePrimaryCrease, pileComparandCrease):
+				if creaseViolation吗(pilePrimary, pileComparand, pilePrimaryCrease, pileComparandCrease):
 					return True
 	return False
 

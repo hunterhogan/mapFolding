@@ -46,7 +46,7 @@ Current variants:
 
 - `mapFolding/_e/algorithms/eliminationCrease.py`
 	- Specialized to “$2^n$-dimensional” maps (i.e., `mapShape == (2,) * n`), and currently gated in `_e/basecamp.py`.
-	- Uses crease-derived pinning constraints and post-filters foldings by validity (`thisLeafFoldingIsValid`).
+	- Uses crease-derived pinning constraints and post-filters foldings by validity (`foldingValid吗`).
 
 - `mapFolding/_e/algorithms/iff.py`
 	- Validity predicates / “is folding feasible?” logic.
