@@ -174,7 +174,6 @@ def reduceAllPermutationSpaceInEliminationState(state: EliminationState) -> Elim
 		_reducePermutationSpace_HeadsBeforeTails,
 		_reducePermutationSpace_ConditionalPredecessors,
 		_reducePermutationSpace_CrossedCreases,
-
 		_reducePermutationSpace_noConsecutiveDimensions,
 		reducePermutationSpace_leafDomainOf1,
 		_reducePermutationSpace_nakedSubset,
@@ -663,6 +662,7 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 	piles: int = 1
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
+		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
 		pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(permutationSpace)
 
@@ -670,16 +670,8 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 		for pile, leafOptions in filterLeafOptions(thisNotHaveThat吗(unique(pilesUndetermined.values())), pilesUndetermined).items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
-		dequeLeafOptionsAndPiles: deque[tuple[LeafOptions, set[Pile]]] = deque(
-			DOTitems(
-				itemfilter(lambda groupBy: (howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
-			)
-		)
+		for leafOptions, setPiles in DOTitems(itemfilter(lambda groupBy: (howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)):
 
-		while dequeLeafOptionsAndPiles and not permutationSpaceHasNewLeaf:
-			leafOptions, setPiles = dequeLeafOptionsAndPiles.pop()
-
-			sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 			if not (
 				permutationSpace := _reduceLeafSpace(
 					state
@@ -689,8 +681,9 @@ def _reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpac
 				)
 			):
 				return None
-			if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
-				permutationSpaceHasNewLeaf = True
+
+		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
