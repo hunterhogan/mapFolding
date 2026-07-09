@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 from gmpy2 import mpz
+from typing import TypeAlias
 
 #======== Scalars ================================
 
 type DimensionIndex = int
 """Zero-based index of a dimension."""
 
-type Leaf = int
-# TODO Why does this change how everything behaves?
-# LeafOptions: TypeAlias = mpz  # noqa: ERA001
-type LeafOptions = mpz
+Leaf: TypeAlias = int
+LeafOptions: TypeAlias = mpz
 """Represent a set of `Leaf` indices as a bitset.
 
 (AI generated docstring)

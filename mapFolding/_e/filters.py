@@ -50,14 +50,14 @@ References
 """
 from __future__ import annotations
 
-from gmpy2 import mpz
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding._e import 零
+from mapFolding._e.theTypes import Leaf, LeafOptions
 from mapFolding.genericNeedsNewHome import DOTitems
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
 	from typing import TypeIs
 
 #======== Boolean antecedents ================================================
@@ -241,10 +241,10 @@ def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 
 	Returns
 	-------
-	intIsProbablyALeaf : TypeIs[int]
-		Technically, we only know the type is `int`.
+	intIsProbablyALeaf : TypeIs[Leaf]
+		Technically, we only know the type is `Leaf`.
 	"""
-	return isinstance(leafSpace, int)
+	return isinstance(leafSpace, Leaf)
 
 def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	"""Return True if `leafSpace` is a pile's range of leaves.
@@ -259,7 +259,7 @@ def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	youHaveAPileRange : TypeIs[LeafOptions]
 		Congrats, you have a pile range!
 	"""
-	return isinstance(leafSpace, mpz)
+	return isinstance(leafSpace, LeafOptions)
 
 #======== Filtering functions ================================================
 

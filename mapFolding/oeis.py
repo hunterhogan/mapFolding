@@ -783,7 +783,6 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	countTotal: int = -errorL33T
 	matched_oeisID: bool = True
 
-	# TODO convert match/case to if/elif
 	match oeisID:
 		case 'A000136': from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
 		case 'A000560': from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
