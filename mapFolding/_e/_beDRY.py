@@ -102,8 +102,6 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 
 #======== `LeafOptions` functions ================================================
 
-# TODO Should `PermutationSpace` be a subclass of `dict` so I can add methods? NOTE I REFUSE TO BE AN OBJECT-ORIENTED
-# PROGRAMMER!!! But, I'll use some OOP if it makes sense. I think collections has some my-first-dict-subclass functions.
 def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Leaf | None = None) -> Leaf | None:
 	"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
 

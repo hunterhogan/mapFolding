@@ -54,14 +54,15 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.permutationSpace = {pileOrigin: leafOrigin}
-		state.listPermutationSpace = deque([addMissingLeafOptionsToPermutationSpace(state).permutationSpace])
+		state = addMissingLeafOptionsToPermutationSpace(state)
+		state.listPermutationSpace = deque([state.permutationSpace])
+		state.permutationSpace = {}
 		state = reduceAllPermutationSpace(state)
 
 		state = theorem4(state)
 		state = theorem2b(state)
 
 	if 1 < workersMaximum:
-		state.permutationSpace = {}
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
 			listClaimTickets: list[Future[EliminationState]] = [

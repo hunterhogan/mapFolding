@@ -302,9 +302,9 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		return state
 
 	if not state.listPermutationSpace:
-		# NOTE `nextPermutationSpaceWorkbench` can't handle an empty `state.listPermutationSpace`.
 		state.permutationSpace = {}
-		state.listPermutationSpace = deque([addMissingLeafOptionsToPermutationSpace(state).permutationSpace])
+		state = addMissingLeafOptionsToPermutationSpace(state)
+		state.listPermutationSpace = deque([state.permutationSpace])
 
 	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
 	if depth < 0:

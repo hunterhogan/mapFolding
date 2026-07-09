@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 from collections import deque
-from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首
-from mapFolding._e.theTypes import Folding, LeafSpace, PermutationSpace, Pile
+from humpy_cytoolz import compose, merge, valmap as mapLeaf
+from hunterMakesPy import raiseIfNone
+from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
+from mapFolding._e.theTypes import Folding, LeafSpace, PermutationSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from typing import TYPE_CHECKING
@@ -129,8 +131,18 @@ class EliminationState:
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
 
 #==== PermutationSpace(dict) ====
-# addMissingLeafOptionsToPermutationSpace: maybe this should be on `EliminationState`, but maybe `PermutationSpace`.
+# TODO Make `PermutationSpace` a subclass of `dict` so I can add methods.
+# NOTE I REFUSE TO BE AN OBJECT-ORIENTED PROGRAMMER!!! But, I'll use some OOP if it makes sense.
+# Goals: DRY code, useful code, a useful PermutationSpace `object`, EFFICIENCY, seamless integration with a strongly functional paradigm.
+# On EFFICIENCY: this object will help enumerate ~362794844160000 permutations for A001417(8), for
+# example. One extra clock cycle on one oft-called operation can add days to a multi-week computation.
+
 #---- method (only?) ------------
+# addMissingLeafOptionsToPermutationSpace
+# def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles):
+# 	# Incomplete prototype.
+# 	self.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self.permutationSpace)
+# 	return self
 # atPilePinLeaf
 # atPilePinLeafSafetyFilter
 # bifurcatePermutationSpace
@@ -139,12 +151,15 @@ class EliminationState:
 # extractPinnedLeaves
 # extractUndeterminedPiles
 # makeFolding
+
 #---- method and function (?) ---
+# Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
+# to ensure that behavior is consistent between the method and the function.
 # deconstructPermutationSpaceAtPile
 # deconstructPermutationSpaceByDomainOfLeaf
 # deconstructPermutationSpaceByDomainsCombined
-# leafIsNotPinned
+# leafNotPinned吗
 # leafPinned吗
-# leafIsPinnedAtPile
-# pileIsNotOpen
-# pileIsOpen
+# leafPinnedAtPile吗
+# pileNotOpen吗
+# pileOpen吗

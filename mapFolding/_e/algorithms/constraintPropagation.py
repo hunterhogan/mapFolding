@@ -1,3 +1,4 @@
+# ruff: noqa: PLC0415, DOC201, DOC501
 from __future__ import annotations
 
 from collections import deque
@@ -92,12 +93,12 @@ def count(state: EliminationState) -> EliminationState:
 		r__小于_k1: cp_model.IntVar = addLessThan(leaf_r, leaf_kCrease)
 		model.add_bool_or([r1_小于_k.Not(), k__小于_r.Not(), r__小于_k1.Not()])		# [r+1 < k < r < k+1]
 
-		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])  # [k < r < k+1 < r+1]
+		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])  	# [k < r < k+1 < r+1]
 
 		k__小于_r1: cp_model.IntVar = addLessThan(leaf_k, leaf_rCrease)
 		r1_小于_k1: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_kCrease)
 		k1_小于_r: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_r)
-		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于_r.Not()])  # [k < r+1 < k+1 < r]
+		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于_r.Not()])  	# [k < r+1 < k+1 < r]
 
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:
 		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.dimensionsTotal))
@@ -146,10 +147,10 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `count` operates efficiently."""  # noqa: DOC201, DOC501
+	"""Do the things necessary so that `count` operates efficiently."""
 #======== Edge cases for "small" map shapes ============================
 	if (0 in state.mapShape) or not state.mapShape:
-		from mapFolding.oeis import librarianConstructsDictionaryFoldsTotalKnown  # noqa: PLC0415
+		from mapFolding.oeis import librarianConstructsDictionaryFoldsTotalKnown
 		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = librarianConstructsDictionaryFoldsTotalKnown()
 		if state.mapShape in dictionaryFoldsTotalKnown:
 			state.groupsOfFolds = dictionaryFoldsTotalKnown[state.mapShape]
@@ -160,7 +161,8 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.permutationSpace = {pileOrigin: leafOrigin}
-		state.listPermutationSpace = deque([addMissingLeafOptionsToPermutationSpace(state).permutationSpace])
+		state = addMissingLeafOptionsToPermutationSpace(state)
+		state.listPermutationSpace = deque([state.permutationSpace])
 		state = reduceAllPermutationSpace(state)
 
 	state.permutationSpace = {}

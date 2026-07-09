@@ -1,6 +1,7 @@
+# pyright: reportAssignmentType=false
 # pyright: reportUnknownVariableType=false
 # pyright: reportUnknownArgumentType=false
-# ruff: noqa: PLC0415 DOC201
+# ruff: noqa: PLC0415 DOC201 ERA001 T201 T203
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -19,7 +20,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile, UndeterminedPiles
 	import pandas
 
 # TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
@@ -64,11 +65,9 @@ def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...],
 
 	return makeLeafOptions(leavesTotal, leafOptions)
 
-def getDictionaryLeafOptions(state: EliminationState) -> dict[Pile, LeafOptions]:
+def getDictionaryLeafOptions(state: EliminationState) -> UndeterminedPiles:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
 	return {pile: getLeafOptions(state, pile) for pile in range(state.leavesTotal)}
-
-# ruff: noqa: ERA001 T201 T203  # noqa: RUF100
 
 #======== Functions to help find a formula ======================================
 
@@ -76,7 +75,7 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType]
+	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:

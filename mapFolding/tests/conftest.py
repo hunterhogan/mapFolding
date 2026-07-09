@@ -73,9 +73,8 @@ def setupWarningsAsErrors() -> Generator[None, Any]:
 	warnings.resetwarnings()
 
 #======== SSOT for test data paths and filenames ==============
-# TODO I might still need something like
-# this to test the creation of a job. But I don't need to use this for every tmp dir or file, and it
-# doesn't need to be this complicated.
+# TODO I might still need something like this to test the creation of a job. But I don't need to use
+# this for every tmp dir or file, and it doesn't need to be this complicated.
 pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
 path_tmpRoot: Path = pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)

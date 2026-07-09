@@ -3,6 +3,13 @@ from __future__ import annotations
 from gmpy2 import mpz
 from typing import TypeAlias
 
+# NOTE use `type` by default. Switch to `TypeAlias` whenever it promotes self-documenting code,
+# especially through semiotics. Examples, I prefer `isinstance(x, LeafOptions)` to `isinstance(x,
+# mpz)`; `dimension = DimensionIndex(2)` is more self-documenting than `dimension = int(2)`.
+
+# TODO Consider putting TypeAlias in a semiotics module. The division between theTypes, dataBaskets,
+# and semiotics is still evolving.
+
 #======== Scalars ================================
 
 type DimensionIndex = int
