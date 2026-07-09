@@ -5,8 +5,7 @@ from mapFolding.someAssemblyRequired.A007822.makeA007822AsynchronousModules impo
 from mapFolding.someAssemblyRequired.A007822.makeA007822Modules import makeA007822Modules
 from mapFolding.someAssemblyRequired.mapFoldingModules.makeMapFoldingModules import makeMapFoldingModules
 from mapFolding.someAssemblyRequired.meanders.makeMeandersModules import makeMeandersModules
-
-# TODO from mapFolding.zCuzDocStoopid import makeDocstrings
+from mapFolding.zCuzDocStoopid.makeDocstrings import do
 
 makeMapFoldingModules()
 
@@ -14,3 +13,5 @@ makeA007822Modules()
 makeA007822AsynchronousModules()
 
 makeMeandersModules()
+
+do()

@@ -27,7 +27,7 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
 def _threadDoesSomething() -> None:
     global symmetricFoldsTotal
     while True:
-        state = queueFutures.get()
+        state: SymmetricFoldsState = queueFutures.get()
         if state is STOPsignal:
             break
         state = _filterAsymmetricFolds(state)

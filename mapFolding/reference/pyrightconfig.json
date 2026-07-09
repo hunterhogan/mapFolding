@@ -1,0 +1,13 @@
+{
+	"exclude": [
+		"**"
+	],
+	"extends": "../../pyrightconfig.json",
+	"ignore": [
+		"**"
+	],
+	"include": [
+		"."
+	],
+	"typeCheckingMode": "off"
+}

@@ -1,0 +1,6 @@
+# Archival subtree: suppress ty diagnostics here.
+[src]
+exclude = ["**"]
+
+[rules]
+all = "ignore"

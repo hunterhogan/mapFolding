@@ -1,8 +1,10 @@
 extend = "../../ruff.toml"
-# TODO turn of linting and formatting and type checking
+# Archival subtree: do not lint, format, or auto-fix files in this directory tree.
+force-exclude = true
+extend-exclude = ["**/*"]
+
 [lint]
-preview = true
-allowed-confusables = []
-ignore = []
-select = []
-task-tags = ["DEVELOPMENT", "FailEarly", "NOTE", "SEMIOTICS", "TODO"]
+exclude = ["**/*"]
+
+[format]
+exclude = ["**/*"]

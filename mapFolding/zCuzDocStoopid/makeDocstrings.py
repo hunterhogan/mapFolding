@@ -1,3 +1,4 @@
+# ruff: noqa: DOC201 D103
 """Make docstrings."""
 from __future__ import annotations
 
@@ -18,7 +19,7 @@ sourcePrefix: str = 'zCuzDocStoopid'
 
 moduleWarning = "NOTE: This is a generated file; edit the source file."
 
-def transformOEISidByFormula(pathFilenameSource: Path) -> None:
+def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     """Transform the docstrings of functions corresponding to OEIS sequences."""
     pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
     astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
@@ -72,6 +73,12 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> None:
 
     writeStringToHere(moduleAsString, pathFilenameWrite)
 
-pathRoot: Path = packageSettings.pathPackage / "algorithms"
-pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
-transformOEISidByFormula(pathFilenameSource)
+    return pathFilenameWrite
+
+def do() -> None:
+    pathRoot: Path = packageSettings.pathPackage / "algorithms"
+    pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
+    transformOEISidByFormula(pathFilenameSource)
+
+if __name__ == "__main__":
+    do()

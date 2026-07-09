@@ -549,50 +549,77 @@ def reduceAllPermutationSpace(state: EliminationState, listFunctionsReduction: S
 
 #-------- Shared logic -----------------------------------------
 
-def reduceLeafSpace(  # DOCUMENT If a function uses this shared logic, then that function ought not to modify `permutationSpace` directly.
+def reduceLeafSpace(
 	state: EliminationState  # noqa: ARG001
 	, permutationSpace: PermutationSpace
-	, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]]  # DOCUMENT `tuple[Pile, LeafOptions]` because `permutationSpace[pile]` is not _necessarily_ equal to `leafOptions`.
+	, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]]
 	, leafAntiOptions: LeafOptions
 ) -> PermutationSpace:
-	"""I use this to update permutation space by removing forbidden leaves from piles.
+	"""Update permutation space by removing forbidden leaves from specified piles.
 
-	I use this shared subroutine to handle the mechanical work of updating `LeafOptions` at specified
-	piles by removing forbidden leaves. All constraint encoders (`_reducePermutationSpace_*`) call
-	this function to perform the actual updates. I process each pile in `pilesToUpdate`, remove leaves
-	specified by `leafAntiOptions`, and propagate newly pinned leaves.
+	(AI generated docstring)
 
-	I do not return a `bool` for `permutationSpaceHasNewLeaf`. Calling functions compare
-	`permutationSpace` properties before and after calling this function to detect whether new leaves
-	were pinned.
+	You can use this shared subroutine to update a `PermutationSpace` by applying leaf exclusion
+	constraints to specified piles. The function intersects each pile's domain with the complement
+	of forbidden leaves, normalizes the result to a single leaf when possible, and invalidates the
+	entire permutation space if any pile's domain becomes empty.
 
-	Algorithm Details
-	-----------------
-	For each pile in `pilesToUpdate`:
+	This function implements the mechanical update logic used by all constraint-propagation
+	functions in the reduction system. Constraint encoders should call this function rather than
+	modifying `permutationSpace` directly to ensure consistent domain updates, proper normalization
+	via `JeanValjean` [1], and early detection of unsatisfiable constraints.
 
-	1. Remove forbidden leaves by computing `leafOptionsAND(leafAntiOptions, leafOptions)`.
-	2. Use `JeanValjean` [1] to convert the result to `LeafSpace` (either `Leaf` or
-		`LeafOptions`).
-	3. If the result is `None` (empty domain), invalidate `permutationSpace` by setting to `{}`.
-
-	When `permutationSpaceHasNewLeaf` becomes `True`, I call `_reducePermutationSpace_LeafIsPinned` to
-	propagate the newly pinned leaf before returning.
+	The `pilesToUpdate` parameter contains explicit `(pile, leafOptions)` tuples because constraint
+	encoders may need to restrict a different domain than the current `permutationSpace[pile]` value.
+	For example, when enforcing crease adjacency, the encoder provides the specific crease-neighbor
+	options to intersect with `leafAntiOptions`, not the broader current domain at that pile.
 
 	Parameters
 	----------
 	state : EliminationState
-		A data basket to facilitate computations and actions.
+		Data basket containing computed properties such as `leavesTotal`. Currently unused by the
+		function but included for signature consistency with other reduction functions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		Dictionary mapping pile indices to leaf indices or `LeafOptions` bitsets. The function
+		mutates this dictionary in place.
 	pilesToUpdate : Iterable[tuple[Pile, LeafOptions]]
-		Piles to update with `pile` and existing `leafOptions`.
+		Pile indices to update and their corresponding leaf domains to restrict. Each tuple contains
+		a pile index and the `LeafOptions` bitset representing the domain to intersect with
+		`leafAntiOptions`. The provided `LeafOptions` may differ from `permutationSpace[pile]` when
+		the constraint encoder needs to restrict against a computed subset.
 	leafAntiOptions : LeafOptions
-		A bitset of leaves to remove from `LeafOptions`.
+		Bitset representing forbidden leaves to exclude from all updated piles. The function computes
+		the intersection of each pile's domain with the complement of this bitset.
 
 	Returns
 	-------
 	updatedPermutationSpace : PermutationSpace
-		The updated `permutationSpace` if valid; otherwise an empty dictionary (invalid).
+		The mutated `permutationSpace` with updated pile domains, or an empty dictionary if any pile's
+		domain becomes empty after applying the constraints.
+
+	Constraint Propagation Architecture
+	------------------------------------
+	This function is the shared update subroutine for the constraint-propagation system orchestrated
+	by `reduceAllPermutationSpace` [2]. All constraint encoders (`reducePermutationSpace_*` functions)
+	call this function to perform domain updates. Constraint encoders should not modify
+	`permutationSpace` directly; they should identify forbidden leaves, construct `leafAntiOptions`,
+	and delegate the actual update to this function.
+
+	The function enforces two critical invariants:
+	1. Domain reduction: Every update shrinks or maintains pile domains; domains never expand.
+	2. Early failure: If any domain becomes empty, the function immediately returns an empty
+		dictionary, signaling that the permutation space is unsatisfiable.
+
+	References
+	----------
+	[1] mapFolding._e.JeanValjean
+
+	[2] mapFolding._e.pinIt.reduceAllPermutationSpace
+
+	[3] mapFolding._e.leafOptionsAND
+
+	[4] gmpy2 - Integer arithmetic
+		https://gmpy2.readthedocs.io/en/latest/
 	"""
 	for pile, leafOptions in pilesToUpdate:
 		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
