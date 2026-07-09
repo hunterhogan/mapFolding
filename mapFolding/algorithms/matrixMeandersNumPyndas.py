@@ -58,9 +58,9 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 	bitWidthLimitArcCode: int | None = None
 	bitWidthLimitCrossings: int | None = None
 
-	datatypeArcCode: TypeAlias = numpy.uint64  # noqa: UP040
+	datatypeArcCode: TypeAlias = numpy.uint64
 	"""The fixed-size integer type used to store `arcCode`."""
-	datatypeCrossings: TypeAlias = numpy.uint64  # noqa: UP040
+	datatypeCrossings: TypeAlias = numpy.uint64
 	"""The fixed-size integer type used to store `crossings`."""
 	# Hypothetically, the above datatypes could be different from each other, especially in pandas.
 

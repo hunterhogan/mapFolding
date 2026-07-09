@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 #------------------ General Settings ----------------------------------------------------------------------------------
 sourcePrefix: str = 'zCuzDocStoopid'
 
-moduleWarning = "NOTE: This is a generated file; edit the source file."
+moduleWarning = "NOTE: This is a generated file; edit the source file.\n"
 
 def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     """Transform the docstrings of functions corresponding to OEIS sequences."""

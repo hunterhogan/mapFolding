@@ -141,8 +141,8 @@ class EliminationState:
 # addMissingLeafOptionsToPermutationSpace
 	# def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles):
 	# 	# Incomplete prototype.
-	# 	self.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self.permutationSpace)
-	# 	return self
+	# 	self.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self.permutationSpace)  # noqa: ERA001
+	# 	return self  # noqa: ERA001
 # atPilePinLeaf
 # atPilePinLeafSafetyFilter
 # bifurcatePermutationSpace
