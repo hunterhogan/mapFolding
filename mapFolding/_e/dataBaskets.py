@@ -139,10 +139,10 @@ class EliminationState:
 
 #---- method (only?) ------------
 # addMissingLeafOptionsToPermutationSpace
-# def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles):
-# 	# Incomplete prototype.
-# 	self.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self.permutationSpace)
-# 	return self
+	# def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles):
+	# 	# Incomplete prototype.
+	# 	self.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self.permutationSpace)
+	# 	return self
 # atPilePinLeaf
 # atPilePinLeafSafetyFilter
 # bifurcatePermutationSpace
@@ -153,8 +153,8 @@ class EliminationState:
 # makeFolding
 
 #---- method and function (?) ---
-# Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
-# to ensure that behavior is consistent between the method and the function.
+# NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
+#	 to ensure that behavior is consistent between the method and the function.
 # deconstructPermutationSpaceAtPile
 # deconstructPermutationSpaceByDomainOfLeaf
 # deconstructPermutationSpaceByDomainsCombined
