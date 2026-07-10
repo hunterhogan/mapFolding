@@ -81,35 +81,6 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 #======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
 # NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `Leaf` in a `PermutationSpace` or `Folding`.
 
-def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
-	"""Pin `leaf` at each open `pile` in the domain of `leaf`.
-
-	Return a `deque` of `PermutationSpace` with either `permutationSpace` because `leaf` is already pinned or one `PermutationSpace` for each
-	open `pile` in `leafDomain` with `leaf` pinned at `pile`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary to divide and replace.
-	leaf : int
-		`leaf` to pin.
-	leafDomain : Iterable[int]
-		Domain of `pile` indices for `leaf`.
-
-	Returns
-	-------
-	deconstructedPermutationSpace : deque[PermutationSpace]
-		Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in `leafDomain`.
-	"""
-	if leafNotPinned吗(permutationSpace, leaf):
-		pileOpen: Callable[[int], bool] = pileOpen吗(permutationSpace)
-		leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(permutationSpace.DOTgetPileIfLeafOptions, default=bit_mask(len(permutationSpace))))
-		pinLeafAt: Callable[[int], PermutationSpace] = partial(permutationSpace.atPilePinLeaf, leaf=leaf)
-		deconstructedPermutationSpace: deque[PermutationSpace] = deque(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
-	else:
-		deconstructedPermutationSpace = deque([permutationSpace])
-	return deconstructedPermutationSpace
-
 def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSpace, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
 	"""Prototype."""  # noqa: DOC201
 	deconstructedPermutationSpace: deque[PermutationSpace] = deque()

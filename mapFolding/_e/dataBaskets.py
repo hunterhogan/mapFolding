@@ -3,10 +3,11 @@ from __future__ import annotations
 
 from collections import deque
 from functools import partial
+from gmpy2 import bit_mask
 from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafNotPinned吗, leafPinnedAtPile吗, pileOpen吗
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, pileOpen吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys, DOTvalues
@@ -161,6 +162,35 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 			pin: Callable[[Leaf], PermutationSpace] = partial(self.atPilePinLeaf, pile)
 			leafCanBePinned: Callable[[Leaf], bool] = leafNotPinned吗(self)
 			deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
+		return deconstructedPermutationSpace
+
+	def deconstructPermutationSpaceByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
+		"""Pin `leaf` at each open `pile` in the domain of `leaf`.
+
+		Return a `deque` containing this `PermutationSpace` if `leaf` is already
+		pinned, or one `PermutationSpace` for each open `pile` in `leafDomain` with
+		`leaf` pinned at `pile`.
+
+		Parameters
+		----------
+		leaf : int
+			`leaf` to pin.
+		leafDomain : Iterable[int]
+			Domain of `pile` indices for `leaf`.
+
+		Returns
+		-------
+		deconstructedPermutationSpace : deque[PermutationSpace]
+			Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open
+			`pile` in `leafDomain`.
+		"""
+		if leafNotPinned吗(self, leaf):
+			pileOpen: Callable[[int], bool] = pileOpen吗(self)
+			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.DOTgetPileIfLeafOptions, default=bit_mask(len(self))))
+			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
+			deconstructedPermutationSpace: deque[PermutationSpace] = deque(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
+		else:
+			deconstructedPermutationSpace = deque([cast("PermutationSpace", self)])
 		return deconstructedPermutationSpace
 
 	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:

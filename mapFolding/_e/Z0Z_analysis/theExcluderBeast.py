@@ -17,7 +17,6 @@ from mapFolding._e import (
 	首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
-from mapFolding._e.pinIt import deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings
 from mapFolding.genericNeedsNewHome import between吗, exclude
 from more_itertools import consecutive_groups
@@ -568,7 +567,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listPermutationSpaceFromExcluder: deque[PermutationSpace] = deconstructPermutationSpaceByDomainOfLeaf(permutationSpaceWithExcluder, leafExcluded, domainReduced)
+				listPermutationSpaceFromExcluder: deque[PermutationSpace] = permutationSpaceWithExcluder.deconstructPermutationSpaceByDomainOfLeaf(leafExcluded, domainReduced)
 
 				stateValidation.listPermutationSpace = listPermutationSpaceOther + listPermutationSpaceFromExcluder
 

@@ -69,8 +69,7 @@ from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import (
-	deconstructPermutationSpaceByDomainOfLeaf, deconstructPermutationSpaceByDomainsCombined, disqualifyPinningLeafAtPile,
-	moveFoldingToListFolding, reduceAllPermutationSpace)
+	deconstructPermutationSpaceByDomainsCombined, disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace)
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.genericNeedsNewHome import DOTvalues
 from more_itertools import partition
@@ -516,7 +515,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 	This function computes `leavesDomain` for each input `PermutationSpace` dictionary by calling
 	`getLeafDomain(EliminationState(...), leaf)`. This function then concurrently deconstructs each `PermutationSpace` dictionary
-	using `deconstructPermutationSpaceByDomainOfLeaf` [1] inside a `ProcessPoolExecutor` [2] and aggregates results with
+	using `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1] inside a `ProcessPoolExecutor` [2] and aggregates results with
 	`as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
 	This function calls `pinPilesAtEnds(state, 0)` [4] when `state.listPermutationSpace` is empty.
@@ -545,7 +544,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainOfLeaf.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf.
 
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
@@ -589,7 +588,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	(AI generated docstring)
 
-	This function calls `deconstructPermutationSpaceByDomainOfLeaf` [1] to build `state.listPermutationSpace`, and then normalizes
+	This function calls `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1] to build `state.listPermutationSpace`, and then normalizes
 	and filters `state.listPermutationSpace` by calling `reduceAllPermutationSpace` [2] and
 	`removeIFFViolationsFromEliminationState` [3].
 
@@ -609,13 +608,13 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainOfLeaf.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf.
 
 	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
-	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(state.permutationSpace, leaves, leavesDomain)
+	state.listPermutationSpace = state.permutationSpace.deconstructPermutationSpaceByDomainOfLeaf(leaves, leavesDomain)
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
 
 #-------- Plebian functions -----------------------------------------
