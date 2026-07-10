@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
 	from mapFolding import Limitation
-	from mapFolding._e.theTypes import PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
 
 @pytest.mark.parametrize("pinningFunction", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))

@@ -16,8 +16,8 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
-	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import PermutationSpace, PinnedLeaves
+	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.theTypes import PinnedLeaves
 
 @syntacticCurry
 def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:

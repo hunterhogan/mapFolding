@@ -5,7 +5,7 @@ from collections import deque
 from humpy_cytoolz import compose, merge, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
-from mapFolding._e.theTypes import Folding, LeafSpace, PermutationSpace, Pile, UndeterminedPiles
+from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from typing import TYPE_CHECKING
@@ -13,6 +13,13 @@ import dataclasses
 
 if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf
+
+
+class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
+	"""Represent `pile: leaf` and `pile: leafOptions` mappings."""
+
+	def copy(self) -> PermutationSpace:
+		return PermutationSpace(self)
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:
@@ -81,7 +88,7 @@ class EliminationState:
 
 	pile: Pile = -1
 	"""The `pile` on the workbench."""
-	permutationSpace: PermutationSpace = dataclasses.field(default_factory=dict[Pile, LeafSpace], init=True)
+	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	Theorem2aMultiplier: int = 1

@@ -9,7 +9,7 @@ from mapFolding import packageSettings
 from mapFolding._e import (
 	bifurcatePermutationSpace, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
 	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import between吗, DOTvalues
 from math import factorial, prod
@@ -160,12 +160,12 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.permutationSpace = {pileOrigin: leafOrigin}
+		state.permutationSpace = PermutationSpace({pileOrigin: leafOrigin})
 		state = addMissingLeafOptionsToPermutationSpace(state)
 		state.listPermutationSpace = deque([state.permutationSpace])
 		state = reduceAllPermutationSpace(state)
 
-	state.permutationSpace = {}
+	state.permutationSpace = PermutationSpace()
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
 		listClaimTickets: list[Future[EliminationState]] = [

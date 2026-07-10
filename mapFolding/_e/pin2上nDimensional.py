@@ -62,7 +62,7 @@ from mapFolding._e import (
 	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin, mapShapeIs2上nDimensions,
 	pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import pileOpen吗
 from mapFolding._e.pin2上nDimensionalAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
 from mapFolding._e.pin2上nDimensionalByCrease import (
@@ -83,7 +83,7 @@ if TYPE_CHECKING:
 	from concurrent.futures import Future
 	from hunterMakesPy import CallableFunction
 	from mapFolding import Limitation
-	from mapFolding._e.theTypes import Leaf, PermutationSpace, Pile
+	from mapFolding._e.theTypes import Leaf, Pile
 
 #======== Pin by `pile` ===========================================
 
@@ -302,7 +302,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		return state
 
 	if not state.listPermutationSpace:
-		state.permutationSpace = {}
+		state.permutationSpace = PermutationSpace()
 		state = addMissingLeafOptionsToPermutationSpace(state)
 		state.listPermutationSpace = deque([state.permutationSpace])
 

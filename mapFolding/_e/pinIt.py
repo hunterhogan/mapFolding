@@ -21,6 +21,7 @@ from mapFolding._e import (
 	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, getDictionaryLeafOptions, getIteratorOfLeaves,
 	getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
+from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import (
 	extractPinnedLeaves, extractUndeterminedPiles, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗)
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
@@ -31,8 +32,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import (
-		DimensionIndex, Folding, Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles)
+	from mapFolding._e.theTypes import DimensionIndex, Folding, Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Boolean filters =======================
 
@@ -132,7 +132,7 @@ def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) ->
 	--------
 	deconstructPermutationSpaceAtPile
 	"""
-	return associate(permutationSpace, pile, leaf)
+	return PermutationSpace(associate(permutationSpace, pile, leaf))
 
 def makeFolding(permutationSpace: PermutationSpace, leavesToInsert: Sequence[Leaf]) -> Folding:
 	pilesToInsert: Iterator[Pile] = DOTkeys(extractUndeterminedPiles(permutationSpace))
@@ -330,7 +330,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 				listPermutationSpace_kPinnedAt_pile_k.append(atPilePinLeaf(permutationSpace, pile_k, leaf_k))
 				leafSpaceWithoutLeaf_k = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
 				if leafSpaceWithoutLeaf_k is not None:
-					listPermutationSpaceCompleted.append(associate(permutationSpace, pile_k, leafSpaceWithoutLeaf_k))
+					listPermutationSpaceCompleted.append(PermutationSpace(associate(permutationSpace, pile_k, leafSpaceWithoutLeaf_k)))
 			else:
 				listPermutationSpaceCompleted.append(permutationSpace)
 
@@ -413,7 +413,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 		if leafInLeafOptions吗(leaf, leafOptionsAtPile):
 			leafSpaceWithoutLeaf = JeanValjean(bit_clear(leafOptionsAtPile, leaf))
 			if leafSpaceWithoutLeaf is not None:
-				yield associate(permutationSpace, pile, leafSpaceWithoutLeaf)
+				yield PermutationSpace(associate(permutationSpace, pile, leafSpaceWithoutLeaf))
 		else:
 			yield permutationSpace
 
@@ -625,7 +625,7 @@ def reduceLeafSpace(
 		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
 			# NOTE quick return
-			return {}
+			return PermutationSpace()
 		else:
 			permutationSpace[pile] = leafSpace
 	return permutationSpace
@@ -895,5 +895,5 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 #======== Initialization =====================
 
 def addMissingLeafOptionsToPermutationSpace(state: EliminationState) -> EliminationState:
-	state.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), getDictionaryLeafOptions(state)), state.permutationSpace)
+	state.permutationSpace = PermutationSpace(merge(mapLeaf(compose(raiseIfNone, JeanValjean), getDictionaryLeafOptions(state)), state.permutationSpace))
 	return state

@@ -57,7 +57,8 @@ from mapFolding.genericNeedsNewHome import DOTitems
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.dataBaskets import PermutationSpace
+	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 	from typing import TypeIs
 
 #======== Boolean antecedents ================================================

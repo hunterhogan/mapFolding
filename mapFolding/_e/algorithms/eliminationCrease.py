@@ -20,7 +20,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import Folding, PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace
+	from mapFolding._e.theTypes import Folding
 
 def pinByCrease(state: EliminationState) -> EliminationState:
 	listFolding: list[Folding] = []

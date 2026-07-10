@@ -31,7 +31,7 @@ import sys
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace
 	from mapFolding._e.Z0Z_analysis.toolkit import PermutationSpaceStatus
 	import pandas
 

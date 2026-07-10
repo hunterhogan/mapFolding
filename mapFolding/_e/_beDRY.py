@@ -73,7 +73,8 @@ from typing import cast, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.dataBaskets import PermutationSpace
+	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Group-by functions ================================================
 

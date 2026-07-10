@@ -5,7 +5,7 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import DOTitems
@@ -16,7 +16,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import PermutationSpace
 
 def count(state: EliminationState) -> EliminationState:
 	state.groupsOfFolds += sum(map(countPermutationSpace, state.listPermutationSpace, repeat(state.mapShape)))
@@ -53,10 +52,10 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.permutationSpace = {pileOrigin: leafOrigin}
+		state.permutationSpace = PermutationSpace({pileOrigin: leafOrigin})
 		state = addMissingLeafOptionsToPermutationSpace(state)
 		state.listPermutationSpace = deque([state.permutationSpace])
-		state.permutationSpace = {}
+		state.permutationSpace = PermutationSpace()
 		state = reduceAllPermutationSpace(state)
 
 		state = theorem4(state)

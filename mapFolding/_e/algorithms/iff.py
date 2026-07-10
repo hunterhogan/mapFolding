@@ -86,8 +86,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import Folding, Leaf, PermutationSpace, Pile
+	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.theTypes import Folding, Leaf, Pile
 
 #======== Forbidden inequalities ============================
 
