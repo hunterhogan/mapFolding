@@ -44,7 +44,7 @@ References
 """
 from __future__ import annotations
 
-from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
+from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e import 零
 from mapFolding._e.theTypes import Leaf, LeafOptions
 from typing import TYPE_CHECKING

@@ -1,4 +1,4 @@
-# ruff: noqa: PLR0911
+# ruff: noqa: PLR0911 DOC201
 # pyright: reportUnknownArgumentType=false
 # pyright: reportUnknownVariableType=false
 """Verify that a folding sequence is possible.
@@ -140,7 +140,7 @@ def creaseViolationComplicated吗(pile: Pile, pileComparand: Pile, getLeafCrease
 	Finally, because we need to compare the relative positions of the leaves, pass a function that returns the position of the
 	`Leaf` crease.
 
-	"""  # noqa: DOC201
+	"""
 	if pile < pileComparand:
 
 		comparandCrease: int | None = getComparandCrease()
@@ -179,7 +179,7 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 	to characterize all crease crossings. This function evaluates those four simplified orderings
 	given the four pile positions π(k), π(r), π(k+1), π(r+1) directly.
 
-	"""  # noqa: DOC201
+	"""
 	if pile < pileComparand:
 		if pileComparandCrease < pile:
 			if pileCrease < pileComparandCrease:						# [k+1 < r+1 < k < r]
