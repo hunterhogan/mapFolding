@@ -23,8 +23,6 @@ Disaggregation and deconstruction functions
 		You can iterate over each `Leaf` bit that is set in a `LeafOptions`.
 
 `LeafOptions` functions
-	DOTgetPileIfLeafOptions
-		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
 	getAntiLeafOptions
 		You can build a complement `LeafOptions` by clearing each `leaf` bit.
 	makeLeafOptions
@@ -100,47 +98,6 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 	return (leavesPinned, cast("UndeterminedPiles", dissociatePile(permutationSpace, *DOTkeys(leavesPinned))))
 
 #======== `LeafOptions` functions ================================================
-
-def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
-	"""You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
-
-	This function is a typed analogue of `dict.get`. The function returns a `LeafOptions` when `permutationSpace[pile]` is a
-	`LeafOptions`, and the function returns `default` when `permutationSpace[pile]` is a `Leaf` or `None`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary that maps each `Pile` to either a pinned `Leaf` or a `LeafOptions` domain.
-	pile : Pile
-		`Pile` key to look up.
-	default : LeafOptions | None = None
-		Value to return when `permutationSpace[pile]` is not a `LeafOptions`.
-
-	Returns
-	-------
-	leafOptionsOrNone : LeafOptions | None
-		`LeafOptions` value from `permutationSpace[pile]`, or `default`.
-
-	Examples
-	--------
-	The function is used to retrieve a domain bitset with a fallback mask.
-
-		leafOptions: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
-
-	References
-	----------
-	[1] mapFolding._e.filters.thisIsALeafOptions
-
-	[2] gmpy2 - Integer arithmetic
-		https://gmpy2.readthedocs.io/en/latest/
-	[3] hunterMakesPy - Context7
-		https://context7.com/hunterhogan/huntermakespy
-
-	"""
-	ImaLeafOptions: LeafSpace | None = permutationSpace.get(pile)
-	if isLeafOptions吗(ImaLeafOptions):
-		return ImaLeafOptions
-	return default
 
 def makeLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 	"""You can build a complement `LeafOptions` by clearing each `Leaf` bit in `leaves`.

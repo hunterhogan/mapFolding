@@ -18,8 +18,8 @@ from humpy_cytoolz import (
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct, repeat
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeafOptions, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain,
-	getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
+	bifurcatePermutationSpace, dimensionNearest首, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions,
+	howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
@@ -190,7 +190,7 @@ def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace
 	"""
 	if leafNotPinned吗(permutationSpace, leaf):
 		pileOpen: Callable[[int], bool] = pileOpen吗(permutationSpace)
-		leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(DOTgetPileIfLeafOptions, permutationSpace, default=bit_mask(len(permutationSpace))))
+		leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(permutationSpace.DOTgetPileIfLeafOptions, default=bit_mask(len(permutationSpace))))
 		pinLeafAt: Callable[[int], PermutationSpace] = atPilePinLeaf(permutationSpace, leaf=leaf)
 		deconstructedPermutationSpace: deque[PermutationSpace] = deque(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
 	else:
@@ -208,7 +208,7 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 
 	def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 		def workhorse(domain: Sequence[Pile]) -> bool:
-			leafOptions: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, domain[index], default=bit_mask(len(permutationSpace))))
+			leafOptions: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(domain[index], default=bit_mask(len(permutationSpace))))
 			return leafInLeafOptions吗(leaves[index], leafOptions)
 		return workhorse
 
@@ -324,7 +324,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 		elif leafPinned吗(permutationSpace, leaf_k) or pileNotOpen吗(permutationSpace, pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
 		else:
-			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, pile_k, default=bit_mask(len(permutationSpace))))
+			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
 			if leafInLeafOptions吗(leaf_k, leafOptionsAt_pile_k):
 				listPermutationSpace_kPinnedAt_pile_k.append(atPilePinLeaf(permutationSpace, pile_k, leaf_k))
 				leafSpaceWithoutLeaf_k = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
@@ -405,7 +405,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 		if leafPinnedAtPile吗(permutationSpace, leaf, pile):
 			continue
 
-		if (leafOptionsAtPile := DOTgetPileIfLeafOptions(permutationSpace, pile)) is None:
+		if (leafOptionsAtPile := permutationSpace.DOTgetPileIfLeafOptions(pile)) is None:
 			yield permutationSpace
 			continue
 
@@ -445,7 +445,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 		elif leafPinned吗(permutationSpace, leaf) or pileNotOpen吗(permutationSpace, pile):
 			continue
 		else:
-			leafOptionsAtPile: LeafOptions = raiseIfNone(DOTgetPileIfLeafOptions(permutationSpace, pile, default=bit_mask(len(permutationSpace))))
+			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile, default=bit_mask(len(permutationSpace))))
 			if leafInLeafOptions吗(leaf, leafOptionsAtPile):
 				listLeafAtPile.append(atPilePinLeaf(permutationSpace, pile, leaf))
 

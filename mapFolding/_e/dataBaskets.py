@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Leaf, PinnedLeaves
+	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 
 
 class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
@@ -62,6 +62,26 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 		ImaLeaf: LeafSpace | None = self.get(pile)
 		if isLeaf吗(ImaLeaf):
 			return ImaLeaf
+		return default
+
+	def DOTgetPileIfLeafOptions(self, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
+		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
+
+		Parameters
+		----------
+		pile : Pile
+			`Pile` index to look up in `permutationSpace`.
+		default : LeafOptions | None = None
+			Value to return when `permutationSpace[pile]` is not a `LeafOptions`.
+
+		Returns
+		-------
+		leafOptionsOrNone : LeafOptions | None
+			`LeafOptions` value from `permutationSpace[pile]`, or `default`.
+		"""
+		ImaLeafOptions: LeafSpace | None = self.get(pile)
+		if isLeafOptions吗(ImaLeafOptions):
+			return ImaLeafOptions
 		return default
 
 @dataclasses.dataclass(slots=True)
