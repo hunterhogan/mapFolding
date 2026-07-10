@@ -33,8 +33,6 @@ Boolean antecedents
 		You can narrow `leafSpace` to a `LeafOptions`.
 
 Filter functions
-	extractPinnedLeaves
-		You can extract only `pile: leaf` mappings from a `PermutationSpace`.
 	extractUndeterminedPiles
 		You can extract only `pile: leafOptions` mappings from a `PermutationSpace`.
 
@@ -263,21 +261,6 @@ def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	return isinstance(leafSpace, LeafOptions)
 
 #======== Filtering functions ================================================
-
-def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
-	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: leafOptions`.
-
-	Returns
-	-------
-	dictionaryOfPileLeaf : dict[int, int]
-		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
-	"""
-	return dict(sorted(DOTitems(filterLeaf(isLeaf吗, permutationSpace))))
 
 def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
 	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.

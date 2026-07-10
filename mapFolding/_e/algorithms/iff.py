@@ -76,7 +76,6 @@ from humpy_cytoolz import valfilter as filterLeaf
 from humpy_toolz.curried.operator import indexOf
 from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import between吗, DOTitems
 from math import prod
@@ -543,7 +542,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 	Algorithm Details
 	-----------------
 	`permutationSpaceHasIFFViolation` interprets `state.permutationSpace` as a partial mapping
-	from `Pile` to `Leaf`. The pinned leaves extracted by `extractPinnedLeaves` [1] are inverted
+	from `Pile` to `Leaf`. The pinned leaves extracted by `PermutationSpace.extractPinnedLeaves` [1] are inverted
 	to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
 
 	`permutationSpaceHasIFFViolation` filters candidate assignments with `between` [2] to skip
@@ -570,7 +569,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	References
 	----------
-	[1] mapFolding._e.filters.extractPinnedLeaves
+	[1] mapFolding._e.dataBaskets.PermutationSpace.extractPinnedLeaves
 
 	[2] mapFolding._e.filters.between
 
@@ -582,7 +581,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	[6] mapFolding._e.pin2上nDimensions
 	"""
-	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(extractPinnedLeaves(state.permutationSpace))}
+	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(state.permutationSpace.extractPinnedLeaves())}
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]

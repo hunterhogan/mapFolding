@@ -65,7 +65,7 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import curry as syntacticCurry, dissoc as dissociatePile, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e.filters import extractPinnedLeaves, isLeafOptions吗, isLeaf吗
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
 from mapFolding.genericNeedsNewHome import DOTkeys
 from more_itertools import iter_index
 from operator import add, mul
@@ -97,7 +97,7 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 	pilesUndetermined : UndeterminedPiles
 		Dictionary of `Pile` to `LeafOptions` domain mappings.
 	"""
-	leavesPinned: PinnedLeaves = extractPinnedLeaves(permutationSpace)
+	leavesPinned: PinnedLeaves = permutationSpace.extractPinnedLeaves()
 	# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
 	return (leavesPinned, cast("UndeterminedPiles", dissociatePile(permutationSpace, *DOTkeys(leavesPinned))))
 

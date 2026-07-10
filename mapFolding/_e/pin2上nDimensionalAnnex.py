@@ -74,7 +74,7 @@ from mapFolding._e import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, leafOrigin,
 	makeLeafAntiOptions, mapShapeIs2上nDimensions)
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import extractPinnedLeaves, extractUndeterminedPiles, isLeafOptions吗, isLeaf吗, notLeafOriginOrLeaf零, notPileLast
+from mapFolding._e.filters import extractUndeterminedPiles, isLeafOptions吗, isLeaf吗, notLeafOriginOrLeaf零, notPileLast
 from mapFolding._e.pinIt import (
 	reduceLeafSpace, reducePermutationSpace_CrossedCreases, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
 	reducePermutationSpace_nakedSubset)
@@ -177,7 +177,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast)
 								, filterLeaf(notLeafOriginOrLeaf零
 								, filterLeaf(leafAtPilePredecessors.__contains__
-								, extractPinnedLeaves(permutationSpace)))
+								, permutationSpace.extractPinnedLeaves()))
 		)):
 			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(state, permutationSpace
 				, DOTitems(extractUndeterminedPiles(PermutationSpace(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace))))
@@ -240,7 +240,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 		# TODO `notLeafOriginOrLeaf零` and `pile1stOpen` are specific to 2ⁿ-dimensional maps. Adjust these if moved to `pinIt`.
 		pile1stOpen: int = 2
-		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, extractPinnedLeaves(permutationSpace)))):
+		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves()))):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(state, permutationSpace
 				, DOTitems(extractUndeterminedPiles(PermutationSpace(filterPile(between吗(pile1stOpen, pile - inclusive), permutationSpace))))

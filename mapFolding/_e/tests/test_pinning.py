@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from gmpy2 import mpz
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding._e.pin2上nDimensional import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
@@ -35,7 +34,7 @@ def test_pinningFunctions(pinningFunction: CallableFunction[..., EliminationStat
 
 	for permutationSpace in state.listPermutationSpace:
 		maskRequiredRowsMatchThisPermutationSpace: numpy.ndarray = numpy.ones(requiredRowsTotal, dtype=bool)
-		for pile, leafSpace in extractPinnedLeaves(permutationSpace).items():
+		for pile, leafSpace in permutationSpace.extractPinnedLeaves().items():
 			if isinstance(leafSpace, int):
 				maskRequiredRowsMatchThisPermutationSpace &= (arrayFoldings[:, pile] == leafSpace)
 				continue

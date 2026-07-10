@@ -23,7 +23,7 @@ from mapFolding._e import (
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import (
-	extractPinnedLeaves, extractUndeterminedPiles, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗)
+	extractUndeterminedPiles, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗)
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
 from typing import cast, TYPE_CHECKING
@@ -662,7 +662,7 @@ def reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSp
 	for dimension in range(state.dimensionsTotal):
 		parityEven: PinnedLeaves = {}
 		parityOdd: PinnedLeaves = {}
-		for pileLeaf in DOTitems(extractPinnedLeaves(permutationSpace)):
+		for pileLeaf in DOTitems(permutationSpace.extractPinnedLeaves()):
 			if oddLeaf吗(state.mapShape, pileLeaf[1], dimension):
 				parityOdd.update((pileLeaf,))
 			else:

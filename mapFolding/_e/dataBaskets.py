@@ -2,17 +2,19 @@
 from __future__ import annotations
 
 from collections import deque
-from humpy_cytoolz import compose, merge, valmap as mapLeaf
+from humpy_cytoolz import compose, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
+from mapFolding._e.filters import isLeaf吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
+from mapFolding.genericNeedsNewHome import DOTitems
 from math import prod
 from typing import TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Leaf
+	from mapFolding._e.theTypes import Leaf, PinnedLeaves
 
 
 class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
@@ -20,6 +22,16 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 
 	def copy(self) -> PermutationSpace:
 		return PermutationSpace(self)
+
+	def extractPinnedLeaves(self) -> PinnedLeaves:
+		"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
+
+		Returns
+		-------
+		dictionaryOfPileLeaf : dict[int, int]
+			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
+		"""
+		return dict(sorted(DOTitems(filterLeaf(isLeaf吗, self))))
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:
