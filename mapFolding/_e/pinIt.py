@@ -22,7 +22,7 @@ from mapFolding._e import (
 	makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
+from mapFolding._e.filters import leafInLeafOptions吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
 from typing import cast, TYPE_CHECKING
@@ -71,7 +71,7 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
 	state.listPermutationSpace = deque()
 	for permutationSpace in listPermutationSpace:
-		if any(map(leafNotPinned吗(permutationSpace), range(state.leavesTotal))):
+		if any(map(permutationSpace.leafNotPinned吗, range(state.leavesTotal))):
 			state.listPermutationSpace.append(permutationSpace)
 		else:
 			folding: Folding = permutationSpace.makeFolding(())

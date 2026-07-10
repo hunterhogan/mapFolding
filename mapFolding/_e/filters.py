@@ -83,24 +83,6 @@ def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	"""
 	return leafOptions.bit_test(leaf)
 
-@syntacticCurry
-def leafNotPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
-	"""Return True if `leaf` is not presently pinned in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
-
-	Returns
-	-------
-	leafIsNotPinned : bool
-		True if the mapping does not include `leaf`.
-	"""
-	return leaf not in permutationSpace.values()
-
 @overload
 def leafPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
 @overload

@@ -8,7 +8,7 @@ from gmpy2 import bit_mask
 from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, pileOpen吗
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗, leafPinnedAtPile吗, pileOpen吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys, DOTvalues
@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 #---- method and/or function (?) ---
 # NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
 #	 to ensure that behavior is consistent between the method and the function.
-# leafNotPinned吗
 # leafPinned吗
 # leafPinnedAtPile吗
 # pileNotOpen吗
@@ -136,6 +135,21 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return PermutationSpace(associate(self, pile, leaf, PermutationSpace))
 
+	def leafNotPinned吗(self, leaf: Leaf) -> bool:
+		"""Return `True` if `leaf` is not presently pinned in this `PermutationSpace`.
+
+		Parameters
+		----------
+		leaf : Leaf
+			`Leaf` index.
+
+		Returns
+		-------
+		leafIsNotPinned : bool
+			`True` if this `PermutationSpace` does not include `leaf`.
+		"""
+		return leaf not in self.values()
+
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
 
@@ -151,7 +165,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		isSafeToPin : bool
 			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 		"""
-		return leafPinnedAtPile吗(self, leaf, pile) or (pileOpen吗(self, pile) and leafNotPinned吗(self, leaf))
+		return leafPinnedAtPile吗(self, leaf, pile) or (pileOpen吗(self, pile) and self.leafNotPinned吗(leaf))
 
 	def deconstructPermutationSpaceAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
 		"""Deconstruct an open `pile` to the `leaf` range of `pile`.
@@ -177,7 +191,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: self}
 		else:
 			pin: Callable[[Leaf], PermutationSpace] = partial(self.atPilePinLeaf, pile)
-			leafCanBePinned: Callable[[Leaf], bool] = leafNotPinned吗(self)
+			leafCanBePinned: Callable[[Leaf], bool] = self.leafNotPinned吗
 			deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
 		return deconstructedPermutationSpace
 
@@ -202,7 +216,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			`pile` in `leafDomain`.
 		"""
 		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
-		if leafNotPinned吗(self, leaf):
+		if self.leafNotPinned吗(leaf):
 			pileOpen: Callable[[int], bool] = pileOpen吗(self)
 			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.DOTgetPileIfLeafOptions, default=bit_mask(len(self))))
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
@@ -245,10 +259,10 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 				return leafPinnedAtPile吗(self, leaf, domain[index])
 			return workhorse
 
-		if any(map(leafNotPinned吗(self), leaves)):
+		if any(map(self.leafNotPinned吗, leaves)):
 			for index in range(len(leaves)):
 				"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
-				if leafNotPinned吗(self, leaves[index]):
+				if self.leafNotPinned吗(leaves[index]):
 					"""`leaves[index]` is not pinned, so it needs a pile.
 					In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
 					Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
