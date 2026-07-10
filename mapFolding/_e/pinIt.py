@@ -22,7 +22,7 @@ from mapFolding._e import (
 	makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import leafInLeafOptions吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
+from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗, pileNotOpen吗, pileOpen吗
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
 from typing import cast, TYPE_CHECKING
@@ -63,7 +63,7 @@ def segregateLeafPinnedAtPile(listPermutationSpace: Sequence[PermutationSpace], 
 		First element: dictionaries where `leaf` is NOT pinned at `pile`.
 		Second element: dictionaries where `leaf` IS pinned at `pile`.
 	"""
-	isPinned: Callable[[PermutationSpace], bool] = leafPinnedAtPile吗(leaf=leaf, pile=pile)
+	isPinned: Callable[[PermutationSpace], bool] = partial(PermutationSpace.leafPinnedAtPile吗, leaf=leaf, pile=pile)
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
@@ -151,7 +151,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 		listPermutationSpace_kPinnedAt_pile_k: list[PermutationSpace] = []
 		listPermutationSpaceCompleted: list[PermutationSpace] = []
 
-		if leafPinnedAtPile吗(permutationSpace, leaf_k, pile_k):
+		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):
 			listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace)
 		elif permutationSpace.leafPinned吗(leaf_k) or pileNotOpen吗(permutationSpace, pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
@@ -234,7 +234,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 	del leavesToPin
 
 	for permutationSpace in listPermutationSpace:
-		if leafPinnedAtPile吗(permutationSpace, leaf, pile):
+		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
 			continue
 
 		if (leafOptionsAtPile := permutationSpace.DOTgetPileIfLeafOptions(pile)) is None:
@@ -272,7 +272,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 	listLeafAtPile: deque[PermutationSpace] = deque()
 
 	for permutationSpace in listPermutationSpace:
-		if leafPinnedAtPile吗(permutationSpace, leaf, pile):
+		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
 			listLeafAtPile.append(permutationSpace)
 		elif permutationSpace.leafPinned吗(leaf) or pileNotOpen吗(permutationSpace, pile):
 			continue

@@ -8,7 +8,7 @@ from gmpy2 import bit_mask
 from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗, leafPinnedAtPile吗, pileOpen吗
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗, pileOpen吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys, DOTvalues
@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 #---- method and/or function (?) ---
 # NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
 #	 to ensure that behavior is consistent between the method and the function.
-# leafPinnedAtPile吗
 # pileNotOpen吗
 # pileOpen吗
 
@@ -164,6 +163,23 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return leaf in self.values()
 
+	def leafPinnedAtPile吗(self, leaf: Leaf, pile: Pile) -> bool:
+		"""Return `True` if `leaf` is pinned at `pile` in this `PermutationSpace`.
+
+		Parameters
+		----------
+		leaf : Leaf
+			`Leaf` whose presence at `pile` is being checked.
+		pile : Pile
+			`Pile` index.
+
+		Returns
+		-------
+		leafIsPinnedAtPile : bool
+			`True` if this `PermutationSpace` includes `pile: leaf`.
+		"""
+		return leaf == self.get(pile)
+
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
 
@@ -179,7 +195,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		isSafeToPin : bool
 			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 		"""
-		return leafPinnedAtPile吗(self, leaf, pile) or (pileOpen吗(self, pile) and self.leafNotPinned吗(leaf))
+		return self.leafPinnedAtPile吗(leaf, pile) or (pileOpen吗(self, pile) and self.leafNotPinned吗(leaf))
 
 	def deconstructPermutationSpaceAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
 		"""Deconstruct an open `pile` to the `leaf` range of `pile`.
@@ -270,7 +286,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				return leafPinnedAtPile吗(self, leaf, domain[index])
+				return self.leafPinnedAtPile吗(leaf, domain[index])
 			return workhorse
 
 		if any(map(self.leafNotPinned吗, leaves)):

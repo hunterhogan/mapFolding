@@ -101,26 +101,6 @@ def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 	"""
 	return leaf in leavesPinned.values()
 
-@syntacticCurry
-def leafPinnedAtPile吗(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
-	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` whose presence at `pile` is being checked.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	leafIsPinnedAtPile : bool
-		True if the mapping includes `pile: leaf`.
-	"""
-	return leaf == permutationSpace.get(pile)
-
 def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
 
