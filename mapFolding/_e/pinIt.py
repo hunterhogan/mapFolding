@@ -81,58 +81,6 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 #======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
 # NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `Leaf` in a `PermutationSpace` or `Folding`.
 
-def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSpace, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
-	"""Prototype."""  # noqa: DOC201
-	deconstructedPermutationSpace: deque[PermutationSpace] = deque()
-
-	def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
-		def workhorse(domain: Sequence[Pile]) -> bool:
-			return pileOpen吗(permutationSpace, domain[index])
-		return workhorse
-
-	def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
-		def workhorse(domain: Sequence[Pile]) -> bool:
-			leafOptions: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(domain[index], default=bit_mask(len(permutationSpace))))
-			return leafInLeafOptions吗(leaves[index], leafOptions)
-		return workhorse
-
-	def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> CallableFunction[[Sequence[Pile]], bool]:
-		def workhorse(domain: Sequence[Pile]) -> bool:
-			return leafPinnedAtPile吗(permutationSpace, leaf, domain[index])
-		return workhorse
-
-	if any(map(leafNotPinned吗(permutationSpace), leaves)):
-		for index in range(len(leaves)):
-			"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
-			if leafNotPinned吗(permutationSpace, leaves[index]):
-				"""`leaves[index]` is not pinned, so it needs a pile.
-				In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
-				Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
-				leavesDomain = filter(pileOpenByIndex(index), leavesDomain)
-				"""`leaves[index]` is not pinned, it wants `listOfPiles[index]`, and `listOfPiles[index]` is open.
-				Is `leaves[index]` in the pile-range of `listOfPiles[index]`?"""
-				leavesDomain = filter(leafInPileRangeByIndex(index), leavesDomain)
-			else:
-				"""`leaves[index]` is pinned.
-				In each iteration of `leavesDomain`, `listOfPiles`, the pile in which `leaves[index]` is pinned must match `listOfPiles[index]`.
-				Therefore, if the pile in which `leaves[index]` is pinned matches `listOfPiles[index]`, filter in the iteration. Otherwise, filter out the iteration."""
-				leavesDomain = filter(isPinnedAtPileByIndex(leaves[index], index), leavesDomain)
-
-		for listOfPiles in leavesDomain:
-			"""Properly and safely deconstruct `permutationSpace` by the combined domain of leaves.
-			The parameter `leavesDomain` is the full domain of the leaves, so deconstructing with `leavesDomain` preserves the permutation space.
-			For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
-			I apply filters that prevent pinning the same leaf twice.
-			Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[index]` at `listOfPiles[index]` without corrupting the permutation space."""
-			permutationSpaceForListOfPiles: PermutationSpace = permutationSpace.copy()
-			for index in range(len(leaves)):
-				permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(listOfPiles[index], leaves[index])
-			deconstructedPermutationSpace.append(permutationSpaceForListOfPiles)
-	else:
-		deconstructedPermutationSpace = deque([permutationSpace])
-
-	return deconstructedPermutationSpace
-
 #======== Bulk modifications =======================
 
 def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:

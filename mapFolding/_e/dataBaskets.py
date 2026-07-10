@@ -1,3 +1,4 @@
+# ruff: noqa: FURB189
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 from __future__ import annotations
 
@@ -17,10 +18,26 @@ import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 
+# DEVELOPMENT PermutationSpace(dict)
+# Goals: DRY code, useful code, a useful PermutationSpace `object`, EFFICIENCY, seamless integration with a strongly functional paradigm.
+# On EFFICIENCY: this object will help enumerate ~362794844160000 permutations for A001417(8), for
+# example. One extra clock cycle on one oft-called operation can add days to a multi-week computation.
 
-class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
+#---- method (only?) ------------
+
+#---- method and/or function (?) ---
+# NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
+#	 to ensure that behavior is consistent between the method and the function.
+# leafNotPinned吗
+# leafPinned吗
+# leafPinnedAtPile吗
+# pileNotOpen吗
+# pileOpen吗
+
+class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Represent `pile: leaf` and `pile: leafOptions` mappings with pinning helper methods."""
 
 	def copy(self) -> PermutationSpace:
@@ -117,7 +134,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 		dictionaryPermutationSpace : PermutationSpace
 			New dictionary with `pile` mapped to `leaf`.
 		"""
-		return PermutationSpace(associate(self, pile, cast("LeafSpace", leaf)))
+		return PermutationSpace(associate(self, pile, leaf, PermutationSpace))
 
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
@@ -184,13 +201,80 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 			Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open
 			`pile` in `leafDomain`.
 		"""
+		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
 		if leafNotPinned吗(self, leaf):
 			pileOpen: Callable[[int], bool] = pileOpen吗(self)
 			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.DOTgetPileIfLeafOptions, default=bit_mask(len(self))))
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
-			deconstructedPermutationSpace: deque[PermutationSpace] = deque(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
+			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
 		else:
-			deconstructedPermutationSpace = deque([cast("PermutationSpace", self)])
+			deconstructedPermutationSpace.append(self)
+		return deconstructedPermutationSpace
+
+	def deconstructPermutationSpaceByDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
+		"""Pin several leaves across matching pile-domain tuples.
+
+		Parameters
+		----------
+		leaves : Sequence[int]
+			Leaves to pin.
+		leavesDomain : Iterable[Sequence[int]]
+			Candidate pile tuples whose positions correspond to `leaves`.
+
+		Returns
+		-------
+		deconstructedPermutationSpace : deque[PermutationSpace]
+			Deque of `PermutationSpace` dictionaries with the requested leaves pinned
+			across compatible pile tuples.
+		"""
+		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
+
+		def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
+			def workhorse(domain: Sequence[Pile]) -> bool:
+				return pileOpen吗(self, domain[index])
+			return workhorse
+
+		def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
+			def workhorse(domain: Sequence[Pile]) -> bool:
+				leafOptions: LeafOptions = raiseIfNone(self.DOTgetPileIfLeafOptions(domain[index], default=bit_mask(len(self))))
+				return leafInLeafOptions吗(leaves[index], leafOptions)
+			return workhorse
+
+		def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> CallableFunction[[Sequence[Pile]], bool]:
+			def workhorse(domain: Sequence[Pile]) -> bool:
+				return leafPinnedAtPile吗(self, leaf, domain[index])
+			return workhorse
+
+		if any(map(leafNotPinned吗(self), leaves)):
+			for index in range(len(leaves)):
+				"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
+				if leafNotPinned吗(self, leaves[index]):
+					"""`leaves[index]` is not pinned, so it needs a pile.
+					In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
+					Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
+					leavesDomain = filter(pileOpenByIndex(index), leavesDomain)
+					"""`leaves[index]` is not pinned, it wants `listOfPiles[index]`, and `listOfPiles[index]` is open.
+					Is `leaves[index]` in the pile-range of `listOfPiles[index]`?"""
+					leavesDomain = filter(leafInPileRangeByIndex(index), leavesDomain)
+				else:
+					"""`leaves[index]` is pinned.
+					In each iteration of `leavesDomain`, `listOfPiles`, the pile in which `leaves[index]` is pinned must match `listOfPiles[index]`.
+					Therefore, if the pile in which `leaves[index]` is pinned matches `listOfPiles[index]`, filter in the iteration. Otherwise, filter out the iteration."""
+					leavesDomain = filter(isPinnedAtPileByIndex(leaves[index], index), leavesDomain)
+
+			for listOfPiles in leavesDomain:
+				"""Properly and safely deconstruct `permutationSpace` by the combined domain of leaves.
+				The parameter `leavesDomain` is the full domain of the leaves, so deconstructing with `leavesDomain` preserves the permutation space.
+				For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
+				I apply filters that prevent pinning the same leaf twice.
+				Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[index]` at `listOfPiles[index]` without corrupting the permutation space."""
+				permutationSpaceForListOfPiles: PermutationSpace = self.copy()
+				for index in range(len(leaves)):
+					permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(listOfPiles[index], leaves[index])
+				deconstructedPermutationSpace.append(permutationSpaceForListOfPiles)
+		else:
+			deconstructedPermutationSpace.append(self)
+
 		return deconstructedPermutationSpace
 
 	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
@@ -327,37 +411,3 @@ class EliminationState:
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
-
-#==== PermutationSpace(dict) ====
-# TODO Make `PermutationSpace` a subclass of `dict` so I can add methods.
-# NOTE I REFUSE TO BE AN OBJECT-ORIENTED PROGRAMMER!!! But, I'll use some OOP if it makes sense.
-# Goals: DRY code, useful code, a useful PermutationSpace `object`, EFFICIENCY, seamless integration with a strongly functional paradigm.
-# On EFFICIENCY: this object will help enumerate ~362794844160000 permutations for A001417(8), for
-# example. One extra clock cycle on one oft-called operation can add days to a multi-week computation.
-
-#---- method (only?) ------------
-# addMissingLeafOptionsToPermutationSpace
-	# def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles):
-	# 	# Incomplete prototype.
-	# 	self.permutationSpace = merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self.permutationSpace)  # noqa: ERA001
-	# 	return self  # noqa: ERA001
-# atPilePinLeaf
-# atPilePinLeafSafetyFilter
-# bifurcatePermutationSpace
-# DOTgetPileIfLeaf
-# DOTgetPileIfLeafOptions
-# extractPinnedLeaves
-# extractUndeterminedPiles
-# makeFolding
-
-#---- method and function (?) ---
-# NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
-#	 to ensure that behavior is consistent between the method and the function.
-# deconstructPermutationSpaceAtPile
-# deconstructPermutationSpaceByDomainOfLeaf
-# deconstructPermutationSpaceByDomainsCombined
-# leafNotPinned吗
-# leafPinned吗
-# leafPinnedAtPile吗
-# pileNotOpen吗
-# pileOpen吗

@@ -68,8 +68,7 @@ from mapFolding._e.pin2上nDimensionalAnnex import listFunctionsReduction2上nDi
 from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
-from mapFolding._e.pinIt import (
-	deconstructPermutationSpaceByDomainsCombined, disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace)
+from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.genericNeedsNewHome import DOTvalues
 from more_itertools import partition
@@ -405,7 +404,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	(AI generated docstring)
 
-	This function uses `deconstructPermutationSpaceByDomainsCombined` [1] to deconstruct each `PermutationSpace` dictionary in
+	This function uses `PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1] to deconstruct each `PermutationSpace` dictionary in
 	`state.listPermutationSpace` into a refined list. The deconstruction is performed concurrently across a `ProcessPoolExecutor`
 	[2] and aggregated with `as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
@@ -436,7 +435,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainsCombined.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainsCombined.
 
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
@@ -476,7 +475,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> EliminationState:
 	"""You can deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.listPermutationSpace`.
 
-	This function calls `deconstructPermutationSpaceByDomainsCombined` [1] to build
+	This function calls `PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1] to build
 	`state.listPermutationSpace`, and then normalizes and filters `state.listPermutationSpace`
 	by calling `reduceAllPermutationSpace` [2] and
 	`removeIFFViolationsFromEliminationState` [3].
@@ -497,13 +496,13 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainsCombined.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainsCombined.
 
 	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
-	state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(state.permutationSpace, leaves, leavesDomain)
+	state.listPermutationSpace = state.permutationSpace.deconstructPermutationSpaceByDomainsCombined(leaves, leavesDomain)
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
 
 #--- Logic that wants to join the shared logic ---
