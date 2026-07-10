@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from collections import deque
-from humpy_cytoolz import compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
+from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
@@ -84,6 +84,23 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 		if isLeafOptions吗(ImaLeafOptions):
 			return ImaLeafOptions
 		return default
+
+	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
+		"""Return a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
+
+		Parameters
+		----------
+		pile : int
+			`pile` at which to pin `leaf`.
+		leaf : int
+			`leaf` to pin.
+
+		Returns
+		-------
+		dictionaryPermutationSpace : PermutationSpace
+			New dictionary with `pile` mapped to `leaf`.
+		"""
+		return PermutationSpace(associate(self, pile, cast("LeafSpace", leaf)))
 
 	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
