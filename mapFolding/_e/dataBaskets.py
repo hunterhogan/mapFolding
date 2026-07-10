@@ -5,7 +5,7 @@ from collections import deque
 from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafNotPinned吗, leafPinnedAtPile吗, pileOpen吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys, DOTvalues
@@ -101,6 +101,23 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 			New dictionary with `pile` mapped to `leaf`.
 		"""
 		return PermutationSpace(associate(self, pile, cast("LeafSpace", leaf)))
+
+	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
+		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
+
+		Parameters
+		----------
+		pile : int
+			`pile` at which to pin.
+		leaf : int
+			`leaf` to pin.
+
+		Returns
+		-------
+		isSafeToPin : bool
+			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
+		"""
+		return leafPinnedAtPile吗(self, leaf, pile) or (pileOpen吗(self, pile) and leafNotPinned吗(self, leaf))
 
 	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.

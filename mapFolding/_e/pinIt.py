@@ -36,28 +36,6 @@ if TYPE_CHECKING:
 #======== Boolean filters =======================
 
 @syntacticCurry
-def atPilePinLeafSafetyFilter(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> bool:
-	"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
-
-	For performance, you probably can and probably *should* create a set of filters for your circumstances.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		A mapping of each `pile` with a pinned `leaf`.
-	pile : int
-		`pile` at which to pin.
-	leaf : int
-		`leaf` to pin.
-
-	Returns
-	-------
-	isSafeToPin : bool
-		True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
-	"""
-	return leafPinnedAtPile吗(permutationSpace, leaf, pile) or (pileOpen吗(permutationSpace, pile) and leafNotPinned吗(permutationSpace, leaf))
-
-@syntacticCurry
 def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
 		leafPinned吗(state.permutationSpace, leaf)
