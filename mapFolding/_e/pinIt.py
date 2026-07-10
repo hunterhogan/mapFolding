@@ -81,36 +81,6 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 #======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
 # NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `Leaf` in a `PermutationSpace` or `Folding`.
 
-#======== Deconstruct a `PermutationSpace` dictionary =======
-
-def deconstructPermutationSpaceAtPile(permutationSpace: PermutationSpace, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
-	"""Deconstruct an open `pile` to the `leaf` range of `pile`.
-
-	Return a dictionary of `PermutationSpace` with either `permutationSpace` because it already has a `leaf` pinned at `pile` or one
-	`PermutationSpace` for each `leaf` in `leavesToPin` pinned at `pile`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary to divide and replace.
-	pile : int
-		`pile` at which to pin a `leaf`.
-	leavesToPin : list[int]
-		List of `leaves` to pin at `pile`.
-
-	Returns
-	-------
-	deconstructedPermutationSpace : dict[int, PermutationSpace]
-		Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace` dictionary with the `leaf` pinned at `pile`.
-	"""
-	if (leaf := permutationSpace.DOTgetPileIfLeaf(pile)) is not None:
-		deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: permutationSpace}
-	else:
-		pin: Callable[[Leaf], PermutationSpace] = partial(permutationSpace.atPilePinLeaf, pile)
-		leafCanBePinned: Callable[[Leaf], bool] = leafNotPinned吗(permutationSpace)
-		deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
-	return deconstructedPermutationSpace
-
 def deconstructPermutationSpaceByDomainOfLeaf(permutationSpace: PermutationSpace, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
 	"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
@@ -197,7 +167,7 @@ def deconstructPermutationSpaceByDomainsCombined(permutationSpace: PermutationSp
 def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:
 	"""Expand every dictionary in `listPermutationSpace` at `pile` into all pinning variants.
 
-	Applies `deconstructPermutationSpaceAtPile` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
+	Applies `PermutationSpace.deconstructPermutationSpaceAtPile` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
 	into a single list of dictionaries, discarding the intermediate keyed structure.
 
 	Parameters
@@ -216,9 +186,9 @@ def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[Permuta
 
 	See Also
 	--------
-	deconstructPermutationSpaceAtPile
+	PermutationSpace.deconstructPermutationSpaceAtPile
 	"""
-	return flatten(map(DOTvalues, map(deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
+	return flatten(map(DOTvalues, map(PermutationSpace.deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
 
 # TODO Fix this moronic bullshit created by an AI assistant that refused to follow instructions.
 def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
@@ -339,7 +309,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 
 	See Also
 	--------
-	deconstructPermutationSpaceAtPile : Performs the expansion for one dictionary.
+	PermutationSpace.deconstructPermutationSpaceAtPile : Performs the expansion for one dictionary.
 	requireLeafPinnedAtPile : Complementary operation that forces a `leaf` at a `pile`.
 	"""
 	del leavesToPin
@@ -378,7 +348,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 
 	See Also
 	--------
-	deconstructPermutationSpaceAtPile, excludeLeafAtPile
+	PermutationSpace.deconstructPermutationSpaceAtPile, excludeLeafAtPile
 	"""
 	listLeafAtPile: deque[PermutationSpace] = deque()
 
@@ -396,7 +366,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 
 def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[tuple[PermutationSpace, tuple[PermutationSpace, ...]]]:
 	for permutationSpace in listPermutationSpace:
-		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = deconstructPermutationSpaceAtPile(permutationSpace, pile, leavesToPin)
+		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = permutationSpace.deconstructPermutationSpaceAtPile(pile, leavesToPin)
 		leafPinnedAtPile: PermutationSpace = deconstructedPermutationSpaceAtPile.pop(leaf)
 		yield (leafPinnedAtPile, tuple(deconstructedPermutationSpaceAtPile.values()))
 

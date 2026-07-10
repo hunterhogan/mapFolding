@@ -17,7 +17,7 @@ from mapFolding._e import (
 	首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
-from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
+from mapFolding._e.pinIt import deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings
 from mapFolding.genericNeedsNewHome import between吗, exclude
 from more_itertools import consecutive_groups
@@ -557,7 +557,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				stateValidation = pinPilesAtEnds(stateValidation, 1)
 
 				pileRange: list[int] = list(getIteratorOfLeaves(getLeafOptions(stateValidation, pileExcluder)))
-				dictionaryDeconstructed: dict[int, PermutationSpace] = deconstructPermutationSpaceAtPile(stateValidation.listPermutationSpace[0], pileExcluder, pileRange)
+				dictionaryDeconstructed: dict[int, PermutationSpace] = stateValidation.listPermutationSpace[0].deconstructPermutationSpaceAtPile(pileExcluder, pileRange)
 
 				permutationSpaceWithExcluder: PermutationSpace | None = dictionaryDeconstructed.get(leafExcluder)
 				if permutationSpaceWithExcluder is None:

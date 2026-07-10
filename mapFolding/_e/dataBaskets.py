@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from collections import deque
+from functools import partial
 from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
@@ -14,12 +15,12 @@ from typing import cast, TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
-	from collections.abc import Iterator, Sequence
+	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 
 
 class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
-	"""Represent `pile: leaf` and `pile: leafOptions` mappings with helper methods."""
+	"""Represent `pile: leaf` and `pile: leafOptions` mappings with pinning helper methods."""
 
 	def copy(self) -> PermutationSpace:
 		return PermutationSpace(self)
@@ -133,6 +134,34 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 		"""
 		return leafPinnedAtPile吗(self, leaf, pile) or (pileOpen吗(self, pile) and leafNotPinned吗(self, leaf))
+
+	def deconstructPermutationSpaceAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
+		"""Deconstruct an open `pile` to the `leaf` range of `pile`.
+
+		Return a dictionary containing this `PermutationSpace` if `pile` already has a
+		pinned `leaf`, or one `PermutationSpace` for each unpinned `leaf` in
+		`leavesToPin` pinned at `pile`.
+
+		Parameters
+		----------
+		pile : int
+			`pile` at which to pin a `leaf`.
+		leavesToPin : list[int]
+			List of `leaves` to pin at `pile`.
+
+		Returns
+		-------
+		deconstructedPermutationSpace : dict[int, PermutationSpace]
+			Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace`
+			dictionary with the `leaf` pinned at `pile`.
+		"""
+		if (leaf := self.DOTgetPileIfLeaf(pile)) is not None:
+			deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: self}
+		else:
+			pin: Callable[[Leaf], PermutationSpace] = partial(self.atPilePinLeaf, pile)
+			leafCanBePinned: Callable[[Leaf], bool] = leafNotPinned吗(self)
+			deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
+		return deconstructedPermutationSpace
 
 	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
