@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 @syntacticCurry
 def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
-		leafPinned吗(state.permutationSpace, leaf)
+		state.permutationSpace.leafPinned吗(leaf)
 		, pileNotOpen吗(state.permutationSpace, state.pile)
 		, state.pile not in getLeafDomain(state, leaf),
 	))
@@ -153,7 +153,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 
 		if leafPinnedAtPile吗(permutationSpace, leaf_k, pile_k):
 			listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace)
-		elif leafPinned吗(permutationSpace, leaf_k) or pileNotOpen吗(permutationSpace, pile_k) or leaf_k not in rangePile_k:
+		elif permutationSpace.leafPinned吗(leaf_k) or pileNotOpen吗(permutationSpace, pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
 		else:
 			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
@@ -274,7 +274,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 	for permutationSpace in listPermutationSpace:
 		if leafPinnedAtPile吗(permutationSpace, leaf, pile):
 			listLeafAtPile.append(permutationSpace)
-		elif leafPinned吗(permutationSpace, leaf) or pileNotOpen吗(permutationSpace, pile):
+		elif permutationSpace.leafPinned吗(leaf) or pileNotOpen吗(permutationSpace, pile):
 			continue
 		else:
 			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile, default=bit_mask(len(permutationSpace))))

@@ -47,7 +47,7 @@ from __future__ import annotations
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding._e import 零
 from mapFolding._e.theTypes import Leaf, LeafOptions
-from typing import overload, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import PermutationSpace
@@ -83,27 +83,23 @@ def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	"""
 	return leafOptions.bit_test(leaf)
 
-@overload
-def leafPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
-@overload
-def leafPinned吗(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
 @syntacticCurry
-def leafPinned吗(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
-	"""Return True if `leaf` is pinned in `permutationSpace`.
+def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
+	"""Return `True` if `leaf` is pinned in `leavesPinned`.
 
 	Parameters
 	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
+	leavesPinned : PinnedLeaves
+		Pinned `Leaf` by `Pile`.
+	leaf : Leaf
+		`Leaf` index.
 
 	Returns
 	-------
-	leafPinned吗 : bool
-		True if the mapping includes `leaf`.
+	leafIsPinned : bool
+		`True` if `leavesPinned` includes `leaf`.
 	"""
-	return leaf in permutationSpace.values()
+	return leaf in leavesPinned.values()
 
 @syntacticCurry
 def leafPinnedAtPile吗(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:

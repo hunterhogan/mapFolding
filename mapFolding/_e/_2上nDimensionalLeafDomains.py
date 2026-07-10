@@ -8,7 +8,6 @@ from mapFolding._e import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
 	howManyDimensionsHaveOddParity, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import leafPinned吗
 from mapFolding.genericNeedsNewHome import between吗, consecutive吗, exclude, reverseLookup
 from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
@@ -677,7 +676,7 @@ def getLeaf首零Plus零Domain(state: EliminationState, leaf: Leaf | None = None
 	domain首零Plus零: tuple[Pile, ...] = tuple(getLeafDomain(state, leaf))
 	leaf一零: Leaf = 一 + 零
 	leaf首零一: Leaf = 首零一(state.dimensionsTotal)
-	if leafPinned吗(state.permutationSpace, leaf一零) and leafPinned吗(state.permutationSpace, leaf首零一):
+	if state.permutationSpace.leafPinned吗(leaf一零) and state.permutationSpace.leafPinned吗(leaf首零一):
 		pileOfLeaf一零: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf一零))
 		pileOfLeaf首零一: Pile = raiseIfNone(reverseLookup(state.permutationSpace, leaf首零一))
 		domain首零Plus零 = _getLeaf首零Plus零Domain(domain首零Plus零, pileOfLeaf一零, pileOfLeaf首零一, state.dimensionsTotal, state.leavesTotal)

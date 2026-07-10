@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 #---- method and/or function (?) ---
 # NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
 #	 to ensure that behavior is consistent between the method and the function.
-# leafPinned吗
 # leafPinnedAtPile吗
 # pileNotOpen吗
 # pileOpen吗
@@ -149,6 +148,21 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			`True` if this `PermutationSpace` does not include `leaf`.
 		"""
 		return leaf not in self.values()
+
+	def leafPinned吗(self, leaf: Leaf) -> bool:
+		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
+
+		Parameters
+		----------
+		leaf : Leaf
+			`Leaf` index.
+
+		Returns
+		-------
+		leafIsPinned : bool
+			`True` if this `PermutationSpace` includes `leaf`.
+		"""
+		return leaf in self.values()
 
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
