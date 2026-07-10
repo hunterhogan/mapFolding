@@ -19,10 +19,25 @@ if TYPE_CHECKING:
 
 
 class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
-	"""Represent `pile: leaf` and `pile: leafOptions` mappings."""
+	"""Represent `pile: leaf` and `pile: leafOptions` mappings with helper methods."""
 
 	def copy(self) -> PermutationSpace:
 		return PermutationSpace(self)
+
+	def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles) -> PermutationSpace:
+		"""Return a new `PermutationSpace` with default `LeafOptions` for missing piles.
+
+		Parameters
+		----------
+		dictionaryLeafOptions : UndeterminedPiles
+			Default `LeafOptions` by `Pile`.
+
+		Returns
+		-------
+		permutationSpace : PermutationSpace
+			New `PermutationSpace` with current entries overriding default `LeafOptions`.
+		"""
+		return PermutationSpace(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self))
 
 	def extractPinnedLeaves(self) -> PinnedLeaves:
 		"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.

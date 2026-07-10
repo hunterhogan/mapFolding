@@ -59,8 +59,8 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding._e import (
-	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin, mapShapeIs2上nDimensions,
-	pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin,
+	mapShapeIs2上nDimensions, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import pileOpen吗
@@ -69,8 +69,8 @@ from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import (
-	addMissingLeafOptionsToPermutationSpace, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf,
-	deconstructPermutationSpaceByDomainsCombined, disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace)
+	deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf, deconstructPermutationSpaceByDomainsCombined,
+	disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace)
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.genericNeedsNewHome import DOTvalues
 from more_itertools import partition
@@ -303,7 +303,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 
 	if not state.listPermutationSpace:
 		state.permutationSpace = PermutationSpace()
-		state = addMissingLeafOptionsToPermutationSpace(state)
+		state.permutationSpace = state.permutationSpace.addMissingLeafOptions(getDictionaryLeafOptions(state))
 		state.listPermutationSpace = deque([state.permutationSpace])
 
 	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)

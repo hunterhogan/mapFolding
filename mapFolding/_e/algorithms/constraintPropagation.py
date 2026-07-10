@@ -7,10 +7,10 @@ from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
-	getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost, indicesMapShapeDimensionLengthsAreEqual, leafOrigin,
-	mapShapeIs2上nDimensions, pileOrigin)
+	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
+	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
+from mapFolding._e.pinIt import reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import between吗, DOTvalues
 from math import factorial, prod
 from ortools.sat.python import cp_model
@@ -161,7 +161,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.permutationSpace = PermutationSpace({pileOrigin: leafOrigin})
-		state = addMissingLeafOptionsToPermutationSpace(state)
+		state.permutationSpace = state.permutationSpace.addMissingLeafOptions(getDictionaryLeafOptions(state))
 		state.listPermutationSpace = deque([state.permutationSpace])
 		state = reduceAllPermutationSpace(state)
 

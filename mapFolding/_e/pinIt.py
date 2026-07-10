@@ -12,14 +12,14 @@ from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear, bit_flip, bit_mask
 from humpy_cytoolz import (
-	assoc as associate, compose, concat, curry as syntacticCurry, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, merge, unique,
-	valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue, valmap as mapLeaf)
+	assoc as associate, compose, concat, curry as syntacticCurry, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique,
+	valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue)
 # TODO One or more things is messed up with humpy_*toolz.*.map
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct, repeat
 from mapFolding._e import (
-	dimensionNearest首, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean,
-	leafOptionsAND, makeLeafAntiOptions)
+	dimensionNearest首, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND,
+	makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
@@ -833,9 +833,3 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 				permutationSpace = sherpa
 			permutationSpaceHasNewLeaf = True
 	return permutationSpace
-
-#======== Initialization =====================
-
-def addMissingLeafOptionsToPermutationSpace(state: EliminationState) -> EliminationState:
-	state.permutationSpace = PermutationSpace(merge(mapLeaf(compose(raiseIfNone, JeanValjean), getDictionaryLeafOptions(state)), state.permutationSpace))
-	return state
