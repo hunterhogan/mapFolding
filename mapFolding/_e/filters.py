@@ -142,30 +142,6 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	return pileLast != pile
 
 @syntacticCurry
-def pileNotOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
-	"""Return True if `pile` is not presently pinned in `permutationSpace`.
-
-	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	pileIsOpen : bool
-		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `LeafOptions`.
-
-	See Also
-	--------
-	thisIsALeaf, thisIsALeafOptions
-	"""
-	return isLeaf吗(permutationSpace[pile])
-
-@syntacticCurry
 def pileOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
 	"""Return True if `pile` is not presently pinned in `permutationSpace`.
 

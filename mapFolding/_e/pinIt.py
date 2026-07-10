@@ -22,7 +22,7 @@ from mapFolding._e import (
 	makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗, pileNotOpen吗, pileOpen吗
+from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗, pileOpen吗
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
 from typing import cast, TYPE_CHECKING
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
 		state.permutationSpace.leafPinned吗(leaf)
-		, pileNotOpen吗(state.permutationSpace, state.pile)
+		, state.permutationSpace.pileNotOpen吗(state.pile)
 		, state.pile not in getLeafDomain(state, leaf),
 	))
 
@@ -153,7 +153,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 
 		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):
 			listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace)
-		elif permutationSpace.leafPinned吗(leaf_k) or pileNotOpen吗(permutationSpace, pile_k) or leaf_k not in rangePile_k:
+		elif permutationSpace.leafPinned吗(leaf_k) or permutationSpace.pileNotOpen吗(pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
 		else:
 			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
@@ -274,7 +274,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 	for permutationSpace in listPermutationSpace:
 		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
 			listLeafAtPile.append(permutationSpace)
-		elif permutationSpace.leafPinned吗(leaf) or pileNotOpen吗(permutationSpace, pile):
+		elif permutationSpace.leafPinned吗(leaf) or permutationSpace.pileNotOpen吗(pile):
 			continue
 		else:
 			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile, default=bit_mask(len(permutationSpace))))
