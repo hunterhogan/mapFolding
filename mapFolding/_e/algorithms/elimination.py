@@ -6,7 +6,7 @@ from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
+from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import DOTitems
 from math import factorial
 from more_itertools import all_unique as allUnique吗
@@ -22,10 +22,10 @@ def count(state: EliminationState) -> EliminationState:
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
 	return sum(map(foldingValid吗
-			, map(makeFolding, repeat(permutationSpace)
-		, filter(allUnique吗
-		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(permutationSpace.extractUndeterminedPiles()))))))
-			, repeat(mapShape)))
+					, map(permutationSpace.makeFolding
+			, filter(allUnique吗
+			, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(permutationSpace.extractUndeterminedPiles()))))))
+					, repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:
 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):

@@ -8,12 +8,13 @@ from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
-from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys
+from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys, DOTvalues
 from math import prod
 from typing import cast, TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
+	from collections.abc import Iterator, Sequence
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 
 
@@ -97,6 +98,11 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
 		# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
 		return (leavesPinned, cast("UndeterminedPiles", dissociatePile(self, *DOTkeys(leavesPinned))))
+
+	def makeFolding(self, leavesToInsert: Sequence[Leaf]) -> Folding:
+		pilesToInsert: Iterator[Pile] = DOTkeys(self.extractUndeterminedPiles())
+		# NOTE `cast` because the type checkers cannot possible know that the prior logic leads to all int.
+		return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(self, cast("dict[Pile, LeafSpace]", dict(zip(pilesToInsert, leavesToInsert, strict=True))))))))))
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:

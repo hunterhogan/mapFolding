@@ -96,7 +96,7 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 		if any(map(leafNotPinned吗(permutationSpace), range(state.leavesTotal))):
 			state.listPermutationSpace.append(permutationSpace)
 		else:
-			folding: Folding = makeFolding(permutationSpace, ())
+			folding: Folding = permutationSpace.makeFolding(())
 			state.listFolding.append(folding)
 	return state
 
@@ -132,11 +132,6 @@ def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) ->
 	deconstructPermutationSpaceAtPile
 	"""
 	return PermutationSpace(associate(permutationSpace, pile, leaf))
-
-def makeFolding(permutationSpace: PermutationSpace, leavesToInsert: Sequence[Leaf]) -> Folding:
-	pilesToInsert: Iterator[Pile] = DOTkeys(permutationSpace.extractUndeterminedPiles())
-	# NOTE `cast` because the type checkers cannot possible know that the prior logic leads to all int.
-	return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(permutationSpace, dict(zip(pilesToInsert, leavesToInsert, strict=True)))))))))
 
 #======== Deconstruct a `PermutationSpace` dictionary =======
 
