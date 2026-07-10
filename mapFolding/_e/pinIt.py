@@ -18,8 +18,8 @@ from humpy_cytoolz import (
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct, repeat
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearest首, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions,
-	howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
+	dimensionNearest首, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean,
+	leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
@@ -750,7 +750,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		leavesPinned, pilesUndetermined = bifurcatePermutationSpace(permutationSpace)
+		leavesPinned, pilesUndetermined = permutationSpace.bifurcatePermutationSpace()
 		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 		# NOTE using the walrus operator here `if not (permutationSpace := _reduceLeafSpace...` means
 		# that type checkers are ok with `permutationSpace: PermutationSpace`. If I assigned without
@@ -873,7 +873,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		leavesPinned, pilesUndetermined = bifurcatePermutationSpace(permutationSpace)
+		leavesPinned, pilesUndetermined = permutationSpace.bifurcatePermutationSpace()
 
 		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 

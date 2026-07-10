@@ -8,10 +8,6 @@ into this module without causing circular import problems. This constraint exist
 
 Contents
 --------
-Group-by functions
-	bifurcatePermutationSpace
-		You can split a `PermutationSpace` into pinned leaves and pile-range domains.
-
 Disaggregation and deconstruction functions
 	DOTitems
 		You can iterate over `(key, value)` pairs in a `Mapping`.
@@ -58,44 +54,18 @@ from __future__ import annotations
 
 from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set
-from humpy_cytoolz import curry as syntacticCurry, dissoc as dissociatePile, unique
+from humpy_cytoolz import curry as syntacticCurry, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
-from mapFolding.genericNeedsNewHome import DOTkeys
 from more_itertools import iter_index
 from operator import add, mul
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
-
-#======== Group-by functions ================================================
-
-def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[PinnedLeaves, UndeterminedPiles]:
-	"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
-
-	You can use this function to partition `permutationSpace` into two dictionaries. The first
-	dictionary contains each `Pile` mapped to a pinned `Leaf`. The second dictionary contains
-	each `Pile` mapped to a `LeafOptions` domain.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary mapping each `Pile` to either a pinned `Leaf` or a `LeafOptions` domain.
-
-	Returns
-	-------
-	leavesPinned : PinnedLeaves
-		Dictionary of `Pile` to pinned `Leaf` mappings.
-	pilesUndetermined : UndeterminedPiles
-		Dictionary of `Pile` to `LeafOptions` domain mappings.
-	"""
-	leavesPinned: PinnedLeaves = permutationSpace.extractPinnedLeaves()
-	# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
-	return (leavesPinned, cast("UndeterminedPiles", dissociatePile(permutationSpace, *DOTkeys(leavesPinned))))
 
 #======== `LeafOptions` functions ================================================
 

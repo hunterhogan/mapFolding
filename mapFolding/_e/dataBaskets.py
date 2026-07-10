@@ -2,15 +2,15 @@
 from __future__ import annotations
 
 from collections import deque
-from humpy_cytoolz import compose, merge, valfilter as filterLeaf, valmap as mapLeaf
+from humpy_cytoolz import compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
-from mapFolding.genericNeedsNewHome import DOTitems
+from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys
 from math import prod
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
@@ -83,6 +83,20 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 		if isLeafOptions吗(ImaLeafOptions):
 			return ImaLeafOptions
 		return default
+
+	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
+		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
+
+		Returns
+		-------
+		leavesPinned : PinnedLeaves
+			Dictionary of `Pile` to pinned `Leaf` mappings.
+		pilesUndetermined : UndeterminedPiles
+			Dictionary of `Pile` to `LeafOptions` domain mappings.
+		"""
+		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
+		# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
+		return (leavesPinned, cast("UndeterminedPiles", dissociatePile(self, *DOTkeys(leavesPinned))))
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:

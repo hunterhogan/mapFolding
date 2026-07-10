@@ -7,8 +7,8 @@ from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
-	bifurcatePermutationSpace, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
-	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
+	getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost, indicesMapShapeDimensionLengthsAreEqual, leafOrigin,
+	mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import between吗, DOTvalues
@@ -32,7 +32,7 @@ def count(state: EliminationState) -> EliminationState:
 	model.add_inverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
 #======== Manual concurrency and targeted constraints ============================
-	leavesPinned, pilesUndetermined = bifurcatePermutationSpace(state.permutationSpace)
+	leavesPinned, pilesUndetermined = state.permutationSpace.bifurcatePermutationSpace()
 	for aPile, aLeaf in leavesPinned.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 

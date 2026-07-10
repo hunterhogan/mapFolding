@@ -16,8 +16,7 @@ from mapFolding._e._disaggregation import getIteratorOfLeaves as getIteratorOfLe
 
 # isort: split
 from mapFolding._e._beDRY import (
-	bifurcatePermutationSpace as bifurcatePermutationSpace, getProductsOfDimensions as getProductsOfDimensions,
-	getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
+	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
 	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, howManyLeavesInLeafOptions as howManyLeavesInLeafOptions,
 	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, JeanValjean as JeanValjean,
 	leafOptionsAND as leafOptionsAND, makeLeafAntiOptions as makeLeafAntiOptions, makeLeafOptions as makeLeafOptions)
