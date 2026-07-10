@@ -4,9 +4,9 @@ from __future__ import annotations
 from gmpy2 import bit_flip, bit_mask, bit_test as isBit1吗, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, DOTgetPileIfLeaf,
-	getDictionaryLeafOptions, getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, getSumsOfProductsOfDimensionsNearest首,
-	howManyDimensionsHaveOddParity, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, getDictionaryLeafOptions,
+	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
+	leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.filters import notLeafOriginOrLeaf零
 from mapFolding.genericNeedsNewHome import exclude
 from more_itertools import last
@@ -51,12 +51,12 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
 	"""
-	leafAt一:			Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一))
-	leafAt一Ante首:		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一) + state.首))
-	leafAt一零:			Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, (一 + 零)))
-	leafAt零一Ante首:	Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(零 + 一) + state.首))
-	leafAt二:			Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 二))
-	leafAt二Ante首:		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(二) + state.首))
+	leafAt一:			Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一))
+	leafAt一Ante首:		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首))
+	leafAt一零:			Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一 + 零))
+	leafAt零一Ante首:	Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(零 + 一) + state.首))
+	leafAt二:			Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(二))
+	leafAt二Ante首:		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(二) + state.首))
 
 	dictionaryLeafOptions: dict[Pile, LeafOptions] = getDictionaryLeafOptions(state)
 	listRemoveLeaves: list[int] = []

@@ -18,8 +18,8 @@ from humpy_cytoolz import (
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct, repeat
 from mapFolding._e import (
-	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeaf, DOTgetPileIfLeafOptions, getDictionaryLeafOptions, getIteratorOfLeaves,
-	getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
+	bifurcatePermutationSpace, dimensionNearest首, DOTgetPileIfLeafOptions, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain,
+	getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
@@ -160,7 +160,7 @@ def deconstructPermutationSpaceAtPile(permutationSpace: PermutationSpace, pile: 
 	deconstructedPermutationSpace : dict[int, PermutationSpace]
 		Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace` dictionary with the `leaf` pinned at `pile`.
 	"""
-	if (leaf := DOTgetPileIfLeaf(permutationSpace, pile)) is not None:
+	if (leaf := permutationSpace.DOTgetPileIfLeaf(pile)) is not None:
 		deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: permutationSpace}
 	else:
 		pin: Callable[[Leaf], PermutationSpace] = atPilePinLeaf(permutationSpace, pile)

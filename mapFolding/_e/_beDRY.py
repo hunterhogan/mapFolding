@@ -23,8 +23,6 @@ Disaggregation and deconstruction functions
 		You can iterate over each `Leaf` bit that is set in a `LeafOptions`.
 
 `LeafOptions` functions
-	DOTgetPileIfLeaf
-		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `Leaf`.
 	DOTgetPileIfLeafOptions
 		You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
 	getAntiLeafOptions
@@ -102,49 +100,6 @@ def bifurcatePermutationSpace(permutationSpace: PermutationSpace) -> tuple[Pinne
 	return (leavesPinned, cast("UndeterminedPiles", dissociatePile(permutationSpace, *DOTkeys(leavesPinned))))
 
 #======== `LeafOptions` functions ================================================
-
-def DOTgetPileIfLeaf(permutationSpace: PermutationSpace, pile: Pile, default: Leaf | None = None) -> Leaf | None:
-	"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
-
-	You can use this function to safely extract a `Leaf` from `permutationSpace[pile]` when
-	you expect `permutationSpace[pile]` to be a pinned `Leaf` rather than a `LeafOptions`
-	domain. When `permutationSpace[pile]` is a `Leaf`, the function returns `permutationSpace[pile]`.
-	When `permutationSpace[pile]` is a `LeafOptions` or when `pile` is not in `permutationSpace`,
-	the function returns `default` [1].
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary mapping each `Pile` to either a pinned `Leaf` or a `LeafOptions` domain.
-	pile : Pile
-		`Pile` index to look up in `permutationSpace`.
-	default : Leaf | None = None
-		Value to return when `permutationSpace[pile]` is not a `Leaf`.
-
-	Returns
-	-------
-	leafOrDefault : Leaf | None
-		The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`,
-		otherwise `default`.
-
-	Examples
-	--------
-	The function is used to retrieve a pinned leaf at a specific pile.
-
-		leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `leaf` at {direction(state.pile, 1)}.")
-
-	The function is used to retrieve a leaf with a fallback when the pile might not be pinned.
-
-		leafAt一Ante首: Leaf | None = DOTgetPileIfLeaf(state.permutationSpace, neg(一)+state.首)
-
-	References
-	----------
-	[1] mapFolding._e.filters.thisIsALeaf
-	"""
-	ImaLeaf: LeafSpace | None = permutationSpace.get(pile)
-	if isLeaf吗(ImaLeaf):
-		return ImaLeaf
-	return default
 
 def DOTgetPileIfLeafOptions(permutationSpace: PermutationSpace, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
 	"""You can read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.

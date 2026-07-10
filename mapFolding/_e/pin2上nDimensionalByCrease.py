@@ -4,8 +4,8 @@ from __future__ import annotations
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding._e import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, DOTgetPileIfLeaf, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane,
-	ptount, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一)
+	dimensionIndex, dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane, ptount, 一, 三, 二, 五,
+	四, 零, 首一, 首零, 首零一)
 from mapFolding.genericNeedsNewHome import exclude
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
@@ -27,10 +27,10 @@ def pinPile一ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
+	leafRoot: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
 	tupleLeavesCrease: tuple[Leaf, ...] = _getLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一Ante首: Leaf | None = DOTgetPileIfLeaf(state.permutationSpace, neg(一) + state.首)
+	leafAt一Ante首: Leaf | None = state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首)
 
 	if leafAt一Ante首 and (0 < dimensionNearestTail(leafAt一Ante首)):
 		listCreaseIndicesExcluded.extend([*range(dimensionNearestTail(leafAt一Ante首) - 零, state.dimensionsTotal - 一)])
@@ -40,10 +40,10 @@ def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
+	leafRoot: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
 	tupleLeavesCrease: tuple[Leaf, ...] = _getLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: Leaf | None = DOTgetPileIfLeaf(state.permutationSpace, 一)
+	leafAt一: Leaf | None = state.permutationSpace.DOTgetPileIfLeaf(一)
 
 	if leafAt一 and (leafAt一.bit_length() < state.dimensionsTotal):
 		listCreaseIndicesExcluded.extend([*range(零, dimensionNearest首(leafAt一) + inclusive)])
@@ -54,11 +54,11 @@ def pinPile一零ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
+	leafRoot: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
 	tupleLeavesCrease: tuple[Leaf, ...] = _getLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: 		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一))
-	leafAt一Ante首: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一) + state.首))
+	leafAt一: 		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一))
+	leafAt一Ante首: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首))
 
 	if 1 < len(tupleLeavesCrease):
 		listCreaseIndicesExcluded.append(0)
@@ -70,11 +70,11 @@ def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
+	leafRoot: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
 	tupleLeavesCrease: tuple[Leaf, ...] = _getLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: 		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一))
-	leafAt一Ante首: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一) + state.首))
+	leafAt一: 		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一))
+	leafAt一Ante首: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首))
 
 	if leafAt一Ante首 < 首零一(state.dimensionsTotal):
 		listCreaseIndicesExcluded.append(-1)
@@ -87,13 +87,13 @@ def pinPile二ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = sub
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
+	leafRoot: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
 	tupleLeavesCrease: tuple[Leaf, ...] = _getLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: 		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一))
-	leafAt一Ante首: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一) + state.首))
-	leafAt一零: 	  Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一 + 零))
-	leafAt零一Ante首: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(零 + 一) + state.首))
+	leafAt一: 		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一))
+	leafAt一Ante首: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首))
+	leafAt一零: 	  Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一 + 零))
+	leafAt零一Ante首: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(零 + 一) + state.首))
 
 	if isOdd吗(leafAt一零):
 		listCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt一零)])
@@ -114,14 +114,14 @@ def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = add
 
 	listCreaseIndicesExcluded: list[int] = []
-	leafRoot: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
+	leafRoot: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(direction(state.pile, 1)), f"I could not find an `int` type `Leaf` at {direction(state.pile, 1)}.")
 	tupleLeavesCrease: tuple[Leaf, ...] = _getLeavesCrease(state, direction(0, leafRoot))
 
-	leafAt一: 		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一))
-	leafAt一Ante首: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(一) + state.首))
-	leafAt一零: 	  Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 一 + 零))
-	leafAt零一Ante首: Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, neg(零 + 一) + state.首))
-	leafAt二: 		Leaf = raiseIfNone(DOTgetPileIfLeaf(state.permutationSpace, 二))
+	leafAt一: 		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一))
+	leafAt一Ante首: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首))
+	leafAt一零: 	  Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一 + 零))
+	leafAt零一Ante首: Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(零 + 一) + state.首))
+	leafAt二: 		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(二))
 
 	addendDimension首零: int = leafAt零一Ante首 - leafAt一Ante首
 

@@ -43,6 +43,27 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 		"""
 		return filterLeaf(isLeafOptions吗, self)
 
+	def DOTgetPileIfLeaf(self, pile: Pile, default: Leaf | None = None) -> Leaf | None:
+		"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
+
+		Parameters
+		----------
+		pile : Pile
+			`Pile` index to look up in `permutationSpace`.
+		default : Leaf | None = None
+			Value to return when `permutationSpace[pile]` is not a `Leaf`.
+
+		Returns
+		-------
+		leafOrDefault : Leaf | None
+			The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`,
+			otherwise `default`.
+		"""
+		ImaLeaf: LeafSpace | None = self.get(pile)
+		if isLeaf吗(ImaLeaf):
+			return ImaLeaf
+		return default
+
 @dataclasses.dataclass(slots=True)
 class EliminationState:
 	"""Computational state for algorithms that compute `foldsTotal` by elimination.
