@@ -1,3 +1,4 @@
+# TODO idk enough to choose between `UserDict` and subclassing `dict`.
 # ruff: noqa: FURB189
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 from __future__ import annotations
@@ -5,6 +6,7 @@ from __future__ import annotations
 from collections import deque
 from functools import partial
 from gmpy2 import bit_mask
+# SEMIOTICS `associate`, `associateItem`, or something else?
 from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
@@ -21,24 +23,13 @@ if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 
-# DEVELOPMENT PermutationSpace(dict)
-# Goals: DRY code, useful code, a useful PermutationSpace `object`, EFFICIENCY, seamless integration with a strongly functional paradigm.
-# On EFFICIENCY: this object will help enumerate ~362794844160000 permutations for A001417(8), for
-# example. One extra clock cycle on one oft-called operation can add days to a multi-week computation.
-
-#---- method (only?) ------------
-
-#---- method and/or function (?) ---
-# NOTE Remember the goals when deciding method, function, or both. When implementing both, DRYer code helps
-#	 to ensure that behavior is consistent between the method and the function.
 class PermutationSpace(dict[Pile, LeafSpace]):
-	"""Represent `pile: leaf` and `pile: leafOptions` mappings with pinning helper methods."""
-
-	def copy(self) -> PermutationSpace:
-		return PermutationSpace(self)
+	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
 	def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles) -> PermutationSpace:
-		"""Return a new `PermutationSpace` with default `LeafOptions` for missing piles.
+		"""Return a new `PermutationSpace` with default NO! `LeafOptions` for missing piles.
+
+		TODO "default" is not the right word.
 
 		Parameters
 		----------
@@ -50,68 +41,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		permutationSpace : PermutationSpace
 			New `PermutationSpace` with current entries overriding default `LeafOptions`.
 		"""
-		return PermutationSpace(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self))
-
-	def extractPinnedLeaves(self) -> PinnedLeaves:
-		"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
-
-		Returns
-		-------
-		dictionaryOfPileLeaf : dict[int, int]
-			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
-		"""
-		return dict(sorted(DOTitems(filterLeaf(isLeaf吗, self))))
-
-	def extractUndeterminedPiles(self) -> UndeterminedPiles:
-		"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
-
-		Returns
-		-------
-		pilesUndetermined : dict[int, LeafOptions]
-			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
-		"""
-		return filterLeaf(isLeafOptions吗, self)
-
-	def DOTgetPileIfLeaf(self, pile: Pile, default: Leaf | None = None) -> Leaf | None:
-		"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
-
-		Parameters
-		----------
-		pile : Pile
-			`Pile` index to look up in `permutationSpace`.
-		default : Leaf | None = None
-			Value to return when `permutationSpace[pile]` is not a `Leaf`.
-
-		Returns
-		-------
-		leafOrDefault : Leaf | None
-			The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`,
-			otherwise `default`.
-		"""
-		ImaLeaf: LeafSpace | None = self.get(pile)
-		if isLeaf吗(ImaLeaf):
-			return ImaLeaf
-		return default
-
-	def DOTgetPileIfLeafOptions(self, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
-		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
-
-		Parameters
-		----------
-		pile : Pile
-			`Pile` index to look up in `permutationSpace`.
-		default : LeafOptions | None = None
-			Value to return when `permutationSpace[pile]` is not a `LeafOptions`.
-
-		Returns
-		-------
-		leafOptionsOrNone : LeafOptions | None
-			`LeafOptions` value from `permutationSpace[pile]`, or `default`.
-		"""
-		ImaLeafOptions: LeafSpace | None = self.get(pile)
-		if isLeafOptions吗(ImaLeafOptions):
-			return ImaLeafOptions
-		return default
+		# TODO fix the type annotations in humpy_cytoolz and/or mapFolding: reconstructing as `PermutationSpace` ought not to be necessary.
+		return PermutationSpace(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self, factory=PermutationSpace))
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
 		"""Return a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
@@ -130,83 +61,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return PermutationSpace(associate(self, pile, leaf, PermutationSpace))
 
-	def leafNotPinned吗(self, leaf: Leaf) -> bool:
-		"""Return `True` if `leaf` is not presently pinned in this `PermutationSpace`.
-
-		Parameters
-		----------
-		leaf : Leaf
-			`Leaf` index.
-
-		Returns
-		-------
-		leafIsNotPinned : bool
-			`True` if this `PermutationSpace` does not include `leaf`.
-		"""
-		return leaf not in self.values()
-
-	def leafPinned吗(self, leaf: Leaf) -> bool:
-		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
-
-		Parameters
-		----------
-		leaf : Leaf
-			`Leaf` index.
-
-		Returns
-		-------
-		leafIsPinned : bool
-			`True` if this `PermutationSpace` includes `leaf`.
-		"""
-		return leaf in self.values()
-
-	def leafPinnedAtPile吗(self, leaf: Leaf, pile: Pile) -> bool:
-		"""Return `True` if `leaf` is pinned at `pile` in this `PermutationSpace`.
-
-		Parameters
-		----------
-		leaf : Leaf
-			`Leaf` whose presence at `pile` is being checked.
-		pile : Pile
-			`Pile` index.
-
-		Returns
-		-------
-		leafIsPinnedAtPile : bool
-			`True` if this `PermutationSpace` includes `pile: leaf`.
-		"""
-		return leaf == self.get(pile)
-
-	def pileNotOpen吗(self, pile: Pile) -> bool:
-		"""Return `True` if a `Leaf` is pinned at `pile` in this `PermutationSpace`.
-
-		Parameters
-		----------
-		pile : Pile
-			`Pile` index.
-
-		Returns
-		-------
-		pileIsNotOpen : bool
-			`True` if this `PermutationSpace` contains a `Leaf` at `pile`.
-		"""
-		return isLeaf吗(self[pile])
-
-	def pileOpen吗(self, pile: Pile) -> bool:
-		"""Return `True` if `pile` is open in this `PermutationSpace`.
-
-		Parameters
-		----------
-		pile : Pile
-			`Pile` index.
-
-		Returns
-		-------
-		pileIsOpen : bool
-			`True` if this `PermutationSpace` contains `LeafOptions` at `pile`.
-		"""
-		return not isLeaf吗(self[pile])
-
+	# TODO reconsider the role, necessity, and location of this function.
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
 
@@ -222,9 +77,28 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		isSafeToPin : bool
 			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 		"""
+		# DOCUMENT I'm pretty sure I wrote a lot more documentation for this.
 		return self.leafPinnedAtPile吗(leaf, pile) or (self.pileOpen吗(pile) and self.leafNotPinned吗(leaf))
 
-	def deconstructPermutationSpaceAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
+	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
+		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
+
+		Returns
+		-------
+		leavesPinned : PinnedLeaves
+			Dictionary of `Pile` to pinned `Leaf` mappings.
+		pilesUndetermined : UndeterminedPiles
+			Dictionary of `Pile` to `LeafOptions` domain mappings.
+		"""
+		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
+		# TODO Create new comment marker to signal "deviations" from the code style, or code that doesn't "conform" to the rules.
+		# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
+		return (leavesPinned, cast("UndeterminedPiles", dissociatePile(self, *DOTkeys(leavesPinned))))
+
+	def copy(self) -> PermutationSpace:
+		return PermutationSpace(self)
+
+	def deconstructAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
 		"""Deconstruct an open `pile` to the `leaf` range of `pile`.
 
 		Return a dictionary containing this `PermutationSpace` if `pile` already has a
@@ -244,15 +118,14 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace`
 			dictionary with the `leaf` pinned at `pile`.
 		"""
-		if (leaf := self.DOTgetPileIfLeaf(pile)) is not None:
+		if (leaf := self.getLeaf(pile)) is not None:
 			deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: self}
 		else:
 			pin: Callable[[Leaf], PermutationSpace] = partial(self.atPilePinLeaf, pile)
-			leafCanBePinned: Callable[[Leaf], bool] = self.leafNotPinned吗
-			deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(leafCanBePinned, leavesToPin)}
+			deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(self.leafNotPinned吗, leavesToPin)}
 		return deconstructedPermutationSpace
 
-	def deconstructPermutationSpaceByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
+	def deconstructByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
 		"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
 		Return a `deque` containing this `PermutationSpace` if `leaf` is already
@@ -274,15 +147,14 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
 		if self.leafNotPinned吗(leaf):
-			pileOpen: Callable[[int], bool] = self.pileOpen吗
-			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.DOTgetPileIfLeafOptions, default=bit_mask(len(self))))
+			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.getLeafOptions, default=bit_mask(len(self))))
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
-			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(pileOpen, leafDomain))))
+			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(self.pileOpen吗, leafDomain))))
 		else:
 			deconstructedPermutationSpace.append(self)
 		return deconstructedPermutationSpace
 
-	def deconstructPermutationSpaceByDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
+	def deconstructByDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
 		"""Pin several leaves across matching pile-domain tuples.
 
 		Parameters
@@ -307,7 +179,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				leafOptions: LeafOptions = raiseIfNone(self.DOTgetPileIfLeafOptions(domain[index], default=bit_mask(len(self))))
+				leafOptions: LeafOptions = raiseIfNone(self.getLeafOptions(domain[index], default=bit_mask(len(self))))
 				return leafInLeafOptions吗(leaves[index], leafOptions)
 			return workhorse
 
@@ -348,24 +220,169 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		return deconstructedPermutationSpace
 
-	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
-		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
+	def extractPinnedLeaves(self) -> PinnedLeaves:
+		"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
 
 		Returns
 		-------
-		leavesPinned : PinnedLeaves
-			Dictionary of `Pile` to pinned `Leaf` mappings.
-		pilesUndetermined : UndeterminedPiles
-			Dictionary of `Pile` to `LeafOptions` domain mappings.
+		dictionaryOfPileLeaf : dict[int, int]
+			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 		"""
-		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
-		# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
-		return (leavesPinned, cast("UndeterminedPiles", dissociatePile(self, *DOTkeys(leavesPinned))))
+		return dict(sorted(DOTitems(filterLeaf(isLeaf吗, self))))
 
+	def extractUndeterminedPiles(self) -> UndeterminedPiles:
+		"""Return a dictionary *sorted* by `pile` of all `pile: leafOptions` in `PermutationSpace`.
+
+		Returns
+		-------
+		pilesUndetermined : dict[int, LeafOptions]
+			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
+		"""
+		return dict(sorted(DOTitems(filterLeaf(isLeafOptions吗, self))))
+
+	# TODO `getLeaf` is modeled directly on `.get()`. Therefore, ought `default: Leaf | None` be so
+	# restrictive? I cannot think of any use case for a `default` that is not a `Leaf` or `None`, but
+	# I cannot think of a reason to restrict it.
+	# TODO `isLeaf吗` returns `TypeIs`, and I almost wrote that I should change the return type of
+	# `getLeaf`. Therefore, the REAL todo is: I need to stop coding and go eat.
+	def getLeaf(self, pile: Pile, default: Leaf | None = None) -> Leaf | None:
+		"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
+
+		Parameters
+		----------
+		pile : Pile
+			`Pile` index to look up in `permutationSpace`.
+		default : Leaf | None = None
+			Value to return when `permutationSpace[pile]` is not a `Leaf`.
+
+		Returns
+		-------
+		leafOrDefault : Leaf | None
+			The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`,
+			otherwise `default`.
+		"""
+		ImaLeaf: LeafSpace | None = self.get(pile)
+		if isLeaf吗(ImaLeaf):
+			return ImaLeaf
+		return default
+
+	def getLeafOptions(self, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
+		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
+
+		Parameters
+		----------
+		pile : Pile
+			`Pile` index to look up in `permutationSpace`.
+		default : LeafOptions | None = None
+			Value to return when `permutationSpace[pile]` is not a `LeafOptions`.
+
+		Returns
+		-------
+		leafOptionsOrNone : LeafOptions | None
+			`LeafOptions` value from `permutationSpace[pile]`, or `default`.
+		"""
+		ImaLeafOptions: LeafSpace | None = self.get(pile)
+		if isLeafOptions吗(ImaLeafOptions):
+			return ImaLeafOptions
+		return default
+
+	def leafNotPinned吗(self, leaf: Leaf) -> bool:
+		"""Return `True` if `leaf` is not presently pinned in this `PermutationSpace`.
+
+		Parameters
+		----------
+		leaf : Leaf
+			`Leaf` index.
+
+		Returns
+		-------
+		leafIsNotPinned : bool
+			`True` if this `PermutationSpace` does not include `leaf`.
+		"""
+		return leaf not in self.values()
+
+	# TODO Learn how to use caching for a method. Once a `Leaf` is pinned, it will always be pinned in
+	# this `PermutationSpace`. Is it possible to conditionally cache? I don't want to cache `False`
+	# because that could change.
+	def leafPinned吗(self, leaf: Leaf) -> bool:
+		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
+
+		Parameters
+		----------
+		leaf : Leaf
+			`Leaf` index.
+
+		Returns
+		-------
+		leafIsPinned : bool
+			`True` if this `PermutationSpace` includes `leaf`.
+		"""
+		return leaf in self.values()
+
+	def leafPinnedAtPile吗(self, leaf: Leaf, pile: Pile) -> bool:
+		"""Return `True` if `leaf` is pinned at `pile` in this `PermutationSpace`.
+
+		Parameters
+		----------
+		leaf : Leaf
+			`Leaf` whose presence at `pile` is being checked.
+		pile : Pile
+			`Pile` index.
+
+		Returns
+		-------
+		leafIsPinnedAtPile : bool
+			`True` if this `PermutationSpace` includes `pile: leaf`.
+		"""
+		return leaf == self.get(pile)
+
+	# TODO Consider implementing another method to make a `Folding` or _maybe_ cleverly overloading
+	# this method (I'm deeply skeptical that overload is a good idea). `makeFolding` handles _my_
+	# current needs. If I had to create ONE `makeFolding` function/method with the most utility,
+	# however, it would NOT look like this function. 2026 July 10: off the top of my head, passing
+	# `listPileLeaf: Sequence[tuple[Pile, Leaf]]` would be better than the current function and is
+	# probably close to the ideal generalized function.
 	def makeFolding(self, leavesToInsert: Sequence[Leaf]) -> Folding:
+		# DOCUMENT `pilesToInsert` is sorted from smallest to largest Pile. `leavesToInsert` must be ordered with that in mind.
 		pilesToInsert: Iterator[Pile] = DOTkeys(self.extractUndeterminedPiles())
 		# NOTE `cast` because the type checkers cannot possible know that the prior logic leads to all int.
-		return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(self, cast("dict[Pile, LeafSpace]", dict(zip(pilesToInsert, leavesToInsert, strict=True))))))))))
+		# TODO Think about: I _feel_ like this logic could be more efficient. This
+		# `tuple(DOTvalues(dict(sorted(DOTitems` has THREE constructors (`sorted` is a stealth `list`
+		# constructor) or FIVE constructors if `Iterator` is a constructor (`DOTitems` and
+		# `DOTvalues`), so I _feel_ it would be faster if I could change the values without
+		# ping-ponging from `dict` to `list` to `dict` to `tuple`.
+		return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(self, dict(zip(pilesToInsert, leavesToInsert, strict=True)), factory=PermutationSpace)))))))
+
+	def pileNotOpen吗(self, pile: Pile) -> bool:
+		"""Return `True` if a `Leaf` is pinned at `pile` in this `PermutationSpace`.
+
+		Parameters
+		----------
+		pile : Pile
+			`Pile` index.
+
+		Returns
+		-------
+		pileIsNotOpen : bool
+			`True` if this `PermutationSpace` contains a `Leaf` at `pile`.
+		"""
+		return isLeaf吗(self[pile])
+
+	# SEMIOTICS `pileUndetermined吗` to mirror `UndeterminedPiles`? The pile isn't exactly "open".
+	def pileOpen吗(self, pile: Pile) -> bool:
+		"""Return `True` if `pile` is open in this `PermutationSpace`.
+
+		Parameters
+		----------
+		pile : Pile
+			`Pile` index.
+
+		Returns
+		-------
+		pileIsOpen : bool
+			`True` if this `PermutationSpace` contains `LeafOptions` at `pile`.
+		"""
+		return not isLeaf吗(self[pile])
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:

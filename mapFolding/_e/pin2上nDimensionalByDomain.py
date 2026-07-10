@@ -51,12 +51,12 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
 	"""
-	leafAt一:			Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一))
-	leafAt一Ante首:		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(一) + state.首))
-	leafAt一零:			Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(一 + 零))
-	leafAt零一Ante首:	Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(零 + 一) + state.首))
-	leafAt二:			Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(二))
-	leafAt二Ante首:		Leaf = raiseIfNone(state.permutationSpace.DOTgetPileIfLeaf(neg(二) + state.首))
+	leafAt一:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(一))
+	leafAt一Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(一) + state.首))
+	leafAt一零:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(一 + 零))
+	leafAt零一Ante首:	Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(零 + 一) + state.首))
+	leafAt二:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(二))
+	leafAt二Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(二) + state.首))
 
 	dictionaryLeafOptions: dict[Pile, LeafOptions] = getDictionaryLeafOptions(state)
 	listRemoveLeaves: list[int] = []

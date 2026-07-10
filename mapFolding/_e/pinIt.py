@@ -106,7 +106,7 @@ def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[Permuta
 	--------
 	PermutationSpace.deconstructPermutationSpaceAtPile
 	"""
-	return flatten(map(DOTvalues, map(PermutationSpace.deconstructPermutationSpaceAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
+	return flatten(map(DOTvalues, map(PermutationSpace.deconstructAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
 
 # TODO Fix this moronic bullshit created by an AI assistant that refused to follow instructions.
 def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
@@ -155,7 +155,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 		elif permutationSpace.leafPinned吗(leaf_k) or permutationSpace.pileNotOpen吗(pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
 		else:
-			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
+			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
 			if leafInLeafOptions吗(leaf_k, leafOptionsAt_pile_k):
 				listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace.atPilePinLeaf(pile_k, leaf_k))
 				leafSpaceWithoutLeaf_k = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
@@ -236,7 +236,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
 			continue
 
-		if (leafOptionsAtPile := permutationSpace.DOTgetPileIfLeafOptions(pile)) is None:
+		if (leafOptionsAtPile := permutationSpace.getLeafOptions(pile)) is None:
 			yield permutationSpace
 			continue
 
@@ -276,7 +276,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 		elif permutationSpace.leafPinned吗(leaf) or permutationSpace.pileNotOpen吗(pile):
 			continue
 		else:
-			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.DOTgetPileIfLeafOptions(pile, default=bit_mask(len(permutationSpace))))
+			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile, default=bit_mask(len(permutationSpace))))
 			if leafInLeafOptions吗(leaf, leafOptionsAtPile):
 				listLeafAtPile.append(permutationSpace.atPilePinLeaf(pile, leaf))
 
@@ -284,7 +284,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 
 def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[tuple[PermutationSpace, tuple[PermutationSpace, ...]]]:
 	for permutationSpace in listPermutationSpace:
-		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = permutationSpace.deconstructPermutationSpaceAtPile(pile, leavesToPin)
+		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = permutationSpace.deconstructAtPile(pile, leavesToPin)
 		leafPinnedAtPile: PermutationSpace = deconstructedPermutationSpaceAtPile.pop(leaf)
 		yield (leafPinnedAtPile, tuple(deconstructedPermutationSpaceAtPile.values()))
 
@@ -410,7 +410,7 @@ def reduceLeafSpace(
 		Data basket containing computed properties such as `leavesTotal`. Currently unused by the
 		function but included for signature consistency with other reduction functions.
 	permutationSpace : PermutationSpace
-		Dictionary mapping pile indices to leaf indices or `LeafOptions` bitsets. The function
+		Dictionary mapping pile indices to leaf indices or `LeafOptions`. The function
 		mutates this dictionary in place.
 	pilesToUpdate : Iterable[tuple[Pile, LeafOptions]]
 		Pile indices to update and their corresponding leaf domains to restrict. Each tuple contains

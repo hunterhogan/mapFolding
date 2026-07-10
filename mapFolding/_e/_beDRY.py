@@ -57,15 +57,14 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import curry as syntacticCurry, unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
+from mapFolding._e.filters import isLeafOptions吗
 from more_itertools import iter_index
 from operator import add, mul
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding._e.dataBaskets import PermutationSpace
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace
 
 #======== `LeafOptions` functions ================================================
 
@@ -170,6 +169,7 @@ def howManyLeavesInLeafOptions(leafOptions: LeafOptions) -> int:
 	"""
 	return leafOptions.bit_count() - 1
 
+# SEMIOTICS `JeanValjean`.
 def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
 	"""You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
 

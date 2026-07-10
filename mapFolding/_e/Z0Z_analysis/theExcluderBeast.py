@@ -556,7 +556,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				stateValidation = pinPilesAtEnds(stateValidation, 1)
 
 				pileRange: list[int] = list(getIteratorOfLeaves(getLeafOptions(stateValidation, pileExcluder)))
-				dictionaryDeconstructed: dict[int, PermutationSpace] = stateValidation.listPermutationSpace[0].deconstructPermutationSpaceAtPile(pileExcluder, pileRange)
+				dictionaryDeconstructed: dict[int, PermutationSpace] = stateValidation.listPermutationSpace[0].deconstructAtPile(pileExcluder, pileRange)
 
 				permutationSpaceWithExcluder: PermutationSpace | None = dictionaryDeconstructed.get(leafExcluder)
 				if permutationSpaceWithExcluder is None:
@@ -567,7 +567,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listPermutationSpaceFromExcluder: deque[PermutationSpace] = permutationSpaceWithExcluder.deconstructPermutationSpaceByDomainOfLeaf(leafExcluded, domainReduced)
+				listPermutationSpaceFromExcluder: deque[PermutationSpace] = permutationSpaceWithExcluder.deconstructByDomainOfLeaf(leafExcluded, domainReduced)
 
 				stateValidation.listPermutationSpace = listPermutationSpaceOther + listPermutationSpaceFromExcluder
 

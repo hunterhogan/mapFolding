@@ -32,7 +32,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 		pile, leafOptions = first(DOTitems(filterLeaf(isLeafOptions吗, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructPermutationSpaceAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
+		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
 		sherpa = moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(sherpa, listFunctionsReduction2上nDimensional)))
 
 		listFolding.extend(sherpa.listFolding)
