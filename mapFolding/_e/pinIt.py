@@ -22,7 +22,7 @@ from mapFolding._e import (
 	makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗, pileOpen吗
+from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
 from typing import cast, TYPE_CHECKING

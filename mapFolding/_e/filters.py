@@ -50,7 +50,6 @@ from mapFolding._e.theTypes import Leaf, LeafOptions
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.dataBaskets import PermutationSpace
 	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves
 	from typing import TypeIs
 
@@ -140,24 +139,6 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 		True if `pile` is not equal to `pileLast`.
 	"""
 	return pileLast != pile
-
-@syntacticCurry
-def pileOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
-	"""Return True if `pile` is not presently pinned in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	pileIsOpen : bool
-		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `LeafOptions`.
-	"""
-	return not isLeaf吗(permutationSpace[pile])
 
 def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Return True if `leafSpace` is a `leaf`.

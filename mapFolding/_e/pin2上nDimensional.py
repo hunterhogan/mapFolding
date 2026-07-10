@@ -56,6 +56,7 @@ from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
+from functools import partial
 from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding._e import (
@@ -63,7 +64,6 @@ from mapFolding._e import (
 	mapShapeIs2上nDimensions, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.filters import pileOpen吗
 from mapFolding._e.pin2上nDimensionalAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
 from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
@@ -97,7 +97,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	`PermutationSpace` dictionaries that are open at `pile` and the `PermutationSpace`
 	dictionaries that are not open at `pile`.
 
-	This function uses `partition` [1] and `pileIsOpen` [2] to compute the partition.
+	This function uses `partition` [1] and `PermutationSpace.pileOpen吗` [2] to compute the partition.
 	This function uses `ProcessPoolExecutor` [3] and `tqdm` [4] to concurrently
 	deconstruct open `PermutationSpace` dictionaries.
 
@@ -125,7 +125,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	----------
 	[1] more-itertools `partition`.
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.partition
-	[2] mapFolding._e.filters.pileIsOpen.
+	[2] mapFolding._e.dataBaskets.PermutationSpace.pileOpen吗.
 
 	[3] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
@@ -140,7 +140,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
 		pile: Pile = pileProcessingOrder.popleft()
 
-		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(pileOpen吗(pile=pile), state.listPermutationSpace)
+		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(partial(PermutationSpace.pileOpen吗, pile=pile), state.listPermutationSpace)
 		state.listPermutationSpace = deque(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
