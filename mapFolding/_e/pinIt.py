@@ -12,7 +12,7 @@ from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear, bit_flip, bit_mask
 from humpy_cytoolz import (
-	assoc as associate, compose, concat, curry as syntacticCurry, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique,
+	assoc as associate, concat, curry as syntacticCurry, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique,
 	valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue)
 # TODO One or more things is messed up with humpy_*toolz.*.map
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
@@ -25,11 +25,10 @@ from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
-	from hunterMakesPy import CallableFunction
 	from mapFolding._e.dataBaskets import EliminationState
 	from mapFolding._e.theTypes import DimensionIndex, Folding, Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
