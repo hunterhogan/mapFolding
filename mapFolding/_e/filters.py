@@ -32,10 +32,6 @@ Boolean antecedents
 	thisIsALeafOptions
 		You can narrow `leafSpace` to a `LeafOptions`.
 
-Filter functions
-	extractUndeterminedPiles
-		You can extract only `pile: leafOptions` mappings from a `PermutationSpace`.
-
 References
 ----------
 [1] Built-in Functions - `filter` (Python documentation)
@@ -51,12 +47,11 @@ from __future__ import annotations
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding._e import 零
 from mapFolding._e.theTypes import Leaf, LeafOptions
-from mapFolding.genericNeedsNewHome import DOTitems
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import PermutationSpace
-	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves
 	from typing import TypeIs
 
 #======== Boolean antecedents ================================================
@@ -259,20 +254,3 @@ def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 		Congrats, you have a pile range!
 	"""
 	return isinstance(leafSpace, LeafOptions)
-
-#======== Filtering functions ================================================
-
-def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
-	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: leafOptions`.
-
-	Returns
-	-------
-	pilesUndetermined : dict[int, LeafOptions]
-		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
-	"""
-	return filterLeaf(isLeafOptions吗, permutationSpace)

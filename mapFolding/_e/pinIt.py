@@ -22,8 +22,7 @@ from mapFolding._e import (
 	getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import (
-	extractUndeterminedPiles, leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗)
+from mapFolding._e.filters import leafInLeafOptions吗, leafNotPinned吗, leafPinnedAtPile吗, leafPinned吗, pileNotOpen吗, pileOpen吗
 from mapFolding.genericNeedsNewHome import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisHasThat吗, thisNotHaveThat吗
 from more_itertools import flatten, one
 from typing import cast, TYPE_CHECKING
@@ -135,7 +134,7 @@ def atPilePinLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) ->
 	return PermutationSpace(associate(permutationSpace, pile, leaf))
 
 def makeFolding(permutationSpace: PermutationSpace, leavesToInsert: Sequence[Leaf]) -> Folding:
-	pilesToInsert: Iterator[Pile] = DOTkeys(extractUndeterminedPiles(permutationSpace))
+	pilesToInsert: Iterator[Pile] = DOTkeys(permutationSpace.extractUndeterminedPiles())
 	# NOTE `cast` because the type checkers cannot possible know that the prior logic leads to all int.
 	return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(permutationSpace, dict(zip(pilesToInsert, leavesToInsert, strict=True)))))))))
 
@@ -716,7 +715,7 @@ def reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSp
 				continue
 
 			if not (permutationSpace := reduceLeafSpace(state, permutationSpace
-					, DOTitems(filterPile(thisHasThat吗(pilesForbidden), extractUndeterminedPiles(permutationSpace)))
+					, DOTitems(filterPile(thisHasThat吗(pilesForbidden), permutationSpace.extractUndeterminedPiles()))
 					, leafAntiOptions
 			)):
 				return None
@@ -817,7 +816,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 		permutationSpaceHasNewLeaf = False
 		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
-		pilesUndetermined: UndeterminedPiles = extractUndeterminedPiles(permutationSpace)
+		pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
 
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
 		for pile, leafOptions in filterLeafOptions(thisNotHaveThat吗(unique(pilesUndetermined.values())), pilesUndetermined).items():

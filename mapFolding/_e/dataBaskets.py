@@ -5,7 +5,7 @@ from collections import deque
 from humpy_cytoolz import compose, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
-from mapFolding._e.filters import isLeaf吗
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import DOTitems
@@ -32,6 +32,16 @@ class PermutationSpace(dict[Pile, LeafSpace]):  # noqa: FURB189
 			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 		"""
 		return dict(sorted(DOTitems(filterLeaf(isLeaf吗, self))))
+
+	def extractUndeterminedPiles(self) -> UndeterminedPiles:
+		"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
+
+		Returns
+		-------
+		pilesUndetermined : dict[int, LeafOptions]
+			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
+		"""
+		return filterLeaf(isLeafOptions吗, self)
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:

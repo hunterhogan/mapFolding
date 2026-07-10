@@ -8,13 +8,13 @@ from mapFolding._e import (
 	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain,
 	getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import extractUndeterminedPiles
 from mapFolding._e.pin2上nDimensional import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from mapFolding.genericNeedsNewHome import DOTvalues
 from math import prod
+from operator import methodcaller
 from pprint import pprint
 from typing import TYPE_CHECKING
 import time
@@ -28,7 +28,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
 
-	permutationsPermutationSpaceTotal = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, extractUndeterminedPiles)))
+	permutationsPermutationSpaceTotal = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('extractUndeterminedPiles'))))
 	print(len(str(mm := fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
 	print(len(str(rr := prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
