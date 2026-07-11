@@ -80,6 +80,7 @@ from mapFolding._e.pinIt import (
 	reducePermutationSpace_nakedSubset)
 from mapFolding.genericNeedsNewHome import between吗, DOTitems
 from more_itertools import pairwise, triplewise
+from operator import methodcaller
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -180,7 +181,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 								, permutationSpace.extractPinnedLeaves()))
 		)):
 			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(state, permutationSpace
-				, DOTitems(PermutationSpace(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace)).extractUndeterminedPiles())
+				, DOTitems(methodcaller("extractUndeterminedPiles")(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace, factory=PermutationSpace)))
 				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 			)):
 				return None
@@ -243,14 +244,14 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves()))):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(state, permutationSpace
-				, DOTitems(PermutationSpace(filterPile(between吗(pile1stOpen, pile - inclusive), permutationSpace)).extractUndeterminedPiles())
+				, DOTitems(methodcaller("extractUndeterminedPiles")(filterPile(between吗(pile1stOpen, pile - inclusive), permutationSpace, factory=PermutationSpace)))
 				, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 			)):
 				return None
 
 			dimensionTail: int = dimensionNearestTail(leaf)
 			if 0 < dimensionTail and not (permutationSpace := reduceLeafSpace(state, permutationSpace
-				, DOTitems(PermutationSpace(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace)).extractUndeterminedPiles())
+				, DOTitems(methodcaller("extractUndeterminedPiles")(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace, factory=PermutationSpace)))
 				, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 			)):
 				return None
