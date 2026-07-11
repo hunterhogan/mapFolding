@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from collections import deque
+# TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
 # SEMIOTICS `associate`, `associateItem`, or something else?
@@ -397,6 +398,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return isLeaf吗(self[pile])
 
+	# DOCUMENT "Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?"
 	# SEMIOTICS `pileUndetermined吗` to mirror `UndeterminedPiles`? The pile isn't exactly "open".
 	def pileOpen吗(self, pile: Pile) -> bool:
 		"""Return `True` if `pile` is open in this `PermutationSpace`.
