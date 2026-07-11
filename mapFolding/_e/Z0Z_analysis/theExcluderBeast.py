@@ -17,7 +17,6 @@ from mapFolding._e import (
 	首零三, 首零二, 首零二三)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
-from mapFolding._e.pinIt import deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf
 from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings
 from mapFolding.genericNeedsNewHome import between吗, exclude
 from more_itertools import consecutive_groups
@@ -31,7 +30,7 @@ import sys
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace
 	from mapFolding._e.Z0Z_analysis.toolkit import PermutationSpaceStatus
 	import pandas
 
@@ -557,7 +556,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				stateValidation = pinPilesAtEnds(stateValidation, 1)
 
 				pileRange: list[int] = list(getIteratorOfLeaves(getLeafOptions(stateValidation, pileExcluder)))
-				dictionaryDeconstructed: dict[int, PermutationSpace] = deconstructPermutationSpaceAtPile(stateValidation.listPermutationSpace[0], pileExcluder, pileRange)
+				dictionaryDeconstructed: dict[int, PermutationSpace] = stateValidation.listPermutationSpace[0].deconstructAtPile(pileExcluder, pileRange)
 
 				permutationSpaceWithExcluder: PermutationSpace | None = dictionaryDeconstructed.get(leafExcluder)
 				if permutationSpaceWithExcluder is None:
@@ -568,7 +567,7 @@ def validateAnalysisMethodForMapShape(exclusionsFromAnalysisMethod: dict[strLeaf
 				domainOfLeafExcluded: list[int] = list(getLeafDomain(stateValidation, leafExcluded))
 				domainReduced: list[int] = list(exclude(domainOfLeafExcluded, listIndicesExcluded))
 
-				listPermutationSpaceFromExcluder: deque[PermutationSpace] = deconstructPermutationSpaceByDomainOfLeaf(permutationSpaceWithExcluder, leafExcluded, domainReduced)
+				listPermutationSpaceFromExcluder: deque[PermutationSpace] = permutationSpaceWithExcluder.deconstructByDomainOfLeaf(leafExcluded, domainReduced)
 
 				stateValidation.listPermutationSpace = listPermutationSpaceOther + listPermutationSpaceFromExcluder
 

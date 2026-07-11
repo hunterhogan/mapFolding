@@ -1,4 +1,4 @@
-# ruff: noqa: PLR0911
+# ruff: noqa: PLR0911 DOC201
 # pyright: reportUnknownArgumentType=false
 # pyright: reportUnknownVariableType=false
 """Verify that a folding sequence is possible.
@@ -76,7 +76,6 @@ from humpy_cytoolz import valfilter as filterLeaf
 from humpy_toolz.curried.operator import indexOf
 from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
-from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding.beDRY import getLeavesTotal
 from mapFolding.genericNeedsNewHome import between吗, DOTitems
 from math import prod
@@ -86,8 +85,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import Folding, Leaf, PermutationSpace, Pile
+	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.theTypes import Folding, Leaf, Pile
 
 #======== Forbidden inequalities ============================
 
@@ -141,7 +140,7 @@ def creaseViolationComplicated吗(pile: Pile, pileComparand: Pile, getLeafCrease
 	Finally, because we need to compare the relative positions of the leaves, pass a function that returns the position of the
 	`Leaf` crease.
 
-	"""  # noqa: DOC201
+	"""
 	if pile < pileComparand:
 
 		comparandCrease: int | None = getComparandCrease()
@@ -180,7 +179,7 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 	to characterize all crease crossings. This function evaluates those four simplified orderings
 	given the four pile positions π(k), π(r), π(k+1), π(r+1) directly.
 
-	"""  # noqa: DOC201
+	"""
 	if pile < pileComparand:
 		if pileComparandCrease < pile:
 			if pileCrease < pileComparandCrease:						# [k+1 < r+1 < k < r]
@@ -543,7 +542,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 	Algorithm Details
 	-----------------
 	`permutationSpaceHasIFFViolation` interprets `state.permutationSpace` as a partial mapping
-	from `Pile` to `Leaf`. The pinned leaves extracted by `extractPinnedLeaves` [1] are inverted
+	from `Pile` to `Leaf`. The pinned leaves extracted by `PermutationSpace.extractPinnedLeaves` [1] are inverted
 	to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
 
 	`permutationSpaceHasIFFViolation` filters candidate assignments with `between` [2] to skip
@@ -570,7 +569,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	References
 	----------
-	[1] mapFolding._e.filters.extractPinnedLeaves
+	[1] mapFolding._e.dataBaskets.PermutationSpace.extractPinnedLeaves
 
 	[2] mapFolding._e.filters.between
 
@@ -582,7 +581,7 @@ def permutationSpaceHasIFFViolation(state: EliminationState) -> bool:
 
 	[6] mapFolding._e.pin2上nDimensions
 	"""
-	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(extractPinnedLeaves(state.permutationSpace))}
+	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(state.permutationSpace.extractPinnedLeaves())}
 
 	for dimension in range(state.dimensionsTotal):
 		listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]

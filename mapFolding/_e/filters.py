@@ -32,12 +32,6 @@ Boolean antecedents
 	thisIsALeafOptions
 		You can narrow `leafSpace` to a `LeafOptions`.
 
-Filter functions
-	extractPinnedLeaves
-		You can extract only `pile: leaf` mappings from a `PermutationSpace`.
-	extractUndeterminedPiles
-		You can extract only `pile: leafOptions` mappings from a `PermutationSpace`.
-
 References
 ----------
 [1] Built-in Functions - `filter` (Python documentation)
@@ -50,14 +44,13 @@ References
 """
 from __future__ import annotations
 
-from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
+from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e import 零
 from mapFolding._e.theTypes import Leaf, LeafOptions
-from mapFolding.genericNeedsNewHome import DOTitems
-from typing import overload, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import LeafSpace, PermutationSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves
 	from typing import TypeIs
 
 #======== Boolean antecedents ================================================
@@ -90,64 +83,22 @@ def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	return leafOptions.bit_test(leaf)
 
 @syntacticCurry
-def leafNotPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool:
-	"""Return True if `leaf` is not presently pinned in `permutationSpace`.
+def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
+	"""Return `True` if `leaf` is pinned in `leavesPinned`.
 
 	Parameters
 	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
+	leavesPinned : PinnedLeaves
+		Pinned `Leaf` by `Pile`.
+	leaf : Leaf
+		`Leaf` index.
 
 	Returns
 	-------
-	leafIsNotPinned : bool
-		True if the mapping does not include `leaf`.
+	leafIsPinned : bool
+		`True` if `leavesPinned` includes `leaf`.
 	"""
-	return leaf not in permutationSpace.values()
-
-@overload
-def leafPinned吗(permutationSpace: PermutationSpace, leaf: Leaf) -> bool: ...
-@overload
-def leafPinned吗(permutationSpace: PinnedLeaves, leaf: Leaf) -> bool: ...
-@syntacticCurry
-def leafPinned吗(permutationSpace: PermutationSpace | PinnedLeaves, leaf: Leaf) -> bool:
-	"""Return True if `leaf` is pinned in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` index.
-
-	Returns
-	-------
-	leafPinned吗 : bool
-		True if the mapping includes `leaf`.
-	"""
-	return leaf in permutationSpace.values()
-
-@syntacticCurry
-def leafPinnedAtPile吗(permutationSpace: PermutationSpace, leaf: Leaf, pile: Pile) -> bool:
-	"""Return `True` if `leaf` is presently pinned at `pile` in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	leaf : int
-		`leaf` whose presence at `pile` is being checked.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	leafIsPinnedAtPile : bool
-		True if the mapping includes `pile: leaf`.
-	"""
-	return leaf == permutationSpace.get(pile)
+	return leaf in leavesPinned.values()
 
 def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
@@ -189,48 +140,6 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	"""
 	return pileLast != pile
 
-@syntacticCurry
-def pileNotOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
-	"""Return True if `pile` is not presently pinned in `permutationSpace`.
-
-	Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	pileIsOpen : bool
-		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `LeafOptions`.
-
-	See Also
-	--------
-	thisIsALeaf, thisIsALeafOptions
-	"""
-	return isLeaf吗(permutationSpace[pile])
-
-@syntacticCurry
-def pileOpen吗(permutationSpace: PermutationSpace, pile: Pile) -> bool:
-	"""Return True if `pile` is not presently pinned in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Partial folding mapping from pile -> leaf.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	pileIsOpen : bool
-		True if either `pile` is not a key in `permutationSpace` or `permutationSpace[pile]` is a `LeafOptions`.
-	"""
-	return not isLeaf吗(permutationSpace[pile])
-
 def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Return True if `leafSpace` is a `leaf`.
 
@@ -260,35 +169,3 @@ def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 		Congrats, you have a pile range!
 	"""
 	return isinstance(leafSpace, LeafOptions)
-
-#======== Filtering functions ================================================
-
-def extractPinnedLeaves(permutationSpace: PermutationSpace) -> PinnedLeaves:
-	"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: leafOptions`.
-
-	Returns
-	-------
-	dictionaryOfPileLeaf : dict[int, int]
-		Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
-	"""
-	return dict(sorted(DOTitems(filterLeaf(isLeaf吗, permutationSpace))))
-
-def extractUndeterminedPiles(permutationSpace: PermutationSpace) -> UndeterminedPiles:
-	"""Return a dictionary of all pile-ranges of leaves in `permutationSpace`.
-
-	Parameters
-	----------
-	permutationSpace : PermutationSpace
-		Dictionary of `pile: leaf` and `pile: leafOptions`.
-
-	Returns
-	-------
-	pilesUndetermined : dict[int, LeafOptions]
-		Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
-	"""
-	return filterLeaf(isLeafOptions吗, permutationSpace)

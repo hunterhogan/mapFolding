@@ -56,21 +56,19 @@ from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
+from functools import partial
 from hunterMakesPy.parseParameters import intInnit
 from itertools import filterfalse
 from mapFolding._e import (
-	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin, mapShapeIs2上nDimensions,
-	pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin,
+	mapShapeIs2上nDimensions, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import pileOpen吗
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pin2上nDimensionalAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
 from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
-from mapFolding._e.pinIt import (
-	addMissingLeafOptionsToPermutationSpace, deconstructPermutationSpaceAtPile, deconstructPermutationSpaceByDomainOfLeaf,
-	deconstructPermutationSpaceByDomainsCombined, disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace)
+from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.genericNeedsNewHome import DOTvalues
 from more_itertools import partition
@@ -83,7 +81,7 @@ if TYPE_CHECKING:
 	from concurrent.futures import Future
 	from hunterMakesPy import CallableFunction
 	from mapFolding import Limitation
-	from mapFolding._e.theTypes import Leaf, PermutationSpace, Pile
+	from mapFolding._e.theTypes import Leaf, Pile
 
 #======== Pin by `pile` ===========================================
 
@@ -99,13 +97,13 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	`PermutationSpace` dictionaries that are open at `pile` and the `PermutationSpace`
 	dictionaries that are not open at `pile`.
 
-	This function uses `partition` [1] and `pileIsOpen` [2] to compute the partition.
+	This function uses `partition` [1] and `PermutationSpace.pileOpen吗` [2] to compute the partition.
 	This function uses `ProcessPoolExecutor` [3] and `tqdm` [4] to concurrently
 	deconstruct open `PermutationSpace` dictionaries.
 
 	This function keeps the closed `PermutationSpace` dictionaries, and concurrently
 	deconstructs each open `PermutationSpace` dictionary at `pile` by calling
-	`deconstructPermutationSpaceAtPile` [5].
+	`PermutationSpace.deconstructPermutationSpaceAtPile` [5].
 
 	Parameters
 	----------
@@ -127,13 +125,13 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	----------
 	[1] more-itertools `partition`.
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.partition
-	[2] mapFolding._e.filters.pileIsOpen.
+	[2] mapFolding._e.dataBaskets.PermutationSpace.pileOpen吗.
 
 	[3] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[4] tqdm documentation.
 		https://tqdm.github.io/
-	[5] mapFolding._e.pinIt.deconstructPermutationSpaceAtPile.
+	[5] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceAtPile.
 
 	[6] mapFolding.defineProcessorLimit.
 	"""
@@ -142,7 +140,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
 		pile: Pile = pileProcessingOrder.popleft()
 
-		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(pileOpen吗(pile=pile), state.listPermutationSpace)
+		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(partial(PermutationSpace.pileOpen吗, pile=pile), state.listPermutationSpace)
 		state.listPermutationSpace = deque(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
@@ -162,7 +160,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	(AI generated docstring)
 
-	This function calls `deconstructPermutationSpaceAtPile` [1] with
+	This function calls `PermutationSpace.deconstructPermutationSpaceAtPile` [1] with
 	`leavesToPin` selected by `_getLeavesAtPile` [2].
 
 	Parameters
@@ -173,15 +171,15 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 	Returns
 	-------
 	statePinned : EliminationState
-		State returned by `deconstructPermutationSpaceAtPile`.
+		State returned by `PermutationSpace.deconstructPermutationSpaceAtPile`.
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceAtPile.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceAtPile.
 
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
-	state.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(state.permutationSpace, state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
+	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
@@ -204,7 +202,7 @@ def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	Returns
 	-------
 	leavesToPin : Iterable[Leaf]
-		Leaves that should be used by `deconstructPermutationSpaceAtPile`.
+		Leaves that should be used by `PermutationSpace.deconstructPermutationSpaceAtPile`.
 
 	References
 	----------
@@ -302,10 +300,14 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		return state
 
 	if not state.listPermutationSpace:
-		state.permutationSpace = {}
-		state = addMissingLeafOptionsToPermutationSpace(state)
-		state.listPermutationSpace = deque([state.permutationSpace])
+		state.listPermutationSpace.append(PermutationSpace().addMissingLeafOptions(getDictionaryLeafOptions(state)))
 
+	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
+	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,
+	# I want to accept it: `pinPilesAtEnds.pileDepth` being a `str` would be the most annoying reason
+	# why a multi-week computation failed to start. I created `intInnit` so that if a value is
+	# UNAMBIGUOUSLY an integer, it will be converted to `int` regardless of the original type. ANOTHER
+	# GOAL: less code because every line of code is a bug risk.
 	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
 	if depth < 0:
 		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
@@ -406,7 +408,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	(AI generated docstring)
 
-	This function uses `deconstructPermutationSpaceByDomainsCombined` [1] to deconstruct each `PermutationSpace` dictionary in
+	This function uses `PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1] to deconstruct each `PermutationSpace` dictionary in
 	`state.listPermutationSpace` into a refined list. The deconstruction is performed concurrently across a `ProcessPoolExecutor`
 	[2] and aggregated with `as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
@@ -437,7 +439,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainsCombined.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainsCombined.
 
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
@@ -477,7 +479,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> EliminationState:
 	"""You can deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.listPermutationSpace`.
 
-	This function calls `deconstructPermutationSpaceByDomainsCombined` [1] to build
+	This function calls `PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1] to build
 	`state.listPermutationSpace`, and then normalizes and filters `state.listPermutationSpace`
 	by calling `reduceAllPermutationSpace` [2] and
 	`removeIFFViolationsFromEliminationState` [3].
@@ -498,13 +500,13 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainsCombined.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainsCombined.
 
 	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
-	state.listPermutationSpace = deconstructPermutationSpaceByDomainsCombined(state.permutationSpace, leaves, leavesDomain)
+	state.listPermutationSpace = state.permutationSpace.deconstructByDomainsCombined(leaves, leavesDomain)
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
 
 #--- Logic that wants to join the shared logic ---
@@ -516,7 +518,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 	This function computes `leavesDomain` for each input `PermutationSpace` dictionary by calling
 	`getLeafDomain(EliminationState(...), leaf)`. This function then concurrently deconstructs each `PermutationSpace` dictionary
-	using `deconstructPermutationSpaceByDomainOfLeaf` [1] inside a `ProcessPoolExecutor` [2] and aggregates results with
+	using `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1] inside a `ProcessPoolExecutor` [2] and aggregates results with
 	`as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
 	This function calls `pinPilesAtEnds(state, 0)` [4] when `state.listPermutationSpace` is empty.
@@ -545,7 +547,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainOfLeaf.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf.
 
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
@@ -589,7 +591,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	(AI generated docstring)
 
-	This function calls `deconstructPermutationSpaceByDomainOfLeaf` [1] to build `state.listPermutationSpace`, and then normalizes
+	This function calls `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1] to build `state.listPermutationSpace`, and then normalizes
 	and filters `state.listPermutationSpace` by calling `reduceAllPermutationSpace` [2] and
 	`removeIFFViolationsFromEliminationState` [3].
 
@@ -609,13 +611,13 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	References
 	----------
-	[1] mapFolding._e.pinIt.deconstructPermutationSpaceByDomainOfLeaf.
+	[1] mapFolding._e.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf.
 
 	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
-	state.listPermutationSpace = deconstructPermutationSpaceByDomainOfLeaf(state.permutationSpace, leaves, leavesDomain)
+	state.listPermutationSpace = state.permutationSpace.deconstructByDomainOfLeaf(leaves, leavesDomain)
 	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
 
 #-------- Plebian functions -----------------------------------------

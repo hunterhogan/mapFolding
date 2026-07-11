@@ -1,6 +1,7 @@
 """Compute a(n) for an OEIS ID by computing other OEIS IDs.
 
-NOTE: This is a generated file; edit the source file."""
+NOTE: This is a generated file; edit the source file.
+"""
 from __future__ import annotations
 from functools import cache
 from hunterMakesPy import inclusive

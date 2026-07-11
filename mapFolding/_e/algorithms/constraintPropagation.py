@@ -7,10 +7,10 @@ from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import (
-	bifurcatePermutationSpace, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
+	getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain, getLeavesCreaseAnte, getLeavesCreasePost,
 	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, reduceAllPermutationSpace
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.pinIt import reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import between吗, DOTvalues
 from math import factorial, prod
 from ortools.sat.python import cp_model
@@ -32,7 +32,7 @@ def count(state: EliminationState) -> EliminationState:
 	model.add_inverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
 #======== Manual concurrency and targeted constraints ============================
-	leavesPinned, pilesUndetermined = bifurcatePermutationSpace(state.permutationSpace)
+	leavesPinned, pilesUndetermined = state.permutationSpace.bifurcate()
 	for aPile, aLeaf in leavesPinned.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 
@@ -160,12 +160,10 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.permutationSpace = {pileOrigin: leafOrigin}
-		state = addMissingLeafOptionsToPermutationSpace(state)
-		state.listPermutationSpace = deque([state.permutationSpace])
+		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingLeafOptions(getDictionaryLeafOptions(state)))
 		state = reduceAllPermutationSpace(state)
 
-	state.permutationSpace = {}
+	state.permutationSpace = PermutationSpace()
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
 		listClaimTickets: list[Future[EliminationState]] = [

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from gmpy2 import mpz
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import extractPinnedLeaves
 from mapFolding._e.pin2上nDimensional import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
@@ -16,7 +15,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
 	from mapFolding import Limitation
-	from mapFolding._e.theTypes import PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
 
 @pytest.mark.parametrize("pinningFunction", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))
@@ -35,7 +34,7 @@ def test_pinningFunctions(pinningFunction: CallableFunction[..., EliminationStat
 
 	for permutationSpace in state.listPermutationSpace:
 		maskRequiredRowsMatchThisPermutationSpace: numpy.ndarray = numpy.ones(requiredRowsTotal, dtype=bool)
-		for pile, leafSpace in extractPinnedLeaves(permutationSpace).items():
+		for pile, leafSpace in permutationSpace.extractPinnedLeaves().items():
 			if isinstance(leafSpace, int):
 				maskRequiredRowsMatchThisPermutationSpace &= (arrayFoldings[:, pile] == leafSpace)
 				continue

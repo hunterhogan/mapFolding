@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors, packageSettings
 from mapFolding._e import 一, 零, 首一, 首零一
-from mapFolding._e.filters import extractPinnedLeaves, isLeaf吗
+from mapFolding._e.filters import isLeaf吗
 from mapFolding.genericNeedsNewHome import DOTvalues
 from pathlib import Path
 from pprint import pformat
@@ -16,8 +16,8 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
-	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import PermutationSpace, PinnedLeaves
+	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.theTypes import PinnedLeaves
 
 @syntacticCurry
 def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
@@ -75,7 +75,7 @@ def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
 
 def verifyPinning2Dn(state: EliminationState) -> None:
 	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:
-		return extractPinnedLeaves(permutationSpace)
+		return permutationSpace.extractPinnedLeaves()
 	arrayFoldings = getDataFrameFoldings(state)
 	if arrayFoldings is not None:
 		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)

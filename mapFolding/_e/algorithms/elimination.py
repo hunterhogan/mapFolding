@@ -3,11 +3,10 @@ from __future__ import annotations
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from mapFolding._e import getDictionaryLeafOptions, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import extractUndeterminedPiles
-from mapFolding._e.pinIt import addMissingLeafOptionsToPermutationSpace, excludeLeaf_rBeforeLeaf_k, makeFolding, reduceAllPermutationSpace
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, reduceAllPermutationSpace
 from mapFolding.genericNeedsNewHome import DOTitems
 from math import factorial
 from more_itertools import all_unique as allUnique吗
@@ -16,7 +15,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import PermutationSpace
 
 def count(state: EliminationState) -> EliminationState:
 	state.groupsOfFolds += sum(map(countPermutationSpace, state.listPermutationSpace, repeat(state.mapShape)))
@@ -24,10 +22,10 @@ def count(state: EliminationState) -> EliminationState:
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
 	return sum(map(foldingValid吗
-			, map(makeFolding, repeat(permutationSpace)
-		, filter(allUnique吗
-		, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(extractUndeterminedPiles(permutationSpace)))))))
-			, repeat(mapShape)))
+					, map(permutationSpace.makeFolding
+			, filter(allUnique吗
+			, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(permutationSpace.extractUndeterminedPiles()))))))
+					, repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:
 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):
@@ -53,10 +51,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.permutationSpace = {pileOrigin: leafOrigin}
-		state = addMissingLeafOptionsToPermutationSpace(state)
-		state.listPermutationSpace = deque([state.permutationSpace])
-		state.permutationSpace = {}
+		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingLeafOptions(getDictionaryLeafOptions(state)))
 		state = reduceAllPermutationSpace(state)
 
 		state = theorem4(state)

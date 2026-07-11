@@ -39,7 +39,7 @@ def getIteratorOfLeaves(leafOptions: LeafOptions) -> Iterator[Leaf]:
 
 	The function is used to enumerate leaves for pinning attempts.
 
-		sherpa.listPermutationSpace.extend(DOTvalues(deconstructPermutationSpaceAtPile(sherpa.permutationSpace, sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
+		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructPermutationSpaceAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
 
 	References
 	----------

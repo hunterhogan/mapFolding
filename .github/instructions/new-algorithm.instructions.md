@@ -1,144 +1,77 @@
 ---
-description: 'Overview and navigation guide for the experimental elimination-based algorithms under mapFolding/_e'
+description: 'Quick map of the experimental elimination workbench under mapFolding/_e'
 applyTo: 'mapFolding/_e/**'
 ---
 
-# `_e` directory overview (experimental algorithm workbench)
+# `_e` quick map
 
-`mapFolding/_e/` is a sandbox for developing **elimination-based** map-folding algorithms (plus supporting pinning, constraint-propagation, and analysis tooling). It intentionally mirrors some ideas from the package “front door” (`mapFolding/basecamp.py` + `mapFolding/dataBaskets.py`) while allowing rapid iteration without destabilizing the primary flows.
+`mapFolding/_e/` is the experimental elimination workbench. It is mostly self-contained and revolves around `EliminationState`, `PermutationSpace`, pinning, and folding validation.
 
-Treat `_e` as **internal research code**:
+## Start here
 
-- Public-ish re-exports live in `mapFolding/_e/__init__.py`.
-- Stable package APIs still live at `mapFolding/…` (outside `_e`).
+| path | role |
+| --- | --- |
+| `basecamp.py` | `eliminateFolds(...)` dispatcher; selects `flow` and handles persistence / CPU limits. |
+| `dataBaskets.py` | `EliminationState`; shared runtime state, derived constants, and `foldsTotal`. |
+| `__init__.py` | Re-export surface used by most `_e` modules. |
 
-## Where to start (the “front doors”)
+## Main flows
 
-- `mapFolding/_e/basecamp.py`
-	- Defines `eliminateFolds(...)`, the dispatcher for `_e` algorithms.
-	- Selects an algorithm variant using `flow`.
-		- Default: `'elimination'` (or `None`)
-		- Also: `'constraintPropagation'`, `'crease'`
-	- Handles persistence (`getPathFilenameFoldsTotal`, `saveFoldsTotal`, `saveFoldsTotalFAILearly`) and CPU limits (`defineProcessorLimit`).
+| path | role |
+| --- | --- |
+| `algorithms/elimination.py` | Baseline elimination flow. |
+| `algorithms/constraintPropagation.py` | OR-Tools CP-SAT flow. |
+| `algorithms/eliminationCrease.py` | Crease-driven flow for `(2,) * n` shapes. |
+| `algorithms/iff.py` | Folding validation and forbidden-inequality pruning. |
 
-- `mapFolding/_e/dataBaskets.py`
-	- Defines the state container `EliminationState`.
-	- Centralizes one-time derived constants from `mapShape` (e.g., `leavesTotal`, `productsOfDimensions`, `foldingCheckSum`).
-	- `EliminationState.foldsTotal` is computed as `groupsOfFolds * Theorem2aMultiplier * Theorem2Multiplier * Theorem3Multiplier * Theorem4Multiplier`.
-		- `Theorem2aMultiplier` is initialized to `leavesTotal` in `__post_init__` (replacing the old explicit `* leavesTotal` in the formula).
+## Core support
 
-## Core algorithm variations
+| path | role |
+| --- | --- |
+| `pinIt.py` | Generic permutation-space pinning, deconstruction, and reduction. |
+| `filters.py` | Small predicates and extractors for `PermutationSpace`. |
+| `_beDRY.py` | Generic helpers: `LeafOptions`, dimension products, and grouping helpers. |
+| `_disaggregation.py` | `LeafOptions` → iterator of leaves. |
+| `theTypes.py` | `_e` type aliases such as `Leaf`, `LeafOptions`, and `PermutationSpace`. |
+| `_2上nDimensionalSemiotics.py` | Special naming/numbering contract for `(2,) * n` work. |
 
-Algorithms live in `mapFolding/_e/algorithms/` and expose a shared entry point:
+## `(2,) * n` special-case modules
 
-- `doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState`
+| path | role |
+| --- | --- |
+| `_2上nDimensionalBeDRY.py` | Shape guards and small helpers. |
+| `_2上nDimensionalCreases.py` | Crease-neighbor helpers. |
+| `_2上nDimensionalLeafDomains.py` | Leaf-domain rules. |
+| `_2上nDimensionalLeafOptions.py` | Per-pile `LeafOptions` builders. |
+| `_2上nDimensionalConditionalOrdering.py` | Conditional predecessor/successor helpers. |
+| `_2上nDimensionalMeasure.py` | Coordinate, parity, and sub-hyperplane utilities. |
+| `pin2上nDimensional*.py` | Specialized pinning flows and reducers for `(2,) * n`. |
 
-Current variants:
+## Subfolders
 
-- `mapFolding/_e/algorithms/elimination.py`
-	- Baseline elimination flow.
-	- Encodes Lunnon Theorem 2(a) via pinning (`{pileOrigin: leafOrigin}`) and applies theorem-based eliminations.
+| path | role |
+| --- | --- |
+| `algorithms/` | Algorithm entry points. |
+| `easyRun/` | Ad hoc experiment drivers. |
+| `tests/` | Pytest coverage for `_e`. |
+| `Z0Z_analysis/` | Research helpers and generated analysis artifacts. |
+| `Z0Z_notes/` | Design notes and scratch documentation. |
 
-- `mapFolding/_e/algorithms/constraintPropagation.py`
-	- Constraint programming model using OR-Tools CP-SAT (`cp_model`).
-	- Supports concurrency by splitting permutation spaces across processes.
-	- Includes ad-hoc data capture for certain shapes (e.g., p2d7 CSV dumps under `_e/dataRaw/`).
+## Working assumptions
 
-- `mapFolding/_e/algorithms/eliminationCrease.py`
-	- Specialized to “$2^n$-dimensional” maps (i.e., `mapShape == (2,) * n`), and currently gated in `_e/basecamp.py`.
-	- Uses crease-derived pinning constraints and post-filters foldings by validity (`foldingValid吗`).
+- Leaf and pile indices are 0-based.
+- `LeafOptions` is a `gmpy2.mpz` bitset with a sentinel bit.
+- Many modules assume the `_2上nDimensionalSemiotics.py` vocabulary; do not casually rename it.
+- The `(2,) * n` path is a real specialization, not just an optimization switch.
 
-- `mapFolding/_e/algorithms/iff.py`
-	- Validity predicates / “is folding feasible?” logic.
-	- Implements forbidden-inequality checks (Koehler 1968 / Legendre 2014 style) used for pruning and validation.
+## Mental model
 
-## Supporting modules (what they’re for)
+1. `basecamp.eliminateFolds(...)` builds or receives `EliminationState`.
+2. A flow works over `PermutationSpace` values, usually through `pinIt.py` and/or `pin2上nDimensional*.py`.
+3. `algorithms/iff.py` validates or prunes candidates.
+4. Results accumulate in `state.groupsOfFolds`, `state.listFolding`, and `state.foldsTotal`.
 
-These are the “shop tools” that algorithms tend to import from `_e/__init__.py`.
+## Deep-dive references
 
-- `mapFolding/_e/_beDRY.py`
-	- Shared utilities that should work beyond the $(2,) * n$ special case.
-	- Includes:
-		- `mapShapeIs2上nDimensions(...)` flow guard
-		- `LeafOptions` bitset utilities (via `gmpy2.mpz`/`xmpz`): `makeLeafOptions`, `makeLeafAntiOptions`, `JeanValjean`, `howManyLeavesInLeafOptions`, `leafOptionsAND`
-		- Type-guarded `dict.get` wrappers: `DOTgetPileIfLeaf`, `DOTgetPileIfLeafOptions`
-		- Iterators like `getIteratorOfLeaves(...)` (critical for domain enumeration)
-		- `bifurcatePermutationSpace` for splitting pinned leaves from undetermined pile domains
-
-- `mapFolding/_e/filters.py`
-	- Boolean predicates and specialized filter functions for map-folding data structures.
-	- Includes `thisIsALeaf`, `thisIsLeafOptions` (type-narrowing guards), `extractPinnedLeaves`, and helpers like `between`, `consecutive`, `leafIsInPileRange`, `leafPinned吗`, `mappingHasKey`, `pileIsOpen`.
-
-- `mapFolding/_e/_creases.py`
-	- Crease proximity helpers: `getLeavesCreaseAnte` and `getLeavesCreasePost`.
-	- Returns the leaves adjacent to a given leaf along each dimension (Gray-code crease neighbors).
-
-- `mapFolding/_e/_leafDomains.py`
-	- Domain functions for leaves/piles: `getLeafDomain`, `getDictionaryLeafDomains`, and several `getDomain*` helpers.
-	- Computes the valid pile-range for each leaf given `mapShape`.
-
-- `mapFolding/_e/_leafOptionsAtPile.py`
-	- `LeafOptions` bitset construction at a given pile: `getLeafOptions`, `getDictionaryLeafOptions`.
-
-- `mapFolding/_e/_development.py`
-	- Conditional predecessor/successor computation: `getDictionaryConditionalLeafPredecessors`, `getDictionaryConditionalLeafSuccessors`.
-
-- `mapFolding/_e/dataDynamic.py`
-	- Development/analysis tool that combines `EliminationState` data with pandas DataFrames.
-	- Includes `getDataFrameFoldings` and `makeVerificationDataLeavesDomain` for comparing computed domains against empirical folding data.
-
-- `mapFolding/_e/_measure.py`
-	- Coordinate/projection helpers used to reason about “nearest dimensions”, parity, sub-hyperplanes, etc.
-
-- `mapFolding/_e/_semiotics.py` and `mapFolding/_e/_theTypes.py`
-	- A naming + types system used throughout `_e`.
-	- Many algorithms rely on these symbols as a *semiotic contract*; avoid "normalizing" the vocabulary.
-	- Both re-exported through `mapFolding/_e/__init__.py`.
-- `mapFolding/_e/pinIt.py` and `mapFolding/_e/pin2上nDimensions*.py`
-	- Pinning and permutation-space manipulation.
-	- These modules are where “reduce the search space before counting” tactics live.
-
-## Directory map (subfolders)
-
-- `mapFolding/_e/algorithms/`
-	- Algorithm variants (see above).
-
-- `mapFolding/_e/easyRun/`
-	- Script-like entry points for local experiments.
-	- Examples:
-		- `easyRun/eliminateFolds.py`: ad-hoc driver for comparing `flow` variants against known OEIS values.
-		- `easyRun/pinning.py`: pinning experiments + statistics for permutation-space sizes.
-
-- `mapFolding/_e/dataRaw/`
-	- Raw CSV outputs produced during research runs (e.g., enumerated foldings for specific shapes).
-	- Treat as artifacts: keep format stable if downstream analysis depends on it.
-
-- `mapFolding/_e/analysisExcel/`
-	- “Hand analysis” tables (CSV) used to inspect surplus dictionaries and related measurements.
-
-- `mapFolding/_e/Z0Z_analysisPython/`
-	- Analysis helpers for validating or profiling elimination/pinning ideas.
-
-- `mapFolding/_e/Z0Z_notes/`
-	- Design notes and research breadcrumbs.
-
-## Key representation choices (don’t accidentally break these)
-
-- **Leaf/pile indexing is 0-based inside `_e`**.
-	- This is encoded directly in `EliminationState` (`leafLast = leavesTotal - 1`, `pileLast = pilesTotal - 1`).
-
-- **Pile ranges are represented as bitsets** (`gmpy2.mpz`).
-	- A `LeafOptions` contains one bit per leaf *plus* a sentinel bit indicating “this is a range, not a single leaf”.
-	- Use the existing helpers (`makeLeafOptions`, `getIteratorOfLeaves`, `JeanValjean`, etc.) rather than re-encoding.
-
-- **Re-export discipline**: prefer importing from `mapFolding._e` (via `__init__.py`) when a symbol is intentionally re-exported.
-
-## Performance and style constraints (matches this repo)
-
-- Many computations are intended for very large search spaces; avoid adding superfluous guards/branches in hot paths.
-- Preserve the existing style conventions (tabs, Ruff configuration, and the project rule: do not alias `numpy` as `np` or `pandas` as `pd`).
-- Keep algorithm selection logic centralized in `_e/basecamp.py` (don’t scatter flow selection across modules).
-
-## Additional information
-
-['What I think I know about my "elimination" algorithm'](../../mapFolding/_e/Z0Z_notes/Elimination.md) has detailed notes on the elimination algorithm’s design rationale and data structures. It’s a useful reference when working in `_e/`.
+- `mapFolding/_e/Z0Z_notes/Elimination.md`
+- `_e/tests/` for executable examples of expected behavior

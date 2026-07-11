@@ -110,9 +110,6 @@ type Pile = int
 type Folding = tuple[Leaf, ...]
 """`leaf` indexed to `pile`; length must be `leavesTotal`."""
 
-type PermutationSpace = dict[Pile, LeafSpace]
-"""`pile: leaf` or `pile: leafOptions`; length must be `leavesTotal`."""
-
 type PinnedLeaves = dict[Pile, Leaf]
 """`pile: leaf`; length ought to be less than `leavesTotal`: when length equals `leavesTotal`, ought to convert to `Folding`."""
 
