@@ -58,7 +58,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
-	from mapFolding import Limitation
+	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 	from pathlib import Path, PurePath
 

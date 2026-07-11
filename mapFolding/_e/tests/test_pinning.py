@@ -14,7 +14,7 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
-	from mapFolding import Limitation
+	from hunterMakesPy.theTypes import Limitation
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
 

@@ -9,7 +9,7 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from mapFolding import Limitation
+	from hunterMakesPy.theTypes import Limitation
 	from numpy.typing import NDArray
 	from pytest import FixtureRequest
 	import numpy

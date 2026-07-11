@@ -53,15 +53,14 @@ if __name__ == "__main__":
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
-			state = pinPilesAtEnds(state, 4)
-			# state = pinLeavesDimension首二(state)
+			state = pinPile零Ante首零(state)
+			# state = pinPilesAtEnds(state, 4)
+			state = pinLeavesDimension首二(state)
 			# state = pin3beans2(state)
 			# state = pin首beans(state)
-			# state = pinPile零Ante首零(state)
 			# state = pinLeavesDimension一(state)
-
 			# state = pinLeavesDimension二(state)
-			# state = pinLeavesDimensions0零一(state)
+			state = pinLeavesDimensions0零一(state)
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWriteFoldsTotal=pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow)

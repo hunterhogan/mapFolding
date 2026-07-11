@@ -12,7 +12,8 @@ import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
-	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, Limitation, NumPyIntegerType
+	from hunterMakesPy.theTypes import Limitation
+	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
 	from numpy import dtype as numpy_dtype, ndarray
 	from typing import Any
 

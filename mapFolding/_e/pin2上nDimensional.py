@@ -80,7 +80,7 @@ if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from concurrent.futures import Future
 	from hunterMakesPy import CallableFunction
-	from mapFolding import Limitation
+	from hunterMakesPy.theTypes import Limitation
 	from mapFolding._e.theTypes import Leaf, Pile
 
 #======== Pin by `pile` ===========================================
