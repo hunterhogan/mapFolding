@@ -32,7 +32,7 @@ def count(state: EliminationState) -> EliminationState:
 	model.add_inverse(listLeavesInPileOrder, listPilingsInLeafOrder)
 
 #======== Manual concurrency and targeted constraints ============================
-	leavesPinned, pilesUndetermined = state.permutationSpace.bifurcatePermutationSpace()
+	leavesPinned, pilesUndetermined = state.permutationSpace.bifurcate()
 	for aPile, aLeaf in leavesPinned.items():
 		model.add(listLeavesInPileOrder[aPile] == aLeaf)
 

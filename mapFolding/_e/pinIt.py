@@ -39,7 +39,7 @@ def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
 		state.permutationSpace.leafPinned吗(leaf)
 		, state.permutationSpace.pileNotOpen吗(state.pile)
-		, state.pile not in getLeafDomain(state, leaf),
+		, state.pile not in getLeafDomain(state, leaf)
 	))
 
 #======== Group by =======================
@@ -78,7 +78,7 @@ def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
 	return state
 
 #======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
-# NOTE This section ought to contain all functions based on the "Elimination" algorithm that pin a `Leaf` in a `PermutationSpace` or `Folding`.
+# NOTE The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
 
 #======== Bulk modifications =======================
 
@@ -158,9 +158,14 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
 			if leafInLeafOptions吗(leaf_k, leafOptionsAt_pile_k):
 				listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace.atPilePinLeaf(pile_k, leaf_k))
-				leafSpaceWithoutLeaf_k = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
+				leafSpaceWithoutLeaf_k: Leaf | LeafOptions | None = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
 				if leafSpaceWithoutLeaf_k is not None:
 					listPermutationSpaceCompleted.append(PermutationSpace(associate(permutationSpace, pile_k, leafSpaceWithoutLeaf_k)))
+					# listPermutationSpaceCompleted.append(associate(permutationSpace, pile_k, leafSpaceWithoutLeaf_k, factory=PermutationSpace))  # ruff:ignore[commented-out-code]
+					# TODO `class PermutationSpace(dict[Pile, LeafSpace])` but Pylance and ty say:
+					# Argument of type "dict[Pile, LeafSpace]" cannot be assigned to parameter "object" of type "PermutationSpace" in function "append"
+					# 	"dict[Pile, LeafSpace]" is not assignable to "PermutationSpace"
+					# Argument to bound method `list.append` is incorrect: Expected `PermutationSpace`, found `dict[Pile, int | mpz]`
 			else:
 				listPermutationSpaceCompleted.append(permutationSpace)
 
@@ -241,7 +246,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 			continue
 
 		if leafInLeafOptions吗(leaf, leafOptionsAtPile):
-			leafSpaceWithoutLeaf = JeanValjean(bit_clear(leafOptionsAtPile, leaf))
+			leafSpaceWithoutLeaf: Leaf | LeafOptions | None = JeanValjean(bit_clear(leafOptionsAtPile, leaf))
 			if leafSpaceWithoutLeaf is not None:
 				yield PermutationSpace(associate(permutationSpace, pile, leafSpaceWithoutLeaf))
 		else:
@@ -581,7 +586,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		leavesPinned, pilesUndetermined = permutationSpace.bifurcatePermutationSpace()
+		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
 		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 		# NOTE using the walrus operator here `if not (permutationSpace := _reduceLeafSpace...` means
 		# that type checkers are ok with `permutationSpace: PermutationSpace`. If I assigned without
@@ -655,14 +660,10 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 		for leafOptions, setPiles in DOTitems(itemfilter(lambda groupBy: (howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)):
 
-			if not (
-				permutationSpace := reduceLeafSpace(
-					state
-					, permutationSpace
+			if not (permutationSpace := reduceLeafSpace(state, permutationSpace
 					, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
 					, makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
-				)
-			):
+			)):
 				return None
 
 		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
@@ -704,7 +705,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 
-		leavesPinned, pilesUndetermined = permutationSpace.bifurcatePermutationSpace()
+		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
 
 		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 

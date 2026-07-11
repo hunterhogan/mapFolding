@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 
+# TODO Probably create a `Property` to report the number of `Leaf` objects. Use case example: `sum首:
+# int = sum(map(dimensionNearest首, permutationSpace.values()))`.
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
@@ -83,7 +85,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		# DOCUMENT I'm pretty sure I wrote a lot more documentation for this.
 		return self.leafPinnedAtPile吗(leaf, pile) or (self.pileOpen吗(pile) and self.leafNotPinned吗(leaf))
 
-	def bifurcatePermutationSpace(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
+	def bifurcate(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
 
 		Returns
