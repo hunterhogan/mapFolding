@@ -51,10 +51,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.permutationSpace = PermutationSpace({pileOrigin: leafOrigin})
-		state.permutationSpace = state.permutationSpace.addMissingLeafOptions(getDictionaryLeafOptions(state))
-		state.listPermutationSpace = deque([state.permutationSpace])
-		state.permutationSpace = PermutationSpace()
+		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingLeafOptions(getDictionaryLeafOptions(state)))
 		state = reduceAllPermutationSpace(state)
 
 		state = theorem4(state)

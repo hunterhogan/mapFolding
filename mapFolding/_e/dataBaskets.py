@@ -41,8 +41,11 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		permutationSpace : PermutationSpace
 			New `PermutationSpace` with current entries overriding default `LeafOptions`.
 		"""
-		# TODO fix the type annotations in humpy_cytoolz and/or mapFolding: reconstructing as `PermutationSpace` ought not to be necessary.
-		return PermutationSpace(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self, factory=PermutationSpace))
+		# NOTE `sorted` overrides the insertion order and sorts based on `Pile` index. This is
+		# partially "defensive" in the sense that it is a consistent, logical, expected order, and may
+		# prevent odd results if another subroutine didn't guarantee the order when it ought to have.
+		# I'm hoping it improves efficiency, too.
+		return PermutationSpace(sorted(DOTitems(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self, factory=PermutationSpace))))
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
 		"""Return a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.

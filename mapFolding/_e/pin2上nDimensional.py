@@ -300,10 +300,14 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		return state
 
 	if not state.listPermutationSpace:
-		state.permutationSpace = PermutationSpace()
-		state.permutationSpace = state.permutationSpace.addMissingLeafOptions(getDictionaryLeafOptions(state))
-		state.listPermutationSpace = deque([state.permutationSpace])
+		state.listPermutationSpace.append(PermutationSpace().addMissingLeafOptions(getDictionaryLeafOptions(state)))
 
+	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
+	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,
+	# I want to accept it: `pinPilesAtEnds.pileDepth` being a `str` would be the most annoying reason
+	# why a multi-week computation failed to start. I created `intInnit` so that if a value is
+	# UNAMBIGUOUSLY an integer, it will be converted to `int` regardless of the original type. ANOTHER
+	# GOAL: less code because every line of code is a bug risk.
 	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
 	if depth < 0:
 		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
