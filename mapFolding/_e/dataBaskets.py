@@ -50,7 +50,23 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return PermutationSpace(sorted(DOTitems(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self, factory=PermutationSpace))))
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
-		"""Return a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
+		"""DANGEROUSLY create a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
+
+		Danger: Corrupted `PermutationSpace`
+		------------------------------------
+		If you overwrite a different `Leaf` pinned at `pile`, it will corrupt the `PermutationSpace`.
+		If `leaf` is already pinned at a different `Pile`, but you pin `leaf` at `pile`, it will
+		corrupt the `PermutationSpace`.
+
+		Nevertheless, this method _assumes_ either 1. a. `leaf` is not pinned and b. `pile` is open or
+		2. `leaf` is already pinned at `pile`.
+
+		Danger: Corrupted Collection of `PermutationSpace`
+		--------------------------------------------------
+		If any `PermutationSpace` in your collection overlaps with any other `PermutationSpace` in
+		your collection, it will corrupt your collection. This method creates a new `PermutationSpace`
+		that _almost completely overlaps_ the original `PermutationSpace`. Ensure your logic never
+		puts both versions in your collection.
 
 		Parameters
 		----------
@@ -63,12 +79,21 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		-------
 		dictionaryPermutationSpace : PermutationSpace
 			New dictionary with `pile` mapped to `leaf`.
+
+		Example
+		-------
+		Overwriting the original `PermutationSpace` avoids corruption.
+		```python
+			ImaPermutationSpace = ImaPermutationSpace.atPilePinLeaf(pile, leaf)
+		```
 		"""
 		return PermutationSpace(associate(self, pile, leaf, PermutationSpace))
 
 	# TODO reconsider the role, necessity, and location of this function.
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
+
+		For performance, you probably can and probably *should* create a set of filters for your circumstances.
 
 		Parameters
 		----------
@@ -82,7 +107,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		isSafeToPin : bool
 			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 		"""
-		# DOCUMENT I'm pretty sure I wrote a lot more documentation for this.
 		return self.leafPinnedAtPile吗(leaf, pile) or (self.pileOpen吗(pile) and self.leafNotPinned吗(leaf))
 
 	def bifurcate(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
