@@ -11,12 +11,12 @@ from mapFolding._e import (
 	indicesMapShapeDimensionLengthsAreEqual, leafOrigin, mapShapeIs2上nDimensions, pileOrigin)
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pinIt import reduceAllPermutationSpace
-from mapFolding.genericNeedsNewHome import between吗, DOTvalues
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
 from tqdm import tqdm
 from typing import TYPE_CHECKING
+from Z0Z_tools import between吗, DOTvalues
 import csv
 import uuid
 

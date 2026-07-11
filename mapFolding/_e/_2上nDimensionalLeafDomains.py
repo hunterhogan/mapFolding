@@ -8,10 +8,10 @@ from mapFolding._e import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
 	howManyDimensionsHaveOddParity, leafOrigin, mapShapeIs2上nDimensions, pileOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding.genericNeedsNewHome import between吗, consecutive吗, exclude, reverseLookup
 from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
 from typing import TYPE_CHECKING
+from Z0Z_tools import between吗, consecutive吗, exclude, reverseLookup
 
 if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction

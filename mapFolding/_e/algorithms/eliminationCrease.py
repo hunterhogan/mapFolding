@@ -11,11 +11,11 @@ from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import isLeafOptions吗
 from mapFolding._e.pin2上nDimensional import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
-from mapFolding.genericNeedsNewHome import DOTitems, DOTvalues
 from math import factorial
 from more_itertools import first
 from tqdm import tqdm
 from typing import TYPE_CHECKING
+from Z0Z_tools import DOTitems, DOTvalues
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future

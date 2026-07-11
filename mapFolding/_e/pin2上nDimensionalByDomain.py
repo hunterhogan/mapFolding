@@ -8,10 +8,10 @@ from mapFolding._e import (
 	getIteratorOfLeaves, getLeavesCreaseAnte, getLeavesCreasePost, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
 	leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
 from mapFolding._e.filters import notLeafOriginOrLeaf零
-from mapFolding.genericNeedsNewHome import exclude
 from more_itertools import last
 from operator import getitem, neg
 from typing import TYPE_CHECKING
+from Z0Z_tools import exclude
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import EliminationState

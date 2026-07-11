@@ -77,10 +77,10 @@ from humpy_toolz.curried.operator import indexOf
 from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding.beDRY import getLeavesTotal
-from mapFolding.genericNeedsNewHome import between吗, DOTitems
 from math import prod
 from operator import floordiv
 from typing import TYPE_CHECKING
+from Z0Z_tools import between吗, DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Callable

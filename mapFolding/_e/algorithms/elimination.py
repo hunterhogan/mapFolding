@@ -7,11 +7,11 @@ from mapFolding._e import getDictionaryLeafOptions, getIteratorOfLeaves, indices
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, reduceAllPermutationSpace
-from mapFolding.genericNeedsNewHome import DOTitems
 from math import factorial
 from more_itertools import all_unique as allUnique吗
 from tqdm import tqdm
 from typing import TYPE_CHECKING
+from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future

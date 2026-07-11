@@ -70,11 +70,11 @@ from mapFolding._e.pin2上nDimensionalByCrease import (
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
 from mapFolding.beDRY import defineProcessorLimit
-from mapFolding.genericNeedsNewHome import DOTvalues
 from more_itertools import partition
 from operator import getitem, neg
 from tqdm import tqdm
 from typing import TYPE_CHECKING
+from Z0Z_tools import DOTvalues
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence

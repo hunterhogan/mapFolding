@@ -14,9 +14,9 @@ from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
-from mapFolding.genericNeedsNewHome import DOTitems, DOTkeys, DOTvalues
 from math import prod
 from typing import cast, TYPE_CHECKING
+from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
 if TYPE_CHECKING:

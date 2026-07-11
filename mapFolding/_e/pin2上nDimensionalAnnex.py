@@ -78,10 +78,10 @@ from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, notLeafOriginOrLe
 from mapFolding._e.pinIt import (
 	reduceLeafSpace, reducePermutationSpace_CrossedCreases, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
 	reducePermutationSpace_nakedSubset)
-from mapFolding.genericNeedsNewHome import between吗, DOTitems
 from more_itertools import pairwise, triplewise
 from operator import methodcaller
 from typing import TYPE_CHECKING
+from Z0Z_tools import between吗, DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator, Sequence
