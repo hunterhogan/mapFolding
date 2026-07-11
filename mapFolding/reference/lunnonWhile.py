@@ -26,7 +26,7 @@ def foldings(p: list[int]) -> int:
 	Returns:
 		G: The number of distinct foldings for the given map dimensions.
 
-	NOTE If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
+	If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
 	"""
 
 	g: int = 0

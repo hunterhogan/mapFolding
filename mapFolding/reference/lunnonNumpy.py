@@ -29,7 +29,7 @@ def foldings(p: list[int]) -> int:
 	Returns:
 		G: The number of distinct foldings for the given map dimensions.
 
-	NOTE If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
+	If there are fewer than two dimensions, any dimensions are not positive, or any dimensions are not integers, the output will be unreliable.
 	"""
 
 	g: int = 0
@@ -61,7 +61,7 @@ def foldings(p: list[int]) -> int:
 
 	for i in range(1, d + 1):
 		for m in range(1, n + 1):
-			C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1 # NOTE Because modulo is available, this statement is simpler.
+			C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1 # Because modulo is available, this statement is simpler.
 
 	for i in range(1, d + 1):
 		for l in range(1, n + 1):
@@ -84,9 +84,9 @@ def foldings(p: list[int]) -> int:
 
 	# kick off with null folding
 	while l > 0:
-		if l <= 1 or B[0] == 1: # NOTE This statement is part of a significant divergence from the 1971 paper. As a result, this version is greater than one order of magnitude faster.
+		if l <= 1 or B[0] == 1: # This statement is part of a significant divergence from the 1971 paper. As a result, this version is greater than one order of magnitude faster.
 			if l > n:
-				G = G + n # NOTE Due to `B[0] == 1`, this implementation increments the counted foldings in batches of `n`-many foldings, rather than immediately incrementing when a folding is found, i.e. `G = G + 1`
+				G = G + n # Due to `B[0] == 1`, this implementation increments the counted foldings in batches of `n`-many foldings, rather than immediately incrementing when a folding is found, i.e. `G = G + 1`
 			else:
 				dd: int = 0
 				gg: int = gapter[l - 1]

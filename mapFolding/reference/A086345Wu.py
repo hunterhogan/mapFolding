@@ -9,7 +9,7 @@ from sympy.functions.combinatorial.numbers import mobius
 from sympy.utilities.iterables import partitions
 import time
 
-# NOTE Because `b` and `c` are inside `A086345` instead of peers, the run time is increased by a factor of 6.
+# Because `b` and `c` are inside `A086345` instead of peers, the run time is increased by a factor of 6.
 
 def A086345(n):
 	@cache

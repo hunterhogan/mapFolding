@@ -1,4 +1,3 @@
-# NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
 # ruff: noqa: DOC201
 # ty:ignore[unresolved-attribute]
 from __future__ import annotations
@@ -77,7 +76,6 @@ def writeExclusionDataCollated(listDimensions: Sequence[int] = (5, 6)) -> list[P
 	dictionaryIndices: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
 	dictionaryIndicesNegative: dict[MapKind, dict[strLeafExcluder, dict[strPileExcluder, dict[strLeafExcluded, list[FractionAddend]]]]] = {}
 
-# NOTE Use the docstring to explain this computation, and change the computation to a simpler statement.
 	listsAreAlwaysLessThanHalfLeavesTotal = 1
 	integerDivisionIsSillyIfTheNumeratorIsLessThanTwiceTheDenominator = 1
 	qq: int = min(listDimensions) - listsAreAlwaysLessThanHalfLeavesTotal - integerDivisionIsSillyIfTheNumeratorIsLessThanTwiceTheDenominator

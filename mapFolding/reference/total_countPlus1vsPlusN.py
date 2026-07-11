@@ -144,7 +144,7 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
     for i in range(1, d + 1):
         for m in range(1, n + 1):
             C[i][m] = ((m - 1) // P[i - 1]) - ((m - 1) // P[i]) * p[i - 1] + 1
-            # C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1 # NOTE different, but either one works
+            # C[i][m] = ((m - 1) // P[i - 1]) % p[i - 1] + 1 # different, but either one works
 
     # D[i][l][m] computes the leaf connected to m in section i when inserting l
     D = numpy.zeros((d + 1, n + 1, n + 1), dtype=numpy.int64)
@@ -179,15 +179,15 @@ def foldings(p: list[int], computationDivisions: int = 0, computationIndex: int 
 
     # Start backtracking loop
     while l > 0:
-        if l <= 1 or B[0] == 1: # NOTE different
-            # NOTE the above `if` statement encloses the the if/else block below
-            # NOTE these changes increase the throughput by more than an order of magnitude
+        if l <= 1 or B[0] == 1: # different
+            # the above `if` statement encloses the the if/else block below
+            # these changes increase the throughput by more than an order of magnitude
             if l > n:
                 total_count += n
             else:
                 dd = 0    # Number of sections where leaf l is unconstrained
-                gg = gapter[l - 1]  # Track possible gaps # NOTE different, but not important
-                g = gg # NOTE different, but not important
+                gg = gapter[l - 1]  # Track possible gaps # different, but not important
+                g = gg # different, but not important
 
                 # Count possible gaps for leaf l in each section
                 for i in range(1, d + 1):

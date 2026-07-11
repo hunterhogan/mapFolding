@@ -12,7 +12,7 @@ type DataArray3columns = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64
 type SelectorBoolean = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.bool_]]
 type SelectorIndices = numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.intp]]
 
-# NOTE This code blocks enables semantic references to your data.
+# This code block enables semantic references to your data.
 columnsArrayCurveGroups = columnsArrayTotal = 3
 columnΩ: int = (columnsArrayTotal - columnsArrayTotal) - 1
 columnDistinctCrossings = columnΩ = columnΩ + 1
@@ -43,7 +43,7 @@ def convertDictionaryCurveLocations2CurveGroups(dictionaryCurveLocations: dict[i
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
-	"""NOTE `gc.set_threshold`: Low numbers nullify the `walkDyckPath` cache."""
+	"""`gc.set_threshold`: Low numbers nullify the `walkDyckPath` cache."""
 	findTheExtra_0b1: int = 0
 	flipExtra_0b1_Here: int = 1
 	while True:
@@ -209,7 +209,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.left_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
 		numpy.bitwise_or(curveLocationsGroupAlpha, arrayCurveGroups[selectGroupAlphaCurves, columnGroupAlpha], out=curveLocationsGroupAlpha)
 		numpy.right_shift(curveLocationsGroupAlpha, 2, out=curveLocationsGroupAlpha)
-# NOTE (groupAlpha >> 2) | (groupZulu << 3) | ((1 - (groupAlpha & 1)) << 1)
+# (groupAlpha >> 2) | (groupZulu << 3) | ((1 - (groupAlpha & 1)) << 1)
 		arrayLockbox: numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint8]] = numpy.full_like(a=curveLocationsGroupAlpha, fill_value=numpy.uint8(0b111), dtype=numpy.uint8)
 		numpy.bitwise_and(arrayLockbox, curveLocationsGroupAlpha, out=arrayLockbox, dtype=numpy.uint8)
 		numpy.right_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
@@ -240,11 +240,11 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		selectGroupZuluCurves: SelectorBoolean = arrayCurveGroups[:, columnGroupZulu] > numpy.uint64(1)
 		curveLocationsGroupZulu: DataArray1D = arrayCurveGroups[selectGroupZuluCurves, columnGroupAlpha].copy()
 		numpy.left_shift(curveLocationsGroupZulu, 2, out=curveLocationsGroupZulu)
-# NOTE (groupAlpha << 2)
+# (groupAlpha << 2)
 
 		numpy.bitwise_or(curveLocationsGroupZulu, numpy.subtract(numpy.uint64(1), numpy.bitwise_and(arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], 1)), out=curveLocationsGroupZulu)
 
-# NOTE | (groupZulu >> 1)
+# | (groupZulu >> 1)
 		numpy.left_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
 		numpy.bitwise_or(curveLocationsGroupZulu, arrayCurveGroups[selectGroupZuluCurves, columnGroupZulu], out=curveLocationsGroupZulu)
 		numpy.right_shift(curveLocationsGroupZulu, 1, out=curveLocationsGroupZulu)
@@ -269,7 +269,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 # `bridgesAligned` = `bridgesGroupAlphaPairedToOdd` UNION WITH `bridgesGroupZuluPairedToOdd` UNION WITH `bridgesAlignedAtEven`
 
 # bridgesAligned -------------------------------- bridgesGroupAlphaPairedToOdd ----------------------------------------
-# NOTE this code block MODIFIES `arrayCurveGroups` NOTE
+# this code block MODIFIES `arrayCurveGroups` NOTE
 		set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 
 		selectGroupAlphaAtEven: SelectorBoolean = numpy.empty_like(arrayCurveGroups[:, columnGroupAlpha], dtype=bool)
@@ -281,12 +281,12 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		selectBridgesGroupAlphaPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & selectGroupAlphaAtEven & (~selectGroupZuluAtEven))
 		arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 # Without changing `flipTheExtra_0b1`, above works, but `out=` does not. Why? Elephino.
-# NOTE flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha], casting='unsafe', out=arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
+# flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha], casting='unsafe', out=arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 
 		selectBridgesGroupAlphaPairedToOdd = None; del selectBridgesGroupAlphaPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
 
 # bridgesAligned -------------------------------- bridgesGroupZuluPairedToOdd ------------------------------------------
-# NOTE this code block MODIFIES `arrayCurveGroups` NOTE
+# this code block MODIFIES `arrayCurveGroups` NOTE
 		set_threshold(0, 0, 0)  # Disable the garbage collector inside this loop to maximize the `walkDyckPath` cache hits.
 		selectBridgesGroupZuluPairedToOdd: SelectorIndices = numpy.flatnonzero(selectBridgesAligned & (~selectGroupAlphaAtEven) & selectGroupZuluAtEven)
 		arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
@@ -297,7 +297,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		selectGroupZuluAtEven = None; del selectGroupZuluAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
 		goByeBye()
 
-# NOTE: All computations for `bridgesAlignedAtEven` are handled by the computations for `bridgesAligned`.
+# All computations for `bridgesAlignedAtEven` are handled by the computations for `bridgesAligned`.
 
 #------------------------------------------------ bridgesAligned ------------------------------------------------------
 

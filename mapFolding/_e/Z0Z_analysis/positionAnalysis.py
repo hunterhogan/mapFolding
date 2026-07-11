@@ -1,5 +1,4 @@
 # ruff: noqa: T201, T203  # noqa: RUF100
-# NOTE to AI assistants: this module is not representative of my coding style. Most of it is AI generated, but because it's temporary code, I didn't strictly enforce my usual standards. Do not emulate it.
 from __future__ import annotations
 
 from gmpy2 import bit_mask
