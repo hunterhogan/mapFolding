@@ -148,10 +148,10 @@ def count(state: EliminationState) -> EliminationState:
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Do the things necessary so that `count` operates efficiently."""
-#======== Edge cases for "small" map shapes ============================
+	#======== Edge cases for "small" map shapes ============================
 	if (0 in state.mapShape) or not state.mapShape:
-		from mapFolding.oeis import librarianConstructsDictionaryFoldsTotalKnown
-		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = librarianConstructsDictionaryFoldsTotalKnown()
+		from mapFolding.oeis import makeDictionaryFoldsTotalKnown
+		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
 		if state.mapShape in dictionaryFoldsTotalKnown:
 			state.groupsOfFolds = dictionaryFoldsTotalKnown[state.mapShape]
 			return state

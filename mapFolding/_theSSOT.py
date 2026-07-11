@@ -36,10 +36,10 @@ class mapFoldingPackageSettings(PackageSettings):
 		Settings that are best selected by a human instead of algorithmically for meander sequences.
 	"""
 
-	OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = dataclasses.field(default_factory=dict[str, MetadataOEISidMapFoldingManuallySet])
+	oeisIDsImplementedMapFolding: dict[str, MetadataOEISidMapFoldingManuallySet] = dataclasses.field(default_factory=dict[str, MetadataOEISidMapFoldingManuallySet])
 	"""Settings that are best selected by a human instead of algorithmically."""
 
-	OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = dataclasses.field(default_factory=dict[str, MetadataOEISidManuallySet])
+	oeisIDsImplemented: dict[str, MetadataOEISidManuallySet] = dataclasses.field(default_factory=dict[str, MetadataOEISidManuallySet])
 	"""Settings that are best selected by a human instead of algorithmically for meander sequences."""
 
 	cacheDays: int = 30
@@ -60,7 +60,7 @@ OEISidMapFoldingManuallySet: dict[str, MetadataOEISidMapFoldingManuallySet] = {
 identifierPackageFALLBACK = "mapFolding"
 """Manually entered package name used as fallback when dynamic resolution fails."""
 
-packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifierPackageFALLBACK, OEISidMapFoldingManuallySet=OEISidMapFoldingManuallySet)
+packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifierPackageFALLBACK, oeisIDsImplementedMapFolding=OEISidMapFoldingManuallySet)
 """Global package settings."""
 
 OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {'A000560': {}, 'A000682': {}, 'A001010': {}, 'A001011': {},
@@ -70,8 +70,8 @@ OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {'A000560': {}, 'A0006
 # Recreate packageSettings with meanders settings included
 packageSettings = mapFoldingPackageSettings(
 	identifierPackageFALLBACK=identifierPackageFALLBACK,
-	OEISidMapFoldingManuallySet=OEISidMapFoldingManuallySet,
-	OEISidManuallySet=OEISidManuallySet,
+	oeisIDsImplementedMapFolding=OEISidMapFoldingManuallySet,
+	oeisIDsImplemented=OEISidManuallySet,
 )
 """Global package settings."""
 

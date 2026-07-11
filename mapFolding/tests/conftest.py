@@ -26,7 +26,6 @@ research domain.
 from __future__ import annotations
 
 from mapFolding import _theSSOT, packageSettings
-from mapFolding.oeis import oeisIDsImplemented
 from pathlib import Path
 from typing import TYPE_CHECKING
 import pickle
@@ -203,7 +202,7 @@ def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
 
 #======== OEIS ids =====================================
 
-@pytest.fixture(params=oeisIDsImplemented)
+@pytest.fixture(params=packageSettings.oeisIDsImplementedMapFolding)
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
 
@@ -228,7 +227,7 @@ def oeisID_1random() -> str:
 	randomSequenceIdentifier : str
 		Randomly selected OEIS sequence identifier from implemented sequences.
 	"""
-	return random.choice(oeisIDsImplemented)
+	return random.choice(list(packageSettings.oeisIDsImplementedMapFolding))
 
 #======== Miscellaneous =====================================
 

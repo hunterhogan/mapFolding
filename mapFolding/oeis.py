@@ -1,4 +1,4 @@
-# ruff: noqa: PLC0415 E701
+# ruff: noqa: PLC0415 E701 DOC501
 """You can use this module to access OEIS sequence data and compute sequence values.
 
 (AI generated docstring)
@@ -52,13 +52,16 @@ from __future__ import annotations
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from functools import cache
+from humpy_cytoolz import compose
+from humpy_toolz.curried import map as toolz_map
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from itertools import chain
+from itertools import chain, filterfalse
 from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
+from operator import methodcaller
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 from urllib3.exceptions import HTTPError
@@ -70,11 +73,12 @@ import urllib3
 import warnings
 
 if TYPE_CHECKING:
+	from collections.abc import Iterator
 	from os import PathLike
 	from typing import Final, Literal
 	from urllib3.response import BaseHTTPResponse
 
-def _librarianStandardizesOEISid(oeisID: str) -> str:
+def _formatOEISid(oeisID: str) -> str:
 	"""I use this to normalize OEIS sequence identifiers to a canonical form.
 
 	This shared normalization function ensures consistent OEIS sequence ID formatting
@@ -95,60 +99,7 @@ def _librarianStandardizesOEISid(oeisID: str) -> str:
 	"""
 	return str(oeisID).upper().strip()
 
-oeisIDsImplemented: Final[list[str]] = sorted(map(_librarianStandardizesOEISid, packageSettings.OEISidMapFoldingManuallySet))
-"""Directly implemented OEIS IDs; standardized, e.g., 'A001415'."""
-
-def _librarianEncodesOEISidToBFilename(oeisID: str) -> str:
-	"""Generate the filename for an OEIS b-file given a sequence ID.
-
-	(AI generated docstring)
-
-	OEIS b-files contain sequence values in a standardized format and follow the naming convention
-	'b{sequence_number}.txt', where the sequence number excludes the 'A' prefix.
-
-	Parameters
-	----------
-	oeisID : str
-		The OEIS sequence identifier to convert to a b-file filename.
-
-	Returns
-	-------
-	str
-		The corresponding b-file filename for the given sequence ID.
-
-	"""
-	oeisID = _librarianStandardizesOEISid(oeisID)
-	return f"b{oeisID[1:]}.txt"
-
-def _librarianParsesBFileToSequence(OEISbFile: str) -> dict[int, int]:
-	"""Parse the content of an OEIS b-file into a sequence dictionary.
-
-	(AI generated docstring)
-
-	OEIS b-files contain sequence data in a standardized two-column format where each line represents
-	an index-value pair. Comment lines beginning with '#' are ignored during parsing.
-
-	Parameters
-	----------
-	OEISbFile : str
-		A multiline string representing the content of an OEIS b-file.
-
-	Returns
-	-------
-	OEISsequence : dict[int, int]
-		A dictionary mapping sequence indices to their corresponding values.
-	"""
-	bFileLines: list[str] = OEISbFile.strip().splitlines()
-
-	OEISsequence: dict[int, int] = {}
-	for line in bFileLines:
-		if line.startswith('#'):
-			continue
-		n, aOFn = map(int, line.split())
-		OEISsequence[n] = aOFn
-	return OEISsequence
-
-def _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache: Path, url: str) -> str | None:
+def _getOEISdata(pathFilenameCache: Path, url: str) -> str | None:
 	"""I use this to manage cached OEIS data retrieval with HTTP conditional requests.
 
 	This caching layer minimizes network traffic by checking local cache validity based on
@@ -176,7 +127,7 @@ def _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache: Path, url: str)
 	[2] urllib3 - Context7
 		https://urllib3.readthedocs.io/en/stable/
 
-	"""  # noqa: DOC501
+	"""
 	preferCache: bool = False
 	informationOEIS: str = ''
 	cacheDatetime: datetime | None = None
@@ -215,7 +166,7 @@ def _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache: Path, url: str)
 	return informationOEIS
 
 @cache
-def librarianFetchesOEISidSequenceValues(oeisID: str) -> dict[int, int]:
+def getValuesKnown(oeisID: str) -> dict[int, int]:
 	"""Retrieve known sequence values for a specified OEIS sequence.
 
 	(AI generated docstring)
@@ -235,17 +186,20 @@ def librarianFetchesOEISidSequenceValues(oeisID: str) -> dict[int, int]:
 		A dictionary mapping sequence indices to their corresponding values, or a fallback
 		dictionary containing {-1: -1} if retrieval fails.
 	"""
-	pathFilenameCache: Path = pathCache / _librarianEncodesOEISidToBFilename(oeisID)
-	url: str = f"https://oeis.org/{oeisID}/{_librarianEncodesOEISidToBFilename(oeisID)}"
+	filename: str = f"b{oeisID[1:]}.txt"
+	pathFilenameCache: Path = pathCache / filename
+	url: str = f"https://oeis.org/{oeisID}/{filename}"
 
-	oeisInformation: str | None = _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache, url)
+	oeisData: str | None = _getOEISdata(pathFilenameCache, url)
 
-	if oeisInformation:
-		return _librarianParsesBFileToSequence(oeisInformation)
-	return {-1: -1}
+	n_aOFn: dict[int, int] = {-errorL33T: -errorL33T}
+	if oeisData:
+		listLines: Iterator[str] = filterfalse(methodcaller('startswith', '#'), oeisData.strip().splitlines())
+		n_aOFn = dict(map(compose(tuple, toolz_map(int), methodcaller('split')), listLines))  # pyright: ignore[reportAssignmentType, reportArgumentType, reportCallIssue]
+	return n_aOFn
 
 @cache
-def librarianFetchesOEISidDescriptionAndOffset(oeisID: str) -> tuple[str, int]:
+def getOEISidMetadata(oeisID: str) -> tuple[str, int]:
 	"""Retrieve the description and offset metadata for an OEIS sequence.
 
 	(AI generated docstring)
@@ -273,11 +227,11 @@ def librarianFetchesOEISidDescriptionAndOffset(oeisID: str) -> tuple[str, int]:
 	warning messages and returns fallback values.
 
 	"""
-	oeisID = _librarianStandardizesOEISid(oeisID)
+	oeisID = _formatOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
-	oeisInformation: str | None = _librarianRetrievesOEISdataFromCacheOrWeb(pathFilenameCache, url)
+	oeisInformation: str | None = _getOEISdata(pathFilenameCache, url)
 
 	if not oeisInformation:
 		return "Not found", -1
@@ -306,7 +260,7 @@ def librarianFetchesOEISidDescriptionAndOffset(oeisID: str) -> tuple[str, int]:
 
 #======== Dictionaries of OEIS sequence metadata ==============================================================
 
-def _librarianConstructsDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
+def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 	"""Construct the comprehensive settings dictionary for all implemented OEIS sequences.
 
 	(AI generated docstring)
@@ -330,19 +284,19 @@ def _librarianConstructsDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMa
 
 	"""
 	dictionaryOEIS: dict[str, MetadataOEISidMapFolding] = {}
-	for oeisID in oeisIDsImplemented:
-		valuesKnown: dict[int, int] = librarianFetchesOEISidSequenceValues(oeisID)
-		description, offset = librarianFetchesOEISidDescriptionAndOffset(oeisID)
+	for oeisID in packageSettings.oeisIDsImplementedMapFolding:
+		valuesKnown: dict[int, int] = getValuesKnown(oeisID)
+		description, offset = getOEISidMetadata(oeisID)
 		dictionaryOEIS[oeisID] = MetadataOEISidMapFolding(
 			description=description,
 			offset=offset,
-			getMapShape=packageSettings.OEISidMapFoldingManuallySet[oeisID]['getMapShape'],
+			getMapShape=packageSettings.oeisIDsImplementedMapFolding[oeisID]['getMapShape'],
 			valuesKnown=valuesKnown,
 			valueUnknown=max(valuesKnown.keys(), default=0) + 1
 		)
 	return dictionaryOEIS
 
-def _librarianConstructsDictionaryOEIS() -> dict[str, MetadataOEISid]:
+def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	"""I use this to construct metadata for OEIS sequences computed by specialized algorithms.
 
 	This function builds the configuration dictionary for OEIS sequences that require
@@ -363,9 +317,9 @@ def _librarianConstructsDictionaryOEIS() -> dict[str, MetadataOEISid]:
 
 	"""
 	dictionary: dict[str, MetadataOEISid] = {}
-	for oeisID in packageSettings.OEISidManuallySet:
-		valuesKnown: dict[int, int] = librarianFetchesOEISidSequenceValues(oeisID)
-		description, offset = librarianFetchesOEISidDescriptionAndOffset(oeisID)
+	for oeisID in packageSettings.oeisIDsImplemented:
+		valuesKnown: dict[int, int] = getValuesKnown(oeisID)
+		description, offset = getOEISidMetadata(oeisID)
 		dictionary[oeisID] = MetadataOEISid(
 			description=description,
 			offset=offset,
@@ -374,10 +328,10 @@ def _librarianConstructsDictionaryOEIS() -> dict[str, MetadataOEISid]:
 		)
 	return dictionary
 
-dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _librarianConstructsDictionaryOEISMapFolding()
+dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _makeDictionaryOEISMapFolding()
 """Metadata for each MapFolding OEIS ID."""
 
-dictionaryOEIS: dict[str, MetadataOEISid] = _librarianConstructsDictionaryOEIS()
+dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
 """Metadata for OEIS sequences computed by specialized algorithms (meanders, symmetric foldings, formulas)."""
 
 #======== librarianLookupsFoldsTotalKnown ==============================================================
@@ -426,10 +380,10 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 		https://docs.python.org/3/library/functools.html#functools.cache
 
 	"""
-	lookupFoldsTotal: dict[tuple[int, ...], int] = librarianConstructsDictionaryFoldsTotalKnown()
+	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
 	return lookupFoldsTotal.get(tuple(mapShape), 0)
 
-def librarianConstructsDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
+def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 	"""You can create a dictionary mapping map shapes to known folding totals from all OEIS sequences.
 
 	(AI generated docstring)
@@ -461,7 +415,7 @@ def librarianConstructsDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]
 
 #======== OEIS for n ==============================================================
 
-def _librarianFormatsHelpText() -> str:
+def _CLIHelpText() -> str:
 	"""Format comprehensive help text for both command-line and interactive use.
 
 	(AI generated docstring)
@@ -480,7 +434,7 @@ def _librarianFormatsHelpText() -> str:
 
 	return (
 		"\nAvailable OEIS sequences:\n"
-		f"{_librarianFormatsOEISsequenceInfo()}\n"
+		f"{_getOEISDescriptions()}\n"
 		"\nUsage examples:\n"
 		"  Command line:\n"
 		f"	OEIS_for_n {exampleOEISid} {exampleN}\n"
@@ -489,7 +443,7 @@ def _librarianFormatsHelpText() -> str:
 		f"	foldsTotal = oeisIDfor_n('{exampleOEISid}', {exampleN})"
 	)
 
-def _librarianFormatsOEISsequenceInfo() -> str:
+def _getOEISDescriptions() -> str:
 	"""Format information about available OEIS sequences for display in help messages and error output.
 
 	(AI generated docstring)
@@ -505,7 +459,7 @@ def _librarianFormatsOEISsequenceInfo() -> str:
 	"""
 	return "\n".join(
 		f"  {oeisID}: {dictionaryOEISMapFolding[oeisID]['description']}"
-		for oeisID in oeisIDsImplemented
+		for oeisID in packageSettings.oeisIDsImplementedMapFolding
 	)
 
 def oeisIDfor_n(oeisID: str, n: int) -> int:
@@ -556,7 +510,7 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 		https://oeis.org/
 	[2] mapFolding.basecamp.countFolds
 	"""
-	oeisID = _librarianStandardizesOEISid(oeisID)
+	oeisID = _formatOEISid(oeisID)
 
 	if not isinstance(n, int) or n < 0:
 		message: str = f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`."
@@ -594,7 +548,7 @@ def OEIS_for_n() -> None:
 	"""
 	parserCLI: argparse.ArgumentParser = argparse.ArgumentParser(
 		description="Calculate a(n) for an OEIS sequence.",
-		epilog=_librarianFormatsHelpText(),
+		epilog=_CLIHelpText(),
 		formatter_class=argparse.RawDescriptionHelpFormatter
 	)
 	parserCLI.add_argument('oeisID', help="OEIS sequence identifier")
@@ -627,7 +581,7 @@ def getOEISids() -> None:
 	to help users understand how to access and utilize the OEIS interface functionality.
 
 	"""
-	sys.stdout.write(_librarianFormatsHelpText())
+	sys.stdout.write(_CLIHelpText())
 
 # SEMIOTICS segregate `countingFoldsSymmetric`?
 
