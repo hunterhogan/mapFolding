@@ -360,10 +360,3 @@ def 首二三(dimensionsTotal: int, /) -> int:
 	- thủ nhị tam
 	"""
 	return int('0011' + '0' * (dimensionsTotal - 4), _dimensionLength)
-
-#======== Semantic replacements for ambiguous values =======
-
-leafOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0 * 四) + (0 * 三) + (0 * 二) + (0 * 一) + (0 * 零)
-"""The `leaf` at the origin of all dimensions, with `0` in every `DimensionIndex`."""
-pileOrigin: int = (0 * 九) + (0 * 八) + (0 * 七) + (0 * 六) + (0 * 五) + (0 * 四) + (0 * 三) + (0 * 二) + (0 * 一) + (0 * 零)
-"""The `pile` at the origin of all dimensions, with `0` in every `DimensionIndex`."""

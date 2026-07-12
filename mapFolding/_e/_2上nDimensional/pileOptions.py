@@ -10,10 +10,12 @@ from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from humpy_cytoolz import curry as syntacticCurry
 from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
-from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getIteratorOfLeaves, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafOrigin,
-	makeLeafOptions, mapShapeIs2上nDimensions, 零, 首一, 首二, 首零, 首零一)
+from mapFolding._e import getIteratorOfLeaves, leafOrigin, makeLeafOptions
+from mapFolding._e._2上nDimensional import (
+	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, mapShapeIs2上nDimensions, 零, 首一, 首二, 首零,
+	首零一)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pileOptions import getLeafOptions
 from more_itertools import flatten
 from pprint import pprint
 from typing import TYPE_CHECKING
@@ -47,8 +49,6 @@ def filterDoubleParity(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 
 #======== getLeafOptions ======================================
 
-def getLeafOptions(state: EliminationState, pile: Pile) -> LeafOptions:
-	return _getLeafOptions(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 @cache
 def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> LeafOptions:
 	leafOptions: Iterable[Leaf] = range(leavesTotal)

@@ -11,7 +11,7 @@ Multi-argument functions use curated static cases plus invalid-input coverage.
 
 from __future__ import annotations
 
-from mapFolding._e import (
+from mapFolding._e._2上nDimensional import (
 	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
 	dimensionThirdNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafInSubHyperplane, ptount)
 from mapFolding._e.dataBaskets import EliminationState

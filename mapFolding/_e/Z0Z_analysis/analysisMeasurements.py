@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from mapFolding._e import dimensionNearestTail, getLeafDomain, pileOrigin, 零
+from mapFolding._e import getLeafDomain, pileOrigin
+from mapFolding._e._2上nDimensional import dimensionNearestTail, 零
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from typing import Any, TYPE_CHECKING

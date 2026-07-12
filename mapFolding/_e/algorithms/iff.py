@@ -70,22 +70,17 @@ Citations in BibTeX format at [mapFolding/citations](../../citations).
 """
 from __future__ import annotations
 
-from collections import deque
 from functools import cache
-from humpy_cytoolz import valfilter as filterLeaf
 from humpy_toolz.curried.operator import indexOf
-from hunterMakesPy import inclusive
 from itertools import combinations, filterfalse, product as CartesianProduct
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import floordiv
 from typing import TYPE_CHECKING
-from Z0Z_tools import between吗, DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 	from mapFolding._e.theTypes import Folding, Leaf, Pile
 
 #======== Forbidden inequalities ============================

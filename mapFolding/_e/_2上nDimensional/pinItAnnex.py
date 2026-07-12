@@ -70,11 +70,12 @@ from __future__ import annotations
 
 from humpy_cytoolz import keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import inclusive
-from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, leafOrigin,
-	makeLeafAntiOptions, mapShapeIs2上nDimensions)
+from mapFolding._e import leafOrigin, makeLeafAntiOptions
+from mapFolding._e._2上nDimensional import (
+	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost,
+	mapShapeIs2上nDimensions, notLeafOriginOrLeaf零)
 from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, notLeafOriginOrLeaf零, notPileLast
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, notPileLast
 from mapFolding._e.pinIt import (
 	reduceLeafSpace, reducePermutationSpace_CrossedCreases, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
 	reducePermutationSpace_nakedSubset)

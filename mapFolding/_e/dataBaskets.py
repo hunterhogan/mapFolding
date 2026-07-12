@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
+	from typing import Self
 
 # TODO Probably create a `Property` to report the number of `Leaf` objects. Use case example: `sum首:
 # int = sum(map(dimensionNearest首, permutationSpace.values()))`.
@@ -654,38 +655,76 @@ class EliminationState:
 
 		(AI generated docstring)
 
-		`removeIFFViolationsFromEliminationState` is a mutating filter step that keeps only those
-		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(state) == False` [1].
+		`removePermutationSpaceViolations` is a mutating filter step that keeps only those
+		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(self) == False` [1].
 		This function is used by pinning flows that enumerate multiple candidate permutation
 		spaces and then prune candidate permutation spaces before deeper elimination work.
 		A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
 
-		Thread Safety
-		------------
-		`removeIFFViolationsFromEliminationState` mutates `state.listPermutationSpace` and updates
-		`state.permutationSpace` while iterating. Do not share `state` across threads while
-		`removeIFFViolationsFromEliminationState` is running.
-
 		Parameters
 		----------
-		state : EliminationState
-			An elimination state that provides `state.listPermutationSpace` and a writable
-			`state.permutationSpace`.
+		self : Self
+			The instance of the class.
 
 		Returns
 		-------
-		state : EliminationState
-			The same `state` instance with `state.listPermutationSpace` filtered.
+		self : Self
+			The same instance with `self.listPermutationSpace` filtered.
 
 		References
 		----------
 		[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
 
 		[2] mapFolding._e.pin2上nDimensions
-		"""  # ruff:ignore[docstring-extraneous-parameter, docstring-extraneous-returns]
+		"""  # ruff:ignore[docstring-extraneous-returns]
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
 		self.listPermutationSpace = deque()
 		for permutationSpace in listPermutationSpace:
 			self.permutationSpace = permutationSpace
 			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
 				self.listPermutationSpace.append(permutationSpace)
+
+	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace
+		self.listPermutationSpace = deque()
+		listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()
+
+		# TODO (dissatisfied) I'm not satisfied with this function, and I _think_ the fundamental issue is the lack of no-op.
+
+		while listPermutationSpace:
+			#------------ Initialize `permutationSpace` ------------------------------
+			# TODO (dissatisfied) `... | None` is not natural.
+			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
+			# NOTE `sumPermutationSpace` detects _any_ change in the permutation space; not to be confused with `sum首`.
+			# NOTE reminder: _all_ changes in a permutation space are reductions in the probability space.
+			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
+			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)
+			keepGoing: bool = True
+
+			while keepGoing:
+				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = functionsReduction.popleft()
+				# TODO (dissatisfied) `raiseIfNone` is _only_ necessary because of `... | None`.
+				permutationSpace = reducePermutationSpace(self, raiseIfNone(permutationSpace))
+
+				if not permutationSpace:
+					# TODO (dissatisfied) In this previous version of this function, this check was
+					# handled by `more_itertools.filter_map`. In this version, it is necessary because the
+					# signatures of `_reducePermutationSpace_*` are `reducePermutationSpace:
+					# Callable[[EliminationState, PermutationSpace], PermutationSpace | None]` passing
+					# `PermutationSpace | None` will raise an exception instead of no-op. I will NOT add a
+					# guard to every `_reducePermutationSpace_*` function to handle `None`.
+					keepGoing = False
+				elif sumPermutationSpace != sum(permutationSpace.values()):
+					# TODO I suspect there are faster ways to check if an object has been altered.
+					# NOTE Reset the `functionsReduction` queue.
+					functionsReduction = deque(listFunctionsReduction)
+					sumPermutationSpace = sum(permutationSpace.values())
+				elif not functionsReduction:
+					# NOTE due to the previous `elif`, `... and (sumPermutationSpace == sum(permutationSpace.values()))` is implied.
+					listPermutationSpaceIrreducible.append(permutationSpace)
+					keepGoing = False
+
+		else:
+			self.listPermutationSpace.extend(listPermutationSpaceIrreducible)
+
+		return self

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from mapFolding import packageSettings
-from mapFolding._e import getLeavesCreasePost
+from mapFolding._e._2上nDimensional import getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState
 from pathlib import Path, PurePath
 from typing import TextIO

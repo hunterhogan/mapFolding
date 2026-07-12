@@ -15,10 +15,10 @@ and the tests will automatically pick them up via parametrization.
 
 from __future__ import annotations
 
-from mapFolding._e import (
+from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions
+from mapFolding._e._2上nDimensional import (
 	getDictionaryLeafDomains, getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一,
-	getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getIteratorOfLeaves, getLeafDomain, getLeafOptions, getLeavesCreaseAnte,
-	getLeavesCreasePost)
+	getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeavesCreaseAnte, getLeavesCreasePost)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (

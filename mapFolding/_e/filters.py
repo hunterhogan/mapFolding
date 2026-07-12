@@ -19,8 +19,6 @@ Boolean antecedents
 		You can test whether a `leaf` is absent from `permutationSpace.values()`.
 	leafPinned吗
 		You can test whether a `leaf` is present in `permutationSpace.values()`.
-	notLeafOriginOrLeaf零
-		You can test whether `leaf` is greater than `零`.
 	notPileLast
 		You can test whether `pile` is not equal to `pileLast`.
 	pileIsNotOpen
@@ -45,7 +43,6 @@ References
 from __future__ import annotations
 
 from humpy_cytoolz import curry as syntacticCurry
-from mapFolding._e import 零
 from mapFolding._e.theTypes import Leaf, LeafOptions
 from typing import TYPE_CHECKING
 
@@ -99,28 +96,6 @@ def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 		`True` if `leavesPinned` includes `leaf`.
 	"""
 	return leaf in leavesPinned.values()
-
-def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
-	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
-
-	You can use `notLeafOriginOrLeaf零` in an `if` statement, or you can pass `notLeafOriginOrLeaf零` as a predicate to a
-	filtering utility described in the module docstring.
-
-	Parameters
-	----------
-	leaf : Leaf
-		`leaf` index.
-
-	Returns
-	-------
-	leafIsNotOriginOrZero : bool
-		`True` if `零 < leaf`.
-
-	References
-	----------
-	[1] mapFolding._e.零
-	"""
-	return 零 < leaf
 
 @syntacticCurry
 def notPileLast(pileLast: Pile, pile: Pile) -> bool:

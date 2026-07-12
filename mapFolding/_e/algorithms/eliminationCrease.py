@@ -5,10 +5,11 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import valfilter as filterLeaf
 from itertools import filterfalse
-from mapFolding._e import getIteratorOfLeaves, mapShapeIs2上nDimensions
+from mapFolding._e import getIteratorOfLeaves
+from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
+from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import isLeafOptions吗
-from mapFolding._e.pin2上nDimensional import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, reduceAllPermutationSpace
 from math import factorial
 from more_itertools import first

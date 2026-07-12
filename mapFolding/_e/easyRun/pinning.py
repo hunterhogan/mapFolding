@@ -4,13 +4,13 @@ from __future__ import annotations
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
-from mapFolding._e import (
-	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain,
-	getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions)
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import (
+from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions
+from mapFolding._e._2上nDimensional import (
+	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost)
+from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from operator import methodcaller

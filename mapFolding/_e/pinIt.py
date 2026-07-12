@@ -18,8 +18,8 @@ from humpy_cytoolz import (
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations, product as CartesianProduct, repeat
 from mapFolding._e import (
-	dimensionNearest首, getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND,
-	makeLeafAntiOptions)
+	getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
+from mapFolding._e._2上nDimensional import dimensionNearest首
 from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗
@@ -30,7 +30,7 @@ from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, t
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import DimensionIndex, Folding, Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 #======== Boolean filters =======================
 
@@ -493,6 +493,7 @@ def reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSp
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
+		# TODO `dimensionNearest首` problem?
 		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 
 		for dimension, leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in concat(generators):
