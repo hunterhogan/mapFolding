@@ -103,7 +103,7 @@ def test_aOFn_zeroDim_A001418() -> None:
 		oeisIDfor_n('A001418', 0)
 	assertEqualTo(type(exceptionInfo.value), expected, oeisIDfor_n.__name__, 'A001418', 0)
 
-# ===== Command Line Interface Tests =====
+#===== Command Line Interface Tests =====
 def testHelpText() -> None:
 	"""Test that help text is complete and examples are valid."""
 	outputStream = io.StringIO()

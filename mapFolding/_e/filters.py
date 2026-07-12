@@ -141,31 +141,61 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	return pileLast != pile
 
 def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
-	"""Return True if `leafSpace` is a `leaf`.
+	"""Identify and narrow a `LeafSpace` value to `Leaf`.
+
+	Use this function when control flow already has a `LeafSpace` value and needs to distinguish
+	the Python types in `LeafSpace`. A `True` result narrows `leafSpace` to `Leaf`, but does not
+	validate that the integer is a valid `Leaf` index. Use `PermutationSpace.pilePinned吗` when
+	the logic instead asks about the assignment state of a `Pile`.
 
 	Parameters
 	----------
 	leafSpace : LeafSpace | None
-		`leaf`, `pile`-range, or `None` to check.
+		`Leaf`, `LeafOptions`, or `None` to inspect.
 
 	Returns
 	-------
-	intIsProbablyALeaf : TypeIs[Leaf]
-		Technically, we only know the type is `Leaf`.
+	leafSpaceIsLeaf : TypeIs[Leaf]
+		`True` if `leafSpace` is an instance of `Leaf` and the positive branch can treat
+		`leafSpace` as `Leaf`.
+
+	See Also
+	--------
+	`isLeafOptions吗`
+		Narrow a `LeafSpace` value to `LeafOptions`.
+	`mapFolding._e.dataBaskets.PermutationSpace.pilePinned吗`
+		Determine whether a `Pile` already has a pinned `Leaf`.
+	`mapFolding._e.dataBaskets.PermutationSpace.pileUndetermined吗`
+		Determine whether a `Pile` still requires a `Leaf` assignment.
 	"""
 	return isinstance(leafSpace, Leaf)
 
 def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
-	"""Return True if `leafSpace` is a pile's range of leaves.
+	"""Identify and narrow a `LeafSpace` value to `LeafOptions`.
+
+	Use this function when control flow already has a `LeafSpace` value and needs to distinguish
+	the Python types in `LeafSpace`. A `True` result narrows `leafSpace` to the bitset type
+	`LeafOptions`. Use `PermutationSpace.pileUndetermined吗` when the logic instead asks whether
+	a `Pile` still requires a `Leaf` assignment.
 
 	Parameters
 	----------
 	leafSpace : LeafSpace | None
-		`leaf`, `pile`-range, or `None` to check.
+		`Leaf`, `LeafOptions`, or `None` to inspect.
 
 	Returns
 	-------
-	youHaveAPileRange : TypeIs[LeafOptions]
-		Congrats, you have a pile range!
+	leafSpaceIsLeafOptions : TypeIs[LeafOptions]
+		`True` if `leafSpace` is an instance of `LeafOptions` and the positive branch can treat
+		`leafSpace` as `LeafOptions`.
+
+	See Also
+	--------
+	`isLeaf吗`
+		Narrow a `LeafSpace` value to `Leaf`.
+	`mapFolding._e.dataBaskets.PermutationSpace.pileUndetermined吗`
+		Determine whether a `Pile` still requires a `Leaf` assignment.
+	`mapFolding._e.dataBaskets.PermutationSpace.pilePinned吗`
+		Determine whether a `Pile` already has a pinned `Leaf`.
 	"""
 	return isinstance(leafSpace, LeafOptions)

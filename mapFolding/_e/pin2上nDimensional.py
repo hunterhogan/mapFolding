@@ -140,7 +140,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
 		pile: Pile = pileProcessingOrder.popleft()
 
-		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(partial(PermutationSpace.pileOpen吗, pile=pile), state.listPermutationSpace)
+		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(partial(PermutationSpace.pileUndetermined吗, pile=pile), state.listPermutationSpace)
 		state.listPermutationSpace = deque(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:

@@ -108,7 +108,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		isSafeToPin : bool
 			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
 		"""
-		return self.leafPinnedAtPile吗(leaf, pile) or (self.pileOpen吗(pile) and self.leafNotPinned吗(leaf))
+		return self.leafPinnedAtPile吗(leaf, pile) or (self.pileUndetermined吗(pile) and self.leafNotPinned吗(leaf))
 
 	def bifurcate(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
@@ -121,8 +121,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			Dictionary of `Pile` to `LeafOptions` domain mappings.
 		"""
 		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
-		# TODO Create new comment marker to signal "deviations" from the code style, or code that doesn't "conform" to the rules.
-		# NOTE `cast` because type checkers don't know `PermutationSpace` - `PinnedLeaves` = `UndeterminedPiles`.
+		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
 		return (leavesPinned, cast("UndeterminedPiles", dissociatePile(self, *DOTkeys(leavesPinned))))
 
 	def copy(self) -> PermutationSpace:
@@ -179,7 +178,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		if self.leafNotPinned吗(leaf):
 			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.getLeafOptions, default=bit_mask(len(self))))
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
-			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(self.pileOpen吗, leafDomain))))
+			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(self.pileUndetermined吗, leafDomain))))
 		else:
 			deconstructedPermutationSpace.append(self)
 		return deconstructedPermutationSpace
@@ -204,7 +203,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				return self.pileOpen吗(domain[index])
+				return self.pileUndetermined吗(domain[index])
 			return workhorse
 
 		def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
@@ -373,9 +372,26 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	# `listPileLeaf: Sequence[tuple[Pile, Leaf]]` would be better than the current function and is
 	# probably close to the ideal generalized function.
 	def makeFolding(self, leavesToInsert: Sequence[Leaf]) -> Folding:
-		# DOCUMENT `pilesToInsert` is sorted from smallest to largest Pile. `leavesToInsert` must be ordered with that in mind.
+		"""Complete this `PermutationSpace` as a `Folding`.
+
+		(AI generated docstring)
+
+		This method pairs each item in `leavesToInsert` with an undetermined `Pile`. The first
+		item corresponds to the smallest undetermined `Pile`, the second item to the next-smallest
+		undetermined `Pile`, and so on. Existing pinned `Leaf` values keep their pile positions.
+
+		Parameters
+		----------
+		leavesToInsert : Sequence[Leaf]
+			One `Leaf` for each undetermined `Pile`, ordered by ascending `Pile`.
+
+		Returns
+		-------
+		folding : Folding
+			Every pinned or inserted `Leaf`, ordered by ascending `Pile`.
+		"""
 		pilesToInsert: Iterator[Pile] = DOTkeys(self.extractUndeterminedPiles())
-		# NOTE `cast` because the type checkers cannot possible know that the prior logic leads to all int.
+		#=SIN= `cast` because the type checkers cannot possible know that the prior logic leads to all int.
 		# TODO Think about: I _feel_ like this logic could be more efficient. This
 		# `tuple(DOTvalues(dict(sorted(DOTitems` has THREE constructors (`sorted` is a stealth `list`
 		# constructor) or FIVE constructors if `Iterator` is a constructor (`DOTitems` and
@@ -383,8 +399,12 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		# ping-ponging from `dict` to `list` to `dict` to `tuple`.
 		return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(self, dict(zip(pilesToInsert, leavesToInsert, strict=True)), factory=PermutationSpace)))))))
 
-	def pileNotOpen吗(self, pile: Pile) -> bool:
-		"""Return `True` if a `Leaf` is pinned at `pile` in this `PermutationSpace`.
+	def pilePinned吗(self, pile: Pile) -> bool:
+		"""Determine whether `pile` has a pinned `Leaf`.
+
+		Use this method when control flow concerns the assignment state of a `Pile` in this
+		`PermutationSpace`. Use `isLeaf吗` when the logic already has a `LeafSpace` value and
+		needs Python type narrowing.
 
 		Parameters
 		----------
@@ -393,15 +413,26 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		Returns
 		-------
-		pileIsNotOpen : bool
+		pileIsPinned : bool
 			`True` if this `PermutationSpace` contains a `Leaf` at `pile`.
+
+		See Also
+		--------
+		`pileUndetermined吗`
+			Determine whether a `Pile` still requires a `Leaf` assignment.
+		`mapFolding._e.filters.isLeaf吗`
+			Narrow an existing `LeafSpace` value to `Leaf`.
+		`mapFolding._e.filters.isLeafOptions吗`
+			Narrow an existing `LeafSpace` value to `LeafOptions`.
 		"""
 		return isLeaf吗(self[pile])
 
-	# DOCUMENT "Do you want to know if the pile is open or do you really want to know the Python `type` of the value at that key?"
-	# SEMIOTICS `pileUndetermined吗` to mirror `UndeterminedPiles`? The pile isn't exactly "open".
-	def pileOpen吗(self, pile: Pile) -> bool:
-		"""Return `True` if `pile` is open in this `PermutationSpace`.
+	def pileUndetermined吗(self, pile: Pile) -> bool:
+		"""Determine whether `pile` still requires a `Leaf` assignment.
+
+		Use this method when control flow concerns whether a `Pile` still requires a `Leaf`
+		assignment. Use `isLeafOptions吗` when the logic already has a `LeafSpace` value and
+		needs Python type narrowing.
 
 		Parameters
 		----------
@@ -410,8 +441,17 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		Returns
 		-------
-		pileIsOpen : bool
+		pileIsUndetermined : bool
 			`True` if this `PermutationSpace` contains `LeafOptions` at `pile`.
+
+		See Also
+		--------
+		`pilePinned吗`
+			Determine whether a `Pile` already has a pinned `Leaf`.
+		`mapFolding._e.filters.isLeafOptions吗`
+			Narrow an existing `LeafSpace` value to `LeafOptions`.
+		`mapFolding._e.filters.isLeaf吗`
+			Narrow an existing `LeafSpace` value to `Leaf`.
 		"""
 		return not isLeaf吗(self[pile])
 

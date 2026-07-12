@@ -88,7 +88,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import EliminationState
 	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
 
-# ======== Reducing `LeafOptions` ===============================
+#======== Reducing `LeafOptions` ===============================
 
 def _byCrease2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce crease adjacency constraints.
@@ -162,16 +162,16 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 	updatedPermutationSpace : PermutationSpace | None
 		The updated `permutationSpace` if valid; otherwise `None`.
 	"""
-	# -------------- Guard -------------------------------------------
+	#-------------- Guard -------------------------------------------
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
 		return permutationSpace
 
-	# -------------- Initialize ------------------------------------
+	#-------------- Initialize ------------------------------------
 	leafAtPilePredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
 	permutationSpaceHasNewLeaf: bool = True
 
 	while permutationSpaceHasNewLeaf:
-		# -------------- Initialize again ------------------------------------
+		#-------------- Initialize again ------------------------------------
 		permutationSpaceHasNewLeaf = False
 		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
 

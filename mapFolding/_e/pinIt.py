@@ -38,7 +38,7 @@ if TYPE_CHECKING:
 def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
 	return any((
 		state.permutationSpace.leafPinned吗(leaf)
-		, state.permutationSpace.pileNotOpen吗(state.pile)
+		, state.permutationSpace.pilePinned吗(state.pile)
 		, state.pile not in getLeafDomain(state, leaf)
 	))
 
@@ -152,7 +152,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, lea
 
 		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):
 			listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace)
-		elif permutationSpace.leafPinned吗(leaf_k) or permutationSpace.pileNotOpen吗(pile_k) or leaf_k not in rangePile_k:
+		elif permutationSpace.leafPinned吗(leaf_k) or permutationSpace.pilePinned吗(pile_k) or leaf_k not in rangePile_k:
 			listPermutationSpaceCompleted.append(permutationSpace)
 		else:
 			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
@@ -235,6 +235,7 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 	PermutationSpace.deconstructPermutationSpaceAtPile : Performs the expansion for one dictionary.
 	requireLeafPinnedAtPile : Complementary operation that forces a `leaf` at a `pile`.
 	"""
+	#=SIN= Unused parameter: the shared bulk-modification callable contract requires `leavesToPin`.
 	del leavesToPin
 
 	for permutationSpace in listPermutationSpace:
@@ -278,7 +279,7 @@ def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], le
 	for permutationSpace in listPermutationSpace:
 		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
 			listLeafAtPile.append(permutationSpace)
-		elif permutationSpace.leafPinned吗(leaf) or permutationSpace.pileNotOpen吗(pile):
+		elif permutationSpace.leafPinned吗(leaf) or permutationSpace.pilePinned吗(pile):
 			continue
 		else:
 			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile, default=bit_mask(len(permutationSpace))))
@@ -384,6 +385,7 @@ def reduceAllPermutationSpace(state: EliminationState, listFunctionsReduction: S
 
 #-------- Shared logic -----------------------------------------
 
+#=SIN= Ruff suppression: the shared reduction callable contract requires the unused `state` parameter.
 def reduceLeafSpace(
 	state: EliminationState  # noqa: ARG001
 	, permutationSpace: PermutationSpace
@@ -459,7 +461,7 @@ def reduceLeafSpace(
 	for pile, leafOptions in pilesToUpdate:
 		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
-			# NOTE quick return
+			#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
 			return PermutationSpace()
 		else:
 			permutationSpace[pile] = leafSpace
@@ -488,7 +490,9 @@ def reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSp
 	updatedPermutationSpace : PermutationSpace | None
 		The updated `permutationSpace` if valid; otherwise `None`.
 	"""
+	#=SIN= Sentinel: type checkers cannot infer that pin-state guards precede every read of `pileOf_kCrease`.
 	pileOf_kCrease: Pile = errorL33T
+	#=SIN= Sentinel: type checkers cannot infer that pin-state guards precede every read of `pileOf_rCrease`.
 	pileOf_rCrease: Pile = errorL33T
 	pilesForbidden: Iterable[Pile] = []
 	permutationSpaceHasNewLeaf: bool = True
@@ -544,6 +548,7 @@ def reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSp
 
 			elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
 				if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
+					#=SIN= Early return: crossed pinned creases irreversibly invalidate the candidate.
 					return None
 				continue
 
@@ -554,6 +559,7 @@ def reducePermutationSpace_CrossedCreases(state: EliminationState, permutationSp
 					, DOTitems(filterPile(thisHasThat吗(pilesForbidden), permutationSpace.extractUndeterminedPiles()))
 					, leafAntiOptions
 			)):
+				#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
 				return None
 
 		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
@@ -596,6 +602,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 		if not (permutationSpace := reduceLeafSpace(
 				state, permutationSpace, DOTitems(pilesUndetermined), makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned))
 		)):
+			#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
 			return None
 		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
 			# NOTE 2026 July 7 Does this produces false positives?
@@ -664,6 +671,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 					, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
 					, makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 			)):
+				#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
 				return None
 
 		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
@@ -710,6 +718,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 
 		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
+			#=SIN= Early return: a leaf with no possible pile irreversibly invalidates the candidate.
 			return None
 
 		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(filterValue((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
@@ -717,6 +726,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 			leaf: Leaf = leavesWithDomainOf1.pop()
 			sherpa: PermutationSpace | None = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(DOTkeys(filterLeaf(leafInLeafOptions吗(leaf), pilesUndetermined))), leaf))
 			if (sherpa is None) or (not sherpa):
+				#=SIN= Early return: failed pin propagation irreversibly invalidates the candidate.
 				return None
 			else:
 				permutationSpace = sherpa

@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 pathDataSamples: Path = Path(packageSettings.pathPackage, "_e/tests/dataSamples").absolute()
 
-# ================== Test-function parameters ======================================================
+#================== Test-function parameters ======================================================
 
 @pytest.fixture()
 def approx_abs(request: FixtureRequest) -> float:
