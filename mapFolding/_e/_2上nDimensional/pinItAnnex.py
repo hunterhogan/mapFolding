@@ -119,7 +119,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
+		leafCount: int = permutationSpace.leafCount
 
 		for (pile_k, leafSpace_k), (pile_r, leafSpace_r) in pairwise(permutationSpace.items()):
 			if isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace_r):
@@ -136,7 +136,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 			)):
 				return None
 
-		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
@@ -174,7 +174,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 	while permutationSpaceHasNewLeaf:
 		#-------------- Initialize again ------------------------------------
 		permutationSpaceHasNewLeaf = False
-		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
+		leafCount: int = permutationSpace.leafCount
 
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast)
 								, filterLeaf(notLeafOriginOrLeaf零
@@ -187,7 +187,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 			)):
 				return None
 
-		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
@@ -238,7 +238,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
+		leafCount: int = permutationSpace.leafCount
 
 		# TODO `notLeafOriginOrLeaf零` and `pile1stOpen` are specific to 2ⁿ-dimensional maps. Adjust these if moved to `pinIt`.
 		pile1stOpen: int = 2
@@ -257,7 +257,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 			)):
 				return None
 
-		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
@@ -296,7 +296,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
-		sum首: int = sum(map(dimensionNearest首, permutationSpace.values()))
+		leafCount: int = permutationSpace.leafCount
 
 		for (pile_k, leafSpace_k), (pile, leafSpace), (pile_r, leafSpace_r) in triplewise(sorted(DOTitems(permutationSpace))):
 			if isLeaf吗(leafSpace_k) and isLeaf吗(leafSpace) and isLeafOptions吗(leafSpace_r):
@@ -316,7 +316,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 			):
 				return None
 
-		if sum(map(dimensionNearest首, permutationSpace.values())) < sum首:
+		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace

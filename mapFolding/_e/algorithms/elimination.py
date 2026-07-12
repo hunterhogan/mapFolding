@@ -7,7 +7,7 @@ from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAr
 from mapFolding._e._2上nDimensional import getDictionaryLeafOptions
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, reduceAllPermutationSpace
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, listFunctionsReduction
 from math import factorial
 from more_itertools import all_unique as allUnique吗
 from tqdm import tqdm
@@ -53,7 +53,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingLeafOptions(getDictionaryLeafOptions(state)))
-		state = reduceAllPermutationSpace(state)
+		state = state.reduceAllPermutationSpace(listFunctionsReduction)
 
 		state = theorem4(state)
 		state = theorem2b(state)

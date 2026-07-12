@@ -27,8 +27,6 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 	from typing import Self
 
-# TODO Probably create a `Property` to report the number of `Leaf` objects. Use case example: `sum首:
-# int = sum(map(dimensionNearest首, permutationSpace.values()))`.
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
@@ -331,6 +329,17 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return leaf not in self.values()
 
+	@property
+	def leafCount(self) -> int:
+		"""Count of `Leaf` indices that are pinned in this `PermutationSpace`.
+
+		Returns
+		-------
+		leafCount : int
+			Count of `Leaf` indices that are pinned in this `PermutationSpace`.
+		"""
+		return sum(map(isLeaf吗, self.values()))
+
 	def leafPinned吗(self, leaf: Leaf) -> bool:
 		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
 
@@ -569,7 +578,7 @@ class EliminationState:
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
 
-	def moveFoldingToListFolding(self) -> None:
+	def moveToListFolding(self) -> Self:
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
 		self.listPermutationSpace = deque()
 		for permutationSpace in listPermutationSpace:
@@ -578,6 +587,7 @@ class EliminationState:
 			else:
 				folding: Folding = permutationSpace.makeFolding(())
 				self.listFolding.append(folding)
+		return self
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
 		"""You can detect forbidden crease crossings inside `state.permutationSpace`.
@@ -650,7 +660,7 @@ class EliminationState:
 						return True
 		return False
 
-	def removeIFFViolationsFromEliminationState(self) -> None:
+	def removeCreaseViolations(self) -> Self:
 		"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
 
 		(AI generated docstring)
@@ -676,13 +686,15 @@ class EliminationState:
 		[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
 
 		[2] mapFolding._e.pin2上nDimensions
-		"""  # ruff:ignore[docstring-extraneous-returns]
+		"""
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
 		self.listPermutationSpace = deque()
 		for permutationSpace in listPermutationSpace:
 			self.permutationSpace = permutationSpace
 			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
 				self.listPermutationSpace.append(permutationSpace)
+
+		return self
 
 	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace
@@ -695,7 +707,7 @@ class EliminationState:
 			#------------ Initialize `permutationSpace` ------------------------------
 			# TODO (dissatisfied) `... | None` is not natural.
 			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
-			# NOTE `sumPermutationSpace` detects _any_ change in the permutation space; not to be confused with `sum首`.
+			# NOTE `sumPermutationSpace` detects _any_ change in the permutation space.
 			# NOTE reminder: _all_ changes in a permutation space are reductions in the probability space.
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
 			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)

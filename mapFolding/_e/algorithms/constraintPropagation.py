@@ -9,7 +9,7 @@ from mapFolding import packageSettings
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import getDictionaryLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pinIt import reduceAllPermutationSpace
+from mapFolding._e.pinIt import listFunctionsReduction
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -160,7 +160,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingLeafOptions(getDictionaryLeafOptions(state)))
-		state = reduceAllPermutationSpace(state)
+		state = state.reduceAllPermutationSpace(listFunctionsReduction)
 
 	state.permutationSpace = PermutationSpace()
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
