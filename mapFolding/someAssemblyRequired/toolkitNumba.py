@@ -179,9 +179,6 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		applying the Numba `@jit` decorator. Removed decorators are logged as warnings
 		for debugging purposes.
 
-		TODO: Implement more sophisticated decorator handling that can preserve
-		compatible decorators and intelligently handle decorator composition.
-
 		Parameters
 		----------
 		astCallable : ast.FunctionDef

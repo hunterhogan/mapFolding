@@ -7,8 +7,7 @@ from collections import deque
 # TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
-# SEMIOTICS `associate`, `associateItem`, or something else?
-from humpy_cytoolz import assoc as associate, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
+from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
@@ -88,7 +87,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			ImaPermutationSpace = ImaPermutationSpace.atPilePinLeaf(pile, leaf)
 		```
 		"""
-		return PermutationSpace(associate(self, pile, leaf, PermutationSpace))
+		return PermutationSpace(associateKeyValue(self, pile, leaf, PermutationSpace))
 
 	# TODO reconsider the role, necessity, and location of this function.
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
@@ -272,8 +271,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	# TODO `getLeaf` is modeled directly on `.get()`. Therefore, ought `default: Leaf | None` be so
 	# restrictive? I cannot think of any use case for a `default` that is not a `Leaf` or `None`, but
 	# I cannot think of a reason to restrict it.
-	# TODO `isLeaf吗` returns `TypeIs`, and I almost wrote that I should change the return type of
-	# `getLeaf`. Therefore, the REAL todo is: I need to stop coding and go eat.
 	def getLeaf(self, pile: Pile, default: Leaf | None = None) -> Leaf | None:
 		"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
 
@@ -330,9 +327,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return leaf not in self.values()
 
-	# TODO Learn how to use caching for a method. Once a `Leaf` is pinned, it will always be pinned in
-	# this `PermutationSpace`. Is it possible to conditionally cache? I don't want to cache `False`
-	# because that could change.
 	def leafPinned吗(self, leaf: Leaf) -> bool:
 		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
 

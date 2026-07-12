@@ -346,13 +346,6 @@ def reduceAllPermutationSpace(state: EliminationState, listFunctionsReduction: S
 		# NOTE `sumPermutationSpace` detects _any_ change in the permutation space; not to be confused with `sum首`.
 		# NOTE reminder: _all_ changes in a permutation space are reductions in the probability space.
 		sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
-		# TODO I feel like this could be a dynamic self-ordering queue based on how often a
-		# `reducePermutationSpace` function returns `None` or an altered `PermutationSpace`. Even
-		# better would be if the self-ordering persisted across sessions so that previous computations
-		# inform the current computation. At the very least, I think it would be computationally
-		# inexpensive to order the queue based on the functions that most recently returned `None` or
-		# an altered `PermutationSpace`. That would be a MRU, most recently used, queue, right? If LRU
-		# is cheap, then is MRU cheap?
 		functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)
 		keepGoing: bool = True
 

@@ -7,9 +7,6 @@ from typing import TypeAlias
 # especially through semiotics. Examples, I prefer `isinstance(x, LeafOptions)` to `isinstance(x,
 # mpz)`; `dimension = DimensionIndex(2)` is more self-documenting than `dimension = int(2)`.
 
-# TODO Consider putting TypeAlias in a semiotics module. The division between theTypes, dataBaskets,
-# and semiotics is still evolving.
-
 #======== Scalars ================================
 
 type DimensionIndex = int

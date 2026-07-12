@@ -212,7 +212,7 @@ pp3  = (3, 5, 9, 17, 33)
 	if pileRangeByFormula:
 		state = EliminationState((2,) * 6)
 
-		# NOTE works for 9 <= odd piles <= 47
+		# DEVELOPMENT works for 9 <= odd piles <= 47
 		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
 		# Yes, sort of. `Z0Z_alphaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 

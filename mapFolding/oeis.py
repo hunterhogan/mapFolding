@@ -583,8 +583,6 @@ def getOEISids() -> None:
 	"""
 	sys.stdout.write(_CLIHelpText())
 
-# SEMIOTICS segregate `countingFoldsSymmetric`?
-
 # TODO A long time ago, I had an explicit rule written in "oeis.py" that the module contained only OEIS stuff and ALL OEIS stuff.
 # This function is fundamentally an OEIS function, but I have been trying to treat it the same as `countingFolds`. That mismatch
 # is a major reason for the many problems I've had with semiotics and flow design. `oeisIDfor_n` _might_ be the correct identifier

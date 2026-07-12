@@ -146,8 +146,8 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 			for pile in listOfPiles[listOfPiles.index(pileFirst): listOfPiles.index(pileLast) + inclusive]:
 				dictionaryPrecedence[leaf].setdefault(pile, []).append(leafPredecessor)
 
-# NOTE Some leaves, such as 16,48, have `leafPredecessor`, such as leaves 40 and 56, with a larger step size.
-# NOTE There may be "knock-out" leaves, such as within the domain functions, above. Or I might have to find complex formulas, such
+# DEVELOPMENT Some leaves, such as 16,48, have `leafPredecessor`, such as leaves 40 and 56, with a larger step size.
+# DEVELOPMENT There may be "knock-out" leaves, such as within the domain functions, above. Or I might have to find complex formulas, such
 # as in `pinPile二Crease`. Or, more likely, "knock-out" leaves might be complex formulas that I have not yet discovered.
 
 	return dictionaryPrecedence

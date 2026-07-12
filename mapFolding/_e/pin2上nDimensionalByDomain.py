@@ -104,7 +104,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		listRemoveLeaves.extend([首二(state.dimensionsTotal), 首零一二(state.dimensionsTotal)])
 
 #========= use `leafAt一零` to exclude a `leaf` from `pile` ===================
-# NOTE a leaf in pile一零 does not have leafCrease in the pile-range of pile零Ante首零, but `leafInSubHyperplane(leafAt一零)` does
+# DEVELOPMENT a leaf in pile一零 does not have leafCrease in the pile-range of pile零Ante首零, but `leafInSubHyperplane(leafAt一零)` does
 # have leafCrease in the pile-range of pile零Ante首零. `ptount` uses leafInSubHyperplane. I wrote this code block long before I
 # understood this.
 
@@ -134,11 +134,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			listRemoveLeaves.extend([(零) + 首零一(state.dimensionsTotal), getitem(state.productsOfDimensions, (dimensionNearest首(leafAt一零) - 1))])
 
 #========= use `leafAt零一Ante首` to exclude a `leaf` from `pile` ===================
-# NOTE a leaf in pile首Less一零 does not have leafCrease in the pile-range of pile零Ante首零, but `leafInSubHyperplane(leafAt首
+# DEVELOPMENT a leaf in pile首Less一零 does not have leafCrease in the pile-range of pile零Ante首零, but `leafInSubHyperplane(leafAt首
 # Less一零)` does have leafCrease in the pile-range of pile零Ante首零. `ptount` uses leafInSubHyperplane. I wrote this code block
 # long before I understood this.
 
-# NOTE This section could be "modernized" to be more similar to `leafAt一零`, which used to have `comebackOffset`, too.
+# DEVELOPMENT This section could be "modernized" to be more similar to `leafAt一零`, which used to have `comebackOffset`, too.
 
 	listRemoveLeaves.extend([leafAt零一Ante首])
 
