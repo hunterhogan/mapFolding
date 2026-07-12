@@ -62,13 +62,12 @@ from itertools import filterfalse
 from mapFolding._e import (
 	getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin,
 	mapShapeIs2上nDimensions, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pin2上nDimensionalAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
 from mapFolding._e.pin2上nDimensionalByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
-from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
+from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, reduceAllPermutationSpace
 from mapFolding.beDRY import defineProcessorLimit
 from more_itertools import partition
 from operator import getitem, neg
@@ -180,7 +179,10 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
 	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
-	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
+	state = reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)
+	state.removeIFFViolationsFromEliminationState()
+	state.moveFoldingToListFolding()
+	return state
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	"""You can select an `Iterable` of `Leaf` values to pin at `state.pile`.
@@ -507,7 +509,10 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = state.permutationSpace.deconstructByDomainsCombined(leaves, leavesDomain)
-	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
+	state = reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)
+	state.removeIFFViolationsFromEliminationState()
+	state.moveFoldingToListFolding()
+	return state
 
 #--- Logic that wants to join the shared logic ---
 
@@ -618,7 +623,10 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = state.permutationSpace.deconstructByDomainOfLeaf(leaves, leavesDomain)
-	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
+	state = reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)
+	state.removeIFFViolationsFromEliminationState()
+	state.moveFoldingToListFolding()
+	return state
 
 #-------- Plebian functions -----------------------------------------
 

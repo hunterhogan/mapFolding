@@ -23,7 +23,6 @@ if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from mapFolding._e.theTypes import LeafOptions
 
-
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
@@ -34,14 +33,15 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinLeavesDimensions0零一(state)
+		state: EliminationState = pinPilesAtEnds(state, 2)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -50,7 +50,6 @@ if __name__ == '__main__':
 
 	elif printThis:
 		state: EliminationState = pinPile零Ante首零(state)
-		state: EliminationState = pinPilesAtEnds(state, 4)
 		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pin首beans(state)

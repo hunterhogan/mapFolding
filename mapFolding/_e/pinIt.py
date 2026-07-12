@@ -66,17 +66,6 @@ def segregateLeafPinnedAtPile(listPermutationSpace: Sequence[PermutationSpace], 
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
-def moveFoldingToListFolding(state: EliminationState) -> EliminationState:
-	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
-	state.listPermutationSpace = deque()
-	for permutationSpace in listPermutationSpace:
-		if any(map(permutationSpace.leafNotPinned吗, range(state.leavesTotal))):
-			state.listPermutationSpace.append(permutationSpace)
-		else:
-			folding: Folding = permutationSpace.makeFolding(())
-			state.listFolding.append(folding)
-	return state
-
 #======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
 # NOTE The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
 

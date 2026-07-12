@@ -8,14 +8,17 @@ from collections import deque
 from functools import partial
 from gmpy2 import bit_mask
 from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
-from hunterMakesPy import raiseIfNone
-from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
+from hunterMakesPy import inclusive, raiseIfNone
+from itertools import combinations
+from mapFolding._e import (
+	getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin)
+from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from typing import cast, TYPE_CHECKING
-from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
+from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
 if TYPE_CHECKING:
@@ -564,3 +567,125 @@ class EliminationState:
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
+
+	def moveFoldingToListFolding(self) -> None:
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
+		self.listPermutationSpace = deque()
+		for permutationSpace in listPermutationSpace:
+			if any(map(permutationSpace.leafNotPinned吗, range(self.leavesTotal))):
+				self.listPermutationSpace.append(permutationSpace)
+			else:
+				folding: Folding = permutationSpace.makeFolding(())
+				self.listFolding.append(folding)
+
+	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
+		"""You can detect forbidden crease crossings inside `state.permutationSpace`.
+
+		`permutationSpaceCreaseViolation吗` is a pruning predicate used before counting or expanding a
+		candidate `PermutationSpace`. `removeCreaseViolationsFromEliminationState` uses
+		`permutationSpaceCreaseViolation吗` to filter `state.listPermutationSpace` [5], and
+		a caller such as `mapFolding._e.pin2上nDimensions` uses `removeCreaseViolationsFromEliminationState`
+		[6] as part of building a reduced search space.
+
+		Algorithm Details
+		-----------------
+		`permutationSpaceCreaseViolation吗` interprets `state.permutationSpace` as a partial mapping
+		from `Pile` to `Leaf`. The pinned leaves extracted by `PermutationSpace.extractPinnedLeaves` [1] are inverted
+		to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
+
+		`permutationSpaceCreaseViolation吗` filters candidate assignments with `between` [2] to skip
+		leaves that cannot have a crease-post leaf in a selected dimension.
+
+		For each `dimension`, `permutationSpaceCreaseViolation吗`:
+
+		- enumerates each `(pile, leaf)` assignment that can have a crease-post leaf,
+		- derives the crease-post leaf using `getCreasePost` [4],
+		- looks up the crease-post leaf pile using pinned assignments,
+		- groups crease pairs by parity using `ImaOddLeaf`,
+		- checks each pair of crease pairs with `creaseViolation吗` [3].
+
+		Parameters
+		----------
+		state : EliminationState
+			An elimination state that provides `state.mapShape`, `state.permutationSpace`, and
+			bounds such as `state.leafLast`.
+
+		Returns
+		-------
+		hasViolation : bool
+			`True` when at least one forbidden crease crossing is detected.
+
+		References
+		----------
+		[1] mapFolding._e.dataBaskets.PermutationSpace.extractPinnedLeaves
+
+		[2] mapFolding._e.filters.between
+
+		[3] mapFolding._e.algorithms.iff.creaseViolation吗
+
+		[4] mapFolding._e.algorithms.iff.getCreasePost
+
+		[5] mapFolding._e.algorithms.iff.removeCreaseViolationsFromEliminationState
+
+		[6] mapFolding._e.pin2上nDimensions
+		"""  # ruff:ignore[docstring-extraneous-parameter]
+		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.extractPinnedLeaves())}
+
+		for dimension in range(self.dimensionsTotal):
+			listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
+			for pile, leaf in sorted(DOTitems(filterLeaf(between吗(leafOrigin, self.leafLast - inclusive), permutationSpace.extractPinnedLeaves()))):
+				leafCrease: int | None = getCreasePost(self.mapShape, leaf, dimension)
+				if leafCrease is None:
+					continue
+				pileCrease: int | None = leafToPile.get(leafCrease)
+				if pileCrease is None:
+					continue
+				listPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
+			for groupedParity in listPileCreaseByParity:
+				if len(groupedParity) < 2:
+					continue
+				for (pilePrimary, pilePrimaryCrease), (pileComparand, pileComparandCrease) in combinations(groupedParity, 2):
+					if creaseViolation吗(pilePrimary, pileComparand, pilePrimaryCrease, pileComparandCrease):
+						return True
+		return False
+
+	def removeIFFViolationsFromEliminationState(self) -> None:
+		"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
+
+		(AI generated docstring)
+
+		`removeIFFViolationsFromEliminationState` is a mutating filter step that keeps only those
+		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(state) == False` [1].
+		This function is used by pinning flows that enumerate multiple candidate permutation
+		spaces and then prune candidate permutation spaces before deeper elimination work.
+		A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
+
+		Thread Safety
+		------------
+		`removeIFFViolationsFromEliminationState` mutates `state.listPermutationSpace` and updates
+		`state.permutationSpace` while iterating. Do not share `state` across threads while
+		`removeIFFViolationsFromEliminationState` is running.
+
+		Parameters
+		----------
+		state : EliminationState
+			An elimination state that provides `state.listPermutationSpace` and a writable
+			`state.permutationSpace`.
+
+		Returns
+		-------
+		state : EliminationState
+			The same `state` instance with `state.listPermutationSpace` filtered.
+
+		References
+		----------
+		[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
+
+		[2] mapFolding._e.pin2上nDimensions
+		"""  # ruff:ignore[docstring-extraneous-parameter, docstring-extraneous-returns]
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
+		self.listPermutationSpace = deque()
+		for permutationSpace in listPermutationSpace:
+			self.permutationSpace = permutationSpace
+			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
+				self.listPermutationSpace.append(permutationSpace)
