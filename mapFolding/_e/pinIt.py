@@ -19,7 +19,6 @@ from hunterMakesPy import inclusive, raiseIfNone
 from itertools import chain, repeat
 from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
-from mapFolding._e._2上nDimensional import dimensionNearest首
 from mapFolding._e.dataBaskets import PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗
 from more_itertools import flatten, one

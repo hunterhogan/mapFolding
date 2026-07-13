@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from gmpy2 import bit_test
+from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e._2上nDimensional import 零
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import LeafSpace
+	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafSpace
 
 def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
@@ -27,3 +29,7 @@ def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 	[1] mapFolding._e.零
 	"""
 	return 零 < leaf
+
+@syntacticCurry
+def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
+	return bit_test(leaf, dimension)

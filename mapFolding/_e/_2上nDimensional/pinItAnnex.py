@@ -70,20 +70,21 @@ from __future__ import annotations
 
 from collections import deque
 from gmpy2 import bit_flip
-from humpy_cytoolz import concat, keyfilter as filterPile, valfilter as filterLeaf
+from humpy_cytoolz import compose, concat, get, groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost,
 	mapShapeIs2上nDimensions, notLeafOriginOrLeaf零)
-from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
+from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
+from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafPinned吗, notPileLast
 from mapFolding._e.pinIt import (
 	reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
 from more_itertools import pairwise, triplewise
-from operator import methodcaller
+from operator import itemgetter, methodcaller
 from typing import TYPE_CHECKING
 from Z0Z_tools import between吗, DOTitems, reverseLookup, thisHasThat吗
 
@@ -222,13 +223,10 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
 	for dimension in range(state.dimensionsTotal):
-		parityEven: PinnedLeaves = {}
-		parityOdd: PinnedLeaves = {}
-		for pileLeaf in DOTitems(permutationSpace.extractPinnedLeaves()):
-			if oddLeaf吗(state.mapShape, pileLeaf[1], dimension):
-				parityOdd.update((pileLeaf,))
-			else:
-				parityEven.update((pileLeaf,))
+		odd吗: Callable[[tuple[Pile, Leaf]], bool] = compose(oddLeaf2上nDimensional吗(dimension), itemgetter(1))
+		grouped: dict[bool, list[tuple[Pile, Leaf]]] = groupby(odd吗, DOTitems(permutationSpace.extractPinnedLeaves()))
+		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
+		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
 		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(parityEven.items(), 2)))
 		generators.append(CartesianProduct((dimension,), (parityEven,), combinations(parityOdd.items(), 2)))
 
@@ -237,8 +235,8 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 		leafCount: int = permutationSpace.leafCount
 
 		for dimension, leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in concat(generators):
-			leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
-			leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
+			leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))  # NOTE 2上nDimensional
+			leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))  # NOTE 2上nDimensional
 
 			if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
 				pileOf_kCrease = raiseIfNone(reverseLookup(permutationSpace, leaf_kCrease))
@@ -271,7 +269,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 			elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
 				if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
-					#=SIN= Early return: crossed pinned creases irreversibly invalidate the candidate.
+					#=SIN= Early return
 					return None
 				continue
 
@@ -282,7 +280,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 					, DOTitems(filterPile(thisHasThat吗(pilesForbidden), permutationSpace.extractUndeterminedPiles()))
 					, leafAntiOptions
 			)):
-				#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
+				#=SIN= Early return
 				return None
 
 		if leafCount < permutationSpace.leafCount:
