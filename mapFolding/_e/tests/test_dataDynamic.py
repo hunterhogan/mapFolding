@@ -17,9 +17,10 @@ from __future__ import annotations
 
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions
 from mapFolding._e._2上nDimensional import (
-	getDictionaryLeafDomains, getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一,
-	getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二, getLeavesCreaseAnte, getLeavesCreasePost)
+	getDictionaryLeafDomains, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二,
+	getDomain首零一二and首一二, getDomain首零二and首二, getLeavesCreaseAnte, getLeavesCreasePost)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
 	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二, p2DnDomain首零一二_首一二,

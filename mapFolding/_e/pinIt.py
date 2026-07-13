@@ -54,9 +54,6 @@ def segregateLeafPinnedAtPile(listPermutationSpace: Sequence[PermutationSpace], 
 	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, listPermutationSpace)
 	return (grouped.get(False, []), grouped.get(True, []))
 
-#======== Pin a `Leaf` in a `PermutationSpace` or `Folding` =======================
-# NOTE The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
-
 #======== Bulk modifications =======================
 
 def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:

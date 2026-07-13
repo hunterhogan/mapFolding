@@ -7,8 +7,9 @@ from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import packageSettings
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
-from mapFolding._e._2上nDimensional import getDictionaryLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions
+from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import listFunctionsReduction
 from math import factorial, prod
 from ortools.sat.python import cp_model

@@ -10,9 +10,9 @@ from humpy_cytoolz import curry as syntacticCurry
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getIteratorOfLeaves, getLeafOptions
 from mapFolding._e._2上nDimensional import (
-	dimensionNearest首, getDictionaryLeafDomains, getDictionaryLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions,
-	零, 首一, 首二, 首零, 首零一)
+	dimensionNearest首, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul

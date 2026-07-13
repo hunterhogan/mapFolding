@@ -1,7 +1,7 @@
 # pyright: reportAssignmentType=false
 # pyright: reportUnknownVariableType=false
 # pyright: reportUnknownArgumentType=false
-# ruff: noqa: PLC0415 DOC201 ERA001 T201 T203
+# ruff: noqa: PLC0415, ERA001, T201, T203
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -10,6 +10,7 @@ from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from humpy_cytoolz import curry as syntacticCurry
 from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
+from itertools import filterfalse
 from mapFolding._e import getIteratorOfLeaves, leafOrigin, makeLeafOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, mapShapeIs2上nDimensions, 零, 首一, 首二, 首零,
@@ -19,10 +20,11 @@ from mapFolding._e.pileOptions import getLeafOptions
 from more_itertools import flatten
 from pprint import pprint
 from typing import TYPE_CHECKING
+from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
 	import pandas
 
 # TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
@@ -65,10 +67,6 @@ def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...],
 
 	return makeLeafOptions(leavesTotal, leafOptions)
 
-def getDictionaryLeafOptions(state: EliminationState) -> UndeterminedPiles:
-	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object."""
-	return {pile: getLeafOptions(state, pile) for pile in range(state.leavesTotal)}
-
 #======== Functions to help find a formula ======================================
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
@@ -78,8 +76,10 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
-def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryLeafOptions(state)[pileTarget])).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+def getExcludedLeaves(state: EliminationState, pile: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
+	from mapFolding._e.pileOptions import getDictionaryLeafOptions
+	return {leaves: sorted(filterfalse(listLeaves.__contains__, (getIteratorOfLeaves(getDictionaryLeafOptions(state)[pile]))))
+		for leaves, listLeaves in DOTitems(_getGroupedBy(state, pile, groupByLeavesAtPiles))}
 
 if __name__ == '__main__':
 

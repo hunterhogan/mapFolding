@@ -26,7 +26,6 @@ from mapFolding._e._2上nDimensional.leafDomains import (
 	getDomainDimension二 as getDomainDimension二, getDomainDimension首二 as getDomainDimension首二, getDomain二一零and二一 as getDomain二一零and二一,
 	getDomain二零and二 as getDomain二零and二, getDomain首零一二and首一二 as getDomain首零一二and首一二, getDomain首零二and首二 as getDomain首零二and首二,
 	getLeaf首零Plus零Domain as getLeaf首零Plus零Domain)
-from mapFolding._e._2上nDimensional.pileOptions import getDictionaryLeafOptions as getDictionaryLeafOptions
 
 # isort: split
 from mapFolding._e._2上nDimensional.conditionalOrdering import (

@@ -11,7 +11,7 @@ from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissoci
 from hunterMakesPy import inclusive, raiseIfNone
 from itertools import combinations
 from mapFolding._e import (
-	getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin, getLeafDomain)
+	getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 	from typing import Self
+
+# NOTE The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
 
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""

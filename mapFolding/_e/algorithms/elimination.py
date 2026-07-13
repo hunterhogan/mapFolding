@@ -4,9 +4,9 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
-from mapFolding._e._2上nDimensional import getDictionaryLeafOptions
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, listFunctionsReduction
 from math import factorial
 from more_itertools import all_unique as allUnique吗

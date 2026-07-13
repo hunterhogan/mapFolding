@@ -60,13 +60,14 @@ from functools import partial
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding._e import getLeafDomain, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import (
-	getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, mapShapeIs2上nDimensions, 一,
-	二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, mapShapeIs2上nDimensions, 一, 二, 零, 首一, 首一二, 首二, 首零,
+	首零一, 首零一二, 首零二)
 from mapFolding._e._2上nDimensional.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e._2上nDimensional.pinItAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding.beDRY import defineProcessorLimit
 from more_itertools import partition
 from operator import getitem, neg
