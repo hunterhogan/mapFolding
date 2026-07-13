@@ -118,7 +118,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
                     state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
 
             if bitsAlphaHasArcs and bitsZuluHasArcs and (bitsAlphaIsEven or bitsZuluIsEven):
-                # NOTE This analysis might modify `bitsAlpha` or `bitsZulu`, so it should be last.
+                # This analysis might modify `bitsAlpha` or `bitsZulu`, so it should be last.
                 if bitsAlphaIsEven and not bitsZuluIsEven:
                     bitsAlpha ^= walkDyckPath(bitsAlpha)
                 elif bitsZuluIsEven and not bitsAlphaIsEven:

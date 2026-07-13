@@ -27,8 +27,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
 	from typing import Self
 
-# NOTE The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
-
+#=EndNotes##pinning=
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
@@ -47,10 +46,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		permutationSpace : PermutationSpace
 			New `PermutationSpace` with current entries overriding default `LeafOptions`.
 		"""
-		# NOTE `sorted` overrides the insertion order and sorts based on `Pile` index. This is
-		# partially "defensive" in the sense that it is a consistent, logical, expected order, and may
-		# prevent odd results if another subroutine didn't guarantee the order when it ought to have.
-		# I'm hoping it improves efficiency, too.
+		#=EndNotes##sorted=
 		return PermutationSpace(sorted(DOTitems(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self, factory=PermutationSpace))))
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
@@ -689,8 +685,8 @@ class EliminationState:
 			#------------ Initialize `permutationSpace` ------------------------------
 			# TODO (dissatisfied) `... | None` is not natural.
 			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
-			# NOTE `sumPermutationSpace` detects _any_ change in the permutation space.
-			# NOTE reminder: _all_ changes in a permutation space are reductions in the probability space.
+			# DEVELOPMENT `sumPermutationSpace` detects _any_ change in the permutation space.
+			# DEVELOPMENT reminder: _all_ changes in a permutation space are reductions in the probability space.
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
 			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)
 			keepGoing: bool = True
@@ -710,11 +706,11 @@ class EliminationState:
 					keepGoing = False
 				elif sumPermutationSpace != sum(permutationSpace.values()):
 					# TODO I suspect there are faster ways to check if an object has been altered.
-					# NOTE Reset the `functionsReduction` queue.
+					# DEVELOPMENT Reset the `functionsReduction` queue.
 					functionsReduction = deque(listFunctionsReduction)
 					sumPermutationSpace = sum(permutationSpace.values())
 				elif not functionsReduction:
-					# NOTE due to the previous `elif`, `... and (sumPermutationSpace == sum(permutationSpace.values()))` is implied.
+					# DEVELOPMENT due to the previous `elif`, `... and (sumPermutationSpace == sum(permutationSpace.values()))` is implied.
 					listPermutationSpaceIrreducible.append(permutationSpace)
 					keepGoing = False
 

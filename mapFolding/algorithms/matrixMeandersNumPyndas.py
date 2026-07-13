@@ -330,8 +330,8 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		state.setMAXIMUMarcCode()
 
 #================ analyze aligned ===== if bitsAlpha > 1 and bitsZulu > 1 =============================================
-# NOTE In other versions, this analysis step is last because I modify the data. In this version, I don't modify the data.
-		arrayBitsAlpha: NDArray[numpy.uint64] = bitwise_and(state.arrayArcCodes, state.bitsLocator)  # NOTE extra array
+# In other versions, this analysis step is last because I modify the data. In this version, I don't modify the data.
+		arrayBitsAlpha: NDArray[numpy.uint64] = bitwise_and(state.arrayArcCodes, state.bitsLocator)  # EXTRA ARRAY
 #======== > * > bitsAlpha 1 bitsZulu 1 ====================
 		greater(arrayBitsAlpha, 1, out=prepArea)
 		bitsZuluStack: NDArray[numpy.uint64] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
@@ -375,10 +375,10 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 #======== bitsAlphaAtEven or bitsZuluAtEven =============== #======== ^ & & bitsAlpha 1 bitsZulu 1 ====================
 		bitwise_and(state.arrayArcCodes, state.bitsLocator, out=prepArea)
 		bitwise_and(prepArea, 1, out=prepArea)
-		sherpaBitsZulu: NDArray[numpy.uint64] = bitwise_right_shift(state.arrayArcCodes, 1)  # NOTE 2° extra array
+		sherpaBitsZulu: NDArray[numpy.uint64] = bitwise_right_shift(state.arrayArcCodes, 1)  # 2° extra array
 		bitwise_and(sherpaBitsZulu, state.bitsLocator, out=sherpaBitsZulu)
 		bitwise_and(sherpaBitsZulu, prepArea, out=prepArea)
-		del sherpaBitsZulu															# NOTE del 2° extra array
+		del sherpaBitsZulu															# del 2° extra array
 		bitwise_xor(prepArea, 1, out=prepArea)
 
 		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea)					# `selectorBitsAtEven`
@@ -399,7 +399,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del bitsZuluStack 															# X indexArcCode O indexCrossings
 		bitwise_left_shift(prepArea, 3, out=prepArea)
 		bitwise_or(arrayBitsAlpha, prepArea, out=prepArea)
-		del arrayBitsAlpha															# NOTE del extra array
+		del arrayBitsAlpha															# del extra array
 		bitwise_right_shift(prepArea, 2, out=prepArea)
 
 		prepArea[selectorDisqualified] = 0
@@ -695,7 +695,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 				arcCode = (1 - (bitsZulu & 1)) | (bitsAlpha << 2) | (bitsZulu >> 1)
 			```
 			"""
-# NOTE `(1 - (bitsZulu & 1))` is an evenness test: we want a single bit as the answer.
+			# `(1 - (bitsZulu & 1))` is an evenness test: we want a single bit as the answer.
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode']
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1
 			dataframeMeanders.loc[:, 'analyzed'] &= 1 										# Truncated creation of `bitsZulu`.
@@ -709,7 +709,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsAlpha ...)
 			del bitsTarget
 
-			# NOTE Same trick as in `analyzeBitsAlpha`.
+			# Same trick as in `analyzeBitsAlpha`.
 			dataframeMeanders.loc[:, 'analyzed'] *= 2**1 									# (... << 1)
 
 			bitsTarget = dataframeMeanders['arcCode'].copy()

@@ -112,7 +112,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	"""
 	productDimensions = 1
 	for dimension in mapShape:
-		# NOTE this check is one-degree short of absurd, but three lines of early absurdity is better than invalid output later. I'd add more checks if I could think of more.
+		#=EndNotes##absurd=
 		if dimension > sysMaxsize // productDimensions:
 			message: str = f"I received `{dimension = }` in `{mapShape = }`, but the product of the dimensions exceeds the maximum size of an integer on this system."
 			raise OverflowError(message)
@@ -296,5 +296,5 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 
 	Furthermore, now that the package includes OEIS A000136, 1 x N stamps/maps, sorting could distort results.
 	"""
-	# NOTE Do NOT sort the dimensions.
+	# Do NOT sort the dimensions.
 	return tuple(mapDimensions)

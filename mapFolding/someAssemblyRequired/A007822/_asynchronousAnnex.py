@@ -1,4 +1,4 @@
-# NOTE The real module is generated from this incomplete module. Comments are not preserved.
+# The real module is generated from this incomplete module. Comments are not preserved.
 # ruff: noqa: PLW0603 TC001 DOC201
 # pyright: reportArgumentType=false
 # ty:ignore[invalid-argument-type]

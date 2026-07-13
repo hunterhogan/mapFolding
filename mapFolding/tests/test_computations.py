@@ -225,7 +225,7 @@ def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
 	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisIdentifier, sequenceIndex)
 
 @pytest.fixture
-def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # NOTE TO AI: DO NOT CHANGE THIS IDENTIFIER NAME.
+def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.
 	"""Return one deterministic map shape suitable for code generation tests."""
 	return dictionaryOEISMapFolding['A000136']['getMapShape'](3)
 

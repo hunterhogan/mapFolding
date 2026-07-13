@@ -381,12 +381,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
-		# TODO create an "end notes" system to collect all general development notes in one place.
-		# NOTE using the walrus operator here `if not (permutationSpace := _reduceLeafSpace...` means
-		# that type checkers are ok with `permutationSpace: PermutationSpace`. If I assigned without
-		# the `if` check, `permutationSpace = _reduceLeafSpace...`, then the annotation would need to
-		# be `permutationSpace: PermutationSpace | None` because `_reduceLeafSpace` can return `None`.
-		# Furthermore, not creating an intermediate variable is more efficient.
+		#=EndNotes##walrus=
 		if not (permutationSpace := reduceLeafSpace(
 				state, permutationSpace, DOTitems(pilesUndetermined), makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned))
 		)):

@@ -263,7 +263,7 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	names, this function gives you the power to change the datatype from numpy to numba and/or from 8-bits to 16-bits merely by
 	changing the import statements. You shouldn't need to change any "business" logic.
 
-	NOTE This will not remove potentially conflicting existing imports from other modules.
+	This will not remove potentially conflicting existing imports from other modules.
 	"""  # noqa: DOC201
 	for datatypeConfig in listDatatypeConfigurations:
 		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)

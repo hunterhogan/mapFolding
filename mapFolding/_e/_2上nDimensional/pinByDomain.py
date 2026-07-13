@@ -109,7 +109,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 # have leafCrease in the pile-range of pile零Ante首零. `ptount` uses leafInSubHyperplane. I wrote this code block long before I
 # understood this.
 
-# NOTE this section relies on the exclusions in `leafAt一` and `leafAt一Ante首` to exclude some leaves.
+# DEVELOPMENT this section relies on the exclusions in `leafAt一` and `leafAt一Ante首` to exclude some leaves.
 
 	listRemoveLeaves.extend([leafAt一零])
 	if leafAt一零 == 三 + 二 + 零:
@@ -155,7 +155,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 				listRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零])
 				if 1 < dimensionNearestTail(leafAt零一Ante首):
 					listRemoveLeaves.extend([state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2])])
-				else:  # NOTE IDK and IDC why this works, but it does.
+				else:  # DEVELOPMENT IDK and IDC why this works, but it does.
 					listRemoveLeaves.extend([getitem(tuple(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt零一Ante首))), dimensionIndex(dimension)) - 零])
 			dimension = 三
 			if isBit1吗(leafAt零一Ante首, dimensionIndex(dimension)):
@@ -191,9 +191,9 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if (leafAt一 == 一 + 零) and (leafAt零一Ante首 != next(getLeavesCreaseAnte(state, (零) + 首零(state.dimensionsTotal)))):
 		listRemoveLeaves.append(首一(state.dimensionsTotal))
 
-# NOTE Above this line, all exclusions based on only one leaf in a pile are covered. 😊
+# DEVELOPMENT Above this line, all exclusions based on only one leaf in a pile are covered. 😊
 #========= use leafAt二 to exclude a `leaf` from `pile` ===================
-# NOTE Below this line, abandon all hope, the who code here. 😈
+# DEVELOPMENT Below this line, abandon all hope, the who code here. 😈
 
 	dimensionHead: int = dimensionNearest首(leafAt二)
 	creasePostAt二: tuple[int, ...] = tuple(getLeavesCreasePost(state, leafAt二))
@@ -255,7 +255,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if (not isBit1吗(leafAt二, dimensionIndex(dimension))) and (首零(state.dimensionsTotal) < leafAt二):
 			listRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(dimension))])
 
-# NOTE 1) I am sure this concept has validity. 2) I am sure there is a more accurate computation for it.
+		# DEVELOPMENT 1) I am sure this concept has validity. 2) I am sure there is a more accurate computation for it.
 		zerosAtThe首 = 2
 		if state.dimensionsTotal - zeroIndexed - dimensionHead == zerosAtThe首:
 			sumsOfProductsOfDimensionsNearest首InSubSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - zerosAtThe首)

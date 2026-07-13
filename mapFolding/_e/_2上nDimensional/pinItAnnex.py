@@ -127,10 +127,10 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 		for (pile_k, leafSpace_k), (pile_r, leafSpace_r) in pairwise(permutationSpace.items()):
 			if isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace_r):
 				pilesToUpdate: tuple[tuple[Pile, LeafOptions]] = ((pile_r, leafSpace_r),)
-				leavesCrease: Iterator[Leaf] = getLeavesCreasePost(state, leafSpace_k)  # NOTE 2上nDimensional
+				leavesCrease: Iterator[Leaf] = getLeavesCreasePost(state, leafSpace_k)  # DEVELOPMENT 2上nDimensional
 			elif isLeafOptions吗(leafSpace_k) and isLeaf吗(leafSpace_r):
 				pilesToUpdate = ((pile_k, leafSpace_k),)
-				leavesCrease = getLeavesCreaseAnte(state, leafSpace_r)  # NOTE 2上nDimensional
+				leavesCrease = getLeavesCreaseAnte(state, leafSpace_r)  # DEVELOPMENT 2上nDimensional
 			else:
 				continue
 
@@ -235,8 +235,8 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 		leafCount: int = permutationSpace.leafCount
 
 		for dimension, leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in concat(generators):
-			leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))  # NOTE 2上nDimensional
-			leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))  # NOTE 2上nDimensional
+			leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))  # DEVELOPMENT 2上nDimensional
+			leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))  # DEVELOPMENT 2上nDimensional
 
 			if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
 				pileOf_kCrease = raiseIfNone(reverseLookup(permutationSpace, leaf_kCrease))
