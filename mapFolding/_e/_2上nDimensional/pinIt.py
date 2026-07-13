@@ -58,7 +58,6 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
-from itertools import filterfalse
 from mapFolding._e import getLeafDomain, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import (
 	getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, mapShapeIs2上nDimensions, 一,
@@ -68,7 +67,6 @@ from mapFolding._e._2上nDimensional.pinByCrease import (
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e._2上nDimensional.pinItAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pinIt import disqualifyPinningLeafAtPile
 from mapFolding.beDRY import defineProcessorLimit
 from more_itertools import partition
 from operator import getitem, neg
@@ -179,7 +177,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
-	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
+	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state)))))
 	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
 	state.removeCreaseViolations()
 	state.moveToListFolding()

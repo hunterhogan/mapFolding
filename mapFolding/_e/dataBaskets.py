@@ -11,7 +11,7 @@ from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissoci
 from hunterMakesPy import inclusive, raiseIfNone
 from itertools import combinations
 from mapFolding._e import (
-	getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin)
+	getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin, getLeafDomain)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
@@ -669,41 +669,12 @@ class EliminationState:
 						return True
 		return False
 
-	def removeCreaseViolations(self) -> Self:
-		"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
-
-		(AI generated docstring)
-
-		`removePermutationSpaceViolations` is a mutating filter step that keeps only those
-		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(self) == False` [1].
-		This function is used by pinning flows that enumerate multiple candidate permutation
-		spaces and then prune candidate permutation spaces before deeper elimination work.
-		A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
-
-		Parameters
-		----------
-		self : Self
-			The instance of the class.
-
-		Returns
-		-------
-		self : Self
-			The same instance with `self.listPermutationSpace` filtered.
-
-		References
-		----------
-		[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
-
-		[2] mapFolding._e.pin2上nDimensions
-		"""
-		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
-		self.listPermutationSpace = deque()
-		for permutationSpace in listPermutationSpace:
-			self.permutationSpace = permutationSpace
-			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
-				self.listPermutationSpace.append(permutationSpace)
-
-		return self
+	def pinAt_pile吗(self, leaf: Leaf) -> bool:
+		return all((
+			self.permutationSpace.leafNotPinned吗(leaf)
+			, self.permutationSpace.pileUndetermined吗(self.pile)
+			, self.pile in getLeafDomain(self, leaf)
+		))
 
 	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace
@@ -747,5 +718,41 @@ class EliminationState:
 
 		else:
 			self.listPermutationSpace.extend(listPermutationSpaceIrreducible)
+
+		return self
+
+	def removeCreaseViolations(self) -> Self:
+		"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
+
+		(AI generated docstring)
+
+		`removePermutationSpaceViolations` is a mutating filter step that keeps only those
+		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(self) == False` [1].
+		This function is used by pinning flows that enumerate multiple candidate permutation
+		spaces and then prune candidate permutation spaces before deeper elimination work.
+		A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
+
+		Parameters
+		----------
+		self : Self
+			The instance of the class.
+
+		Returns
+		-------
+		self : Self
+			The same instance with `self.listPermutationSpace` filtered.
+
+		References
+		----------
+		[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
+
+		[2] mapFolding._e.pin2上nDimensions
+		"""
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
+		self.listPermutationSpace = deque()
+		for permutationSpace in listPermutationSpace:
+			self.permutationSpace = permutationSpace
+			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
+				self.listPermutationSpace.append(permutationSpace)
 
 		return self

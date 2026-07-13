@@ -12,8 +12,8 @@ from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear, bit_mask
 from humpy_cytoolz import (
-	assoc as associate, curry as syntacticCurry, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique,
-	valfilter as filterLeaf, valfilter as filterLeafOptions, valfilter as filterValue)
+	assoc as associate, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf,
+	valfilter as filterLeafOptions, valfilter as filterValue)
 # TODO One or more things is messed up with humpy_*toolz.*.map
 from hunterMakesPy import inclusive, raiseIfNone
 from itertools import chain, repeat
@@ -29,16 +29,6 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.dataBaskets import EliminationState
 	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, UndeterminedPiles
-
-#======== Boolean filters =======================
-
-@syntacticCurry
-def disqualifyPinningLeafAtPile(state: EliminationState, leaf: Leaf) -> bool:
-	return any((
-		state.permutationSpace.leafPinned吗(leaf)
-		, state.permutationSpace.pilePinned吗(state.pile)
-		, state.pile not in getLeafDomain(state, leaf)
-	))
 
 #======== Group by =======================
 
