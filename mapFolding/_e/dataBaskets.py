@@ -8,23 +8,27 @@ from collections import deque
 from functools import partial
 from gmpy2 import bit_mask
 from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
-from hunterMakesPy import raiseIfNone
-from mapFolding._e import getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean
+from hunterMakesPy import inclusive, raiseIfNone
+from itertools import combinations
+from mapFolding._e import (
+	getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin)
+from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
-from typing import cast, TYPE_CHECKING
-from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
+from typing import cast, overload, TYPE_CHECKING
+from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
+	from typing import Self
 
-# TODO Probably create a `Property` to report the number of `Leaf` objects. Use case example: `sum首:
-# int = sum(map(dimensionNearest首, permutationSpace.values()))`.
+# NOTE The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
+
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
@@ -268,10 +272,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return dict(sorted(DOTitems(filterLeaf(isLeafOptions吗, self))))
 
-	# TODO `getLeaf` is modeled directly on `.get()`. Therefore, ought `default: Leaf | None` be so
-	# restrictive? I cannot think of any use case for a `default` that is not a `Leaf` or `None`, but
-	# I cannot think of a reason to restrict it.
-	def getLeaf(self, pile: Pile, default: Leaf | None = None) -> Leaf | None:
+	@overload
+	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...
+	@overload
+	def getLeaf(self, pile: Pile, default: Leaf) -> Leaf: ...
+	@overload
+	def getLeaf[个](self, pile: Pile, default: 个) -> Leaf | 个: ...
+	def getLeaf[个](self, pile: Pile, default: Leaf | 个 | None = None) -> Leaf | 个 | None:
 		"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
 
 		Parameters
@@ -292,7 +299,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			return ImaLeaf
 		return default
 
-	def getLeafOptions(self, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
+	@overload
+	def getLeafOptions(self, pile: Pile, default: None = None) -> LeafOptions | None: ...
+	@overload
+	def getLeafOptions(self, pile: Pile, default: LeafOptions) -> LeafOptions: ...
+	@overload
+	def getLeafOptions[个](self, pile: Pile, default: 个) -> LeafOptions | 个: ...
+	def getLeafOptions[个](self, pile: Pile, default: LeafOptions | 个 | None = None) -> LeafOptions | 个 | None:
 		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
 
 		Parameters
@@ -326,6 +339,17 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			`True` if this `PermutationSpace` does not include `leaf`.
 		"""
 		return leaf not in self.values()
+
+	@property
+	def leafCount(self) -> int:
+		"""Count of `Leaf` indices that are pinned in this `PermutationSpace`.
+
+		Returns
+		-------
+		leafCount : int
+			Count of `Leaf` indices that are pinned in this `PermutationSpace`.
+		"""
+		return sum(map(isLeaf吗, self.values()))
 
 	def leafPinned吗(self, leaf: Leaf) -> bool:
 		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
@@ -564,3 +588,173 @@ class EliminationState:
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
+
+	def moveToListFolding(self) -> Self:
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
+		self.listPermutationSpace = deque()
+		for permutationSpace in listPermutationSpace:
+			if any(map(permutationSpace.leafNotPinned吗, range(self.leavesTotal))):
+				self.listPermutationSpace.append(permutationSpace)
+			else:
+				folding: Folding = permutationSpace.makeFolding(())
+				self.listFolding.append(folding)
+		return self
+
+	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
+		"""You can detect forbidden crease crossings inside `state.permutationSpace`.
+
+		`permutationSpaceCreaseViolation吗` is a pruning predicate used before counting or expanding a
+		candidate `PermutationSpace`. `removeCreaseViolationsFromEliminationState` uses
+		`permutationSpaceCreaseViolation吗` to filter `state.listPermutationSpace` [5], and
+		a caller such as `mapFolding._e.pin2上nDimensions` uses `removeCreaseViolationsFromEliminationState`
+		[6] as part of building a reduced search space.
+
+		Algorithm Details
+		-----------------
+		`permutationSpaceCreaseViolation吗` interprets `state.permutationSpace` as a partial mapping
+		from `Pile` to `Leaf`. The pinned leaves extracted by `PermutationSpace.extractPinnedLeaves` [1] are inverted
+		to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
+
+		`permutationSpaceCreaseViolation吗` filters candidate assignments with `between` [2] to skip
+		leaves that cannot have a crease-post leaf in a selected dimension.
+
+		For each `dimension`, `permutationSpaceCreaseViolation吗`:
+
+		- enumerates each `(pile, leaf)` assignment that can have a crease-post leaf,
+		- derives the crease-post leaf using `getCreasePost` [4],
+		- looks up the crease-post leaf pile using pinned assignments,
+		- groups crease pairs by parity using `ImaOddLeaf`,
+		- checks each pair of crease pairs with `creaseViolation吗` [3].
+
+		Parameters
+		----------
+		state : EliminationState
+			An elimination state that provides `state.mapShape`, `state.permutationSpace`, and
+			bounds such as `state.leafLast`.
+
+		Returns
+		-------
+		hasViolation : bool
+			`True` when at least one forbidden crease crossing is detected.
+
+		References
+		----------
+		[1] mapFolding._e.dataBaskets.PermutationSpace.extractPinnedLeaves
+
+		[2] mapFolding._e.filters.between
+
+		[3] mapFolding._e.algorithms.iff.creaseViolation吗
+
+		[4] mapFolding._e.algorithms.iff.getCreasePost
+
+		[5] mapFolding._e.algorithms.iff.removeCreaseViolationsFromEliminationState
+
+		[6] mapFolding._e.pin2上nDimensions
+		"""  # ruff:ignore[docstring-extraneous-parameter]
+		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.extractPinnedLeaves())}
+
+		for dimension in range(self.dimensionsTotal):
+			listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
+			for pile, leaf in sorted(DOTitems(filterLeaf(between吗(leafOrigin, self.leafLast - inclusive), permutationSpace.extractPinnedLeaves()))):
+				leafCrease: int | None = getCreasePost(self.mapShape, leaf, dimension)
+				if leafCrease is None:
+					continue
+				pileCrease: int | None = leafToPile.get(leafCrease)
+				if pileCrease is None:
+					continue
+				listPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
+			for groupedParity in listPileCreaseByParity:
+				if len(groupedParity) < 2:
+					continue
+				for (pilePrimary, pilePrimaryCrease), (pileComparand, pileComparandCrease) in combinations(groupedParity, 2):
+					if creaseViolation吗(pilePrimary, pileComparand, pilePrimaryCrease, pileComparandCrease):
+						return True
+		return False
+
+	def pinAt_pile吗(self, leaf: Leaf) -> bool:
+		return all((
+			self.permutationSpace.leafNotPinned吗(leaf)
+			, self.permutationSpace.pileUndetermined吗(self.pile)
+			, self.pile in getLeafDomain(self, leaf)
+		))
+
+	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace
+		self.listPermutationSpace = deque()
+		listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()
+
+		# TODO (dissatisfied) I'm not satisfied with this function, and I _think_ the fundamental issue is the lack of no-op.
+
+		while listPermutationSpace:
+			#------------ Initialize `permutationSpace` ------------------------------
+			# TODO (dissatisfied) `... | None` is not natural.
+			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
+			# NOTE `sumPermutationSpace` detects _any_ change in the permutation space.
+			# NOTE reminder: _all_ changes in a permutation space are reductions in the probability space.
+			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
+			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)
+			keepGoing: bool = True
+
+			while keepGoing:
+				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = functionsReduction.popleft()
+				# TODO (dissatisfied) `raiseIfNone` is _only_ necessary because of `... | None`.
+				permutationSpace = reducePermutationSpace(self, raiseIfNone(permutationSpace))
+
+				if not permutationSpace:
+					# TODO (dissatisfied) In this previous version of this function, this check was
+					# handled by `more_itertools.filter_map`. In this version, it is necessary because the
+					# signatures of `_reducePermutationSpace_*` are `reducePermutationSpace:
+					# Callable[[EliminationState, PermutationSpace], PermutationSpace | None]` passing
+					# `PermutationSpace | None` will raise an exception instead of no-op. I will NOT add a
+					# guard to every `_reducePermutationSpace_*` function to handle `None`.
+					keepGoing = False
+				elif sumPermutationSpace != sum(permutationSpace.values()):
+					# TODO I suspect there are faster ways to check if an object has been altered.
+					# NOTE Reset the `functionsReduction` queue.
+					functionsReduction = deque(listFunctionsReduction)
+					sumPermutationSpace = sum(permutationSpace.values())
+				elif not functionsReduction:
+					# NOTE due to the previous `elif`, `... and (sumPermutationSpace == sum(permutationSpace.values()))` is implied.
+					listPermutationSpaceIrreducible.append(permutationSpace)
+					keepGoing = False
+
+		else:
+			self.listPermutationSpace.extend(listPermutationSpaceIrreducible)
+
+		return self
+
+	def removeCreaseViolations(self) -> Self:
+		"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
+
+		(AI generated docstring)
+
+		`removePermutationSpaceViolations` is a mutating filter step that keeps only those
+		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(self) == False` [1].
+		This function is used by pinning flows that enumerate multiple candidate permutation
+		spaces and then prune candidate permutation spaces before deeper elimination work.
+		A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
+
+		Parameters
+		----------
+		self : Self
+			The instance of the class.
+
+		Returns
+		-------
+		self : Self
+			The same instance with `self.listPermutationSpace` filtered.
+
+		References
+		----------
+		[1] mapFolding._e.algorithms.iff.permutationSpaceHasIFFViolation
+
+		[2] mapFolding._e.pin2上nDimensions
+		"""
+		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
+		self.listPermutationSpace = deque()
+		for permutationSpace in listPermutationSpace:
+			self.permutationSpace = permutationSpace
+			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
+				self.listPermutationSpace.append(permutationSpace)
+
+		return self

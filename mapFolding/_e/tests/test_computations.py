@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from mapFolding._e.basecamp import eliminateFolds
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import (
+from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
+from mapFolding._e.basecamp import eliminateFolds
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
 from mapFolding.oeis import dictionaryOEISMapFolding
 from typing import TYPE_CHECKING

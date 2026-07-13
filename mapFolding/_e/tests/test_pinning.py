@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from gmpy2 import mpz
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import (
+from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
+from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.Z0Z_analysis.toolkit import beansWithoutCornbread
 from typing import TYPE_CHECKING

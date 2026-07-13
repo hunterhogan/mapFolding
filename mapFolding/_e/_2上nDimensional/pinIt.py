@@ -58,17 +58,16 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
-from itertools import filterfalse
-from mapFolding._e import (
-	getDictionaryLeafOptions, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeafDomain, getLeaf首零Plus零Domain, leafOrigin,
-	mapShapeIs2上nDimensions, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pin2上nDimensionalAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
-from mapFolding._e.pin2上nDimensionalByCrease import (
+from mapFolding._e import getLeafDomain, leafOrigin, pileOrigin
+from mapFolding._e._2上nDimensional import (
+	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, mapShapeIs2上nDimensions, 一, 二, 零, 首一, 首一二, 首二, 首零,
+	首零一, 首零一二, 首零二)
+from mapFolding._e._2上nDimensional.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
-from mapFolding._e.pin2上nDimensionalByDomain import pinPile零Ante首零AfterDepth4
-from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
+from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
+from mapFolding._e._2上nDimensional.pinItAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding.beDRY import defineProcessorLimit
 from more_itertools import partition
 from operator import getitem, neg
@@ -179,8 +178,11 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
-	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filterfalse(disqualifyPinningLeafAtPile(state), _getLeavesAtPile(state)))))
-	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
+	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state)))))
+	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
+	state.removeCreaseViolations()
+	state.moveToListFolding()
+	return state
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	"""You can select an `Iterable` of `Leaf` values to pin at `state.pile`.
@@ -507,7 +509,10 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = state.permutationSpace.deconstructByDomainsCombined(leaves, leavesDomain)
-	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
+	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
+	state.removeCreaseViolations()
+	state.moveToListFolding()
+	return state
 
 #--- Logic that wants to join the shared logic ---
 
@@ -618,7 +623,10 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = state.permutationSpace.deconstructByDomainOfLeaf(leaves, leavesDomain)
-	return moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(state, listFunctionsReduction2上nDimensional)))
+	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
+	state.removeCreaseViolations()
+	state.moveToListFolding()
+	return state
 
 #-------- Plebian functions -----------------------------------------
 

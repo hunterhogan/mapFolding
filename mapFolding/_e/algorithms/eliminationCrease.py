@@ -4,13 +4,11 @@ from __future__ import annotations
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import valfilter as filterLeaf
-from itertools import filterfalse
-from mapFolding._e import getIteratorOfLeaves, mapShapeIs2上nDimensions
-from mapFolding._e.algorithms.iff import removeIFFViolationsFromEliminationState
+from mapFolding._e import getIteratorOfLeaves
+from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
+from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.filters import isLeafOptions吗
-from mapFolding._e.pin2上nDimensional import listFunctionsReduction2上nDimensional, pinPilesAtEnds
-from mapFolding._e.pinIt import disqualifyPinningLeafAtPile, moveFoldingToListFolding, reduceAllPermutationSpace
 from math import factorial
 from more_itertools import first
 from tqdm import tqdm
@@ -32,8 +30,10 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 		pile, leafOptions = first(DOTitems(filterLeaf(isLeafOptions吗, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
-		sherpa = moveFoldingToListFolding(removeIFFViolationsFromEliminationState(reduceAllPermutationSpace(sherpa, listFunctionsReduction2上nDimensional)))
+		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructAtPile(sherpa.pile, filter(sherpa.pinAt_pile吗, getIteratorOfLeaves(leafOptions)))))
+		sherpa = sherpa.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
+		sherpa.removeCreaseViolations()
+		sherpa.moveToListFolding()
 
 		listFolding.extend(sherpa.listFolding)
 
@@ -49,8 +49,6 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.listPermutationSpace:
 		state = pinPilesAtEnds(state, 1)
-	else:
-		state = moveFoldingToListFolding(state)
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 

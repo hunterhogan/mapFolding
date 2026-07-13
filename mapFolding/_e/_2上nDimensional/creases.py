@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from functools import cache
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
-from mapFolding._e import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafOrigin
+from mapFolding._e import leafOrigin
+from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

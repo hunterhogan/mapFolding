@@ -4,13 +4,14 @@ from __future__ import annotations
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
-from mapFolding._e import (
-	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getDictionaryLeafOptions, getIteratorOfLeaves, getLeafDomain,
-	getLeafOptions, getLeavesCreaseAnte, getLeavesCreasePost, howManyLeavesInLeafOptions)
-from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import (
+from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions
+from mapFolding._e._2上nDimensional import (
+	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost)
+from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from operator import methodcaller
@@ -23,7 +24,6 @@ if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from mapFolding._e.theTypes import LeafOptions
 
-
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
 		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
@@ -34,14 +34,15 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = EliminationState((2,) * 5)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinLeavesDimensions0零一(state)
+		state: EliminationState = pinPilesAtEnds(state, 2)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -50,7 +51,6 @@ if __name__ == '__main__':
 
 	elif printThis:
 		state: EliminationState = pinPile零Ante首零(state)
-		state: EliminationState = pinPilesAtEnds(state, 4)
 		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pin首beans(state)

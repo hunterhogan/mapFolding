@@ -11,11 +11,11 @@ from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
 from hunterMakesPy.filesystemToolkit import importPathFilename2Identifier, writePython
 from itertools import product as CartesianProduct, repeat
 from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import (
-	getDictionaryLeafDomains, getIteratorOfLeaves, getLeafDomain, getLeafOptions, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三,
-	首零三, 首零二, 首零二三)
+from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions
+from mapFolding._e._2上nDimensional import (
+	getDictionaryLeafDomains, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
+from mapFolding._e._2上nDimensional.pinIt import pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pin2上nDimensional import pinPilesAtEnds
 from mapFolding._e.Z0Z_analysis.toolkit import detectPermutationSpaceErrors, getDataFrameFoldings
 from more_itertools import consecutive_groups
 from operator import indexOf, neg, pos

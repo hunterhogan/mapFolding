@@ -6,9 +6,10 @@ from collections import defaultdict
 from functools import cache
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
-from mapFolding._e import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, getSumsOfProductsOfDimensionsNearest首, howManyDimensionsHaveOddParity,
-	leafInSubHyperplane, mapShapeIs2上nDimensions, 一, 零, 首一, 首零, 首零一)
+from mapFolding._e import getSumsOfProductsOfDimensionsNearest首
+from mapFolding._e._2上nDimensional import (
+	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, howManyDimensionsHaveOddParity, leafInSubHyperplane,
+	mapShapeIs2上nDimensions, 一, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from operator import neg
 from typing import TYPE_CHECKING

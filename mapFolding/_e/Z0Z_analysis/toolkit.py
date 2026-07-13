@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors, packageSettings
-from mapFolding._e import 一, 零, 首一, 首零一
+from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e.filters import isLeaf吗
 from pathlib import Path
 from pprint import pformat

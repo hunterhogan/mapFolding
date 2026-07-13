@@ -39,7 +39,7 @@ from __future__ import annotations
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
 from hunterMakesPy import raiseIfNone
-from mapFolding._e import 一, 零
+from mapFolding._e._2上nDimensional import 一, 零
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

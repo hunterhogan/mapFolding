@@ -3,10 +3,11 @@ from __future__ import annotations
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding._e import getDictionaryLeafOptions, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, reduceAllPermutationSpace
+from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, listFunctionsReduction
 from math import factorial
 from more_itertools import all_unique as allUnique吗
 from tqdm import tqdm
@@ -52,7 +53,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingLeafOptions(getDictionaryLeafOptions(state)))
-		state = reduceAllPermutationSpace(state)
+		state = state.reduceAllPermutationSpace(listFunctionsReduction)
 
 		state = theorem4(state)
 		state = theorem2b(state)
