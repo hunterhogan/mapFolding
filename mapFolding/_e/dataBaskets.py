@@ -17,7 +17,7 @@ from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
-from typing import cast, TYPE_CHECKING
+from typing import cast, overload, TYPE_CHECKING
 from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
@@ -270,10 +270,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return dict(sorted(DOTitems(filterLeaf(isLeafOptions吗, self))))
 
-	# TODO `getLeaf` is modeled directly on `.get()`. Therefore, ought `default: Leaf | None` be so
-	# restrictive? I cannot think of any use case for a `default` that is not a `Leaf` or `None`, but
-	# I cannot think of a reason to restrict it.
-	def getLeaf(self, pile: Pile, default: Leaf | None = None) -> Leaf | None:
+	@overload
+	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...
+	@overload
+	def getLeaf(self, pile: Pile, default: Leaf) -> Leaf: ...
+	@overload
+	def getLeaf[个](self, pile: Pile, default: 个) -> Leaf | 个: ...
+	def getLeaf[个](self, pile: Pile, default: Leaf | 个 | None = None) -> Leaf | 个 | None:
 		"""Retrieve a pinned `Leaf` from `permutationSpace` at `pile`, or return a default value.
 
 		Parameters
@@ -294,7 +297,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			return ImaLeaf
 		return default
 
-	def getLeafOptions(self, pile: Pile, default: LeafOptions | None = None) -> LeafOptions | None:
+	@overload
+	def getLeafOptions(self, pile: Pile, default: None = None) -> LeafOptions | None: ...
+	@overload
+	def getLeafOptions(self, pile: Pile, default: LeafOptions) -> LeafOptions: ...
+	@overload
+	def getLeafOptions[个](self, pile: Pile, default: 个) -> LeafOptions | 个: ...
+	def getLeafOptions[个](self, pile: Pile, default: LeafOptions | 个 | None = None) -> LeafOptions | 个 | None:
 		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
 
 		Parameters
