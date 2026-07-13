@@ -68,26 +68,28 @@ References
 """
 from __future__ import annotations
 
-from humpy_cytoolz import keyfilter as filterPile, valfilter as filterLeaf
-from hunterMakesPy import inclusive
+from collections import deque
+from gmpy2 import bit_flip
+from humpy_cytoolz import concat, keyfilter as filterPile, valfilter as filterLeaf
+from hunterMakesPy import errorL33T, inclusive, raiseIfNone
+from itertools import combinations, product as CartesianProduct
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost,
 	mapShapeIs2上nDimensions, notLeafOriginOrLeaf零)
-from mapFolding._e.dataBaskets import PermutationSpace
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, notPileLast
+from mapFolding._e.algorithms.iff import creaseViolation吗, oddLeaf吗
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafPinned吗, notPileLast
 from mapFolding._e.pinIt import (
-	reduceLeafSpace, reducePermutationSpace_CrossedCreases, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
-	reducePermutationSpace_nakedSubset)
+	reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
 from more_itertools import pairwise, triplewise
 from operator import methodcaller
 from typing import TYPE_CHECKING
-from Z0Z_tools import between吗, DOTitems
+from Z0Z_tools import between吗, DOTitems, reverseLookup, thisHasThat吗
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterator, Sequence
-	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafOptions, Pile, PinnedLeaves
 
 #======== Reducing `LeafOptions` ===============================
 
@@ -188,6 +190,102 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 				return None
 
 		if permutationSpace.leafCount < leafCount:
+			permutationSpaceHasNewLeaf = True
+
+	return permutationSpace
+
+def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+	"""I use this to detect and eliminate crossed creases.
+
+	I use this constraint encoder to detect configurations where two creases would cross physically
+	and either invalidate `permutationSpace` or restrict forbidden pile positions for unpinned crease
+	leaves. For each dimension, I partition pinned leaves by parity (even/odd coordinate in that
+	dimension), identify crease pairs where one leaf is pinned and the other is not, and compute
+	forbidden pile positions where the unpinned leaf cannot appear without causing a crease crossing.
+
+	Parameters
+	----------
+	state : EliminationState
+		A data basket to facilitate computations and actions.
+	permutationSpace : PermutationSpace
+		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+
+	Returns
+	-------
+	updatedPermutationSpace : PermutationSpace | None
+		The updated `permutationSpace` if valid; otherwise `None`.
+	"""
+	pileOf_kCrease: Pile = errorL33T
+	pileOf_rCrease: Pile = errorL33T
+	pilesForbidden: Iterable[Pile] = []
+	permutationSpaceHasNewLeaf: bool = True
+
+	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
+	for dimension in range(state.dimensionsTotal):
+		parityEven: PinnedLeaves = {}
+		parityOdd: PinnedLeaves = {}
+		for pileLeaf in DOTitems(permutationSpace.extractPinnedLeaves()):
+			if oddLeaf吗(state.mapShape, pileLeaf[1], dimension):
+				parityOdd.update((pileLeaf,))
+			else:
+				parityEven.update((pileLeaf,))
+		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(parityEven.items(), 2)))
+		generators.append(CartesianProduct((dimension,), (parityEven,), combinations(parityOdd.items(), 2)))
+
+	while permutationSpaceHasNewLeaf:
+		permutationSpaceHasNewLeaf = False
+		leafCount: int = permutationSpace.leafCount
+
+		for dimension, leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in concat(generators):
+			leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
+			leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
+
+			if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
+				pileOf_kCrease = raiseIfNone(reverseLookup(permutationSpace, leaf_kCrease))
+			if leaf_rCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_rCrease):
+				pileOf_rCrease = raiseIfNone(reverseLookup(permutationSpace, leaf_rCrease))
+
+			if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+				leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
+
+				if pileOf_k < pileOf_r < pileOf_kCrease:
+					pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
+				elif pileOf_kCrease < pileOf_r < pileOf_k:
+					pilesForbidden = frozenset([*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)])
+				elif (pileOf_r < pileOf_kCrease < pileOf_k) or (pileOf_kCrease < pileOf_k < pileOf_r):
+					pilesForbidden = range(pileOf_kCrease + 1, pileOf_k)
+				elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r):
+					pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
+
+			elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+				leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
+
+				if pileOf_rCrease < pileOf_k < pileOf_r:
+					pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
+				elif pileOf_r < pileOf_k < pileOf_rCrease:
+					pilesForbidden = frozenset([*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)])
+				elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k):
+					pilesForbidden = range(pileOf_r + 1, pileOf_rCrease)
+				elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k):
+					pilesForbidden = range(pileOf_rCrease + 1, pileOf_r)
+
+			elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+				if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
+					#=SIN= Early return: crossed pinned creases irreversibly invalidate the candidate.
+					return None
+				continue
+
+			else:  # elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+				continue
+
+			if not (permutationSpace := reduceLeafSpace(state, permutationSpace
+					, DOTitems(filterPile(thisHasThat吗(pilesForbidden), permutationSpace.extractUndeterminedPiles()))
+					, leafAntiOptions
+			)):
+				#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
+				return None
+
+		if leafCount < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
@@ -329,6 +427,6 @@ listFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, Per
 	reducePermutationSpace_nakedSubset,
 	_headsBeforeTails2上nDimensional,
 	_conditionalPredecessors2上nDimensional,
-	reducePermutationSpace_CrossedCreases,
+	_crossedCreases2上nDimensional,
 	_noConsecutiveDimensions2上nDimensional,
 )
