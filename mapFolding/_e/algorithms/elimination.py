@@ -22,10 +22,9 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
-	return sum(map(foldingValid吗
-					, map(permutationSpace.makeFolding
-			, filter(allUnique吗
-			, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions)) for _pile, leafOptions in sorted(DOTitems(permutationSpace.extractUndeterminedPiles()))))))
+	return sum(map(foldingValid吗, map(permutationSpace.makeFolding, filter(allUnique吗
+			, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions))
+					for _pile, leafOptions in sorted(DOTitems(permutationSpace.extractUndeterminedPiles()))))))
 					, repeat(mapShape)))
 
 def theorem2b(state: EliminationState) -> EliminationState:
@@ -35,15 +34,15 @@ def theorem2b(state: EliminationState) -> EliminationState:
 		leaf_k: int = state.productsOfDimensions[dimension]
 		leaf_r: int = 2 * leaf_k
 		state = excludeLeaf_rBeforeLeaf_k(state, leaf_k, leaf_r)
+		state = state.reduceAllPermutationSpace(listFunctionsReduction)
 	return state
 
 def theorem4(state: EliminationState) -> EliminationState:
-	# TODO This code block is not DRY, and that allowed a bug to exists in this module that was not in the other module.
-	if 2 <= max(state.mapShape):
-		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
-			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
-			for index_k, index_r in pairwise(indicesSameDimensionLength):
-				state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
+	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
+		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
+		for index_k, index_r in pairwise(indicesSameDimensionLength):
+			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
+			state = state.reduceAllPermutationSpace(listFunctionsReduction)
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:

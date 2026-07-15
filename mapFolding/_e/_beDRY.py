@@ -438,4 +438,4 @@ def indicesMapShapeDimensionLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterat
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.iter_index
 	[3] mapFolding._e.algorithms.elimination.theorem4
 	"""
-	return filter(lambda indices: 1 < len(indices), map(tuple, map(partial(iter_index, mapShape), unique(mapShape))))
+	return filter(lambda indices: 1 < len(indices), map(tuple, map(partial(iter_index, mapShape), unique(filter((1).__lt__, mapShape)))))
