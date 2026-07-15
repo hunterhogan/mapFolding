@@ -52,6 +52,7 @@ References
 from __future__ import annotations
 
 from mapFolding import packageSettings
+from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from typing import TYPE_CHECKING
@@ -175,16 +176,19 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
 	else:
-		if all(map((2).__le__, mapShape)) or (flow in {'daoOfMapFolding', None}):
+		if flow in {'daoOfMapFolding', None}:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 		elif flow == 'numba':
 			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-		elif flow == 'theorem2':
-			from mapFolding.syntheticModules.theorem2 import doTheNeedful
-		elif flow == 'theorem2Numba':
-			from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
-		elif flow == 'theorem2Trimmed':
-			from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+		elif any(map((2).__lt__, mapShape)) or mapShapeIs2上nDimensions(mapShape):
+			if flow == 'theorem2':
+				from mapFolding.syntheticModules.theorem2 import doTheNeedful
+			elif flow == 'theorem2Numba':
+				from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
+			elif flow == 'theorem2Trimmed':
+				from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+			else:
+				from mapFolding.syntheticModules.theorem2 import doTheNeedful
 		else:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 

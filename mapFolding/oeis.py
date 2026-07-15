@@ -62,7 +62,7 @@ from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
 from operator import methodcaller
-from pathlib import Path, PurePath
+from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib3.exceptions import HTTPError
 import argparse
@@ -74,8 +74,10 @@ import warnings
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
+	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
-	from typing import Final, Literal
+	from pathlib import PurePath
+	from typing import Literal
 	from urllib3.response import BaseHTTPResponse
 
 def _formatOEISid(oeisID: str) -> str:
@@ -591,7 +593,7 @@ def getOEISids() -> None:
 # parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
 # theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
 # the importance of the semiotics-first paradigm (for me).
-def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, *, CPUlimit: bool | float | int | None = None) -> int:
+def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, *, CPUlimit: Limitation = None) -> int:
 	"""Compute the n-th term of `oeisID`.
 
 	(AI generated docstring)

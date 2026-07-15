@@ -539,6 +539,12 @@ class EliminationState:
 	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
+	# TODO Theorem 2a, divisible by leavesTotal, is an illusion. IDK the right way to implement the
+	# fact that most or all maps are divisible by leavesTotal, but I can see that this is NOT it.
+	# First clue: I had to invent Theorem 2a to create the multiplier. Dispositive observation:
+	# Theorem 4: "G(p^d) is divisible by d!p^d." But, I DON'T implement this as d!p^d. I only set
+	# `Theorem4Multiplier = d!`. That's because p^d == leavesTotal, which I have already implemented
+	# in the fictional Theorem 2a.
 	Theorem2aMultiplier: int = 1
 	Theorem2Multiplier: int = 1
 	Theorem3Multiplier: int = 1
@@ -586,6 +592,7 @@ class EliminationState:
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
 
 	def moveToListFolding(self) -> Self:
+		# TODO refactor to use permutationSpace.leafCount and/or self.foldingCheckSum.
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
 		self.listPermutationSpace = deque()
 		for permutationSpace in listPermutationSpace:

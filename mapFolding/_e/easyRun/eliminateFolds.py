@@ -2,6 +2,7 @@
 # pyright: basic
 from __future__ import annotations
 
+from hunterMakesPy.theTypes import Limitation
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
@@ -31,7 +32,7 @@ if __name__ == "__main__":
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	oeisID: str = ""
 	flow: str = ""
-	CPUlimit: bool | float | int | None = -2
+	CPUlimit: Limitation = -2
 	state: EliminationState | None = None
 
 	flow = "elimination"

@@ -4,8 +4,12 @@ from __future__ import annotations
 from collections import ChainMap
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.oeis import countingMeanders, dictionaryOEIS, dictionaryOEISMapFolding
+from typing import TYPE_CHECKING
 import sys
 import time
+
+if TYPE_CHECKING:
+	from hunterMakesPy.theTypes import Limitation
 
 dictionaryONE = ChainMap(dictionaryOEISMapFolding, dictionaryOEIS)  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
 
@@ -20,7 +24,7 @@ if __name__ == '__main__':
 			f"{ansiColorReset}\n"
 		)
 
-	CPUlimit: bool | float | int | None = -2
+	CPUlimit: Limitation = -2
 	flow: str | None = None
 
 	oeisID = 'A007822'
@@ -42,7 +46,7 @@ if __name__ == '__main__':
 	for n in dict.fromkeys(nList):
 
 		timeStart = time.perf_counter()
-		countTotal = countingMeanders(oeisID, n, flow, None, CPUlimit)
+		countTotal = countingMeanders(oeisID, n, flow, None, CPUlimit=CPUlimit)
 
 		_write()
 

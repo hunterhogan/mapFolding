@@ -16,17 +16,18 @@ import time
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
+	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 	from pathlib import PurePath
 
 if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
-			f"{(match := foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'][n])}\t"
+			f"{(match := foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'].get(n))}\t"
 			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{foldsTotal}\t"
-			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]}\t"
+			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'].get(n)}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			f"{ansiColorReset}\n"
 		)
@@ -34,31 +35,31 @@ if __name__ == '__main__':
 	listDimensions: Sequence[int] | None = None
 	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
 	computationDivisions: int | str | None = None
-	CPUlimit: bool | float | int | None = None
+	CPUlimit: Limitation = None
+	flow = 'daoOfMapFolding'
 	flow = 'numba'
 	flow = 'theorem2'
-	flow = 'daoOfMapFolding'
 	flow = 'theorem2Numba'
 
-	oeisID: str = 'A195646'
 	oeisID: str = 'A001416'
 	oeisID: str = 'A001418'
 	oeisID: str = 'A000136'
 	oeisID: str = 'A001415'
+	oeisID: str = 'A195646'
 	oeisID: str = 'A001417'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(5, 6):
+	for n in range(3, 7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
 		timeStart = time.perf_counter()
-		foldsTotal: int = countFolds(listDimensions=listDimensions
-						, pathLikeWriteFoldsTotal=pathLikeWriteFoldsTotal
-						, computationDivisions=computationDivisions
+		foldsTotal: int = countFolds(listDimensions
+						, pathLikeWriteFoldsTotal
+						, computationDivisions
 						, CPUlimit=CPUlimit
 						, mapShape=mapShape
 						, flow=flow)

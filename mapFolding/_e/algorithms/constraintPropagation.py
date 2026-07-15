@@ -43,6 +43,7 @@ def count(state: EliminationState) -> EliminationState:
 	model.add(listLeavesInPileOrder[pileOrigin] == leafOrigin)
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
+	# TODO I don't think this guard is correct.
 	if 2 <= max(state.mapShape):
 		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))

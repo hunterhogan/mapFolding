@@ -38,7 +38,8 @@ def theorem2b(state: EliminationState) -> EliminationState:
 	return state
 
 def theorem4(state: EliminationState) -> EliminationState:
-	if 2 < max(state.mapShape):
+	# TODO This code block is not DRY, and that allowed a bug to exists in this module that was not in the other module.
+	if 2 <= max(state.mapShape):
 		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 			for index_k, index_r in pairwise(indicesSameDimensionLength):
