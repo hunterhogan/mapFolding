@@ -302,7 +302,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		return state
 
 	if not state.listPermutationSpace:
-		state.listPermutationSpace.append(PermutationSpace().addMissingLeafOptions(getDictionaryLeafOptions(state)))
+		state.listPermutationSpace.append(PermutationSpace().addMissingItems(getDictionaryLeafOptions(state)))
 
 	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
 	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,

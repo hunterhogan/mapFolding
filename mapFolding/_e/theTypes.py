@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 from gmpy2 import mpz
 from typing import TypeAlias
 
@@ -107,5 +108,5 @@ type Folding = tuple[Leaf, ...]
 type PinnedLeaves = dict[Pile, Leaf]
 """`pile: leaf`; length ought to be less than `leavesTotal`: when length equals `leavesTotal`, ought to convert to `Folding`."""
 
-type UndeterminedPiles = dict[Pile, LeafOptions]
+type UndeterminedPiles = MutableMapping[Pile, LeafOptions]
 """`pile: leafOptions`; length less than or equal to `leavesTotal`."""

@@ -7,16 +7,17 @@ from collections import deque
 # TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
-from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, merge, valfilter as filterLeaf, valmap as mapLeaf
+from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, groupby, merge, valfilter as filterLeaf
 from hunterMakesPy import inclusive, raiseIfNone
 from itertools import combinations
 from mapFolding._e import (
-	getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, JeanValjean, leafOrigin)
+	getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, leafOrigin)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
+from operator import attrgetter, methodcaller
 from typing import cast, overload, TYPE_CHECKING
 from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues
 import dataclasses
@@ -31,23 +32,25 @@ if TYPE_CHECKING:
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
-	def addMissingLeafOptions(self, dictionaryLeafOptions: UndeterminedPiles) -> PermutationSpace:
-		"""Return a new `PermutationSpace` with default NO! `LeafOptions` for missing piles.
+	def addMissingItems(self, itemsMissing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
+		"""Update missing `Pile: LeafSpace` items with the items from `itemsMissing`.
 
-		TODO "default" is not the right word.
+		This will not overwrite any existing `Pile: LeafSpace` items in `permutationSpace` because
+		that would corrupt the `PermutationSpace`.
 
 		Parameters
 		----------
-		dictionaryLeafOptions : UndeterminedPiles
-			Default `LeafOptions` by `Pile`.
+		itemsMissing : PermutationSpace
+			`LeafSpace` by `Pile`.
 
 		Returns
 		-------
 		permutationSpace : PermutationSpace
-			New `PermutationSpace` with current entries overriding default `LeafOptions`.
+			New `PermutationSpace` and modifies `PermutationSpace` in place.
 		"""
 		#=EndNotes##sorted=
-		return PermutationSpace(sorted(DOTitems(merge(mapLeaf(compose(raiseIfNone, JeanValjean), dictionaryLeafOptions), self, factory=PermutationSpace))))
+		self = PermutationSpace(sorted(DOTitems(merge(itemsMissing, self, factory=PermutationSpace))))  # ruff:ignore[self-or-cls-assignment]
+		return self  # ruff:ignore[unnecessary-assign]
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
 		"""DANGEROUSLY create a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
@@ -385,7 +388,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	# however, it would NOT look like this function. 2026 July 10: off the top of my head, passing
 	# `listPileLeaf: Sequence[tuple[Pile, Leaf]]` would be better than the current function and is
 	# probably close to the ideal generalized function.
-	def makeFolding(self, leavesToInsert: Sequence[Leaf]) -> Folding:
+	def makeFolding(self, leavesToInsert: Sequence[Leaf] = ()) -> Folding:
 		"""Complete this `PermutationSpace` as a `Folding`.
 
 		(AI generated docstring)
@@ -592,15 +595,9 @@ class EliminationState:
 		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
 
 	def moveToListFolding(self) -> Self:
-		# TODO refactor to use permutationSpace.leafCount and/or self.foldingCheckSum.
-		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
-		self.listPermutationSpace = deque()
-		for permutationSpace in listPermutationSpace:
-			if any(map(permutationSpace.leafNotPinned吗, range(self.leavesTotal))):
-				self.listPermutationSpace.append(permutationSpace)
-			else:
-				folding: Folding = permutationSpace.makeFolding(())
-				self.listFolding.append(folding)
+		foldingGroup吗: dict[bool, list[PermutationSpace]] = groupby(compose(self.leavesTotal.__eq__, attrgetter("leafCount")), self.listPermutationSpace)
+		self.listPermutationSpace = deque(foldingGroup吗.get(False, ()))
+		self.listFolding.extend(map(methodcaller("makeFolding"), foldingGroup吗.get(True, ())))
 		return self
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
