@@ -134,7 +134,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 			else:
 				continue
 
-			if not (permutationSpace := reduceLeafSpace(state, permutationSpace, pilesToUpdate
+			if not (permutationSpace := reduceLeafSpace(permutationSpace, pilesToUpdate
 					, makeLeafAntiOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
 			)):
 				return None
@@ -184,7 +184,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 								, filterLeaf(leafAtPilePredecessors.__contains__
 								, permutationSpace.extractPinnedLeaves()))
 		)):
-			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(state, permutationSpace
+			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace
 				, DOTitems(methodcaller("extractUndeterminedPiles")(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace, factory=PermutationSpace)))
 				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 			)):
@@ -276,7 +276,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 			else:  # elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
 				continue
 
-			if not (permutationSpace := reduceLeafSpace(state, permutationSpace
+			if not (permutationSpace := reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(thisHasThat吗(pilesForbidden), permutationSpace.extractUndeterminedPiles()))
 					, leafAntiOptions
 			)):
@@ -340,14 +340,14 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		pile1stOpen: int = 2
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves()))):
 			dimensionHead: int = dimensionNearest首(leaf)
-			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(state, permutationSpace
+			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(permutationSpace
 				, DOTitems(methodcaller("extractUndeterminedPiles")(filterPile(between吗(pile1stOpen, pile - inclusive), permutationSpace, factory=PermutationSpace)))
 				, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 			)):
 				return None
 
 			dimensionTail: int = dimensionNearestTail(leaf)
-			if 0 < dimensionTail and not (permutationSpace := reduceLeafSpace(state, permutationSpace
+			if 0 < dimensionTail and not (permutationSpace := reduceLeafSpace(permutationSpace
 				, DOTitems(methodcaller("extractUndeterminedPiles")(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace, factory=PermutationSpace)))
 				, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 			)):
@@ -408,7 +408,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 				continue
 
 			if 0 <= leafForbidden < state.leavesTotal and not (permutationSpace :=
-				reduceLeafSpace(state, permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden]))
+				reduceLeafSpace(permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden]))
 			):
 				return None
 

@@ -13,7 +13,7 @@ from math import factorial
 from more_itertools import first
 from tqdm import tqdm
 from typing import TYPE_CHECKING
-from Z0Z_tools import DOTitems, DOTvalues
+from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
@@ -30,10 +30,8 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 		pile, leafOptions = first(DOTitems(filterLeaf(isLeafOptions吗, permutationSpace)))
 
 		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructAtPile(sherpa.pile, filter(sherpa.pinAt_pile吗, getIteratorOfLeaves(leafOptions)))))
-		sherpa = sherpa.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
-		sherpa.removeCreaseViolations()
-		sherpa.moveToListFolding()
+		sherpa.listPermutationSpace.extend(sherpa.permutationSpace.deconstructAtPile(sherpa.pile, filter(sherpa.pinAt_pile吗, getIteratorOfLeaves(leafOptions))))
+		sherpa = sherpa.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 		listFolding.extend(sherpa.listFolding)
 

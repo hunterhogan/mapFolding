@@ -7,37 +7,37 @@ cornbread" problem that was difficult for me to "solve"--due to my programming s
 cornbread" solution from the 2^n-dimensional functions, I would generalize more functions and move them here.
 """
 from __future__ import annotations
+from operator import methodcaller, itemgetter
 
 from collections import Counter, deque
 from functools import partial
-from gmpy2 import bit_clear, bit_mask
+from gmpy2 import bit_clear
 from humpy_cytoolz import (
 	assoc as associate, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf,
-	valfilter as filterLeafOptions, valfilter as filterValue)
+	valfilter as filterLeafOptions, valfilter as filterValue, compose)
 # TODO One or more things is messed up with humpy_*toolz.*.map
-from hunterMakesPy import inclusive, raiseIfNone
-from itertools import chain, repeat
-from mapFolding._e import (
-	getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions)
-from mapFolding._e.dataBaskets import PermutationSpace
+from hunterMakesPy import inclusive
+from itertools import chain
+from mapFolding._e import getIteratorOfLeaves, getLeafDomain, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗
-from more_itertools import flatten, one
-from typing import TYPE_CHECKING
+from mapFolding._e.theTypes import LeafOptions
+from more_itertools import one
+from typing import TYPE_CHECKING, Any
 from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues, thisNotHaveThat吗
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
-	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafSpace, Pile, UndeterminedPiles
 
 #======== Group by =======================
 
-def segregateLeafPinnedAtPile(listPermutationSpace: Sequence[PermutationSpace], leaf: Leaf, pile: Pile) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
+def segregateLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
 	"""Partition `listPermutationSpace` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
 
 	Parameters
 	----------
-	listPermutationSpace : Sequence[PermutationSpace]
+	listPermutationSpace : Iterable[PermutationSpace]
 		Collection of partial folding dictionaries.
 	leaf : int
 		`leaf` to test.
@@ -55,104 +55,6 @@ def segregateLeafPinnedAtPile(listPermutationSpace: Sequence[PermutationSpace], 
 	return (grouped.get(False, []), grouped.get(True, []))
 
 #======== Bulk modifications =======================
-
-def deconstructListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:
-	"""Expand every dictionary in `listPermutationSpace` at `pile` into all pinning variants.
-
-	Applies `PermutationSpace.deconstructPermutationSpaceAtPile` element-wise, then flattens the nested value collections (each a mapping leaf -> dictionary)
-	into a single list of dictionaries, discarding the intermediate keyed structure.
-
-	Parameters
-	----------
-	listPermutationSpace : Iterable[PermutationSpace]
-		Partial folding dictionaries.
-	pile : int
-		`pile` index to expand.
-	leavesToPin : Iterable[int]
-		`leaf` indices to pin at `pile`.
-
-	Returns
-	-------
-	listPermutationSpace : Iterator[PermutationSpace]
-		Flat iterator of expanded dictionaries covering all possible `leaf` assignments at `pile`.
-
-	See Also
-	--------
-	PermutationSpace.deconstructPermutationSpaceAtPile
-	"""
-	return flatten(map(DOTvalues, map(PermutationSpace.deconstructAtPile, listPermutationSpace, repeat(pile), repeat(leavesToPin))))
-
-# TODO Fix this moronic bullshit created by an AI assistant that refused to follow instructions.
-def excludeLeaf_rBeforeLeaf_kAtPile_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, pile_k: Pile, domain_r: Iterable[Pile] | None = None, rangePile_k: Iterable[Leaf] | None = None) -> EliminationState:
-	"""Exclude `leaf_r` from appearing before `leaf_k` at `pile_k`.
-
-	Parameters
-	----------
-	state : EliminationState
-		Mutable elimination state (provides `leavesTotal`, `pileLast`).
-	leaf_k : int
-		Reference leaf index derived from `productOfDimensions` for a dimension.
-	leaf_r : int
-		Leaf that must not appear before `leaf_k` (also dimension-derived).
-	pile_k : int
-		Pile index currently under consideration for leaf `leaf_k`.
-	domain_r : Iterable[int] | None = None
-		Optional domain of piles for leaf `leaf_r`. If `None`, the full domain from `state` is used.
-	rangePile_k : Iterable[int] | None = None
-		Optional range of leaves for pile `pile_k`. If `None`, the full range from `state` is used.
-
-	Returns
-	-------
-	state : EliminationState
-		Same state instance, mutated with updated `listPermutationSpace`.
-
-	See Also
-	--------
-	excludeLeafRBeforeLeafK, theorem4, theorem2b
-	"""
-	listPermutationSpace: deque[PermutationSpace] = deque()
-
-	if domain_r is None:
-		domain_r = getLeafDomain(state, leaf_r)
-	domain_r = tuple(filter(between吗(0, pile_k - inclusive), domain_r))
-
-	if rangePile_k is None:
-		rangePile_k = getIteratorOfLeaves(getLeafOptions(state, pile_k))
-	rangePile_k = frozenset(rangePile_k)
-
-	for permutationSpace in state.listPermutationSpace:
-		listPermutationSpace_kPinnedAt_pile_k: list[PermutationSpace] = []
-		listPermutationSpaceCompleted: list[PermutationSpace] = []
-
-		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):
-			listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace)
-		elif permutationSpace.leafPinned吗(leaf_k) or permutationSpace.pilePinned吗(pile_k) or leaf_k not in rangePile_k:
-			listPermutationSpaceCompleted.append(permutationSpace)
-		else:
-			leafOptionsAt_pile_k: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile_k, default=bit_mask(len(permutationSpace))))
-			if leafInLeafOptions吗(leaf_k, leafOptionsAt_pile_k):
-				listPermutationSpace_kPinnedAt_pile_k.append(permutationSpace.atPilePinLeaf(pile_k, leaf_k))
-				leafSpaceWithoutLeaf_k: Leaf | LeafOptions | None = JeanValjean(bit_clear(leafOptionsAt_pile_k, leaf_k))
-				if leafSpaceWithoutLeaf_k is not None:
-					listPermutationSpaceCompleted.append(PermutationSpace(associate(permutationSpace, pile_k, leafSpaceWithoutLeaf_k)))
-					# listPermutationSpaceCompleted.append(associate(permutationSpace, pile_k, leafSpaceWithoutLeaf_k, factory=PermutationSpace))  # ruff:ignore[commented-out-code]
-					# TODO `class PermutationSpace(dict[Pile, LeafSpace])` but Pylance and ty say:
-					# Argument of type "dict[Pile, LeafSpace]" cannot be assigned to parameter "object" of type "PermutationSpace" in function "append"
-					# 	"dict[Pile, LeafSpace]" is not assignable to "PermutationSpace"
-					# Argument to bound method `list.append` is incorrect: Expected `PermutationSpace`, found `dict[Pile, int | mpz]`
-			else:
-				listPermutationSpaceCompleted.append(permutationSpace)
-
-		iterator_kPinnedAt_pile_k: Iterable[PermutationSpace] = listPermutationSpace_kPinnedAt_pile_k
-		for pile_r in domain_r:
-			iterator_kPinnedAt_pile_k = excludeLeafAtPile(iterator_kPinnedAt_pile_k, leaf_r, pile_r, ())
-
-		listPermutationSpace.extend(listPermutationSpaceCompleted)
-		listPermutationSpace.extend(iterator_kPinnedAt_pile_k)
-
-	state.listPermutationSpace = listPermutationSpace
-
-	return state.reduceAllPermutationSpace(listFunctionsReduction)
 
 def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> EliminationState:
 	"""Exclude `leaf_r` from appearing before `leaf_k` in every `pile` in the domain of `leaf_k`.
@@ -182,10 +84,54 @@ def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Lea
 	if domain_k is None:
 		domain_k = getLeafDomain(state, leaf_k)
 	for pile_k in reversed(tuple(domain_k)):
-		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, leaf_k, leaf_r, pile_k, domain_r=domain_r)
+		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, leaf_k, leaf_r, pile_k, domainOf_leaf_r=domain_r)
 	return state
 
-def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[PermutationSpace]:
+def excludeLeaf_rBeforeLeaf_kAtPile_k(
+	state: EliminationState
+	, leaf_k: Leaf
+	, leaf_r: Leaf
+	, pile_k: Pile
+	, domainOf_leaf_r: Iterable[Pile] | None = None
+) -> EliminationState:
+	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = deque()
+
+	listPermutationSpaceUnchanged: deque[PermutationSpace] = deque()
+	listExcludeLeaf_r: Iterable[PermutationSpace] = []
+
+	for permutationSpace in listPermutationSpace:
+		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):
+			listExcludeLeaf_r.append(permutationSpace)
+
+		elif leafInLeafOptions吗(leaf_k, permutationSpace.getLeafOptions(pile_k, LeafOptions(0))):
+			permutationSpaceCopy = permutationSpace.copy()
+			permutationSpaceCopy[pile_k] = bit_clear(permutationSpaceCopy[pile_k], leaf_k)
+			state.listPermutationSpace.append(permutationSpaceCopy)
+
+			listExcludeLeaf_r.append(permutationSpace.atPilePinLeaf(pile_k, leaf_k))
+
+		else:
+			listPermutationSpaceUnchanged.append(permutationSpace)
+
+	# DEVELOPMENT If I were to use `domainOf_leaf_r = domainOf_leaf_r or getLeafDomain(self,
+	# leaf_r)`, then an empty `Iterable` would be replaced by `getLeafDomain(self, leaf_r)`. That
+	# would be good if it prevents an error state. Or, allowing to pass an empty `Iterable` might
+	# enable a no-op, which could be good. TODO make a conscious choice.
+	if domainOf_leaf_r is None:
+		domainOf_leaf_r = getLeafDomain(state, leaf_r)
+
+	for pile_r in filter(between吗(0, pile_k - inclusive), domainOf_leaf_r):
+		listExcludeLeaf_r = excludeLeafAtPile(listExcludeLeaf_r, leaf_r, pile_r)
+
+	state.listPermutationSpace.extend(listExcludeLeaf_r)
+	state.reduceAllPermutationSpace(listFunctionsReduction).removeCreaseViolations()
+
+	state.listPermutationSpace.extend(listPermutationSpaceUnchanged)
+
+	return state
+
+def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> Iterator[PermutationSpace]:
 	"""Return a new list of pinned-leaves dictionaries that forbid `leaf` at `pile`.
 
 	Parameters
@@ -196,8 +142,6 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 		`leaf` to exclude from `pile`.
 	pile : int
 		`pile` at which `leaf` must not be fixed.
-	leavesToPin : Iterable[int]
-		List of leaves available for pinning at `pile`. Don't include `leaf`.
 
 	Yields
 	------
@@ -209,72 +153,20 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 	PermutationSpace.deconstructPermutationSpaceAtPile : Performs the expansion for one dictionary.
 	requireLeafPinnedAtPile : Complementary operation that forces a `leaf` at a `pile`.
 	"""
-	#=SIN= Unused parameter: the shared bulk-modification callable contract requires `leavesToPin`.
-	del leavesToPin
+	listPermutationSpace, _pinnedAtPile = segregateLeafPinnedAtPile(listPermutationSpace, leaf, pile)
+	pilePinned: dict[bool, list[PermutationSpace]] = toolz_groupby(methodcaller('pilePinned吗', pile), listPermutationSpace)
 
-	for permutationSpace in listPermutationSpace:
-		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
-			continue
+	yield from pilePinned.get(True, [])
 
-		if (leafOptionsAtPile := permutationSpace.getLeafOptions(pile)) is None:
-			yield permutationSpace
-			continue
-
-		if leafInLeafOptions吗(leaf, leafOptionsAtPile):
-			leafSpaceWithoutLeaf: Leaf | LeafOptions | None = JeanValjean(bit_clear(leafOptionsAtPile, leaf))
-			if leafSpaceWithoutLeaf is not None:
-				yield PermutationSpace(associate(permutationSpace, pile, leafSpaceWithoutLeaf))
-		else:
-			yield permutationSpace
-
-def requireLeafPinnedAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> deque[PermutationSpace]:
-	"""In every `PermutationSpace` dictionary, ensure `leaf`, and *only* `leaf`, is pinned at `pile`: excluding every other `leaf` at `pile`.
-
-	Parameters
-	----------
-	listPermutationSpace : Iterable[PermutationSpace]
-		Collection of partial pinning dictionaries to transform.
-	leaf : int
-		`leaf` required at `pile`.
-	pile : int
-		`pile` at which to pin the leaf.
-
-	Returns
-	-------
-	listLeafAtPile : deque[PermutationSpace]
-		`deque` of `PermutationSpace` dictionaries with `leaf` pinned at `pile`.
-
-	See Also
-	--------
-	PermutationSpace.deconstructPermutationSpaceAtPile, excludeLeafAtPile
-	"""
-	listLeafAtPile: deque[PermutationSpace] = deque()
-
-	for permutationSpace in listPermutationSpace:
-		if permutationSpace.leafPinnedAtPile吗(leaf, pile):
-			listLeafAtPile.append(permutationSpace)
-		elif permutationSpace.leafPinned吗(leaf) or permutationSpace.pilePinned吗(pile):
-			continue
-		else:
-			leafOptionsAtPile: LeafOptions = raiseIfNone(permutationSpace.getLeafOptions(pile, default=bit_mask(len(permutationSpace))))
-			if leafInLeafOptions吗(leaf, leafOptionsAtPile):
-				listLeafAtPile.append(permutationSpace.atPilePinLeaf(pile, leaf))
-
-	return listLeafAtPile
-
-def segregateLeafByDeconstructingListPermutationSpaceAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile, leavesToPin: Iterable[Leaf]) -> Iterator[tuple[PermutationSpace, tuple[PermutationSpace, ...]]]:
-	for permutationSpace in listPermutationSpace:
-		deconstructedPermutationSpaceAtPile: dict[Leaf, PermutationSpace] = permutationSpace.deconstructAtPile(pile, leavesToPin)
-		leafPinnedAtPile: PermutationSpace = deconstructedPermutationSpaceAtPile.pop(leaf)
-		yield (leafPinnedAtPile, tuple(deconstructedPermutationSpaceAtPile.values()))
+	for permutationSpace in pilePinned.get(False, []):
+		permutationSpace[pile] = bit_clear(permutationSpace[pile], leaf)
+		yield permutationSpace
 
 #======== Reducing `LeafOptions` ===============================
 #-------- Shared logic -----------------------------------------
 
-#=SIN= Ruff suppression: the shared reduction callable contract requires the unused `state` parameter.
 def reduceLeafSpace(
-	state: EliminationState  # noqa: ARG001
-	, permutationSpace: PermutationSpace
+	permutationSpace: PermutationSpace
 	, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]]
 	, leafAntiOptions: LeafOptions
 ) -> PermutationSpace:
@@ -299,9 +191,6 @@ def reduceLeafSpace(
 
 	Parameters
 	----------
-	state : EliminationState
-		Data basket containing computed properties such as `leavesTotal`. Currently unused by the
-		function but included for signature consistency with other reduction functions.
 	permutationSpace : PermutationSpace
 		Dictionary mapping pile indices to leaf indices or `LeafOptions`. The function
 		mutates this dictionary in place.
@@ -347,8 +236,7 @@ def reduceLeafSpace(
 	for pile, leafOptions in pilesToUpdate:
 		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
-			#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
-			return PermutationSpace()
+			permutationSpace.clear()
 		else:
 			permutationSpace[pile] = leafSpace
 	return permutationSpace
@@ -383,7 +271,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
 		#=EndNotes##walrus=
 		if not (permutationSpace := reduceLeafSpace(
-				state, permutationSpace, DOTitems(pilesUndetermined), makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned))
+				permutationSpace, DOTitems(pilesUndetermined), makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned))
 		)):
 			#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
 			return None
@@ -441,7 +329,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 		for leafOptions, setPiles in DOTitems(itemfilter(lambda groupBy: (howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)):
 
-			if not (permutationSpace := reduceLeafSpace(state, permutationSpace
+			if not (permutationSpace := reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
 					, makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 			)):

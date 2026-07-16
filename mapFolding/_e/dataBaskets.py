@@ -1,6 +1,7 @@
 # TODO idk enough to choose between `UserDict` and subclassing `dict`.
 # ruff: noqa: FURB189
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
+
 from __future__ import annotations
 
 from collections import deque
@@ -11,10 +12,11 @@ from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissoci
 from hunterMakesPy import inclusive, raiseIfNone
 from itertools import combinations
 from mapFolding._e import (
-	getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首, leafOrigin)
+	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首,
+	leafOrigin)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
-from mapFolding._e.theTypes import Folding, LeafSpace, Pile, UndeterminedPiles
+from mapFolding._e.theTypes import Folding, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import attrgetter, methodcaller
@@ -25,23 +27,23 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves
+	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
 
-	def addMissingItems(self, itemsMissing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
-		"""Update missing `Pile: LeafSpace` items with the items from `itemsMissing`.
+	def addMissingPileLeafSpace(self, missing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
+		"""Update missing `Pile: LeafSpace` items with the items from `missing`.
 
 		This will not overwrite any existing `Pile: LeafSpace` items in `permutationSpace` because
 		that would corrupt the `PermutationSpace`.
 
 		Parameters
 		----------
-		itemsMissing : PermutationSpace
-			`LeafSpace` by `Pile`.
+		missing : PermutationSpace | UndeterminedPiles | PinnedLeaves
+			`LeafSpace` by `Pile` in `missing`.
 
 		Returns
 		-------
@@ -49,7 +51,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			New `PermutationSpace` and modifies `PermutationSpace` in place.
 		"""
 		#=EndNotes##sorted=
-		self = PermutationSpace(sorted(DOTitems(merge(itemsMissing, self, factory=PermutationSpace))))  # ruff:ignore[self-or-cls-assignment]
+		self = PermutationSpace(sorted(DOTitems(merge(missing, self, factory=PermutationSpace))))  # ruff:ignore[self-or-cls-assignment]
 		return self  # ruff:ignore[unnecessary-assign]
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
@@ -96,7 +98,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
 		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
 
-		For performance, you probably can and probably *should* create a set of filters for your circumstances.
+		For performance, you probably can and probably *should* create a set of filters for your
+		circumstances.
 
 		Parameters
 		----------
@@ -124,44 +127,26 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
 		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
-		return (leavesPinned, cast("UndeterminedPiles", dissociatePile(self, *DOTkeys(leavesPinned))))
+		return (leavesPinned, cast('UndeterminedPiles', dissociatePile(self, *DOTkeys(leavesPinned))))
 
 	def copy(self) -> PermutationSpace:
 		return PermutationSpace(self)
 
-	def deconstructAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf]) -> dict[Leaf, PermutationSpace]:
-		"""Deconstruct an open `pile` to the `leaf` range of `pile`.
-
-		Return a dictionary containing this `PermutationSpace` if `pile` already has a
-		pinned `leaf`, or one `PermutationSpace` for each unpinned `leaf` in
-		`leavesToPin` pinned at `pile`.
-
-		Parameters
-		----------
-		pile : int
-			`pile` at which to pin a `leaf`.
-		leavesToPin : list[int]
-			List of `leaves` to pin at `pile`.
-
-		Returns
-		-------
-		deconstructedPermutationSpace : dict[int, PermutationSpace]
-			Dictionary mapping from `leaf` pinned at `pile` to the `PermutationSpace`
-			dictionary with the `leaf` pinned at `pile`.
-		"""
-		if (leaf := self.getLeaf(pile)) is not None:
-			deconstructedPermutationSpace: dict[Leaf, PermutationSpace] = {leaf: self}
+	def deconstructAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
+		# DOCUMENT Do not keep the original if you use any part of the return.
+		if self.pilePinned吗(pile):
+			deconstructed: Iterable[PermutationSpace] = deque([self])
 		else:
+			leavesToPin = leavesToPin or getIteratorOfLeaves(self[pile])  # pyright: ignore[reportArgumentType] # ty:ignore[invalid-argument-type]
 			pin: Callable[[Leaf], PermutationSpace] = partial(self.atPilePinLeaf, pile)
-			deconstructedPermutationSpace = {leaf: pin(leaf) for leaf in filter(self.leafNotPinned吗, leavesToPin)}
-		return deconstructedPermutationSpace
+			deconstructed = map(pin, filter(self.leafNotPinned吗, leavesToPin))
+		return deconstructed
 
 	def deconstructByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
 		"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
-		Return a `deque` containing this `PermutationSpace` if `leaf` is already
-		pinned, or one `PermutationSpace` for each open `pile` in `leafDomain` with
-		`leaf` pinned at `pile`.
+		Return a `deque` containing this `PermutationSpace` if `leaf` is already pinned, or one
+		`PermutationSpace` for each open `pile` in `leafDomain` with `leaf` pinned at `pile`.
 
 		Parameters
 		----------
@@ -173,12 +158,14 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		deconstructedPermutationSpace : deque[PermutationSpace]
-			Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open
-			`pile` in `leafDomain`.
+			Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in
+			`leafDomain`.
 		"""
 		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
 		if self.leafNotPinned吗(leaf):
-			leafInPileRange: Callable[[int], bool] = compose(leafInLeafOptions吗(leaf), partial(self.getLeafOptions, default=bit_mask(len(self))))
+			leafInPileRange: Callable[[int], bool] = compose(
+				leafInLeafOptions吗(leaf), partial(self.getLeafOptions, default=bit_mask(len(self)))
+			)
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
 			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(self.pileUndetermined吗, leafDomain))))
 		else:
@@ -198,25 +185,28 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		deconstructedPermutationSpace : deque[PermutationSpace]
-			Deque of `PermutationSpace` dictionaries with the requested leaves pinned
-			across compatible pile tuples.
+			Deque of `PermutationSpace` dictionaries with the requested leaves pinned across
+			compatible pile tuples.
 		"""
 		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
 
 		def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
 				return self.pileUndetermined吗(domain[index])
+
 			return workhorse
 
 		def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
 				leafOptions: LeafOptions = raiseIfNone(self.getLeafOptions(domain[index], default=bit_mask(len(self))))
 				return leafInLeafOptions吗(leaves[index], leafOptions)
+
 			return workhorse
 
 		def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
 				return self.leafPinnedAtPile吗(leaf, domain[index])
+
 			return workhorse
 
 		if any(map(self.leafNotPinned吗, leaves)):
@@ -290,8 +280,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		leafOrDefault : Leaf | None
-			The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`,
-			otherwise `default`.
+			The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`, otherwise
+			`default`.
 		"""
 		ImaLeaf: LeafSpace | None = self.get(pile)
 		if isLeaf吗(ImaLeaf):
@@ -393,8 +383,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		(AI generated docstring)
 
-		This method pairs each item in `leavesToInsert` with an undetermined `Pile`. The first
-		item corresponds to the smallest undetermined `Pile`, the second item to the next-smallest
+		This method pairs each item in `leavesToInsert` with an undetermined `Pile`. The first item
+		corresponds to the smallest undetermined `Pile`, the second item to the next-smallest
 		undetermined `Pile`, and so on. Existing pinned `Leaf` values keep their pile positions.
 
 		Parameters
@@ -414,14 +404,14 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		# constructor) or FIVE constructors if `Iterator` is a constructor (`DOTitems` and
 		# `DOTvalues`), so I _feel_ it would be faster if I could change the values without
 		# ping-ponging from `dict` to `list` to `dict` to `tuple`.
-		return tuple(DOTvalues(dict(sorted(DOTitems(cast("PinnedLeaves", merge(self, dict(zip(pilesToInsert, leavesToInsert, strict=True)), factory=PermutationSpace)))))))
+		return tuple(DOTvalues(dict(sorted(DOTitems(cast('PinnedLeaves', merge(self, dict(zip(pilesToInsert, leavesToInsert, strict=True)), factory=PermutationSpace)))))))
 
 	def pilePinned吗(self, pile: Pile) -> bool:
 		"""Determine whether `pile` has a pinned `Leaf`.
 
 		Use this method when control flow concerns the assignment state of a `Pile` in this
-		`PermutationSpace`. Use `isLeaf吗` when the logic already has a `LeafSpace` value and
-		needs Python type narrowing.
+		`PermutationSpace`. Use `isLeaf吗` when the logic already has a `LeafSpace` value and needs
+		Python type narrowing.
 
 		Parameters
 		----------
@@ -448,8 +438,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""Determine whether `pile` still requires a `Leaf` assignment.
 
 		Use this method when control flow concerns whether a `Pile` still requires a `Leaf`
-		assignment. Use `isLeafOptions吗` when the logic already has a `LeafSpace` value and
-		needs Python type narrowing.
+		assignment. Use `isLeafOptions吗` when the logic already has a `LeafSpace` value and needs
+		Python type narrowing.
 
 		Parameters
 		----------
@@ -518,11 +508,13 @@ class EliminationState:
 	sumsOfProductsOfDimensionsNearest首 : tuple[int, ...]
 		Unchanging sums of `productsOfDimensions` from the head `首`.
 	首 : int
-		Unchanging single-base positional-numeral value of the first out-of-bounds Cartesian coordinate.
+		Unchanging single-base positional-numeral value of the first out-of-bounds Cartesian
+		coordinate.
 
 	Notes
 	-----
-	The computed `foldsTotal` is `groupsOfFolds * leavesTotal * Theorem2Multiplier * Theorem3Multiplier * Theorem4Multiplier`.
+	The computed `foldsTotal` is `groupsOfFolds * leavesTotal * Theorem2Multiplier *
+	Theorem3Multiplier * Theorem4Multiplier`.
 
 	"""
 
@@ -577,7 +569,9 @@ class EliminationState:
 	@property
 	def foldsTotal(self) -> int:
 		"""The computed number of distinct `Folding` patterns for this `mapShape`."""
-		return prod((self.groupsOfFolds, self.Theorem2aMultiplier, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier))
+		return prod(
+			(self.groupsOfFolds, self.Theorem2aMultiplier, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier)
+		)
 
 	def __post_init__(self) -> None:
 		"""One-time computation of unchanging values."""
@@ -592,12 +586,16 @@ class EliminationState:
 		self.首 = self.leavesTotal
 		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
 		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
+		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(
+			self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal
+		)
 
 	def moveToListFolding(self) -> Self:
-		foldingGroup吗: dict[bool, list[PermutationSpace]] = groupby(compose(self.leavesTotal.__eq__, attrgetter("leafCount")), self.listPermutationSpace)
+		foldingGroup吗: dict[bool, list[PermutationSpace]] = groupby(
+			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
+		)
 		self.listPermutationSpace = deque(foldingGroup吗.get(False, ()))
-		self.listFolding.extend(map(methodcaller("makeFolding"), foldingGroup吗.get(True, ())))
+		self.listFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
 		return self
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
@@ -605,15 +603,16 @@ class EliminationState:
 
 		`permutationSpaceCreaseViolation吗` is a pruning predicate used before counting or expanding a
 		candidate `PermutationSpace`. `removeCreaseViolationsFromEliminationState` uses
-		`permutationSpaceCreaseViolation吗` to filter `state.listPermutationSpace` [5], and
-		a caller such as `mapFolding._e.pin2上nDimensions` uses `removeCreaseViolationsFromEliminationState`
+		`permutationSpaceCreaseViolation吗` to filter `state.listPermutationSpace` [5], and a caller
+		such as `mapFolding._e.pin2上nDimensions` uses `removeCreaseViolationsFromEliminationState`
 		[6] as part of building a reduced search space.
 
 		Algorithm Details
 		-----------------
 		`permutationSpaceCreaseViolation吗` interprets `state.permutationSpace` as a partial mapping
-		from `Pile` to `Leaf`. The pinned leaves extracted by `PermutationSpace.extractPinnedLeaves` [1] are inverted
-		to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by `Leaf` index.
+		from `Pile` to `Leaf`. The pinned leaves extracted by `PermutationSpace.extractPinnedLeaves`
+		[1] are inverted to a `Leaf`-to-`Pile` mapping so crease-post leaves can be looked up by
+		`Leaf` index.
 
 		`permutationSpaceCreaseViolation吗` filters candidate assignments with `between` [2] to skip
 		leaves that cannot have a crease-post leaf in a selected dimension.
@@ -629,8 +628,8 @@ class EliminationState:
 		Parameters
 		----------
 		state : EliminationState
-			An elimination state that provides `state.mapShape`, `state.permutationSpace`, and
-			bounds such as `state.leafLast`.
+			An elimination state that provides `state.mapShape`, `state.permutationSpace`, and bounds
+			such as `state.leafLast`.
 
 		Returns
 		-------
@@ -655,7 +654,9 @@ class EliminationState:
 
 		for dimension in range(self.dimensionsTotal):
 			listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-			for pile, leaf in sorted(DOTitems(filterLeaf(between吗(leafOrigin, self.leafLast - inclusive), permutationSpace.extractPinnedLeaves()))):
+			for pile, leaf in sorted(
+				DOTitems(filterLeaf(between吗(leafOrigin, self.leafLast - inclusive), permutationSpace.extractPinnedLeaves()))
+			):
 				leafCrease: int | None = getCreasePost(self.mapShape, leaf, dimension)
 				if leafCrease is None:
 					continue
@@ -678,7 +679,9 @@ class EliminationState:
 			, self.pile in getLeafDomain(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
+	def reduceAllPermutationSpace(
+		self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]
+	) -> Self:
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace
 		self.listPermutationSpace = deque()
 		listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()
@@ -692,11 +695,15 @@ class EliminationState:
 			# DEVELOPMENT `sumPermutationSpace` detects _any_ change in the permutation space.
 			# DEVELOPMENT reminder: _all_ changes in a permutation space are reductions in the probability space.
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
-			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(listFunctionsReduction)
+			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(
+				listFunctionsReduction
+			)
 			keepGoing: bool = True
 
 			while keepGoing:
-				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = functionsReduction.popleft()
+				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = (
+					functionsReduction.popleft()
+				)
 				# TODO (dissatisfied) `raiseIfNone` is _only_ necessary because of `... | None`.
 				permutationSpace = reducePermutationSpace(self, raiseIfNone(permutationSpace))
 
@@ -730,9 +737,9 @@ class EliminationState:
 
 		`removePermutationSpaceViolations` is a mutating filter step that keeps only those
 		`PermutationSpace` values that satisfy `permutationSpaceHasIFFViolation(self) == False` [1].
-		This function is used by pinning flows that enumerate multiple candidate permutation
-		spaces and then prune candidate permutation spaces before deeper elimination work.
-		A caller such as `mapFolding._e.pin2上nDimensions` uses this function [2].
+		This function is used by pinning flows that enumerate multiple candidate permutation spaces
+		and then prune candidate permutation spaces before deeper elimination work. A caller such as
+		`mapFolding._e.pin2上nDimensions` uses this function [2].
 
 		Parameters
 		----------

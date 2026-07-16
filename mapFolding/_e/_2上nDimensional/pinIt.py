@@ -73,7 +73,6 @@ from more_itertools import partition
 from operator import getitem, neg
 from tqdm import tqdm
 from typing import TYPE_CHECKING
-from Z0Z_tools import DOTvalues
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
@@ -178,23 +177,20 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
-	state.listPermutationSpace.extend(DOTvalues(state.permutationSpace.deconstructAtPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state)))))
-	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
-	state.removeCreaseViolations()
-	state.moveToListFolding()
-	return state
+	state.listPermutationSpace.extend(state.permutationSpace.deconstructAtPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
+	return state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	"""You can select an `Iterable` of `Leaf` values to pin at `state.pile`.
 
 	(AI generated docstring)
 
-	This function selects `leavesToPin` based on `state.pile`. This function uses
-	`operator.neg` [1] when comparing `state.pile` values.
+	This function selects `leavesToPin` based on `state.pile`. This function uses `operator.neg` [1]
+	when comparing `state.pile` values.
 
-	For certain `pile` values, `leavesToPin` is a fixed singleton set. For other
-	`pile` values, `leavesToPin` is computed by a crease-based pinning function [2]
-	or a domain-based post-depth function [3].
+	For certain `pile` values, `leavesToPin` is a fixed singleton set. For other `pile` values,
+	`leavesToPin` is computed by a crease-based pinning function [2] or a domain-based post-depth
+	function [3].
 
 	Parameters
 	----------
@@ -302,7 +298,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		return state
 
 	if not state.listPermutationSpace:
-		state.listPermutationSpace.append(PermutationSpace().addMissingItems(getDictionaryLeafOptions(state)))
+		state.listPermutationSpace.append(PermutationSpace().addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
 
 	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
 	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,
@@ -509,10 +505,7 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = state.permutationSpace.deconstructByDomainsCombined(leaves, leavesDomain)
-	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
-	state.removeCreaseViolations()
-	state.moveToListFolding()
-	return state
+	return state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 #--- Logic that wants to join the shared logic ---
 
@@ -623,10 +616,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.listPermutationSpace = state.permutationSpace.deconstructByDomainOfLeaf(leaves, leavesDomain)
-	state = state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional)
-	state.removeCreaseViolations()
-	state.moveToListFolding()
-	return state
+	return state.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 #-------- Plebian functions -----------------------------------------
 
