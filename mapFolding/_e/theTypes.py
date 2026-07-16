@@ -26,7 +26,7 @@ The `LeafOptions` representation provides multiple independent uses. You can bui
 `makeLeafAntiOptions` [3]). You can query `LeafOptions` values to count domain cardinality
 (`howManyLeavesInLeafOptions` [4]) or enumerate individual `Leaf` indices
 (`getIteratorOfLeaves` [5]). You can apply constraint propagation operations
-(`leafOptionsAND` [6], `JeanValjean` [7]) to reduce domains or normalize degenerate
+(`leafOptionsAND` [6], `leafOptionsLeafNone` [7]) to reduce domains or normalize degenerate
 ranges.
 
 The `gmpy2.mpz` [1] type provides many built-in methods and associated functions that
@@ -73,7 +73,7 @@ Enumerate each `Leaf` index in a domain.
 
 Apply a constraint mask and normalize the result.
 
-	leafSpace = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
+	leafSpace = leafOptionsLeafNone(leafOptionsAND(leafAntiOptions, leafOptions))
 
 References
 ----------
@@ -89,7 +89,7 @@ References
 	Internal package reference
 [6] mapFolding._e._beDRY.leafOptionsAND
 	Internal package reference
-[7] mapFolding._e._beDRY.JeanValjean
+[7] mapFolding._e._beDRY.leafOptionsLeafNone
 	Internal package reference
 [8] gmpy2.xmpz.iter_set - gmpy2 documentation
 	https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set

@@ -7,23 +7,24 @@ cornbread" problem that was difficult for me to "solve"--due to my programming s
 cornbread" solution from the 2^n-dimensional functions, I would generalize more functions and move them here.
 """
 from __future__ import annotations
-from operator import methodcaller, itemgetter
 
 from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear
 from humpy_cytoolz import (
-	assoc as associate, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf,
-	valfilter as filterLeafOptions, valfilter as filterValue, compose)
+	groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf, valfilter as filterLeafOptions,
+	valfilter as filterValue)
 # TODO One or more things is messed up with humpy_*toolz.*.map
 from hunterMakesPy import inclusive
 from itertools import chain
-from mapFolding._e import getIteratorOfLeaves, getLeafDomain, howManyLeavesInLeafOptions, JeanValjean, leafOptionsAND, makeLeafAntiOptions
+from mapFolding._e import (
+	getIteratorOfLeaves, getLeafDomain, howManyLeavesInLeafOptions, leafOptionsAND, leafOptionsLeafNone, makeLeafAntiOptions)
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import leafInLeafOptions吗
 from mapFolding._e.theTypes import LeafOptions
 from more_itertools import one
-from typing import TYPE_CHECKING, Any
+from operator import methodcaller
+from typing import TYPE_CHECKING
 from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues, thisNotHaveThat吗
 
 if TYPE_CHECKING:
@@ -182,7 +183,7 @@ def reduceLeafSpace(
 	This function implements the mechanical update logic used by all constraint-propagation
 	functions in the reduction system. Constraint encoders should call this function rather than
 	modifying `permutationSpace` directly to ensure consistent domain updates, proper normalization
-	via `JeanValjean` [1], and early detection of unsatisfiable constraints.
+	via `leafOptionsLeafNone` [1], and early detection of unsatisfiable constraints.
 
 	The `pilesToUpdate` parameter contains explicit `(pile, leafOptions)` tuples because constraint
 	encoders may need to restrict a different domain than the current `permutationSpace[pile]` value.
@@ -224,7 +225,7 @@ def reduceLeafSpace(
 
 	References
 	----------
-	[1] mapFolding._e.JeanValjean
+	[1] mapFolding._e.leafOptionsLeafNone
 
 	[2] mapFolding._e.pinIt.reduceAllPermutationSpace
 
@@ -234,7 +235,7 @@ def reduceLeafSpace(
 		https://gmpy2.readthedocs.io/en/latest/
 	"""
 	for pile, leafOptions in pilesToUpdate:
-		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
+		leafSpace: LeafSpace | None = leafOptionsLeafNone(leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
 			permutationSpace.clear()
 		else:
@@ -333,7 +334,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 					, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
 					, makeLeafAntiOptions(state.leavesTotal, getIteratorOfLeaves(leafOptions))
 			)):
-				#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
+				#=SIN= Early return.
 				return None
 
 		if permutationSpace.leafCount < leafCount:
@@ -396,7 +397,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 	return permutationSpace
 
 listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
-	reducePermutationSpace_LeafIsPinned,
-	reducePermutationSpace_leafDomainOf1,
-	reducePermutationSpace_nakedSubset,
+	reducePermutationSpace_LeafIsPinned
+	, reducePermutationSpace_leafDomainOf1
+	, reducePermutationSpace_nakedSubset
 )

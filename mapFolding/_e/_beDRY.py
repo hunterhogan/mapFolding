@@ -23,7 +23,7 @@ Disaggregation and deconstruction functions
 		You can build a complement `LeafOptions` by clearing each `leaf` bit.
 	makeLeafOptions
 		You can build a `LeafOptions` by setting each `leaf` bit.
-	JeanValjean
+	leafOptionsLeafNone
 		You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
 	leafOptionsAND
 		You can AND a `LeafOptions` with a disposable mask in a curry-friendly parameter order.
@@ -124,16 +124,16 @@ def makeLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
 
 	Examples
 	--------
-	The function is used to create a domain bitset before normalizing with `JeanValjean`.
+	The function is used to create a domain bitset before normalizing with `leafOptionsLeafNone`.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(makeLeafOptions(state.leavesTotal, leafOptions)))
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(leafOptionsLeafNone(makeLeafOptions(state.leavesTotal, leafOptions)))
 											for pile, leafOptions in getDictionaryLeafOptions(state).items()}
 
 	References
 	----------
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding._e._beDRY.JeanValjean
+	[2] mapFolding._e._beDRY.leafOptionsLeafNone
 	"""
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
@@ -169,38 +169,37 @@ def howManyLeavesInLeafOptions(leafOptions: LeafOptions) -> int:
 	"""
 	return leafOptions.bit_count() - 1
 
-# SEMIOTICS `JeanValjean`.
-def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
-	"""You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
+def leafOptionsLeafNone(leafOptions: LeafOptions, /) -> LeafOptions | Leaf | None:
+	"""You can normalize a `LeafOptions` into a `Leaf`, `LeafOptions`, or `None` when the range is degenerate.
 
-	When `p24601` is a `LeafOptions`, `p24601` contains one sentinel bit that indicates the value is a `LeafOptions`.
+	When `leafOptions` is a `LeafOptions`, `leafOptions` contains one sentinel bit that indicates the value is a `LeafOptions`.
 	This function interprets the total set-bit count as a compact encoding of domain cardinality.
 
-	- When `p24601.bit_count() == 1`, `p24601` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
-	- When `p24601.bit_count() == 2`, `p24601` contains exactly one `Leaf` plus the sentinel bit. The function converts the range to a
-		`Leaf` by returning `raiseIfNone(p24601.bit_scan1())`.
-	- Otherwise, the function returns `p24601` unchanged.
+	- When `leafOptions.bit_count() == 1`, `leafOptions` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
+	- When `leafOptions.bit_count() == 2`, `leafOptions` contains exactly one `Leaf` plus the sentinel bit. The function converts the range to a
+		`Leaf` by returning `raiseIfNone(leafOptions.bit_scan1())`.
+	- Otherwise, the function returns `leafOptions` unchanged.
 
 	Parameters
 	----------
-	p24601 : LeafOptions
+	leafOptions : LeafOptions
 		Candidate `LeafOptions` value.
 
 	Returns
 	-------
-	leafSpaceOrNone : LeafSpace | None
-		A `Leaf` when `p24601` encodes exactly one leaf, `None` when `p24601` encodes an empty domain, or `p24601` otherwise.
+	leafSpaceOrNone : Leaf | LeafOptions | None
+		A `Leaf` when `leafOptions` encodes exactly one leaf, `None` when `leafOptions` encodes an empty domain, or `leafOptions` otherwise.
 
 	Examples
 	--------
 	The function is used to normalize a masked domain.
 
-		if (ImaLeafSpaceNotAWalrusSubscript := JeanValjean(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
+		if (ImaLeafSpaceNotAWalrusSubscript := leafOptionsLeafNone(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
 			return {}
 
 	The function is used to normalize per-pile domains into pinned leaves when possible.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(JeanValjean(makeLeafOptions(state.leavesTotal, leafOptions)))
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(leafOptionsLeafNone(makeLeafOptions(state.leavesTotal, leafOptions)))
 											for pile, leafOptions in getDictionaryLeafOptions(state).items()}
 
 	References
@@ -213,12 +212,12 @@ def JeanValjean(p24601: LeafOptions, /) -> LeafSpace | None:
 		https://context7.com/hunterhogan/huntermakespy
 
 	"""
-	whoAmI: LeafSpace | None = p24601
-	if isLeafOptions吗(p24601):
-		if p24601.bit_count() == 1:
+	whoAmI: LeafOptions | Leaf | None = leafOptions
+	if isLeafOptions吗(leafOptions):
+		if leafOptions.bit_count() == 2:
+			whoAmI = raiseIfNone(leafOptions.bit_scan1())
+		elif leafOptions.bit_count() == 1:
 			whoAmI = None
-		elif p24601.bit_count() == 2:
-			whoAmI = raiseIfNone(p24601.bit_scan1())
 	return whoAmI
 
 @syntacticCurry
@@ -245,14 +244,14 @@ def leafOptionsAND(leafOptionsDISPOSABLE: LeafOptions, leafOptions: LeafOptions)
 
 	Examples
 	--------
-	The function is used with `JeanValjean` to normalize masked domains.
+	The function is used with `leafOptionsLeafNone` to normalize masked domains.
 
-		if (ImaLeafSpaceNotAWalrusSubscript := JeanValjean(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
+		if (ImaLeafSpaceNotAWalrusSubscript := leafOptionsLeafNone(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
 			return {}
 
 	The function is used to mask pile domains during constraint propagation.
 
-		leafSpace: LeafSpace | None = JeanValjean(leafOptionsAND(leafAntiOptions, leafOptions))
+		leafSpace: LeafSpace | None = leafOptionsLeafNone(leafOptionsAND(leafAntiOptions, leafOptions))
 
 	Important
 	---------
