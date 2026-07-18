@@ -1,5 +1,4 @@
-#=SIN= Ruff suppression: optional Numba support requires importing its threading API only when selected.
-# ruff: noqa: PLC0415
+# ruff:file-ignore[import-outside-top-level] `numba`.
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 from __future__ import annotations
 

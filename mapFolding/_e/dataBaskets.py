@@ -1,5 +1,5 @@
+# ruff:file-ignore[subclass-builtin]
 # TODO idk enough to choose between `UserDict` and subclassing `dict`.
-# ruff: noqa: FURB189
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 
 from __future__ import annotations
@@ -9,11 +9,10 @@ from collections import deque
 from functools import partial
 from gmpy2 import bit_mask
 from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, groupby, merge, valfilter as filterLeaf
-from hunterMakesPy import inclusive, raiseIfNone
+from hunterMakesPy import raiseIfNone
 from itertools import combinations
 from mapFolding._e import (
-	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首,
-	leafOrigin)
+	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile
@@ -21,7 +20,7 @@ from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import attrgetter, methodcaller
 from typing import cast, overload, TYPE_CHECKING
-from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues
+from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
 if TYPE_CHECKING:
@@ -653,22 +652,16 @@ class EliminationState:
 		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.extractPinnedLeaves())}
 
 		for dimension in range(self.dimensionsTotal):
-			listPileCreaseByParity: list[list[tuple[int, int]]] = [[], []]
-			for pile, leaf in sorted(
-				DOTitems(filterLeaf(between吗(leafOrigin, self.leafLast - inclusive), permutationSpace.extractPinnedLeaves()))
-			):
-				leafCrease: int | None = getCreasePost(self.mapShape, leaf, dimension)
-				if leafCrease is None:
-					continue
-				pileCrease: int | None = leafToPile.get(leafCrease)
-				if pileCrease is None:
-					continue
-				listPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
+			listPileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
+			for pile, leaf in permutationSpace.extractPinnedLeaves().items():
+				crease: int | None = getCreasePost(self.mapShape, leaf, dimension)
+				if crease:
+					pileCrease: int | None = leafToPile.get(crease)
+					if pileCrease:
+						listPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
 			for groupedParity in listPileCreaseByParity:
-				if len(groupedParity) < 2:
-					continue
-				for (pilePrimary, pilePrimaryCrease), (pileComparand, pileComparandCrease) in combinations(groupedParity, 2):
-					if creaseViolation吗(pilePrimary, pileComparand, pilePrimaryCrease, pileComparandCrease):
+				if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
+					for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
 						return True
 		return False
 

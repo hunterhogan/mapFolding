@@ -67,9 +67,8 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			]
 
 			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc=f"PermutationSpace {len(listClaimTickets)}"):
-				sherpa: EliminationState = claimTicket.result()
+				state.groupsOfFolds += claimTicket.result().groupsOfFolds
 
-				state.groupsOfFolds += sherpa.groupsOfFolds
 	else:
 		state = count(state)
 

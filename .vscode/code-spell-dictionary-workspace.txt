@@ -200,6 +200,7 @@ Makefiles
 Malkovich
 mappingproxy
 MASUR
+mathamagic
 mathbb
 MATHEMATICA
 Mathématiques

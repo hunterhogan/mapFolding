@@ -1,4 +1,3 @@
-# ruff: noqa: F811
 """You can use this script to benchmark map-folding algorithms against known OEIS values.
 
 This script iterates through multiple OEIS map-folding sequences and algorithm implementations,
@@ -41,18 +40,18 @@ if __name__ == '__main__':
 	flow = 'theorem2'
 	flow = 'theorem2Numba'
 
-	oeisID: str = 'A001416'
-	oeisID: str = 'A001418'
-	oeisID: str = 'A000136'
-	oeisID: str = 'A195646'
-	oeisID: str = 'A001417'
-	oeisID: str = 'A001415'
+	oeisID = 'A001416'
+	oeisID = 'A001418'
+	oeisID = 'A000136'
+	oeisID = 'A195646'
+	oeisID = 'A001415'
+	oeisID = 'A001417'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(7, 11):
+	for n in range(3, 7):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 

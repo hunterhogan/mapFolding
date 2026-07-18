@@ -1,10 +1,8 @@
-# ruff: noqa: DOC201
 from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import valfilter as filterLeaf
-from mapFolding._e import getIteratorOfLeaves
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState
@@ -13,7 +11,6 @@ from math import factorial
 from more_itertools import first
 from tqdm import tqdm
 from typing import TYPE_CHECKING
-from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
@@ -21,16 +18,16 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Folding
 
 def pinByCrease(state: EliminationState) -> EliminationState:
-	listFolding: list[Folding] = []
+	listFolding: deque[Folding] = deque()
 
 	while state.listPermutationSpace:
 
 		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
 
-		pile, leafOptions = first(DOTitems(filterLeaf(isLeafOptions吗, permutationSpace)))
+		pile = first(filterLeaf(isLeafOptions吗, permutationSpace))
 
-		sherpa: EliminationState = EliminationState(state.mapShape, pile=pile, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(sherpa.permutationSpace.deconstructAtPile(sherpa.pile, filter(sherpa.pinAt_pile吗, getIteratorOfLeaves(leafOptions))))
+		sherpa: EliminationState = EliminationState(state.mapShape, permutationSpace=permutationSpace)
+		sherpa.listPermutationSpace.extend(sherpa.permutationSpace.deconstructAtPile(pile))
 		sherpa = sherpa.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 		listFolding.extend(sherpa.listFolding)
@@ -41,7 +38,13 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `pinByCrease` operates efficiently."""
+	"""Do the things necessary so that `pinByCrease` operates efficiently.
+
+	Returns
+	-------
+	EliminationState
+		The state with `listFolding` populated and `listPermutationSpace` empty.
+	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
