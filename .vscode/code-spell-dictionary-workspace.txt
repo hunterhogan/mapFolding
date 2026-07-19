@@ -1,5 +1,6 @@
 # Custom Dictionary Words
 Abelian
+addopts
 Adham
 Afunction
 aggfunc
@@ -13,6 +14,7 @@ antidivisors
 appauthor
 appendleft
 appname
+archmageirvine
 argnames
 argnums
 Arndt
@@ -23,6 +25,7 @@ asname
 atleast
 Autocode
 autoflake
+autograd
 autopep
 autouse
 Azeem
@@ -54,6 +57,7 @@ comjnl
 comparand
 Comparand
 complevel
+confusables
 Connectee
 Connectees
 consec
@@ -67,6 +71,7 @@ cupy
 cytoolz
 databasket
 Dataclass
+dataclasses
 datastructures
 DELECROIX
 Demaine
@@ -77,6 +82,7 @@ Dimino
 Dispatchees
 dissoc
 distclean
+Docstrings
 DOTHARDCODED
 Doye
 dtypes
@@ -168,7 +174,9 @@ isidentifier
 isin
 isprime
 ISSN
+itemfilter
 itemsize
+itertools
 Iwan
 jaxtyping
 jitted
@@ -176,6 +184,7 @@ joeis
 Kaboozle
 Kahlo
 Kaseorg
+keyfilter
 Koehler
 Kplus
 kwarguments
@@ -189,6 +198,7 @@ Leedham
 LEGB
 Lehner
 libc
+LICEN
 Lindorfer
 líng
 linh
@@ -251,6 +261,7 @@ numbinations
 NUMERICALPYTHON
 numma
 Numma
+numpy
 NZER
 objmode
 objs
@@ -303,11 +314,14 @@ problème
 prufer
 Prufer
 ptount
+pyarrow
+pydocstyle
 pyflakes
 Pylance
 Pynatics
 Pyndas
 pypa
+pyproject
 pytastic
 PYTHONIOENCODING
 Quizas
@@ -332,6 +346,7 @@ searchsorted
 Seress
 setdiff
 setlocal
+setuptools
 sharex
 shichi
 shǒu
@@ -341,9 +356,11 @@ sinclude
 sorez
 sqrtrem
 squarefree
+SSOT
 stackoverflow
 standardised
 Stéphane
+Stoopid
 subclasshook
 subexponential
 succ
@@ -358,6 +375,7 @@ Tcls
 Tctx
 Telt
 Tenabled
+testpaths
 testutil
 Tfinalbody
 thất
@@ -369,11 +387,14 @@ tomli
 totient
 Touchard
 tount
+tqdm
 transversals
 triplewise
 Truncator
 udivisor
 udivisors
+ufunc
+Ufunc
 unaryop
 uncompiled
 unparameterized
@@ -383,7 +404,9 @@ Unroller
 unsignedinteger
 untenably
 urldate
+urllib
 usegmt
+valfilter
 Valjean
 valmap
 vararg
@@ -396,6 +419,7 @@ Weisstein's
 Wextra
 withitem
 wocky
+xdist
 xlabel
 xmpz
 yada

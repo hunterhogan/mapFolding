@@ -163,5 +163,5 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 	return ingredientsFunction
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 10)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (3,) * 4
 	fromMapShape(mapShape)

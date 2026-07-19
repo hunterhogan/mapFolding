@@ -2,7 +2,6 @@
 
 This is a generated file; edit the source file.
 """
-from __future__ import annotations
 from functools import cache
 from hunterMakesPy import inclusive
 from mapFolding.oeis import countingMeanders, dictionaryOEIS

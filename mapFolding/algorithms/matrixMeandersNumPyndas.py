@@ -1,4 +1,3 @@
-# ruff: noqa: RUF052 DOC201 E116
 """Transfer matrix algorithm implementations in NumPy (*Num*erical *Py*thon) and pandas.
 
 Citations
@@ -13,8 +12,6 @@ https://oeis.org/A000682
 https://oeis.org/A005316
 https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
 """
-from __future__ import annotations
-
 from functools import cache
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
@@ -24,16 +21,13 @@ from mapFolding.dataBaskets import MatrixMeandersState
 from mapFolding.reference.A000682facts import A000682_n_boundary_buckets
 from mapFolding.reference.A005316facts import A005316_n_boundary_buckets
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
-from typing import Any, TYPE_CHECKING, TypeAlias
+from numpy.lib._arraysetops_impl import UniqueInverseResult
+from numpy.typing import NDArray
+from typing import Any, TypeAlias
 from warnings import warn
 import dataclasses
 import numpy
 import pandas
-
-# TODO Don't require pandas to run NumPy version. The "challenge" is that `areIntegersWide` can take a DataFrame.
-if TYPE_CHECKING:
-	from numpy.lib._arraysetops_impl import UniqueInverseResult
-	from numpy.typing import NDArray
 
 """Goals:
 - Extreme abstraction.
@@ -70,27 +64,27 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 	def __post_init__(self) -> None:
 		"""Post init."""
 		if self.bitWidthLimitArcCode is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeArcCode).itemsize * 8  # bits
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(self.datatypeArcCode).itemsize * 8  # bits
 
-			_offsetNecessary: int = 3  # For example, `bitsZulu << 3`.
-			_offsetSafety: int = 1  # I don't have mathematical proof of how many extra bits I need.
-			_offset: int = _offsetNecessary + _offsetSafety
+			offsetNecessary_: int = 3  # For example, `bitsZulu << 3`.
+			offsetSafety_: int = 1  # I don't have mathematical proof of how many extra bits I need.
+			offset_: int = offsetNecessary_ + offsetSafety_
 
-			self.bitWidthLimitArcCode = _bitWidthOfFixedSizeInteger - _offset
+			self.bitWidthLimitArcCode = bitWidthOfFixedSizeInteger_ - offset_
 
-			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetSafety, _offset
+			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
 
 		if self.bitWidthLimitCrossings is None:
-			_bitWidthOfFixedSizeInteger: int = numpy.dtype(self.datatypeCrossings).itemsize * 8  # bits
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(self.datatypeCrossings).itemsize * 8  # bits
 
-			_offsetNecessary: int = 0  # I don't know of any.
-			_offsetEstimation: int = 3  # See 'reference' directory.
-			_offsetSafety: int = 1
-			_offset: int = _offsetNecessary + _offsetEstimation + _offsetSafety
+			offsetNecessary_: int = 0  # I don't know of any.
+			offsetEstimation_: int = 3  # See 'reference' directory.
+			offsetSafety_: int = 1
+			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
 
-			self.bitWidthLimitCrossings = _bitWidthOfFixedSizeInteger - _offset
+			self.bitWidthLimitCrossings = bitWidthOfFixedSizeInteger_ - offset_
 
-			del _bitWidthOfFixedSizeInteger, _offsetNecessary, _offsetEstimation, _offsetSafety, _offset
+			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
 
 	def makeDictionary(self) -> None:
 		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
@@ -117,9 +111,11 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 	state : MatrixMeandersState
 		The current state of the computation, including `dictionaryMeanders`.
 	dataframe : pandas.DataFrame | None = None
-		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of `state.dictionaryMeanders`.
+		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of
+		`state.dictionaryMeanders`.
 	fixedSizeMAXIMUMarcCode : bool = False
-		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as `state.datatypeArcCode`.
+		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as
+		`state.datatypeArcCode`.
 
 	Returns
 	-------
@@ -128,19 +124,22 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 
 	Notes
 	-----
-	Casting `state.MAXIMUMarcCode` to a fixed-size 64-bit unsigned integer might cause the flow to be a little more
-	complicated because `MAXIMUMarcCode` is usually 1-bit larger than the `max(arcCode)` value.
+	Casting `state.MAXIMUMarcCode` to a fixed-size 64-bit unsigned integer might cause the flow to be
+	a little more complicated because `MAXIMUMarcCode` is usually 1-bit larger than the `max(arcCode)`
+	value.
 
-	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,* A000682), then the
-	flow will go to a function that does not use fixed size integers. When the integers are below the limits (*e.g.,*
-	`bitWidthArcCodeMaximum`), the flow will go to a function with fixed size integers. In that case, casting
-	`MAXIMUMarcCode` to a fixed size merely delays the transition from one function to the other by one iteration.
+	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,*
+	A000682), then the flow will go to a function that does not use fixed size integers. When the
+	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
+	with fixed size integers. In that case, casting `MAXIMUMarcCode` to a fixed size merely delays the
+	transition from one function to the other by one iteration.
 
-	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the function with fixed size
-	integers and usually stays there until `crossings` is huge, which is near the end of the computation. If you cast
-	`MAXIMUMarcCode` into a 64-bit unsigned integer, however, then around `state.boundary == 28`, the bit width of
-	`MAXIMUMarcCode` might exceed the limit. That will cause the flow to go to the function that does not have fixed size
-	integers for a few iterations before returning to the function with fixed size integers.
+	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the
+	function with fixed size integers and usually stays there until `crossings` is huge, which is near
+	the end of the computation. If you cast `MAXIMUMarcCode` into a 64-bit unsigned integer, however,
+	then around `state.boundary == 28`, the bit width of `MAXIMUMarcCode` might exceed the limit. That
+	will cause the flow to go to the function that does not have fixed size integers for a few
+	iterations before returning to the function with fixed size integers.
 	"""
 	if dataframe is not None:
 		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
@@ -183,14 +182,14 @@ arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]
 	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
 """
 
-def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:  # noqa: ARG001
+def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:  # ruff:ignore[unused-function-argument]
 	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
 
 	Warning
 	-------
 	Because `countPandas` does not store anything in `state.arrayArcCodes`, if `countPandas` requests
-	bucketsTotal for a value not in the dictionary, the returned value will be 0. But `countPandas` should have a safety
-	check that will allocate more space.
+	bucketsTotal for a value not in the dictionary, the returned value will be 0. But `countPandas`
+	should have a safety check that will allocate more space.
 
 	Notes
 	-----
@@ -231,9 +230,10 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	Notes
 	-----
-	This version is *relatively* slow for small values of `n` (*e.g.*, 3 seconds vs. 3 milliseconds) because of my aggressive use
-	of garbage collection because I don't really know how to manage memory. On the other hand, it uses less memory for extreme
-	values of `n`, which makes it faster due to less disk swapping--as compared to the pandas implementation and other NumPy
+	This version is *relatively* slow for small values of `n` (*e.g.*, 3 seconds vs. 3 milliseconds)
+	because of my aggressive use of garbage collection because I don't really know how to manage
+	memory. On the other hand, it uses less memory for extreme values of `n`, which makes it faster
+	due to less disk swapping--as compared to the pandas implementation and other NumPy
 	implementations I tried.
 	"""
 	indicesPrepArea: int = 1
@@ -250,7 +250,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			"""Create new `arrayMeanders` by deduplicating `arcCode` and summing `crossings`."""
 			unique: UniqueInverseResult[numpy.uint64] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
 
-			state.arrayArcCodes = unique.values  # noqa: PD011
+			state.arrayArcCodes = unique.values  # ruff:ignore[pandas-use-of-dot-values]
 			state.arrayCrossings = numpy.zeros_like(state.arrayArcCodes, dtype=state.datatypeCrossings)
 			numpy.add.at(state.arrayCrossings, unique.inverse_indices, arrayAnalyzed[slicerCrossings])
 			del unique
@@ -340,7 +340,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		multiply(bitsZuluStack, prepArea, out=prepArea)
 		greater(prepArea, 1, out=prepArea)
 		selectorGreaterThan1: NDArray[numpy.uint64] = makeStorage(prepArea, state, arrayAnalyzed, indexArcCode)
-																					# X indexArcCode X indexCrossings
+#																					 X indexArcCode X indexCrossings
 #======== if bitsAlphaAtEven and not bitsZuluAtEven ======= #======== ^ & | ^ & bitsZulu 1 1 bitsAlpha 1 1 ============
 		bitwise_and(bitsZuluStack, 1, out=prepArea)
 		del bitsZuluStack 															# X indexArcCode O indexCrossings
@@ -351,7 +351,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea)
 		selectorAlignAlpha: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexCrossings)
-																					# X indexArcCode X indexCrossings
+#																					 X indexArcCode X indexCrossings
 		arrayBitsAlpha[selectorAlignAlpha] = flipTheExtra_0b1AsUfunc(arrayBitsAlpha[selectorAlignAlpha])
 		del selectorAlignAlpha 														# X indexArcCode O indexCrossings
 
@@ -371,7 +371,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		bitwise_and(selectorGreaterThan1, prepArea, out=prepArea)
 		selectorAlignZulu: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexCrossings)
-																					# X indexArcCode X indexCrossings
+#																					 X indexArcCode X indexCrossings
 #======== bitsAlphaAtEven or bitsZuluAtEven =============== #======== ^ & & bitsAlpha 1 bitsZulu 1 ====================
 		bitwise_and(state.arrayArcCodes, state.bitsLocator, out=prepArea)
 		bitwise_and(prepArea, 1, out=prepArea)
@@ -385,7 +385,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del selectorGreaterThan1 													# O indexArcCode X indexCrossings
 		bitwise_xor(prepArea, 1, out=prepArea)
 		selectorDisqualified: NDArray[numpy.intp] = makeStorage(numpy.flatnonzero(prepArea), state, arrayAnalyzed, indexArcCode)
-																					# X indexArcCode X indexCrossings
+#																					 X indexArcCode X indexCrossings
 		bitwise_right_shift(state.arrayArcCodes, 1, out=prepArea)
 		bitwise_and(prepArea, state.bitsLocator, out=prepArea)
 
@@ -493,7 +493,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		if state.n >= 45:  # Data collection for 'reference' directory.
 			# oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-			print(state.oeisID, state.n, state.boundary + 1, state.indexTarget, len(state.arrayArcCodes), int(state.arrayArcCodes.max()).bit_length(), int(state.arrayCrossings.max()).bit_length(), sep=',')  # noqa: T201
+			print(state.oeisID, state.n, state.boundary + 1, state.indexTarget, len(state.arrayArcCodes), int(state.arrayArcCodes.max()).bit_length(), int(state.arrayCrossings.max()).bit_length(), sep=',')  # ruff:ignore[print]
 	return state
 
 def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
@@ -534,8 +534,8 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			Formula
 			-------
 			```python
-			if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven):
-				arcCode = (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1)
+				if bitsAlpha > 1 and bitsZulu > 1 and (bitsAlphaIsEven or bitsZuluIsEven):
+					arcCode = (bitsAlpha >> 2) | ((bitsZulu >> 2) << 1)
 			```
 			"""
 			#--------- Step 1 drop unqualified rows ---------------------------
@@ -605,14 +605,13 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			Formula
 			-------
 			```python
-			arcCode = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
+				arcCode = ((bitsAlpha | (bitsZulu << 1)) << 2) | 3
 			```
 
 			Notes
 			-----
-			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the last bits are '0b00'. '0 + 3'
-			is '0b11', and '0b00 | 0b11' is also '0b11'.
-
+			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the
+			last bits are '0b00'. '0 + 3' is '0b11', and '0b00 | 0b11' is also '0b11'.
 			"""
 			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
@@ -639,9 +638,9 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			Formula
 			-------
 			```python
-			if bitsAlpha > 1:
-				arcCode = ((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) | (bitsAlpha >> 2)
-			# `(1 - (bitsAlpha & 1)` is an evenness test.
+				if bitsAlpha > 1:
+					arcCode = ((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) | (bitsAlpha >> 2)
+				# `(1 - (bitsAlpha & 1)` is an evenness test.
 			```
 			"""
 			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']					# Truncated creation of `bitsAlpha`
@@ -658,7 +657,6 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsZulu ...)
 
 			del bitsTarget
-# TODO clarify the note.
 			"""NOTE In this code block, I rearranged the "formula" to use `bitsTarget` for two goals.
 			1. `(bitsAlpha >> 2)`.
 			2. `if bitsAlpha > 1`. The trick is in the equivalence of v1 and v2.
@@ -691,8 +689,8 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			Formula
 			-------
 			```python
-			if bitsZulu > 1:
-				arcCode = (1 - (bitsZulu & 1)) | (bitsAlpha << 2) | (bitsZulu >> 1)
+				if bitsZulu > 1:
+					arcCode = (1 - (bitsZulu & 1)) | (bitsAlpha << 2) | (bitsZulu >> 1)
 			```
 			"""
 			# `(1 - (bitsZulu & 1))` is an evenness test: we want a single bit as the answer.
@@ -727,7 +725,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			return dataframeMeanders
 
 		def recordArcCodes(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
-			"""This abstraction makes it easier to do things such as write to disk."""  # noqa: D404
+			"""Abstraction makes it easier to do things such as write to disk."""
 			nonlocal dataframeAnalyzed
 
 			indexStopAnalyzed: int = state.indexTarget + int((dataframeMeanders['analyzed'] > 0).sum())
@@ -812,7 +810,7 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 	"""
 	while state.boundary > 0:
 		if areIntegersWide(state):
-			from mapFolding.syntheticModules.meanders.bigInt import countBigInt  # noqa: PLC0415
+			from mapFolding.syntheticModules.meanders.bigInt import countBigInt  # ruff:ignore[import-outside-top-level]
 			state = countBigInt(state)
 		else:
 			state.makeArray()
@@ -835,7 +833,7 @@ def doTheNeedfulPandas(state: MatrixMeandersNumPyState) -> int:
 	"""
 	while state.boundary > 0:
 		if areIntegersWide(state):
-			from mapFolding.syntheticModules.meanders.bigInt import countBigInt  # noqa: PLC0415
+			from mapFolding.syntheticModules.meanders.bigInt import countBigInt  # ruff:ignore[import-outside-top-level]
 			state = countBigInt(state)
 		else:
 			state = countPandas(state)

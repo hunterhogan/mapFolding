@@ -58,6 +58,7 @@ optional-dependencies = { development = [
   "py-spy",
   "pyarrow-stubs",
   "pytest-cov",
+  "python-minifier",
   "setuptools"
 ], numba = ["numba", "numba_progress"], ortools = ["ortools"], pandas = [
   "pandas",

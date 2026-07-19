@@ -9,9 +9,7 @@ Notes
 	- `numpy.take(..., out=...)`
 	- `numpy.all(..., axis=...)`
 """
-from __future__ import annotations
-
-from mapFolding.dataBaskets import SymmetricFoldsState  # noqa: TC001
+from mapFolding.dataBaskets import SymmetricFoldsState
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 	state.indexLeaf = 1

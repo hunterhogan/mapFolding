@@ -1,10 +1,6 @@
 """Generalized pinning functions in the "Elimination" algorithm for any `mapShape`.
 
 Functions for 2^n-dimensional maps must go in other modules.
-
-The development of this generalized module is severely hampered, however. Functions for 2^n-dimensional maps have a "beans and
-cornbread" problem that was difficult for me to "solve"--due to my programming skills. If I were able to decouple the "beans and
-cornbread" solution from the 2^n-dimensional functions, I would generalize more functions and move them here.
 """
 from __future__ import annotations
 

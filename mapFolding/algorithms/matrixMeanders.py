@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from functools import cache
-from mapFolding.dataBaskets import MatrixMeandersState  # noqa: TC001
+from mapFolding.dataBaskets import MatrixMeandersState
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:

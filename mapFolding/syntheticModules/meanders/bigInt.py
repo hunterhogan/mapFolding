@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from functools import cache
 from mapFolding.algorithms.matrixMeandersNumPyndas import areIntegersWide, MatrixMeandersNumPyState
 
