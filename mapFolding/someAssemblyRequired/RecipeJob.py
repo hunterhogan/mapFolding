@@ -1,17 +1,18 @@
+# ruff:file-ignore[undocumented-public-function]
 """Configuration by dataclass."""
-
 from __future__ import annotations
 
-from astToolkit import parseLogicalPath2astModule
+from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import packageSettings
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import default
+from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
+import ast
 import dataclasses
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 	from mapFolding.someAssemblyRequired import DatatypeConfiguration, ShatteredDataclass
-	import ast
+	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:
@@ -131,6 +132,7 @@ class RecipeJobTheorem2:
 	"""Target dataclass instance identifier."""
 	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
 	"""Logical path to target dataclass module."""
+	foldsTotalMultiplier: int = 1
 
 #-------- Datatypes ------------------------------------------
 
@@ -211,6 +213,8 @@ class RecipeJobTheorem2:
 		if self.source_astModule is None:
 			self.source_astModule = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
 
+#================== Bulk changes ======================================================================
+
 def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
 	"""Embed a shattered dataclass field assignment into the function body.
 
@@ -244,6 +248,130 @@ def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> 
 		case _:
 			pass
 	return Ima___Assign
+
+def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
+	"""Convert function parameters into initialized variables with concrete values.
+
+	(AI generated docstring)
+
+	This function implements a critical transformation that converts function parameters
+	into statically initialized variables in the function body. This enables several
+	optimizations:
+
+	1. Eliminating parameter passing overhead
+	2. Embedding concrete values directly in the code
+	3. Allowing Numba to optimize based on known value characteristics
+	4. Simplifying function signatures for specialized use cases
+
+	The function handles different data types (scalars, arrays, custom types) appropriately,
+	replacing abstract parameter references with concrete values from the computation state.
+	It also removes unused parameters and variables to eliminate dead code.
+
+	Parameters
+	----------
+	ingredientsFunction : IngredientsFunction
+		The function to transform.
+	job : RecipeJobTheorem2Numba
+		Recipe containing concrete values for parameters and field metadata.
+
+	Returns
+	-------
+	modifiedFunction : IngredientsFunction
+		The modified function with parameters converted to initialized variables.
+	"""
+	ingredientsFunction.imports.update(raiseIfNone(job.shatteredDataclass).imports)
+
+	list_argCuzMyBrainRefusesToThink: list[ast.arg] = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+	list_arg_arg: list[str] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
+	listName: list[ast.Name] = []
+	NodeTourist(Be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
+	listIdentifiers: list[str] = [astName.id for astName in listName]
+	listIdentifiersNotUsed: list[str] = list(set(list_arg_arg) - set(listIdentifiers))
+
+	for ast_arg in list_argCuzMyBrainRefusesToThink:
+		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).field2AnnAssign:
+			if ast_arg.arg in listIdentifiersNotUsed:
+				pass
+			else:
+				ImaAnnAssign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[ast_arg.arg]
+				match elementConstructor:
+					case 'scalar':
+						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff:ignore[suspicious-eval-usage]
+					case 'array':
+						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # ruff:ignore[suspicious-eval-usage]
+						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
+						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
+					case _:
+						list_exprDOTannotation: list[ast.expr] = []
+						list_exprDOTvalue: list[ast.expr] = []
+						for dimension in job.state.mapShape:
+							list_exprDOTannotation.append(Make.Name(elementConstructor))
+							list_exprDOTvalue.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
+						cast('ast.Tuple', cast('ast.Subscript', cast('ast.AnnAssign', ImaAnnAssign).annotation).slice).elts = list_exprDOTannotation
+						cast('ast.Tuple', ImaAnnAssign.value).elts = list_exprDOTvalue
+
+				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
+
+			NodeChanger(IfThis.is_argIdentifier(ast_arg.arg), Then.removeIt).visit(ingredientsFunction.astFunctionDef)
+
+	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
+	return ingredientsFunction
+
+def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) -> None:
+	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
+		NodeChanger(IfThis.isNameIdentifier(identifier)
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff:ignore[suspicious-eval-usage]
+		).visit(ingredientsCount.astFunctionDef)
+
+#================== Launchers =======================================================================
+
+def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba | None = None) -> None:
+	"""Add a standalone launcher section to a computation module."""
+	ingredientsModule.imports.addImport_asStr('time')
+	listLauncherBody: list[ast.stmt] = [Make.Assign(
+		[Make.Name('timeStart', Make.Store())]
+		, Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')))]
+
+	if spices is not None and spices.useNumbaProgressBar:
+		identifierStatusUpdate: str = 'statusUpdate'
+		ingredientsModule.imports.addImportFrom_asStr('numba_progress', 'ProgressBar')
+		ingredientsFunction.astFunctionDef.args.args.append(
+			Make.arg(spices.numbaProgressBarIdentifier, annotation=Make.Name('ProgressBar')))
+		NodeChanger(
+			findThis=Be.AugAssign.targetIs(IfThis.isNameIdentifier(raiseIfNone(job.shatteredDataclass).countingVariableName.id))
+			, doThat=Then.replaceWith(Make.Expr(Make.Call(
+				Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier), 'update'), [Make.Constant(2)])))
+		).visit(ingredientsFunction.astFunctionDef)
+		NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
+		ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
+		listLauncherBody.extend([
+			Make.With([Make.withitem(Make.Call(Make.Name('ProgressBar'), list_keyword=[
+				Make.keyword('total', Make.Constant(job.foldsTotalEstimated // job.foldsTotalMultiplier))
+				, Make.keyword('update_interval', Make.Constant(2))])
+				, Make.Name(identifierStatusUpdate, Make.Store()))]
+				, [Make.Expr(Make.Call(Make.Name(job.identifierCallable), [Make.Name(identifierStatusUpdate)]))])
+			, Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Mult().join([
+				Make.Attribute(Make.Name(identifierStatusUpdate), 'n'), Make.Constant(job.foldsTotalMultiplier)]))])
+	else:
+		NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Name(
+			raiseIfNone(job.shatteredDataclass).countingVariableName.id)))).visit(ingredientsFunction.astFunctionDef)
+		ingredientsFunction.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
+		listLauncherBody.append(Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Call(Make.Name('int'), [
+			Make.Mult().join([Make.Call(Make.Name(job.identifierCallable)), Make.Constant(job.foldsTotalMultiplier)])])))
+
+	listLauncherBody.extend([
+		Make.Expr(Make.Call(Make.Name('print'), [Make.Sub().join([
+			Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')), Make.Name('timeStart')])]))
+		, Make.Expr(Make.Call(Make.Name('print'), [Make.Constant(f'\nmap {job.state.mapShape} ='), Make.Name('foldsTotal')]))
+		, Make.Assign([Make.Name('writeStream', Make.Store())], Make.Call(Make.Name('open'), [
+			Make.Constant(raiseIfNone(job.pathFilenameFoldsTotal).as_posix()), Make.Constant('w')]))
+		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'write'), [
+			Make.Call(Make.Name('str'), [Make.Name('foldsTotal')])]))
+		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'close')))])
+	ingredientsModule.appendLauncher(statement=Make.If(
+		Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')]), listLauncherBody))
+
+#================== Datatypes =======================================================================
 
 # TODO Use this concept in general modules, not just custom jobs.
 def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, listDatatypeConfigurations: list[DatatypeConfiguration]) -> tuple[IngredientsFunction, IngredientsModule]:

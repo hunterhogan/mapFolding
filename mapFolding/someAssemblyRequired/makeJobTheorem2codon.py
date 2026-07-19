@@ -4,14 +4,15 @@ https://docs.exaloop.io/start/install/
 """
 from __future__ import annotations
 
-from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
-from astToolkit.containers import IngredientsFunction, IngredientsModule
+from astToolkit import Be, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
-from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, moveShatteredDataclass_arg2body, RecipeJobTheorem2
+from mapFolding.someAssemblyRequired.RecipeJob import (
+	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -22,8 +23,6 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	import ast
 
-# TODO Converge with `makeJobTheorem2Numba`.
-
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeElephino'),
@@ -33,21 +32,73 @@ listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
 ]
 
-def _addWriteFoldsTotal(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
-	NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
-	ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
+def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
+	"""Create a binary executable for a map-folding job from map dimensions.
 
-	writeFoldsTotal = Make.Expr(Make.Call(Make.Attribute(
-		Make.Call(Make.Name('open'), listParameters=[Make.Constant(raiseIfNone(job.pathFilenameFoldsTotal).as_posix()), Make.Constant('w')])
-		, 'write'), listParameters=[Make.Call(Make.Name('str'), listParameters=[
-			Make.Mult().join([raiseIfNone(job.shatteredDataclass).countingVariableName, Make.Constant(job.state.leavesTotal * 12)])])]))
+	This function initializes a map folding computation state from the given map shape, sets up the necessary file paths, and
+	generates an optimized executable for the specific map configuration.
 
-	NodeChanger(IfThis.isAllOf(Be.AugAssign.targetIs(IfThis.isNameIdentifier(raiseIfNone(job.shatteredDataclass).countingVariableName.id))
-			, Be.AugAssign.opIs(Be.Mult), Be.AugAssign.valueIs(Be.Constant))
-		, doThat=Then.replaceWith(writeFoldsTotal)
-	).visit(ingredientsFunction.astFunctionDef)
+	Parameters
+	----------
+	mapShape : tuple[DatatypeLeavesTotal, ...]
+		Dimensions of the map as a tuple where each element represents the size
+		along one axis.
 
-	return ingredientsFunction
+	"""
+	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
+	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba'
+	source_astModule: ast.Module = parseLogicalPath2astModule(logicalPath2astModule)
+	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
+	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule
+		, pathFilenameFoldsTotal=pathFilenameFoldsTotal, foldsTotalMultiplier=state.leavesTotal)
+	makeJob(aJob)
+
+def makeJob(job: RecipeJobTheorem2) -> None:
+	"""Generate an optimized module for map folding calculations.
+
+	This function orchestrates the complete code transformation assembly line to convert a generic map folding algorithm into a
+	highly optimized, specialized computation module.
+
+	Parameters
+	----------
+	job : RecipeJobTheorem2
+		Configuration recipe containing source locations, target paths, raw materials, and state.
+
+	"""
+	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
+	ingredientsCount.astFunctionDef.decorator_list = []
+
+	staticValues(job, ingredientsCount)
+
+	ingredientsModule = IngredientsModule()
+	addLauncher(ingredientsModule, ingredientsCount, job)
+	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
+	ingredientsCount = _variableCompatibility(ingredientsCount, job)
+
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
+
+	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
+
+	ingredientsModule.appendIngredientsFunction(ingredientsCount)
+
+	if sys.platform == 'linux':
+		Path(job.pathFilenameModule).parent.mkdir(parents=True, exist_ok=True)
+		buildCommand: list[str] = ['codon', 'build', '--exe', '--release',
+			'--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions',
+			'--mcpu=native',
+			'-o', str(job.pathFilenameModule.with_suffix('')),
+			'-']
+		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
+		if streamText.stdin is not None:
+			ingredientsModule.write_astModule(streamText.stdin, job.packageIdentifier)
+			streamText.stdin.close()
+		streamText.wait()
+		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
+		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
+	else:
+		ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
+		sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
 
 def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Ensure the variable is compiled to the correct type.
@@ -111,83 +162,6 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 
 	return ingredientsFunction
 
-def makeJob(job: RecipeJobTheorem2) -> None:
-	"""Generate an optimized module for map folding calculations.
-
-	This function orchestrates the complete code transformation assembly line to convert a generic map folding algorithm into a
-	highly optimized, specialized computation module.
-
-	Parameters
-	----------
-	job : RecipeJobTheorem2
-		Configuration recipe containing source locations, target paths, raw materials, and state.
-
-	"""
-	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(raiseIfNone(job.source_astModule), job.identifierCallableSource)))
-	ingredientsCount.astFunctionDef.decorator_list = []
-
-	# Replace identifiers-with-static-values with their values.
-	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
-		NodeChanger(IfThis.isNameIdentifier(identifier)
-			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff:ignore[suspicious-eval-usage]
-		).visit(ingredientsCount.astFunctionDef)
-
-	ingredientsCount.imports.update(raiseIfNone(job.shatteredDataclass).imports)
-	ingredientsCount.removeUnusedParameters()
-	NodeChanger(Be.arg, lambda removeIt: ingredientsCount.astFunctionDef.body.insert(0, moveShatteredDataclass_arg2body(removeIt.arg, job))).visit(ingredientsCount.astFunctionDef)
-
-	ingredientsCount = _addWriteFoldsTotal(ingredientsCount, job)
-	ingredientsCount = _variableCompatibility(ingredientsCount, job)
-
-	ingredientsModule = IngredientsModule(launcher=Make.Module([
-		Make.If(Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')])
-			, body=[Make.Expr(Make.Call(Make.Name(job.identifierCallable)))])]))
-
-	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
-
-	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
-
-	ingredientsModule.appendIngredientsFunction(ingredientsCount)
-
-	if sys.platform == 'linux':
-		Path(job.pathFilenameModule).parent.mkdir(parents=True, exist_ok=True)
-		buildCommand: list[str] = ['codon', 'build', '--exe', '--release',
-			'--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions',
-			'--mcpu=native',
-			'-o', str(job.pathFilenameModule.with_suffix('')),
-			'-']
-		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
-		if streamText.stdin is not None:
-			ingredientsModule.write_astModule(streamText.stdin, job.packageIdentifier)
-			streamText.stdin.close()
-		streamText.wait()
-		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
-		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
-	else:
-		ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
-		sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
-
-def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
-	"""Create a binary executable for a map-folding job from map dimensions.
-
-	This function initializes a map folding computation state from the given map shape, sets up the necessary file paths, and
-	generates an optimized executable for the specific map configuration.
-
-	Parameters
-	----------
-	mapShape : tuple[DatatypeLeavesTotal, ...]
-		Dimensions of the map as a tuple where each element represents the size
-		along one axis.
-
-	"""
-	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
-	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
-	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba'
-	source_astModule: ast.Module = parseLogicalPath2astModule(logicalPath2astModule)
-	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal)
-	makeJob(aJob)
-
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 21)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 10)
 	fromMapShape(mapShape)

@@ -1,4 +1,4 @@
-# ruff: noqa: PLC0415 E701 DOC501
+# ruff:file-ignore[import-outside-top-level, multiple-statements-on-one-line-colon, docstring-missing-exception]
 """You can use this module to access OEIS sequence data and compute sequence values.
 
 (AI generated docstring)
@@ -777,8 +777,8 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 					else:
 						arcCode = 0b1
 					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
-													#  0b1010 | 0b0101 is 0b1111, or 0xf  # noqa: E116
-													#    0b10 |   0b01 is   0b11, or 0x3  # noqa: E116
+													#  0b1010 | 0b0101 is 0b1111, or 0xf  # ruff:ignore[unexpected-indentation-comment]
+													#    0b10 |   0b01 is   0b11, or 0x3  # ruff:ignore[unexpected-indentation-comment]
 
 					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
 					while listArcCodes[-1] < MAXIMUMarcCode:

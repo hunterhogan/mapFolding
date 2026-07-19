@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import MapFoldingState  # noqa: TC001
+from mapFolding.dataBaskets import MapFoldingState  # ruff:ignore[typing-only-first-party-import]
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
 	return state.leaf1ndex > 0

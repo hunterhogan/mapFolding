@@ -1,4 +1,4 @@
-# ruff: noqa: PLC0415
+# ruff:file-ignore[import-outside-top-level]
 """You can use this module to access the central dispatch functions for all map-folding computations.
 
 This module provides the primary entry points for computing distinct foldings of multidimensional maps
@@ -135,7 +135,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
-	"""  # noqa: DOC501
+	"""  # ruff:ignore[docstring-missing-exception]
 #-------- mapShape ---------------------------------------------------------------------
 
 	if mapShape:

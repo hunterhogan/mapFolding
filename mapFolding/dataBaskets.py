@@ -3,7 +3,7 @@
 # pyright: reportUnknownMemberType=false
 # pyright: reportAttributeAccessIssue=false
 # ty:ignore[invalid-assignment,unresolved-attribute]
-# ruff: noqa: RUF009 E701 PLC0415
+# ruff:file-ignore[function-call-in-dataclass-default-argument, import-outside-top-level]
 """
 Computational state orchestration for map folding analysis.
 
@@ -151,12 +151,18 @@ class MapFoldingState:
 
 		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
-		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
-		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+		if self.dimensionsUnconstrained is None:
+			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
+		if self.gapsWhere is None:
+			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+		if self.countDimensionsGapped is None:
+			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
+		if self.gapRangeStart is None:
+			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
+		if self.leafAbove is None:
+			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
+		if self.leafBelow is None:
+			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 
 @dataclasses.dataclass(slots=True)
 class SymmetricFoldsState:
@@ -268,13 +274,20 @@ class SymmetricFoldsState:
 
 		self.indices = [[((index + folding) % (self.leavesTotal + 1), (-2 - index + folding) % (self.leavesTotal + 1)) for index in range(self.leavesTotal // 2)] for folding in range(self.leavesTotal + 1)]
 
-		if self.dimensionsUnconstrained is None: self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
-		if self.gapsWhere is None: self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
-		if self.countDimensionsGapped is None: self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if self.gapRangeStart is None: self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if self.leafAbove is None: self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if self.leafBelow is None: self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
-		if self.leafComparison is None: self.leafComparison = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
+		if self.dimensionsUnconstrained is None:
+			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
+		if self.gapsWhere is None:
+			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+		if self.countDimensionsGapped is None:
+			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
+		if self.gapRangeStart is None:
+			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
+		if self.leafAbove is None:
+			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
+		if self.leafBelow is None:
+			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+		if self.leafComparison is None:
+			self.leafComparison = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
 
 @dataclasses.dataclass
 class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + dataclassIdentifier`.

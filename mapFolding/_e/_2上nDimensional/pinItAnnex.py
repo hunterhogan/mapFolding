@@ -115,9 +115,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 		The updated `permutationSpace` if valid; otherwise `None`.
 
 	"""
-	# TODO (High value improvement) To generalize, I need to
-	# - know how to compute crease neighbors for arbitrary map shapes, and
-	# - know if this algorithm is valid for arbitrary map shapes.
+	# TODO (High value improvement) To generalize, at least one of the adjacent leaves must be a crease.
 	permutationSpaceHasNewLeaf: bool = True
 
 	while permutationSpaceHasNewLeaf:

@@ -261,7 +261,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	pathFilenameFoldsTotal: Path = pathFilenameModule.with_suffix('.foldsTotalTesting')
 	registrarRecordsTemporaryFilesystemObject(pathFilenameFoldsTotal)
 
-	jobTest = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal))
+	jobTest = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem
+		, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal), foldsTotalMultiplier=state.leavesTotal)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(jobTest, spices)
 
