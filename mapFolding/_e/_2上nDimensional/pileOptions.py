@@ -1,7 +1,7 @@
 # pyright: reportAssignmentType=false
 # pyright: reportUnknownVariableType=false
 # pyright: reportUnknownArgumentType=false
-# ruff: noqa: PLC0415, ERA001, T201, T203
+# ruff:file-ignore[import-outside-top-level, commented-out-code, print, p-print]
 from __future__ import annotations
 
 from bisect import bisect_left

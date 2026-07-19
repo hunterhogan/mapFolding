@@ -1,4 +1,4 @@
-# ruff: noqa: SIM102 PLR0916
+# ruff:file-ignore[collapsible-if, too-many-boolean-expressions]
 from __future__ import annotations
 
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗

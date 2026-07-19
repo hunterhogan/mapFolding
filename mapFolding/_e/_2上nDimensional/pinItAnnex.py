@@ -286,7 +286,6 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 	return permutationSpace
 
-# TODO I don't think this applies to all map shapes.
 def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce head-before-tail ordering constraints.
 
@@ -334,7 +333,6 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		# TODO `notLeafOriginOrLeaf零` and `pile1stOpen` are specific to 2ⁿ-dimensional maps. Adjust these if moved to `pinIt`.
 		pile1stOpen: int = 2
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves()))):
 			dimensionHead: int = dimensionNearest首(leaf)
@@ -356,7 +354,6 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 	return permutationSpace
 
-# TODO I don't think this applies to all map shapes.
 def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to enforce non-consecutive dimension constraints.
 

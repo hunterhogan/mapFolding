@@ -1,4 +1,4 @@
-# ruff: noqa: T201, T203
+# ruff:file-ignore[print, p-print]
 from __future__ import annotations
 
 from gmpy2 import fac

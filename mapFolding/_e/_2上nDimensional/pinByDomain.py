@@ -1,4 +1,3 @@
-# ruff: noqa: DOC201
 from __future__ import annotations
 
 from gmpy2 import bit_flip, bit_mask, bit_test as isBit1吗, is_even as isEven吗, is_odd as isOdd吗
@@ -51,6 +50,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	But I would still have 1312 surplus dictionaries.
 
 	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
+
+	Returns
+	-------
+	listRemoveLeaves : list[int]
+		A list of leaves to exclude from pile 零Ante首零.
 	"""
 	leafAt一:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(一))
 	leafAt一Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(一) + state.首))
@@ -312,15 +316,15 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if isBit1吗(leafAt二, dimensionIndex(dimension)):
 			listRemoveLeaves.extend([首一(state.dimensionsTotal), (零) + 首零一(state.dimensionsTotal)])
 
-		# --- small ---
+		#--- small ---
 		if leafAt二 < 首一(state.dimensionsTotal):
 			listRemoveLeaves.extend([一])
 
-		# --- medium ---
+		#--- medium ---
 		if 首一(state.dimensionsTotal) < leafAt二 < 首零(state.dimensionsTotal):
 			listRemoveLeaves.extend([leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 2)), 首一(state.dimensionsTotal) + (一 + 零)])
 
-		#  --- large ---
+		#--- large ---
 		if 首零(state.dimensionsTotal) < leafAt二:
 			dimension = 二
 			if isBit1吗(leafAt二, dimensionIndex(dimension)):
@@ -367,12 +371,12 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 				listRemoveLeaves.extend([voodooMath])
 	# /voodooMath
 
-	# --- only 17 allows 49 ---
+	#--- only 17 allows 49 ---
 
 	if leafAt二Ante首 != (零) + 首一(state.dimensionsTotal):
 		listRemoveLeaves.extend([(零) + 首零一(state.dimensionsTotal)])
 
-	# --- odd and even ---
+	#--- odd and even ---
 
 	if howManyDimensionsHaveOddParity(leafAt二Ante首) == 1:
 		listRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
@@ -396,7 +400,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if dimensionTail == 3:
 		listRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensionsNearest首, dimensionTail)])
 
-	# --- large ---
+	#--- large ---
 
 	if 首零(state.dimensionsTotal) < leafAt二Ante首:
 

@@ -1,4 +1,4 @@
-# ruff: noqa: PLC0415, DOC201, DOC501
+# ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
 from collections import deque
@@ -147,7 +147,18 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `count` operates efficiently."""
+	"""Do the things necessary so that `count` operates efficiently.
+
+	Returns
+	-------
+	state : EliminationState
+		An updated `EliminationState`.
+
+	Raises
+	------
+	ValueError
+		If `state.mapShape` is empty or contains a zero dimension length.
+	"""
 	#======== Edge cases for "small" map shapes ============================
 	if (0 in state.mapShape) or not state.mapShape:
 		from mapFolding.oeis import makeDictionaryFoldsTotalKnown

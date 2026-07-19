@@ -1,4 +1,4 @@
-# ruff: noqa: SIM102 DOC201
+# ruff:file-ignore[collapsible-if, docstring-missing-returns]
 from __future__ import annotations
 
 from bisect import bisect_right

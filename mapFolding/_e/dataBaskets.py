@@ -8,9 +8,9 @@ from collections import deque
 # TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
-from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, groupby, merge, valfilter as filterLeaf
+from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, first, groupby, merge, valfilter as filterLeaf
 from hunterMakesPy import raiseIfNone
-from itertools import combinations
+from itertools import combinations, filterfalse
 from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
@@ -131,14 +131,15 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def copy(self) -> PermutationSpace:
 		return PermutationSpace(self)
 
-	def deconstructAtPile(self, pile: Pile, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
+	def deconstructAtPile(self, pile: Pile | None = None, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
 		# DOCUMENT Do not keep the original if you use any part of the return.
-		if self.pilePinned吗(pile):
+		if pile is None:
+			pile = first(filterLeaf(isLeafOptions吗, self))
+		if (leafOptions := self.getLeafOptions(pile)) is None:
 			deconstructed: Iterable[PermutationSpace] = deque([self])
 		else:
-			leavesToPin = leavesToPin or getIteratorOfLeaves(self[pile])  # pyright: ignore[reportArgumentType] # ty:ignore[invalid-argument-type]
-			pin: Callable[[Leaf], PermutationSpace] = partial(self.atPilePinLeaf, pile)
-			deconstructed = map(pin, filter(self.leafNotPinned吗, leavesToPin))
+			leavesToPin = leavesToPin or getIteratorOfLeaves(leafOptions)
+			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
 		return deconstructed
 
 	def deconstructByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
@@ -620,9 +621,9 @@ class EliminationState:
 
 		Parameters
 		----------
-		state : EliminationState
-			An elimination state that provides `state.mapShape`, `state.permutationSpace`, and bounds
-			such as `state.leafLast`.
+		permutationSpace : PermutationSpace
+			A permutation space that provides `permutationSpace.extractPinnedLeaves()` and bounds
+			such as `permutationSpace.leafLast`.
 
 		Returns
 		-------
@@ -642,7 +643,7 @@ class EliminationState:
 		[5] mapFolding._e.algorithms.iff.removeCreaseViolationsFromEliminationState
 
 		[6] mapFolding._e.pin2上nDimensions
-		"""  # ruff:ignore[docstring-extraneous-parameter]
+		"""
 		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.extractPinnedLeaves())}
 
 		for dimension in range(self.dimensionsTotal):
@@ -673,14 +674,9 @@ class EliminationState:
 		self.listPermutationSpace = deque()
 		listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()
 
-		# TODO (dissatisfied) I'm not satisfied with this function, and I _think_ the fundamental issue is the lack of no-op.
-
 		while listPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
-			# TODO (dissatisfied) `... | None` is not natural.
 			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
-			# DEVELOPMENT `sumPermutationSpace` detects _any_ change in the permutation space.
-			# DEVELOPMENT reminder: _all_ changes in a permutation space are reductions in the probability space.
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
 			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(
 				listFunctionsReduction
@@ -691,24 +687,14 @@ class EliminationState:
 				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = (
 					functionsReduction.popleft()
 				)
-				# TODO (dissatisfied) `raiseIfNone` is _only_ necessary because of `... | None`.
 				permutationSpace = reducePermutationSpace(self, raiseIfNone(permutationSpace))
 
 				if not permutationSpace:
-					# TODO (dissatisfied) In this previous version of this function, this check was
-					# handled by `more_itertools.filter_map`. In this version, it is necessary because the
-					# signatures of `_reducePermutationSpace_*` are `reducePermutationSpace:
-					# Callable[[EliminationState, PermutationSpace], PermutationSpace | None]` passing
-					# `PermutationSpace | None` will raise an exception instead of no-op. I will NOT add a
-					# guard to every `_reducePermutationSpace_*` function to handle `None`.
 					keepGoing = False
 				elif sumPermutationSpace != sum(permutationSpace.values()):
-					# TODO I suspect there are faster ways to check if an object has been altered.
-					# DEVELOPMENT Reset the `functionsReduction` queue.
 					functionsReduction = deque(listFunctionsReduction)
 					sumPermutationSpace = sum(permutationSpace.values())
 				elif not functionsReduction:
-					# DEVELOPMENT due to the previous `elif`, `... and (sumPermutationSpace == sum(permutationSpace.values()))` is implied.
 					listPermutationSpaceIrreducible.append(permutationSpace)
 					keepGoing = False
 
@@ -746,9 +732,6 @@ class EliminationState:
 		"""
 		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
 		self.listPermutationSpace = deque()
-		for permutationSpace in listPermutationSpace:
-			self.permutationSpace = permutationSpace
-			if not self.permutationSpaceCreaseViolation吗(permutationSpace):
-				self.listPermutationSpace.append(permutationSpace)
+		self.listPermutationSpace.extend(filterfalse(self.permutationSpaceCreaseViolation吗, listPermutationSpace))
 
 		return self

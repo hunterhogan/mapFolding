@@ -1,4 +1,4 @@
-# ruff: noqa: S301
+# ruff:file-ignore[suspicious-pickle-usage]
 from __future__ import annotations
 
 from mapFolding import packageSettings

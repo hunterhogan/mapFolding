@@ -2,13 +2,10 @@ from __future__ import annotations
 
 from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
-from humpy_cytoolz import valfilter as filterLeaf
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.filters import isLeafOptions吗
 from math import factorial
-from more_itertools import first
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
@@ -24,10 +21,8 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 
 		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
 
-		pile = first(filterLeaf(isLeafOptions吗, permutationSpace))
-
 		sherpa: EliminationState = EliminationState(state.mapShape, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(sherpa.permutationSpace.deconstructAtPile(pile))
+		sherpa.listPermutationSpace.extend(sherpa.permutationSpace.deconstructAtPile())
 		sherpa = sherpa.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 		listFolding.extend(sherpa.listFolding)

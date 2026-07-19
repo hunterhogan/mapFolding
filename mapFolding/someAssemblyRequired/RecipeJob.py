@@ -1,4 +1,3 @@
-# ruff:file-ignore[undocumented-public-function]
 """Configuration by dataclass."""
 from __future__ import annotations
 
@@ -318,6 +317,15 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	return ingredientsFunction
 
 def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) -> None:
+	"""Replace static scalar identifiers with concrete constant values in a function AST.
+
+	Parameters
+	----------
+	job : RecipeJobTheorem2
+		Recipe configuration containing the computation state and shattered dataclass metadata.
+	ingredientsCount : IngredientsFunction
+		Container holding the counting function's AST to be transformed.
+	"""
 	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
 			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff:ignore[suspicious-eval-usage]

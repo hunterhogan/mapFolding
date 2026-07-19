@@ -1,4 +1,4 @@
-# ruff: noqa: DOC201
+# ruff:file-ignore[docstring-missing-returns]
 from __future__ import annotations
 
 from functools import cache
@@ -779,5 +779,5 @@ def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
 	"""For each `leaf`, the associated Python `range` defines the mathematical domain:
 	1. every `pile` at which `leaf` may be found in a `folding` and
 	2. in the set of all valid foldings, every `pile` at which `leaf` must be found.
-	"""  # noqa: D205
+	"""  # ruff:ignore[missing-blank-line-after-summary]
 	return {leaf: getLeafDomain(state, leaf) for leaf in range(state.leavesTotal)}

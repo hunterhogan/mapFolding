@@ -1,10 +1,8 @@
-# ruff: noqa: DOC201, DOC501
+# ruff:file-ignore[docstring-missing-returns]
 from __future__ import annotations
 
 from functools import cache
-from hunterMakesPy.parseParameters import intInnit
 from math import log
-from operator import getitem
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -133,21 +131,15 @@ _place_ValueIndex: int = _dimensionIndex
 """
 
 @cache
-def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: int = _dimensionLength) -> int:
-	"""Convert the integer value of a single dimension into its corresponding `DimensionIndex`."""
-	dimension: int = getitem(intInnit([dimensionAsNonnegativeInteger], 'dimensionNonnegative', int), 0)
-	if dimension < 0:
-		message: str = f"I received `{dimensionAsNonnegativeInteger = }`, but I need a value greater than or equal to 0."
-		raise ValueError(message)
-	base: int = getitem(intInnit([dimensionLength], 'dimensionLength', int), 0)
-	if base < 1:
-		message: str = f"I received `{dimensionLength = }`, but I need an integer value greater than 1."
-		raise ValueError(message)
-	place_ValueIndex: float = log(dimension, base)
-	if not place_ValueIndex.is_integer():
-		message: str = f"I received `{dimensionAsNonnegativeInteger = }`, but I need a value that is an integer power of `{dimensionLength = }`."
-		raise ValueError(message)
-	return int(place_ValueIndex)
+def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: int = _dimensionLength) -> DimensionIndex:
+	"""In a single-base positional-numeral system, convert the integer value of a position to its `DimensionIndex`.
+
+	Returns
+	-------
+	index: DimensionIndex
+		The `DimensionIndex` corresponding to the provided dimension value.
+	"""
+	return int(log(dimensionAsNonnegativeInteger, dimensionLength))
 
 #-------- Access the dimension coordinates encoded in a number relative to the number's most significant digit -------
 
