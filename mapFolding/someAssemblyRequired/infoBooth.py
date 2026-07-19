@@ -14,12 +14,14 @@ specific dimensional configurations.
 from __future__ import annotations
 
 from copy import deepcopy
+from mapFolding import packageSettings
+from mapFolding.filesystemToolkit import getPathRootJobDEFAULT
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
 	from typing import Final
-
 
 dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
 	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000,
@@ -31,33 +33,38 @@ dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
 """Estimates of multidimensional map folding `foldsTotal`."""
 
 class Default(TypedDict):
-	"""Default identifiers."""
+	"""Default values."""
 
+	filesystem: dict[str, PurePosixPath]
 	function: dict[str, str]
 	logicalPath: dict[str, identifierDotAttribute]
 	module: dict[str, str]
 	variable: dict[str, str]
 
 default = Default(
-	function={
-		'counting': 'count',
-		'dispatcher': 'doTheNeedful',
-		'initializeState': 'transitionOnGroupsOfFolds',
-	},
-	logicalPath={
-		'algorithm': 'algorithms',
-		'synthetic': 'syntheticModules',
-	},
-	module={
-		'algorithm': 'daoOfMapFolding',
-		'dataBasket': 'dataBaskets',
-		'initializeState': 'initializeState',
-	},
-	variable={
-		'counting': 'groupsOfFolds',
-		'stateDataclass': 'MapFoldingState',
-		'stateInstance': 'state',
-	},
+	filesystem={
+		'jobModule': PurePosixPath(getPathRootJobDEFAULT())
+		, 'sourcePackage': PurePosixPath(packageSettings.pathPackage)
+	}
+	, function={
+		'counting': 'count'
+		, 'dispatcher': 'doTheNeedful'
+		, 'initializeState': 'transitionOnGroupsOfFolds'
+	}
+	, logicalPath={
+		'algorithm': 'algorithms'
+		, 'synthetic': 'syntheticModules'
+	}
+	, module={
+		'algorithm': 'daoOfMapFolding'
+		, 'dataBasket': 'dataBaskets'
+		, 'initializeState': 'initializeState'
+	}
+	, variable={
+		'counting': 'groupsOfFolds'
+		, 'stateDataclass': 'MapFoldingState'
+		, 'stateInstance': 'state'
+	}
 )
 
 defaultA007822: Default = deepcopy(default)

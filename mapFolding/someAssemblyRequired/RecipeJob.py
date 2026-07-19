@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from astToolkit import parseLogicalPath2astModule
 from astToolkit.transformationTools import pythonCode2ast_expr
+from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import packageSettings
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT
+from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import default
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
@@ -16,10 +17,6 @@ import dataclasses
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
-	# SEMIOTICS 'The____' identifiers are a vestigial semiotic system. Do I still need to import `asname`? If so, would different
-	# identifiers better integrate into the current semiotics?
-	from mapFolding import (
-		DatatypeElephino as TheDatatypeElephino, DatatypeFoldsTotal as TheDatatypeFoldsTotal, DatatypeLeavesTotal as TheDatatypeLeavesTotal)
 	from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 	from mapFolding.someAssemblyRequired import DatatypeConfiguration, ShatteredDataclass
 	import ast
@@ -88,11 +85,11 @@ class RecipeJobTheorem2:
 	"""The map folding computation state containing dimensions and initial values."""
 	foldsTotalEstimated: int = 0
 	"""Estimated total number of folds for progress tracking."""
-	shatteredDataclass: ShatteredDataclass = dataclasses.field(default=None, init=True)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	shatteredDataclass: ShatteredDataclass | None = None
 	"""Deconstructed dataclass metadata for code transformation."""
 
 #-------- Source -----------------------------------------
-	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba')  # noqa: RUF009
+	source_astModule: ast.Module | None = None
 	"""Parsed AST of the source module containing the generic algorithm."""
 	identifierCallableSource: str = default['function']['counting']
 	"""Name of the counting function to extract."""
@@ -104,7 +101,7 @@ class RecipeJobTheorem2:
 	sourceDataclassInstance: str = default['variable']['stateInstance']
 	"""Instance identifier for the dataclass."""
 
-	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)  # noqa: RUF009
+	sourcePathPackage: PurePosixPath | None = default['filesystem']['sourcePackage']
 	"""Path to the source package."""
 	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
 	"""Name of the source package."""
@@ -112,19 +109,19 @@ class RecipeJobTheorem2:
 #-------- Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None
 	"""Override path for the target package."""
-	pathModule: PurePosixPath | None = PurePosixPath(getPathRootJobDEFAULT())  # noqa: RUF009
+	pathModule: PurePosixPath | None = default['filesystem']['jobModule']
 	"""Override path for the target module directory."""
 	fileExtension: str = packageSettings.fileExtension
 	"""File extension for generated modules."""
-	pathFilenameFoldsTotal: PurePosixPath = dataclasses.field(default=None, init=True)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	pathFilenameFoldsTotal: PurePosixPath | None = None
 	"""Path for writing fold count results."""
 
 #-------- Logical identifiers, as opposed to physical identifiers ------------------------
-	packageIdentifier: str | None = None
+	packageIdentifier: str = ''
 	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
 	"""Logical path root; probably corresponds to physical filesystem directory."""
-	moduleIdentifier: str = dataclasses.field(default=None, init=True)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	moduleIdentifier: str | None = None
 	"""Target module identifier."""
 	identifierCallable: str = identifierCallableSource
 	"""Name of the counting function in generated module."""
@@ -136,12 +133,6 @@ class RecipeJobTheorem2:
 	"""Logical path to target dataclass module."""
 
 #-------- Datatypes ------------------------------------------
-	type DatatypeFoldsTotal = TheDatatypeFoldsTotal
-	"""Type alias for datatype linked to the magnitude of `foldsTotal`."""
-	type DatatypeElephino = TheDatatypeElephino
-	"""Type alias for intermediate computation datatype."""
-	type DatatypeLeavesTotal = TheDatatypeLeavesTotal
-	"""Type alias for datatype linked to the magnitude of `leavesTotal`."""
 
 	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathINFIX: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:
 		"""Construct a complete file path from component parts.
@@ -169,7 +160,7 @@ class RecipeJobTheorem2:
 			whyIsThisStillAThing: list[str] = logicalPathINFIX.split('.')
 			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
 		if filenameStem is None:
-			filenameStem = self.moduleIdentifier
+			filenameStem = raiseIfNone(self.moduleIdentifier)
 		if fileExtension is None:
 			fileExtension = self.fileExtension
 		filename: str = filenameStem + fileExtension
@@ -208,14 +199,17 @@ class RecipeJobTheorem2:
 		"""
 		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
 
-		if self.pathFilenameFoldsTotal is None:  # pyright: ignore[reportUnnecessaryComparison]
+		if self.pathFilenameFoldsTotal is None:
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
 
-		if self.moduleIdentifier is None:  # pyright: ignore[reportUnnecessaryComparison]
+		if self.moduleIdentifier is None:
 			self.moduleIdentifier = self.pathFilenameFoldsTotal.stem
 
-		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance:  # pyright: ignore[reportUnnecessaryComparison]
+		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance:
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
+
+		if self.source_astModule is None:
+			self.source_astModule = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
 
 def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
 	"""Embed a shattered dataclass field assignment into the function body.
@@ -239,12 +233,12 @@ def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> 
 	Ima___Assign : ast.AnnAssign | ast.Assign
 		Assignment node mutated with state-backed values for the requested field.
 	"""
-	Ima___Assign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[identifier]
+	Ima___Assign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[identifier]
 	match elementConstructor:
 		case 'scalar':
-			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # noqa: S307
+			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # ruff:ignore[suspicious-eval-usage]
 		case 'array':
-			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # noqa: S307
+			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # ruff:ignore[suspicious-eval-usage]
 			dataAs_ast_expr: ast.expr = pythonCode2ast_expr(dataAsStrRLE)
 			cast('ast.Call', Ima___Assign.value).args = [dataAs_ast_expr]
 		case _:
@@ -264,7 +258,12 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	changing the import statements. You shouldn't need to change any "business" logic.
 
 	This will not remove potentially conflicting existing imports from other modules.
-	"""  # noqa: DOC201
+
+	Returns
+	-------
+	datatypesIngredientsObjects : tuple[IngredientsFunction, IngredientsModule]
+		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
+	"""
 	for datatypeConfig in listDatatypeConfigurations:
 		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
 		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)

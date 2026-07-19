@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule
-from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
@@ -16,12 +15,11 @@ from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
-import subprocess  # noqa: S404
+import subprocess  # ruff:ignore[suspicious-subprocess-import]
 import sys
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
-	from io import TextIOBase
 	import ast
 
 # TODO Converge with `makeJobTheorem2Numba`.
@@ -40,11 +38,11 @@ def _addWriteFoldsTotal(ingredientsFunction: IngredientsFunction, job: RecipeJob
 	ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
 
 	writeFoldsTotal = Make.Expr(Make.Call(Make.Attribute(
-		Make.Call(Make.Name('open'), listParameters=[Make.Constant(str(job.pathFilenameFoldsTotal.as_posix())), Make.Constant('w')])
+		Make.Call(Make.Name('open'), listParameters=[Make.Constant(raiseIfNone(job.pathFilenameFoldsTotal).as_posix()), Make.Constant('w')])
 		, 'write'), listParameters=[Make.Call(Make.Name('str'), listParameters=[
-			Make.Mult().join([job.shatteredDataclass.countingVariableName, Make.Constant(job.state.leavesTotal * 2)])])]))
+			Make.Mult().join([raiseIfNone(job.shatteredDataclass).countingVariableName, Make.Constant(job.state.leavesTotal * 12)])])]))
 
-	NodeChanger(IfThis.isAllOf(Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
+	NodeChanger(IfThis.isAllOf(Be.AugAssign.targetIs(IfThis.isNameIdentifier(raiseIfNone(job.shatteredDataclass).countingVariableName.id))
 			, Be.AugAssign.opIs(Be.Mult), Be.AugAssign.valueIs(Be.Constant))
 		, doThat=Then.replaceWith(writeFoldsTotal)
 	).visit(ingredientsFunction.astFunctionDef)
@@ -71,7 +69,7 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 	ingredientsFunction : IngredientsFunction
 		Modified function.
 	"""
-	for ast_arg in job.shatteredDataclass.list_argAnnotated4ArgumentsSpecification:
+	for ast_arg in raiseIfNone(job.shatteredDataclass).list_argAnnotated4ArgumentsSpecification:
 		identifier: str = ast_arg.arg
 		annotation: ast.expr = raiseIfNone(ast_arg.annotation)
 
@@ -125,16 +123,16 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		Configuration recipe containing source locations, target paths, raw materials, and state.
 
 	"""
-	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallable)))
+	ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(raiseIfNone(job.source_astModule), job.identifierCallableSource)))
 	ingredientsCount.astFunctionDef.decorator_list = []
 
 	# Replace identifiers-with-static-values with their values.
-	for identifier in job.shatteredDataclass.listIdentifiersStaticScalars:
+	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
-			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff:ignore[suspicious-eval-usage]
 		).visit(ingredientsCount.astFunctionDef)
 
-	ingredientsCount.imports.update(job.shatteredDataclass.imports)
+	ingredientsCount.imports.update(raiseIfNone(job.shatteredDataclass).imports)
 	ingredientsCount.removeUnusedParameters()
 	NodeChanger(Be.arg, lambda removeIt: ingredientsCount.astFunctionDef.body.insert(0, moveShatteredDataclass_arg2body(removeIt.arg, job))).visit(ingredientsCount.astFunctionDef)
 
@@ -160,7 +158,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 			'-']
 		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
 		if streamText.stdin is not None:
-			write_astModule(ingredientsModule, pathFilename=cast('TextIOBase', streamText.stdin), packageName=job.packageIdentifier)
+			ingredientsModule.write_astModule(streamText.stdin, job.packageIdentifier)
 			streamText.stdin.close()
 		streamText.wait()
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
@@ -191,5 +189,5 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	makeJob(aJob)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (1, 14)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 21)
 	fromMapShape(mapShape)

@@ -1,4 +1,4 @@
-# ruff: noqa: E701
+# ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
 from mapFolding import packageSettings
@@ -52,14 +52,22 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 	-------
 	foldsTotal : int
 		Number of distinct ways to fold a map of the given dimensions.
-	"""  # noqa: DOC501
+
+	Raises
+	------
+	ValueError
+		If `mapShape` is `None` and `state` is `None`, then `eliminateFolds` raises a `ValueError`
+		because it cannot determine the map shape to compute the number of folds for.
+	NotImplementedError
+		If `flow` is set to "crease" and `mapShape` is not of the form `(2,) * n` for `n >= 4`, then
+		`eliminateFolds` raises a `NotImplementedError` because the crease algorithm is only
+		implemented for maps of that
+	"""
 #-------- state ---------------------------------------------------------------------
+
 	if not state:
 		if not mapShape:
-			message: str = (f"""I received these values:
-	`{mapShape = }` and `{state = }`,
-	but I was unable to select a map of which to count the folds."""
-			)
+			message: str = f"I received these values: `{mapShape = }` and `{state = }`, but I was unable to select a map of which to count the folds."
 			raise ValueError(message)
 		state = EliminationState(mapShape)
 
@@ -76,15 +84,18 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		pathFilenameFoldsTotal = None
 
 #-------- Algorithm version -----------------------------------------------------
+
 	match flow:
-		case 'constraintPropagation': from mapFolding._e.algorithms.constraintPropagation import doTheNeedful  # noqa: PLC0415
+		case 'constraintPropagation':
+			from mapFolding._e.algorithms.constraintPropagation import doTheNeedful
 		case 'crease':
 			if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=4):
-				from mapFolding._e.algorithms.eliminationCrease import doTheNeedful  # noqa: PLC0415
+				from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 			else:
 				message: str = "As of 25 December 2025, this algorithm only works on mapShape = (2,) * n, n >= 4. Did I forget to update this barrier?"
 				raise NotImplementedError(message)
-		case 'elimination' | _: from mapFolding._e.algorithms.elimination import doTheNeedful  # noqa: PLC0415
+		case 'elimination' | _:
+			from mapFolding._e.algorithms.elimination import doTheNeedful
 
 	state = doTheNeedful(state, concurrencyLimit)
 

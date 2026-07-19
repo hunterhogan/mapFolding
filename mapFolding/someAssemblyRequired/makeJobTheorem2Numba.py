@@ -1,4 +1,4 @@
-# ruff: noqa: ERA001
+# ruff:file-ignore[commented-out-code]
 """
 Map folding AST transformation system: Specialized job generation and optimization implementation.
 
@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
+from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import packageSettings
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
@@ -22,6 +23,7 @@ from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA00782
 from mapFolding.someAssemblyRequired.RecipeJob import customizeDatatypeViaImport, RecipeJobTheorem2
 from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import PurePosixPath
 from typing import cast, TYPE_CHECKING
 import ast
@@ -46,7 +48,7 @@ listDatatypeConfigurations: list[DatatypeConfiguration] = [
 ]
 
 def addLauncher(ingredientsModule: IngredientsModule, ingredientsCount: IngredientsFunction, job: RecipeJobTheorem2) -> tuple[IngredientsModule, IngredientsFunction]:
-	"""Add a standalone launcher section to a computation module."""  # noqa: DOC201
+	"""Add a standalone launcher section to a computation module."""  # ruff:ignore[docstring-missing-returns]
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	import time
@@ -54,18 +56,18 @@ if __name__ == '__main__':
 	foldsTotal = int({job.identifierCallable}() * {job.state.leavesTotal})
 	print(time.perf_counter() - timeStart)
 	print('\\nmap {job.state.mapShape} =', foldsTotal)
-	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream = open('{raiseIfNone(job.pathFilenameFoldsTotal).as_posix()}', 'w')
 	writeStream.write(str(foldsTotal))
 	writeStream.close()
 """
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
-	NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName))).visit(ingredientsCount.astFunctionDef)
-	ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(raiseIfNone(job.shatteredDataclass).countingVariableName))).visit(ingredientsCount.astFunctionDef)
+	ingredientsCount.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
 
 	return ingredientsModule, ingredientsCount
 
 def addLauncherA007822(ingredientsModule: IngredientsModule, ingredientsCount: IngredientsFunction, job: RecipeJobTheorem2) -> tuple[IngredientsModule, IngredientsFunction]:
-	"""Add a standalone launcher section to a computation module."""  # noqa: DOC201
+	"""Add a standalone launcher section to a computation module."""  # ruff:ignore[docstring-missing-returns]
 	linesLaunch: str = f"""
 if __name__ == '__main__':
 	import time
@@ -73,13 +75,13 @@ if __name__ == '__main__':
 	foldsTotal = int({job.identifierCallable}())
 	print(time.perf_counter() - timeStart)
 	print('\\nmap {job.state.mapShape} =', foldsTotal)
-	writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
+	writeStream = open('{raiseIfNone(job.pathFilenameFoldsTotal).as_posix()}', 'w')
 	writeStream.write(str(foldsTotal))
 	writeStream.close()
 """
 	ingredientsModule.appendLauncher(ast.parse(linesLaunch))
-	NodeChanger(Be.Return, Then.replaceWith(Make.Return(job.shatteredDataclass.countingVariableName))).visit(ingredientsCount.astFunctionDef)
-	ingredientsCount.astFunctionDef.returns = job.shatteredDataclass.countingVariableAnnotation
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(raiseIfNone(job.shatteredDataclass).countingVariableName))).visit(ingredientsCount.astFunctionDef)
+	ingredientsCount.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
 
 	return ingredientsModule, ingredientsCount
 
@@ -110,7 +112,7 @@ if __name__ == '__main__':
 		{job.identifierCallable}(statusUpdate)
 		foldsTotal = statusUpdate.n * {job.state.leavesTotal}
 		print('\\nmap {job.state.mapShape} =', foldsTotal)
-		writeStream = open('{job.pathFilenameFoldsTotal.as_posix()}', 'w')
+		writeStream = open('{raiseIfNone(job.pathFilenameFoldsTotal).as_posix()}', 'w')
 		writeStream.write(str(foldsTotal))
 		writeStream.close()
 """
@@ -123,7 +125,7 @@ if __name__ == '__main__':
 	ingredientsFunction.astFunctionDef.args.args.append(ast_argNumbaProgress)
 
 	NodeChanger(
-		findThis=Be.AugAssign.targetIs(IfThis.isNameIdentifier(job.shatteredDataclass.countingVariableName.id))
+		findThis=Be.AugAssign.targetIs(IfThis.isNameIdentifier(raiseIfNone(job.shatteredDataclass).countingVariableName.id))
 		, doThat=Then.replaceWith(Make.Expr(Make.Call(Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier), 'update'), [Make.Constant(2)])))
 	).visit(ingredientsFunction.astFunctionDef)
 
@@ -164,7 +166,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	modifiedFunction : IngredientsFunction
 		The modified function with parameters converted to initialized variables.
 	"""
-	ingredientsFunction.imports.update(job.shatteredDataclass.imports)
+	ingredientsFunction.imports.update(raiseIfNone(job.shatteredDataclass).imports)
 
 	list_argCuzMyBrainRefusesToThink: list[ast.arg] = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
 	list_arg_arg: list[str] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
@@ -174,16 +176,16 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	listIdentifiersNotUsed: list[str] = list(set(list_arg_arg) - set(listIdentifiers))
 
 	for ast_arg in list_argCuzMyBrainRefusesToThink:
-		if ast_arg.arg in job.shatteredDataclass.field2AnnAssign:
+		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).field2AnnAssign:
 			if ast_arg.arg in listIdentifiersNotUsed:
 				pass
 			else:
-				ImaAnnAssign, elementConstructor = job.shatteredDataclass.Z0Z_field2AnnAssign[ast_arg.arg]
+				ImaAnnAssign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # noqa: S307
+						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff:ignore[suspicious-eval-usage]
 					case 'array':
-						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # noqa: S307
+						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # ruff:ignore[suspicious-eval-usage]
 						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
 						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
 					case _:
@@ -233,11 +235,11 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	"""
 	# ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallableSource)))
-	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(job.source_astModule, job.identifierCallableSource)
+	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 
-	for identifier in job.shatteredDataclass.listIdentifiersStaticScalars:
+	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
-			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # noqa: S307
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff:ignore[suspicious-eval-usage]
 		).visit(ingredientsCount.astFunctionDef)
 
 	ingredientsModule = IngredientsModule()
@@ -275,7 +277,6 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
@@ -286,7 +287,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 
 def A007822(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # noqa: PLC0415
+	from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
 	foldsTotalEstimated: int = dictionaryOEIS['A007822']['valuesKnown'].get(n, 0)
 	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{packageSettings.identifierPackage}.{defaultA007822['module']['dataBasket']}"
@@ -302,7 +303,7 @@ def A007822(n: int) -> None:
 	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
 	fileExtension: str = packageSettings.fileExtension
 	pathFilenameFoldsTotal = pathModule / ('A007822_' + str(n))
-	packageIdentifier: str | None = None
+	packageIdentifier: str = ''
 	logicalPathRoot: identifierDotAttribute | None = None
 	moduleIdentifier: str = pathFilenameFoldsTotal.stem
 	identifierCallable: str = identifierCallableSource
