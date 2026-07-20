@@ -1,0 +1,4 @@
+extend = "../ruff.toml"
+
+[lint]
+ignore = ["missing-return-type-undocumented-public-function", "missing-type-function-argument"]

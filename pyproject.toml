@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.23.1"
+version = "0.24.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -50,7 +50,7 @@ dependencies = [
   "tqdm",
   "urllib3",
 ]
-optional-dependencies = { development = [
+optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'"], development = [
   "gmpy2-stubs",
   "ipykernel",
   "ipywidgets",
@@ -58,7 +58,6 @@ optional-dependencies = { development = [
   "py-spy",
   "pyarrow-stubs",
   "pytest-cov",
-  "python-minifier",
   "setuptools"
 ], numba = ["numba", "numba_progress"], ortools = ["ortools"], pandas = [
   "pandas",

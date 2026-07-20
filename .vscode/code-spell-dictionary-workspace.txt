@@ -7,6 +7,7 @@ aggfunc
 Aichholzer
 Alcover
 Alie
+allclose
 alphita
 Anders
 antidivisor
@@ -22,6 +23,7 @@ arraysetops
 Asano
 asmprinter
 asname
+ative
 atleast
 Autocode
 autoflake
@@ -38,6 +40,7 @@ Bletionary
 boolop
 boundscheck
 bsgs
+bsolute
 carmichaels
 Celler
 cffconvert
@@ -98,6 +101,7 @@ elts
 Embedder
 enabledelayedexpansion
 enteroperableity
+erance
 erical
 excepthandler
 Excludee
@@ -267,6 +271,7 @@ objmode
 objs
 OBJS
 oeis
+olute
 onefile
 oneword
 optnone
@@ -334,6 +339,7 @@ relators
 rels
 rmuln
 Rplus
+rtol
 Ruskey
 Saakov
 saam

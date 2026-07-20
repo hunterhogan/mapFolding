@@ -28,6 +28,7 @@ which is useful if you're working with the code synthesis features of the packag
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
+from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import countingMeanders, dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, oeisIDfor_n
@@ -50,7 +51,7 @@ if TYPE_CHECKING:
 	from types import ModuleType
 
 @pytest.mark.parametrize(
-	'oeisIdentifier, sequenceIndex, flow, processorLimit'
+	'oeisID, n, flow, CPUlimit'
 	, [
 		pytest.param('A007822', 4, 'algorithm', 0.5, id='algorithm')
 		, pytest.param('A007822', 4, 'asynchronous', 0.5, id='asynchronous')
@@ -59,38 +60,57 @@ if TYPE_CHECKING:
 		, pytest.param('A007822', 4, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
 	]
 )
-def test_A007822(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLimit: float) -> None:
+def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 	"""Test A007822 flow options.
 
 	Parameters
 	----------
-	oeisIdentifier : str
+	oeisID : str
 		OEIS identifier to validate.
-	sequenceIndex : int
+	n : int
 		Sequence index to validate.
 	flow : str
 		Computation flow to validate.
-	processorLimit : float
+	CPUlimit : float
 		CPU limit for the computation.
 
 	"""
 	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
-	expected: int = dictionaryOEIS[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, CPUlimit=processorLimit)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, flow, pathLikeWriteFoldsTotal, processorLimit)
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
+	actual: int = countingMeanders(oeisID, n, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, flow, pathLikeWriteFoldsTotal, CPUlimit)
 
-@pytest.mark.parametrize(
-	'oeisIdentifier, sequenceIndex, flow, processorLimit'
+@pytest.mark.parametrize('CPUlimit', (None,))
+@pytest.mark.parametrize('oeisID, n, flow'
 	, [
-		pytest.param('A000136', 3, 'daoOfMapFolding', None, id='A000136::daoOfMapFolding')
-		, pytest.param('A001415', 3, 'numba', None, id='A001415::numba')
-		, pytest.param('A001416', 3, 'theorem2Numba', None, id='A001416::theorem2Numba')
-		, pytest.param('A001417', 3, 'theorem2', None, id='A001417::theorem2')
-		, pytest.param('A001418', 3, 'theorem2Trimmed', None, id='A001418::theorem2Trimmed')
+		*[
+			pytest.param(oeisID, n, flow, id=f'{oeisID}::n{n}::{flow}')
+			for oeisID, nValues in (
+				('A000136', (2, 3, 12))
+				, ('A001415', (2, 3, 9))
+				, ('A001416', (2, 4, 6))
+				, ('A001417', (3, 5))
+				, ('A001418', (4,))
+				, ('A195646', (2,))
+			)
+			for n, flow in CartesianProduct(nValues, ('numba', 'theorem2Codon', 'theorem2Numba'))
+		]
+		, *[
+			pytest.param(oeisID, n, flow, id=f'{oeisID}::n{n}::{flow}')
+			for oeisID, nValues in (
+				('A000136', (2, 3, 12))
+				, ('A001415', (2, 3, 6))
+				, ('A001416', (2, 4))
+				, ('A001417', (3,))
+				, ('A001418', (3,))
+				, ('A195646', (1,))
+			)
+			for n, flow in CartesianProduct(nValues, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed'))
+		]
 	]
 )
-def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processorLimit: float | None) -> None:
+def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> None:
 	"""Validate that different computational flows produce valid results.
 
 	(AI generated docstring)
@@ -104,33 +124,27 @@ def test_countFolds(oeisIdentifier: str, sequenceIndex: int, flow: str, processo
 
 	Parameters
 	----------
-	oeisIdentifier : str
+	oeisID : str
 		OEIS identifier to validate.
-	sequenceIndex : int
+	n : int
 		Sequence index to validate.
 	flow : str
 		Computation flow to validate.
-	processorLimit : float | None
+	CPUlimit : float | None
 		CPU limit for the computation.
 
 	"""
-	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisIdentifier]['getMapShape'](sequenceIndex)
-	expected: int = dictionaryOEISMapFolding[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countFolds(None, None, None, CPUlimit=processorLimit, mapShape=mapShape, flow=flow)
-	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, processorLimit, mapShape, flow)
+	if flow == 'theorem2Codon' and importlib.util.find_spec('codon') is None:
+		pytest.skip('codon-jit is not installed')
 
-@pytest.mark.parametrize(
-	'oeisIdentifier, sequenceIndex, flow'
-	, [
-		pytest.param('A000682', 3, 'matrixMeanders', id='A000682::matrixMeanders')
-		, pytest.param('A005316', 3, 'matrixMeanders', id='A005316::matrixMeanders')
-		, pytest.param('A000682', 3, 'matrixNumPy', id='A000682::matrixNumPy')
-		, pytest.param('A005316', 3, 'matrixNumPy', id='A005316::matrixNumPy')
-		, pytest.param('A000682', 3, 'matrixPandas', id='A000682::matrixPandas')
-		, pytest.param('A005316', 3, 'matrixPandas', id='A005316::matrixPandas')
-	]
-)
-def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
+	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
+	expected: int = dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]
+	actual: int = countFolds(None, None, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
+	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, CPUlimit, mapShape, flow)
+
+@pytest.mark.parametrize('oeisID', ('A000682', 'A005316'))
+@pytest.mark.parametrize('n, flow', (*CartesianProduct((2, 29), ('matrixNumPy', 'matrixPandas')), (3, 'matrixMeanders'), (10, 'matrixMeanders')))
+def test_meanders(oeisID: str, n: int, flow: str) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -138,21 +152,21 @@ def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 
 	Parameters
 	----------
-	oeisIdentifier : str
+	oeisID : str
 		OEIS identifier to validate.
-	sequenceIndex : int
+	n : int
 		Sequence index to validate.
 	flow : str
 		Computation flow to validate.
 
 	"""
-	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisIdentifier in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, flow, None)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, flow, None)
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][n]
+	actual: int = countingMeanders(oeisID, n, flow, None)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, flow, None)
 
 @pytest.mark.parametrize(
-	'oeisIdentifier, sequenceIndex'
+	'oeisID, n'
 	, [
 		pytest.param('A000560', 3, id='A000560::n3')
 		, pytest.param('A000682', 3, id='A000682::n3')
@@ -171,7 +185,7 @@ def test_meanders(oeisIdentifier: str, sequenceIndex: int, flow: str) -> None:
 		, pytest.param('A301620', 3, id='A301620::n3')
 	]
 )
-def test_countingMeanders(oeisIdentifier: str, sequenceIndex: int) -> None:
+def test_countingMeanders(oeisID: str, n: int) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -179,19 +193,19 @@ def test_countingMeanders(oeisIdentifier: str, sequenceIndex: int) -> None:
 
 	Parameters
 	----------
-	oeisIdentifier : str
+	oeisID : str
 		OEIS identifier to validate.
-	sequenceIndex : int
+	n : int
 		Sequence index to validate.
 
 	"""
-	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisIdentifier in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = countingMeanders(oeisIdentifier, sequenceIndex, None, None)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisIdentifier, sequenceIndex, None, None)
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][n]
+	actual: int = countingMeanders(oeisID, n, None, None)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, None, None)
 
 @pytest.mark.parametrize(
-	'oeisIdentifier, sequenceIndex'
+	'oeisID, n'
 	, [
 		pytest.param('A000136', 3, id='A000136::n3')
 		, pytest.param('A001415', 3, id='A001415::n3')
@@ -201,7 +215,7 @@ def test_countingMeanders(oeisIdentifier: str, sequenceIndex: int) -> None:
 		, pytest.param('A195646', 2, id='A195646::n2')
 	]
 )
-def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
+def test_oeisIDfor_n(oeisID: str, n: int) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
 
 	Tests the `oeisIDfor_n` function by comparing its calculated output against
@@ -214,15 +228,15 @@ def test_oeisIDfor_n(oeisIdentifier: str, sequenceIndex: int) -> None:
 
 	Parameters
 	----------
-	oeisIdentifier : str
+	oeisID : str
 		OEIS identifier to validate.
-	sequenceIndex : int
+	n : int
 		Sequence index to validate.
 
 	"""
-	expected: int = dictionaryOEISMapFolding[oeisIdentifier]['valuesKnown'][sequenceIndex]
-	actual: int = oeisIDfor_n(oeisIdentifier, sequenceIndex)
-	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisIdentifier, sequenceIndex)
+	expected: int = dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]
+	actual: int = oeisIDfor_n(oeisID, n)
+	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, n)
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.

@@ -76,7 +76,8 @@ calculations through the strategic application of compiler optimization techniqu
 from __future__ import annotations
 
 from mapFolding.someAssemblyRequired.infoBooth import (
-	default as default, Default as Default, defaultA007822 as defaultA007822, dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding)
+	default as default, Default as Default, defaultA007822 as defaultA007822, defaultCodon as defaultCodon,
+	dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding)
 
 # isort: split
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis

@@ -242,7 +242,7 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 	"""
 	def loader(dimensionsTotal: int) -> NDArray[numpy.uint8]:
 		pathFilename = pathDataSamples / f"arrayFoldingsP2d{dimensionsTotal}.pkl"
-		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # noqa: S301
+		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # ruff:ignore[suspicious-pickle-usage]
 		return arrayFoldings
 
 	return loader

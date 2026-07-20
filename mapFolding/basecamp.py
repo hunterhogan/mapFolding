@@ -114,6 +114,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		- 'daoOfMapFolding'
 		- 'numba'
 		- 'theorem2'
+		- 'theorem2Codon'
 		- 'theorem2Numba'
 		- 'theorem2Trimmed'
 
@@ -183,6 +184,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		elif any(map((2).__lt__, mapShape)) or mapShapeIs2上nDimensions(mapShape):
 			if flow == 'theorem2':
 				from mapFolding.syntheticModules.theorem2 import doTheNeedful
+			elif flow == 'theorem2Codon':
+				from mapFolding.syntheticModules.codon.theorem2 import doTheNeedful
 			elif flow == 'theorem2Numba':
 				from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
 			elif flow == 'theorem2Trimmed':

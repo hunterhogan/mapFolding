@@ -78,3 +78,9 @@ defaultA007822['module']['algorithm'] = 'algorithm'
 defaultA007822['module']['asynchronous'] = 'asynchronous'
 defaultA007822['variable']['counting'] = 'symmetricFolds'
 defaultA007822['variable']['stateDataclass'] = 'SymmetricFoldsState'
+
+defaultCodon: Default = deepcopy(default)
+defaultCodon['logicalPath']['assembly'] = 'someAssemblyRequired.codon'
+defaultCodon['logicalPath']['synthetic'] += '.codon'
+defaultCodon['module']['algorithm'] = 'theorem2'
+defaultCodon['module']['source'] = 'theorem2Trimmed'

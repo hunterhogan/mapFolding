@@ -9,6 +9,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
+from mapFolding.someAssemblyRequired.codon.makeCodonModules import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.makingModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
 from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
@@ -208,6 +209,8 @@ def makeMapFoldingModules() -> None:
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+
+	makeTheorem2Codon()
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])

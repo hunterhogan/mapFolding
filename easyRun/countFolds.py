@@ -38,20 +38,21 @@ if __name__ == '__main__':
 	flow = 'daoOfMapFolding'
 	flow = 'numba'
 	flow = 'theorem2'
+	flow = 'theorem2Codon'
 	flow = 'theorem2Numba'
 
 	oeisID = 'A001416'
 	oeisID = 'A001418'
 	oeisID = 'A000136'
 	oeisID = 'A195646'
-	oeisID = 'A001415'
 	oeisID = 'A001417'
+	oeisID = 'A001415'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(3, 7):
+	for n in range(3, 15):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 
