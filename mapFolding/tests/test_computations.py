@@ -251,8 +251,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 		The temporary file path for generated module testing.
 
 	"""
-	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # noqa: PLC0415
-	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # noqa: PLC0415
+	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # ruff:ignore[import-outside-top-level]
+	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba  # ruff:ignore[import-outside-top-level]
 
 	mapShape: tuple[int, ...] = oneTestCuzTestsOverwritingTests
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))

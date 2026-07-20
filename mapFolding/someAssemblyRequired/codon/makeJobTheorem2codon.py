@@ -1,7 +1,4 @@
-"""codon.
-
-https://docs.exaloop.io/start/install/
-"""
+"""mapFolding job."""
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
@@ -74,7 +71,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	ingredientsModule = IngredientsModule()
 	addLauncher(ingredientsModule, ingredientsCount, job)
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
-	ingredientsCount = _variableCompatibility(ingredientsCount, job)
+	ingredientsCount = variableCompatibility(ingredientsCount, job)
 
 	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
 
@@ -100,7 +97,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
 		sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
 
-def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
+def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Ensure the variable is compiled to the correct type.
 
 	Add a type constructor to `identifier` to ensure compatibility if
@@ -163,5 +160,5 @@ def _variableCompatibility(ingredientsFunction: IngredientsFunction, job: Recipe
 	return ingredientsFunction
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (3,) * 4
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (3, 7)
 	fromMapShape(mapShape)
