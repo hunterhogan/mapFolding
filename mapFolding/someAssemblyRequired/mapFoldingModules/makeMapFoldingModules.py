@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	from typing import Any
 
-def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
 	"""Generate parallel implementation with concurrent execution and task division.
 
 	Parameters
@@ -46,7 +46,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	pathFilename : PurePath
 		Filesystem path where the parallel module was written.
 
-	"""  # noqa: DOC501
+	"""  # ruff:ignore[docstring-missing-exception]
 	sourceCallableIdentifier = default['function']['counting']
 	if identifierCallable is None:
 		identifierCallable = sourceCallableIdentifier
@@ -57,7 +57,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 
 	dataclassLogicalPathModule = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # noqa: SLF001
+	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff:ignore[private-member-access]
 		for nameTuple in listNameTuples:
 			if nameTuple[0] == dataclassIdentifier:
 				dataclassLogicalPathModule = moduleWithLogicalPath
@@ -65,7 +65,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 		if dataclassLogicalPathModule:
 			break
 	if dataclassLogicalPathModule is None:
-		raise Exception  # noqa: TRY002
+		raise Exception  # ruff:ignore[raise-vanilla-class]
 	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclassIdentifier, dataclassInstanceIdentifier)
 
@@ -116,7 +116,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 # START add the parallel logic to the count function ------------------------------------------------
 
 	findThis = Be.While.testIs(Be.Compare.leftIs(IfThis.isNameIdentifier('leafConnectee')))
-	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat=Then.extractIt(DOT.body))  # ty:ignore[invalid-assignment]
+	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat=Then.extractIt(DOT.body))
 	countGapsCodeBlock: Sequence[ast.stmt] = raiseIfNone(captureCountGapsCodeBlock.captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	thisIsMyTaskIndexCodeBlock = Make.If(Make.Or.join([Make.Compare(Make.Name('leaf1ndex'), ops=[Make.NotEq()], comparators=[Make.Name('taskDivisions')])
@@ -146,7 +146,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportArgumentType]  # ty:ignore[invalid-argument-type]
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportAssignmentType, reportArgumentType]  # ty:ignore[invalid-assignment]
 	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
 		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))

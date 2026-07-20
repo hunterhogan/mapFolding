@@ -1,1 +1,1 @@
-# noqa: D104
+# ruff:ignore[undocumented-public-package]

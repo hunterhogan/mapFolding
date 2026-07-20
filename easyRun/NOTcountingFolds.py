@@ -1,4 +1,4 @@
-# ruff: noqa: ERA001, D100
+# ruff:file-ignore[commented-out-code, undocumented-public-module]
 from __future__ import annotations
 
 from collections import ChainMap
@@ -27,11 +27,12 @@ if __name__ == '__main__':
 	CPUlimit: Limitation = -2
 	flow: str | None = None
 
-	oeisID = 'A007822'
 	oeisID = 'A000136'
+	oeisID = 'A007822'
 
 	flow = 'algorithm'
 	flow = 'theorem2'
+	flow = 'theorem2Numba'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")

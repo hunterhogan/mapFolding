@@ -1,4 +1,4 @@
-# ruff: noqa: D100
+# ruff:file-ignore[undocumented-public-module]
 from __future__ import annotations
 
 from astToolkit import extractFunctionDef, Make

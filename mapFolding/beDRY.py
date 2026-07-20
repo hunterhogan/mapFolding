@@ -25,12 +25,11 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 	Parameters
 	----------
 	CPUlimit : bool | float | int | None
-		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to be sure you
-		have the most accurate information.
+		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to
+		be sure you have the most accurate information.
 	concurrencyPackage : str | None = None
-		Specifies which concurrency package to use.
-		- `None` or `'multiprocessing'`: Uses standard `multiprocessing`.
-		- `'numba'`: Uses Numba's threading system.
+		Specifies which concurrency package to use. - `None` or `'multiprocessing'`: Uses standard
+		`multiprocessing`. - `'numba'`: Uses Numba's threading system.
 
 	Returns
 	-------
@@ -40,11 +39,11 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 	Numba
 	-----
 	If using `'numba'` as the concurrency package, the maximum number of processors is retrieved from
-	`numba.get_num_threads()` rather than by polling the hardware. If Numba environment variables limit available
-	processors, that will affect this function.
+	`numba.get_num_threads()` rather than by polling the hardware. If Numba environment variables
+	limit available processors, that will affect this function.
 
-	When using Numba, this function must be called before importing any Numba-jitted function for this processor limit
-	to affect the Numba-jitted function.
+	When using Numba, this function must be called before importing any Numba-jitted function for this
+	processor limit to affect the Numba-jitted function.
 	"""
 	if concurrencyPackage == 'numba':
 		from numba import get_num_threads, set_num_threads
@@ -69,15 +68,14 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 	leavesTotal : int
 		The total number of leaves in the map.
 	datatype : type[NumPyIntegerType]
-		The NumPy integer type to use for the array elements, ensuring proper memory usage and compatibility with the
-		computation state.
+		The NumPy integer type to use for the array elements, ensuring proper memory usage and
+		compatibility with the computation state.
 
 	Returns
 	-------
 	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]
-		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the specified `datatype`,
-		representing all possible connections between leaves.
-
+		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the
+		specified `datatype`, representing all possible connections between leaves.
 	"""
 	connectionGraph: Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
 	return connectionGraph.astype(datatype)
@@ -99,13 +97,14 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 	Raises
 	------
 	OverflowError
-		If the product of dimensions would exceed the system's maximum integer size. This check prevents silent numeric
-		overflow issues that could lead to incorrect results.
+		If the product of dimensions would exceed the system's maximum integer size. This check
+		prevents silent numeric overflow issues that could lead to incorrect results.
 
 	Notes
 	-----
-	It is impossible to overstate the importance of `leavesTotal` in every algorithm for counting folds. Therefore, in this
-	package, this function is the ***only*** permissible way to compute `leavesTotal`.
+	It is impossible to overstate the importance of `leavesTotal` in every algorithm for counting
+	folds. Therefore, in this package, this function is the ***only*** permissible way to compute
+	`leavesTotal`.
 
 	The total number of leaves is the product of all dimensions in `mapShape`.
 	"""
@@ -124,8 +123,8 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	Parameters
 	----------
 	computationDivisions : int | str | None
-		Specifies how to divide computations. Please see the documentation in `countFolds` for details. I know it is
-		annoying, but I want to be sure you have the most accurate information.
+		Specifies how to divide computations. Please see the documentation in `countFolds` for
+		details. I know it is annoying, but I want to be sure you have the most accurate information.
 	concurrencyLimit : int
 		Maximum number of concurrent tasks allowed.
 	leavesTotal : int
@@ -134,17 +133,18 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	Returns
 	-------
 	taskDivisions : int
-		How many tasks must finish before the job can compute the total number of folds. `0` means no tasks, only job.
+		How many tasks must finish before the job can compute the total number of folds. `0` means no
+		tasks, only job.
 
 	Raises
 	------
 	ValueError
-		If `computationDivisions` is an unsupported type or if resulting task divisions exceed total leaves.
+		If `computationDivisions` is an unsupported type or if resulting task divisions exceed total
+		leaves.
 
 	Notes
 	-----
 	Task divisions should not exceed total leaves or the folds will be over-counted.
-
 	"""
 	taskDivisions = 0
 	match computationDivisions:
@@ -184,17 +184,17 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 	Returns
 	-------
 	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[numpy_int64]]
-		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) where each entry [d,i,j]
-		represents the leaf that would be connected to leaf j when inserting leaf i in dimension d.
+		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) where each
+		entry [d,i,j] represents the leaf that would be connected to leaf j when inserting leaf i in
+		dimension d.
 
 	Notes
 	-----
-	This is an implementation detail and shouldn't be called directly by external code. Use `getConnectionGraph`
-	instead, which applies proper typing.
+	This is an implementation detail and shouldn't be called directly by external code. Use
+	`getConnectionGraph` instead, which applies proper typing.
 
-	The algorithm calculates a coordinate system first, then determines connections based on parity rules, boundary
-	conditions, and dimensional constraints.
-
+	The algorithm calculates a coordinate system first, then determines connections based on parity
+	rules, boundary conditions, and dimensional constraints.
 	"""
 	dimensionsTotal: int = len(mapShape)
 	cumulativeProduct: Array1DLeavesTotal = numpy.multiply.accumulate([1, *list(mapShape)], dtype=numpy_int64)
@@ -246,9 +246,9 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 
 	(AI generated docstring)
 
-	This function serves as the gatekeeper for dimension inputs, ensuring that all map dimensions provided to the
-	package meet the requirements for valid computation. It performs multiple validation steps and normalizes the
-	dimensions into a consistent format.
+	This function serves as the gatekeeper for dimension inputs, ensuring that all map dimensions
+	provided to the package meet the requirements for valid computation. It performs multiple
+	validation steps and normalizes the dimensions into a consistent format.
 
 	Parameters
 	----------
@@ -266,7 +266,6 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 		If the input is empty or contains negative values.
 	NotImplementedError
 		If fewer than two positive dimensions are provided.
-
 	"""
 	if not listDimensions:
 		message: str = "`listDimensions` is a required parameter."

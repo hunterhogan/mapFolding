@@ -1,4 +1,4 @@
-# ruff: noqa: ERA001 D100 D103
+# ruff:file-ignore[commented-out-code, undocumented-public-module, undocumented-public-function]
 from __future__ import annotations
 
 from mapFolding import ansiColorReset, ansiColors
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 		nList: list[int] = []
 		nList.extend(range(2, 10))
 		# nList.extend(range(10, 28))
-		# nList.extend(range(28,33))
+		nList.extend(range(28,33))
 		# nList.extend(range(33,38))
 		# nList.extend(range(38,43))
 		# nList.extend(range(43,45))

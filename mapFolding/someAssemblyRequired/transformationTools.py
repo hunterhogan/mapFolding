@@ -44,15 +44,14 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 
 	(AI generated docstring)
 
-	This function breaks down a complete dataclass (like ComputationState) into its constituent
-	parts as AST nodes, enabling fine-grained manipulation of its fields for code generation.
-	It extracts all field definitions, annotations, and metadata, organizing them into a
-	ShatteredDataclass that provides convenient access to AST representations needed for
-	different code generation contexts.
+	This function breaks down a complete dataclass (like ComputationState) into its constituent parts
+	as AST nodes, enabling fine-grained manipulation of its fields for code generation. It extracts
+	all field definitions, annotations, and metadata, organizing them into a ShatteredDataclass that
+	provides convenient access to AST representations needed for different code generation contexts.
 
 	The function identifies a special "counting variable" (marked with 'theCountingIdentifier'
-	metadata) which is crucial for map folding algorithms, ensuring it's properly accessible
-	in the generated code.
+	metadata) which is crucial for map folding algorithms, ensuring it's properly accessible in the
+	generated code.
 
 	This decomposition is particularly important when generating optimized code (e.g., for Numba)
 	where dataclass instances can't be directly used but their fields need to be individually
@@ -70,13 +69,14 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 	Returns
 	-------
 	ShatteredDataclass
-		A ShatteredDataclass containing AST representations of all dataclass components,
-		with imports, field definitions, annotations, and repackaging code.
+		A ShatteredDataclass containing AST representations of all dataclass components, with imports,
+		field definitions, annotations, and repackaging code.
 
 	Raises
 	------
 	ValueError
-		If the dataclass cannot be found in the specified module or if no counting variable is identified in the dataclass.
+		If the dataclass cannot be found in the specified module or if no counting variable is
+		identified in the dataclass.
 
 	"""
 	Official_fieldOrder: list[str] = []

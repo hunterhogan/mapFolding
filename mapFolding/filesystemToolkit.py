@@ -40,9 +40,9 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 
 	(AI generated docstring)
 
-	This function generates a consistent, filesystem-safe filename based on map dimensions. Standardizing filenames
-	ensures that results can be reliably stored and retrieved, avoiding potential filesystem incompatibilities or Python
-	naming restrictions.
+	This function generates a consistent, filesystem-safe filename based on map dimensions.
+	Standardizing filenames ensures that results can be reliably stored and retrieved, avoiding
+	potential filesystem incompatibilities or Python naming restrictions.
 
 	Parameters
 	----------
@@ -56,8 +56,9 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 
 	Notes
 	-----
-	The filename format ensures no spaces in the filename, safe filesystem characters, unique extension (.foldsTotal),
-	Python-safe strings (no starting with numbers, no reserved words), and the 'p' prefix comes from Lunnon's original code.
+	The filename format ensures no spaces in the filename, safe filesystem characters, unique
+	extension (.foldsTotal), Python-safe strings (no starting with numbers, no reserved words), and
+	the 'p' prefix comes from Lunnon's original code.
 
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
@@ -65,15 +66,16 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None) -> Path:
 	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
 
-	To help reduce duplicate code and to increase predictability, this function creates a standardized filename, has a default but
-	configurable path, and creates the path.
+	To help reduce duplicate code and to increase predictability, this function creates a standardized
+	filename, has a default but configurable path, and creates the path.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
 		A sequence of integers representing the map dimensions.
 	pathLikeWriteFoldsTotal : PathLike[str] | PurePath | None = getPathRootJobDEFAULT()
-		Path, filename, or relative path and filename. If None, uses default path. If a directory, appends standardized filename.
+		Path, filename, or relative path and filename. If None, uses default path. If a directory,
+		appends standardized filename.
 
 	Returns
 	-------
@@ -103,9 +105,9 @@ def getPathRootJobDEFAULT() -> Path:
 
 	(AI generated docstring)
 
-	This function determines the appropriate default directory for storing computation results based on the current
-	runtime environment. It uses platform-specific directories for normal environments and adapts to special
-	environments like Google Colab.
+	This function determines the appropriate default directory for storing computation results based
+	on the current runtime environment. It uses platform-specific directories for normal environments
+	and adapts to special environments like Google Colab.
 
 	Returns
 	-------
@@ -114,9 +116,8 @@ def getPathRootJobDEFAULT() -> Path:
 
 	Notes
 	-----
-	For standard environments, uses `platformdirs` to find appropriate user data directory.
-	For Google Colab, uses a specific path in Google Drive.
-	Creates the directory if it doesn't exist.
+	For standard environments, uses `platformdirs` to find appropriate user data directory. For Google
+	Colab, uses a specific path in Google Drive. Creates the directory if it doesn't exist.
 
 	"""
 	if 'google.colab' in sysModules:
@@ -131,9 +132,9 @@ def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> 
 
 	(AI generated docstring)
 
-	This function provides the core file writing functionality used by the public `saveFoldsTotal` function. It handles
-	the basic operations of creating parent directories and writing the integer value as text to the specified file
-	location.
+	This function provides the core file writing functionality used by the public `saveFoldsTotal`
+	function. It handles the basic operations of creating parent directories and writing the integer
+	value as text to the specified file location.
 
 	Parameters
 	----------
@@ -144,8 +145,8 @@ def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> 
 
 	Notes
 	-----
-	This is an internal function that doesn't include error handling or fallback mechanisms. Use `saveFoldsTotal`
-	for production code that requires robust error handling.
+	This is an internal function that doesn't include error handling or fallback mechanisms. Use
+	`saveFoldsTotal` for production code that requires robust error handling.
 
 	"""
 	pathFilenameFoldsTotal = Path(pathFilename)
@@ -157,8 +158,9 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 
 	(AI generated docstring)
 
-	This function attempts to save the computed `foldsTotal` value to the specified location, with backup strategies in
-	case the primary save attempt fails. The robustness is critical since these computations may take days to complete.
+	This function attempts to save the computed `foldsTotal` value to the specified location, with
+	backup strategies in case the primary save attempt fails. The robustness is critical since these
+	computations may take days to complete.
 
 	Parameters
 	----------
@@ -169,29 +171,28 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 
 	Notes
 	-----
-	If the primary save fails, the function will attempt alternative save methods.
-	Print the value prominently to `stdout`.
-	Create a fallback file in the current working directory.
-	As a last resort, simply print the value.
+	If the primary save fails, the function will attempt alternative save methods. Print the value
+	prominently to `stdout`. Create a fallback file in the current working directory. As a last
+	resort, simply print the value.
 
 	The fallback filename includes a unique identifier based on the value itself to prevent conflicts.
 
 	"""
 	try:
 		_saveFoldsTotal(pathFilename, foldsTotal)
-	except Exception as ERRORmessage:  # noqa: BLE001
-		try:  # noqa: PLW0717
+	except Exception as ERRORmessage:  # ruff:ignore[blind-except]
+		try:  # ruff:ignore[too-many-statements-in-try-clause]
 			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
 			randomnessPlanB: list[str] = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
 			filenameInfixUnique: str = ''.join(randomnessPlanB)
-			pathFilenamePlanB: str = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # noqa: PTH109, PTH118
-			writeStreamFallback: TextIOWrapper = open(pathFilenamePlanB, 'w', encoding='utf-8')  # noqa: PTH123, SIM115
+			pathFilenamePlanB: str = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
+			writeStreamFallback: TextIOWrapper = open(pathFilenamePlanB, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
 			writeStreamFallback.write(str(foldsTotal))
 			writeStreamFallback.close()
 			stdout.write(str(pathFilenamePlanB))
-		except Exception:  # noqa: BLE001
+		except Exception:  # ruff:ignore[blind-except]
 			stdout.write(str(foldsTotal))
 
 def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
@@ -199,8 +200,9 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 
 	(AI generated docstring)
 
-	This function performs validation checks on the target file location before a potentially long-running computation
-	begins. It tests several critical aspects of filesystem functionality to ensure results can be saved.
+	This function performs validation checks on the target file location before a potentially
+	long-running computation begins. It tests several critical aspects of filesystem functionality to
+	ensure results can be saved.
 
 	Parameters
 	----------
@@ -216,15 +218,13 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 
 	Notes
 	-----
-	Checks performed:
-	1. Checks if the file already exists to prevent accidental overwrites.
-	2. Verifies that parent directories exist.
-	3. Tests if the system can write a test value to the file.
+	Checks performed: 1. Checks if the file already exists to prevent accidental overwrites. 2.
+	Verifies that parent directories exist. 3. Tests if the system can write a test value to the file.
 	4. Confirms that the written value can be read back correctly.
 
-	This function helps prevent a situation where a computation runs for hours or days only to discover at the end
-	that results cannot be saved. The test value used is a large integer that exercises both the writing and
-	reading mechanisms thoroughly.
+	This function helps prevent a situation where a computation runs for hours or days only to
+	discover at the end that results cannot be saved. The test value used is a large integer that
+	exercises both the writing and reading mechanisms thoroughly.
 
 	"""
 	if Path(pathFilename).exists():

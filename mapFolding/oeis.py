@@ -83,10 +83,10 @@ if TYPE_CHECKING:
 def _formatOEISid(oeisID: str) -> str:
 	"""I use this to normalize OEIS sequence identifiers to a canonical form.
 
-	This shared normalization function ensures consistent OEIS sequence ID formatting
-	across all retrieval, lookup, and computation operations throughout the module.
-	The function converts the identifier to uppercase and removes leading and trailing
-	whitespace to ensure reliable dictionary lookups and cache key formation.
+	This shared normalization function ensures consistent OEIS sequence ID formatting across all
+	retrieval, lookup, and computation operations throughout the module. The function converts the
+	identifier to uppercase and removes leading and trailing whitespace to ensure reliable dictionary
+	lookups and cache key formation.
 
 	Parameters
 	----------
@@ -104,11 +104,10 @@ def _formatOEISid(oeisID: str) -> str:
 def _getOEISdata(pathFilenameCache: Path, url: str) -> str | None:
 	"""I use this to manage cached OEIS data retrieval with HTTP conditional requests.
 
-	This caching layer minimizes network traffic by checking local cache validity based on
-	file modification time and using HTTP If-Modified-Since headers [1] for efficient updates.
-	The function implements a three-tier strategy: prefer valid cache, use conditional HTTP
-	requests with the `urllib3` [2] library when cache is stale, fall back to stale cache on
-	network errors.
+	This caching layer minimizes network traffic by checking local cache validity based on file
+	modification time and using HTTP If-Modified-Since headers [1] for efficient updates. The function
+	implements a three-tier strategy: prefer valid cache, use conditional HTTP requests with the
+	`urllib3` [2] library when cache is stale, fall back to stale cache on network errors.
 
 	Parameters
 	----------
@@ -128,7 +127,6 @@ def _getOEISdata(pathFilenameCache: Path, url: str) -> str | None:
 		https://www.rfc-editor.org/rfc/rfc9110.html#name-if-modified-since
 	[2] urllib3 - Context7
 		https://urllib3.readthedocs.io/en/stable/
-
 	"""
 	preferCache: bool = False
 	informationOEIS: str = ''
@@ -185,8 +183,8 @@ def getValuesKnown(oeisID: str) -> dict[int, int]:
 	Returns
 	-------
 	OEISsequence : dict[int, int]
-		A dictionary mapping sequence indices to their corresponding values, or a fallback
-		dictionary containing {-1: -1} if retrieval fails.
+		A dictionary mapping sequence indices to their corresponding values, or a fallback dictionary
+		containing {-1: -1} if retrieval fails.
 	"""
 	filename: str = f"b{oeisID[1:]}.txt"
 	pathFilenameCache: Path = pathCache / filename
@@ -224,10 +222,9 @@ def getOEISidMetadata(oeisID: str) -> tuple[str, int]:
 
 	Parsing Details
 	---------------
-	Descriptions are parsed from OEIS %N entries and offsets from %O entries in the
-	machine-readable text format. If metadata cannot be retrieved, the function issues
-	warning messages and returns fallback values.
-
+	Descriptions are parsed from OEIS %N entries and offsets from %O entries in the machine-readable
+	text format. If metadata cannot be retrieved, the function issues warning messages and returns
+	fallback values.
 	"""
 	oeisID = _formatOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
@@ -275,15 +272,14 @@ def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 	3. Hardcoded mapping functions and test parameter sets
 
 	The resulting dictionary serves as the authoritative configuration source for all OEIS-related
-	operations throughout the package, enabling consistent access to sequence definitions, known values,
-	and operational parameters.
+	operations throughout the package, enabling consistent access to sequence definitions, known
+	values, and operational parameters.
 
 	Returns
 	-------
 	settingsTarget : dict[str, SettingsOEIS]
-		A comprehensive dictionary mapping OEIS sequence IDs to their complete settings
-		objects, containing all metadata and known values needed for computation and validation.
-
+		A comprehensive dictionary mapping OEIS sequence IDs to their complete settings objects,
+		containing all metadata and known values needed for computation and validation.
 	"""
 	dictionaryOEIS: dict[str, MetadataOEISidMapFolding] = {}
 	for oeisID in packageSettings.oeisIDsImplementedMapFolding:
@@ -301,22 +297,21 @@ def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	"""I use this to construct metadata for OEIS sequences computed by specialized algorithms.
 
-	This function builds the configuration dictionary for OEIS sequences that require
-	algorithms beyond standard map-folding (meanders, symmetric foldings, formula-based
-	sequences). The dictionary construction parallels `_librarianConstructsDictionaryOEISMapFolding`
-	but targets sequences configured in `packageSettings.OEISidManuallySet`.
+	This function builds the configuration dictionary for OEIS sequences that require algorithms
+	beyond standard map-folding (meanders, symmetric foldings, formula-based sequences). The
+	dictionary construction parallels `_librarianConstructsDictionaryOEISMapFolding` but targets
+	sequences configured in `packageSettings.OEISidManuallySet`.
 
 	Returns
 	-------
 	dictionaryOEIS : dict[str, MetadataOEISid]
-		A dictionary mapping OEIS sequence IDs to their metadata objects, containing
-		descriptions, offsets, and known values.
+		A dictionary mapping OEIS sequence IDs to their metadata objects, containing descriptions,
+		offsets, and known values.
 
 	See Also
 	--------
 	mapFolding.oeis._librarianConstructsDictionaryOEISMapFolding
 		Construct metadata for standard map-folding OEIS sequences.
-
 	"""
 	dictionary: dict[str, MetadataOEISid] = {}
 	for oeisID in packageSettings.oeisIDsImplemented:
@@ -344,9 +339,9 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 
 	(AI generated docstring)
 
-	This function queries the comprehensive dictionary of known folding totals constructed
-	from OEIS sequence data. The function returns the total if the map shape matches a known
-	value, or 0 if the shape is not found in the OEIS sequences.
+	This function queries the comprehensive dictionary of known folding totals constructed from OEIS
+	sequence data. The function returns the total if the map shape matches a known value, or 0 if the
+	shape is not found in the OEIS sequences.
 
 	Parameters
 	----------
@@ -356,8 +351,8 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	Returns
 	-------
 	foldingsTotal : int
-		The known total number of distinct folding patterns for the given map shape, or 0
-		if the map shape does not match any known values in the OEIS sequences.
+		The known total number of distinct folding patterns for the given map shape, or 0 if the map
+		shape does not match any known values in the OEIS sequences.
 
 	Examples
 	--------
@@ -367,9 +362,9 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 
 	Implementation Details
 	----------------------
-	Map shapes are matched exactly as provided without internal sorting or normalization.
-	The function uses `functools.cache` [1] for memoization to avoid reconstructing the
-	lookup dictionary on repeated calls.
+	Map shapes are matched exactly as provided without internal sorting or normalization. The function
+	uses `functools.cache` [1] for memoization to avoid reconstructing the lookup dictionary on
+	repeated calls.
 
 	See Also
 	--------
@@ -380,7 +375,6 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	----------
 	[1] functools.cache - Python standard library
 		https://docs.python.org/3/library/functools.html#functools.cache
-
 	"""
 	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
 	return lookupFoldsTotal.get(tuple(mapShape), 0)
@@ -390,27 +384,26 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 
 	(AI generated docstring)
 
-	This function constructs a comprehensive lookup dictionary by extracting and transforming
-	data from all map-folding OEIS sequences in `dictionaryOEISMapFolding`. The function
-	applies each sequence's `getMapShape` function to its known indices to generate the
-	corresponding map shapes, then pairs each shape with its folding total.
+	This function constructs a comprehensive lookup dictionary by extracting and transforming data
+	from all map-folding OEIS sequences in `dictionaryOEISMapFolding`. The function applies each
+	sequence's `getMapShape` function to its known indices to generate the corresponding map shapes,
+	then pairs each shape with its folding total.
 
 	Returns
 	-------
 	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
-		A dictionary where keys are tuple `mapShape` and values are the total number
-		of distinct folding patterns for `mapShape`.
+		A dictionary where keys are tuple `mapShape` and values are the total number of distinct
+		folding patterns for `mapShape`.
 
 	Exclusions
 	----------
-	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents
-	a constrained subset rather than the total count for each `mapShape`.
+	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents a
+	constrained subset rather than the total count for each `mapShape`.
 
 	See Also
 	--------
 	mapFolding.oeis.dictionaryOEISMapFolding
 		Source metadata for map-folding OEIS sequences.
-
 	"""
 	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
 	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEISMapFolding.items() if oeisID != 'A007822'))
@@ -423,13 +416,13 @@ def _CLIHelpText() -> str:
 	(AI generated docstring)
 
 	This function generates standardized help documentation that includes all available OEIS sequences
-	with their descriptions and provides usage examples for both command-line and programmatic interfaces.
+	with their descriptions and provides usage examples for both command-line and programmatic
+	interfaces.
 
 	Returns
 	-------
 	helpText : str
 		A formatted string containing complete usage information and examples.
-
 	"""
 	exampleOEISid: str = 'A001415'
 	exampleN: int = 6
@@ -450,14 +443,13 @@ def _getOEISDescriptions() -> str:
 
 	(AI generated docstring)
 
-	This function creates a standardized listing of all implemented OEIS sequences with their mathematical
-	descriptions, suitable for inclusion in help text and error messages.
+	This function creates a standardized listing of all implemented OEIS sequences with their
+	mathematical descriptions, suitable for inclusion in help text and error messages.
 
 	Returns
 	-------
 	sequenceInfo : str
 		A formatted string listing each OEIS sequence ID with its description.
-
 	"""
 	return "\n".join(
 		f"  {oeisID}: {dictionaryOEISMapFolding[oeisID]['description']}"
@@ -469,10 +461,10 @@ def oeisIDfor_n(oeisID: str, n: int) -> int:
 
 	(AI generated docstring)
 
-	This function computes OEIS [1] sequence values by dispatching to the appropriate
-	algorithm based on the sequence ID. For small values or trivial cases, the function
-	returns known values from cached OEIS data. For larger indices, the function invokes
-	`countFolds` [2] with the map shape corresponding to the sequence index.
+	This function computes OEIS [1] sequence values by dispatching to the appropriate algorithm based
+	on the sequence ID. For small values or trivial cases, the function returns known values from
+	cached OEIS data. For larger indices, the function invokes `countFolds` [2] with the map shape
+	corresponding to the sequence index.
 
 	Parameters
 	----------
@@ -598,14 +590,14 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 	(AI generated docstring)
 
-	This function computes values for OEIS [1] sequences that require specialized algorithms
-	(meanders [2], symmetric foldings) or closed-form formulas, as opposed to the general
-	multidimensional map-folding algorithm accessible via `countFolds` [3]. The function
-	dispatches to algorithm-specific implementations based on `oeisID` and `flow` parameters.
+	This function computes values for OEIS [1] sequences that require specialized algorithms (meanders
+	[2], symmetric foldings) or closed-form formulas, as opposed to the general multidimensional
+	map-folding algorithm accessible via `countFolds` [3]. The function dispatches to
+	algorithm-specific implementations based on `oeisID` and `flow` parameters.
 
-	The function name reflects that these computations are NOT standard map-folding counts:
-	meanders use transfer matrix methods, symmetric foldings exploit symmetry constraints,
-	and formula-based sequences compute directly without search.
+	The function name reflects that these computations are NOT standard map-folding counts: meanders
+	use transfer matrix methods, symmetric foldings exploit symmetry constraints, and formula-based
+	sequences compute directly without search.
 
 	Parameters
 	----------
@@ -640,7 +632,8 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	Raises
 	------
 	ValueError
-		If `oeisID` matches A000682 or A005316 but receives an invalid internal state (programming error, not user error).
+		If `oeisID` matches A000682 or A005316 but receives an invalid internal state (programming
+		error, not user error).
 
 	Examples
 	--------
@@ -777,8 +770,8 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 					else:
 						arcCode = 0b1
 					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
-													#  0b1010 | 0b0101 is 0b1111, or 0xf  # ruff:ignore[unexpected-indentation-comment]
-													#    0b10 |   0b01 is   0b11, or 0x3  # ruff:ignore[unexpected-indentation-comment]
+#													   0b1010 | 0b0101 is 0b1111, or 0xf
+#													     0b10 |   0b01 is   0b11, or 0x3
 
 					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
 					while listArcCodes[-1] < MAXIMUMarcCode:

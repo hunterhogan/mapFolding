@@ -19,9 +19,9 @@ enables subsequent transformation stages to apply targeted optimizations while p
 correctness.
 
 Classes:
-    IfThis: Extended predicate class with specialized methods for matching attribute comparisons
-            and control flow patterns involving namespaced identifiers essential to map folding
-            algorithm transformations.
+	IfThis: Extended predicate class with specialized methods for matching attribute comparisons
+			and control flow patterns involving namespaced identifiers essential to map folding
+			algorithm transformations.
 """
 
 from __future__ import annotations
@@ -38,13 +38,12 @@ class IfThis(astToolkit_IfThis):
 
 	(AI generated docstring)
 
-	The `IfThis` `class` contains static methods that generate predicate functions used to test whether AST nodes match
-	specific criteria. These predicates can be used with `NodeChanger` and `NodeTourist` to identify and process specific
-	patterns in the AST.
+	The `IfThis` `class` contains static methods that generate predicate functions used to test
+	whether AST nodes match specific criteria. These predicates can be used with `NodeChanger` and
+	`NodeTourist` to identify and process specific patterns in the AST.
 
-	The `class` provides predicates for matching various node types, attributes, identifiers, and structural patterns,
-	enabling precise targeting of AST elements for analysis or transformation.
-
+	The `class` provides predicates for matching various node types, attributes, identifiers, and
+	structural patterns, enabling precise targeting of AST elements for analysis or transformation.
 	"""
 
 	@staticmethod
@@ -53,9 +52,9 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing comparisons
-		of the form `namespace.identifier <= 0`. It's used to identify conditional
-		expressions that test non-positive values of counting variables or similar constructs.
+		This function creates a predicate that identifies AST nodes representing comparisons of the
+		form `namespace.identifier <= 0`. It's used to identify conditional expressions that test
+		non-positive values of counting variables or similar constructs.
 
 		Parameters
 		----------
@@ -68,7 +67,6 @@ class IfThis(astToolkit_IfThis):
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
 			A predicate function that returns `True` for `Compare` nodes matching the pattern.
-
 		"""
 		return lambda node: (Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))(node)
 					and Be.Compare.opsIs(Be.at(0, Be.LtE))(node)
@@ -80,9 +78,9 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing comparisons
-		of the form `namespace.identifier > 0`. It's commonly used to identify conditional
-		expressions that test positive values of counting variables or similar constructs.
+		This function creates a predicate that identifies AST nodes representing comparisons of the
+		form `namespace.identifier > 0`. It's commonly used to identify conditional expressions that
+		test positive values of counting variables or similar constructs.
 
 		Parameters
 		----------
@@ -95,7 +93,6 @@ class IfThis(astToolkit_IfThis):
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
 			A predicate function that returns `True` for `Compare` nodes matching the pattern.
-
 		"""
 		return lambda node: (Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))(node)
 					and Be.Compare.opsIs(Be.at(0, Be.Gt))(node)
@@ -109,8 +106,8 @@ class IfThis(astToolkit_IfThis):
 		(AI generated docstring)
 
 		This function creates a predicate that identifies AST nodes representing conditional
-		statements of the form `if namespace.identifier > 0:`. It's used to find control
-		flow structures that depend on positive values of specific attributes.
+		statements of the form `if namespace.identifier > 0:`. It's used to find control flow
+		structures that depend on positive values of specific attributes.
 
 		Parameters
 		----------
@@ -123,7 +120,6 @@ class IfThis(astToolkit_IfThis):
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
 			A predicate function that returns `True` for `If` nodes with the specified test condition.
-
 		"""
 		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty:ignore[invalid-return-type]
 
@@ -133,9 +129,9 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing loop
-		statements of the form `while namespace.identifier > 0:`. It's used to find
-		iteration constructs that continue while specific attributes remain positive.
+		This function creates a predicate that identifies AST nodes representing loop statements of
+		the form `while namespace.identifier > 0:`. It's used to find iteration constructs that
+		continue while specific attributes remain positive.
 
 		Parameters
 		----------
@@ -147,7 +143,7 @@ class IfThis(astToolkit_IfThis):
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.While]]
-			A predicate function that returns `True` for `While` nodes with the specified test condition.
-
+			A predicate function that returns `True` for `While` nodes with the specified test
+			condition.
 		"""
 		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty:ignore[invalid-return-type]

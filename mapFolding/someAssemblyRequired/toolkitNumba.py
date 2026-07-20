@@ -145,16 +145,15 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 	(AI generated docstring)
 
-	This function applies Numba's `@jit` decorator to an existing function definition within
-	an `IngredientsFunction` container. It handles the complete transformation assembly line
-	including removing any existing decorators that might conflict with Numba, constructing
-	type signatures for Numba compilation when possible, applying the `@jit` decorator with
-	specified or default parameters, and updating import requirements to include necessary
-	Numba modules.
+	This function applies Numba's `@jit` decorator to an existing function definition within an
+	`IngredientsFunction` container. It handles the complete transformation assembly line including
+	removing any existing decorators that might conflict with Numba, constructing type signatures for
+	Numba compilation when possible, applying the `@jit` decorator with specified or default
+	parameters, and updating import requirements to include necessary Numba modules.
 
 	The transformation preserves function semantics while enabling significant performance
-	improvements through just-in-time compilation. Type inference is attempted for
-	function parameters and return values to enable optimized compilation paths.
+	improvements through just-in-time compilation. Type inference is attempted for function parameters
+	and return values to enable optimized compilation paths.
 
 	Parameters
 	----------
@@ -174,10 +173,9 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 
 		(AI generated docstring)
 
-		Numba compilation can be incompatible with certain Python decorators, so this
-		function strips all existing decorators from a function definition before
-		applying the Numba `@jit` decorator. Removed decorators are logged as warnings
-		for debugging purposes.
+		Numba compilation can be incompatible with certain Python decorators, so this function strips
+		all existing decorators from a function definition before applying the Numba `@jit` decorator.
+		Removed decorators are logged as warnings for debugging purposes.
 
 		Parameters
 		----------
@@ -202,12 +200,12 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		(AI generated docstring)
 
 		This function analyzes function parameter type annotations and converts them into
-		Numba-compatible type signature expressions. It handles various annotation patterns
-		including array types with shape and dtype information, scalar types with simple
-		name annotations, and complex subscripted types requiring special handling.
+		Numba-compatible type signature expressions. It handles various annotation patterns including
+		array types with shape and dtype information, scalar types with simple name annotations, and
+		complex subscripted types requiring special handling.
 
-		The generated signatures enable Numba to perform more efficient compilation by
-		providing explicit type information rather than relying solely on type inference.
+		The generated signatures enable Numba to perform more efficient compilation by providing
+		explicit type information rather than relying solely on type inference.
 
 		Parameters
 		----------
@@ -276,25 +274,25 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=listDecoratorKeywords)  # noqa: F811
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=listDecoratorKeywords)  # ruff:ignore[redefined-while-unused]
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
 
-@dataclasses.dataclass
-class SpicesJobNumba:  # slots?
+@dataclasses.dataclass(slots=True)
+class SpicesJobNumba:
 	"""Configuration container for Numba-specific job processing options.
 
 	(AI generated docstring)
 
-	This dataclass encapsulates configuration settings that control how Numba
-	compilation and execution is applied to job processing functions. It provides
-	a centralized way to manage Numba-specific settings that affect both
-	compilation behavior and runtime features like progress reporting.
+	This dataclass encapsulates configuration settings that control how Numba compilation and
+	execution is applied to job processing functions. It provides a centralized way to manage
+	Numba-specific settings that affect both compilation behavior and runtime features like progress
+	reporting.
 
-	The class serves as a bridge between the generic job processing system and
-	Numba's specialized requirements, enabling consistent application of
-	optimization settings across different computational contexts.
+	The class serves as a bridge between the generic job processing system and Numba's specialized
+	requirements, enabling consistent application of optimization settings across different
+	computational contexts.
 
 	Attributes
 	----------
@@ -304,7 +302,6 @@ class SpicesJobNumba:  # slots?
 		Progress bar implementation identifier.
 	parametersNumba : ParametersNumba
 		Numba compilation parameters with sensible defaults.
-
 	"""
 
 	useNumbaProgressBar: bool = True

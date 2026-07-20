@@ -1,4 +1,3 @@
-# ruff: noqa D201
 """makeMeandersModules."""
 from __future__ import annotations
 
@@ -45,7 +44,7 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
 		findThis=IfThis.isAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
 		, doThat=Then.extractIt
-	).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
+	).captureLastMatch(astModule))  # pyright: ignore[reportAssignmentType] # ty:ignore[invalid-assignment]
 	newTest: ast.expr = Make.And.join([astCompare, Call_areIntegersWide])
 
 	NodeChanger(IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
@@ -63,7 +62,7 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 def makeMeandersModules() -> None:
 	"""Make meanders modules."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule='matrixMeanders')
-	pathFilename: PurePath = makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, default['function']['dispatcher'])  # pyright: ignore[reportUnusedVariable] # noqa: F841
+	makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, default['function']['dispatcher'])
 
 if __name__ == '__main__':
 	makeMeandersModules()

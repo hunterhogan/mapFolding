@@ -1,4 +1,3 @@
-# ruff: noqa D201
 """
 Map folding AST transformation system: Comprehensive transformation orchestration and module generation.
 
@@ -50,10 +49,11 @@ if TYPE_CHECKING:
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
 	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
 
-	Like many things in the "IngredientsFunction/IngredientsModule" ecosystem, this has specific requirements.
-	`ingredientsFunction` must have the dataclass as its first parameter. The `LedgerOfImports` in `ingredientsFunction` must have
-	the import information for the dataclass. If you are not using `IngredientsFunction`, you can still use this function to get
-	the information you want.
+	Like many things in the "IngredientsFunction/IngredientsModule" ecosystem, this has specific
+	requirements. `ingredientsFunction` must have the dataclass as its first parameter. The
+	`LedgerOfImports` in `ingredientsFunction` must have the import information for the dataclass. If
+	you are not using `IngredientsFunction`, you can still use this function to get the information
+	you want.
 
 	```python
 	from astToolkit import astModuleToIngredientsFunction
@@ -78,7 +78,7 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	identifierDataclass: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 	logicalPathDataclass = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # noqa: SLF001
+	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff:ignore[private-member-access]
 		for nameTuple in listNameTuples:
 			if nameTuple[0] == identifierDataclass:
 				logicalPathDataclass = moduleWithLogicalPath
@@ -114,7 +114,7 @@ def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.
 		Base directory for the package structure.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Logical path in dot notation.
-	moduleIdentifier : str = ''
+	identifierModule : str = ''
 		Name of the specific module file.
 	fileExtension : str = packageSettings.fileExtension
 		File extension for Python modules.

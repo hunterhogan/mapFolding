@@ -1,7 +1,7 @@
 """Make the `count` function for an algorithm.
 
-These transformation functions will work on at least two different algorithms. If a transformation function only works on a
-specific type of algorithm, it will be in a subdirectory.
+These transformation functions will work on at least two different algorithms. If a transformation
+function only works on a specific type of algorithm, it will be in a subdirectory.
 """
 from __future__ import annotations
 

@@ -15,18 +15,18 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from pathlib import PurePath
 
-def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # noqa: ARG001
+def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
 	"""Generate initialization module for counting variable setup.
 
 	(AI generated docstring)
 
-	Creates a specialized module containing initialization logic for the counting variables
-	used in map folding computations. The generated function transforms the original
-	algorithm's loop conditions to use equality comparisons instead of greater-than
-	comparisons, optimizing the initialization phase.
+	Creates a specialized module containing initialization logic for the counting variables used in
+	map folding computations. The generated function transforms the original algorithm's loop
+	conditions to use equality comparisons instead of greater-than comparisons, optimizing the
+	initialization phase.
 
-	This transformation is particularly important for ensuring that counting variables
-	are properly initialized before the main computational loops begin executing.
+	This transformation is particularly important for ensuring that counting variables are properly
+	initialized before the main computational loops begin executing.
 
 	Parameters
 	----------

@@ -24,7 +24,7 @@ AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	, value=Make.Call(Make.Name(defaultA007822['function']['getSymmetricFoldsTotal']))
 )
 
-def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
 	"""Make the check for symmetry in each folding pattern in a group of folds asynchronous to the rest of the symmetric map folding algorithm.
 
 	To do asynchronous filtering, a few things must happen.
@@ -38,11 +38,11 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	2. Filtering must start immediately to keep up with the finding process.
 	3. To discover A007822(27), which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
-	"""  # noqa: DOC201
+	"""
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
 		, doThat=Then.extractIt
-		).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
+		).captureLastMatch(astModule))
 
 	NodeChanger(
 		Be.Assign.valueIs(IfThis.isCallIdentifier(defaultA007822['function']['filterAsymmetricFolds']))
@@ -62,7 +62,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	astFunctionDef_doTheNeedful: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher))
 		, doThat=Then.extractIt
-		).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
+		).captureLastMatch(astModule))
 
 	astFunctionDef_doTheNeedful.body.insert(0, astExprCall_initializeConcurrencyManager)
 	astFunctionDef_doTheNeedful.args.args.append(Make.arg('maxWorkers', Make.Name('int')))
@@ -100,7 +100,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 def makeA007822AsynchronousModules() -> None:
 	"""Make asynchronous modules for A007822."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['algorithm'])
-	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultA007822['module']['asynchronous'], defaultA007822['function']['counting']  # noqa: F841 # pyright: ignore[reportUnusedVariable]
+	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultA007822['module']['asynchronous'], defaultA007822['function']['counting']  # ruff:ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
 		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
 
 if __name__ == '__main__':

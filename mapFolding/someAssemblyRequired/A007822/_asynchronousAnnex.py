@@ -1,5 +1,5 @@
 # The real module is generated from this incomplete module. Comments are not preserved.
-# ruff: noqa: PLW0603 TC001 DOC201
+# ruff:file-ignore[global-statement, typing-only-first-party-import]
 # pyright: reportArgumentType=false
 # ty:ignore[invalid-argument-type]
 from __future__ import annotations

@@ -45,8 +45,8 @@ dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
 dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
 dummyTuple = Make.Tuple([Make.Name("dummyElement")])
 
-@dataclasses.dataclass
-class ShatteredDataclass:  # slots?
+@dataclasses.dataclass(slots=True)
+class ShatteredDataclass:
 	"""Container for decomposed dataclass components organized as AST nodes for code generation.
 
 	This class holds the decomposed representation of a dataclass, breaking it down into individual
@@ -108,22 +108,20 @@ class ShatteredDataclass:  # slots?
 	signatureReturnAnnotation: ast.Subscript = dummySubscript
 	"""Tuple-based return type annotation for functions returning decomposed field values."""
 
-@dataclasses.dataclass
-class DeReConstructField2ast:  # slots?
+@dataclasses.dataclass(slots=True)
+class DeReConstructField2ast:
 	"""
 	Transform a dataclass field into AST node representations for code generation.
 
-	This class extracts and transforms a dataclass Field object into various AST node
-	representations needed for code generation. It handles the conversion of field
-	attributes, type annotations, and metadata into AST constructs that can be used
-	to reconstruct the field in generated code.
-	The class is particularly important for decomposing dataclass fields (like those in
-	ComputationState) to enable their use in specialized contexts like Numba-optimized
-	functions, where the full dataclass cannot be directly used but its contents need
-	to be accessible.
+	This class extracts and transforms a dataclass Field object into various AST node representations
+	needed for code generation. It handles the conversion of field attributes, type annotations, and
+	metadata into AST constructs that can be used to reconstruct the field in generated code. The
+	class is particularly important for decomposing dataclass fields (like those in ComputationState)
+	to enable their use in specialized contexts like Numba-optimized functions, where the full
+	dataclass cannot be directly used but its contents need to be accessible.
 
-	Each field is processed according to its type and metadata to create appropriate
-	variable declarations, type annotations, and initialization code as AST nodes.
+	Each field is processed according to its type and metadata to create appropriate variable
+	declarations, type annotations, and initialization code as AST nodes.
 	"""
 
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[identifierDotAttribute]
@@ -196,10 +194,9 @@ class DeReConstructField2ast:  # slots?
 		"""
 		Initialize AST components based on the provided dataclass field.
 
-		This method extracts field attributes and constructs corresponding AST nodes
-		for various code generation contexts. It handles special cases for array types,
-		scalar types, and complex type annotations, creating appropriate constructor
-		calls and import requirements.
+		This method extracts field attributes and constructs corresponding AST nodes for various code
+		generation contexts. It handles special cases for array types, scalar types, and complex type
+		annotations, creating appropriate constructor calls and import requirements.
 
 		Parameters
 		----------
@@ -270,9 +267,9 @@ class DeReConstructField2ast:  # slots?
 class DatatypeConfiguration(NamedTuple):
 	"""Configuration for mapping framework datatypes to compiled datatypes.
 
-	This configuration class defines how abstract datatypes used in the map folding framework should be replaced with compiled
-	datatypes during code generation. Each configuration specifies the source module, target type name, and optional import alias
-	for the transformation.
+	This configuration class defines how abstract datatypes used in the map folding framework should
+	be replaced with compiled datatypes during code generation. Each configuration specifies the
+	source module, target type name, and optional import alias for the transformation.
 
 	Attributes
 	----------

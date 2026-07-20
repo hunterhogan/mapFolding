@@ -1,4 +1,3 @@
-# ruff: noqa: DOC201
 """addSymmetryCheck."""
 from __future__ import annotations
 
@@ -20,7 +19,7 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	import ast
 
-def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # noqa: ARG001
+def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
 	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
 			, Grab.idAttribute(Then.replaceWith(defaultA007822['variable']['stateDataclass']))
@@ -33,7 +32,7 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 	FunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
 		, doThat=Then.extractIt
-		).captureLastMatch(astModule))  # ty:ignore[invalid-assignment]
+		).captureLastMatch(astModule))
 	FunctionDef_count.name = identifierCallable or defaultA007822['function']['counting']
 
 	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(FunctionDef_count)
