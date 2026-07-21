@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
 from typing import Any, NamedTuple, TYPE_CHECKING, TypedDict, TypeVar
-import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
@@ -75,7 +74,7 @@ DatatypeFoldsTotal: TypeAlias = int
 
 #-------- Additional `TypeAlias` with NumPy types as their default ----------
 
-NumPyLeavesTotal: TypeAlias = numpy.uint8
+NumPyLeavesTotal: TypeAlias = numpy_int
 """Use in NumPy data structures whose elements are unsigned integers that will never exceed the magnitude of `leavesTotal`."""
 
 NumPyElephino: TypeAlias = numpy_int

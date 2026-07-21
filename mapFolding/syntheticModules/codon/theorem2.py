@@ -23,7 +23,7 @@ def countCodon__mapFolding_syntheticModules_codon_theorem2(groupsOfFolds, gap1nd
                             gapsWhere[int(gap1ndexCeiling)] = leafConnectee
                             if int(countDimensionsGapped[int(leafConnectee)]) == 0:
                                 gap1ndexCeiling += 1
-                            countDimensionsGapped[int(leafConnectee)] += np.uint8(1)
+                            countDimensionsGapped[int(leafConnectee)] += np.int64(1)
                             leafConnectee = int(connectionGraph[int(indexDimension), int(leaf1ndex), int(leafBelow[leafConnectee])])
                     indexDimension += 1
                 indexMiniGap = gap1ndex
