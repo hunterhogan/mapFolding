@@ -12,6 +12,7 @@ alphita
 Anders
 antidivisor
 antidivisors
+anyascii
 appauthor
 appendleft
 appname
@@ -185,6 +186,7 @@ Iwan
 jaxtyping
 jitted
 joeis
+juxt
 Kaboozle
 Kahlo
 Kaseorg

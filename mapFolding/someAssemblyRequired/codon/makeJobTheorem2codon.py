@@ -4,6 +4,7 @@ from __future__ import annotations
 from astToolkit import Be, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
+from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
@@ -13,6 +14,7 @@ from mapFolding.someAssemblyRequired.RecipeJob import (
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
+import python_minifier
 import subprocess  # ruff:ignore[suspicious-subprocess-import]
 import sys
 
@@ -79,23 +81,24 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 
+	Path(job.pathFilenameModule).parent.mkdir(parents=True, exist_ok=True)
+	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
+	sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
+
 	if sys.platform == 'linux':
-		Path(job.pathFilenameModule).parent.mkdir(parents=True, exist_ok=True)
-		buildCommand: list[str] = ['codon', 'build', '--exe', '--release',
-			'--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions',
-			'--mcpu=native',
-			'-o', str(job.pathFilenameModule.with_suffix('')),
-			'-']
-		streamText = subprocess.Popen(buildCommand, stdin=subprocess.PIPE, text=True)
-		if streamText.stdin is not None:
-			ingredientsModule.write_astModule(streamText.stdin, job.packageIdentifier)
-			streamText.stdin.close()
-		streamText.wait()
+		Path(job.pathFilenameModule.with_stem('min')).write_text(python_minifier.minify(Path(job.pathFilenameModule).read_text(encoding='utf-8')), encoding='ascii')
+
+		buildCommand: list[str] = ['codon', 'build', '--exe', '--release', '--mcpu=native'
+			, '--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions'
+			, '-o', str(job.pathFilenameModule.with_suffix(''))
+			, str(job.pathFilenameModule.with_stem('min'))
+		]
+
+		subprocess.run(buildCommand, check=False)
+
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
+
 		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
-	else:
-		ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
-		sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
 
 def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Ensure the variable is compiled to the correct type.
@@ -129,7 +132,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 			, IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
 							, Be.Assign.valueIs(Be.Constant))
 			)
-			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
+			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
 		).visit(ingredientsFunction.astFunctionDef)
 
 	#-------- `identifier` - 1. ----------------------------------------------
@@ -145,7 +148,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 	#-------- `identifier` has exactly one index value. -----------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
 			, lambda node: not Be.Subscript.sliceIs(Be.Tuple)(node))
-			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)
+			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
 		).visit(ingredientsFunction.astFunctionDef)
 
 	#-------- `identifier` has multiple index values. -------------------------
@@ -153,12 +156,12 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 								, Be.Subscript.sliceIs(Be.Tuple))
 			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(
 				Then.replaceWith([
-					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])
-					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)
+					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])  # ty:ignore[unresolved-attribute] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
+					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
 		).visit(ingredientsFunction.astFunctionDef)
 
 	return ingredientsFunction
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (3, 7)
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 14)
 	fromMapShape(mapShape)

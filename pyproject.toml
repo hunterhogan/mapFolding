@@ -50,7 +50,7 @@ dependencies = [
   "tqdm",
   "urllib3",
 ]
-optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'"], development = [
+optional-dependencies = { codon = ["anyascii","autoflake", "codon-jit>=0.4.6; sys_platform == 'linux'", "python-minifier"], development = [
   "gmpy2-stubs",
   "ipykernel",
   "ipywidgets",
