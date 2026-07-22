@@ -48,12 +48,12 @@ Four forbidden inequalities of matching parity k and r *à la* Legendre (2014), 
 References
 ----------
 [1] John E. Koehler, Folding a strip of stamps, Journal of Combinatorial Theory, Volume 5,
-    Issue 2, 1968, Pages 135-152, ISSN 0021-9800. https://doi.org/10.1016/S0021-9800(68)80048-1
+	Issue 2, 1968, Pages 135-152, ISSN 0021-9800. https://doi.org/10.1016/S0021-9800(68)80048-1
 [2] Stéphane Legendre, Foldings and meanders, The Australasian Journal of Combinatorics,
-    Volume 58, Part 2, 2014, Pages 275-291, ISSN 2202-3518.
-    https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf
+	Volume 58, Part 2, 2014, Pages 275-291, ISSN 2202-3518.
+	https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf
 [3] W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14,
-    Issue 1, 1971, Pages 75-80. https://doi.org/10.1093/comjnl/14.1.75
+	Issue 1, 1971, Pages 75-80. https://doi.org/10.1093/comjnl/14.1.75
 
 See Also
 --------
@@ -451,16 +451,15 @@ def oddLeaf吗(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 
 @cache
 def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
-	r"""You can compute the mixed-radix stride for the prefix of `mapShape`.
+	"""You can compute the mixed-radix stride for the prefix of `mapShape`.
 
 	(AI generated docstring)
 
-	`productOfDimensions` computes $\prod mapShape[0:dimension]$ with a multiplicative
-	identity of $1$ using `math.prod` [1]. The return value acts as the stride that converts a
-	coordinate step in `dimension` into a `Leaf` index increment.
+	`productOfDimensions` computes the product of `mapShape[0:dimension]`. The return value acts as
+	the stride that converts a coordinate step in `dimension` into a `Leaf` index increment.
 
-	The return value is consumed by `getCreasePost` when converting a coordinate step into a
-	`Leaf` increment [2].
+	The return value is consumed by `getCreasePost` when converting a coordinate step into a `Leaf`
+	increment.
 
 	Parameters
 	----------
@@ -473,11 +472,5 @@ def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
 	-------
 	stride : int
 		The product of the first `dimension` entries of `mapShape`.
-
-	References
-	----------
-	[1] math.prod
-		https://docs.python.org/3/library/math.html#math.prod
-	[2] mapFolding._e.algorithms.iff.getCreasePost
 	"""
 	return prod(mapShape[0:dimension], start=1)

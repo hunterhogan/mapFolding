@@ -67,7 +67,7 @@ def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
 	pathFilename: Path = Path(f'{packageSettings.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
 	dataframeFoldings: pandas.DataFrame | None = None
 	if pathFilename.exists():
-		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # noqa: S301
+		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # ruff:ignore[suspicious-pickle-usage]
 	else:
 		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
 		sys.stderr.write(message + '\n')

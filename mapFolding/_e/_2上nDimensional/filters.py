@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from gmpy2 import bit_test
+from gmpy2 import bit_test as isBit1吗
 from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e._2上nDimensional import 零
 from typing import TYPE_CHECKING
@@ -32,4 +32,4 @@ def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 
 @syntacticCurry
 def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
-	return bit_test(leaf, dimension)
+	return isBit1吗(leaf, dimension)

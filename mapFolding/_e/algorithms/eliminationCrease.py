@@ -33,13 +33,7 @@ def pinByCrease(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `pinByCrease` operates efficiently.
-
-	Returns
-	-------
-	EliminationState
-		The state with `listFolding` populated and `listPermutationSpace` empty.
-	"""
+	"""Do the things necessary so that `pinByCrease` operates efficiently."""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 

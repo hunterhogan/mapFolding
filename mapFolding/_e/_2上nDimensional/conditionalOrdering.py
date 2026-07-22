@@ -1,4 +1,3 @@
-# ruff:file-ignore[collapsible-if, docstring-missing-returns]
 from __future__ import annotations
 
 from bisect import bisect_right
@@ -94,24 +93,23 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 			for aPile in listOfPiles[listOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-			if indexUniversal < state.dimensionsTotal - 4:
-				if isOdd吗(dimensionNearestTail(leafPredecessor - isOdd吗(leafPredecessor))):
-					pileFirst = (
-						sumsOfProductsOfDimensionsNearest首InSubHyperplane[indexUniversal]
-						+ state.sumsOfProductsOfDimensions[2 + 1 + indexUniversal]
-						- (pileStepAbsolute
-							* 2
-							* (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1
-								+ isEven吗(leafPredecessor首零) * indexUniversal
-								- isEven吗(leafPredecessor首零) * (int(not (bool(indexUniversal))))
-							)
+			if (indexUniversal < state.dimensionsTotal - 4) and isOdd吗(dimensionNearestTail(leafPredecessor - isOdd吗(leafPredecessor))):
+				pileFirst = (
+					sumsOfProductsOfDimensionsNearest首InSubHyperplane[indexUniversal]
+					+ state.sumsOfProductsOfDimensions[2 + 1 + indexUniversal]
+					- (pileStepAbsolute
+						* 2
+						* (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1
+							+ isEven吗(leafPredecessor首零) * indexUniversal
+							- isEven吗(leafPredecessor首零) * (int(not (bool(indexUniversal))))
 						)
-						+ state.productsOfDimensions[state.dimensionsTotal - 1
-													+ addend * (int(not (bool(indexUniversal))))
-													- (indexUniversal + 2)]
 					)
-					for aPile in listOfPiles[listOfPiles.index(pileFirst) + indexUniversal: listOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) - indexUniversal + inclusive]:
-						dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
+					+ state.productsOfDimensions[state.dimensionsTotal - 1
+												+ addend * (int(not (bool(indexUniversal))))
+												- (indexUniversal + 2)]
+				)
+				for aPile in listOfPiles[listOfPiles.index(pileFirst) + indexUniversal: listOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) - indexUniversal + inclusive]:
+					dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
 	del leaf, listOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute, sumsOfProductsOfDimensionsNearest首InSubHyperplane
 

@@ -1,3 +1,4 @@
+# ruff:file-ignore[docstring-missing-returns]
 from __future__ import annotations
 
 from functools import cache
@@ -37,6 +38,103 @@ def _getLeafDomain(leaf: Leaf, dimensionsTotal: int, mapShape: tuple[int, ...], 
 					, 2 + (2 * (leaf == 首零(dimensionsTotal) + 零))								# `step`
 				)
 	return range(leavesTotal)
+
+"""leaf domains are directly tied to sumsOfProductsOfDimensions and sumsOfProductsOfDimensionsNearest首
+
+2d6
+(0, 32, 48, 56, 60, 62, 63) = sumsOfProductsOfDimensionsNearest首
+(0, 1, 3, 7, 15, 31, 63, 127) = sumsOfProductsOfDimensions
+
+leaf descends from 63 in sumsOfProductsOfDimensionsNearest首
+first pile is dimensionsTotal and ascends by addends in sumsOfProductsOfDimensions
+
+leaf63 starts at pile6 = 6+0
+leaf62 starts at pile7 = 6+1
+leaf60 starts at pile10 = 7+3
+leaf56 starts at pile17 = 10+7
+leaf48 starts at pile32 = 17+15
+leaf32 starts at pile63 = 32+31
+
+2d5
+sumsOfProductsOfDimensionsNearest首
+(0, 16, 24, 28, 30, 31)
+
+31, 5+0
+30, 5+1
+28, 6+3
+24, 9+7
+16, 16+15
+
+sumsOfProductsOfDimensions
+(0, 1, 3, 7, 15, 31, 63)
+
+{0: [0],
+ 1: [1],
+ 2: [3, 5, 9, 17],
+ 3: [2, 7, 11, 13, 19, 21, 25],
+ 4: [3, 5, 6, 9, 10, 15, 18, 23, 27, 29],
+ 5: [2, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31],
+ 6: [3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 30],
+ 7: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31],
+ 8: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 27, 29, 30],
+ 9: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 10: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30],
+ 11: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 12: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 27, 29, 30],
+ 13: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 14: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30],
+ 15: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 16: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+ 17: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 18: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+ 19: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 20: [5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+ 21: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 22: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+ 23: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 24: [5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+ 25: [4, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 26: [9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+ 27: [8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+ 28: [9, 10, 12, 18, 20, 23, 24, 27, 29, 30],
+ 29: [8, 19, 21, 22, 25, 26, 28],
+ 30: [17, 18, 20, 24],
+ 31: [16]}
+"""
+
+"""products of dimensions and sums of products emerge from the formulas in `getLeafDomain`.
+state = EliminationState((2,) * 6)
+domainsOfDimensionOrigins = tuple(getLeafDomain(state, leaf) for leaf in state.productsOfDimensions)[0:-1]
+sumsOfDimensionOrigins = tuple(accumulate(state.productsOfDimensions))[0:-1]
+sumsOfDimensionOriginsReversed = tuple(accumulate(state.productsOfDimensions[::-1], initial=-state.leavesTotal))[1:None]
+for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.productsOfDimensions, domainsOfDimensionOrigins, sumsOfDimensionOrigins, sumsOfDimensionOriginsReversed, strict=False):
+	print(f"{dimensionOrigin:<2}\t{domain.start == sumOrigins = }\t{sumOrigins}\t{sumReversed+2}\t{domain.stop == sumReversed+2 = }")
+1       domain.start == sumOrigins = True       1       2       domain.stop == sumReversed+2 = True
+2       domain.start == sumOrigins = True       3       34      domain.stop == sumReversed+2 = True
+4       domain.start == sumOrigins = True       7      50      domain.stop == sumReversed+2 = True
+8       domain.start == sumOrigins = True       15      58      domain.stop == sumReversed+2 = True
+16      domain.start == sumOrigins = True       31     62	      domain.stop == sumReversed+2 = True
+32      domain.start == sumOrigins = True       63      64      domain.stop == sumReversed+2 = True
+
+(Note to self: in `sumReversed+2`, consider if this is better explained by `sumReversed - descending + inclusive` or something similar.)
+
+The piles of dimension origins (sums of products of dimensions) emerge from the following formulas!
+
+(Note: the function below is included to capture the function as it existed at this point in development. I hope the package has improved/evolved by the time you read this.)
+def getLeafDomain(state: EliminationState, leaf: int) -> range:
+	def workhorse(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
+		originPinned =  leaf == leafOrigin
+		return range(
+					int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1))									# `start`, first value included in the `range`.
+						+ howManyDimensionsHaveOddParity(leaf)
+						- 1 - originPinned
+					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
+						- howManyDimensionsHaveOddParity(leaf)
+						+ 2 - originPinned
+					, 2 + (2 * (leaf == 首零(dimensionsTotal)+零))											# `step`
+				)
+	return workhorse(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
+"""
 
 def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""The beans and cornbread and beans and cornbread dimension.
@@ -678,10 +776,8 @@ def _getLeaf首零Plus零Domain(domain首零Plus零: tuple[Pile, ...], pileOfLea
 	return tuple(exclude(domain首零Plus零, listIndicesPilesExcluded))
 
 def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
-	"""Dictionary of `Leaf` to `range` of valid `Pile`s in which the `Leaf` may be found in a `folding`.
-
-	For each `leaf`, the associated Python `range` defines the mathematical domain:
+	"""For each `leaf`, the associated Python `range` defines the mathematical domain:
 	1. every `pile` at which `leaf` may be found in a `folding` and
 	2. in the set of all valid foldings, every `pile` at which `leaf` must be found.
-	"""
+	"""  # ruff:ignore[missing-blank-line-after-summary]
 	return {leaf: getLeafDomain(state, leaf) for leaf in range(state.leavesTotal)}

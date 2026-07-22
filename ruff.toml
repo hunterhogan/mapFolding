@@ -78,6 +78,7 @@ ignore = [
   "PLR0914",
   "PLR0917",
   "S403",
+  "self-or-cls-assignment",
 ]
 select = ["ALL"]
 task-tags = ["DEVELOPMENT", "FailEarly", "NOTE", "SEMIOTICS", "TODO"]
@@ -91,14 +92,20 @@ banned-aliases = { numpy = ["np"], pandas = ["pd"], regex = ["re"] }
 [lint.flake8-import-conventions.aliases]
 "accelerate.utils.dataclasses" = "accelerate_dataclasses"
 "fs.path" = "fs_path"
+"gmpy2.bit_test" = "isBit1吗"
+"gmpy2.is_even" = "isEven吗"
+"gmpy2.is_odd" = "isOdd吗"
+"humpy_cytoolz.assoc" = "associateKeyValue"
 "humpy_cytoolz.curry" = "syntacticCurry"
+"humpy_cytoolz.groupby" = "toolz_groupby"
 "itertools.product" = "CartesianProduct"
+"more_itertools.all_unique" = "allUnique吗"
+"numpy" = "numpy"
+"pandas" = "pandas"
+"regex" = "regex"
 "torch.autograd.grad" = "torch_grad"
 "torch.nn.functional" = "F"
 "torch.nn.parallel.DistributedDataParallel" = "DDP"
-numpy = "numpy"
-pandas = "pandas"
-re = "regex"
 
 [lint.flake8-quotes]
 inline-quotes = "single"

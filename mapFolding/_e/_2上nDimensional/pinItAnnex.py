@@ -70,7 +70,7 @@ from __future__ import annotations
 
 from collections import deque
 from gmpy2 import bit_flip
-from humpy_cytoolz import compose, concat, get, groupby, keyfilter as filterPile, valfilter as filterLeaf
+from humpy_cytoolz import compose, concat, get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
@@ -222,7 +222,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
 	for dimension in range(state.dimensionsTotal):
 		odd吗: Callable[[tuple[Pile, Leaf]], bool] = compose(oddLeaf2上nDimensional吗(dimension), itemgetter(1))
-		grouped: dict[bool, list[tuple[Pile, Leaf]]] = groupby(odd吗, DOTitems(permutationSpace.extractPinnedLeaves()))
+		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(odd吗, DOTitems(permutationSpace.extractPinnedLeaves()))
 		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
 		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
 		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(parityEven.items(), 2)))

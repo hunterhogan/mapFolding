@@ -1,4 +1,3 @@
-# ruff:file-ignore[docstring-missing-returns]
 from __future__ import annotations
 
 from functools import cache

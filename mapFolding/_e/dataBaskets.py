@@ -8,7 +8,8 @@ from collections import deque
 # TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
-from humpy_cytoolz import assoc as associateKeyValue, compose, dissoc as dissociatePile, first, groupby, merge, valfilter as filterLeaf
+from humpy_cytoolz import (
+	assoc as associateKeyValue, compose, dissoc as dissociatePile, first, groupby as toolz_groupby, merge, valfilter as filterLeaf)
 from hunterMakesPy import raiseIfNone
 from itertools import combinations, filterfalse
 from mapFolding._e import (
@@ -50,8 +51,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			New `PermutationSpace` and modifies `PermutationSpace` in place.
 		"""
 		#=EndNotes##sorted=
-		self = PermutationSpace(sorted(DOTitems(merge(missing, self, factory=PermutationSpace))))  # ruff:ignore[self-or-cls-assignment]
-		return self  # ruff:ignore[unnecessary-assign]
+		self = PermutationSpace(sorted(DOTitems(merge(missing, self, factory=PermutationSpace))))
+		return self.copy()
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
 		"""DANGEROUSLY create a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
@@ -585,7 +586,7 @@ class EliminationState:
 		)
 
 	def moveToListFolding(self) -> Self:
-		foldingGroup吗: dict[bool, list[PermutationSpace]] = groupby(
+		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
 			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
 		)
 		self.listPermutationSpace = deque(foldingGroup吗.get(False, ()))

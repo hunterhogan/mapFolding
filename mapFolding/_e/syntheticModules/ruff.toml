@@ -1,0 +1,7 @@
+extend = "../../../ruff.toml"
+
+[lint]
+ignore   = [
+	"subclass-builtin",
+	"too-many-boolean-expressions",
+]
