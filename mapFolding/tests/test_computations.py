@@ -178,7 +178,6 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 		, pytest.param('A060206', 3, id='A060206::n3')
 		, pytest.param('A077460', 3, id='A077460::n3')
 		, pytest.param('A078591', 3, id='A078591::n3')
-		, pytest.param('A086345', 3, id='A086345::n3')
 		, pytest.param('A178961', 3, id='A178961::n3')
 		, pytest.param('A223094', 3, id='A223094::n3')
 		, pytest.param('A259702', 3, id='A259702::n3')

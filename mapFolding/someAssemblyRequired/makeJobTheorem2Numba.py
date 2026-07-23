@@ -15,7 +15,7 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsMod
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
+from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba

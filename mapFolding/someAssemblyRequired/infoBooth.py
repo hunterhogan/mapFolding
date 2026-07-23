@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from mapFolding import packageSettings
-from mapFolding.filesystemToolkit import getPathRootJobDEFAULT
+from mapFolding.kitFilesystem import getPathRootJobDEFAULT
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, TypedDict
 

@@ -1,3 +1,4 @@
+# ruff:noqa
 from __future__ import annotations
 
 import distutils.sysconfig as du_sysconfig

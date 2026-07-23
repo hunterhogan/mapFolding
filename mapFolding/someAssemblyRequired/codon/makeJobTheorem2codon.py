@@ -4,10 +4,9 @@ from __future__ import annotations
 from astToolkit import Be, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
+from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)

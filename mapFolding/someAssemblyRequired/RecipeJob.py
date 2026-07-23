@@ -6,7 +6,7 @@ from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import packageSettings
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
+from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath

@@ -5,7 +5,7 @@ from mapFolding import packageSettings
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

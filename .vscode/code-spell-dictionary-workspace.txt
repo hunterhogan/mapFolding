@@ -376,7 +376,6 @@ Summinator
 swopping
 sylow
 sympify
-sympy
 taskset
 Tcff
 Tcls

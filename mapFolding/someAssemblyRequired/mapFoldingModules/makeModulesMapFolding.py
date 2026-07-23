@@ -47,7 +47,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	pathFilename : PurePath
 		Filesystem path where the parallel module was written.
 
-	"""  # ruff:ignore[docstring-missing-exception]
+	"""
 	sourceCallableIdentifier = default['function']['counting']
 	if identifierCallable is None:
 		identifierCallable = sourceCallableIdentifier

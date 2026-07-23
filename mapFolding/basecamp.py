@@ -54,7 +54,7 @@ from __future__ import annotations
 from mapFolding import packageSettings
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -136,7 +136,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
-	"""  # ruff:ignore[docstring-missing-exception]
+	"""
 #-------- mapShape ---------------------------------------------------------------------
 
 	if mapShape:

@@ -1,12 +1,13 @@
 extend = "../../ruff.toml"
 
 [lint]
-ignore   = [
-	"undocumented-public-module",
-	"undocumented-public-function",
-	"line-too-long",
-	"global-statement",
-	"unnecessary-assign",
-	"typing-only-first-party-import",
-	"missing-whitespace-around-parameter-equals",
+ignore = [
+  "global-statement",
+  "line-too-long",
+  "missing-whitespace-around-parameter-equals",
+  "typing-only-first-party-import",
+  "undocumented-public-function",
+  "undocumented-public-module",
+  "unnecessary-assign",
+  "unnecessary-cast-to-int",
 ]

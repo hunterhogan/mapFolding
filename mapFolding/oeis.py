@@ -1,4 +1,4 @@
-# ruff:file-ignore[import-outside-top-level, multiple-statements-on-one-line-colon, docstring-missing-exception]
+# ruff:file-ignore[import-outside-top-level, multiple-statements-on-one-line-colon]
 """You can use this module to access OEIS sequence data and compute sequence values.
 
 (AI generated docstring)
@@ -52,15 +52,13 @@ from __future__ import annotations
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from functools import cache
-from humpy_cytoolz import compose
-from humpy_toolz.curried import map as toolz_map
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain, filterfalse
 from mapFolding import MetadataOEISid, MetadataOEISidMapFolding, packageSettings
 from mapFolding._theSSOT import pathCache
 from mapFolding.basecamp import countFolds
-from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
 from operator import methodcaller
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -192,10 +190,16 @@ def getValuesKnown(oeisID: str) -> dict[int, int]:
 
 	oeisData: str | None = _getOEISdata(pathFilenameCache, url)
 
-	n_aOFn: dict[int, int] = {-errorL33T: -errorL33T}
+	n_aOFn: dict[int, int] = {}
 	if oeisData:
 		listLines: Iterator[str] = filterfalse(methodcaller('startswith', '#'), oeisData.strip().splitlines())
-		n_aOFn = dict(map(compose(tuple, toolz_map(int), methodcaller('split')), listLines))  # pyright: ignore[reportAssignmentType, reportArgumentType, reportCallIssue]
+		for line in listLines:
+			list_int: list[int] = list(map(int, line.split()))
+			if len(list_int) == 2:
+				n_aOFn[list_int[0]] = list_int[1]
+			else:
+				message: str = f"Unexpected line format in OEIS data for {oeisID}: {line}"
+				warnings.warn(message, stacklevel=0)
 	return n_aOFn
 
 @cache
@@ -604,7 +608,7 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	oeisID : str
 		OEIS sequence identifier. Supported sequences fall into three categories:
 		- Formula-based: A000136, A000560, A001010, A001011, A005315, A060206, A077460,
-			A078591, A086345 [4], A178961, A223094, A259702, A301620
+			A078591, A178961, A223094, A259702, A301620
 		- Meanders: A000682 [5], A005316 [6]
 		- Symmetric foldings: A007822
 	oeis_n : int
@@ -688,8 +692,6 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 		https://en.wikipedia.org/wiki/Meander_(mathematics)
 	[3] mapFolding.basecamp.countFolds
 
-	[4] mapFolding.algorithms.A086345
-		Internal package reference (special formula implementation for A086345)
 	[5] OEIS A000682 - Semi-meanders: number of Folded meanders
 		https://oeis.org/A000682
 	[6] OEIS A005316 - Meanders
@@ -739,7 +741,6 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 		case 'A060206': from mapFolding.algorithms.oeisIDbyFormula import A060206 as doTheNeedful
 		case 'A077460': from mapFolding.algorithms.oeisIDbyFormula import A077460 as doTheNeedful
 		case 'A078591': from mapFolding.algorithms.oeisIDbyFormula import A078591 as doTheNeedful
-		case 'A086345': from mapFolding.algorithms.A086345 import A086345 as doTheNeedful
 		case 'A178961': from mapFolding.algorithms.oeisIDbyFormula import A178961 as doTheNeedful
 		case 'A223094': from mapFolding.algorithms.oeisIDbyFormula import A223094 as doTheNeedful
 		case 'A259702': from mapFolding.algorithms.oeisIDbyFormula import A259702 as doTheNeedful

@@ -40,7 +40,7 @@ classifiers = [
 ]
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "Z0Z_tools>=3.0.0",
+  "Z0Z_tools>=3.1.1",
   "astToolkit>=0.11.4",
   "gmpy2",
   "hunterMakesPy>=0.7.3",
@@ -50,7 +50,12 @@ dependencies = [
   "tqdm",
   "urllib3",
 ]
-optional-dependencies = { codon = ["anyascii","autoflake", "codon-jit>=0.4.6; sys_platform == 'linux'", "python-minifier"], development = [
+optional-dependencies = { codon = [
+  "anyascii",
+  "autoflake",
+  "codon-jit>=0.4.6; sys_platform == 'linux'",
+  "python-minifier"
+], development = [
   "gmpy2-stubs",
   "ipykernel",
   "ipywidgets",
@@ -62,7 +67,7 @@ optional-dependencies = { codon = ["anyascii","autoflake", "codon-jit>=0.4.6; sy
 ], numba = ["numba", "numba_progress"], ortools = ["ortools"], pandas = [
   "pandas",
   "pyarrow"
-], sympy = ["sympy"], testing = [
+], testing = [
   "numba",
   "ortools",
   "pandas",
@@ -70,7 +75,6 @@ optional-dependencies = { codon = ["anyascii","autoflake", "codon-jit>=0.4.6; sy
   "pytest-env",
   "pytest-xdist",
   "pytest",
-  "sympy"
 ] }
 
 [project.urls]

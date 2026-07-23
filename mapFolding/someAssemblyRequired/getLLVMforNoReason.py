@@ -1,6 +1,5 @@
 # pyright: reportMissingTypeStubs=false
 # pyright: reportUnknownMemberType=false
-# ruff:file-ignore[docstring-missing-exception]
 """
 Utility for extracting LLVM IR from compiled Python modules.
 

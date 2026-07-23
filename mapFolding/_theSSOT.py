@@ -65,7 +65,7 @@ packageSettings = mapFoldingPackageSettings(identifierPackageFALLBACK=identifier
 
 OEISidManuallySet: dict[str, MetadataOEISidManuallySet] = {'A000560': {}, 'A000682': {}, 'A001010': {}, 'A001011': {},
 	'A005315': {}, 'A005316': {}, 'A007822': {}, 'A060206': {}, 'A077460': {}, 'A078591': {},
-	'A086345': {}, 'A178961': {}, 'A223094': {}, 'A259702': {}, 'A301620': {}}
+	'A178961': {}, 'A223094': {}, 'A259702': {}, 'A301620': {}}
 
 # Recreate packageSettings with meanders settings included
 packageSettings = mapFoldingPackageSettings(

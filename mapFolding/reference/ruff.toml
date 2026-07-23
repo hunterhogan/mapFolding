@@ -1,7 +1,4 @@
 extend = "../../ruff.toml"
-# Archival subtree: do not lint, format, or auto-fix files in this directory tree.
-force-exclude = true
-extend-exclude = ["**/*"]
 
 [lint]
 exclude = ["**/*"]
