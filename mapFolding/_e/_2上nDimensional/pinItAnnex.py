@@ -68,9 +68,11 @@ References
 """
 from __future__ import annotations
 
+from bisect import bisect
 from collections import deque
 from gmpy2 import bit_flip
-from humpy_cytoolz import compose, concat, get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
+from humpy_cytoolz import (
+	compose, concat, curry as syntacticCurry, get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf)
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
@@ -276,12 +278,99 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 			if not (permutationSpace := reduceLeafSpace(permutationSpace
 					, DOTitems(filterLeaf(isLeafOptions吗, dict(extract(permutationSpace.items(), pilesForbidden))))
-					# , DOTitems(filterPile(thisHasThat吗(pilesForbidden), permutationSpace.extractUndeterminedPiles())) # ~6 times longer than line above.
 					, leafAntiOptions
 			)):
 				#=SIN= Early return.
 				return None
 
+		if leafCount < permutationSpace.leafCount:
+			permutationSpaceHasNewLeaf = True
+
+	return permutationSpace
+
+def Z0Z_crossedCreases2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+	@syntacticCurry
+	def crease(dimension: DimensionIndex, leaf: Leaf) -> Leaf:
+		return int(bit_flip(leaf, dimension))
+
+	def makeLeafToPile(leavesPinned: PinnedLeaves) -> dict[Leaf, Pile]:
+		return dict(zip(leavesPinned.values(), leavesPinned.keys(), strict=True))
+
+	permutationSpaceHasNewLeaf: bool = True
+
+	while permutationSpaceHasNewLeaf:
+		permutationSpaceHasNewLeaf = False
+		leafCount: int = permutationSpace.leafCount
+
+		leafToPile: dict[Leaf, Pile] = makeLeafToPile(permutationSpace.extractPinnedLeaves())
+		listDimensions: list[int] = list(range(state.dimensionsTotal))
+		while listDimensions and not permutationSpaceHasNewLeaf:
+			dimension: DimensionIndex = listDimensions.pop(0)
+			# At this dimensionsIndex, generate every even leaf.
+			leavesEven: Iterable[Leaf] = deque()
+			run: int = int(2**dimension)
+			start: int = 0
+			while start < state.leavesTotal:
+				leavesEven.extend(range(start, start + run))
+				start += run * 2
+			# filter: keep leaf is pinned.
+			leavesEven = set(leafToPile).intersection(leavesEven)
+			# group by: crease is pinned or not pinned.
+			creasePin吗: Callable[[Leaf], bool] = compose(thisHasThat吗(leafToPile), crease(dimension))
+			grouped: dict[bool, list[Leaf]] = toolz_groupby(creasePin吗, leavesEven)
+			# sort both groups by leaf.
+			creasesPinned: list[Leaf] = sorted(get(True, grouped, ()))
+			creasesUnpinned: list[Leaf] = sorted(get(False, grouped, ()))
+			# pinned group: combination, creaseViolation吗
+			pilePileCrease: list[tuple[Pile, Pile]] = [(leafToPile[leaf], leafToPile[crease(dimension, leaf)]) for leaf in creasesPinned]
+			if any(creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease)
+					for (pileOf_k, pileOf_kCrease), (pileOf_r, pileOf_rCrease) in combinations(pilePileCrease, 2)):
+				return None
+			pileLeafCrease: list[tuple[Pile, Leaf]] = [(leafToPile[leaf], crease(dimension, leaf)) for leaf in creasesUnpinned]
+			# leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+			for pileOf_k, pileOf_kCrease in pilePileCrease:
+				index: int = bisect(pileLeafCrease, (pileOf_k, 0))
+				for pileOf_r, leaf_rCrease in pileLeafCrease[index:None]:
+					if pileOf_k < pileOf_r < pileOf_kCrease:
+						pilesForbidden: Iterable[int] = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
+					elif pileOf_kCrease < pileOf_r < pileOf_k:
+						pilesForbidden = frozenset([*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)])
+					elif (pileOf_r < pileOf_kCrease < pileOf_k) or (pileOf_kCrease < pileOf_k < pileOf_r):
+						pilesForbidden = range(pileOf_kCrease + 1, pileOf_k)
+					elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r):
+						pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
+					else:
+						continue
+					leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
+
+					if not (permutationSpace := reduceLeafSpace(permutationSpace
+						, DOTitems(filterLeaf(isLeafOptions吗, dict(extract(permutationSpace.items(), pilesForbidden))))
+						, leafAntiOptions
+					)):
+						#=SIN= Early return.
+						return None
+			# not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+			for pileOf_k, leaf_kCrease in pileLeafCrease:
+				index: int = bisect(pilePileCrease, (pileOf_k, 0))
+				for pileOf_r, pileOf_rCrease in pilePileCrease[index:None]:
+					if pileOf_rCrease < pileOf_k < pileOf_r:
+						pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
+					elif pileOf_r < pileOf_k < pileOf_rCrease:
+						pilesForbidden = frozenset([*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)])
+					elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k):
+						pilesForbidden = range(pileOf_r + 1, pileOf_rCrease)
+					elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k):
+						pilesForbidden = range(pileOf_rCrease + 1, pileOf_r)
+					else:
+						continue
+					leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
+
+					if not (permutationSpace := reduceLeafSpace(permutationSpace
+						, DOTitems(filterLeaf(isLeafOptions吗, dict(extract(permutationSpace.items(), pilesForbidden))))
+						, leafAntiOptions
+					)):
+						#=SIN= Early return.
+						return None
 		if leafCount < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
@@ -338,14 +427,14 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves()))):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(permutationSpace
-				, DOTitems(filterPile(between吗(pile1stOpen, pile - inclusive), permutationSpace.extractUndeterminedPiles()))
+				, DOTitems(filterLeaf(isLeafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
 				, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 			)):
 				return None
 
 			dimensionTail: int = dimensionNearestTail(leaf)
 			if 0 < dimensionTail and not (permutationSpace := reduceLeafSpace(permutationSpace
-				, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
+				, DOTitems(filterPile(pile.__lt__, filterPile(state.pileLast.__gt__, permutationSpace.extractUndeterminedPiles())))
 				, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 			)):
 				return None

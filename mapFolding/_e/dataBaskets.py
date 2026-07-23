@@ -275,9 +275,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		pilesUndetermined : dict[int, LeafOptions]
 			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 		"""
-		def dunderMightHaveABug(leafSpace: LeafSpace) -> TypeIs[LeafOptions]:
-			return len(self) <= leafSpace
-		return filterLeaf(dunderMightHaveABug, self)
+		return filterLeaf(isLeafOptions吗, self)
 
 	@overload
 	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...
