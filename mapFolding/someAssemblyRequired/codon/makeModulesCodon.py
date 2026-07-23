@@ -8,10 +8,10 @@ from functools import partial
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, IfThis
-from mapFolding.someAssemblyRequired.codon.toolkitCodon import (
+from mapFolding.someAssemblyRequired.codon.kitCodon import (
 	decorateCallableWithCodon, getIntegerArrayDtypes, integerArraysCodonCompatible, parameterCodonCompatible)
-from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getLogicalPath, getModule, getPathFilename
-from mapFolding.someAssemblyRequired.transformationTools import (
+from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getLogicalPath, getModule, getPathFilename
+from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
 from typing import TYPE_CHECKING
 

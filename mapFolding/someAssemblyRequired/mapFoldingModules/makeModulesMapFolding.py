@@ -9,13 +9,13 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
-from mapFolding.someAssemblyRequired.codon.makeCodonModules import makeTheorem2Codon
-from mapFolding.someAssemblyRequired.makingModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
-from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
-from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
-from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight
-from mapFolding.someAssemblyRequired.transformationTools import (
+from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
+from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
+from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+from mapFolding.someAssemblyRequired.makeModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
 from typing import TYPE_CHECKING
 import ast
 import dataclasses

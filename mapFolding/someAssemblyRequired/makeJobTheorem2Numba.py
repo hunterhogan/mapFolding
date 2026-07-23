@@ -18,10 +18,10 @@ from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding
+from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
+from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
-from mapFolding.someAssemblyRequired.toolkitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
-from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -105,17 +105,6 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
-
-	"""
-	Overview
-	- the code starts life in theDao.py, which has many optimizations;
-		- `makeNumbaOptimizedFlow` increase optimization especially by using numba;
-		- `makeJobNumba` increases optimization especially by limiting its capabilities to just one set of parameters
-	- the synthesized module must run well as a standalone interpreted-Python script
-	- the next major optimization step will (probably) be to use the module synthesized by `makeJobNumba` to compile a standalone executable
-	- Nevertheless, at each major optimization step, the code is constantly being improved and optimized, so everything must be
-		well organized (read: semantic) and able to handle a range of arbitrary upstream and not disrupt downstream transformations
-	"""
 
 def A007822(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""

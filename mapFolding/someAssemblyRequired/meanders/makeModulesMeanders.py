@@ -7,7 +7,7 @@ from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, IfThis
-from mapFolding.someAssemblyRequired.toolkitMakeModules import findDataclass, getModule, getPathFilename
+from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getModule, getPathFilename
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

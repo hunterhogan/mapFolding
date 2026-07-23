@@ -8,7 +8,7 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding import packageSettings
 from mapFolding.filesystemToolkit import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import default, IfThis
-from mapFolding.someAssemblyRequired.transformationTools import shatter_dataclassesDOTdataclass
+from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
 import ast
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 	from mapFolding.someAssemblyRequired import DatatypeConfiguration, ShatteredDataclass
-	from mapFolding.someAssemblyRequired.toolkitNumba import SpicesJobNumba
+	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:

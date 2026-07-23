@@ -7,7 +7,7 @@ from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, Default, IfThis
-from mapFolding.someAssemblyRequired.toolkitMakeModules import getPathFilename
+from mapFolding.someAssemblyRequired.kitMakeModules import getPathFilename
 from typing import TYPE_CHECKING
 import ast
 

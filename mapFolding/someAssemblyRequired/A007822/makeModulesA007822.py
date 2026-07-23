@@ -7,11 +7,11 @@ from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
-from mapFolding.someAssemblyRequired.A007822.A007822rawMaterials import (
+from mapFolding.someAssemblyRequired.A007822.rawMaterialsA007822 import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
-from mapFolding.someAssemblyRequired.makingModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
-from mapFolding.someAssemblyRequired.makingModules_doTheNeedful import makeInitializeState
-from mapFolding.someAssemblyRequired.toolkitMakeModules import getModule, getPathFilename
+from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
+from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

@@ -82,5 +82,5 @@ from mapFolding.someAssemblyRequired.infoBooth import (
 from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
 
 # isort: split
-from mapFolding.someAssemblyRequired._toolkitContainers import (
+from mapFolding.someAssemblyRequired._containers import (
 	DatatypeConfiguration as DatatypeConfiguration, DeReConstructField2ast as DeReConstructField2ast, ShatteredDataclass as ShatteredDataclass)
