@@ -1,4 +1,4 @@
-# ruff: noqa: T201
+# ruff:file-ignore[print]
 """Analyze entropy of leaves in folding sequences to understand their distributional properties."""
 from __future__ import annotations
 

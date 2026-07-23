@@ -38,35 +38,35 @@ if __name__ == "__main__":
 	CPUlimit: Limitation = -2
 	state: EliminationState | None = None
 
-	flow = "constraintPropagation"
 	flow = "elimination"
+	flow = "constraintPropagation"
 	flow = "crease"
 
 	oeisID = "A195646"
 	oeisID = "A000136"
 	oeisID = "A001418"
-	oeisID = "A001415"
 	oeisID = "A001416"
+	oeisID = "A001415"
 	oeisID = "A001417"
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(4, 6):
+	for n in range(4, 7):
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
+		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
-			# state = pinPile零Ante首零(state)
-			state = pinPilesAtEnds(state, 4)
-			state = pinLeavesDimension首二(state)
+			state = pinPile零Ante首零(state)
+			# state = pinPilesAtEnds(state, 4)
+			# state = pinLeavesDimension首二(state)
 			# state = pin3beans2(state)
 			# state = pin首beans(state)
 			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
-			state = pinLeavesDimensions0零一(state)
+			# state = pinLeavesDimensions0零一(state)
 
-		timeStart: float = time.perf_counter()
 		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWriteFoldsTotal=pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow)
 
 		_write()

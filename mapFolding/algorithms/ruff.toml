@@ -2,7 +2,7 @@ extend = "../../ruff.toml"
 
 [lint]
 ignore   = [
-	"D103",
-	"D100",
-	"RET504"
+	"undocumented-public-function",
+	"undocumented-public-module",
+	"unnecessary-assign"
 ]

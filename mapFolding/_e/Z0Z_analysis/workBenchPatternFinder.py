@@ -1,6 +1,6 @@
 # pyright: reportUnknownArgumentType=false
 # pyright: reportUnknownVariableType=false
-# ruff: noqa: ERA001 T201 T203
+# ruff:file-ignore[commented-out-code, print, p-print]
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType]
+	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:

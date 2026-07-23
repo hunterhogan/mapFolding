@@ -2,11 +2,11 @@ extend = "../../ruff.toml"
 
 [lint]
 ignore   = [
-	"D100",
-	"D103",
-	"E501",
-	"PLW0603",
-	"RET504",
-	"TC001",
-	"E252",
+	"undocumented-public-module",
+	"undocumented-public-function",
+	"line-too-long",
+	"global-statement",
+	"unnecessary-assign",
+	"typing-only-first-party-import",
+	"missing-whitespace-around-parameter-equals",
 ]

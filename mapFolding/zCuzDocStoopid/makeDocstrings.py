@@ -1,4 +1,3 @@
-# ruff: noqa: DOC201 D103
 """Make docstrings."""
 from __future__ import annotations
 
@@ -76,6 +75,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     return pathFilenameWrite
 
 def do() -> None:
+    """Make docstrings for all functions corresponding to OEIS sequences."""
     pathRoot: Path = packageSettings.pathPackage / "algorithms"
     pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
     transformOEISidByFormula(pathFilenameSource)

@@ -1,4 +1,4 @@
-# ruff: noqa: T201, T203  # noqa: RUF100
+# ruff:file-ignore[print, p-print]
 from __future__ import annotations
 
 from gmpy2 import bit_mask
@@ -243,7 +243,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 	return dataframeConditionalPrecedenceAtLastPile
 
 def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
-	"""When a leaf is at the last pile in its domain, identify leaves that must come after it."""  # noqa: DOC201
+	"""When a leaf is at the last pile in its domain, identify leaves that must come after it."""
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
 	if columnsToExclude is not None:  # pyright: ignore[reportUnnecessaryComparison]

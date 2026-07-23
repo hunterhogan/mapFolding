@@ -20,7 +20,7 @@ from mapFolding._e.theTypes import Folding, LeafOptions, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import attrgetter, methodcaller
-from typing import cast, overload, TYPE_CHECKING, TypeIs
+from typing import cast, overload, TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
@@ -258,17 +258,17 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return deconstructedPermutationSpace
 
 	def extractPinnedLeaves(self) -> PinnedLeaves:
-		"""Create a dictionary *sorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
+		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
 
 		Returns
 		-------
 		dictionaryOfPileLeaf : dict[int, int]
 			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 		"""
-		return dict(sorted(DOTitems(filterLeaf(isLeaf吗, self))))
+		return filterLeaf(isLeaf吗, self)
 
 	def extractUndeterminedPiles(self) -> UndeterminedPiles:
-		"""Return a dictionary *sorted* by `pile` of all `pile: leafOptions` in `PermutationSpace`.
+		"""Return a dictionary *unsorted* by `pile` of all `pile: leafOptions` in `PermutationSpace`.
 
 		Returns
 		-------
