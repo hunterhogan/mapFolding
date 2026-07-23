@@ -40,18 +40,21 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		state = pinPilesAtEnds(state, 1)
 
-	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+	if (1 < workersMaximum) and (1 < len(state.listPermutationSpace)):
+		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
-		listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
-		state.listPermutationSpace = deque()
+			listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
+			state.listPermutationSpace = deque()
 
-		listClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=deque([permutationSpace])))
-			for permutationSpace in listPermutationSpace
-		]
+			listClaimTickets: list[Future[EliminationState]] = [
+				concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=deque([permutationSpace])))
+				for permutationSpace in listPermutationSpace
+			]
 
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-			state.listFolding.extend(claimTicket.result().listFolding)
+			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
+				state.listFolding.extend(claimTicket.result().listFolding)
+	else:
+		state = pinByCrease(state)
 
 	state.Theorem4Multiplier = factorial(state.dimensionsTotal)
 	state.groupsOfFolds = len(state.listFolding)

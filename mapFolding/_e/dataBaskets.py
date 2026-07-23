@@ -16,23 +16,41 @@ from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
-from mapFolding._e.theTypes import Folding, LeafSpace, Pile
+from mapFolding._e.theTypes import Folding, LeafOptions, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
 from operator import attrgetter, methodcaller
-from typing import cast, overload, TYPE_CHECKING
+from typing import cast, overload, TYPE_CHECKING, TypeIs
 from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, PinnedLeaves, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Representation of `Pile: LeafSpace` for all `Pile` in `pilesTotal`, and methods to validly alter `PermutationSpace`."""
+
+	#============== Modify inherited methods and attributes =======================================
+
+	"""
+	disable:
+		del d[key]
+		clear()
+		pop
+		popitem
+
+	fromkeys(iterable, value=None): remove the default of `value`.
+	setdefault(key, default=None, /): remove the default of `default`.
+	"""
+
+	def copy(self) -> PermutationSpace:
+		return PermutationSpace(self)
+
+	#============== New methods and attributes ====================================================
 
 	def addMissingPileLeafSpace(self, missing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
 		"""Update missing `Pile: LeafSpace` items with the items from `missing`.
@@ -128,9 +146,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
 		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
 		return (leavesPinned, cast('UndeterminedPiles', dissociatePile(self, *DOTkeys(leavesPinned))))
-
-	def copy(self) -> PermutationSpace:
-		return PermutationSpace(self)
 
 	def deconstructAtPile(self, pile: Pile | None = None, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
 		# DOCUMENT Do not keep the original if you use any part of the return.
@@ -260,7 +275,9 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		pilesUndetermined : dict[int, LeafOptions]
 			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 		"""
-		return dict(sorted(DOTitems(filterLeaf(isLeafOptions吗, self))))
+		def dunderMightHaveABug(leafSpace: LeafSpace) -> TypeIs[LeafOptions]:
+			return len(self) <= leafSpace
+		return filterLeaf(dunderMightHaveABug, self)
 
 	@overload
 	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...

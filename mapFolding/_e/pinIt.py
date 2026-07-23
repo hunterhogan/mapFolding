@@ -233,7 +233,8 @@ def reduceLeafSpace(
 	for pile, leafOptions in pilesToUpdate:
 		leafSpace: LeafSpace | None = leafOptionsLeafNone(leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
-			permutationSpace.clear()
+			#=SIN= Early return.
+			return PermutationSpace()
 		else:
 			permutationSpace[pile] = leafSpace
 	return permutationSpace
