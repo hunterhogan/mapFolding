@@ -1,26 +1,23 @@
 """mapFolding job."""
 from __future__ import annotations
 
-from astToolkit import Be, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
+from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
+from mapFolding import DatatypeLeavesTotal  # ruff:ignore[typing-only-first-party-import]
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, default
+from mapFolding.someAssemblyRequired.codon.kitCodon import variableCompatibility
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
-from typing import cast, TYPE_CHECKING
+import ast  # ruff:ignore[typing-only-standard-library-import]
 import python_minifier
 import subprocess  # ruff:ignore[suspicious-subprocess-import]
 import sys
-
-if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
-	from mapFolding import DatatypeLeavesTotal
-	import ast
 
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
@@ -72,8 +69,9 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 
 	ingredientsModule = IngredientsModule()
 	addLauncher(ingredientsModule, ingredientsCount, job)
+	ingredientsCount = variableCompatibility(
+		ingredientsCount, raiseIfNone(job.shatteredDataclass).list_argAnnotated4ArgumentsSpecification)
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
-	ingredientsCount = variableCompatibility(ingredientsCount, job)
 
 	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
 
@@ -86,7 +84,10 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
 
 	if sys.platform == 'linux':
-		Path(job.pathFilenameModule.with_stem('min')).write_text(python_minifier.minify(Path(job.pathFilenameModule).read_text(encoding='utf-8')), encoding='ascii')
+		Path(job.pathFilenameModule.with_stem('min')).write_text(python_minifier.minify(
+			Path(job.pathFilenameModule).read_text(encoding='utf-8')
+			, remove_annotations=False
+		), encoding='ascii')
 
 		buildCommand: list[str] = ['codon', 'build', '--exe', '--release', '--mcpu=native'
 			, '--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions'
@@ -99,68 +100,6 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		subprocess.run(['/usr/bin/strip', str(job.pathFilenameModule.with_suffix(''))], check=False)
 
 		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
-
-def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
-	"""Ensure the variable is compiled to the correct type.
-
-	Add a type constructor to `identifier` to ensure compatibility if
-	- an incompatible type might be assigned to it,
-	- it might be compared with an incompatible type,
-	- it is used as an indexer but its type is not a valid indexer type.
-
-	Parameters
-	----------
-	ingredientsFunction : IngredientsFunction
-		Function to modify.
-	job : RecipeJobTheorem2
-		Configuration settings with identifiers and their type annotations.
-
-	Returns
-	-------
-	ingredientsFunction : IngredientsFunction
-		Modified function.
-	"""
-	for ast_arg in raiseIfNone(job.shatteredDataclass).list_argAnnotated4ArgumentsSpecification:
-		identifier: str = ast_arg.arg
-		annotation: ast.expr = raiseIfNone(ast_arg.annotation)
-
-	#-------- `identifier` is target of Augmented Assignment, or --------------
-	#-------- `identifier` is target of Assignment and value is Constant. -----
-		NodeChanger(
-			IfThis.isAnyOf(
-							Be.AugAssign.targetIs(IfThis.isNestedNameIdentifier(identifier))
-			, IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
-							, Be.Assign.valueIs(Be.Constant))
-			)
-			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
-		).visit(ingredientsFunction.astFunctionDef)
-
-	#-------- `identifier` - 1. ----------------------------------------------
-		NodeChanger(Be.BinOp.leftIs(IfThis.isNestedNameIdentifier(identifier))
-			, doThat=lambda node, annotation=annotation: Grab.rightAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.right])))(node)
-		).visit(ingredientsFunction.astFunctionDef)
-
-	#-------- `identifier` in Comparison. -------------------------------------
-		NodeChanger(Be.Compare.leftIs(IfThis.isNestedNameIdentifier(identifier))
-			, doThat=lambda node, annotation=annotation: Grab.comparatorsAttribute(lambda at, annotation=annotation: Then.replaceWith([Make.Call(annotation, listParameters=[node.comparators[0]])])(at[0]))(node)
-		).visit(ingredientsFunction.astFunctionDef)
-
-	#-------- `identifier` has exactly one index value. -----------------------
-		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
-			, lambda node: not Be.Subscript.sliceIs(Be.Tuple)(node))
-			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
-		).visit(ingredientsFunction.astFunctionDef)
-
-	#-------- `identifier` has multiple index values. -------------------------
-		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
-								, Be.Subscript.sliceIs(Be.Tuple))
-			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(
-				Then.replaceWith([
-					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])  # ty:ignore[unresolved-attribute] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
-					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
-		).visit(ingredientsFunction.astFunctionDef)
-
-	return ingredientsFunction
 
 if __name__ == '__main__':
 	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 14)

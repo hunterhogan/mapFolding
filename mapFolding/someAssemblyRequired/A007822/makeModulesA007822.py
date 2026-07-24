@@ -8,6 +8,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
 from mapFolding.someAssemblyRequired.A007822.rawMaterialsA007822 import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
+from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
@@ -85,6 +86,8 @@ def makeA007822Modules() -> None:
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', defaultA007822['function']['counting']
 		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
+
+	makeTheorem2Codon(defaultA007822)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = _numbaOnTheorem2(astModule, 'theorem2Numba', defaultA007822['function']['counting']

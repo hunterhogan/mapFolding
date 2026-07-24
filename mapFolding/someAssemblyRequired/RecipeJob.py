@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.transformationTools import pythonCode2ast_expr
+from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
@@ -364,7 +365,8 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Name(
 			raiseIfNone(job.shatteredDataclass).countingVariableName.id)))).visit(ingredientsFunction.astFunctionDef)
 		ingredientsFunction.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
-		listLauncherBody.append(Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Call(Make.Name('int'), [
+		listLauncherBody.append(Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Call(
+			deepcopy(raiseIfNone(job.shatteredDataclass).countingVariableAnnotation), [
 			Make.Mult().join([Make.Call(Make.Name(job.identifierCallable)), Make.Constant(job.foldsTotalMultiplier)])])))
 
 	listLauncherBody.extend([

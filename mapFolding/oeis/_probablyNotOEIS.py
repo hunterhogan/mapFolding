@@ -129,7 +129,7 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	flow : str | None = None
 		Algorithm variant selector. Available values depend on `oeisID`:
 		- For A000682, A005316: 'matrixMeanders' (default), 'matrixNumPy', 'matrixPandas'
-		- For A007822: 'algorithm' (default), 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'
+		- For A007822: 'algorithm' (default), 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'
 		- For formula-based sequences: ignored (`flow` has no effect)
 	CPUlimit : bool | float | int | None = None
 		Processor usage limit for parallel algorithms (A007822 with certain `flow` values).
@@ -333,6 +333,9 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
 					case 'theorem2':
 						from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
+						symmetricState = doTheNeedful(symmetricState)
+					case 'theorem2Codon':
+						from mapFolding.syntheticModules.A007822.codon.theorem2 import doTheNeedful
 						symmetricState = doTheNeedful(symmetricState)
 					case 'theorem2Numba':
 						from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful

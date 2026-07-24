@@ -56,6 +56,14 @@ if TYPE_CHECKING:
 		pytest.param('A007822', 4, 'algorithm', 0.5, id='algorithm')
 		, pytest.param('A007822', 4, 'asynchronous', 0.5, id='asynchronous')
 		, pytest.param('A007822', 4, 'theorem2', 0.5, id='theorem2')
+		, pytest.param(
+			'A007822', 4, 'theorem2Codon', 0.5
+			, id='theorem2Codon'
+			, marks=pytest.mark.skipif(
+				importlib.util.find_spec('codon') is None
+				, reason='codon-jit is not installed'
+			)
+		)
 		, pytest.param('A007822', 4, 'theorem2Numba', 0.5, id='theorem2Numba')
 		, pytest.param('A007822', 4, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
 	]

@@ -33,13 +33,14 @@ if __name__ == '__main__':
 	flow = 'algorithm'
 	flow = 'theorem2'
 	flow = 'theorem2Numba'
+	flow = 'theorem2Codon'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
 	nList: list[int] = []
-	nList.extend(range(7, 11))
+	nList.extend(range(7, 12))
 	# nList.extend(range(9, 13))
 	# nList.extend(range(11, 15))
 	# nList.extend(range(13, 17))

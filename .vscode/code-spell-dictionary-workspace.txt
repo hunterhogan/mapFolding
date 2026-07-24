@@ -143,6 +143,7 @@ GOUJARD
 grâce
 Graphes
 graycode
+groupby
 Guitter
 Guttmann
 hachi
@@ -257,6 +258,7 @@ nonn
 noob
 noobplementation
 nopython
+noqa
 Nout
 ntheory
 nthroot
@@ -391,6 +393,7 @@ threadfence
 tion
 Tkwd
 tomli
+toolz
 totient
 Touchard
 tount
