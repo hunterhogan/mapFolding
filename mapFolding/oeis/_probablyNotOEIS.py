@@ -247,29 +247,29 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 	match oeisID:
 		case 'A000136':
-			from mapFolding.algorithms.oeisIDbyFormula import A000136 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A000136 as doTheNeedful
 		case 'A000560':
-			from mapFolding.algorithms.oeisIDbyFormula import A000560 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A000560 as doTheNeedful
 		case 'A001010':
-			from mapFolding.algorithms.oeisIDbyFormula import A001010 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A001010 as doTheNeedful
 		case 'A001011':
-			from mapFolding.algorithms.oeisIDbyFormula import A001011 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A001011 as doTheNeedful
 		case 'A005315':
-			from mapFolding.algorithms.oeisIDbyFormula import A005315 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A005315 as doTheNeedful
 		case 'A060206':
-			from mapFolding.algorithms.oeisIDbyFormula import A060206 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A060206 as doTheNeedful
 		case 'A077460':
-			from mapFolding.algorithms.oeisIDbyFormula import A077460 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A077460 as doTheNeedful
 		case 'A078591':
-			from mapFolding.algorithms.oeisIDbyFormula import A078591 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A078591 as doTheNeedful
 		case 'A178961':
-			from mapFolding.algorithms.oeisIDbyFormula import A178961 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A178961 as doTheNeedful
 		case 'A223094':
-			from mapFolding.algorithms.oeisIDbyFormula import A223094 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A223094 as doTheNeedful
 		case 'A259702':
-			from mapFolding.algorithms.oeisIDbyFormula import A259702 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A259702 as doTheNeedful
 		case 'A301620':
-			from mapFolding.algorithms.oeisIDbyFormula import A301620 as doTheNeedful
+			from mapFolding.oeis.oeisIDbyFormula import A301620 as doTheNeedful
 		case _:
 			matched_oeisID = False
 	if matched_oeisID:

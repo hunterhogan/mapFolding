@@ -76,7 +76,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
 
 def do() -> None:
     """Make docstrings for all functions corresponding to OEIS sequences."""
-    pathRoot: Path = settingsPackage.pathPackage / "algorithms"
+    pathRoot: Path = settingsPackage.pathPackage / "oeis"
     pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
     transformOEISidByFormula(pathFilenameSource)
 
