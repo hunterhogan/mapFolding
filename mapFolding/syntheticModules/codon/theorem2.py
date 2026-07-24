@@ -4,7 +4,7 @@ from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFold
 import codon
 
 @codon.jit
-def countCodon__mapFolding_syntheticModules_codon_theorem2(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal):
+def count(groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal):
     import numpy as np
     while leaf1ndex > 4:
         if int(leafBelow[int(0)]) == 1:
@@ -68,6 +68,6 @@ def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     connectionGraph: Array3DLeavesTotal = state.connectionGraph
     dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
     leavesTotal: DatatypeLeavesTotal = state.leavesTotal
-    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = countCodon__mapFolding_syntheticModules_codon_theorem2(int(groupsOfFolds), int(gap1ndex), int(gap1ndexCeiling), int(indexDimension), int(indexMiniGap), int(leaf1ndex), int(leafConnectee), int(dimensionsUnconstrained), countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, int(dimensionsTotal), int(leavesTotal))
+    groupsOfFolds, gap1ndex, gap1ndexCeiling, indexDimension, indexMiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = count(int(groupsOfFolds), int(gap1ndex), int(gap1ndexCeiling), int(indexDimension), int(indexMiniGap), int(leaf1ndex), int(leafConnectee), int(dimensionsUnconstrained), countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, int(dimensionsTotal), int(leavesTotal))
     state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, indexDimension=indexDimension, indexLeaf=indexLeaf, indexMiniGap=indexMiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow)
     return state

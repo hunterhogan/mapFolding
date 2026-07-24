@@ -1,7 +1,7 @@
 # ruff:file-ignore[suspicious-pickle-usage]
 from __future__ import annotations
 
-from mapFolding import packageSettings
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
 import pickle
@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 	from pytest import FixtureRequest
 	import numpy
 
-pathDataSamples: Path = Path(packageSettings.pathPackage, "_e/tests/dataSamples").absolute()
+pathDataSamples: Path = Path(settingsPackage.pathPackage, "_e/tests/dataSamples").absolute()
 
 #================== Test-function parameters ======================================================
 

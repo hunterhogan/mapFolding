@@ -5,10 +5,10 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import defaultA007822, IfThis
 from mapFolding.someAssemblyRequired.A007822.rawMaterialsA007822 import ExprCallFilterAsymmetricFoldsState
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -91,9 +91,9 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 
 	astModule.body = [*imports.makeList_ast(), *astModuleAsynchronousAnnex.body, *astModule.body]
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(astModule, pathFilename, identifierPackage=packageSettings.identifierPackage)
+	write_astModule(astModule, pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 

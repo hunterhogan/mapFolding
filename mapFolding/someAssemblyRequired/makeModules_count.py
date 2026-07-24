@@ -9,12 +9,12 @@ from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, Default, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+from mapFolding.theSSOT import settingsPackage
 from typing import cast, TYPE_CHECKING
 import operator
 
@@ -77,9 +77,9 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 
@@ -172,14 +172,14 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		# Insert the transitionOnGroupsOfFolds call at the beginning of the function
 		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, AssignInitializedDataclass)
 
-		dotModule: identifierDotAttribute = getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, identifierModuleInitializeDataclass)
+		dotModule: identifierDotAttribute = getLogicalPath(settingsPackage.identifierPackage, logicalPathInfix, identifierModuleInitializeDataclass)
 		ingredientsFunctionDispatcher.imports.addImportFrom_asStr(dotModule, identifierCallableInitializeDataclass)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 
@@ -239,9 +239,9 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 
@@ -293,8 +293,8 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename

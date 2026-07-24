@@ -4,13 +4,13 @@ from __future__ import annotations
 from astToolkit import Be, Grab, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import DatatypeLeavesTotal, packageSettings
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, IfThis
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
 import python_minifier
@@ -19,6 +19,7 @@ import sys
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
+	from mapFolding import DatatypeLeavesTotal
 	import ast
 
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
@@ -45,7 +46,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	pathModule = PurePosixPath(Path.home(), 'mapFolding', 'jobs')
-	logicalPath2astModule: identifierDotAttribute = f'{packageSettings.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba'
+	logicalPath2astModule: identifierDotAttribute = f'{settingsPackage.identifierPackage}.{default['logicalPath']['synthetic']}.theorem2Numba'
 	source_astModule: ast.Module = parseLogicalPath2astModule(logicalPath2astModule)
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, source_astModule=source_astModule, pathModule=pathModule

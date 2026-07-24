@@ -30,7 +30,11 @@ from __future__ import annotations
 
 from mapFolding import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 from mapFolding.beDRY import getConnectionGraph, getLeavesTotal, makeDataContainer
+from typing import NamedTuple, TYPE_CHECKING
 import dataclasses
+
+if TYPE_CHECKING:
+	from types import EllipsisType
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:
@@ -465,3 +469,17 @@ class MatrixMeandersState:
 		self.setBitWidth()
 		self.setBitsLocator()
 		self.setMAXIMUMarcCode()
+
+#======== Managing data structures in `matrixMeandersNumPyndas` algorithm =======
+
+class ShapeArray(NamedTuple):
+	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
+
+	length: int
+	indices: int
+
+class ShapeSlicer(NamedTuple):
+	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
+
+	length: EllipsisType | slice
+	indices: int

@@ -5,9 +5,9 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getModule, getPathFilename
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -55,7 +55,7 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=identifierModule)
 
-	write_astModule(astModule, pathFilename, identifierPackage=packageSettings.identifierPackage)
+	write_astModule(astModule, pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 

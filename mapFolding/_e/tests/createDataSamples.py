@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
-from mapFolding import packageSettings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.Z0Z_analysis.toolkit import getDataFrameFoldings
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePath
 from typing import TYPE_CHECKING
 
@@ -55,7 +55,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 	filenameLeafPart: str = '_'.join(listLeafNames)
 
 	if pathFilename is None:
-		pathFilename = Path(f"{packageSettings.pathPackage}/_e/tests/dataSamples/p2DnDomain{filenameLeafPart}.py")
+		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/tests/dataSamples/p2DnDomain{filenameLeafPart}.py")
 	else:
 		pathFilename = Path(pathFilename)
 

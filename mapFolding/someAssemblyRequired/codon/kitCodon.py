@@ -23,6 +23,7 @@ def _removeAnnotationFromAssignment(assignment: ast.AnnAssign) -> ast.stmt:
 
 def decorateCallableWithCodon(ingredientsFunction: IngredientsFunction) -> IngredientsFunction:
 	"""Decorate a generated function with `codon.jit`."""
+	# misuse of astToolkit. The motherfucking point is that all changes are precise.
 	NodeChanger(Be.arg, doThat=Grab.annotationAttribute(Then.replaceWith(None))).visit(ingredientsFunction.astFunctionDef)
 	Grab.returnsAttribute(Then.replaceWith(None))(ingredientsFunction.astFunctionDef)
 	NodeChanger(Be.AnnAssign, doThat=_removeAnnotationFromAssignment).visit(ingredientsFunction.astFunctionDef)
@@ -38,6 +39,7 @@ def getIntegerArrayDtypes(
 ) -> dict[str, str]:
 	"""Map integer-array fields to their NumPy dtype identifiers."""
 	dataclassType = importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)
+	# fucking for loop with a fucking ternary.
 	return {
 		field.name: numpy.dtype(field.metadata['dtype']).name
 		for field in dataclasses.fields(dataclassType)
@@ -45,11 +47,13 @@ def getIntegerArrayDtypes(
 	}
 
 def _indexCodonCompatible(index: ast.expr) -> ast.expr:
+	# fuck your dumb ass functions. use astToolkit.
 	if Be.Slice(index) or IfThis.isConstant_value(Ellipsis)(index) or IfThis.isCallIdentifier('int')(index):
 		return index
 	return Make.Call(Make.Name('int'), [index])
 
 def _indexesCodonCompatible(subscript: ast.Subscript) -> ast.Subscript:
+	# fuck your dumb ass functions. use astToolkit.
 	if Be.Tuple(subscript.slice):
 		Grab.eltsAttribute(Then.replaceWith([
 			_indexCodonCompatible(index)
@@ -84,7 +88,7 @@ def integerArraysCodonCompatible(
 	NodeChanger(isIntegerArraySubscript, doThat=_indexesCodonCompatible).visit(ingredientsFunction.astFunctionDef)
 	if NodeTourist(isIntegerArrayAugmentedAssignment, Then.extractIt).captureLastMatch(ingredientsFunction.astFunctionDef) is not None:
 		Grab.bodyAttribute(Then.replaceWith([
-			Make.Import('numpy', 'np')
+			Make.Import('numpy', 'np')  # fuck you. You don't fucking know if they are using numpy. They might be using jax. Use the fucking typing system.
 			, *ingredientsFunction.astFunctionDef.body
 		]))(ingredientsFunction.astFunctionDef)
 		NodeChanger(

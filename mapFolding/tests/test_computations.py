@@ -46,7 +46,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
-	from mapFolding import MetadataOEISid, MetadataOEISidMapFolding
+	from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
 	from os import PathLike
 	from types import ModuleType
 

@@ -5,10 +5,10 @@ from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astM
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
-from mapFolding import packageSettings
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
 import ast
@@ -94,7 +94,7 @@ class RecipeJobTheorem2:
 	identifierCallableSource: str = default['function']['counting']
 	"""Name of the counting function to extract."""
 
-	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{packageSettings.identifierPackage}.dataBaskets'
+	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
 	"""Logical path to the dataclass module."""
 	sourceDataclassIdentifier: str = default['variable']['stateDataclass']
 	"""Name of the source dataclass."""
@@ -103,7 +103,7 @@ class RecipeJobTheorem2:
 
 	sourcePathPackage: PurePosixPath | None = default['filesystem']['sourcePackage']
 	"""Path to the source package."""
-	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
+	sourcePackageIdentifier: str | None = settingsPackage.identifierPackage
 	"""Name of the source package."""
 
 #-------- Filesystem, names of physical objects ------------------------------------------
@@ -111,7 +111,7 @@ class RecipeJobTheorem2:
 	"""Override path for the target package."""
 	pathModule: PurePosixPath | None = default['filesystem']['jobModule']
 	"""Override path for the target module directory."""
-	fileExtension: str = packageSettings.fileExtension
+	fileExtension: str = settingsPackage.fileExtension
 	"""File extension for generated modules."""
 	pathFilenameFoldsTotal: PurePosixPath | None = None
 	"""Path for writing fold count results."""
@@ -210,7 +210,7 @@ class RecipeJobTheorem2:
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
 
 		if self.source_astModule is None:
-			self.source_astModule = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
+			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
 
 #================== Bulk changes ======================================================================
 

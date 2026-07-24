@@ -51,10 +51,10 @@ References
 """
 from __future__ import annotations
 
-from mapFolding import packageSettings
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -151,7 +151,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 #-------- task division instructions -----------------------------------------------------
 
 	if computationDivisions:
-		concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
+		concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
 		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, getLeavesTotal(mapShape))
 	else:
 		concurrencyLimit = 1

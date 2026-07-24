@@ -5,9 +5,9 @@ from astToolkit import Be, DOT, Grab, NodeChanger, NodeTourist, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, Default, IfThis
 from mapFolding.someAssemblyRequired.kitMakeModules import getPathFilename
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 
@@ -59,7 +59,7 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 	doThat = Grab.testAttribute(Grab.andDoAllOf([Grab.opsAttribute(Then.replaceWith([ast.Eq()])), Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))]))
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef.body[0])
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, moduleIdentifier)
-	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, moduleIdentifier)
+	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename

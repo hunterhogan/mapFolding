@@ -25,7 +25,8 @@ research domain.
 
 from __future__ import annotations
 
-from mapFolding import _theSSOT, packageSettings
+from mapFolding.oeis import _theSSOT
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
 import pickle
@@ -74,7 +75,7 @@ def setupWarningsAsErrors() -> Generator[None, Any]:
 #======== SSOT for test data paths and filenames ==============
 # TODO I might still need something like this to test the creation of a job. But I don't need to use
 # this for every tmp dir or file, and it doesn't need to be this complicated.
-pathDataSamples: Path = Path(packageSettings.pathPackage, "tests/dataSamples").absolute()
+pathDataSamples: Path = Path(settingsPackage.pathPackage, "tests/dataSamples").absolute()
 path_tmpRoot: Path = pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)
 
@@ -202,7 +203,7 @@ def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
 
 #======== OEIS ids =====================================
 
-@pytest.fixture(params=packageSettings.oeisIDsImplementedMapFolding)
+@pytest.fixture(params=_theSSOT.oeisIDsImplementedMapFolding)
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:
 	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
 
@@ -227,7 +228,7 @@ def oeisID_1random() -> str:
 	randomSequenceIdentifier : str
 		Randomly selected OEIS sequence identifier from implemented sequences.
 	"""
-	return random.choice(list(packageSettings.oeisIDsImplementedMapFolding))
+	return random.choice(list(_theSSOT.oeisIDsImplementedMapFolding))
 
 #======== Miscellaneous =====================================
 

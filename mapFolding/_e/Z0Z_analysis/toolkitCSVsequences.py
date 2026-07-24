@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from mapFolding import packageSettings
 from mapFolding._e._2上nDimensional import getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePath
 from typing import TextIO
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
 	sortEm = True
 	if sortEm:
 		state = EliminationState((2,) * 7)
-		pathDataRaw: Path = packageSettings.pathPackage / "_e" / 'Z0Z_analysis' / "dataRaw"
+		pathDataRaw: Path = settingsPackage.pathPackage / "_e" / 'Z0Z_analysis' / "dataRaw"
 		sortP2d7GeneratedCSVFiles(state, pathDataRaw)
 		subdivideP2d7s0_1_3_2CSVFile(state, pathDataRaw)
 		for pathFilename in pathDataRaw.glob("p2d7s*.csv"):

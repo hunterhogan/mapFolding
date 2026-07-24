@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
-from mapFolding import ansiColorReset, ansiColors, packageSettings
+from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e.filters import isLeaf吗
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from pprint import pformat
 from typing import TYPE_CHECKING
@@ -64,7 +65,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 #======== Specialized tools ===============================
 
 def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
-	pathFilename: Path = Path(f'{packageSettings.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
+	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
 	dataframeFoldings: pandas.DataFrame | None = None
 	if pathFilename.exists():
 		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # ruff:ignore[suspicious-pickle-usage]
@@ -94,7 +95,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		sys.stdout.write(f"{len(listDictionaryPinned)} surplus dictionaries.\n")
 		sys.stdout.write(ansiColorReset)
 
-		pathFilename = Path(f"{packageSettings.pathPackage}/_e/Z0Z_analysis/excel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
+		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/Z0Z_analysis/excel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
 
 		if listDictionaryPinned:
 			with pathFilename.open('w', encoding='utf-8', newline='') as writeStream:

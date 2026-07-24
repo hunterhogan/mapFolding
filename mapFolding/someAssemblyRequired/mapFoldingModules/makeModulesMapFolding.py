@@ -7,7 +7,6 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
@@ -16,6 +15,7 @@ from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
 from mapFolding.someAssemblyRequired.makeModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 import dataclasses
@@ -187,9 +187,9 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	ingredientsModule.write_astModule(pathFilename, packageSettings.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, settingsPackage.identifierPackage)
 
 	return pathFilename
 

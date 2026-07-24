@@ -1,11 +1,11 @@
 # ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
-from mapFolding import packageSettings
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,7 +73,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 
 #-------- concurrency limit -----------------------------------------------------
 
-	concurrencyLimit: int = defineProcessorLimit(CPUlimit, packageSettings.concurrencyPackage)
+	concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
 
 #-------- memorialization instructions ---------------------------------------------
 

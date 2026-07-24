@@ -5,12 +5,12 @@ from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding import packageSettings
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import listFunctionsReduction
+from mapFolding.theSSOT import settingsPackage
 from math import factorial, prod
 from ortools.sat.python import cp_model
 from pathlib import Path
@@ -187,7 +187,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 			# TODO temporary data collection for p2d7
 			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
-				pathFilename: Path = packageSettings.pathPackage / "_e" / 'Z0Z_analysis' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+				pathFilename: Path = settingsPackage.pathPackage / "_e" / 'Z0Z_analysis' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 				with Path.open(pathFilename, mode="w", newline="") as fileCSV:
 					csvWriter = csv.writer(fileCSV)
 					csvWriter.writerows(sherpa.listFolding)

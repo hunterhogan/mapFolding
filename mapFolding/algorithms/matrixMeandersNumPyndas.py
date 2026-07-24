@@ -1,3 +1,4 @@
+# ruff:file-ignore[import-outside-top-level]
 """Transfer matrix algorithm implementations in NumPy (*Num*erical *Py*thon) and pandas.
 
 Citations
@@ -12,22 +13,26 @@ https://oeis.org/A000682
 https://oeis.org/A005316
 https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
 """
+from __future__ import annotations
+
 from functools import cache
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
-from mapFolding import ShapeArray, ShapeSlicer
 from mapFolding.algorithms.matrixMeanders import walkDyckPath
-from mapFolding.dataBaskets import MatrixMeandersState
+from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
 from mapFolding.reference.A000682facts import A000682_n_boundary_buckets
 from mapFolding.reference.A005316facts import A005316_n_boundary_buckets
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
-from numpy.lib._arraysetops_impl import UniqueInverseResult
-from numpy.typing import NDArray
-from typing import Any, TypeAlias
+from typing import TYPE_CHECKING
 from warnings import warn
 import dataclasses
 import numpy
 import pandas
+
+if TYPE_CHECKING:
+	from numpy.lib._arraysetops_impl import UniqueInverseResult
+	from numpy.typing import NDArray
+	from typing import Any, TypeAlias
 
 """Goals:
 - Extreme abstraction.
@@ -791,7 +796,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()  # pyright: ignore[reportAttributeAccessIssue]
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
 	del dataframeAnalyzed
 	return state
 
@@ -810,7 +815,7 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 	"""
 	while state.boundary > 0:
 		if areIntegersWide(state):
-			from mapFolding.syntheticModules.meanders.bigInt import countBigInt  # ruff:ignore[import-outside-top-level]
+			from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 			state = countBigInt(state)
 		else:
 			state.makeArray()
@@ -833,7 +838,7 @@ def doTheNeedfulPandas(state: MatrixMeandersNumPyState) -> int:
 	"""
 	while state.boundary > 0:
 		if areIntegersWide(state):
-			from mapFolding.syntheticModules.meanders.bigInt import countBigInt  # ruff:ignore[import-outside-top-level]
+			from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 			state = countBigInt(state)
 		else:
 			state = countPandas(state)

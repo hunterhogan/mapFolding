@@ -23,7 +23,7 @@ solutions to their map folding challenges.
 
 from __future__ import annotations
 
-from mapFolding import packageSettings
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
@@ -121,9 +121,9 @@ def getPathRootJobDEFAULT() -> Path:
 
 	"""
 	if 'google.colab' in sysModules:
-		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / packageSettings.identifierPackage
+		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / settingsPackage.identifierPackage
 	else:
-		pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=packageSettings.identifierPackage, appauthor=False, ensure_exists=True))
+		pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=settingsPackage.identifierPackage, appauthor=False, ensure_exists=True))
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 

@@ -5,13 +5,13 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, parsePathFilena
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
 from mapFolding.someAssemblyRequired.A007822.rawMaterialsA007822 import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -48,9 +48,9 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 
 	astModule.body = [*imports.makeList_ast(), FunctionDef_filterAsymmetricFolds, *astModule.body]
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
 
-	write_astModule(astModule, pathFilename, identifierPackage=packageSettings.identifierPackage)
+	write_astModule(astModule, pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 
@@ -64,7 +64,7 @@ def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCal
 
 	astModule.body.insert(0, Make.ImportFrom('numba.typed', [Make.alias('List')]))
 
-	write_astModule(astModule, pathFilename, identifierPackage=packageSettings.identifierPackage)
+	write_astModule(astModule, pathFilename, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 

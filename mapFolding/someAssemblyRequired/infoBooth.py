@@ -14,8 +14,8 @@ specific dimensional configurations.
 from __future__ import annotations
 
 from copy import deepcopy
-from mapFolding import packageSettings
 from mapFolding.kitFilesystem import getPathRootJobDEFAULT
+from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, TypedDict
 
@@ -44,7 +44,7 @@ class Default(TypedDict):
 default = Default(
 	filesystem={
 		'jobModule': PurePosixPath(getPathRootJobDEFAULT())
-		, 'sourcePackage': PurePosixPath(packageSettings.pathPackage)
+		, 'sourcePackage': PurePosixPath(settingsPackage.pathPackage)
 	}
 	, function={
 		'counting': 'count'

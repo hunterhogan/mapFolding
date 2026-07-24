@@ -13,7 +13,6 @@ from __future__ import annotations
 from astToolkit import parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
@@ -23,6 +22,7 @@ from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclass
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -48,7 +48,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
-	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
+	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
 	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
 	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal
 		, foldsTotalEstimated=foldsTotalEstimated, foldsTotalMultiplier=state.leavesTotal)
@@ -111,18 +111,18 @@ def A007822(n: int) -> None:
 	from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
 	foldsTotalEstimated: int = dictionaryOEIS['A007822']['valuesKnown'].get(n, 0)
-	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{packageSettings.identifierPackage}.{defaultA007822['module']['dataBasket']}"
+	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultA007822['module']['dataBasket']}"
 		, defaultA007822['variable']['stateDataclass'], defaultA007822['variable']['stateInstance'])
-	source_astModule: ast.Module = parseLogicalPath2astModule(f'{packageSettings.identifierPackage}.{defaultA007822['logicalPath']['synthetic']}.theorem2Numba')
+	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultA007822['logicalPath']['synthetic']}.theorem2Numba')
 	identifierCallableSource: str = defaultA007822['function']['counting']
-	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{packageSettings.identifierPackage}.dataBaskets'
+	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
 	sourceDataclassIdentifier: str = defaultA007822['variable']['stateDataclass']
 	sourceDataclassInstance: str = defaultA007822['variable']['stateInstance']
-	sourcePathPackage: PurePosixPath | None = PurePosixPath(packageSettings.pathPackage)
-	sourcePackageIdentifier: str | None = packageSettings.identifierPackage
+	sourcePathPackage: PurePosixPath | None = PurePosixPath(settingsPackage.pathPackage)
+	sourcePackageIdentifier: str | None = settingsPackage.identifierPackage
 	pathPackage: PurePosixPath | None = None
-	pathModule = PurePosixPath(packageSettings.pathPackage, 'jobs')
-	fileExtension: str = packageSettings.fileExtension
+	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
+	fileExtension: str = settingsPackage.fileExtension
 	pathFilenameFoldsTotal = pathModule / ('A007822_' + str(n))
 	packageIdentifier: str = ''
 	logicalPathRoot: identifierDotAttribute | None = None

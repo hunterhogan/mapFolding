@@ -6,13 +6,13 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from copy import deepcopy
 from functools import partial
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default, IfThis
 from mapFolding.someAssemblyRequired.codon.kitCodon import (
 	decorateCallableWithCodon, getIntegerArrayDtypes, integerArraysCodonCompatible, parameterCodonCompatible)
 from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getLogicalPath, getModule, getPathFilename
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -30,11 +30,7 @@ def codonJitOnFunction(
 ) -> PurePath:
 	"""Generate a Codon JIT module from a dataclass-based function."""
 	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
-	targetCallableIdentifier: str = (
-		f'{identifierCallable or sourceCallableIdentifier}Codon__'
-		f'{getLogicalPath(packageSettings.identifierPackage, logicalPathInfix, identifierModule).replace(".", "_")}'
-	)
-	Grab.nameAttribute(Then.replaceWith(targetCallableIdentifier))(ingredientsFunction.astFunctionDef)
+	targetCallableIdentifier: str = identifierCallable or sourceCallableIdentifier
 
 	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 	shatteredDataclass = shatter_dataclassesDOTdataclass(
@@ -63,9 +59,9 @@ def codonJitOnFunction(
 			, doThat=Then.extractIt(DOT.value)
 		).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTupleAssigned = deepcopy(astTupleReturned)
-		Grab.ctxAttribute(Then.replaceWith(Make.Store()))(astTupleAssigned)
+
 		NodeChanger(Be.Name, doThat=Grab.ctxAttribute(Then.replaceWith(Make.Store()))).visit(astTupleAssigned)
-		Grab.ctxAttribute(Then.replaceWith(Make.Load()))(astTupleReturned)
+
 		NodeChanger(Be.Name, doThat=Grab.ctxAttribute(Then.replaceWith(Make.Load()))).visit(astTupleReturned)
 		NodeChanger(
 			Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
@@ -79,8 +75,8 @@ def codonJitOnFunction(
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
-	pathFilename: PurePath = getPathFilename(packageSettings.pathPackage, logicalPathInfix, identifierModule)
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=packageSettings.identifierPackage)
+	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
+	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
 	return pathFilename
 
 def makeTheorem2Codon() -> PurePath:

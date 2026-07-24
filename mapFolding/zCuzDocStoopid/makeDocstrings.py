@@ -5,8 +5,8 @@ from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astMod
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from mapFolding import packageSettings
 from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 
@@ -76,7 +76,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
 
 def do() -> None:
     """Make docstrings for all functions corresponding to OEIS sequences."""
-    pathRoot: Path = packageSettings.pathPackage / "algorithms"
+    pathRoot: Path = settingsPackage.pathPackage / "algorithms"
     pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
     transformOEISidByFormula(pathFilenameSource)
 

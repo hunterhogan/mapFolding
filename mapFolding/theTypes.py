@@ -3,49 +3,10 @@
 from __future__ import annotations
 
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
-from typing import Any, NamedTuple, TYPE_CHECKING, TypedDict, TypeVar
+from typing import Any, TYPE_CHECKING, TypeVar
 
 if TYPE_CHECKING:
-	from collections.abc import Callable
-	from types import EllipsisType
-	from typing import Final, TypeAlias
-
-#======== Metadata management for OEIS sequences =======
-
-class MetadataOEISidMapFoldingManuallySet(TypedDict):
-	"""Settings that are best selected by a human instead of algorithmically."""
-
-	getMapShape: Callable[[int], tuple[int, ...]]
-	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
-
-class MetadataOEISidMapFolding(TypedDict):
-	"""Settings for an OEIS ID that may be computed by a multidimensional map folding algorithm."""
-
-	description: str
-	"""The OEIS.org description of the integer sequence."""
-	getMapShape: Callable[[int], tuple[int, ...]]
-	"""Function to convert the OEIS sequence index, 'n', to its `mapShape` tuple."""
-	offset: int
-	"""The starting index, 'n', of the sequence, typically 0 or 1."""
-	valuesKnown: dict[int, int]
-	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
-	valueUnknown: int
-	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
-
-class MetadataOEISidManuallySet(TypedDict, total=False):
-	"""Placeholder for future manually curated OEIS metadata."""
-
-class MetadataOEISid(TypedDict):
-	"""Settings for an implemented OEIS sequence."""
-
-	description: str
-	"""The OEIS.org description of the integer sequence."""
-	offset: int
-	"""The starting index, 'n', of the sequence, typically 0 or 1."""
-	valuesKnown: dict[int, int]
-	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
-	valueUnknown: int
-	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
+	from typing import TypeAlias
 
 #======== `TypeVar` indicates when a NumPy integer type is mandatory =======
 
@@ -105,20 +66,3 @@ Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]
 
 Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 """A `numpy.ndarray` with one axis and elements of type `NumPyFoldsTotal`."""
-
-#======== Managing data structures in `matrixMeandersNumPyndas` algorithm =======
-
-# TODO To have a SSOT for the axis order, implement the system I created in `hunterHearsPy`.
-axisOfLength: Final[int] = 0
-
-class ShapeArray(NamedTuple):
-	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
-
-	length: int
-	indices: int
-
-class ShapeSlicer(NamedTuple):
-	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
-
-	length: EllipsisType | slice
-	indices: int

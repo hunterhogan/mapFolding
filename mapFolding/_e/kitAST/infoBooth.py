@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from mapFolding import packageSettings
 from mapFolding.kitFilesystem import getPathRootJobDEFAULT
+from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING, TypedDict
 
@@ -22,15 +22,15 @@ class Default(TypedDict):
 default = Default(
 	filesystem={
 		'jobModule': PurePosixPath(getPathRootJobDEFAULT())
-		, 'sourcePackage': PurePosixPath(packageSettings.pathPackage)
+		, 'sourcePackage': PurePosixPath(settingsPackage.pathPackage)
 	}
 	, function={
 		'counting': 'count'
 		, 'dispatcher': 'doTheNeedful'
 	}
 	, logicalPath={
-		'algorithm': f'{packageSettings.identifierPackage}._e.algorithms'
-		, 'synthetic': f'{packageSettings.identifierPackage}._e.syntheticModules'
+		'algorithm': f'{settingsPackage.identifierPackage}._e.algorithms'
+		, 'synthetic': f'{settingsPackage.identifierPackage}._e.syntheticModules'
 	}
 	, module={
 		'algorithm': 'eliminationCrease'

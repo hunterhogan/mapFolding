@@ -27,8 +27,8 @@ which is crucial for maintaining package reliability in production environments.
 from __future__ import annotations
 
 from contextlib import redirect_stdout
-from mapFolding import packageSettings
-from mapFolding.oeis import _formatOEISid, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n
+from mapFolding.oeis import _theSSOT, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n
+from mapFolding.oeis._metadata import _formatOEISid
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from typing import TYPE_CHECKING
 import io
@@ -113,7 +113,7 @@ def testHelpText() -> None:
 	helpText = outputStream.getvalue()
 
 	# Verify content
-	for oeisID in packageSettings.oeisIDsImplementedMapFolding:
+	for oeisID in _theSSOT.oeisIDsImplementedMapFolding:
 		assertEqualTo(oeisID in helpText, True, getOEISids.__name__, oeisID)
 		assertEqualTo(dictionaryOEISMapFolding[oeisID]['description'] in helpText, True, getOEISids.__name__, oeisID)
 
@@ -164,4 +164,4 @@ def testCLI_HelpFlag() -> None:
 		helpOutput = outputStream.getvalue()
 		assertEqualTo('Available OEIS sequences:' in helpOutput, True, OEIS_for_n.__name__, '--help')
 		assertEqualTo('Usage examples:' in helpOutput, True, OEIS_for_n.__name__, '--help')
-		assertEqualTo(all(oeisID in helpOutput for oeisID in packageSettings.oeisIDsImplementedMapFolding), True, OEIS_for_n.__name__, '--help')
+		assertEqualTo(all(oeisID in helpOutput for oeisID in _theSSOT.oeisIDsImplementedMapFolding), True, OEIS_for_n.__name__, '--help')

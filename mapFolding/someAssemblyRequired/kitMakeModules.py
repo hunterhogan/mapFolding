@@ -35,8 +35,8 @@ from __future__ import annotations
 
 from astToolkit import Be, DOT, NodeTourist, parseLogicalPath2astModule, Then
 from hunterMakesPy import raiseIfNone
-from mapFolding import packageSettings
 from mapFolding.someAssemblyRequired import default
+from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePath
 from typing import TYPE_CHECKING
 
@@ -99,24 +99,24 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 		listLogicalPathParts.extend([module for module in identifierModule if module is not None])
 	return '.'.join(listLogicalPathParts)
 
-def getModule(identifierPackage: str | None = packageSettings.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = default['module']['algorithm']) -> ast.Module:
+def getModule(identifierPackage: str | None = settingsPackage.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = default['module']['algorithm']) -> ast.Module:
 	"""Get Module."""
 	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, identifierModule)
 	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)
 	return astModule
 
-def getPathFilename(pathRoot: PathLike[str] | PurePath | None = packageSettings.pathPackage, logicalPathInfix: identifierDotAttribute | None = None, identifierModule: str = '', fileExtension: str = packageSettings.fileExtension) -> PurePath:
+def getPathFilename(pathRoot: PathLike[str] | PurePath | None = settingsPackage.pathPackage, logicalPathInfix: identifierDotAttribute | None = None, identifierModule: str = '', fileExtension: str = settingsPackage.fileExtension) -> PurePath:
 	"""Construct filesystem path from logical path.
 
 	Parameters
 	----------
-	pathRoot : PathLike[str] | PurePath | None = packageSettings.pathPackage
+	pathRoot : PathLike[str] | PurePath | None = settingsPackage.pathPackage
 		Base directory for the package structure.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Logical path in dot notation.
 	identifierModule : str = ''
 		Name of the specific module file.
-	fileExtension : str = packageSettings.fileExtension
+	fileExtension : str = settingsPackage.fileExtension
 		File extension for Python modules.
 
 	Returns

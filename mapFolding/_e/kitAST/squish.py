@@ -6,8 +6,8 @@ from astToolkit import Be, IfThis, Make, NodeChanger, NodeTourist, parseLogicalP
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule, LedgerOfImports
 from humpy_cytoolz import juxt
 from itertools import repeat
-from mapFolding import packageSettings
 from mapFolding._e.kitAST.infoBooth import default
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
 import autoflake  # pyright: ignore[reportMissingTypeStubs]
@@ -65,13 +65,13 @@ def assimilateModule(logicalPath: identifierDotAttribute) -> None:
 	module1.appendEpilogue(moduleDissect)
 
 def assimilateEliminationCrease(identifierModule: str) -> Path:
-	pathFilename = Path(*default['logicalPath']['synthetic'].split('.'), identifierModule + packageSettings.fileExtension)
+	pathFilename = Path(*default['logicalPath']['synthetic'].split('.'), identifierModule + settingsPackage.fileExtension)
 
 	listModules: list[identifierDotAttribute] = [
-		*tuple(map("{0}._e.{1}".format, repeat(packageSettings.identifierPackage), (
+		*tuple(map("{0}._e.{1}".format, repeat(settingsPackage.identifierPackage), (
 			'theTypes', 'semiotics', 'leafDomains', 'pileOptions', '_disaggregation', '_beDRY', 'dataBaskets', 'filters', 'pinIt'
 		)))
-		, *tuple(map("{0}._e._2上nDimensional.{1}".format, repeat(packageSettings.identifierPackage), (
+		, *tuple(map("{0}._e._2上nDimensional.{1}".format, repeat(settingsPackage.identifierPackage), (
 			'pinIt', 'pinByCrease', 'pinByDomain', 'pinItAnnex', 'semiotics', 'beDRY', 'measure', 'creases'
 			, 'leafDomains', 'conditionalOrdering', 'pileOptions', 'filters'
 		)))
@@ -80,7 +80,7 @@ def assimilateEliminationCrease(identifierModule: str) -> Path:
 	]
 
 	listPackages: list[identifierDotAttribute] = [
-		*tuple(map("{0}.{1}".format, repeat(packageSettings.identifierPackage), ('beDRY', '_e', '_e._2上nDimensional')))
+		*tuple(map("{0}.{1}".format, repeat(settingsPackage.identifierPackage), ('beDRY', '_e', '_e._2上nDimensional')))
 		, *listModules
 	]
 
@@ -93,7 +93,7 @@ def assimilateEliminationCrease(identifierModule: str) -> Path:
 	module1.appendPrologue(statement=Make.If(Make.Name('TYPE_CHECKING'), ledgerTYPE_CHECKING.makeList_ast()))
 	module1.appendLauncher(ast_parse(launcher))
 
-	return module1.write_astModule(pathFilename, packageSettings.identifierPackage)
+	return module1.write_astModule(pathFilename, settingsPackage.identifierPackage)
 
 def minify(pathFilename: Path) -> Path:
 	pathFilename.with_stem('min').write_text(python_minifier.minify(autoflake.fix_code(pathFilename.read_text(encoding='utf-8'), remove_unused_variables=True)
@@ -122,5 +122,5 @@ def toCodon(pathFilename: Path) -> Path:
 if __name__ == '__main__':
 	toCodon(minify(assimilateEliminationCrease('module1')))
 	toCodon(toASCII(assimilateEliminationCrease('module1')))
-	pathFilename = packageSettings.pathPackage / '_e' / 'kitAST' / 'aa.py'
+	pathFilename = settingsPackage.pathPackage / '_e' / 'kitAST' / 'aa.py'
 	toCodon(pathFilename)
