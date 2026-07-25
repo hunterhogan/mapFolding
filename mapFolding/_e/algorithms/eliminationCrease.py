@@ -1,36 +1,31 @@
 from __future__ import annotations
 
 from collections import deque
-from concurrent.futures import as_completed, ProcessPoolExecutor
+from functools import partial
+from itertools import chain, repeat, starmap
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from math import factorial
-from tqdm import tqdm
+from multiprocessing import get_context
+from operator import methodcaller
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from concurrent.futures import Future
-	from mapFolding._e.dataBaskets import PermutationSpace
-	from mapFolding._e.theTypes import Folding
+	from collections.abc import Iterable, Iterator
+	from multiprocessing.context import BaseContext
+	from multiprocessing.process import BaseProcess
+	from multiprocessing.queues import Queue
 
-def pinByCrease(state: EliminationState) -> EliminationState:
-	listFolding: deque[Folding] = deque()
+def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
+	return EliminationState(mapShape, listPermutationSpace=deque([permutationSpace])
+		).reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
-	while state.listPermutationSpace:
+def deconstructPermutationSpaces(listPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
+	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, listPermutationSpace))
 
-		permutationSpace: PermutationSpace = state.listPermutationSpace.pop()
-
-		sherpa: EliminationState = EliminationState(state.mapShape, permutationSpace=permutationSpace)
-		sherpa.listPermutationSpace.extend(sherpa.permutationSpace.deconstructAtPile())
-		sherpa = sherpa.reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
-
-		listFolding.extend(sherpa.listFolding)
-
-		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
-
-	state.listFolding.extend(listFolding)
-	return state
+def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
+	tuple(map(queueStates.put, map(partial(pinByCrease, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Do the things necessary so that `pinByCrease` operates efficiently."""
@@ -40,23 +35,39 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		state = pinPilesAtEnds(state, 1)
 
-	if (1 < workersMaximum) and (1 < len(state.listPermutationSpace)):
-		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
+	processManager: BaseContext = get_context()
+	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
+	queueStates: Queue[EliminationState] = processManager.Queue()
 
-			listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace.copy()
-			state.listPermutationSpace = deque()
+	state.groupsOfFolds = len(state.listFolding)
+	state.listFolding = deque()
 
-			listClaimTickets: list[Future[EliminationState]] = [
-				concurrencyManager.submit(pinByCrease, EliminationState(state.mapShape, listPermutationSpace=deque([permutationSpace])))
-				for permutationSpace in listPermutationSpace
-			]
+	listProcesses: deque[BaseProcess] = deque(starmap(
+		partial(processManager.Process, target=consumePermutationSpaces, args=(state.mapShape, queuePermutationSpace, queueStates))
+		, repeat((), workersMaximum)
+	))
+	tuple(map(methodcaller('start'), listProcesses))
 
-			for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False):
-				state.listFolding.extend(claimTicket.result().listFolding)
-	else:
-		state = pinByCrease(state)
+	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = deque()
+
+	permutationSpacesLiving: int = len(listPermutationSpace)
+
+	while permutationSpacesLiving:
+		tuple(map(queuePermutationSpace.put, listPermutationSpace))
+		sherpa: EliminationState = queueStates.get()
+		state.groupsOfFolds += len(sherpa.listFolding)
+		listPermutationSpace = deque(deconstructPermutationSpaces(sherpa.listPermutationSpace))
+		permutationSpacesLiving += -1 + len(listPermutationSpace)
+
+	tuple(map(queuePermutationSpace.put, repeat(PermutationSpace(), workersMaximum)))
+	tuple(map(methodcaller('join'), listProcesses))
+
+	queuePermutationSpace.close()
+	queuePermutationSpace.join_thread()
+	queueStates.close()
+	queueStates.join_thread()
 
 	state.Theorem4Multiplier = factorial(state.dimensionsTotal)
-	state.groupsOfFolds = len(state.listFolding)
 
 	return state

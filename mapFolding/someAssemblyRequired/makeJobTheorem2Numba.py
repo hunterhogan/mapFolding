@@ -1,4 +1,3 @@
-# ruff:file-ignore[commented-out-code]
 """
 Map folding AST transformation system: Specialized job generation and optimization implementation.
 
@@ -37,10 +36,10 @@ if TYPE_CHECKING:
 # That would probably be an improvement.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint16', type_asname='DatatypeElephino'),
+	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='DatatypeFoldsTotal'),
 	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='Array1DElephino'),
+	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
 ]
 
@@ -85,7 +84,6 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 		Optimization settings including Numba parameters and progress options.
 
 	"""
-	# ingredientsCount: IngredientsFunction = IngredientsFunction(raiseIfNone(extractFunctionDef(job.source_astModule, job.identifierCallableSource)))
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 
 	staticValues(job, ingredientsCount)
@@ -139,5 +137,6 @@ def A007822(n: int) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 10)
+	# TODO is `gapRangeStart.max() == leavesTotal * 2 + 1`?
+	mapShape: tuple[DatatypeLeavesTotal, ...] = (6, 6)
 	fromMapShape(mapShape)
