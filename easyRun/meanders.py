@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import countingMeanders, dictionaryOEIS
+from mapFolding.oeis import countingMeanders
+from mapFolding.oeis._metadata import dictionaryOEIS  # ruff: ignore[import-private-name]
 import gc
 import sys
 import time
@@ -23,12 +24,12 @@ if __name__ == '__main__':
 	if sys.version_info >= (3, 14):
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	flow = 'matrixPandas'
 	flow = 'matrixMeanders'
 	flow = 'matrixNumPy'
+	flow = 'matrixPandas'
 
 	for oeisID in [
-			'A005316',
+			# 'A005316',
 			'A000682',
 				]:
 		sys.stdout.write(f"\n{oeisID}\n")
@@ -39,15 +40,13 @@ if __name__ == '__main__':
 		2. Dragging up a loop end.
 		3. Dragging down a loop end.
 		4. Connect ends across the line.
-
-		flipTheExtra_0b1AsUfunc: what is extra?
 		"""
 
 		nList: list[int] = []
-		nList.extend(range(2, 10))
+		# nList.extend(range(2, 10))
 		# nList.extend(range(10, 28))
-		nList.extend(range(28, 33))
-		# nList.extend(range(33, 38))
+		# nList.extend(range(28, 33))
+		nList.extend(range(33, 38))
 		# nList.extend(range(38, 43))
 		# nList.extend(range(43, 45))
 		# nList.extend(range(47, 57))

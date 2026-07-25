@@ -161,7 +161,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	"""
 	#======== Edge cases for "small" map shapes ============================
 	if (0 in state.mapShape) or not state.mapShape:
-		from mapFolding.oeis import makeDictionaryFoldsTotalKnown
+		from mapFolding.oeis._metadata import makeDictionaryFoldsTotalKnown
 		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
 		if state.mapShape in dictionaryFoldsTotalKnown:
 			state.groupsOfFolds = dictionaryFoldsTotalKnown[state.mapShape]

@@ -12,9 +12,10 @@ from __future__ import annotations
 from astToolkit import parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
+from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
-from mapFolding.oeis import dictionaryOEIS, getFoldsTotalKnown
+from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass

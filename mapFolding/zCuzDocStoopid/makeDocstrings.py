@@ -1,3 +1,4 @@
+# ruff: file-ignore[import-outside-top-level] `mapFolding.oeis._metadata`.
 """Make docstrings."""
 from __future__ import annotations
 
@@ -5,7 +6,6 @@ from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astMod
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from mapFolding.oeis import dictionaryOEIS, dictionaryOEISMapFolding
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
@@ -20,6 +20,7 @@ moduleWarning = "This is a generated file; edit the source file.\n"
 
 def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     """Transform the docstrings of functions corresponding to OEIS sequences."""
+    from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
     pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
     astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
     dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)

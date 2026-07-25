@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from functools import cache
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from itertools import filterfalse
+from itertools import chain, filterfalse
 from mapFolding.oeis import _theSSOT
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
 from operator import methodcaller
@@ -202,7 +202,34 @@ def getOEISidMetadata(oeisID: str) -> tuple[str, int]:
 	description: str = ' '.join(listDescriptionDeconstructed)
 	return description, offset
 
-#======== Dictionaries of OEIS sequence metadata ==============================================================================
+def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
+	"""You can create a dictionary mapping map shapes to known folding totals from all OEIS sequences.
+
+	(AI generated docstring)
+
+	This function constructs a comprehensive lookup dictionary by extracting and transforming data
+	from all map-folding OEIS sequences in `dictionaryOEISMapFolding`. The function applies each
+	sequence's `getMapShape` function to its known indices to generate the corresponding map shapes,
+	then pairs each shape with its folding total.
+
+	Returns
+	-------
+	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
+		A dictionary where keys are tuple `mapShape` and values are the total number of distinct
+		folding patterns for `mapShape`.
+
+	Exclusions
+	----------
+	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents a
+	constrained subset rather than the total count for each `mapShape`.
+
+	See Also
+	--------
+	mapFolding.oeis.dictionaryOEISMapFolding
+		Source metadata for map-folding OEIS sequences.
+	"""
+	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
+	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEISMapFolding.items() if oeisID != 'A007822'))
 
 def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
 	"""Construct the comprehensive settings dictionary for all implemented OEIS sequences.

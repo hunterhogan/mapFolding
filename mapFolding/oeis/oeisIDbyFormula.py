@@ -4,7 +4,8 @@ This is a generated file; edit the source file.
 """
 from functools import cache
 from hunterMakesPy import inclusive
-from mapFolding.oeis import countingMeanders, dictionaryOEIS
+from mapFolding.oeis import countingMeanders
+from mapFolding.oeis._metadata import dictionaryOEIS
 
 @cache
 def A000136(n: int) -> int:

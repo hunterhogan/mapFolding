@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
-from mapFolding.oeis import dictionaryOEISMapFolding
+from mapFolding.oeis._metadata import dictionaryOEISMapFolding  # ruff: ignore[import-private-name]
 from typing import TYPE_CHECKING
 import sys
 import time
@@ -43,16 +43,16 @@ if __name__ == '__main__':
 
 	oeisID = 'A001416'
 	oeisID = 'A001418'
-	oeisID = 'A000136'
 	oeisID = 'A195646'
 	oeisID = 'A001417'
 	oeisID = 'A001415'
+	oeisID = 'A000136'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(3, 15):
+	for n in range(3, 25):
 
 		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
 

@@ -27,8 +27,8 @@ which is crucial for maintaining package reliability in production environments.
 from __future__ import annotations
 
 from contextlib import redirect_stdout
-from mapFolding.oeis import _theSSOT, dictionaryOEISMapFolding, getOEISids, OEIS_for_n, oeisIDfor_n
-from mapFolding.oeis._metadata import _formatOEISid
+from mapFolding.oeis import _theSSOT, getOEISids, OEIS_for_n, oeisIDfor_n
+from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEISMapFolding
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from typing import TYPE_CHECKING
 import io

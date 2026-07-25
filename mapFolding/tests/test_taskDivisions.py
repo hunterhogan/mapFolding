@@ -27,8 +27,8 @@ from __future__ import annotations
 
 from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
 from mapFolding.basecamp import countFolds
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
-from mapFolding.oeis import dictionaryOEISMapFolding, getFoldsTotalKnown
+from mapFolding.beDRY import defineProcessorLimit, getFoldsTotalKnown, getLeavesTotal, getTaskDivisions, validateListDimensions
+from mapFolding.oeis._metadata import dictionaryOEISMapFolding
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import pytest

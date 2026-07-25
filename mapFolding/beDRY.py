@@ -1,7 +1,8 @@
-# ruff:file-ignore[import-outside-top-level] `numba`.
+# ruff:file-ignore[import-outside-top-level] `numba`, `makeDictionaryFoldsTotalKnown`.
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 from __future__ import annotations
 
+from collections.abc import Sequence
 from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
@@ -11,13 +12,12 @@ from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
-	from collections.abc import Sequence
 	from hunterMakesPy.theTypes import Limitation
 	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
 	from numpy import dtype as numpy_dtype, ndarray
 	from typing import Any
 
-#======== Flow control ======================================
+#======== Parse parameters ======================================
 
 def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = None) -> int:
 	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
@@ -55,67 +55,6 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 	else:
 		concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
-
-#======== map folding ===================================
-
-def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
-	"""Create a properly typed connection graph for the map folding algorithm.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A tuple of integers representing the dimensions of the map.
-	leavesTotal : int
-		The total number of leaves in the map.
-	datatype : type[NumPyIntegerType]
-		The NumPy integer type to use for the array elements, ensuring proper memory usage and
-		compatibility with the computation state.
-
-	Returns
-	-------
-	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]
-		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the
-		specified `datatype`, representing all possible connections between leaves.
-	"""
-	connectionGraph: Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
-	return connectionGraph.astype(datatype)
-
-@cache
-def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
-	"""The definitive calculation of the total number of leaves in a map with the given dimensions.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A tuple of integers with the length of each dimension of the map.
-
-	Returns
-	-------
-	leavesTotal : int
-		The definitive total number of leaves in the map.
-
-	Raises
-	------
-	OverflowError
-		If the product of dimensions would exceed the system's maximum integer size. This check
-		prevents silent numeric overflow issues that could lead to incorrect results.
-
-	Notes
-	-----
-	It is impossible to overstate the importance of `leavesTotal` in every algorithm for counting
-	folds. Therefore, in this package, this function is the ***only*** permissible way to compute
-	`leavesTotal`.
-
-	The total number of leaves is the product of all dimensions in `mapShape`.
-	"""
-	productDimensions = 1
-	for dimension in mapShape:
-		#=EndNotes##absurd=
-		if dimension > sysMaxsize // productDimensions:
-			message: str = f"I received `{dimension = }` in `{mapShape = }`, but the product of the dimensions exceeds the maximum size of an integer on this system."
-			raise OverflowError(message)
-		productDimensions *= dimension
-	return productDimensions
 
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:
 	"""Determine whether to divide the computation into tasks and how many divisions.
@@ -170,6 +109,153 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		message = f"Problem: `{taskDivisions = }`, is greater than `{leavesTotal = }`, which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`: they are derived from parameters that may or may not be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from my dubious-quality Python code."
 		raise ValueError(message)
 	return int(max(0, taskDivisions))
+
+def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
+	"""Validate and normalize dimensions for a map folding problem.
+
+	(AI generated docstring)
+
+	This function serves as the gatekeeper for dimension inputs, ensuring that all map dimensions
+	provided to the package meet the requirements for valid computation. It performs multiple
+	validation steps and normalizes the dimensions into a consistent format.
+
+	Parameters
+	----------
+	listDimensions : Sequence[int]
+		A sequence of integers representing the dimensions of the map.
+
+	Returns
+	-------
+	mapShape : tuple[int, ...]
+		An _unsorted_ tuple of positive integers representing the validated dimensions.
+
+	Raises
+	------
+	ValueError
+		If the input is empty or contains negative values.
+	NotImplementedError
+		If fewer than two positive dimensions are provided.
+	"""
+	listOFint: list[int] = intInnit(listDimensions, 'listDimensions', Sequence[int])
+	if not listOFint or any(map((0).__ge__, listOFint)):
+		message: str = f"I received `{listDimensions = }`, but every dimension must be a non-negative integer, and I need at least one dimension."
+		raise ValueError(message)
+
+	# TODO idk where this guard belongs.
+	if len(listOFint) < 2:
+		message = f"This function requires `{listDimensions = }` to have at least two dimensions greater than 0. You may want to look at https://oeis.org/."
+		raise NotImplementedError(message)
+	#=EndNotes##sortingDimensions=
+	# Do NOT sort the dimensions.
+	return tuple(listOFint)
+
+#======== map folding ===================================
+
+def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
+	"""Create a properly typed connection graph for the map folding algorithm.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A tuple of integers representing the dimensions of the map.
+	leavesTotal : int
+		The total number of leaves in the map.
+	datatype : type[NumPyIntegerType]
+		The NumPy integer type to use for the array elements, ensuring proper memory usage and
+		compatibility with the computation state.
+
+	Returns
+	-------
+	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]
+		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the
+		specified `datatype`, representing all possible connections between leaves.
+	"""
+	connectionGraph: Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
+	return connectionGraph.astype(datatype)
+
+@cache
+def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
+	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
+
+	(AI generated docstring)
+
+	This function queries the comprehensive dictionary of known folding totals constructed from OEIS
+	sequence data. The function returns the total if the map shape matches a known value, or 0 if the
+	shape is not found in the OEIS sequences.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A tuple of integers representing the dimensions of the map.
+
+	Returns
+	-------
+	foldingsTotal : int
+		The known total number of distinct folding patterns for the given map shape, or 0 if the map
+		shape does not match any known values in the OEIS sequences.
+
+	Examples
+	--------
+	>>> from mapFolding.oeis import librarianLookupsFoldsTotalKnown
+	>>> librarianLookupsFoldsTotalKnown((2, 3))
+	10
+
+	Implementation Details
+	----------------------
+	Map shapes are matched exactly as provided without internal sorting or normalization. The function
+	uses `functools.cache` [1] for memoization to avoid reconstructing the lookup dictionary on
+	repeated calls.
+
+	See Also
+	--------
+	mapFolding.oeis.librarianConstructsDictionaryFoldsTotalKnown
+		Construct the underlying lookup dictionary.
+
+	References
+	----------
+	[1] functools.cache - Python standard library
+		https://docs.python.org/3/library/functools.html#functools.cache
+	"""
+	from mapFolding.oeis import makeDictionaryFoldsTotalKnown
+	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
+	return lookupFoldsTotal.get(tuple(mapShape), 0)
+
+@cache
+def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
+	"""The definitive calculation of the total number of leaves in a map with the given dimensions.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A tuple of integers with the length of each dimension of the map.
+
+	Returns
+	-------
+	leavesTotal : int
+		The definitive total number of leaves in the map.
+
+	Raises
+	------
+	OverflowError
+		If the product of dimensions would exceed the system's maximum integer size. This check
+		prevents silent numeric overflow issues that could lead to incorrect results.
+
+	Notes
+	-----
+	It is impossible to overstate the importance of `leavesTotal` in every algorithm for counting
+	folds. Therefore, in this package, this function is the ***only*** permissible way to compute
+	`leavesTotal`.
+
+	The total number of leaves is the product of all dimensions in `mapShape`.
+	"""
+	productDimensions = 1
+	for dimension in mapShape:
+		#=EndNotes##absurd=
+		if dimension > sysMaxsize // productDimensions:
+			message: str = f"I received `{dimension = }` in `{mapShape = }`, but the product of the dimensions exceeds the maximum size of an integer on this system."
+			raise OverflowError(message)
+		productDimensions *= dimension
+	return productDimensions
 
 def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray[tuple[int, int, int], numpy_dtype[numpy_int64]]:
 	"""Implement connection graph generation for map folding.
@@ -240,59 +326,3 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[NumPyIntegerT
 
 	"""
 	return numpy.zeros(shape, dtype=datatype)
-
-def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
-	"""Validate and normalize dimensions for a map folding problem.
-
-	(AI generated docstring)
-
-	This function serves as the gatekeeper for dimension inputs, ensuring that all map dimensions
-	provided to the package meet the requirements for valid computation. It performs multiple
-	validation steps and normalizes the dimensions into a consistent format.
-
-	Parameters
-	----------
-	listDimensions : Sequence[int]
-		A sequence of integers representing the dimensions of the map.
-
-	Returns
-	-------
-	mapShape : tuple[int, ...]
-		An _unsorted_ tuple of positive integers representing the validated dimensions.
-
-	Raises
-	------
-	ValueError
-		If the input is empty or contains negative values.
-	NotImplementedError
-		If fewer than two positive dimensions are provided.
-	"""
-	if not listDimensions:
-		message: str = "`listDimensions` is a required parameter."
-		raise ValueError(message)
-	listOFint: list[int] = intInnit(listDimensions, 'listDimensions')
-	mapDimensions: list[int] = []
-	for dimension in listOFint:
-		if dimension <= 0:
-			message = f"I received `{dimension = }` in `{listDimensions = }`, but all dimensions must be a non-negative integer."
-			raise ValueError(message)
-		mapDimensions.append(dimension)
-	if len(mapDimensions) < 2:
-		message = f"This function requires `{listDimensions = }` to have at least two dimensions greater than 0. You may want to look at https://oeis.org/."
-		raise NotImplementedError(message)
-
-	"""
-	I previously sorted the dimensions for a few reasons that may or may not be valid:
-		1. After empirical testing, I believe that (2,10), for example, computes significantly faster than (10,2).
-		2. Standardization, generally.
-		3. If I recall correctly, after empirical testing, I concluded that sorted dimensions always leads to
-		non-negative values in the connection graph, but if the dimensions are not in ascending order of magnitude,
-		the connection graph might have negative values, which as far as I know, is not an inherent problem, but the
-		negative values propagate into other data structures, which requires the datatypes to hold negative values,
-		which means I cannot optimize the bit-widths of the datatypes as easily. (And optimized bit-widths helps with
-		performance.)
-
-	Furthermore, now that the package includes OEIS A000136, 1 x N stamps/maps, sorting could distort results.
-	"""
-	# Do NOT sort the dimensions.
-	return tuple(mapDimensions)

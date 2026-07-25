@@ -24,7 +24,7 @@ from __future__ import annotations
 from contextlib import redirect_stdout
 from mapFolding.beDRY import validateListDimensions
 from mapFolding.kitFilesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal
-from mapFolding.oeis import dictionaryOEISMapFolding
+from mapFolding.oeis._metadata import dictionaryOEISMapFolding
 from mapFolding.tests import assertEqualTo
 from pathlib import Path
 import io

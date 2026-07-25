@@ -30,8 +30,10 @@ from __future__ import annotations
 from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds
+from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import countingMeanders, dictionaryOEIS, dictionaryOEISMapFolding, getFoldsTotalKnown, oeisIDfor_n
+from mapFolding.oeis import countingMeanders, oeisIDfor_n
+from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds

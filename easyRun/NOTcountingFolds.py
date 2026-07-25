@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from collections import ChainMap
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import countingMeanders, dictionaryOEIS, dictionaryOEISMapFolding
+from mapFolding.oeis import countingMeanders
+from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding  # ruff: ignore[import-private-name]
 from typing import TYPE_CHECKING
 import sys
 import time

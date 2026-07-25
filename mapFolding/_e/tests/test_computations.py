@@ -6,7 +6,7 @@ from mapFolding._e._2上nDimensional.pinIt import (
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
-from mapFolding.oeis import dictionaryOEISMapFolding
+from mapFolding.oeis._metadata import dictionaryOEISMapFolding
 from typing import TYPE_CHECKING
 import pytest
 

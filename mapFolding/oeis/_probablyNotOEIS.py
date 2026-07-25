@@ -5,11 +5,8 @@
 # ty:ignore[invalid-argument-type]
 from __future__ import annotations
 
-from functools import cache
 from hunterMakesPy import errorL33T
-from itertools import chain
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
-from mapFolding.oeis._metadata import dictionaryOEISMapFolding
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -18,81 +15,6 @@ if TYPE_CHECKING:
 	from os import PathLike
 	from pathlib import PurePath
 	from typing import Literal
-
-@cache
-def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
-	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
-
-	(AI generated docstring)
-
-	This function queries the comprehensive dictionary of known folding totals constructed from OEIS
-	sequence data. The function returns the total if the map shape matches a known value, or 0 if the
-	shape is not found in the OEIS sequences.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A tuple of integers representing the dimensions of the map.
-
-	Returns
-	-------
-	foldingsTotal : int
-		The known total number of distinct folding patterns for the given map shape, or 0 if the map
-		shape does not match any known values in the OEIS sequences.
-
-	Examples
-	--------
-	>>> from mapFolding.oeis import librarianLookupsFoldsTotalKnown
-	>>> librarianLookupsFoldsTotalKnown((2, 3))
-	10
-
-	Implementation Details
-	----------------------
-	Map shapes are matched exactly as provided without internal sorting or normalization. The function
-	uses `functools.cache` [1] for memoization to avoid reconstructing the lookup dictionary on
-	repeated calls.
-
-	See Also
-	--------
-	mapFolding.oeis.librarianConstructsDictionaryFoldsTotalKnown
-		Construct the underlying lookup dictionary.
-
-	References
-	----------
-	[1] functools.cache - Python standard library
-		https://docs.python.org/3/library/functools.html#functools.cache
-	"""
-	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
-	return lookupFoldsTotal.get(tuple(mapShape), 0)
-
-def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""You can create a dictionary mapping map shapes to known folding totals from all OEIS sequences.
-
-	(AI generated docstring)
-
-	This function constructs a comprehensive lookup dictionary by extracting and transforming data
-	from all map-folding OEIS sequences in `dictionaryOEISMapFolding`. The function applies each
-	sequence's `getMapShape` function to its known indices to generate the corresponding map shapes,
-	then pairs each shape with its folding total.
-
-	Returns
-	-------
-	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
-		A dictionary where keys are tuple `mapShape` and values are the total number of distinct
-		folding patterns for `mapShape`.
-
-	Exclusions
-	----------
-	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents a
-	constrained subset rather than the total count for each `mapShape`.
-
-	See Also
-	--------
-	mapFolding.oeis.dictionaryOEISMapFolding
-		Source metadata for map-folding OEIS sequences.
-	"""
-	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
-	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEISMapFolding.items() if oeisID != 'A007822'))
 
 # TODO A long time ago, I had an explicit rule written in "oeis.py" that the module contained only OEIS stuff and ALL OEIS stuff.
 # This function is fundamentally an OEIS function, but I have been trying to treat it the same as `countingFolds`. That mismatch
@@ -289,6 +211,15 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 				boundary: int = oeis_n - 1
 
+				# TODO Consider: If A000682 is essentially A000136 * leavesTotal, then my graphs of
+				# A000136 are _literal_ graphs of A000682. Since Theorem 2 applies to A000136, it must
+				# apply to A000682. Can I use the graphs to find the midpoint of an A000682
+				# computation using the matrix algorithm? The problem with the matrix algorithm is
+				# memory usage. Unique signatures (buckets) grows predictably. Cutting the count in
+				# half...
+				#
+				# TODO In `doTheNeedful`, use `while state.boundary > 0:` and the ratio trick to find
+				# the midpoint.
 				if oeisID == 'A000682':
 					if oeis_n == 1:
 						return 1
