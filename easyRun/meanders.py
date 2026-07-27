@@ -15,18 +15,19 @@ def write() -> None:
 		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 		f"{n}\t"
 		# f"{countTotal}\t"
-		# f"{dictionaryOEISMeanders[oeisID]['valuesKnown'][n]}\t"
+		# f"{dictionaryOEIS[oeisID]['valuesKnown'][n]}\t"
+		# f"{dictionaryOEIS[oeisID]['valuesKnown'][n] / countTotal}\t"
 		f"{time.perf_counter() - timeStart:.2f}\t"
 		f"{ansiColorReset}\n"
 	)
 
 if __name__ == '__main__':
-	if sys.version_info >= (3, 14):
+	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
 	flow = 'matrixMeanders'
-	flow = 'matrixNumPy'
 	flow = 'matrixPandas'
+	flow = 'matrixNumPy'
 
 	for oeisID in [
 			# 'A005316',
@@ -46,10 +47,10 @@ if __name__ == '__main__':
 		# nList.extend(range(2, 10))
 		# nList.extend(range(10, 28))
 		# nList.extend(range(28, 33))
-		nList.extend(range(33, 38))
-		# nList.extend(range(38, 43))
+		# nList.extend(range(33, 38))
+		nList.extend(range(38, 43))
 		# nList.extend(range(43, 45))
-		# nList.extend(range(47, 57))
+		# nList.extend(range(45, 50))
 
 		for n in nList:
 			gc.collect()

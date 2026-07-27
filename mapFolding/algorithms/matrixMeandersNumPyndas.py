@@ -158,7 +158,7 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 	if fixedSizeMAXIMUMarcCode:
 		MAXIMUMarcCode = state.MAXIMUMarcCode
 
-	return (arcCodeWidest > raiseIfNone(state.bitWidthLimitArcCode)
+	return (raiseIfNone(state.bitWidthLimitArcCode) < arcCodeWidest
 		or raiseIfNone(state.bitWidthLimitCrossings) < crossingsWidest
 		or raiseIfNone(state.bitWidthLimitArcCode) < MAXIMUMarcCode
 		)
@@ -240,18 +240,16 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	due to less disk swapping--as compared to the pandas implementation and other NumPy
 	implementations I tried.
 	"""
+	indicesAnalyzed: int = 2
+	indexArcCode, indexCrossings = range(indicesAnalyzed)
+	slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=indexArcCode)
+	slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexCrossings)
+
 	indicesPrepArea: int = 1
 	indexAnalysis = 0
 	slicerAnalysis: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalysis)
 
 	indicesSelectors: int = 1
-	indexSelector = 0
-	slicerSelector: ShapeSlicer = ShapeSlicer(length=..., indices=indexSelector)
-
-	indicesAnalyzed: int = 2
-	indexArcCode, indexCrossings = range(indicesAnalyzed)
-	slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=indexArcCode)
-	slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexCrossings)
 
 	while 0 < state.boundary and not areIntegersWide(state):
 		def aggregateAnalyzed(arrayAnalyzed: ndarray[tuple[Any, ...], dtype[dtypeArcCode]], state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
@@ -368,10 +366,6 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.zeros(shape, dtype=numpy.intp)
 		del shape
 
-		# TODO I did this wrong. Ditch `view()` and access directly as with `arrayAnalyzed`. This
-		# unintentionally creates two `arraySelectors`-sized objects but only uses one of them.
-		selector: ndarray[tuple[int], dtype[numpy.intp]] = arraySelectors[slicerSelector].view()
-
 		state.indexTarget = 0
 
 		state.boundary -= 1
@@ -380,7 +374,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 #================ analyze aligned ===== if 1 < bitsAlpha and 1 < bitsZulu =============================================
 # In other versions, this analysis step is last because I modify the data. In this version, I don't modify the data.
 		arrayBitsAlpha: ndarray[tuple[int], dtype[dtypeArcCode]] = bitwise_and(state.arrayArcCodes, state.bitsLocator)  # EXTRA ARRAY dtypeArcCode
-#======== > * > bitsAlpha 1 bitsZulu 1 ====================
+#======== < * < 1 bitsAlpha < 1 bitsZulu ====================
 		greater(arrayBitsAlpha, 1, out=toPrepArea)
 		bitsZuluStack: ndarray[tuple[int], dtype[dtypeArcCode]] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
 		bitwise_right_shift(bitsZuluStack, 1, out=bitsZuluStack)					# O indexArcCode X indexCrossings
@@ -399,8 +393,8 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-		selector = numpy.flatnonzero(toPrepArea)
-		arrayBitsAlpha[selector] = flipTheExtra_0b1AsUfunc(arrayBitsAlpha[selector])
+		arraySelectors = numpy.flatnonzero(toPrepArea)
+		arrayBitsAlpha[arraySelectors] = flipTheExtra_0b1AsUfunc(arrayBitsAlpha[arraySelectors])
 
 #======== if bitsZuluAtEven and not bitsAlphaAtEven ======= #======== ^ & | ^ & bitsAlpha 1 1 bitsZulu 1 1 ============
 		bitsAlphaStack: ndarray[tuple[int], dtype[dtypeArcCode]] = makeStorage(state.arrayArcCodes, state, arrayAnalyzed, indexCrossings)
@@ -417,7 +411,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-		selector = numpy.flatnonzero(toPrepArea)
+		arraySelectors = numpy.flatnonzero(toPrepArea)
 
 #======== bitsAlphaAtEven or bitsZuluAtEven =============== #======== ^ & & bitsAlpha 1 bitsZulu 1 ====================
 		bitwise_and(state.arrayArcCodes, state.bitsLocator, out=toPrepArea)
@@ -429,14 +423,14 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del bitsZuluStack 															# X indexArcCode O indexCrossings
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
-		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)					# `selectorBitsAtEven`
+		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)				# `selectorBitsAtEven`
 		del selectorGreaterThan1 													# O indexArcCode O indexCrossings
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 		selectorDisqualified: ndarray[tuple[int], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)  # EXTRA ARRAY numpy.intp
 		bitwise_right_shift(state.arrayArcCodes, 1, out=toPrepArea)
 		bitwise_and(toPrepArea, state.bitsLocator, out=toPrepArea)
 
-		toPrepArea[selector] = flipTheExtra_0b1AsUfunc(toPrepArea[selector])
+		toPrepArea[arraySelectors] = flipTheExtra_0b1AsUfunc(toPrepArea[arraySelectors])
 
 		bitsZuluStack: ndarray[tuple[int], dtype[dtypeArcCode]] = makeStorage(toPrepArea, state, arrayAnalyzed, indexCrossings)
 #																					 O indexArcCode X indexCrossings
@@ -474,11 +468,11 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_or(bitsAlphaStack, toPrepArea, out=toPrepArea)
 		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
 
-#-------- if bitsAlpha > 1 ------------ > bitsAlpha 1 -----
+#-------- if 1 < bitsAlpha ------------ < 1 bitsAlpha -----
 		less_equal(bitsAlphaStack, 1, out=bitsAlphaStack)
-		selector: ndarray[tuple[int], dtype[numpy.intp]] = numpy.flatnonzero(bitsAlphaStack)
+		arraySelectors = numpy.flatnonzero(bitsAlphaStack)
 		del bitsAlphaStack 															# O indexArcCode O indexCrossings
-		toPrepArea[selector] = 0
+		toPrepArea[arraySelectors] = 0
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea)
 
@@ -502,13 +496,13 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_or(bitsZuluStack, toPrepArea, out=toPrepArea)
 		bitwise_right_shift(toPrepArea, 1, out=toPrepArea)
 
-#-------- if bitsZulu > 1 ------------- > bitsZulu 1 ------
+#-------- if 1 < bitsZulu ------------- < 1 bitsZulu ------
 		less_equal(bitsZuluStack, 1, out=bitsZuluStack)
-		selector = numpy.flatnonzero(bitsZuluStack)
+		arraySelectors = numpy.flatnonzero(bitsZuluStack)
 		del bitsZuluStack 															# O indexArcCode O indexCrossings
-		toPrepArea[selector] = 0
+		toPrepArea[arraySelectors] = 0
 
-		del selector, arraySelectors
+		del arraySelectors
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea)
 
@@ -597,7 +591,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			dataframeMeanders['analyzed'] *= bitsTarget
 			del bitsTarget
-			dataframeMeanders = dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 1)]  # `if (bitsAlphaHasArcs and bitsZuluHasArcs)`
+			dataframeMeanders = dataframeMeanders.loc[(1 < dataframeMeanders['analyzed'])]  # `if (bitsAlphaHasArcs and bitsZuluHasArcs)`  # ty:ignore[invalid-assignment]
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator				# `bitsAlpha`
@@ -612,7 +606,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			del bitsTarget
 			dataframeMeanders.loc[:, 'analyzed'] ^= 1								# Combined second step for `bitsAlphaAtEven` and `bitsZuluAtEven`.
 
-			dataframeMeanders = dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0)]  # `if (bitsAlphaIsEven or bitsZuluIsEven)`
+			dataframeMeanders = dataframeMeanders.loc[(0 < dataframeMeanders['analyzed'])]  # `if (bitsAlphaIsEven or bitsZuluIsEven)`
 
 			#-------- Step 2 modify rows --------------------------------------
 			# Make a selector for bitsZuluAtOdd, so you can modify bitsAlpha
@@ -624,16 +618,16 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			bitsTarget &= state.bitsLocator            								# `bitsAlpha`
 
 			# `if bitsAlphaAtEven and not bitsZuluAtEven`, modify `bitsAlphaPairedToOdd`
-			bitsTarget.loc[(dataframeMeanders['analyzed'] > 0)] = dtypeArcCode(
-				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(dataframeMeanders['analyzed'] > 0)]))
+			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = dtypeArcCode(
+				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]))  # ty:ignore[invalid-assignment]
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator     			# `bitsZulu`
 
 			# `if bitsZuluAtEven and not bitsAlphaAtEven`, modify `bitsZuluPairedToOdd`
-			dataframeMeanders.loc[((dataframeMeanders.loc[:, 'arcCode'] & 1) > 0), 'analyzed'] = dtypeArcCode(
-				flipTheExtra_0b1AsUfunc(dataframeMeanders.loc[((dataframeMeanders.loc[:, 'arcCode'] & 1) > 0), 'analyzed']))
+			dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = dtypeArcCode(
+				flipTheExtra_0b1AsUfunc(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']))
 
 			#--------- Step 3 compute `arcCode` -------------------------------
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# (bitsZulu >> 2)
@@ -642,7 +636,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			del bitsTarget
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# ... >> 2
 
-			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
+			dataframeMeanders.loc[state.MAXIMUMarcCode <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
 			return dataframeMeanders
 
@@ -675,7 +669,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			dataframeMeanders.loc[:, 'analyzed'] *= 2**2 					# (... << 2)
 			dataframeMeanders.loc[:, 'analyzed'] += 3 						# (...) | 3
-			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
+			dataframeMeanders.loc[state.MAXIMUMarcCode <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
 			return dataframeMeanders
 
@@ -685,7 +679,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			Formula
 			-------
 			```python
-				if bitsAlpha > 1:
+				if 1 < bitsAlpha:
 					arcCode = ((1 - (bitsAlpha & 1)) << 1) | (bitsZulu << 3) | (bitsAlpha >> 2)
 				# `(1 - (bitsAlpha & 1)` is an evenness test.
 			```
@@ -706,13 +700,13 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			del bitsTarget
 			"""NOTE In this code block, I rearranged the "formula" to use `bitsTarget` for two goals.
 			1. `(bitsAlpha >> 2)`.
-			2. `if bitsAlpha > 1`. The trick is in the equivalence of v1 and v2.
+			2. `if 1 < bitsAlpha`. The trick is in the equivalence of v1 and v2.
 
 			v1: BITScow | (BITSwalk >> 2)
 			v2: ((BITScow << 2) | BITSwalk) >> 2
 
 			The "formula" calls for v1, but by using v2, `bitsTarget` is not changed. Therefore, because `bitsTarget` is
-			`bitsAlpha`, I can use `bitsTarget` for goal 2, `if bitsAlpha > 1`.
+			`bitsAlpha`, I can use `bitsTarget` for goal 2, `if 1 < bitsAlpha`.
 			"""
 			dataframeMeanders.loc[:, 'analyzed'] *= 2**2									# ... | (bitsAlpha >> 2)
 
@@ -726,7 +720,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 			del bitsTarget
 
-			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
+			dataframeMeanders.loc[state.MAXIMUMarcCode <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
 			return dataframeMeanders
 
@@ -736,7 +730,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			Formula
 			-------
 			```python
-				if bitsZulu > 1:
+				if 1 < bitsZulu:
 					arcCode = (1 - (bitsZulu & 1)) | (bitsAlpha << 2) | (bitsZulu >> 1)
 			```
 			"""
@@ -764,10 +758,10 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsZulu)
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1 									# (... >> 1)
 
-			dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0 							# if bitsZulu > 1
+			dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0 							# if 1 < bitsZulu
 			del bitsTarget
 
-			dataframeMeanders.loc[dataframeMeanders['analyzed'] >= state.MAXIMUMarcCode, 'analyzed'] = 0
+			dataframeMeanders.loc[state.MAXIMUMarcCode <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
 			return dataframeMeanders
 
@@ -775,20 +769,20 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			"""Abstraction makes it easier to do things such as write to disk."""
 			nonlocal dataframeAnalyzed
 
-			indexStopAnalyzed: int = state.indexTarget + int((dataframeMeanders['analyzed'] > 0).sum())
+			indexStopAnalyzed: int = state.indexTarget + int((0 < dataframeMeanders['analyzed']).sum())
 
-			if indexStopAnalyzed > state.indexTarget:
+			if state.indexTarget < indexStopAnalyzed:
 				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
 					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.boundary=}.", stacklevel=2)
 					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
 
 				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed']] = (
-					dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0), ['analyzed']
+					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['analyzed']
 								].to_numpy(dtype=dtypeArcCode, copy=False)
 				)
 
 				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['crossings']] = (
-					dataframeMeanders.loc[(dataframeMeanders['analyzed'] > 0), ['crossings']
+					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['crossings']
 								].to_numpy(dtype=dtypeCrossings, copy=False)
 				)
 
@@ -838,7 +832,7 @@ def countPandas(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()  # pyright: ignore[reportAttributeAccessIssue]  # ty:ignore[invalid-assignment]
 	del dataframeAnalyzed
 	return state
 
@@ -855,7 +849,7 @@ def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
 	crossings : int
 		The computed value of `crossings`.
 	"""
-	while state.boundary > 0:
+	while 0 < state.boundary:
 		if areIntegersWide(state):
 			from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 			state = countBigInt(state)
@@ -878,7 +872,7 @@ def doTheNeedfulPandas(state: MatrixMeandersNumPyState) -> int:
 	crossings : int
 		The computed value of `crossings`.
 	"""
-	while state.boundary > 0:
+	while 0 < state.boundary:
 		if areIntegersWide(state):
 			from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 			state = countBigInt(state)

@@ -42,12 +42,12 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 	# while (state.boundary > 0 and areIntegersWide(state)):
 	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
-		findThis=IfThis.isAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
+		findThis=IfThis.is0LessThanAttributeNamespaceIdentifier(identifierDataclassInstance, 'boundary')
 		, doThat=Then.extractIt
 	).captureLastMatch(astModule))  # pyright: ignore[reportAssignmentType] # ty:ignore[invalid-assignment]
 	newTest: ast.expr = Make.And.join([astCompare, Call_areIntegersWide])
 
-	NodeChanger(IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'boundary')
+	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(identifierDataclassInstance, 'boundary')
 			, Grab.testAttribute(Then.replaceWith(newTest))
 	).visit(astModule)
 
