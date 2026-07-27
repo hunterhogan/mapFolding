@@ -249,8 +249,6 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	indexAnalysis = 0
 	slicerAnalysis: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalysis)
 
-	indicesSelectors: int = 1
-
 	while 0 < state.boundary and not areIntegersWide(state):
 		def aggregateAnalyzed(arrayAnalyzed: ndarray[tuple[Any, ...], dtype[dtypeArcCode]], state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 			"""Create new `arrayMeanders` by deduplicating `arcCode` and summing `crossings`."""
@@ -322,7 +320,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del lengthArrayAnalyzed
 		goByeBye()
 
-		arrayAnalyzed: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.zeros(shape, dtype=dtypeArcCode)
+		arrayAnalyzed: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.memmap('arrayAnalyzed.dat', mode='w+', shape=shape, dtype=dtypeArcCode)
 		del shape
 
 		# TODO 2026 July 26. I don't remember exactly when I created the `ShapeArray` system, but I'm
@@ -349,7 +347,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		# tried not to think about it. Remembering all of that is so depressing, I'm going to take a
 		# break now.)
 		shape = ShapeArray(length=len(state.arrayArcCodes), indices=indicesPrepArea)
-		arrayPrepArea: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.zeros(shape, dtype=dtypeArcCode)
+		arrayPrepArea: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.memmap('arrayPrepArea.dat', mode='w+', shape=shape, dtype=dtypeArcCode)
 		del shape
 
 		# TODO Make an EndNote about the ultimate implementation of this idea and the `makeStorage` system.
@@ -361,10 +359,6 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		# access to the physical array. Managing the physical memory is a major problem, so I
 		# segregated the logical access from the physical memory management.
 		toPrepArea: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayPrepArea[slicerAnalysis].view()
-
-		shape = ShapeArray(length=len(state.arrayArcCodes), indices=indicesSelectors)
-		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.zeros(shape, dtype=numpy.intp)
-		del shape
 
 		state.indexTarget = 0
 
@@ -382,7 +376,8 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		bitwise_and(bitsZuluStack, state.bitsLocator, out=bitsZuluStack)
 		multiply(bitsZuluStack, toPrepArea, out=toPrepArea)
-		selectorGreaterThan1: ndarray[tuple[int], dtype[numpy.bool]] = greater(toPrepArea, 1)  # EXTRA ARRAY numpy.bool
+		selectorGreaterThan1: ndarray[tuple[int], dtype[numpy.bool]] = numpy.memmap('selectorGreaterThan1.dat', mode='w+', shape=len(toPrepArea), dtype=numpy.bool)
+		greater(toPrepArea, 1, out=selectorGreaterThan1)  							# EXTRA ARRAY numpy.bool
 
 #======== if bitsAlphaAtEven and not bitsZuluAtEven ======= #======== ^ & | ^ & bitsZulu 1 1 bitsAlpha 1 1 ============
 		bitwise_and(bitsZuluStack, 1, out=toPrepArea)
@@ -393,7 +388,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-		arraySelectors = numpy.flatnonzero(toPrepArea)
+		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)  # EXTRA ARRAY numpy.intp
 		arrayBitsAlphaStack[arraySelectors] = flipTheExtra_0b1AsUfunc(arrayBitsAlphaStack[arraySelectors])
 
 #======== if bitsZuluAtEven and not bitsAlphaAtEven ======= #======== ^ & | ^ & bitsAlpha 1 1 bitsZulu 1 1 ============
@@ -424,7 +419,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)				# `selectorBitsAtEven`
-		del selectorGreaterThan1 													# X indexArcCode O indexCrossings; del extra array numpy.bool
+		del selectorGreaterThan1 													# del extra array numpy.bool
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 		selectorDisqualified: ndarray[tuple[int], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)  # EXTRA ARRAY numpy.intp
 		bitwise_right_shift(state.arrayArcCodes, 1, out=toPrepArea)
@@ -502,7 +497,7 @@ def countNumPy(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del bitsZuluStack 															# O indexArcCode O indexCrossings
 		toPrepArea[arraySelectors] = 0
 
-		del arraySelectors
+		del arraySelectors  														# del extra array numpy.intp
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea)
 
