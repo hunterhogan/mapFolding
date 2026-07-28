@@ -16,7 +16,6 @@ https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044
 from __future__ import annotations
 
 from gc import collect as goByeBye
-from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.theTypes import dtypeArcCode, dtypeCrossings
 from typing import TYPE_CHECKING

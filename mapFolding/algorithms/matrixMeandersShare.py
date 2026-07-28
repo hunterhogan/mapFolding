@@ -7,6 +7,9 @@ import numpy
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import MatrixMeandersNumPyState
+	from mapFolding.theTypes import dtypeArcCode
+	from numpy import dtype, ndarray
+	from typing import Any
 	import pandas
 
 """Goals:
@@ -20,7 +23,7 @@ if TYPE_CHECKING:
 - Convert duplicate code to procedures.
 """
 
-def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+def areIntegersWide(state: MatrixMeandersNumPyState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
@@ -61,9 +64,9 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, dataframe: pandas.DataFr
 	if dataframe is not None:
 		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
 		crossingsWidest = int(dataframe['crossings'].max()).bit_length()
-	elif not state.dictionaryMeanders:
-		arcCodeWidest = int(state.arrayArcCodes.max()).bit_length()
-		crossingsWidest = int(state.arrayCrossings.max()).bit_length()
+	elif arrayMeanders is not None:
+		arcCodeWidest = int(arrayMeanders.max()).bit_length()
+		crossingsWidest = int(arrayMeanders.max()).bit_length()
 	else:
 		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
 		crossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
@@ -181,7 +184,7 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 	theDictionary: dict[str, dict[int, dict[int, int]]] = {'A005316': A005316_n_boundary_buckets, 'A000682': A000682_n_boundary_buckets}
 	bucketsTotal: int = theDictionary.get(state.oeisID, {}).get(state.n, {}).get(state.boundary, 0)
 	if bucketsTotal <= 0:
-		bucketsTotal = int(3.55 * len(state.arrayArcCodes))
+		bucketsTotal = int(3.55 * 665523011)
 
 	return bucketsTotal
 

@@ -31,13 +31,14 @@ from __future__ import annotations
 from mapFolding import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 from mapFolding.beDRY import getConnectionGraph, getLeavesTotal, makeDataContainer
 from mapFolding.theTypes import dtypeArcCode, dtypeCrossings
-from numpy import dtype, ndarray
 from typing import NamedTuple, TYPE_CHECKING
 import dataclasses
 import numpy
 
 if TYPE_CHECKING:
+	from numpy import dtype, ndarray
 	from types import EllipsisType
+	from typing import Any
 
 @dataclasses.dataclass(slots=True)
 class MapFoldingState:
@@ -474,7 +475,7 @@ class MatrixMeandersState:
 		self.setBitsLocator()
 		self.setMAXIMUMarcCode()
 
-#======== Managing data structures in `matrixMeandersNumPyndas` algorithm =======
+#======== Managing data structures in `matrixMeandersNumPy` algorithm =======
 
 class ShapeArray(NamedTuple):
 	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
@@ -491,9 +492,6 @@ class ShapeSlicer(NamedTuple):
 @dataclasses.dataclass(slots=True)
 class MatrixMeandersNumPyState(MatrixMeandersState):
 	"""Hold the state of a meanders transfer matrix algorithm computation implemented in NumPy (*Num*erical *Py*thon) or pandas."""
-
-	arrayArcCodes: ndarray[tuple[int], dtype[dtypeArcCode]] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=dtypeArcCode))
-	arrayCrossings: ndarray[tuple[int], dtype[dtypeCrossings]] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=dtypeCrossings))
 
 	bitWidthLimitArcCode: int | None = None
 	bitWidthLimitCrossings: int | None = None
@@ -526,19 +524,6 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
 
-	def makeDictionary(self) -> None:
-		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
-		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(self.arrayArcCodes, self.arrayCrossings, strict=True)}
-		self.arrayArcCodes = numpy.empty((0,), dtype=dtypeArcCode)
-		self.arrayCrossings = numpy.empty((0,), dtype=dtypeCrossings)
-
-	def makeArray(self) -> None:
-		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
-		self.arrayArcCodes = numpy.array(list(self.dictionaryMeanders.keys()), dtype=dtypeArcCode)
-		self.arrayCrossings = numpy.array(list(self.dictionaryMeanders.values()), dtype=dtypeCrossings)
-		self.bitWidth = int(self.arrayArcCodes.max()).bit_length()
-		self.dictionaryMeanders = {}
-
-	def setBitWidthNumPy(self) -> None:
-		"""Set `bitWidth` from the current `arrayArcCodes`."""
-		self.bitWidth = int(self.arrayArcCodes.max()).bit_length()
+	def setBitWidthNumPy(self, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]]) -> None:
+		"""Set `bitWidth` from the current `arrayMeanders`."""
+		self.bitWidth = int(arrayMeanders.max()).bit_length()
