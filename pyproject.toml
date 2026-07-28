@@ -57,6 +57,8 @@ optional-dependencies = { codon = [
   "python-minifier"
 ], development = [
   "gmpy2-stubs",
+  "google-api-python-client-stubs>=1.35.0",
+  "google-auth-oauthlib-stubs>=1.2.0",
   "ipykernel",
   "ipywidgets",
   "memray; sys_platform == 'linux'",

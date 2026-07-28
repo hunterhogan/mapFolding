@@ -6,6 +6,7 @@ from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheEx
 from mapFolding.dataBaskets import MatrixMeandersNumPyState, ShapeArray, ShapeSlicer
 from mapFolding.theTypes import dtypeArcCode
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
+from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 import numpy
 
@@ -40,9 +41,9 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=indexArcCode)
 	slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexCrossings)
 
-	indicesPrepArea: int = 3
-	indexAnalysis, indexAlfa, indexZulu = range(indicesPrepArea)
-	slicerAnalysis: ShapeSlicer = ShapeSlicer(length=..., indices=indexAnalysis)
+	indicesWorkbench: int = 3
+	indexPrepArea, indexAlfa, indexZulu = range(indicesWorkbench)
+	slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., indices=indexPrepArea)
 	slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., indices=indexAlfa)
 	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=indexZulu)
 
@@ -55,6 +56,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	state.dictionaryMeanders = {}
 
+	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
 	while 0 < state.boundary and not areIntegersWide(state, arrayMeanders=arrayMeanders):
 		def recordAnalysis(arrayAnalyzed: memmap[tuple[Any, ...], dtype[dtypeArcCode]], state: MatrixMeandersNumPyState, arcCode: ndarray[tuple[int], dtype[dtypeArcCode]], arrayMeanders: memmap[tuple[Any, ...], dtype[dtypeArcCode]]) -> MatrixMeandersNumPyState:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
@@ -92,13 +94,11 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		arrayAnalyzed: memmap[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.memmap('arrayAnalyzed.mM', dtypeArcCode, 'write', shape=shape)
 		del lengthArrayAnalyzed, shape
 
-		# TODO 2026 July 26. I don't remember exactly when I created the `ShapeArray` system, but I'm
+		# 2026 July 26. I don't remember exactly when I created the `ShapeArray` system, but I'm
 		# not sure it is working the way I intended.
-
 		# OR, it is so sophisticated that I can't remember enough of the details. I mean, I use a lot
 		# of techniques in this module that I have never used again, such as the tricks with
 		# `.view()`.
-
 		# Actually, yes, I think my understanding WAS more sophisticated at the time I created this. I
 		# think I knew the shape would always be tuple[int, int] and that it was possible an axis
 		# could have a length of 1. While that is unusual, I don't believe it is a problem. And the
@@ -115,42 +115,36 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		# And it's amplified by my ignorance of programming-speak. I mothballed the algorithm and
 		# tried not to think about it. Remembering all of that is so depressing, I'm going to take a
 		# break now.)
-		shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indices=indicesPrepArea)
-		arrayPrepArea: memmap[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.memmap('arrayPrepArea.mM', dtypeArcCode, 'write', shape=shape)
+		shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indices=indicesWorkbench)
+		arrayWorkbench: memmap[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.memmap('arrayPrepArea.mM', dtypeArcCode, 'write', shape=shape)
 		del shape
 
-		# DOCUMENT Make an EndNote about the ultimate implementation of this idea and the `makeStorage` system.
-		# DEVELOPMENT `toPrepArea` is NEVER the LHS of an assignment because, as a view, it it is more
-		# like a human-readable address of a physical array. Instead, I ALWAYS use `toPrepArea` in the
-		# `out` parameter of a numpy function. e.g., `greater(arrayBitsAlfaStack, 1, out=toPrepArea)`. I
-		# could have `toPrepArea1` and `toPrepArea2` and/or multiple sizes of views and/or views onto
-		# different axes of the same array. The point of using `toPrepArea` is to abstract the logical
-		# access to the physical array. Managing the physical memory is a major problem, so I
-		# segregated the logical access from the physical memory management.
-		toPrepArea: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayPrepArea[slicerAnalysis].view()
-		bitsAlfa: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayPrepArea[slicerAlfa].view()
-		bitsZulu: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayPrepArea[slicerZulu].view()
+		#=EndNotes##arrayWorkbench=
+		toPrepArea: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayWorkbench[slicerPrepArea].view()
+		bitsAlfa: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayWorkbench[slicerAlfa].view()
+		bitsZulu: ndarray[tuple[int], dtype[dtypeArcCode]] = arrayWorkbench[slicerZulu].view()
 
 		bitwise_and(arrayMeanders[slicerArcCode], state.bitsLocator, out=bitsAlfa)
 		bitwise_right_shift(arrayMeanders[slicerArcCode], 1, out=bitsZulu)
 		bitwise_and(bitsZulu, state.bitsLocator, out=bitsZulu)
-		arrayPrepArea.flush()
+		arrayWorkbench.flush()
 
 		state.indexTarget = 0
 
 		state.boundary -= 1
+		boundaryProgressBar.set_postfix(boundary=state.boundary)  # pyright: ignore[reportUnknownMemberType]
 		state.setMAXIMUMarcCode()
 
 #================ analyze aligned ===== if 1 < bitsAlfa and 1 < bitsZulu =============================================
-# DOCUMENT in EndNote: In other versions, this analysis step is last because I modify the data. In this version, I don't modify the data.
-#======== < * < 1 bitsAlfa < 1 bitsZulu ====================
+#=EndNotes##analyzeArcCodesAligned=
+#-------- < * < 1 bitsAlfa < 1 bitsZulu --------------------
 		greater(bitsAlfa, 1, out=toPrepArea)
 
 		multiply(bitsZulu, toPrepArea, out=toPrepArea)
 		selectorGreaterThan1: ndarray[tuple[int], dtype[numpy.bool]] = numpy.empty_like(toPrepArea, dtype=numpy.bool)
 		greater(toPrepArea, 1, out=selectorGreaterThan1)
 
-#======== if bitsAlfaAtEven and not bitsZuluAtEven ======= #======== ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ============
+#-------- if bitsAlfaAtEven and not bitsZuluAtEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
 		bitwise_and(bitsZulu, 1, out=toPrepArea)
 
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
@@ -165,7 +159,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitsAlfaStack[arraySelectors] = flipTheExtra_0b1AsUfunc(bitsAlfaStack[arraySelectors])
 		del arraySelectors
 
-#======== if bitsZuluAtEven and not bitsAlfaAtEven ======= #======== ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ============
+#-------- if bitsZuluAtEven and not bitsAlfaAtEven ------ #-------- ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ------------
 		bitwise_and(bitsAlfa, 1, out=toPrepArea)
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 		bitwise_or(bitsZulu, toPrepArea, out=toPrepArea)
@@ -174,7 +168,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
 		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)
 
-#======== bitsAlfaAtEven or bitsZuluAtEven =============== #======== ^ & & bitsAlfa 1 bitsZulu 1 ====================
+#-------- bitsAlfaAtEven or bitsZuluAtEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
 		bitwise_and(bitsZulu, bitsAlfa, out=toPrepArea)
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
@@ -188,7 +182,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del arraySelectors
 		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
 
-#======== (bitsZulu >> 2 << 3 | bitsAlfa) >> 2 =========== #======== >> | << >> bitsZulu 2 3 bitsAlfa 2 =============
+#-------- (bitsZulu >> 2 << 3 | bitsAlfa) >> 2 ---------- #-------- >> | << >> bitsZulu 2 3 bitsAlfa 2 ------------
 
 		bitwise_left_shift(toPrepArea, 3, out=toPrepArea)
 		bitwise_or(bitsAlfaStack, toPrepArea, out=toPrepArea)
@@ -200,7 +194,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
-#------------------ analyze bitsAlfa ------- (1 - (bitsAlfa & 1)) << 1 | bitsAlfa >> 2 | bitsZulu << 3 ---------
+#================== analyze bitsAlfa ====== (1 - (bitsAlfa & 1)) << 1 | bitsAlfa >> 2 | bitsZulu << 3 ========
 		bitsAlfaStack: ndarray[tuple[int], dtype[dtypeArcCode]] = numpy.empty_like(arrayMeanders[slicerArcCode])
 #-------- >> | << | (<< - 1 & bitsAlfa 1 1) << bitsZulu 3 2 bitsAlfa 2 ----------
 		bitwise_and(bitsAlfa, 1, out=bitsAlfaStack)
@@ -225,7 +219,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
-#------------------ analyze bitsZulu ---------- (1 - (bitsZulu & 1)) | bitsAlfa << 2 | bitsZulu >> 1 -------------
+#================== analyze bitsZulu ========== (1 - (bitsZulu & 1)) | bitsAlfa << 2 | bitsZulu >> 1 ============
 		bitsZuluStack: ndarray[tuple[int], dtype[dtypeArcCode]] = numpy.empty_like(arrayMeanders[slicerArcCode])
 #-------- >> | << | (- 1 & bitsZulu 1) << bitsAlfa 2 1 bitsZulu 1 ----------
 		bitwise_and(bitsZulu, 1, out=bitsZuluStack)
@@ -250,7 +244,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
-#------------------ analyze simple ------------------------ (bitsZulu << 1 | bitsAlfa) << 2 | 3 ------------------
+#================== analyze simple ======================= (bitsZulu << 1 | bitsAlfa) << 2 | 3 =======================
 #-------- | << | bitsAlfa << bitsZulu 1 2 3 --------------
 		bitwise_left_shift(bitsZulu, 1, out=toPrepArea)
 		bitwise_or(bitsAlfa, toPrepArea, out=toPrepArea)
@@ -259,8 +253,8 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
-		del bitsAlfa, bitsZulu, toPrepArea, arrayPrepArea
-#------------------------------------------------ aggregation ---------------------------------------------------------
+		del bitsAlfa, bitsZulu, toPrepArea, arrayWorkbench
+#================================================ aggregation ========================================================-
 
 		del arrayMeanders
 		goByeBye()
@@ -280,7 +274,9 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		if 45 <= state.n:  # Data collection for 'reference' directory.
 			# oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
 			print(state.oeisID, state.n, state.boundary + 1, state.indexTarget, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff:ignore[print]
+		boundaryProgressBar.update()
 
+	boundaryProgressBar.close()
 	state.dictionaryMeanders = {int(key): int(value) for key, value in zip(arrayMeanders[slicerArcCode], arrayMeanders[slicerCrossings], strict=True)}
 	del arrayMeanders
 	# close files and delete files?

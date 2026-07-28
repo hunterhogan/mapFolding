@@ -4,6 +4,23 @@
 
 `getLeavesTotal`: this check is one-degree short of absurd, but three lines of early absurdity is better than invalid output later. I'd add more checks if I could think of more. Fail early.
 
+## analyzeArcCodesAligned
+
+Implementations that filter or mutate shared input during this analysis must run it last, so later
+analyses still receive every original arc code. This implementation preserves `arrayMeanders`,
+`bitsAlfa`, and `bitsZulu`, performing its transformations in `bitsAlfaStack` and `toPrepArea`.
+Running the aligned analysis first is therefore intentional.
+
+## arrayWorkbench
+
+`arrayWorkbench` is one disk-backed allocation partitioned into named views for `bitsAlfa`,
+`bitsZulu`, and reusable scratch space, `toPrepArea`. Most NumPy operations target these views with
+`out=`, reusing the workbench instead of allocating a new full-length result. Slice assignment also
+writes through a view; assigning a new object to a view name would merely rebind the name.
+
+`ShapeArray` and `ShapeSlicer` centralize the physical layout, so axes or scratch lanes can be
+rearranged without changing the analysis's semantic access names.
+
 ## pinning
 
 The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to call a method of `PermutationSpace`.
