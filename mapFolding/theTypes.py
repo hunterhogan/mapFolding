@@ -8,12 +8,22 @@ from typing import Any, TYPE_CHECKING, TypeVar
 if TYPE_CHECKING:
 	from typing import TypeAlias
 
-#======== `TypeVar` indicates when a NumPy integer type is mandatory =======
+#================== `TypeVar` when a NumPy integer type is mandatory =======
 
 NumPyIntegerType = TypeVar('NumPyIntegerType', bound=integer[Any], covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 
-#======== Flexible `TypeAlias` for granular control over fixed-width integers =======
+#================== Matrix meanders ===========================================================
+
+# Hypothetically, the dtypes could be different from each other, especially in pandas.
+dtypeArcCode: TypeAlias = numpy_uint64
+"""The fixed-size integer type used to store `arcCode`."""
+
+dtypeCrossings: TypeAlias = numpy_uint64
+"""The fixed-size integer type used to store `crossings`."""
+
+#================== Flexible `TypeAlias` for granular control over fixed-width integers =======
+
 DatatypeLeavesTotal: TypeAlias = int
 """Use on unsigned integers that will never exceed the magnitude of `leavesTotal`."""
 

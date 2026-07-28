@@ -106,7 +106,7 @@ run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFoldin
 ], parallel = true, source = ["."] }
 
 [tool.pytest]
-addopts = ["--color=yes", "-n 5"]
+addopts = ["--color=yes", "-n", "5", "--dist", "loadgroup"]
 log_auto_indent = "On"
 testpaths = ["**/tests"]
 

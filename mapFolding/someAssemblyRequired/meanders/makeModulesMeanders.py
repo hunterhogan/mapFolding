@@ -36,22 +36,23 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 			, Grab.idAttribute(Then.replaceWith(identifierDataclassNumPy))
 		).visit(astModule)
 
-	# Remove import from dataBaskets
-	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclassOld)), Then.removeIt).visit(astModule)
+	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclassOld))
+			, Grab.nameAttribute(Then.replaceWith(identifierDataclassNumPy))
+		).visit(astModule)
 
-	# while (state.boundary > 0 and areIntegersWide(state)):
+	# while (0 < state.boundary and areIntegersWide(state)):
 	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
 		findThis=IfThis.is0LessThanAttributeNamespaceIdentifier(identifierDataclassInstance, 'boundary')
 		, doThat=Then.extractIt
-	).captureLastMatch(astModule))  # pyright: ignore[reportAssignmentType] # ty:ignore[invalid-assignment]
+	).captureLastMatch(astModule))
 	newTest: ast.expr = Make.And.join([astCompare, Call_areIntegersWide])
 
 	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(identifierDataclassInstance, 'boundary')
 			, Grab.testAttribute(Then.replaceWith(newTest))
 	).visit(astModule)
 
-	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersNumPyndas', list_alias=[Make.alias('areIntegersWide'), Make.alias(identifierDataclassNumPy)]))
+	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersShare', list_alias=[Make.alias('areIntegersWide')]))
 
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=identifierModule)
 

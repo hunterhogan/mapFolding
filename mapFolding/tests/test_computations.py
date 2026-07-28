@@ -152,6 +152,7 @@ def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> N
 	actual: int = countFolds(None, None, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
 	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, CPUlimit, mapShape, flow)
 
+@pytest.mark.xdist_group(name='test_meanders')
 @pytest.mark.parametrize('oeisID', ('A000682', 'A005316'))
 @pytest.mark.parametrize('n, flow', (*CartesianProduct((2, 29), ('matrixNumPy', 'matrixPandas')), (3, 'matrixMeanders'), (10, 'matrixMeanders')))
 def test_meanders(oeisID: str, n: int, flow: str) -> None:

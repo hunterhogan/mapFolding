@@ -30,8 +30,11 @@ from __future__ import annotations
 
 from mapFolding import Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal
 from mapFolding.beDRY import getConnectionGraph, getLeavesTotal, makeDataContainer
+from mapFolding.theTypes import dtypeArcCode, dtypeCrossings
+from numpy import dtype, ndarray
 from typing import NamedTuple, TYPE_CHECKING
 import dataclasses
+import numpy
 
 if TYPE_CHECKING:
 	from types import EllipsisType
@@ -446,11 +449,11 @@ class MatrixMeandersState:
 
 		Notes
 		-----
-		In binary, `locatorBitsAlpha` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
+		In binary, `locatorBitsAlfa` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
 		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
 		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
-		counting this way, `locatorBitsAlpha` has 1s in the columns with odd index numbers. Mathematicians and programmers,
-		therefore, tend to call `locatorBitsAlpha` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
+		counting this way, `locatorBitsAlfa` has 1s in the columns with odd index numbers. Mathematicians and programmers,
+		therefore, tend to call `locatorBitsAlfa` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
 		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
 		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 
@@ -484,3 +487,58 @@ class ShapeSlicer(NamedTuple):
 
 	length: EllipsisType | slice
 	indices: int
+
+@dataclasses.dataclass(slots=True)
+class MatrixMeandersNumPyState(MatrixMeandersState):
+	"""Hold the state of a meanders transfer matrix algorithm computation implemented in NumPy (*Num*erical *Py*thon) or pandas."""
+
+	arrayArcCodes: ndarray[tuple[int], dtype[dtypeArcCode]] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=dtypeArcCode))
+	arrayCrossings: ndarray[tuple[int], dtype[dtypeCrossings]] = dataclasses.field(default_factory=lambda: numpy.empty((0,), dtype=dtypeCrossings))
+
+	bitWidthLimitArcCode: int | None = None
+	bitWidthLimitCrossings: int | None = None
+
+	indexTarget: int = 0
+	"""What is being indexed depends on the algorithm flavor."""
+
+	def __post_init__(self) -> None:
+		"""Post init."""
+		if self.bitWidthLimitArcCode is None:
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(dtypeArcCode).itemsize * 8  # bits
+
+			offsetNecessary_: int = 3  # For example, `bitsZulu << 3`.
+			offsetSafety_: int = 1  # I don't have mathematical proof of how many extra bits I need.
+			offset_: int = offsetNecessary_ + offsetSafety_
+
+			self.bitWidthLimitArcCode = bitWidthOfFixedSizeInteger_ - offset_
+
+			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
+
+		if self.bitWidthLimitCrossings is None:
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(dtypeCrossings).itemsize * 8  # bits
+
+			offsetNecessary_: int = 0  # I don't know of any.
+			offsetEstimation_: int = 3  # See 'reference' directory.
+			offsetSafety_: int = 1
+			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
+
+			self.bitWidthLimitCrossings = bitWidthOfFixedSizeInteger_ - offset_
+
+			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
+
+	def makeDictionary(self) -> None:
+		"""Convert from NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array) to Python `dict` (*dict*ionary)."""
+		self.dictionaryMeanders = {int(key): int(value) for key, value in zip(self.arrayArcCodes, self.arrayCrossings, strict=True)}
+		self.arrayArcCodes = numpy.empty((0,), dtype=dtypeArcCode)
+		self.arrayCrossings = numpy.empty((0,), dtype=dtypeCrossings)
+
+	def makeArray(self) -> None:
+		"""Convert from Python `dict` (*dict*ionary) to NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array)."""
+		self.arrayArcCodes = numpy.array(list(self.dictionaryMeanders.keys()), dtype=dtypeArcCode)
+		self.arrayCrossings = numpy.array(list(self.dictionaryMeanders.values()), dtype=dtypeCrossings)
+		self.bitWidth = int(self.arrayArcCodes.max()).bit_length()
+		self.dictionaryMeanders = {}
+
+	def setBitWidthNumPy(self) -> None:
+		"""Set `bitWidth` from the current `arrayArcCodes`."""
+		self.bitWidth = int(self.arrayArcCodes.max()).bit_length()

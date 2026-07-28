@@ -165,15 +165,15 @@ pp3  = (3, 5, 9, 17, 33)
 
 		# works for 9 <= odd piles <= 47
 		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
-		# Yes, sort of. `Z0Z_alphaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
+		# Yes, sort of. `Z0Z_alfaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
 		@syntacticCurry
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
 			return list(map(partial(add, dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
 
 		@syntacticCurry
-		def Z0Z_alphaBeta(state: EliminationState, alphaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
-			return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alphaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+		def Z0Z_alfaBeta(state: EliminationState, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
+			return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
 
 		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
@@ -183,19 +183,19 @@ pp3  = (3, 5, 9, 17, 33)
 			# ? 24 < even leaves < 32.
 			# piles 49, 51, 53, 55 need a higher start on yy=0.
 			for yy in range(3):
-				pileRange.extend(map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy))))
+				pileRange.extend(map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alfaBeta(state, betaStop=-(yy))))
 
 			# 32 < even leaves
 			for yy in range(1):
 				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
-					, Z0Z_alphaBeta(state
-						, alphaStart=yy + (state.dimensionsTotal - 2 - dimensionNearest首(pile))
+					, Z0Z_alfaBeta(state
+						, alfaStart=yy + (state.dimensionsTotal - 2 - dimensionNearest首(pile))
 						, betaStop=-(yy)
 					))))
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
 			for yy in range(1, 3):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
@@ -214,7 +214,7 @@ pp3  = (3, 5, 9, 17, 33)
 					partial(add, 1)
 					, (map(
 						partial(mul, state.productsOfDimensions[yy])
-						, Z0Z_alphaBeta(state, alphaStart=0, betaStop=-(yy))
+						, Z0Z_alfaBeta(state, alfaStart=0, betaStop=-(yy))
 				)
 			)
 		)
@@ -222,12 +222,12 @@ pp3  = (3, 5, 9, 17, 33)
 
 			# for yy in range(1):
 			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy])
-			# 		, Z0Z_alphaBeta(state
-			# 			, alphaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
+			# 		, Z0Z_alfaBeta(state
+			# 			, alfaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
 			# 			, betaStop=-(yy)
 			# 		))))
 			# for yy in range(1,3):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alphaBeta(state, betaStop=-(yy)))))
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.productsOfDimensions[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			pileRange.extend(map(partial(add, 1), state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))

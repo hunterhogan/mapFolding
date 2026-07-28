@@ -202,9 +202,11 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 			case 'A000682' | 'A005316':
 				match flow:
 					case 'matrixNumPy':
-						from mapFolding.algorithms.matrixMeandersNumPyndas import doTheNeedful, MatrixMeandersNumPyState as State
+						from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
 					case 'matrixPandas':
-						from mapFolding.algorithms.matrixMeandersNumPyndas import doTheNeedfulPandas as doTheNeedful, MatrixMeandersNumPyState as State
+						from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
+						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
 					case 'matrixMeanders' | _:
 						from mapFolding.algorithms.matrixMeanders import doTheNeedful
 						from mapFolding.dataBaskets import MatrixMeandersState as State
@@ -228,8 +230,8 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 					else:
 						arcCode = 0b1
 					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
-#															   0b1010 | 0b0101 is 0b1111, or 0xf
-#															     0b10 |   0b01 is   0b11, or 0x3
+#													   0b1010 | 0b0101 is 0b1111, or 0xf
+#														 0b10 |   0b01 is   0b11, or 0x3
 
 					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
 					while listArcCodes[-1] < MAXIMUMarcCode:
