@@ -34,7 +34,6 @@ from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import countingMeanders, oeisIDfor_n
 from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
-from mapFolding.oeis.oeisIDbyFormula import A259689
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -181,19 +180,6 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, flow, None)
 
 @pytest.mark.parametrize(
-	'n, n下k, expected'
-	, [
-		pytest.param(2, 2, 1, id='weightedRow::firstRow')
-		, pytest.param(3, 2, 2, id='rightEdge')
-		, pytest.param(4, 2, 2, id='penultimateEdge')
-		, pytest.param(8, 3, 64, id='weightedRow::interior')
-	]
-)
-def test_A259689(n: int, n下k: int | None, expected: int) -> None:
-	actual: int = A259689(n, n下k)
-	assertEqualTo(actual, expected, A259689.__name__, n, n下k)
-
-@pytest.mark.parametrize(
 	'oeisID'
 	, [
 		pytest.param('A000560')
@@ -202,9 +188,7 @@ def test_A259689(n: int, n下k: int | None, expected: int) -> None:
 		, pytest.param('A060206')
 		, pytest.param('A077460')
 		, pytest.param('A078591')
-		, pytest.param('A178961')
-		, pytest.param('A259689')
-		, pytest.param('A259702')
+		, pytest.param('A301620')
 	]
 )
 @pytest.mark.parametrize(
@@ -239,7 +223,6 @@ def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWr
 		, pytest.param('A000136', 'A000560', id='A000136::A000560')
 		, pytest.param('A000682', 'A000560', id='A000682::A000560')
 		, pytest.param('A000682', 'A301620', id='A000682::A301620')
-		, pytest.param('A000682', 'A259689', id='A000682::A259689')
 		, pytest.param('A000682', 'A000136', id='A000682::A000136')
 		, pytest.param('A000682', 'A223094', id='A000682::A223094')
 		, pytest.param('A001010', 'A000682 and A007822', id='A001010::A000682-and-A007822')
@@ -247,9 +230,6 @@ def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWr
 		, pytest.param('A223094', 'A000136 and A000682', id='A223094::A000136-and-A000682')
 		, pytest.param('A223094', 'A223094 and A000682', id='A223094::A223094-and-A000682')
 		, pytest.param('A223094', 'A000682', id='A223094::A000682')
-		, pytest.param('A301620', 'A000682', id='A301620::A000682')
-		, pytest.param('A301620', 'A259689', id='A301620::A259689')
-		, pytest.param('A301620', 'A259702', id='A301620::A259702')
 	]
 )
 @pytest.mark.parametrize(

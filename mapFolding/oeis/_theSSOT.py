@@ -20,7 +20,7 @@ oeisIDsImplementedMapFolding: dict[str, MetadataOEISidMapFoldingManuallySet] = {
 
 oeisIDsImplemented: dict[str, MetadataOEISidManuallySet] = {'A000560': {}, 'A000682': {}, 'A001010': {}, 'A001011': {},
 	'A005315': {}, 'A005316': {}, 'A007822': {}, 'A060206': {}, 'A077460': {}, 'A078591': {},
-	'A178961': {}, 'A223094': {}, 'A259689': {}, 'A259702': {}, 'A301620': {}}
+	'A223094': {}, 'A301620': {}}
 """Settings that are best selected by a human instead of algorithmically for meander sequences."""
 
 cacheDays: int = 30

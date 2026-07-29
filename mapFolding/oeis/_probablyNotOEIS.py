@@ -42,7 +42,7 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	oeisID : str
 		OEIS sequence identifier. Supported sequences fall into three categories:
 		- Formula-based: A000136, A000560, A001010, A001011, A005315, A060206, A077460,
-			A078591, A178961, A223094, A259689, A259702, A301620
+			A078591, A223094, A301620
 		- Meanders: A000682 [5], A005316 [6]
 		- Symmetric foldings: A007822
 	oeis_n : int
@@ -50,10 +50,10 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	flow : str | None = None
 		Algorithm variant selector. Available values depend on `oeisID`:
 		- For A000682: 'matrixMeanders' (default), 'matrixNumPy', 'matrixPandas',
-			'A000560', 'A301620', 'A259689', 'A000136', 'A223094'
+			'A000560', 'A301620', 'A000136', 'A223094'
 		- For A005316: 'matrixMeanders' (default), 'matrixNumPy', 'matrixPandas'
 		- For A007822: 'algorithm' (default), 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'
-		- For A000136, A001010, A223094, A301620: the corresponding formula selector `f`
+		- For A000136, A001010, A223094: the corresponding formula selector `f`
 		- For other formula-based sequences: ignored
 	CPUlimit : bool | float | int | None = None
 		Processor usage limit for parallel algorithms (A007822 with certain `flow` values).
@@ -118,8 +118,8 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 	Formula-Based Sequences
 		These sequences have closed-form definitions that compute values directly without search.
-		Implementations reside in `mapFolding.algorithms.oeisIDbyFormula` [9]. Some formulas
-		(A259702, A301620) are defined recursively in terms of A000682.
+		Implementations reside in `mapFolding.algorithms.oeisIDbyFormula` [9]. The A301620 formula
+		is defined in terms of A000682.
 
 	References
 	----------
@@ -165,14 +165,12 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	match oeisID:
 		case 'A000136':
 			from mapFolding.oeis.oeisIDbyFormula import A000136 as doTheNeedful
-		case 'A000682' if flow in {'A000560', 'A301620', 'A259689', 'A000136', 'A223094'}:
+		case 'A000682' if flow in {'A000560', 'A301620', 'A000136', 'A223094'}:
 			from mapFolding.oeis.oeisIDbyFormula import A000682 as doTheNeedful
 		case 'A001010':
 			from mapFolding.oeis.oeisIDbyFormula import A001010 as doTheNeedful
 		case 'A223094':
 			from mapFolding.oeis.oeisIDbyFormula import A223094 as doTheNeedful
-		case 'A301620':
-			from mapFolding.oeis.oeisIDbyFormula import A301620 as doTheNeedful
 		case _:
 			matched_oeisID = False
 	if matched_oeisID:
@@ -195,12 +193,8 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 				from mapFolding.oeis.oeisIDbyFormula import A077460 as doTheNeedful
 			case 'A078591':
 				from mapFolding.oeis.oeisIDbyFormula import A078591 as doTheNeedful
-			case 'A178961':
-				from mapFolding.oeis.oeisIDbyFormula import A178961 as doTheNeedful
-			case 'A259689':
-				from mapFolding.oeis.oeisIDbyFormula import A259689 as doTheNeedful
-			case 'A259702':
-				from mapFolding.oeis.oeisIDbyFormula import A259702 as doTheNeedful
+			case 'A301620':
+				from mapFolding.oeis.oeisIDbyFormula import A301620 as doTheNeedful
 			case _:
 				matched_oeisID = False
 		if matched_oeisID:
