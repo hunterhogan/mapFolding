@@ -293,6 +293,7 @@ ower
 Paltrowitz
 Panayotopoulos
 pandoc
+PARI
 partitionary
 pbar
 Pergamon

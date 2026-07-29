@@ -17,7 +17,6 @@ if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
-	from pathlib import PurePath
 
 if __name__ == '__main__':
 	def _write() -> None:
@@ -32,7 +31,7 @@ if __name__ == '__main__':
 		)
 
 	listDimensions: Sequence[int] | None = None
-	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
+	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
 	CPUlimit: Limitation = None
 	flow = 'daoOfMapFolding'

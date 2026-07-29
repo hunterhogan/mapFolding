@@ -1,3 +1,4 @@
+# ruff: file-ignore[unused-function-argument]
 # ruff:file-ignore[import-outside-top-level]
 # TODO the following diagnostics suggest to me that there is a better paradigm for the flow control.
 # pyright: reportPossiblyUnboundVariable=false
@@ -6,15 +7,13 @@
 from __future__ import annotations
 
 from hunterMakesPy import errorL33T
-from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
-	from pathlib import PurePath
-	from typing import Literal
 
 # TODO A long time ago, I had an explicit rule written in "oeis.py" that the module contained only OEIS stuff and ALL OEIS stuff.
 # This function is fundamentally an OEIS function, but I have been trying to treat it the same as `countingFolds`. That mismatch
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 # parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
 # theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
 # the importance of the semiotics-first paradigm (for me).
-def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None, *, CPUlimit: Limitation = None) -> int:
+def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	"""Compute the n-th term of `oeisID`.
 
 	(AI generated docstring)
@@ -145,22 +144,15 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 #-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWriteFoldsTotal is not None:
-		# For sequences without a natural mapShape, create filename based on oeisID and oeis_n
-		if oeisID == 'A007822':
-			# A007822 has a mapShape, so use the standard approach
-			mapShapeForFilename: tuple[int, ...] = (1, 2 * oeis_n)
-			pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShapeForFilename, pathLikeWriteFoldsTotal)
+		filenameCountTotal: str = f"{oeisID}_n{oeis_n}.countTotal"
+		pathLikeSherpa = Path(pathLikeWriteFoldsTotal)
+		if pathLikeSherpa.is_dir():
+			pathFilenameFoldsTotal = pathLikeSherpa / filenameCountTotal
+		elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():
+			pathFilenameFoldsTotal = pathLikeSherpa
 		else:
-			# Other sequences don't have mapShape, so create filename directly
-			filenameCountTotal: str = f"{oeisID}_n{oeis_n}.countTotal"
-			pathLikeSherpa = Path(pathLikeWriteFoldsTotal)
-			if pathLikeSherpa.is_dir():
-				pathFilenameFoldsTotal = pathLikeSherpa / filenameCountTotal
-			elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():
-				pathFilenameFoldsTotal = pathLikeSherpa
-			else:
-				pathFilenameFoldsTotal = getPathRootJobDEFAULT() / pathLikeSherpa
-			pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
+			pathFilenameFoldsTotal = getPathRootJobDEFAULT() / pathLikeSherpa
+		pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 	else:
 		pathFilenameFoldsTotal = None
@@ -269,35 +261,6 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 					state = State(oeis_n, oeisID, boundary, dictionaryMeanders)
 					countTotal = doTheNeedful(state)
-				case 'A007822':
-					mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
-					from mapFolding.beDRY import defineProcessorLimit
-					concurrencyLimit: int = defineProcessorLimit(CPUlimit)
-
-					from mapFolding.dataBaskets import SymmetricFoldsState
-					symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
-
-					match flow:
-						case 'asynchronous':
-							from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
-							symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
-						case 'theorem2':
-							from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
-							symmetricState = doTheNeedful(symmetricState)
-						case 'theorem2Codon':
-							from mapFolding.syntheticModules.A007822.codon.theorem2 import doTheNeedful
-							symmetricState = doTheNeedful(symmetricState)
-						case 'theorem2Numba':
-							from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
-							symmetricState = doTheNeedful(symmetricState)
-						case 'theorem2Trimmed':
-							from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
-							symmetricState = doTheNeedful(symmetricState)
-						case _:
-							from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
-							symmetricState = doTheNeedful(symmetricState)
-
-					countTotal = symmetricState.symmetricFolds
 				case _:
 					matched_oeisID = False
 

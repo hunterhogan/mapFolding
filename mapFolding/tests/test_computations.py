@@ -29,7 +29,7 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
-from mapFolding.basecamp import countFolds
+from mapFolding.basecamp import countFolds, countFoldsSymmetric
 from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import countingMeanders, oeisIDfor_n
@@ -41,16 +41,18 @@ from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFold
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject
 from numba.core.errors import NumbaPendingDeprecationWarning
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 import importlib.util
 import pytest
 import warnings
 
 if TYPE_CHECKING:
+	from hunterMakesPy.theTypes import Limitation
 	from importlib.machinery import ModuleSpec
 	from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
 	from os import PathLike
+	from pathlib import Path
 	from types import ModuleType
 
 @pytest.mark.parametrize(
@@ -88,9 +90,10 @@ def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 	"""
 	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
+	mapShape: tuple[int, int] = (1, 2 * n)
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
-	actual: int = countingMeanders(oeisID, n, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, flow, pathLikeWriteFoldsTotal, CPUlimit)
+	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWriteFoldsTotal, CPUlimit)
 
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('oeisID, n, flow'
@@ -191,20 +194,17 @@ def test_A259689(n: int, n下k: int | None, expected: int) -> None:
 	assertEqualTo(actual, expected, A259689.__name__, n, n下k)
 
 @pytest.mark.parametrize(
-	'oeisID, flow'
+	'oeisID'
 	, [
-		pytest.param('A000560', 'ignored', id='A000560')
-		, pytest.param('A000682', None, id='A000682')
-		, pytest.param('A001011', 'ignored', id='A001011')
-		, pytest.param('A005315', 'ignored', id='A005315')
-		, pytest.param('A005316', None, id='A005316')
-		, pytest.param('A007822', None, id='A007822')
-		, pytest.param('A060206', 'ignored', id='A060206')
-		, pytest.param('A077460', 'ignored', id='A077460')
-		, pytest.param('A078591', 'ignored', id='A078591')
-		, pytest.param('A178961', 'ignored', id='A178961')
-		, pytest.param('A259689', 'ignored', id='A259689')
-		, pytest.param('A259702', 'ignored', id='A259702')
+		pytest.param('A000560')
+		, pytest.param('A001011')
+		, pytest.param('A005315')
+		, pytest.param('A060206')
+		, pytest.param('A077460')
+		, pytest.param('A078591')
+		, pytest.param('A178961')
+		, pytest.param('A259689')
+		, pytest.param('A259702')
 	]
 )
 @pytest.mark.parametrize(
@@ -212,7 +212,10 @@ def test_A259689(n: int, n下k: int | None, expected: int) -> None:
 	, [pytest.param(0, id='offset'), pytest.param(1, id='offsetPlus1'), pytest.param(2, id='offsetPlus2')]
 	, indirect=True
 )
-def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None) -> None:
+@pytest.mark.parametrize('flow', (None,))
+@pytest.mark.parametrize('pathLikeWriteFoldsTotal', (None,))
+@pytest.mark.parametrize('CPUlimit', (None,))
+def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWriteFoldsTotal: PathLike[str] | None, CPUlimit: Limitation) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -224,13 +227,9 @@ def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None) -> None:
 		OEIS identifier to validate.
 	oeis_n : int
 		Sequence index to validate.
-	flow : str | None
-		Computation flow to validate.
-
 	"""
-	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][oeis_n]
-	actual: int = countingMeanders(oeisID, oeis_n, flow, None)
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
+	actual: int = countingMeanders(oeisID, oeis_n, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
 	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, oeis_n, flow, None)
 
 @pytest.mark.parametrize(

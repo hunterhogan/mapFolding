@@ -133,18 +133,12 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	------
 	ValueError
 		If the input is empty or contains negative values.
-	NotImplementedError
-		If fewer than two positive dimensions are provided.
 	"""
 	listOFint: list[int] = intInnit(listDimensions, 'listDimensions', Sequence[int])
 	if not listOFint or any(map((0).__ge__, listOFint)):
 		message: str = f"I received `{listDimensions = }`, but every dimension must be a non-negative integer, and I need at least one dimension."
 		raise ValueError(message)
 
-	# TODO idk where this guard belongs.
-	if len(listOFint) < 2:
-		message = f"This function requires `{listDimensions = }` to have at least two dimensions greater than 0. You may want to look at https://oeis.org/."
-		raise NotImplementedError(message)
 	#=EndNotes##sortingDimensions=
 	# Do NOT sort the dimensions.
 	return tuple(listOFint)

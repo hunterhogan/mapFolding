@@ -11,11 +11,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
-	from pathlib import Path, PurePath
+	from pathlib import Path
 
 def eliminateFolds(mapShape: tuple[int, ...] | None = None
 				, state: EliminationState | None = None
-				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
+				, pathLikeWriteFoldsTotal: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
 				, flow: str | None = None
@@ -30,7 +30,7 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		"dimensions", such as in the seminal paper, "Multi-dimensional map-folding". Nevertheless, in contemporary Python
 		programming, in the context of these algorithms, the term "shape" makes it much easier to align the mathematics with the
 		syntax of the programming language.
-	pathLikeWriteFoldsTotal : PathLike[str] | PurePath | None = None
+	pathLikeWriteFoldsTotal : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
 		value of `foldsTotal`. If `pathLikeWriteFoldsTotal` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.

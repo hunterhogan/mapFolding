@@ -105,12 +105,12 @@ def getModule(identifierPackage: str | None = settingsPackage.identifierPackage,
 	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)
 	return astModule
 
-def getPathFilename(pathRoot: PathLike[str] | PurePath | None = settingsPackage.pathPackage, logicalPathInfix: identifierDotAttribute | None = None, identifierModule: str = '', fileExtension: str = settingsPackage.fileExtension) -> PurePath:
+def getPathFilename(pathRoot: PathLike[str] | None = settingsPackage.pathPackage, logicalPathInfix: identifierDotAttribute | None = None, identifierModule: str = '', fileExtension: str = settingsPackage.fileExtension) -> PurePath:
 	"""Construct filesystem path from logical path.
 
 	Parameters
 	----------
-	pathRoot : PathLike[str] | PurePath | None = settingsPackage.pathPackage
+	pathRoot : PathLike[str] | None = settingsPackage.pathPackage
 		Base directory for the package structure.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Logical path in dot notation.

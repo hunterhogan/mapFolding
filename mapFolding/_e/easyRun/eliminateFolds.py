@@ -32,7 +32,7 @@ if __name__ == "__main__":
 			f"{ansiColorReset}\n"
 		)
 
-	pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
+	pathLikeWriteFoldsTotal: PathLike[str] | None = None
 	oeisID: str = ""
 	flow: str = ""
 	CPUlimit: Limitation = -2

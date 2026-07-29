@@ -3,17 +3,17 @@
 This is a generated file; edit the source file.
 """
 from __future__ import annotations
-
 from functools import cache
 from hunterMakesPy import inclusive
 from itertools import chain
+from mapFolding.basecamp import countFoldsSymmetric
 from mapFolding.oeis import countingMeanders
 from mapFolding.oeis._metadata import dictionaryOEIS
 from math import factorial, isqrt
 from typing import Literal
 
 @cache
-def A000136(n: int, f: Literal['A000682', 'A000560'] = 'A000682') -> int:
+def A000136(n: int, f: Literal['A000682', 'A000560']='A000682') -> int:
     """
     Compute A000136(n) as a function of A000682 or A000560.
 
@@ -72,7 +72,7 @@ def A000560(n: int) -> int:
     return _A000682(n + 1) // 2
 
 @cache
-def A000682(n: int, f: Literal['A000560', 'A301620', 'A259689', 'A000136', 'A223094'] = 'A000560') -> int:
+def A000682(n: int, f: Literal['A000560', 'A301620', 'A259689', 'A000136', 'A223094']='A000560') -> int:
     """
     Compute A000682(n) as a function of A000560 or A301620 or A259689 or A000136 or A223094.
 
@@ -99,19 +99,19 @@ def A000682(n: int, f: Literal['A000560', 'A301620', 'A259689', 'A000136', 'A223
     if n in {1, 2}:
         countTotal: int = 1
     elif f == 'A301620':
-        countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
+        countTotal = 2 ** (n - 2) + sum((2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1)))
     elif f == 'A259689':
-        countTotal = 2 ** (n - 2) + sum(2 ** (n - 1 - n下j) * sum(A259689(n下j, n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + inclusive)) for n下j in range(4, n))
+        countTotal = 2 ** (n - 2) + sum((2 ** (n - 1 - n下j) * sum((A259689(n下j, n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + inclusive))) for n下j in range(4, n)))
     elif f == 'A000136':
         countTotal = A000136(n) // n
     elif f == 'A223094':
         nMinus1Factorial: int = factorial(n - 1)
-        countTotal = nMinus1Factorial - sum(A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n))
+        countTotal = nMinus1Factorial - sum((A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n)))
     else:
         countTotal = 2 * A000560(n - 1)
     return countTotal
 
-def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136'] = 'A000682 and A007822') -> int:
+def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136']='A000682 and A007822') -> int:
     """
     Compute A001010(n) as a function of A000682 and A007822 or A001011 and A000136.
 
@@ -357,7 +357,7 @@ def A178961(n: int) -> int:
             countTotal += A001010(n下i)
     return countTotal
 
-def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A000682'] = 'A000136 and A000682') -> int:
+def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A000682']='A000136 and A000682') -> int:
     """
     Compute A223094(n) as a function of A000136 and A000682 or A223094 and A000682 or A000682.
 
@@ -385,7 +385,7 @@ def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A0
         countTotal: int = A000136(n) - _A000682(n + 1)
     elif f == 'A223094 and A000682':
         nFactorial: int = factorial(n)
-        countTotal = nFactorial - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)) - _A000682(n + 1)
+        countTotal = nFactorial - sum((A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n))) - _A000682(n + 1)
     elif f == 'A000682':
         countTotal = n * _A000682(n) - _A000682(n + 1)
     else:
@@ -393,7 +393,7 @@ def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A0
     return countTotal
 
 @cache
-def A259689(n: int, n下k: int | None = None) -> int:
+def A259689(n: int, n下k: int | None=None) -> int:
     """
     Compute A259689(n) as a function of A000682.
 
@@ -433,7 +433,7 @@ def A259689(n: int, n下k: int | None = None) -> int:
     elif nRow > 2 and n下k == (nRow + 2) // 2:
         countTotal = 2 ** ((nRow - 1) // 2)
     else:
-        countTotal = (_A000682(nRow + 1) - sum(n下kOther * dictionaryOEIS['A259689']['valuesKnown'][(nRow - 1) ** 2 // 4 + n下kOther] for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2)))) // n下k
+        countTotal = (_A000682(nRow + 1) - sum((n下kOther * dictionaryOEIS['A259689']['valuesKnown'][(nRow - 1) ** 2 // 4 + n下kOther] for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))))) // n下k
     return countTotal
 
 def A259702(n: int) -> int:
@@ -466,7 +466,7 @@ def A259702(n: int) -> int:
         countTotal = _A000682(n) // 2 - _A000682(n - 1)
     return countTotal
 
-def A301620(n: int, f: Literal['A000682', 'A259689', 'A259702'] = 'A000682') -> int:
+def A301620(n: int, f: Literal['A000682', 'A259689', 'A259702']='A000682') -> int:
     """
     Compute A301620(n) as a function of A000682 or A259689 or A259702.
 
@@ -491,7 +491,7 @@ def A301620(n: int, f: Literal['A000682', 'A259689', 'A259702'] = 'A000682') -> 
         https://oeis.org/A301620
     """
     if f == 'A259689':
-        countTotal: int = sum(A259689(n + 1, n下k) * (n下k - 2) for n下k in range(3, (n + 3) // 2 + inclusive))
+        countTotal: int = sum((A259689(n + 1, n下k) * (n下k - 2) for n下k in range(3, (n + 3) // 2 + inclusive)))
     elif f == 'A259702':
         countTotal = 2 * A259702(n + 2)
     else:
@@ -503,7 +503,7 @@ def _A000682(n: int) -> int:
     return countingMeanders('A000682', n)
 
 def _A007822(n: int) -> int:
-    return countingMeanders('A007822', n)
+    return countFoldsSymmetric((1, 2 * n))
 
 @cache
 def _A005316(n: int) -> int:

@@ -112,7 +112,6 @@ def test_validateListDimensions(listDimensions: list[Any] | range | tuple[Any, .
 		, ([-4, 2], ValueError)
 		, ([-3], ValueError)
 		, ([7.5], ValueError)
-		, ([11], NotImplementedError)
 		, ([None], TypeError)
 		, ([True], TypeError)
 		, ([[17, 39]], TypeError)

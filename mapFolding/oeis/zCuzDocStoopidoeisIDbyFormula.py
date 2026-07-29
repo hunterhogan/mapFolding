@@ -1,11 +1,11 @@
 # ruff: file-ignore[collapsible-else-if]
-# ruff: file-ignore[commented-out-code]
 """Compute a(n) for an OEIS ID by computing other OEIS IDs."""
 from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import inclusive
 from itertools import chain
+from mapFolding.basecamp import countFoldsSymmetric
 from mapFolding.oeis import countingMeanders
 from mapFolding.oeis._metadata import dictionaryOEIS
 from math import factorial, isqrt
@@ -50,7 +50,6 @@ def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136'] = '
 		countTotal: int = 1
 	elif f == 'A001011 and A000136':
 		countTotal = 4 * A001011(n) - A000136(n)
-	# elif f == 'A000682 and A007822':
 	else:
 		if n & 0b1:
 			countTotal = 2 * _A007822((n - 1) // 2 + 1)
@@ -181,7 +180,7 @@ def _A000682(n: int) -> int:
 	return countingMeanders('A000682', n)
 
 def _A007822(n: int) -> int:
-	return countingMeanders('A007822', n)
+	return countFoldsSymmetric((1, 2 * n))
 
 @cache
 def _A005316(n: int) -> int:

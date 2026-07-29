@@ -194,7 +194,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		Name for the generated Numba-accelerated module.
 	identifierCallable : str | None = None
 		Name for the accelerated computational function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
+	logicalPathInfix : PathLike[str] | str | None = None
 		Directory path for organizing the generated module.
 	sourceCallableDispatcher : str | None = None
 		Optional dispatcher function identifier (unused).
@@ -256,7 +256,7 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		Name for the generated trimmed module.
 	identifierCallable : str | None = None
 		Name for the trimmed computational function.
-	logicalPathInfix : PathLike[str] | PurePath | str | None = None
+	logicalPathInfix : PathLike[str] | str | None = None
 		Directory path for organizing the generated module.
 	sourceCallableDispatcher : str | None = None
 		Optional dispatcher function identifier (unused).

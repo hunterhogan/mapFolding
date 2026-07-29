@@ -61,15 +61,15 @@ if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
-	from pathlib import Path, PurePath
+	from pathlib import Path
 
 def countFolds(listDimensions: Sequence[int] | None = None
-				, pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None
+				, pathLikeWriteFoldsTotal: PathLike[str] | None = None
 				, computationDivisions: int | str | None = None
 				, *
 				, CPUlimit: Limitation = None
 				, mapShape: tuple[int, ...] | None = None
-				, flow: str | None = None
+				, flow: str = ''
 				) -> int:
 	"""
 	Count the number of distinct ways to fold a map.
@@ -81,7 +81,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	----------
 	listDimensions : Sequence[int] | None = None
 		List of integers representing the dimensions of the map to be folded.
-	pathLikeWriteFoldsTotal : PathLike[str] | PurePath | None = None
+	pathLikeWriteFoldsTotal : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
 		value of `foldsTotal`. If `pathLikeWriteFoldsTotal` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.
@@ -140,7 +140,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 #-------- mapShape ---------------------------------------------------------------------
 
 	if mapShape:
-		pass
+		mapShape = validateListDimensions(mapShape)
 	elif listDimensions:
 		mapShape = validateListDimensions(listDimensions)
 
@@ -176,6 +176,28 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		# `listStatesParallel` exists so you can research the parallel computation.
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
+	elif flow == 'asynchronousSymmetric':
+		from mapFolding.dataBaskets import SymmetricFoldsState
+		from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
+		foldsTotal = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
+	elif flow.endswith('Symmetric'):
+		if flow == 'theorem2Symmetric':
+			from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
+		elif flow == 'theorem2CodonSymmetric':
+			from mapFolding.syntheticModules.A007822.codon.theorem2 import doTheNeedful
+		elif flow == 'theorem2NumbaSymmetric':
+			from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
+		elif flow == 'theorem2TrimmedSymmetric':
+			from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
+		else:
+			from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
+
+		from mapFolding.dataBaskets import SymmetricFoldsState
+		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
+
+		symmetricState = doTheNeedful(symmetricState)
+		foldsTotal = symmetricState.symmetricFolds
+
 	else:
 		if flow in {'daoOfMapFolding', None}:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
@@ -206,3 +228,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal
+
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str = '', pathLikeWriteFoldsTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+	flow += 'Symmetric'
+
+	return countFolds(None, pathLikeWriteFoldsTotal, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)

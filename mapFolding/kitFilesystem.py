@@ -33,7 +33,6 @@ import platformdirs
 if TYPE_CHECKING:
 	from io import TextIOWrapper
 	from os import PathLike
-	from pathlib import PurePath
 
 def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""Create a standardized filename for a computed `foldsTotal` value.
@@ -63,7 +62,7 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
-def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: PathLike[str] | PurePath | None = None) -> Path:
+def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: PathLike[str] | None = None) -> Path:
 	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
 
 	To help reduce duplicate code and to increase predictability, this function creates a standardized
@@ -73,7 +72,7 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	----------
 	mapShape : tuple[int, ...]
 		A sequence of integers representing the map dimensions.
-	pathLikeWriteFoldsTotal : PathLike[str] | PurePath | None = getPathRootJobDEFAULT()
+	pathLikeWriteFoldsTotal : PathLike[str] | None = getPathRootJobDEFAULT()
 		Path, filename, or relative path and filename. If None, uses default path. If a directory,
 		appends standardized filename.
 
@@ -127,7 +126,7 @@ def getPathRootJobDEFAULT() -> Path:
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 
-def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
+def _saveFoldsTotal(pathFilename: PathLike[str], foldsTotal: int) -> None:
 	"""Save a `foldsTotal` value to a file.
 
 	(AI generated docstring)
@@ -138,7 +137,7 @@ def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> 
 
 	Parameters
 	----------
-	pathFilename : PathLike[str] | PurePath
+	pathFilename : PathLike[str]
 		Path where the `foldsTotal` value should be saved.
 	foldsTotal : int
 		The integer value to save.
@@ -153,7 +152,7 @@ def _saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> 
 	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
 	pathFilenameFoldsTotal.write_text(str(foldsTotal), encoding='utf-8')
 
-def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> None:
+def saveFoldsTotal(pathFilename: PathLike[str], foldsTotal: int) -> None:
 	"""Save `foldsTotal` value to disk with multiple fallback mechanisms.
 
 	(AI generated docstring)
@@ -164,7 +163,7 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 
 	Parameters
 	----------
-	pathFilename : PathLike[str] | PurePath
+	pathFilename : PathLike[str]
 		Target save location for the `foldsTotal` value.
 	foldsTotal : int
 		The computed value to save.
@@ -195,7 +194,7 @@ def saveFoldsTotal(pathFilename: PathLike[str] | PurePath, foldsTotal: int) -> N
 		except Exception:  # ruff:ignore[blind-except]
 			stdout.write(str(foldsTotal))
 
-def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
+def saveFoldsTotalFAILearly(pathFilename: PathLike[str]) -> None:
 	"""Preemptively test file write capabilities before beginning computation.
 
 	(AI generated docstring)
@@ -206,7 +205,7 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str] | PurePath) -> None:
 
 	Parameters
 	----------
-	pathFilename : PathLike[str] | PurePath
+	pathFilename : PathLike[str]
 		The path and filename where computation results will be saved.
 
 	Raises
