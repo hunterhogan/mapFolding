@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from mapFolding.oeis import _theSSOT
 from mapFolding.oeis._byID import oeisIDfor_n
-from mapFolding.oeis._metadata import dictionaryOEISMapFolding
+from mapFolding.oeis._metadata import dictionaryOEISImplemented
 import argparse
 import sys
 import time
@@ -49,8 +48,8 @@ def _getOEISDescriptions() -> str:
 		A formatted string listing each OEIS sequence ID with its description.
 	"""
 	return "\n".join(
-		f"  {oeisID}: {dictionaryOEISMapFolding[oeisID]['description']}"
-		for oeisID in _theSSOT.oeisIDsImplementedMapFolding
+		f"  {oeisID}: {dictionaryOEISImplemented[oeisID]['description']}"
+		for oeisID in dictionaryOEISImplemented
 	)
 
 def OEIS_for_n() -> None:

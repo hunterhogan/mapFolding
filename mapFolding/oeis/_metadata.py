@@ -302,3 +302,6 @@ dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _makeDictionaryO
 
 dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
 """Metadata for OEIS sequences computed by specialized algorithms (meanders, symmetric foldings, formulas)."""
+
+dictionaryOEISImplemented: dict[str, MetadataOEISidMapFolding | MetadataOEISid] = dictionaryOEISMapFolding | dictionaryOEIS
+"""Metadata for every implemented OEIS sequence."""

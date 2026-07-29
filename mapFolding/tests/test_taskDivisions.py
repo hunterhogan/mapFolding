@@ -42,18 +42,18 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize('computationDivisions', ('maximum',))
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('mapShape', [pytest.param(dictionaryOEISMapFolding['A001417']['getMapShape'](5), id='A001417::n5')])
-@pytest.mark.parametrize('flow', (None,))
+@pytest.mark.parametrize('flow', ('',))
 def test_countFolds_computationDivisionsMaximum(
 	listDimensions: Sequence[int] | None
     , pathLikeWriteTotal: PathLike[str] | None
     , computationDivisions: int | str | None
     , CPUlimit: int | float | None
     , mapShape: tuple[int, ...] | None
-    , flow: str | None
+    , flow: str
 ) -> None:
 	expected: int = getFoldsTotalKnown(mapShape)
-	actual: int = countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, mapShape=mapShape)
-	assertEqualTo(actual, expected, countFolds.__name__, mapShape, computationDivisions=computationDivisions)
+	actual: int = countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, mapShape=mapShape, flow=flow)
+	assertEqualTo(actual, expected, countFolds.__name__, mapShape, computationDivisions=computationDivisions, flow=flow)
 
 @pytest.mark.parametrize('listDimensions', (None,))
 @pytest.mark.parametrize('pathLikeWriteTotal', (None,))
@@ -62,7 +62,7 @@ def test_countFolds_computationDivisionsMaximum(
 @pytest.mark.parametrize(
 	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
-@pytest.mark.parametrize('flow', (None,))
+@pytest.mark.parametrize('flow', ('',))
 @pytest.mark.parametrize('expected', (ValueError,))
 def test_countFolds_computationDivisionsError(
 	listDimensions: Sequence[int] | None
@@ -70,12 +70,12 @@ def test_countFolds_computationDivisionsError(
     , computationDivisions: int | str | None
     , CPUlimit: int | float | None
     , mapShape: tuple[int, ...] | None
-    , flow: str | None
+    , flow: str
 	, expected: type[Exception]
 ) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, mapShape=mapShape)
-		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, computationDivisions)
+		countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, mapShape=mapShape, flow=flow)
+		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, computationDivisions, flow=flow)
 
 @pytest.mark.parametrize('listDimensions', (None,))
 @pytest.mark.parametrize('pathLikeWriteTotal', (None,))
@@ -84,7 +84,7 @@ def test_countFolds_computationDivisionsError(
 @pytest.mark.parametrize(
 	'mapShape', [pytest.param(dictionaryOEISMapFolding['A000136']['getMapShape'](3), id='A000136::n3'), pytest.param(dictionaryOEISMapFolding['A001415']['getMapShape'](3), id='A001415::n3')]
 )
-@pytest.mark.parametrize('flow', (None,))
+@pytest.mark.parametrize('flow', ('',))
 @pytest.mark.parametrize('expected', (TypeError,))
 def test_countFolds_CPUlimitError(
 	listDimensions: Sequence[int] | None
@@ -92,12 +92,12 @@ def test_countFolds_CPUlimitError(
     , computationDivisions: int | str | None
     , CPUlimit: int | float | None
     , mapShape: tuple[int, ...] | None
-    , flow: str | None
+    , flow: str
 	, expected: type[Exception]
 ) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, CPUlimit=CPUlimit, mapShape=mapShape)
-		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, CPUlimit=CPUlimit, mapShape=mapShape)
+		countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
+		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
 
 @pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_defineConcurrencyLimit())
 def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
@@ -107,7 +107,8 @@ def test_defineConcurrencyLimit(nameOfTest: str, callablePytest: Callable[[], No
 def test_defineProcessorLimitError(expected: type[TypeError], parameter: list[int] | tuple[int, ...] | set[int] | dict[str, int]) -> None:
 	"""Test that invalid CPUlimit types are properly handled."""
 	with pytest.raises(expected) as exceptionInfo:
-		defineProcessorLimit(parameter)
+		#=SIN= Invalid argument type: the test verifies rejection of values outside `Limitation`.
+		defineProcessorLimit(parameter)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 		assertEqualTo(type(exceptionInfo.value), expected, defineProcessorLimit.__name__, parameter)
 
 @pytest.mark.parametrize('computationDivisions, concurrencyLimit, listDimensions, expected', [(None, 4, [9, 11], 0), ('maximum', 4, [7, 11], 77), ('cpu', 4, [3, 7], 4)])

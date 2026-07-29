@@ -1,3 +1,4 @@
+# ruff: file-ignore[unused-function-argument]
 # ruff: file-ignore[collapsible-else-if]
 # Run makeDocstrings.py
 """Compute a(n) for an OEIS ID by computing other OEIS IDs."""
@@ -5,7 +6,7 @@ from __future__ import annotations
 
 from functools import cache
 from mapFolding.basecamp import countFoldsSymmetric
-from mapFolding.oeis import countMeanders
+from mapFolding.oeis._meanders import countMeanders
 from math import factorial
 from typing import Literal
 
@@ -20,7 +21,7 @@ def A000136(n: int, f: Literal['A000682', 'A000560'] = 'A000682') -> int:
 		countTotal = n * _A000682(n)
 	return countTotal
 
-def A000560(n: int) -> int:
+def A000560(n: int, f: str = '') -> int:
 	"""A000682"""
 	return _A000682(n + 1) // 2
 
@@ -53,7 +54,7 @@ def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136'] = '
 			countTotal = 2 * _A000682(n // 2 + 1)
 	return countTotal
 
-def A001011(n: int) -> int:
+def A001011(n: int, f: str = '') -> int:
 	"""A000136 and A001010"""
 	if n == 1:
 		countTotal: int = 1
@@ -62,7 +63,7 @@ def A001011(n: int) -> int:
 	return countTotal
 
 @cache
-def A005315(n: int) -> int:
+def A005315(n: int, f: str = '') -> int:
 	"""A005316"""
 	if n in {0, 1}:
 		countTotal: int = 1
@@ -70,7 +71,7 @@ def A005315(n: int) -> int:
 		countTotal = _A005316(2 * n - 1)
 	return countTotal
 
-def A007822(n: int) -> int:
+def A007822(n: int, f: str = '') -> int:
 	"""A001010"""
 	if n == 1:
 		countTotal: int = 1
@@ -78,11 +79,11 @@ def A007822(n: int) -> int:
 		countTotal = A001010(2 * n - 1) // 2
 	return countTotal
 
-def A060206(n: int) -> int:
+def A060206(n: int, f: str = '') -> int:
 	"""A000682"""
 	return _A000682(2 * n + 1)
 
-def A077460(n: int) -> int:
+def A077460(n: int, f: str = '') -> int:
 	"""A005315, A005316, and A060206"""
 	if n in {0, 1}:
 		countTotal: int = 1
@@ -93,7 +94,7 @@ def A077460(n: int) -> int:
 
 	return countTotal
 
-def A078591(n: int) -> int:
+def A078591(n: int, f: str = '') -> int:
 	"""A005315"""
 	if n in {0, 1}:
 		countTotal: int = 1
@@ -114,7 +115,7 @@ def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A0
 		countTotal = A000136(n) - _A000682(n + 1)
 	return countTotal
 
-def A301620(n: int) -> int:
+def A301620(n: int, f: str = '') -> int:
 	"""A000682"""
 	return _A000682(n + 2) - 2 * _A000682(n + 1)
 

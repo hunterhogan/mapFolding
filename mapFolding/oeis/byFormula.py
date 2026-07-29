@@ -3,15 +3,14 @@
 This is a generated file; edit the source file.
 """
 from __future__ import annotations
-
 from functools import cache
 from mapFolding.basecamp import countFoldsSymmetric
-from mapFolding.oeis import countMeanders
+from mapFolding.oeis._meanders import countMeanders
 from math import factorial
 from typing import Literal
 
 @cache
-def A000136(n: int, f: Literal['A000682', 'A000560'] = 'A000682') -> int:
+def A000136(n: int, f: Literal['A000682', 'A000560']='A000682') -> int:
     """
     Compute A000136(n) as a function of A000682 or A000560.
 
@@ -43,7 +42,7 @@ def A000136(n: int, f: Literal['A000682', 'A000560'] = 'A000682') -> int:
         countTotal = n * _A000682(n)
     return countTotal
 
-def A000560(n: int) -> int:
+def A000560(n: int, f: str='') -> int:
     """
     Compute A000560(n) as a function of A000682.
 
@@ -70,7 +69,7 @@ def A000560(n: int) -> int:
     return _A000682(n + 1) // 2
 
 @cache
-def A000682(n: int, f: Literal['A000560', 'A301620', 'A000136', 'A223094'] = 'A000560') -> int:
+def A000682(n: int, f: Literal['A000560', 'A301620', 'A000136', 'A223094']='A000560') -> int:
     """
     Compute A000682(n) as a function of A000560 or A301620 or A000136 or A223094.
 
@@ -97,17 +96,17 @@ def A000682(n: int, f: Literal['A000560', 'A301620', 'A000136', 'A223094'] = 'A0
     if n in {1, 2}:
         countTotal: int = 1
     elif f == 'A301620':
-        countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
+        countTotal = 2 ** (n - 2) + sum((2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1)))
     elif f == 'A000136':
         countTotal = A000136(n) // n
     elif f == 'A223094':
         nMinus1Factorial: int = factorial(n - 1)
-        countTotal = nMinus1Factorial - sum(A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n))
+        countTotal = nMinus1Factorial - sum((A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n)))
     else:
         countTotal = 2 * A000560(n - 1)
     return countTotal
 
-def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136'] = 'A000682 and A007822') -> int:
+def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136']='A000682 and A007822') -> int:
     """
     Compute A001010(n) as a function of A000682 and A007822 or A001011 and A000136.
 
@@ -141,7 +140,7 @@ def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136'] = '
         countTotal = 2 * _A000682(n // 2 + 1)
     return countTotal
 
-def A001011(n: int) -> int:
+def A001011(n: int, f: str='') -> int:
     """
     Compute A001011(n) as a function of A000136 and A001010.
 
@@ -172,7 +171,7 @@ def A001011(n: int) -> int:
     return countTotal
 
 @cache
-def A005315(n: int) -> int:
+def A005315(n: int, f: str='') -> int:
     """
     Compute A005315(n) as a function of A005316.
 
@@ -202,7 +201,7 @@ def A005315(n: int) -> int:
         countTotal = _A005316(2 * n - 1)
     return countTotal
 
-def A007822(n: int) -> int:
+def A007822(n: int, f: str='') -> int:
     """
     Compute A007822(n) as a function of A001010.
 
@@ -232,7 +231,7 @@ def A007822(n: int) -> int:
         countTotal = A001010(2 * n - 1) // 2
     return countTotal
 
-def A060206(n: int) -> int:
+def A060206(n: int, f: str='') -> int:
     """
     Compute A060206(n) as a function of A000682.
 
@@ -258,7 +257,7 @@ def A060206(n: int) -> int:
     """
     return _A000682(2 * n + 1)
 
-def A077460(n: int) -> int:
+def A077460(n: int, f: str='') -> int:
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206.
 
@@ -290,7 +289,7 @@ def A077460(n: int) -> int:
         countTotal = (A005315(n) + 2 * _A005316(n)) // 4
     return countTotal
 
-def A078591(n: int) -> int:
+def A078591(n: int, f: str='') -> int:
     """
     Compute A078591(n) as a function of A005315.
 
@@ -320,7 +319,7 @@ def A078591(n: int) -> int:
         countTotal = A005315(n) // 2
     return countTotal
 
-def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A000682'] = 'A000136 and A000682') -> int:
+def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A000682']='A000136 and A000682') -> int:
     """
     Compute A223094(n) as a function of A000136 and A000682 or A223094 and A000682 or A000682.
 
@@ -348,14 +347,14 @@ def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A0
         countTotal: int = A000136(n) - _A000682(n + 1)
     elif f == 'A223094 and A000682':
         nFactorial: int = factorial(n)
-        countTotal = nFactorial - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)) - _A000682(n + 1)
+        countTotal = nFactorial - sum((A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n))) - _A000682(n + 1)
     elif f == 'A000682':
         countTotal = n * _A000682(n) - _A000682(n + 1)
     else:
         countTotal = A000136(n) - _A000682(n + 1)
     return countTotal
 
-def A301620(n: int) -> int:
+def A301620(n: int, f: str='') -> int:
     """
     Compute A301620(n) as a function of A000682.
 
