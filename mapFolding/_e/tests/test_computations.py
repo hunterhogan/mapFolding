@@ -44,8 +44,8 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 	"""
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 	state: EliminationState | None = None
-	pathLikeWriteFoldsTotal: None = None
-	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteFoldsTotal, CPUlimit, flow)
+	pathLikeWriteTotal: None = None
+	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteTotal, CPUlimit, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(ValueError, oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
@@ -53,9 +53,9 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 	state: EliminationState | None = None
-	pathLikeWriteFoldsTotal: None = None
+	pathLikeWriteTotal: None = None
 	with pytest.raises(expected):
-		eliminateFolds(mapShape, state, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit, flow=flow)
+		eliminateFolds(mapShape, state, pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow)
 
 # @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
 @pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")
@@ -71,7 +71,7 @@ def test_eliminateFoldsPinnedState(pinningFunctionEliminateFolds2上nDimensional
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 	expectedFoldsTotal: int = dictionaryOEISMapFolding[oeisID]["valuesKnown"][n]
 	statePinned: EliminationState = pinningFunctionEliminateFolds2上nDimensional(EliminationState(mapShape), CPUlimit=CPUlimit)
-	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteFoldsTotal=None, CPUlimit=CPUlimit, flow=flow)
+	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteTotal=None, CPUlimit=CPUlimit, flow=flow)
 	functionName: str = getattr(pinningFunctionEliminateFolds2上nDimensional, "__name__", pinningFunctionEliminateFolds2上nDimensional.__class__.__name__)
 
 	assertEqualTo(actualFoldsTotal, expectedFoldsTotal, 'eliminateFolds', functionName, oeisID, n, flow)
@@ -90,6 +90,6 @@ def test_eliminateFoldsPinPilesAtEnds(pileDepthPinningTests: int, CPUlimit: floa
 	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
 	expectedFoldsTotal: int = dictionaryOEISMapFolding[oeisID]["valuesKnown"][n]
 	statePinned: EliminationState = pinPilesAtEnds(EliminationState(mapShape), pileDepthPinningTests, CPUlimit=CPUlimit)
-	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteFoldsTotal=None, CPUlimit=CPUlimit, flow=flow)
+	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteTotal=None, CPUlimit=CPUlimit, flow=flow)
 
 	assertEqualTo(actualFoldsTotal, expectedFoldsTotal, 'eliminateFolds', oeisID, n, flow, pileDepthPinningTests=pileDepthPinningTests)

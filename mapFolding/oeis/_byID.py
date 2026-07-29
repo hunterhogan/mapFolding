@@ -2,8 +2,13 @@ from __future__ import annotations
 
 from mapFolding.basecamp import countFolds
 from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEISMapFolding
+from typing import TYPE_CHECKING
 
-def oeisIDfor_n(oeisID: str, n: int) -> int:
+if TYPE_CHECKING:
+	from hunterMakesPy.theTypes import Limitation
+	from os import PathLike
+
+def oeisIDfor_n(oeisID: str, n: int, flow: str | None = None, pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	"""You can calculate the value a(n) for a specified OEIS ID and index.
 
 	(AI generated docstring)

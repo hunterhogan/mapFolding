@@ -29,8 +29,8 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	pathLikeWriteFoldsTotal: PathLike[str] | None = '/apps/mapFolding/mapFolding/jobs'  # pyright: ignore[reportAssignmentType] # ty: ignore[invalid-assignment]
-	pathLikeWriteFoldsTotal = None
+	pathLikeWriteTotal: PathLike[str] | None = '/apps/mapFolding/mapFolding/jobs'  # pyright: ignore[reportAssignmentType] # ty: ignore[invalid-assignment]
+	pathLikeWriteTotal = None
 	flow = 'matrixMeanders'
 	flow = 'matrixPandas'
 	flow = 'matrixNumPy'
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
-			countTotal = countMeanders(oeisID, n, flow, pathLikeWriteFoldsTotal)
+			countTotal = countMeanders(oeisID, n, flow, pathLikeWriteTotal)
 			if n < dictionaryOEIS[oeisID]['valueUnknown']:
 				write()
 			else:

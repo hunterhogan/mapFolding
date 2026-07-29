@@ -38,25 +38,25 @@ if TYPE_CHECKING:
 	from os import PathLike
 
 @pytest.mark.parametrize('listDimensions', (None,))
-@pytest.mark.parametrize('pathLikeWriteFoldsTotal', (None,))
+@pytest.mark.parametrize('pathLikeWriteTotal', (None,))
 @pytest.mark.parametrize('computationDivisions', ('maximum',))
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('mapShape', [pytest.param(dictionaryOEISMapFolding['A001417']['getMapShape'](5), id='A001417::n5')])
 @pytest.mark.parametrize('flow', (None,))
 def test_countFolds_computationDivisionsMaximum(
 	listDimensions: Sequence[int] | None
-    , pathLikeWriteFoldsTotal: PathLike[str] | None
+    , pathLikeWriteTotal: PathLike[str] | None
     , computationDivisions: int | str | None
     , CPUlimit: int | float | None
     , mapShape: tuple[int, ...] | None
     , flow: str | None
 ) -> None:
 	expected: int = getFoldsTotalKnown(mapShape)
-	actual: int = countFolds(listDimensions, pathLikeWriteFoldsTotal, computationDivisions, mapShape=mapShape)
+	actual: int = countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, mapShape=mapShape)
 	assertEqualTo(actual, expected, countFolds.__name__, mapShape, computationDivisions=computationDivisions)
 
 @pytest.mark.parametrize('listDimensions', (None,))
-@pytest.mark.parametrize('pathLikeWriteFoldsTotal', (None,))
+@pytest.mark.parametrize('pathLikeWriteTotal', (None,))
 @pytest.mark.parametrize('computationDivisions', ({'wrong': 'value'},))
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize(
@@ -66,7 +66,7 @@ def test_countFolds_computationDivisionsMaximum(
 @pytest.mark.parametrize('expected', (ValueError,))
 def test_countFolds_computationDivisionsError(
 	listDimensions: Sequence[int] | None
-    , pathLikeWriteFoldsTotal: PathLike[str] | None
+    , pathLikeWriteTotal: PathLike[str] | None
     , computationDivisions: int | str | None
     , CPUlimit: int | float | None
     , mapShape: tuple[int, ...] | None
@@ -74,11 +74,11 @@ def test_countFolds_computationDivisionsError(
 	, expected: type[Exception]
 ) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		countFolds(listDimensions, pathLikeWriteFoldsTotal, computationDivisions, mapShape=mapShape)
+		countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, mapShape=mapShape)
 		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, computationDivisions)
 
 @pytest.mark.parametrize('listDimensions', (None,))
-@pytest.mark.parametrize('pathLikeWriteFoldsTotal', (None,))
+@pytest.mark.parametrize('pathLikeWriteTotal', (None,))
 @pytest.mark.parametrize('computationDivisions', ('cpu',))
 @pytest.mark.parametrize('CPUlimit', [{'invalid': True}, ['weird']])
 @pytest.mark.parametrize(
@@ -88,7 +88,7 @@ def test_countFolds_computationDivisionsError(
 @pytest.mark.parametrize('expected', (TypeError,))
 def test_countFolds_CPUlimitError(
 	listDimensions: Sequence[int] | None
-    , pathLikeWriteFoldsTotal: PathLike[str] | None
+    , pathLikeWriteTotal: PathLike[str] | None
     , computationDivisions: int | str | None
     , CPUlimit: int | float | None
     , mapShape: tuple[int, ...] | None
@@ -96,7 +96,7 @@ def test_countFolds_CPUlimitError(
 	, expected: type[Exception]
 ) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		countFolds(listDimensions, pathLikeWriteFoldsTotal, computationDivisions, CPUlimit=CPUlimit, mapShape=mapShape)
+		countFolds(listDimensions, pathLikeWriteTotal, computationDivisions, CPUlimit=CPUlimit, mapShape=mapShape)
 		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, CPUlimit=CPUlimit, mapShape=mapShape)
 
 @pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_defineConcurrencyLimit())

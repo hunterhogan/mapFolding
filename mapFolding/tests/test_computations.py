@@ -87,12 +87,12 @@ def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 		CPU limit for the computation.
 
 	"""
-	pathLikeWriteFoldsTotal: PathLike[str] | None = None
+	pathLikeWriteTotal: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	mapShape: tuple[int, int] = (1, 2 * n)
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
-	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
-	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWriteFoldsTotal, CPUlimit)
+	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWriteTotal, CPUlimit)
 
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('oeisID, n, flow'
@@ -197,9 +197,9 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 	, indirect=True
 )
 @pytest.mark.parametrize('flow', (None,))
-@pytest.mark.parametrize('pathLikeWriteFoldsTotal', (None,))
+@pytest.mark.parametrize('pathLikeWriteTotal', (None,))
 @pytest.mark.parametrize('CPUlimit', (None,))
-def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWriteFoldsTotal: PathLike[str] | None, CPUlimit: Limitation) -> None:
+def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWriteTotal: PathLike[str] | None, CPUlimit: Limitation) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -213,7 +213,7 @@ def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWr
 		Sequence index to validate.
 	"""
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
-	actual: int = countMeanders(oeisID, oeis_n, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
+	actual: int = countMeanders(oeisID, oeis_n, flow, pathLikeWriteTotal, CPUlimit=CPUlimit)
 	assertEqualTo(actual, expected, countMeanders.__name__, oeisID, oeis_n, flow, None)
 
 @pytest.mark.parametrize(

@@ -31,7 +31,7 @@ if __name__ == '__main__':
 		)
 
 	listDimensions: Sequence[int] | None = None
-	pathLikeWriteFoldsTotal: PathLike[str] | None = None
+	pathLikeWriteTotal: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
 	CPUlimit: Limitation = None
 	flow = 'daoOfMapFolding'
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = countFolds(listDimensions
-						, pathLikeWriteFoldsTotal
+						, pathLikeWriteTotal
 						, computationDivisions
 						, CPUlimit=CPUlimit
 						, mapShape=mapShape

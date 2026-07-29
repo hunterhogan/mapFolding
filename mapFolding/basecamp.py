@@ -64,7 +64,7 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 def countFolds(listDimensions: Sequence[int] | None = None
-				, pathLikeWriteFoldsTotal: PathLike[str] | None = None
+				, pathLikeWriteTotal: PathLike[str] | None = None
 				, computationDivisions: int | str | None = None
 				, *
 				, CPUlimit: Limitation = None
@@ -81,9 +81,9 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	----------
 	listDimensions : Sequence[int] | None = None
 		List of integers representing the dimensions of the map to be folded.
-	pathLikeWriteFoldsTotal : PathLike[str] | None = None
+	pathLikeWriteTotal : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
-		value of `foldsTotal`. If `pathLikeWriteFoldsTotal` is a path of only directories, `countFolds` creates a filename based
+		value of `foldsTotal`. If `pathLikeWriteTotal` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.
 	computationDivisions : int | str | None = None
 		Whether and how to divide the computational work.
@@ -159,8 +159,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 #-------- memorialization instructions ---------------------------------------------
 
-	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteFoldsTotal)
+	if pathLikeWriteTotal is not None:
+		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteTotal)
 		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 	else:
 		pathFilenameFoldsTotal = None
@@ -229,7 +229,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	return foldsTotal
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str = '', pathLikeWriteFoldsTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	flow += 'Symmetric'
 
-	return countFolds(None, pathLikeWriteFoldsTotal, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
+	return countFolds(None, pathLikeWriteTotal, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)

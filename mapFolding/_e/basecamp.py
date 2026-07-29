@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 def eliminateFolds(mapShape: tuple[int, ...] | None = None
 				, state: EliminationState | None = None
-				, pathLikeWriteFoldsTotal: PathLike[str] | None = None
+				, pathLikeWriteTotal: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
 				, flow: str | None = None
@@ -30,9 +30,9 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		"dimensions", such as in the seminal paper, "Multi-dimensional map-folding". Nevertheless, in contemporary Python
 		programming, in the context of these algorithms, the term "shape" makes it much easier to align the mathematics with the
 		syntax of the programming language.
-	pathLikeWriteFoldsTotal : PathLike[str] | None = None
+	pathLikeWriteTotal : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
-		value of `foldsTotal`. If `pathLikeWriteFoldsTotal` is a path of only directories, `countFolds` creates a filename based
+		value of `foldsTotal`. If `pathLikeWriteTotal` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.
 	CPUlimit : bool | float | int | None = None
 		If relevant, whether and how to limit the number of processors `countFolds` will use.
@@ -77,8 +77,8 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 
 #-------- memorialization instructions ---------------------------------------------
 
-	if pathLikeWriteFoldsTotal is not None:
-		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(state.mapShape, pathLikeWriteFoldsTotal)
+	if pathLikeWriteTotal is not None:
+		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(state.mapShape, pathLikeWriteTotal)
 		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 	else:
 		pathFilenameFoldsTotal = None

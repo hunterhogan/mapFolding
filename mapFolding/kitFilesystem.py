@@ -62,7 +62,7 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	"""
 	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
 
-def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal: PathLike[str] | None = None) -> Path:
+def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteTotal: PathLike[str] | None = None) -> Path:
 	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
 
 	To help reduce duplicate code and to increase predictability, this function creates a standardized
@@ -72,7 +72,7 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	----------
 	mapShape : tuple[int, ...]
 		A sequence of integers representing the map dimensions.
-	pathLikeWriteFoldsTotal : PathLike[str] | None = getPathRootJobDEFAULT()
+	pathLikeWriteTotal : PathLike[str] | None = getPathRootJobDEFAULT()
 		Path, filename, or relative path and filename. If None, uses default path. If a directory,
 		appends standardized filename.
 
@@ -85,10 +85,10 @@ def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteFoldsTotal
 	-----
 	The function creates any necessary directories in the path if they don't exist.
 	"""
-	if pathLikeWriteFoldsTotal is None:
+	if pathLikeWriteTotal is None:
 		pathFilenameFoldsTotal: Path = getPathRootJobDEFAULT() / getFilenameFoldsTotal(mapShape)
 	else:
-		pathLikeSherpa = Path(pathLikeWriteFoldsTotal)
+		pathLikeSherpa = Path(pathLikeWriteTotal)
 		if pathLikeSherpa.is_dir():
 			pathFilenameFoldsTotal = pathLikeSherpa / getFilenameFoldsTotal(mapShape)
 		elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():

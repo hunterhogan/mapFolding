@@ -1,6 +1,7 @@
 # ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
+from contextlib import suppress
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.dataBaskets import MatrixMeandersNumPyState, ShapeArray, ShapeSlicer
@@ -9,6 +10,7 @@ from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shi
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 import numpy
+import pathlib
 
 if TYPE_CHECKING:
 	from numpy import dtype, memmap, ndarray
@@ -136,7 +138,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		state.setMAXIMUMarcCode()
 
 #================ analyze aligned ===== if 1 < bitsAlfa and 1 < bitsZulu =============================================
-#=EndNotes##analyzeArcCodesAligned=
+		#=EndNotes##analyzeArcCodesAligned=
 #-------- < * < 1 bitsAlfa < 1 bitsZulu --------------------
 		greater(bitsAlfa, 1, out=toPrepArea)
 
@@ -278,8 +280,15 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	boundaryProgressBar.close()
 	state.dictionaryMeanders = {int(key): int(value) for key, value in zip(arrayMeanders[slicerArcCode], arrayMeanders[slicerCrossings], strict=True)}
+
 	del arrayMeanders
-	# close files and delete files?
+
+	with suppress(Exception):
+		pathlib.Path('arrayMeanders.mM').unlink()
+	with suppress(Exception):
+		pathlib.Path('arrayAnalyzed.mM').unlink()
+	with suppress(Exception):
+		pathlib.Path('arrayPrepArea.mM').unlink()
 
 	return state
 

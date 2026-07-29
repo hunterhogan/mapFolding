@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 # parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
 # theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
 # the importance of the semiotics-first paradigm (for me).
-def countMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+def countMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	"""Compute the n-th term of `oeisID`.
 
 	(AI generated docstring)
@@ -143,9 +143,9 @@ def countMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWri
 	"""
 #-------- memorialization instructions ---------------------------------------------
 
-	if pathLikeWriteFoldsTotal is not None:
+	if pathLikeWriteTotal is not None:
 		filenameCountTotal: str = f"{oeisID}_n{oeis_n}.countTotal"
-		pathLikeSherpa = Path(pathLikeWriteFoldsTotal)
+		pathLikeSherpa = Path(pathLikeWriteTotal)
 		if pathLikeSherpa.is_dir():
 			pathFilenameFoldsTotal = pathLikeSherpa / filenameCountTotal
 		elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():
