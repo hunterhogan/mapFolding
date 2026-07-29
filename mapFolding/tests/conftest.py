@@ -26,6 +26,7 @@ research domain.
 from __future__ import annotations
 
 from mapFolding.oeis import _theSSOT
+from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -202,6 +203,14 @@ def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
 	registrarDeletesTemporaryFilesystemObjects()
 
 #======== OEIS ids =====================================
+
+@pytest.fixture
+def oeis_n(request: pytest.FixtureRequest, oeisID: str) -> int:
+	return (
+		dictionaryOEISMapFolding[oeisID]['offset']
+		if oeisID in dictionaryOEISMapFolding
+		else dictionaryOEIS[oeisID]['offset']
+	) + request.param
 
 @pytest.fixture(params=_theSSOT.oeisIDsImplementedMapFolding)
 def oeisIDmapFolding(request: pytest.FixtureRequest) -> Any:

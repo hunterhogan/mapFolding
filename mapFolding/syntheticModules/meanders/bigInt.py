@@ -32,10 +32,9 @@ def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
     [2] `walkDyckPath`
     """
-    dictionaryArcCodeToCrossings: dict[int, int] = {}
     while 0 < state.boundary and areIntegersWide(state):
         state.reduceBoundary()
-        dictionaryArcCodeToCrossings = state.dictionaryMeanders.copy()
+        dictionaryArcCodeToCrossings: dict[int, int] = state.dictionaryMeanders.copy()
         state.dictionaryMeanders = {}
 
         def analyzeArcCode(arcCode: int, crossings: int) -> None:
@@ -65,5 +64,4 @@ def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
                 if arcCodeAnalysis < state.MAXIMUMarcCode:
                     state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
         tuple(map(analyzeArcCode, dictionaryArcCodeToCrossings.keys(), dictionaryArcCodeToCrossings.values()))
-        dictionaryArcCodeToCrossings = {}
     return state

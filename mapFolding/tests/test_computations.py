@@ -34,6 +34,7 @@ from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import countingMeanders, oeisIDfor_n
 from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
+from mapFolding.oeis.oeisIDbyFormula import A259689
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -177,25 +178,41 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, flow, None)
 
 @pytest.mark.parametrize(
-	'oeisID, n'
+	'n, n下k, expected'
 	, [
-		pytest.param('A000560', 3, id='A000560::n3')
-		, pytest.param('A000682', 3, id='A000682::n3')
-		, pytest.param('A001010', 3, id='A001010::n3')
-		, pytest.param('A001011', 3, id='A001011::n3')
-		, pytest.param('A005315', 3, id='A005315::n3')
-		, pytest.param('A005316', 3, id='A005316::n3')
-		, pytest.param('A007822', 3, id='A007822::n3')
-		, pytest.param('A060206', 3, id='A060206::n3')
-		, pytest.param('A077460', 3, id='A077460::n3')
-		, pytest.param('A078591', 3, id='A078591::n3')
-		, pytest.param('A178961', 3, id='A178961::n3')
-		, pytest.param('A223094', 3, id='A223094::n3')
-		, pytest.param('A259702', 3, id='A259702::n3')
-		, pytest.param('A301620', 3, id='A301620::n3')
+		pytest.param(2, 2, 1, id='weightedRow::firstRow')
+		, pytest.param(3, 2, 2, id='rightEdge')
+		, pytest.param(4, 2, 2, id='penultimateEdge')
+		, pytest.param(8, 3, 64, id='weightedRow::interior')
 	]
 )
-def test_countingMeanders(oeisID: str, n: int) -> None:
+def test_A259689(n: int, n下k: int | None, expected: int) -> None:
+	actual: int = A259689(n, n下k)
+	assertEqualTo(actual, expected, A259689.__name__, n, n下k)
+
+@pytest.mark.parametrize(
+	'oeisID, flow'
+	, [
+		pytest.param('A000560', 'ignored', id='A000560')
+		, pytest.param('A000682', None, id='A000682')
+		, pytest.param('A001011', 'ignored', id='A001011')
+		, pytest.param('A005315', 'ignored', id='A005315')
+		, pytest.param('A005316', None, id='A005316')
+		, pytest.param('A007822', None, id='A007822')
+		, pytest.param('A060206', 'ignored', id='A060206')
+		, pytest.param('A077460', 'ignored', id='A077460')
+		, pytest.param('A078591', 'ignored', id='A078591')
+		, pytest.param('A178961', 'ignored', id='A178961')
+		, pytest.param('A259689', 'ignored', id='A259689')
+		, pytest.param('A259702', 'ignored', id='A259702')
+	]
+)
+@pytest.mark.parametrize(
+	'oeis_n'
+	, [pytest.param(0, id='offset'), pytest.param(1, id='offsetPlus1'), pytest.param(2, id='offsetPlus2')]
+	, indirect=True
+)
+def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -205,14 +222,47 @@ def test_countingMeanders(oeisID: str, n: int) -> None:
 	----------
 	oeisID : str
 		OEIS identifier to validate.
-	n : int
+	oeis_n : int
 		Sequence index to validate.
+	flow : str | None
+		Computation flow to validate.
 
 	"""
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][n]
-	actual: int = countingMeanders(oeisID, n, None, None)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, None, None)
+	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][oeis_n]
+	actual: int = countingMeanders(oeisID, oeis_n, flow, None)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, oeis_n, flow, None)
+
+@pytest.mark.parametrize(
+	'oeisID, flow'
+	, [
+		pytest.param('A000136', 'A000682', id='A000136::A000682')
+		, pytest.param('A000136', 'A000560', id='A000136::A000560')
+		, pytest.param('A000682', 'A000560', id='A000682::A000560')
+		, pytest.param('A000682', 'A301620', id='A000682::A301620')
+		, pytest.param('A000682', 'A259689', id='A000682::A259689')
+		, pytest.param('A000682', 'A000136', id='A000682::A000136')
+		, pytest.param('A000682', 'A223094', id='A000682::A223094')
+		, pytest.param('A001010', 'A000682 and A007822', id='A001010::A000682-and-A007822')
+		, pytest.param('A001010', 'A001011 and A000136', id='A001010::A001011-and-A000136')
+		, pytest.param('A223094', 'A000136 and A000682', id='A223094::A000136-and-A000682')
+		, pytest.param('A223094', 'A223094 and A000682', id='A223094::A223094-and-A000682')
+		, pytest.param('A223094', 'A000682', id='A223094::A000682')
+		, pytest.param('A301620', 'A000682', id='A301620::A000682')
+		, pytest.param('A301620', 'A259689', id='A301620::A259689')
+		, pytest.param('A301620', 'A259702', id='A301620::A259702')
+	]
+)
+@pytest.mark.parametrize(
+	'oeis_n'
+	, [pytest.param(0, id='offset'), pytest.param(2, id='offsetPlus2'), pytest.param(5, id='offsetPlus5')]
+	, indirect=True
+)
+def test_countingMeanders_f(oeisID: str, oeis_n: int, flow: str) -> None:
+	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
+	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][oeis_n]
+	actual: int = countingMeanders(oeisID, oeis_n, flow, None)
+	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, oeis_n, flow, None)
 
 @pytest.mark.parametrize(
 	'oeisID, n'

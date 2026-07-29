@@ -4,10 +4,14 @@ from __future__ import annotations
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.oeis import countingMeanders
 from mapFolding.oeis._metadata import dictionaryOEIS  # ruff: ignore[import-private-name]
+from typing import TYPE_CHECKING
 import gc
 import sys
 import time
 import warnings
+
+if TYPE_CHECKING:
+	from os import PathLike
 
 def write() -> None:
 	sys.stdout.write(
@@ -25,13 +29,15 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	flow = 'matrixNumPy'
-	flow = 'matrixPandas'
+	pathLikeWriteFoldsTotal: PathLike[str] | None = '/apps/mapFolding/mapFolding/jobs'  # pyright: ignore[reportAssignmentType] # ty: ignore[invalid-assignment]
+	pathLikeWriteFoldsTotal = None
 	flow = 'matrixMeanders'
+	flow = 'matrixPandas'
+	flow = 'matrixNumPy'
 
 	for oeisID in [
 			'A005316',
-			'A000682',
+			# 'A000682',
 				]:
 		sys.stdout.write(f"\n{oeisID}\n")
 
@@ -44,18 +50,18 @@ if __name__ == '__main__':
 		"""
 
 		nList: list[int] = []
-		nList.extend(range(2, 10))
-		nList.extend(range(10, 28))
-		nList.extend(range(28, 33))
-		nList.extend(range(33, 38))
-		# nList.extend(range(38, 43))
+		# nList.extend(range(2, 10))
+		# nList.extend(range(10, 28))
+		# nList.extend(range(28, 33))
+		# nList.extend(range(33, 38))
+		nList.extend(range(38, 43))
 		# nList.extend(range(43, 45))
 		# nList.extend(range(45, 50))
 
 		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
-			countTotal = countingMeanders(oeisID, n, flow)
+			countTotal = countingMeanders(oeisID, n, flow, pathLikeWriteFoldsTotal)
 			if n < dictionaryOEIS[oeisID]['valueUnknown']:
 				write()
 			else:

@@ -33,12 +33,10 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
     [2] `walkDyckPath`
     """
-    dictionaryArcCodeToCrossings: dict[int, int] = {}
-
     while 0 < state.boundary:
         state.reduceBoundary()
 
-        dictionaryArcCodeToCrossings = state.dictionaryMeanders.copy()
+        dictionaryArcCodeToCrossings: dict[int, int] = state.dictionaryMeanders.copy()
         state.dictionaryMeanders = {}
 
         def analyzeArcCode(arcCode: int, crossings: int) -> None:
@@ -76,8 +74,6 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
                     state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
 
         tuple(map(analyzeArcCode, dictionaryArcCodeToCrossings.keys(), dictionaryArcCodeToCrossings.values()))
-
-        dictionaryArcCodeToCrossings = {}
 
     return state
 
@@ -123,6 +119,4 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
     [6] Irvine, S. A. (Java port). `A005316.java` in `archmageirvine/joeis`.
         https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
     """
-    state = count(state)
-
-    return sum(state.dictionaryMeanders.values())
+    return sum(count(state).dictionaryMeanders.values())

@@ -2,15 +2,20 @@
 
 This is a generated file; edit the source file.
 """
+from __future__ import annotations
+
 from functools import cache
 from hunterMakesPy import inclusive
+from itertools import chain
 from mapFolding.oeis import countingMeanders
 from mapFolding.oeis._metadata import dictionaryOEIS
+from math import factorial, isqrt
+from typing import Literal
 
 @cache
-def A000136(n: int) -> int:
+def A000136(n: int, f: Literal['A000682', 'A000560'] = 'A000682') -> int:
     """
-    Compute A000136(n) as a function of A000682.
+    Compute A000136(n) as a function of A000682 or A000560.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136 is: "Number of ways of folding a strip of n labeled stamps."
 
@@ -32,7 +37,13 @@ def A000136(n: int) -> int:
     OEIS : webpage
         https://oeis.org/A000136
     """
-    return n * _A000682(n)
+    if n in {1, 2}:
+        countTotal: int = n * _A000682(n)
+    elif f == 'A000560':
+        countTotal = 2 * n * A000560(n - 1)
+    else:
+        countTotal = n * _A000682(n)
+    return countTotal
 
 def A000560(n: int) -> int:
     """
@@ -60,9 +71,49 @@ def A000560(n: int) -> int:
     """
     return _A000682(n + 1) // 2
 
-def A001010(n: int) -> int:
+@cache
+def A000682(n: int, f: Literal['A000560', 'A301620', 'A259689', 'A000136', 'A223094'] = 'A000560') -> int:
     """
-    Compute A001010(n) as a function of A000682 or A007822.
+    Compute A000682(n) as a function of A000560 or A301620 or A259689 or A000136 or A223094.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682 is: "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times."
+
+    The domain of A000682 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 46.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+
+    Returns
+    -------
+    a(n) : int
+        Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A000682
+    """
+    if n in {1, 2}:
+        countTotal: int = 1
+    elif f == 'A301620':
+        countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
+    elif f == 'A259689':
+        countTotal = 2 ** (n - 2) + sum(2 ** (n - 1 - n下j) * sum(A259689(n下j, n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + inclusive)) for n下j in range(4, n))
+    elif f == 'A000136':
+        countTotal = A000136(n) // n
+    elif f == 'A223094':
+        nMinus1Factorial: int = factorial(n - 1)
+        countTotal = nMinus1Factorial - sum(A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n))
+    else:
+        countTotal = 2 * A000560(n - 1)
+    return countTotal
+
+def A001010(n: int, f: Literal['A000682 and A007822', 'A001011 and A000136'] = 'A000682 and A007822') -> int:
+    """
+    Compute A001010(n) as a function of A000682 and A007822 or A001011 and A000136.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is: "Number of symmetric foldings of a strip of n blank stamps."
 
@@ -86,6 +137,8 @@ def A001010(n: int) -> int:
     """
     if n == 1:
         countTotal: int = 1
+    elif f == 'A001011 and A000136':
+        countTotal = 4 * A001011(n) - A000136(n)
     elif n & 1:
         countTotal = 2 * _A007822((n - 1) // 2 + 1)
     else:
@@ -151,6 +204,36 @@ def A005315(n: int) -> int:
         countTotal: int = 1
     else:
         countTotal = _A005316(2 * n - 1)
+    return countTotal
+
+def A007822(n: int) -> int:
+    """
+    Compute A007822(n) as a function of A001010.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007822 is: "Number of symmetric foldings of 2n+1 stamps."
+
+    The domain of A007822 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 27.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+
+    Returns
+    -------
+    a(n) : int
+        Number of symmetric foldings of 2n+1 stamps.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A007822
+    """
+    if n == 1:
+        countTotal: int = 1
+    else:
+        countTotal = A001010(2 * n - 1) // 2
     return countTotal
 
 def A060206(n: int) -> int:
@@ -274,9 +357,9 @@ def A178961(n: int) -> int:
             countTotal += A001010(n下i)
     return countTotal
 
-def A223094(n: int) -> int:
+def A223094(n: int, f: Literal['A000136 and A000682', 'A223094 and A000682', 'A000682'] = 'A000136 and A000682') -> int:
     """
-    Compute A223094(n) as a function of A000136 and A000682.
+    Compute A223094(n) as a function of A000136 and A000682 or A223094 and A000682 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is: "Number of foldings of n labeled stamps in which leaf n is inwards."
 
@@ -298,7 +381,60 @@ def A223094(n: int) -> int:
     OEIS : webpage
         https://oeis.org/A223094
     """
-    return A000136(n) - _A000682(n + 1)
+    if n in {1, 2}:
+        countTotal: int = A000136(n) - _A000682(n + 1)
+    elif f == 'A223094 and A000682':
+        nFactorial: int = factorial(n)
+        countTotal = nFactorial - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)) - _A000682(n + 1)
+    elif f == 'A000682':
+        countTotal = n * _A000682(n) - _A000682(n + 1)
+    else:
+        countTotal = A000136(n) - _A000682(n + 1)
+    return countTotal
+
+@cache
+def A259689(n: int, n下k: int | None = None) -> int:
+    """
+    Compute A259689(n) as a function of A000682.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259689 is: "Irregular triangle read by rows: T(n,k) is the number of degree-n permutations without overlaps which furnish k new permutations without overlaps upon the addition of an (n+1)st element, 2 <= k <= 1 + floor(n/2)."
+
+    The domain of A259689 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 171.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+
+    Returns
+    -------
+    a(n) : int
+        Irregular triangle read by rows: T(n,k) is the number of degree-n permutations without overlaps which furnish k new permutations without overlaps upon the addition of an (n+1)st element, 2 <= k <= 1 + floor(n/2).
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A259689
+    """
+    nRow: int = n
+    if n下k is None:
+        nFlattenedZeroBased: int = n - 2
+        rowLength: int = (isqrt(4 * nFlattenedZeroBased + 1) + 1) // 2
+        indexInRowsPair: int = nFlattenedZeroBased - rowLength * (rowLength - 1)
+        if indexInRowsPair < rowLength:
+            nRow = 2 * rowLength
+            n下k = indexInRowsPair + 2
+        else:
+            nRow = 2 * rowLength + 1
+            n下k = indexInRowsPair - rowLength + 2
+    if nRow >= 4 and n下k == nRow // 2:
+        countTotal: int = 2 ** ((nRow - 1) // 2) * (nRow - 4) + 2
+    elif nRow > 2 and n下k == (nRow + 2) // 2:
+        countTotal = 2 ** ((nRow - 1) // 2)
+    else:
+        countTotal = (_A000682(nRow + 1) - sum(n下kOther * dictionaryOEIS['A259689']['valuesKnown'][(nRow - 1) ** 2 // 4 + n下kOther] for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2)))) // n下k
+    return countTotal
 
 def A259702(n: int) -> int:
     """
@@ -330,9 +466,9 @@ def A259702(n: int) -> int:
         countTotal = _A000682(n) // 2 - _A000682(n - 1)
     return countTotal
 
-def A301620(n: int) -> int:
+def A301620(n: int, f: Literal['A000682', 'A259689', 'A259702'] = 'A000682') -> int:
     """
-    Compute A301620(n) as a function of A000682.
+    Compute A301620(n) as a function of A000682 or A259689 or A259702.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620 is: "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches."
 
@@ -354,7 +490,13 @@ def A301620(n: int) -> int:
     OEIS : webpage
         https://oeis.org/A301620
     """
-    return _A000682(n + 2) - 2 * _A000682(n + 1)
+    if f == 'A259689':
+        countTotal: int = sum(A259689(n + 1, n下k) * (n下k - 2) for n下k in range(3, (n + 3) // 2 + inclusive))
+    elif f == 'A259702':
+        countTotal = 2 * A259702(n + 2)
+    else:
+        countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
+    return countTotal
 
 @cache
 def _A000682(n: int) -> int:

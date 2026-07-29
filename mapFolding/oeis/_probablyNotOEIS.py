@@ -43,16 +43,19 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	oeisID : str
 		OEIS sequence identifier. Supported sequences fall into three categories:
 		- Formula-based: A000136, A000560, A001010, A001011, A005315, A060206, A077460,
-			A078591, A178961, A223094, A259702, A301620
+			A078591, A178961, A223094, A259689, A259702, A301620
 		- Meanders: A000682 [5], A005316 [6]
 		- Symmetric foldings: A007822
 	oeis_n : int
 		Sequence index (typically starting from 0 or 1, depending on OEIS sequence offset).
 	flow : str | None = None
 		Algorithm variant selector. Available values depend on `oeisID`:
-		- For A000682, A005316: 'matrixMeanders' (default), 'matrixNumPy', 'matrixPandas'
+		- For A000682: 'matrixMeanders' (default), 'matrixNumPy', 'matrixPandas',
+			'A000560', 'A301620', 'A259689', 'A000136', 'A223094'
+		- For A005316: 'matrixMeanders' (default), 'matrixNumPy', 'matrixPandas'
 		- For A007822: 'algorithm' (default), 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'
-		- For formula-based sequences: ignored (`flow` has no effect)
+		- For A000136, A001010, A223094, A301620: the corresponding formula selector `f`
+		- For other formula-based sequences: ignored
 	CPUlimit : bool | float | int | None = None
 		Processor usage limit for parallel algorithms (A007822 with certain `flow` values).
 		Interpretation matches `countFolds.CPUlimit` [3]:
@@ -170,119 +173,133 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 	match oeisID:
 		case 'A000136':
 			from mapFolding.oeis.oeisIDbyFormula import A000136 as doTheNeedful
-		case 'A000560':
-			from mapFolding.oeis.oeisIDbyFormula import A000560 as doTheNeedful
+		case 'A000682' if flow in {'A000560', 'A301620', 'A259689', 'A000136', 'A223094'}:
+			from mapFolding.oeis.oeisIDbyFormula import A000682 as doTheNeedful
 		case 'A001010':
 			from mapFolding.oeis.oeisIDbyFormula import A001010 as doTheNeedful
-		case 'A001011':
-			from mapFolding.oeis.oeisIDbyFormula import A001011 as doTheNeedful
-		case 'A005315':
-			from mapFolding.oeis.oeisIDbyFormula import A005315 as doTheNeedful
-		case 'A060206':
-			from mapFolding.oeis.oeisIDbyFormula import A060206 as doTheNeedful
-		case 'A077460':
-			from mapFolding.oeis.oeisIDbyFormula import A077460 as doTheNeedful
-		case 'A078591':
-			from mapFolding.oeis.oeisIDbyFormula import A078591 as doTheNeedful
-		case 'A178961':
-			from mapFolding.oeis.oeisIDbyFormula import A178961 as doTheNeedful
 		case 'A223094':
 			from mapFolding.oeis.oeisIDbyFormula import A223094 as doTheNeedful
-		case 'A259702':
-			from mapFolding.oeis.oeisIDbyFormula import A259702 as doTheNeedful
 		case 'A301620':
 			from mapFolding.oeis.oeisIDbyFormula import A301620 as doTheNeedful
 		case _:
 			matched_oeisID = False
 	if matched_oeisID:
-		countTotal = doTheNeedful(oeis_n)
+		if flow is not None:
+			countTotal = doTheNeedful(oeis_n, f=flow)
+		else:
+			countTotal = doTheNeedful(oeis_n)
 	else:
 		matched_oeisID = True
 		match oeisID:
-			case 'A000682' | 'A005316':
-				match flow:
-					case 'matrixNumPy':
-						from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
-						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-					case 'matrixPandas':
-						from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-						from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-					case 'matrixMeanders' | _:
-						from mapFolding.algorithms.matrixMeanders import doTheNeedful
-						from mapFolding.dataBaskets import MatrixMeandersState as State
-
-				boundary: int = oeis_n - 1
-
-				# TODO Consider: If A000682 is essentially A000136 * leavesTotal, then my graphs of
-				# A000136 are _literal_ graphs of A000682. Since Theorem 2 applies to A000136, it must
-				# apply to A000682. Can I use the graphs to find the midpoint of an A000682
-				# computation using the matrix algorithm? The problem with the matrix algorithm is
-				# memory usage. Unique signatures (buckets) grows predictably. Cutting the count in
-				# half...
-				#
-				# TODO In `doTheNeedful`, use `while state.boundary > 0:` and the ratio trick to find
-				# the midpoint.
-				if oeisID == 'A000682':
-					if oeis_n == 1:
-						return 1
-					elif oeis_n & 0b1:
-						arcCode: int = 0b101
-					else:
-						arcCode = 0b1
-					listArcCodes: list[int] = [(arcCode << 1) | arcCode]
-#													   0b1010 | 0b0101 is 0b1111, or 0xf
-#														 0b10 |   0b01 is   0b11, or 0x3
-
-					MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
-					while listArcCodes[-1] < MAXIMUMarcCode:
-						arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
-						listArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
-						# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
-						# See "mapFolding/reference/A000682facts.py"
-					dictionaryMeanders: dict[int, int] = dict.fromkeys(listArcCodes, 1)
-
-				elif oeisID == 'A005316':
-					if oeis_n & 0b1:
-						dictionaryMeanders: dict[int, int] = {0b1111: 1}  # 0xf
-					else:
-						dictionaryMeanders = {0b10110: 1}
-				else:
-					message: str = f"I received `{oeisID = }` for meander computation, but I only support 'A000682' and 'A005316' in this code path."
-					raise ValueError(message)
-
-				state = State(oeis_n, oeisID, boundary, dictionaryMeanders)
-				countTotal = doTheNeedful(state)
-			case 'A007822':
-				mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
-				from mapFolding.beDRY import defineProcessorLimit
-				concurrencyLimit: int = defineProcessorLimit(CPUlimit)
-
-				from mapFolding.dataBaskets import SymmetricFoldsState
-				symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
-
-				match flow:
-					case 'asynchronous':
-						from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
-					case 'theorem2':
-						from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState)
-					case 'theorem2Codon':
-						from mapFolding.syntheticModules.A007822.codon.theorem2 import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState)
-					case 'theorem2Numba':
-						from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState)
-					case 'theorem2Trimmed':
-						from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState)
-					case _:
-						from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
-						symmetricState = doTheNeedful(symmetricState)
-
-				countTotal = symmetricState.symmetricFolds
+			case 'A000560':
+				from mapFolding.oeis.oeisIDbyFormula import A000560 as doTheNeedful
+			case 'A001011':
+				from mapFolding.oeis.oeisIDbyFormula import A001011 as doTheNeedful
+			case 'A005315':
+				from mapFolding.oeis.oeisIDbyFormula import A005315 as doTheNeedful
+			case 'A060206':
+				from mapFolding.oeis.oeisIDbyFormula import A060206 as doTheNeedful
+			case 'A077460':
+				from mapFolding.oeis.oeisIDbyFormula import A077460 as doTheNeedful
+			case 'A078591':
+				from mapFolding.oeis.oeisIDbyFormula import A078591 as doTheNeedful
+			case 'A178961':
+				from mapFolding.oeis.oeisIDbyFormula import A178961 as doTheNeedful
+			case 'A259689':
+				from mapFolding.oeis.oeisIDbyFormula import A259689 as doTheNeedful
+			case 'A259702':
+				from mapFolding.oeis.oeisIDbyFormula import A259702 as doTheNeedful
 			case _:
 				matched_oeisID = False
+		if matched_oeisID:
+			countTotal = doTheNeedful(oeis_n)
+		else:
+			matched_oeisID = True
+			match oeisID:
+				case 'A000682' | 'A005316':
+					match flow:
+						case 'matrixNumPy':
+							from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+							from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+						case 'matrixPandas':
+							from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
+							from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+						case 'matrixMeanders' | _:
+							from mapFolding.algorithms.matrixMeanders import doTheNeedful
+							from mapFolding.dataBaskets import MatrixMeandersState as State
+
+					boundary: int = oeis_n - 1
+
+					# TODO Consider: If A000682 is essentially A000136 * leavesTotal, then my graphs of
+					# A000136 are _literal_ graphs of A000682. Since Theorem 2 applies to A000136, it must
+					# apply to A000682. Can I use the graphs to find the midpoint of an A000682
+					# computation using the matrix algorithm? The problem with the matrix algorithm is
+					# memory usage. Unique signatures (buckets) grows predictably. Cutting the count in
+					# half...
+					#
+					# TODO In `doTheNeedful`, use `while state.boundary > 0:` and the ratio trick to find
+					# the midpoint.
+					if oeisID == 'A000682':
+						if oeis_n == 1:
+							return 1
+						elif oeis_n & 0b1:
+							arcCode: int = 0b101
+						else:
+							arcCode = 0b1
+						listArcCodes: list[int] = [(arcCode << 1) | arcCode]
+	#													   0b1010 | 0b0101 is 0b1111, or 0xf
+	#														 0b10 |   0b01 is   0b11, or 0x3
+
+						MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
+						while listArcCodes[-1] < MAXIMUMarcCode:
+							arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
+							listArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+							# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
+							# See "mapFolding/reference/A000682facts.py"
+						dictionaryMeanders: dict[int, int] = dict.fromkeys(listArcCodes, 1)
+
+					elif oeisID == 'A005316':
+						if oeis_n & 0b1:
+							dictionaryMeanders: dict[int, int] = {0b1111: 1}  # 0xf
+						else:
+							dictionaryMeanders = {0b10110: 1}
+					else:
+						message: str = f"I received `{oeisID = }` for meander computation, but I only support 'A000682' and 'A005316' in this code path."
+						raise ValueError(message)
+
+					state = State(oeis_n, oeisID, boundary, dictionaryMeanders)
+					countTotal = doTheNeedful(state)
+				case 'A007822':
+					mapShape: tuple[Literal[1], int] = (1, 2 * oeis_n)
+					from mapFolding.beDRY import defineProcessorLimit
+					concurrencyLimit: int = defineProcessorLimit(CPUlimit)
+
+					from mapFolding.dataBaskets import SymmetricFoldsState
+					symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
+
+					match flow:
+						case 'asynchronous':
+							from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
+							symmetricState = doTheNeedful(symmetricState, concurrencyLimit)
+						case 'theorem2':
+							from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
+							symmetricState = doTheNeedful(symmetricState)
+						case 'theorem2Codon':
+							from mapFolding.syntheticModules.A007822.codon.theorem2 import doTheNeedful
+							symmetricState = doTheNeedful(symmetricState)
+						case 'theorem2Numba':
+							from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
+							symmetricState = doTheNeedful(symmetricState)
+						case 'theorem2Trimmed':
+							from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
+							symmetricState = doTheNeedful(symmetricState)
+						case _:
+							from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
+							symmetricState = doTheNeedful(symmetricState)
+
+					countTotal = symmetricState.symmetricFolds
+				case _:
+					matched_oeisID = False
 
 #-------- Follow memorialization instructions ---------------------------------------------
 
