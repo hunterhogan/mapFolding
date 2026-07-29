@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import countingMeanders
+from mapFolding.oeis import countMeanders
 from mapFolding.oeis._metadata import dictionaryOEIS  # ruff: ignore[import-private-name]
 from typing import TYPE_CHECKING
 import gc
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
-			countTotal = countingMeanders(oeisID, n, flow, pathLikeWriteFoldsTotal)
+			countTotal = countMeanders(oeisID, n, flow, pathLikeWriteFoldsTotal)
 			if n < dictionaryOEIS[oeisID]['valueUnknown']:
 				write()
 			else:

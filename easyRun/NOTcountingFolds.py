@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from collections import ChainMap
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import countingMeanders
+from mapFolding.oeis import countMeanders
 from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding  # ruff: ignore[import-private-name]
 from typing import TYPE_CHECKING
 import sys
@@ -49,7 +49,7 @@ if __name__ == '__main__':
 	for n in dict.fromkeys(nList):
 
 		timeStart = time.perf_counter()
-		countTotal = countingMeanders(oeisID, n, flow, None, CPUlimit=CPUlimit)
+		countTotal = countMeanders(oeisID, n, flow, None, CPUlimit=CPUlimit)
 
 		_write()
 

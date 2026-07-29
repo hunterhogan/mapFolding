@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from functools import cache
 from mapFolding.basecamp import countFoldsSymmetric
-from mapFolding.oeis import countingMeanders
+from mapFolding.oeis import countMeanders
 from math import factorial
 from typing import Literal
 
@@ -122,11 +122,11 @@ def A301620(n: int) -> int:
 
 @cache
 def _A000682(n: int) -> int:
-	return countingMeanders('A000682', n)
+	return countMeanders('A000682', n)
 
 def _A007822(n: int) -> int:
 	return countFoldsSymmetric((1, 2 * n))
 
 @cache
 def _A005316(n: int) -> int:
-	return countingMeanders('A005316', n)
+	return countMeanders('A005316', n)

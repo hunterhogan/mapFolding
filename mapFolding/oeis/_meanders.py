@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 # parameter, I have been trying to figure out how to put it into `oeisIDfor_n`. For a long time, `oeisIDfor_n` would call numba
 # theorem2 because it was the fastest, but I made numba an optional dependency. All of these seemingly unrelated issues underscore
 # the importance of the semiotics-first paradigm (for me).
-def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+def countMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLikeWriteFoldsTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	"""Compute the n-th term of `oeisID`.
 
 	(AI generated docstring)
@@ -164,13 +164,13 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 
 	match oeisID:
 		case 'A000136':
-			from mapFolding.oeis.oeisIDbyFormula import A000136 as doTheNeedful
+			from mapFolding.oeis.byFormula import A000136 as doTheNeedful
 		case 'A000682' if flow in {'A000560', 'A301620', 'A000136', 'A223094'}:
-			from mapFolding.oeis.oeisIDbyFormula import A000682 as doTheNeedful
+			from mapFolding.oeis.byFormula import A000682 as doTheNeedful
 		case 'A001010':
-			from mapFolding.oeis.oeisIDbyFormula import A001010 as doTheNeedful
+			from mapFolding.oeis.byFormula import A001010 as doTheNeedful
 		case 'A223094':
-			from mapFolding.oeis.oeisIDbyFormula import A223094 as doTheNeedful
+			from mapFolding.oeis.byFormula import A223094 as doTheNeedful
 		case _:
 			matched_oeisID = False
 	if matched_oeisID:
@@ -182,19 +182,19 @@ def countingMeanders(oeisID: str, oeis_n: int, flow: str | None = None, pathLike
 		matched_oeisID = True
 		match oeisID:
 			case 'A000560':
-				from mapFolding.oeis.oeisIDbyFormula import A000560 as doTheNeedful
+				from mapFolding.oeis.byFormula import A000560 as doTheNeedful
 			case 'A001011':
-				from mapFolding.oeis.oeisIDbyFormula import A001011 as doTheNeedful
+				from mapFolding.oeis.byFormula import A001011 as doTheNeedful
 			case 'A005315':
-				from mapFolding.oeis.oeisIDbyFormula import A005315 as doTheNeedful
+				from mapFolding.oeis.byFormula import A005315 as doTheNeedful
 			case 'A060206':
-				from mapFolding.oeis.oeisIDbyFormula import A060206 as doTheNeedful
+				from mapFolding.oeis.byFormula import A060206 as doTheNeedful
 			case 'A077460':
-				from mapFolding.oeis.oeisIDbyFormula import A077460 as doTheNeedful
+				from mapFolding.oeis.byFormula import A077460 as doTheNeedful
 			case 'A078591':
-				from mapFolding.oeis.oeisIDbyFormula import A078591 as doTheNeedful
+				from mapFolding.oeis.byFormula import A078591 as doTheNeedful
 			case 'A301620':
-				from mapFolding.oeis.oeisIDbyFormula import A301620 as doTheNeedful
+				from mapFolding.oeis.byFormula import A301620 as doTheNeedful
 			case _:
 				matched_oeisID = False
 		if matched_oeisID:

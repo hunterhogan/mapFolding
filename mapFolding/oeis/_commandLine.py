@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from mapFolding.oeis import _theSSOT
 from mapFolding.oeis._metadata import dictionaryOEISMapFolding
-from mapFolding.oeis._needsAHome import oeisIDfor_n
+from mapFolding.oeis._byID import oeisIDfor_n
 import argparse
 import sys
 import time

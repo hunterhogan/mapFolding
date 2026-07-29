@@ -32,7 +32,7 @@ from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric
 from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import countingMeanders, oeisIDfor_n
+from mapFolding.oeis import countMeanders, oeisIDfor_n
 from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
@@ -176,8 +176,8 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 	"""
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
 	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][n]
-	actual: int = countingMeanders(oeisID, n, flow, None)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, n, flow, None)
+	actual: int = countMeanders(oeisID, n, flow, None)
+	assertEqualTo(actual, expected, countMeanders.__name__, oeisID, n, flow, None)
 
 @pytest.mark.parametrize(
 	'oeisID'
@@ -213,8 +213,8 @@ def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWr
 		Sequence index to validate.
 	"""
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
-	actual: int = countingMeanders(oeisID, oeis_n, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, oeis_n, flow, None)
+	actual: int = countMeanders(oeisID, oeis_n, flow, pathLikeWriteFoldsTotal, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countMeanders.__name__, oeisID, oeis_n, flow, None)
 
 @pytest.mark.parametrize(
 	'oeisID, flow'
@@ -240,8 +240,8 @@ def test_countingMeanders(oeisID: str, oeis_n: int, flow: str | None, pathLikeWr
 def test_countingMeanders_f(oeisID: str, oeis_n: int, flow: str) -> None:
 	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
 	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][oeis_n]
-	actual: int = countingMeanders(oeisID, oeis_n, flow, None)
-	assertEqualTo(actual, expected, countingMeanders.__name__, oeisID, oeis_n, flow, None)
+	actual: int = countMeanders(oeisID, oeis_n, flow, None)
+	assertEqualTo(actual, expected, countMeanders.__name__, oeisID, oeis_n, flow, None)
 
 @pytest.mark.parametrize(
 	'oeisID, n'
