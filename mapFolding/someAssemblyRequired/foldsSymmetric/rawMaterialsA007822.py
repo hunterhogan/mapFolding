@@ -7,7 +7,7 @@ from mapFolding.someAssemblyRequired import defaultA007822
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule
 import ast
 
-FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(logicalPathInfix='algorithms', identifierModule='symmetricFolds'), defaultA007822['function']['filterAsymmetricFolds']))
+FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(logicalPathInfix='algorithms', identifierModule='foldsSymmetric'), defaultA007822['function']['filterAsymmetricFolds']))
 
 ImaString: str = f"{defaultA007822['variable']['stateInstance']} = {defaultA007822['function']['filterAsymmetricFolds']}({defaultA007822['variable']['stateInstance']})"
 A007822incrementCount = ast.parse(ImaString).body[0]

@@ -6,7 +6,7 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import defaultA007822, IfThis
-from mapFolding.someAssemblyRequired.A007822.rawMaterialsA007822 import ExprCallFilterAsymmetricFoldsState
+from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsA007822 import ExprCallFilterAsymmetricFoldsState
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING

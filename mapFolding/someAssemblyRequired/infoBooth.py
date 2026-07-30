@@ -67,14 +67,19 @@ default = Default(
 	}
 )
 
+# TODO Outside of the oeis directory, transition from A007822 to foldsSymmetric.
+# TODO Figure out how to centralize more variables. Example: I renamed
+# mapFolding\algorithms\symmetricFolds.py to mapFolding\algorithms\foldsSymmetric.py.
 defaultA007822: Default = deepcopy(default)
 defaultA007822['function']['_processCompletedFutures'] = '_processCompletedFutures'
 defaultA007822['function']['filterAsymmetricFolds'] = 'filterAsymmetricFolds'
 defaultA007822['function']['getSymmetricFoldsTotal'] = 'getSymmetricFoldsTotal'
 defaultA007822['function']['initializeConcurrencyManager'] = 'initializeConcurrencyManager'
-defaultA007822['logicalPath']['assembly'] = 'someAssemblyRequired.A007822'
+defaultA007822['logicalPath']['assembly'] = 'someAssemblyRequired.foldsSymmetric'
 defaultA007822['logicalPath']['synthetic'] += '.A007822'
 defaultA007822['module']['algorithm'] = 'algorithm'
 defaultA007822['module']['asynchronous'] = 'asynchronous'
+# TODO Ambitious: can I dynamically extract this value from the hand-made algorithm?
 defaultA007822['variable']['counting'] = 'symmetricFolds'
+# TODO: Didn't I make a clever function to dynamically extract this value?
 defaultA007822['variable']['stateDataclass'] = 'SymmetricFoldsState'

@@ -6,9 +6,9 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
-from mapFolding.someAssemblyRequired.A007822.rawMaterialsA007822 import (
-	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
+from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsA007822 import (
+	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
