@@ -87,27 +87,59 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 	else:
 		match oeisID:
 			case 'A000136' if f:
-				foldsTotal = byFormula.A000136(n, f=f)
+				foldsTotal = byFormula.A000136(n, f)
 			case 'A000560':
-				foldsTotal = byFormula.A000560(n, f=f)
+				foldsTotal = byFormula.A000560(n, f)
 			case 'A000682' if f:
-				foldsTotal = byFormula.A000682(n, f=f)
+				foldsTotal = byFormula.A000682(n, f)
 			case 'A001010':
-				foldsTotal = byFormula.A001010(n, f=f)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+				foldsTotal = byFormula.A001010(n, f)
 			case 'A001011':
-				foldsTotal = byFormula.A001011(n, f=f)
+				foldsTotal = byFormula.A001011(n, f)
 			case 'A005315':
-				foldsTotal = byFormula.A005315(n, f=f)
+				foldsTotal = byFormula.A005315(n, f)
+			case 'A005316' if f:
+				foldsTotal = byFormula.A005316(n, f)
 			case 'A060206':
-				foldsTotal = byFormula.A060206(n, f=f)
+				foldsTotal = byFormula.A060206(n, f)
+			case 'A077014':
+				foldsTotal = byFormula.A077014(n, f)
+			case 'A077054':
+				foldsTotal = byFormula.A077054(n, f)
 			case 'A077460':
-				foldsTotal = byFormula.A077460(n, f=f)
+				foldsTotal = byFormula.A077460(n, f)
 			case 'A078591':
-				foldsTotal = byFormula.A078591(n, f=f)
+				foldsTotal = byFormula.A078591(n, f)
+			case 'A078592':
+				foldsTotal = byFormula.A078592(n, f)
+			case 'A085973':
+				foldsTotal = byFormula.A085973(n, f)
+			case 'A208357':
+				foldsTotal = byFormula.A208357(n, f)
+			case 'A217310':
+				foldsTotal = byFormula.A217310(n, f)
+			case 'A217318':
+				foldsTotal = byFormula.A217318(n, f)
+			case 'A223093':
+				foldsTotal = byFormula.A223093(n, f)
 			case 'A223094':
-				foldsTotal = byFormula.A223094(n, f=f)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+				foldsTotal = byFormula.A223094(n, f)
+			case 'A223095':
+				foldsTotal = byFormula.A223095(n, f)
+			case 'A227167':
+				foldsTotal = byFormula.A227167(n, f)
+			case 'A259702':
+				foldsTotal = byFormula.A259702(n, f)
 			case 'A301620':
-				foldsTotal = byFormula.A301620(n, f=f)
+				foldsTotal = byFormula.A301620(n, f)
+			case 'A330269':
+				foldsTotal = byFormula.A330269(n, f)
+			case 'A333971':
+				foldsTotal = byFormula.A333971(n, f)
+			case 'A334615':
+				foldsTotal = byFormula.A334615(n, f)
+			case 'A337581':
+				foldsTotal = byFormula.A337581(n, f)
 			case 'A000682' | 'A005316':
 				foldsTotal = countMeanders(oeisID, n, **keywordArguments)
 			case 'A007822':

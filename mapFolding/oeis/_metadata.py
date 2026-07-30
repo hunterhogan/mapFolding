@@ -7,7 +7,7 @@ from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import chain, filterfalse
 from mapFolding.oeis import _theSSOT
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
-from operator import methodcaller
+from operator import getitem, methodcaller
 from typing import TYPE_CHECKING
 from urllib3.exceptions import HTTPError
 import contextlib
@@ -133,14 +133,9 @@ def getValuesKnown(oeisID: str) -> dict[int, int]:
 
 	n_aOFn: dict[int, int] = {}
 	if oeisData:
-		listLines: Iterator[str] = filterfalse(methodcaller('startswith', '#'), oeisData.strip().splitlines())
-		for line in listLines:
-			list_int: list[int] = list(map(int, line.split()))
-			if len(list_int) == 2:
-				n_aOFn[list_int[0]] = list_int[1]
-			else:
-				message: str = f"Unexpected line format in OEIS data for {oeisID}: {line}"
-				warnings.warn(message, stacklevel=0)
+		qq: Iterator[list[str]] = map(methodcaller('split'), filterfalse(methodcaller('startswith', '#'), oeisData.strip().splitlines()))
+		for list_str in qq:
+			n_aOFn.update([getitem(tuple(map(int, list_str)), slice(0, 2))])  # pyright: ignore[reportArgumentType, reportCallIssue]
 	return n_aOFn
 
 @cache
