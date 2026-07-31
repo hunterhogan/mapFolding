@@ -55,7 +55,7 @@ from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
-from typing import TYPE_CHECKING, Literal
+from typing import Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence

@@ -67,6 +67,7 @@ if __name__ == "__main__":
 			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimensions0零一(state)
+			state.listPermutationSpace.reverse()
 
 		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWriteTotal=pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow)
 

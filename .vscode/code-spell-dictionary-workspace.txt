@@ -166,6 +166,7 @@ igcd
 Ihaving
 ilcm
 imensional
+inequivalent
 infile
 Initializable
 inspectable

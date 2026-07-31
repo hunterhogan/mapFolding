@@ -182,6 +182,8 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 				for permutationSpace in state.listPermutationSpace
 		]
 
+		state.listPermutationSpace = deque()
+
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc=f"PermutationSpace {len(listClaimTickets)}"):
 			sherpa: EliminationState = claimTicket.result()
 
