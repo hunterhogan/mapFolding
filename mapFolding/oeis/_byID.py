@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from mapFolding.basecamp import countFolds, countFoldsSymmetric
-from mapFolding.oeis import byFormula
+from mapFolding.oeis import byFormula, getMapShape
 from mapFolding.oeis._meanders import countMeanders
-from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEISImplemented, dictionaryOEISMapFolding
+from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEIS
 from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
+	from mapFolding.oeis._dataBaskets import MetadataOEISid
 	from os import PathLike
 	from typing import Unpack
 
@@ -76,7 +76,7 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 		message: str = f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`."
 		raise ValueError(message)
 
-	metadataOEISid: MetadataOEISidMapFolding | MetadataOEISid = dictionaryOEISImplemented[oeisID]
+	metadataOEISid: MetadataOEISid = dictionaryOEIS[oeisID]
 
 	if n < metadataOEISid['offset']:
 		message: str = f"I received `{n = }`, but OEIS sequence `{oeisID = }` is not defined for values below `offset = {metadataOEISid['offset']}`."
@@ -143,11 +143,8 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 			case 'A000682' | 'A005316':
 				foldsTotal = countMeanders(oeisID, n, **keywordArguments)
 			case 'A007822':
-				foldsTotal = countFoldsSymmetric((1, 2 * n), **keywordArguments)
+				foldsTotal = countFoldsSymmetric(getMapShape(oeisID, n), **keywordArguments)
 			case _:
-				foldsTotal = countFolds(
-					mapShape=dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
-					, **keywordArguments
-				)
+				foldsTotal = countFolds(mapShape=getMapShape(oeisID, n), **keywordArguments)
 
 	return foldsTotal

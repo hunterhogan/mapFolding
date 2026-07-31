@@ -1,4 +1,3 @@
-# ruff: file-ignore[import-outside-top-level] `mapFolding.oeis._metadata`.
 """Make docstrings."""
 from __future__ import annotations
 
@@ -6,6 +5,7 @@ from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astMod
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
+from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
@@ -20,7 +20,6 @@ moduleWarning = "This is a generated file; edit the source file.\n"
 
 def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     """Transform the docstrings of functions corresponding to OEIS sequences."""
-    from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISMapFolding
     pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
     astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
     dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
@@ -31,16 +30,15 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     for oeisID, FunctionDef in dictionaryFunctionDef.items():
         if not oeisID.startswith('A') or not oeisID[1:7].isdigit():
             continue
-        dictionary = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
         functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
 
         ImaDocstring: str = f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionary[oeisID]['description']}"
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionaryOEIS[oeisID]['description']}"
 
-    The domain of {oeisID} starts at {dictionary[oeisID]['offset']}, therefore for values of `n` < {dictionary[oeisID]['offset']}, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is {dictionary[oeisID]['valueUnknown']}.
+    The domain of {oeisID} starts at {dictionaryOEIS[oeisID]['offset']}, therefore for values of `n` < {dictionaryOEIS[oeisID]['offset']}, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is {dictionaryOEIS[oeisID]['valueUnknown']}.
 
     Parameters
     ----------
@@ -50,7 +48,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     Returns
     -------
     a(n) : int
-        {dictionary[oeisID]['description']}
+        {dictionaryOEIS[oeisID]['description']}
 
     Would You Like to Know More?
     ----------------------------

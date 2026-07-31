@@ -28,7 +28,7 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from mapFolding.oeis import getOEISids, OEIS_for_n, oeisIDfor_n
-from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEISImplemented
+from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEIS
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from typing import TYPE_CHECKING
 import io
@@ -73,18 +73,18 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 	else:
 		assertEqualTo(exitCode, expected, functionName, *arguments)
 
-def test__validateOEISid_valid_id(oeisIDmapFolding: str) -> None:
-	actual: str = _formatOEISid(oeisIDmapFolding)
-	assertEqualTo(actual, oeisIDmapFolding, _formatOEISid.__name__, oeisIDmapFolding)
+def test__validateOEISid_valid_id(oeisID: str) -> None:
+	actual: str = _formatOEISid(oeisID)
+	assertEqualTo(actual, oeisID, _formatOEISid.__name__, oeisID)
 
-def test__validateOEISid_valid_id_case_insensitive(oeisIDmapFolding: str) -> None:
-	expected: str = oeisIDmapFolding.upper()
-	actualLower: str = _formatOEISid(oeisIDmapFolding.lower())
-	actualUpper: str = _formatOEISid(oeisIDmapFolding.upper())
-	actualSwapcase: str = _formatOEISid(oeisIDmapFolding.swapcase())
-	assertEqualTo(actualLower, expected, _formatOEISid.__name__, oeisIDmapFolding.lower())
-	assertEqualTo(actualUpper, expected, _formatOEISid.__name__, oeisIDmapFolding.upper())
-	assertEqualTo(actualSwapcase, expected, _formatOEISid.__name__, oeisIDmapFolding.swapcase())
+def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
+	expected: str = oeisID.upper()
+	actualLower: str = _formatOEISid(oeisID.lower())
+	actualUpper: str = _formatOEISid(oeisID.upper())
+	actualSwapcase: str = _formatOEISid(oeisID.swapcase())
+	assertEqualTo(actualLower, expected, _formatOEISid.__name__, oeisID.lower())
+	assertEqualTo(actualUpper, expected, _formatOEISid.__name__, oeisID.upper())
+	assertEqualTo(actualSwapcase, expected, _formatOEISid.__name__, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [(-random.randint(1, 100), 'randomNegative'), ('foo', 'string'), (1.5, 'float')]
 badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n, strict=True)
@@ -113,9 +113,9 @@ def testHelpText() -> None:
 	helpText = outputStream.getvalue()
 
 	# Verify content
-	for oeisID in dictionaryOEISImplemented:
+	for oeisID in dictionaryOEIS:
 		assertEqualTo(oeisID in helpText, True, getOEISids.__name__, oeisID)
-		assertEqualTo(dictionaryOEISImplemented[oeisID]['description'] in helpText, True, getOEISids.__name__, oeisID)
+		assertEqualTo(dictionaryOEIS[oeisID]['description'] in helpText, True, getOEISids.__name__, oeisID)
 
 	# Extract and verify examples
 
@@ -164,4 +164,4 @@ def testCLI_HelpFlag() -> None:
 		helpOutput = outputStream.getvalue()
 		assertEqualTo('Available OEIS sequences:' in helpOutput, True, OEIS_for_n.__name__, '--help')
 		assertEqualTo('Usage examples:' in helpOutput, True, OEIS_for_n.__name__, '--help')
-		assertEqualTo(all(oeisID in helpOutput for oeisID in dictionaryOEISImplemented), True, OEIS_for_n.__name__, '--help')
+		assertEqualTo(all(oeisID in helpOutput for oeisID in dictionaryOEIS), True, OEIS_for_n.__name__, '--help')

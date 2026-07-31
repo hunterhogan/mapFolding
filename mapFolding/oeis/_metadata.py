@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
-from functools import cache
+from functools import cache, partial
+from humpy_cytoolz import keymap, merge
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from itertools import chain, filterfalse
-from mapFolding.oeis import _theSSOT
-from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
+from itertools import filterfalse
+from mapFolding.oeis import getMapShape
+from mapFolding.oeis._dataBaskets import MetadataOEISid
+from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, oeisIDsMapFolding, pathCache
 from operator import getitem, methodcaller
 from typing import TYPE_CHECKING
 from urllib3.exceptions import HTTPError
@@ -74,7 +76,7 @@ def _getOEISdata(pathFilenameCache: Path, url: str) -> str | None:
 	if pathFilenameCache.exists():
 		cacheDatetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
 		fileAge: timedelta = datetime.now(tz=UTC) - cacheDatetime
-		preferCache = fileAge < timedelta(days=_theSSOT.cacheDays)
+		preferCache = fileAge < timedelta(days=cacheDays)
 		informationOEIS = pathFilenameCache.read_text(encoding="utf-8")
 
 	if not preferCache:
@@ -126,7 +128,7 @@ def getValuesKnown(oeisID: str) -> dict[int, int]:
 		containing {-1: -1} if retrieval fails.
 	"""
 	filename: str = f"b{oeisID[1:]}.txt"
-	pathFilenameCache: Path = _theSSOT.pathCache / filename
+	pathFilenameCache: Path = pathCache / filename
 	url: str = f"https://oeis.org/{oeisID}/{filename}"
 
 	oeisData: str | None = _getOEISdata(pathFilenameCache, url)
@@ -167,7 +169,7 @@ def getOEISidMetadata(oeisID: str) -> tuple[str, int]:
 	fallback values.
 	"""
 	oeisID = _formatOEISid(oeisID)
-	pathFilenameCache: Path = _theSSOT.pathCache / f"{oeisID}.txt"
+	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
 
 	oeisInformation: str | None = _getOEISdata(pathFilenameCache, url)
@@ -203,8 +205,8 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 	(AI generated docstring)
 
 	This function constructs a comprehensive lookup dictionary by extracting and transforming data
-	from all map-folding OEIS sequences in `dictionaryOEISMapFolding`. The function applies each
-	sequence's `getMapShape` function to its known indices to generate the corresponding map shapes,
+	from all map-folding OEIS sequences in `dictionaryOEIS`. The function applies `getMapShape` to
+	each sequence's known indices to generate the corresponding map shapes,
 	then pairs each shape with its folding total.
 
 	Returns
@@ -218,85 +220,17 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents a
 	constrained subset rather than the total count for each `mapShape`.
 
-	See Also
-	--------
-	mapFolding.oeis.dictionaryOEISMapFolding
-		Source metadata for map-folding OEIS sequences.
 	"""
-	return dict(chain.from_iterable(zip(map(oeisIDmetadata['getMapShape'], oeisIDmetadata['valuesKnown'].keys())
-	, oeisIDmetadata['valuesKnown'].values(), strict=True) for oeisID, oeisIDmetadata in dictionaryOEISMapFolding.items() if oeisID != 'A007822'))
-
-def _makeDictionaryOEISMapFolding() -> dict[str, MetadataOEISidMapFolding]:
-	"""Construct the comprehensive settings dictionary for all implemented OEIS sequences.
-
-	(AI generated docstring)
-
-	This function builds the complete configuration dictionary by merging hardcoded settings with
-	dynamically retrieved data from OEIS. For each implemented sequence, it combines:
-
-	1. Sequence values from OEIS b-files
-	2. Sequence metadata including descriptions and offsets
-	3. Hardcoded mapping functions and test parameter sets
-
-	The resulting dictionary serves as the authoritative configuration source for all OEIS-related
-	operations throughout the package, enabling consistent access to sequence definitions, known
-	values, and operational parameters.
-
-	Returns
-	-------
-	settingsTarget : dict[str, SettingsOEIS]
-		A comprehensive dictionary mapping OEIS sequence IDs to their complete settings objects,
-		containing all metadata and known values needed for computation and validation.
-	"""
-	dictionaryOEIS: dict[str, MetadataOEISidMapFolding] = {}
-	for oeisID in _theSSOT.oeisIDsImplementedMapFolding:
-		valuesKnown: dict[int, int] = getValuesKnown(oeisID)
-		description, offset = getOEISidMetadata(oeisID)
-		dictionaryOEIS[oeisID] = MetadataOEISidMapFolding(
-			description=description,
-			offset=offset,
-			getMapShape=_theSSOT.oeisIDsImplementedMapFolding[oeisID]['getMapShape'],
-			valuesKnown=valuesKnown,
-			valueUnknown=max(valuesKnown.keys(), default=0) + 1
-		)
-	return dictionaryOEIS
+	return merge(*[keymap(partial(getMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in oeisIDsMapFolding])
 
 def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
-	"""I use this to construct metadata for OEIS sequences computed by specialized algorithms.
-
-	This function builds the configuration dictionary for OEIS sequences that require algorithms
-	beyond standard map-folding (meanders, symmetric foldings, formula-based sequences). The
-	dictionary construction parallels `_librarianConstructsDictionaryOEISMapFolding` but targets
-	sequences configured in `_theSSOT.oeisIDsImplemented`.
-
-	Returns
-	-------
-	dictionaryOEIS : dict[str, MetadataOEISid]
-		A dictionary mapping OEIS sequence IDs to their metadata objects, containing descriptions,
-		offsets, and known values.
-
-	See Also
-	--------
-	mapFolding.oeis._librarianConstructsDictionaryOEISMapFolding
-		Construct metadata for standard map-folding OEIS sequences.
-	"""
+	"""Construct metadata for every implemented OEIS sequence."""
 	dictionary: dict[str, MetadataOEISid] = {}
-	for oeisID in _theSSOT.oeisIDsImplemented:
+	for oeisID in oeisIDsImplemented:
 		valuesKnown: dict[int, int] = getValuesKnown(oeisID)
 		description, offset = getOEISidMetadata(oeisID)
-		dictionary[oeisID] = MetadataOEISid(
-			description=description,
-			offset=offset,
-			valuesKnown=valuesKnown,
-			valueUnknown=max(valuesKnown.keys(), default=0) + 1,
-		)
+		dictionary[oeisID] = MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 	return dictionary
 
-dictionaryOEISMapFolding: dict[str, MetadataOEISidMapFolding] = _makeDictionaryOEISMapFolding()
-"""Metadata for each MapFolding OEIS ID."""
-
 dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
-"""Metadata for OEIS sequences computed by specialized algorithms (meanders, symmetric foldings, formulas)."""
-
-dictionaryOEISImplemented: dict[str, MetadataOEISidMapFolding | MetadataOEISid] = dictionaryOEISMapFolding | dictionaryOEIS
 """Metadata for every implemented OEIS sequence."""

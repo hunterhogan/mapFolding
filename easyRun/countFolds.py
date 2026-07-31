@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
-from mapFolding.oeis._metadata import dictionaryOEISMapFolding  # ruff: ignore[import-private-name]
+from mapFolding.oeis import getMapShape
+from mapFolding.oeis._metadata import dictionaryOEIS  # ruff: ignore[import-private-name]
 from typing import TYPE_CHECKING
 import sys
 import time
@@ -21,11 +22,11 @@ if TYPE_CHECKING:
 if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
-			f"{(match := foldsTotal == dictionaryOEISMapFolding[oeisID]['valuesKnown'].get(n))}\t"
+			f"{(match := foldsTotal == dictionaryOEIS[oeisID]['valuesKnown'].get(n))}\t"
 			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{foldsTotal}\t"
-			f"{dictionaryOEISMapFolding[oeisID]['valuesKnown'].get(n)}\t"
+			f"{dictionaryOEIS[oeisID]['valuesKnown'].get(n)}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			f"{ansiColorReset}\n"
 		)
@@ -53,7 +54,7 @@ if __name__ == '__main__':
 
 	for n in range(3, 25):
 
-		mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
+		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = countFolds(listDimensions

@@ -6,7 +6,8 @@ from mapFolding._e._2上nDimensional.pinIt import (
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
-from mapFolding.oeis._metadata import dictionaryOEISMapFolding
+from mapFolding.oeis import _theSSOT, getMapShape
+from mapFolding.oeis._metadata import dictionaryOEIS
 from typing import TYPE_CHECKING
 import pytest
 
@@ -21,12 +22,12 @@ def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest
 	return request.param
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
-	*[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4),)]  # , ('A001417', 5))]
-	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "constraintPropagation", 0.99) for oeisID, n in (("A000136", 5), ("A001415", 5), ("A001416", 4), ("A001417", 4), ("A001418", 3), ("A195646", 2))]
-	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][n], oeisID, n, "elimination", 0.99)
+	*[pytest.param(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4),)]  # , ('A001417', 5))]
+	, *[pytest.param(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisID, n, "constraintPropagation", 0.99) for oeisID, n in (("A000136", 5), ("A001415", 5), ("A001416", 4), ("A001417", 4), ("A001418", 3), ("A195646", 2))]
+	, *[pytest.param(dictionaryOEIS[oeisID]['valuesKnown'][n], oeisID, n, "elimination", 0.99)
 		for oeisID, n in (("A000136", 3), ("A001415", 3), ("A001416", 2), ("A001417", 3), ("A001418", 2), ("A195646", 1))]
-	, *[pytest.param(dictionaryOEISMapFolding[oeisID]['valuesKnown'][dictionaryOEISMapFolding[oeisID]["offset"]], oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A000136', 'A001415', 'A001416', 'A001418')]
-	, *[pytest.param(metadata['valuesKnown'][metadata["offset"] + 1], oeisID, metadata["offset"] + 1, "constraintPropagation", 1) for oeisID, metadata in dictionaryOEISMapFolding.items()]
+	, *[pytest.param(dictionaryOEIS[oeisID]['valuesKnown'][dictionaryOEIS[oeisID]["offset"]], oeisID, dictionaryOEIS[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A000136', 'A001415', 'A001416', 'A001418')]
+	, *[pytest.param(metadata['valuesKnown'][metadata["offset"] + 1], oeisID, metadata["offset"] + 1, "constraintPropagation", 1) for oeisID, metadata in dictionaryOEIS.items() if oeisID in _theSSOT.oeisIDsMapFolding]
 ])
 def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 	"""Validate `eliminateFolds` and different flows produce valid results.
@@ -42,16 +43,16 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 	CPUlimit : float
 		CPU limit for the computation.
 	"""
-	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 	state: EliminationState | None = None
 	pathLikeWriteTotal: None = None
 	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWriteTotal, CPUlimit, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
-	*[pytest.param(ValueError, oeisID, dictionaryOEISMapFolding[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
+	*[pytest.param(ValueError, oeisID, dictionaryOEIS[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
 ])
 def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
-	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 	state: EliminationState | None = None
 	pathLikeWriteTotal: None = None
 	with pytest.raises(expected):
@@ -68,8 +69,8 @@ def test_eliminateFoldsPinnedState(pinningFunctionEliminateFolds2上nDimensional
 	pinning function is exercised against both supported `_e` flows.
 	"""
 	oeisID: str = "A001417"
-	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
-	expectedFoldsTotal: int = dictionaryOEISMapFolding[oeisID]["valuesKnown"][n]
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+	expectedFoldsTotal: int = dictionaryOEIS[oeisID]["valuesKnown"][n]
 	statePinned: EliminationState = pinningFunctionEliminateFolds2上nDimensional(EliminationState(mapShape), CPUlimit=CPUlimit)
 	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteTotal=None, CPUlimit=CPUlimit, flow=flow)
 	functionName: str = getattr(pinningFunctionEliminateFolds2上nDimensional, "__name__", pinningFunctionEliminateFolds2上nDimensional.__class__.__name__)
@@ -87,8 +88,8 @@ def test_eliminateFoldsPinPilesAtEnds(pileDepthPinningTests: int, CPUlimit: floa
 	pinning fixture so the pytest matrix stays explicit and easy to debug.
 	"""
 	oeisID: str = "A001417"
-	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]["getMapShape"](n)
-	expectedFoldsTotal: int = dictionaryOEISMapFolding[oeisID]["valuesKnown"][n]
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+	expectedFoldsTotal: int = dictionaryOEIS[oeisID]["valuesKnown"][n]
 	statePinned: EliminationState = pinPilesAtEnds(EliminationState(mapShape), pileDepthPinningTests, CPUlimit=CPUlimit)
 	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWriteTotal=None, CPUlimit=CPUlimit, flow=flow)
 

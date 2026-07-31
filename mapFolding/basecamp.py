@@ -34,9 +34,9 @@ Minimal Preprocessing
 
 OEIS Identifier Usability
     OEIS identifiers are meaningless labels without context. The module's data structures (via
-    `mapFolding.dictionaryOEISMapFolding` [3] and `mapFolding.dictionaryOEIS` [3]) provide sequence
-    descriptions alongside identifiers so users can work with domain concepts rather than memorizing
-    arbitrary codes. That said, current evidence suggests the package has only one user (the author).
+    `dictionaryOEIS` [3]) provide sequence descriptions alongside identifiers so users can work with
+    domain concepts rather than memorizing arbitrary codes. That said, current evidence suggests the
+    package has only one user (the author).
 
 References
 ----------

@@ -32,8 +32,8 @@ from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric
 from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import countMeanders, oeisIDfor_n
-from mapFolding.oeis._metadata import dictionaryOEIS, dictionaryOEISImplemented, dictionaryOEISMapFolding
+from mapFolding.oeis import countMeanders, getMapShape, oeisIDfor_n
+from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -49,7 +49,6 @@ import warnings
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
 	from mapFolding.oeis._byID import KeywordArgumentsCount
-	from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidMapFolding
 	from os import PathLike
 	from pathlib import Path
 	from types import ModuleType
@@ -150,8 +149,8 @@ def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> N
 	if flow == 'theorem2Codon' and importlib.util.find_spec('codon') is None:
 		pytest.skip('codon-jit is not installed')
 
-	mapShape: tuple[int, ...] = dictionaryOEISMapFolding[oeisID]['getMapShape'](n)
-	expected: int = dictionaryOEISMapFolding[oeisID]['valuesKnown'][n]
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 	actual: int = countFolds(None, None, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
 	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, CPUlimit, mapShape, flow)
 
@@ -174,8 +173,7 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 		Computation flow to validate.
 
 	"""
-	dictionaryCurrent: dict[str, MetadataOEISidMapFolding] | dict[str, MetadataOEISid] = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
-	expected: int = dictionaryCurrent[oeisID]['valuesKnown'][n]
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 	actual: int = countMeanders(oeisID, n, flow, None)
 	assertEqualTo(actual, expected, countMeanders.__name__, oeisID, n, flow, None)
 
@@ -208,7 +206,7 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 	, indirect=True
 )
 def test_oeisIDfor_n_byFormula(oeisID: str, oeis_n: int, f: str) -> None:
-	expected: int = dictionaryOEISImplemented[oeisID]['valuesKnown'][oeis_n]
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
 	actual: int = oeisIDfor_n(oeisID, oeis_n, f=f)
 	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, oeis_n, f=f)
 
@@ -245,14 +243,14 @@ def test_oeisIDfor_n(oeisID: str, n: int, f: str, keywordArguments: KeywordArgum
 		Sequence index to validate.
 
 	"""
-	expected: int = dictionaryOEISImplemented[oeisID]['valuesKnown'][n]
+	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 	actual: int = oeisIDfor_n(oeisID, n, f, **keywordArguments)
 	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, n, f, **keywordArguments)
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.
 	"""Return one deterministic map shape suitable for code generation tests."""
-	return dictionaryOEISMapFolding['A000136']['getMapShape'](3)
+	return getMapShape('A000136', 3)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:
