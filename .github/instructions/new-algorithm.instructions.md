@@ -54,8 +54,8 @@ applyTo: 'mapFolding/_e/**'
 | `algorithms/` | Algorithm entry points. |
 | `easyRun/` | Ad hoc experiment drivers. |
 | `tests/` | Pytest coverage for `_e`. |
-| `Z0Z_analysis/` | Research helpers and generated analysis artifacts. |
-| `Z0Z_notes/` | Design notes and scratch documentation. |
+| `_development/` | Research helpers and generated analysis artifacts. |
+| `reference/` | Design notes and scratch documentation. |
 
 ## Working assumptions
 
@@ -73,5 +73,5 @@ applyTo: 'mapFolding/_e/**'
 
 ## Deep-dive references
 
-- `mapFolding/_e/Z0Z_notes/Elimination.md`
+- `mapFolding/_e/reference/Elimination.md`
 - `_e/tests/` for executable examples of expected behavior

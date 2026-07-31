@@ -10,9 +10,9 @@ from mapFolding._e._2上nDimensional import (
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
+from mapFolding._e._development.toolkit import verifyPinning2Dn
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
-from mapFolding._e.Z0Z_analysis.toolkit import verifyPinning2Dn
 from math import prod
 from operator import methodcaller
 from pprint import pprint
@@ -34,13 +34,13 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 5)
+	state = EliminationState((2,) * 7)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinPilesAtEnds(state, 2)
+		state: EliminationState = pinPilesAtEnds(state, 4)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")

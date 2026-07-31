@@ -34,7 +34,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
         dictionary = dictionaryOEISMapFolding if oeisID in dictionaryOEISMapFolding else dictionaryOEIS
         functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
 
-        ImaDocstring = f"""
+        ImaDocstring: str = f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionary[oeisID]['description']}"
@@ -58,7 +58,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
         https://oeis.org/{oeisID}
     """
 
-        astExprDocstring = Make.Expr(Make.Constant(ImaDocstring))
+        astExprDocstring: ast.Expr = Make.Expr(Make.Constant(ImaDocstring))
 
         NodeChanger(
             findThis=IfThis.isFunctionDefIdentifier(oeisID)
@@ -71,9 +71,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     moduleAsString: str = ast.unparse(astModule) + "\n"
     moduleAsString = moduleAsString.replace(docstringModule, docstringModule + "\n\n" + moduleWarning)
 
-    writeStringToHere(moduleAsString, pathFilenameWrite)
-
-    return pathFilenameWrite
+    return writeStringToHere(moduleAsString, pathFilenameWrite)
 
 def do() -> None:
     """Make docstrings for all functions corresponding to OEIS sequences."""

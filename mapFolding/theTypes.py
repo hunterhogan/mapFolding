@@ -27,6 +27,7 @@ dtypeCrossings: TypeAlias = numpy_uint64
 DatatypeLeavesTotal: TypeAlias = int
 """Use on unsigned integers that will never exceed the magnitude of `leavesTotal`."""
 
+# TODO use lessons from mapFolding\reference\multiDimensionalMapFolding\elephinoIntegerWidthAnalysis.ipynb.
 DatatypeElephino: TypeAlias = int
 """Use on unsigned integers that will exceed the magnitude of `leavesTotal` but that are not "colossal."
 

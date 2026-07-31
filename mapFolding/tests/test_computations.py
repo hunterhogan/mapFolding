@@ -98,7 +98,7 @@ def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 @pytest.mark.parametrize('oeisID, n, flow'
 	, [
 		*[
-			pytest.param(oeisID, n, flow, id=f'{oeisID}::n{n}::{flow}')
+			pytest.param(oeisID, n, flow, id=f'{flow}::{oeisID}({n})')
 			for oeisID, nValues in (
 				('A000136', (2, 3, 12))
 				, ('A001415', (2, 3, 9))
@@ -110,7 +110,7 @@ def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 			for n, flow in CartesianProduct(nValues, ('numba', 'theorem2Codon', 'theorem2Numba'))
 		]
 		, *[
-			pytest.param(oeisID, n, flow, id=f'{oeisID}::n{n}::{flow}')
+			pytest.param(oeisID, n, flow, id=f'{flow}::{oeisID}({n})')
 			for oeisID, nValues in (
 				('A000136', (2, 3, 12))
 				, ('A001415', (2, 3, 6))

@@ -187,7 +187,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 			# TODO temporary data collection for p2d7
 			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
-				pathFilename: Path = settingsPackage.pathPackage / "_e" / 'Z0Z_analysis' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 				with Path.open(pathFilename, mode="w", newline="") as fileCSV:
 					csvWriter = csv.writer(fileCSV)
 					csvWriter.writerows(sherpa.listFolding)
