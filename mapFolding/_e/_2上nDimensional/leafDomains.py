@@ -373,7 +373,6 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 				indexDomain0 = 3 * pilesTotal // 4
 				indexDomain0 -= pilesFewerDomain0
-				# NOTE thinking:  首一二(dimensionsTotal)
 				if pileOfLeaf零 < 首一二(dimensionsTotal):
 					dimensionIndexPart首: int = dimensionsTotal
 					dimensionIndexPart一: int = dimensionIndex(一)

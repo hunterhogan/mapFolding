@@ -138,6 +138,5 @@ def A007822(n: int) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
-	# TODO is `gapRangeStart.max() == leavesTotal * 2 + 1`?
 	mapShape: tuple[DatatypeLeavesTotal, ...] = (6, 6)
 	fromMapShape(mapShape)

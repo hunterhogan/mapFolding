@@ -86,15 +86,12 @@ def countMeanders(oeisID: str, oeis_n: int, flow: str = '', pathLikeWriteTotal: 
 
 	boundary: int = oeis_n - 1
 
-	# TODO Consider: If A000682 is essentially A000136 * leavesTotal, then my graphs of
-	# A000136 are _literal_ graphs of A000682. Since Theorem 2 applies to A000136, it must
-	# apply to A000682. Can I use the graphs to find the midpoint of an A000682
-	# computation using the matrix algorithm? The problem with the matrix algorithm is
-	# memory usage. Unique signatures (buckets) grows predictably. Cutting the count in
-	# half...
-	#
-	# TODO In `doTheNeedful`, use `while state.boundary > 0:` and the ratio trick to find
-	# the midpoint.
+	# TODO Consider: If A000682 is essentially A000136 * leavesTotal, then my graphs of A000136 are
+	# _literal_ graphs of A000682. Since Theorem 2 applies to A000136, it must apply to A000682. Can I
+	# use the graphs to find the midpoint of an A000682 computation using the matrix algorithm? The
+	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows
+	# predictably. Cutting the count in half... In `doTheNeedful`, I used `while state.boundary > 0:`
+	# and the ratio trick to find the midpoint: it didn't work.
 	if oeisID == 'A000682':
 		if oeis_n == 1:
 			return 1

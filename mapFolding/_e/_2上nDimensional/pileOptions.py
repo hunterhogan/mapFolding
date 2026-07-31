@@ -12,8 +12,6 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
 	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
 
-# TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
-
 #======== Boolean filters ======================================
 
 @syntacticCurry

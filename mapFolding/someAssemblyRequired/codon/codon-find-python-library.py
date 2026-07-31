@@ -77,8 +77,6 @@ def get_python_library(python_version):
                 python_library = candidate
                 break
 
-    # TODO(opadron): what happens if we don't find a libpython?
-
     return python_library
 
 print(get_python_library(f'{sys.version_info[0]}.{sys.version_info[1]}'))
