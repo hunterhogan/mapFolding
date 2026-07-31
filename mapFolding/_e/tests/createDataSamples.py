@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 	from typing import Any
 	import pandas
 
-def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
-	"""Create a Python module containing combined domain data for multiple leaves across multiple mapShapes.
+def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
+	"""Create a Python module containing combined domain data for multiple leaves across multiple map shapes.
 
 	This function extracts the actual combined domain (the set of valid pile position tuples) for a group of leaves from pickled
 	folding data. The data is used for verification in pytest tests comparing computed domains against empirical data.
@@ -25,7 +25,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	Parameters
 	----------
-	listDimensions : Sequence[int]
+	sequenceDimensionsTotal : Sequence[int]
 		The dimension counts to process (e.g., `[4, 5, 6]` for 2^4, 2^5, 2^6 leaf maps).
 	listLeaves : Sequence[int | Callable[[int], int]]
 		The leaves whose combined domain to extract. Elements can be:
@@ -61,7 +61,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 
 	dictionaryDomainsByDimensions: dict[int, list[tuple[int, ...]]] = {}
 
-	for dimensionsTotal in listDimensions:
+	for dimensionsTotal in sequenceDimensionsTotal:
 		mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 		state: EliminationState = EliminationState(mapShape)
 		dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
@@ -81,7 +81,7 @@ def makeVerificationDataLeavesDomain(listDimensions: Sequence[int], listLeaves: 
 		'"""Verification data for combined leaf domains.',
 		'',
 		'This module contains empirically extracted combined domain data for leaves',
-		f'{listLeafNames} across multiple mapShape configurations.',
+		f'{listLeafNames} across multiple map-shape configurations.',
 		'',
 		'Each list is named `listDomain2D{dimensionsTotal}` where `dimensionsTotal`',  # ruff:ignore[missing-f-string-syntax]
 		'is the exponent in the 2^dimensionsTotal mapShape, and it contains tuples representing',

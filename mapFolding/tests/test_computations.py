@@ -157,8 +157,8 @@ def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> N
 
 	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
-	actual: int = countFolds(None, None, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
-	assertEqualTo(actual, expected, countFolds.__name__, None, None, None, CPUlimit, mapShape, flow)
+	actual: int = countFolds(mapShape, flow, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countFolds.__name__, mapShape, flow, CPUlimit=CPUlimit)
 
 @pytest.mark.xdist_group(name='test_meanders')
 @pytest.mark.parametrize('oeisID', ('A000682', 'A005316'))

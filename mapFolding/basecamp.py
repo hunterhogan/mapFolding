@@ -56,7 +56,7 @@ References
 from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
+from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateMapShape
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
@@ -67,13 +67,12 @@ if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 
-def countFolds(listDimensions: Sequence[int] | None = None
+def countFolds(mapShape: Sequence[int]
+				, flow: str = ''
 				, pathLikeWriteTotal: PathLike[str] | None = None
-				, computationDivisions: int | str | None = None
 				, *
 				, CPUlimit: Limitation = None
-				, mapShape: tuple[int, ...] | None = None
-				, flow: str = ''
+				, computationDivisions: int | str | None = None
 				) -> int:
 	"""
 	Count the number of distinct ways to fold a map.
@@ -83,8 +82,8 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	Parameters
 	----------
-	listDimensions : Sequence[int] | None = None
-		List of integers representing the dimensions of the map to be folded.
+	mapShape : Sequence[int]
+		A sequence containing the positive integer length of each dimension of the map to be folded.
 	pathLikeWriteTotal : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
 		value of `foldsTotal`. If `pathLikeWriteTotal` is a path of only directories, `countFolds` creates a filename based
@@ -107,11 +106,6 @@ def countFolds(listDimensions: Sequence[int] | None = None
 		- `int <= -1`: The number of available processors to *not* use.
 		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds` truncates the value to an `int`
 		with the same sign as the `float`.
-	mapShape : tuple[int, ...] | None = None
-		Tuple of integers representing the dimensions of the map to be folded. Mathematicians almost always use the term
-		"dimensions", such as in the seminal paper, "Multi-dimensional map-folding". Nevertheless, in contemporary Python
-		programming, in the context of these algorithms, the term "shape" makes it much easier to align the mathematics with the
-		syntax of the programming language.
 	flow : str = ''
 		My stupid way of selecting the version of the algorithm to use in the computation. There are certainly better ways to do
 		this, but I have not yet solved this issue. As of 2025 Aug 14, these values will work:
@@ -144,14 +138,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 	"""
 #-------- mapShape ---------------------------------------------------------------------
 
-	if mapShape:
-		mapShape = validateListDimensions(mapShape)
-	elif listDimensions:
-		mapShape = validateListDimensions(listDimensions)
-
-	if mapShape is None:
-		message: str = (f"I received `{listDimensions = }` and `{mapShape = }`, but I was unable to select a map for which to count the folds.")
-		raise ValueError(message)
+	mapShape = validateMapShape(mapShape)
 
 #-------- task division instructions -----------------------------------------------------
 
@@ -237,7 +224,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 # DOCUMENT, possibly in multiple locations, that the map shape is (1, 2n) not (1, 2n+1). Or rather,
 # the algorithm uses (1, 2n).
 def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
-	return countFolds(None, pathLikeWriteTotal, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=f'{flow}Symmetric')
+	return countFolds(mapShape, f'{flow}Symmetric', pathLikeWriteTotal, CPUlimit=CPUlimit)
 
 def countMeanders(oeisID: str, oeis_n: int, flow: str = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	"""Compute a native meander sequence term.

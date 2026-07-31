@@ -106,12 +106,15 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 			raise ValueError(message)
 
 	if taskDivisions > leavesTotal:
-		message = f"Problem: `{taskDivisions = }`, is greater than `{leavesTotal = }`, which will cause duplicate counting of the folds.\n\nChallenge: you cannot directly set `taskDivisions` or `leavesTotal`: they are derived from parameters that may or may not be named `computationDivisions`, `CPUlimit` , and `listDimensions` and from my dubious-quality Python code."
+		message = (
+			f"I derived `{taskDivisions = }`, which is greater than `{leavesTotal = }`, but task divisions cannot exceed the map's "
+			"total leaves because that would count folds more than once."
+		)
 		raise ValueError(message)
 	return int(max(0, taskDivisions))
 
-def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
-	"""Validate and normalize dimensions for a map folding problem.
+def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
+	"""Validate and normalize a map shape for a map-folding problem.
 
 	(AI generated docstring)
 
@@ -121,7 +124,7 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 
 	Parameters
 	----------
-	listDimensions : Sequence[int]
+	mapShape : Sequence[int]
 		A sequence of integers representing the dimensions of the map.
 
 	Returns
@@ -132,16 +135,16 @@ def validateListDimensions(listDimensions: Sequence[int]) -> tuple[int, ...]:
 	Raises
 	------
 	ValueError
-		If the input is empty or contains negative values.
+		If the input is empty or contains non-positive values.
 	"""
-	listOFint: list[int] = intInnit(listDimensions, 'listDimensions', Sequence[int])
-	if not listOFint or any(map((0).__ge__, listOFint)):
-		message: str = f"I received `{listDimensions = }`, but every dimension must be a non-negative integer, and I need at least one dimension."
+	mapShapeAsList: list[int] = intInnit(mapShape, 'mapShape', Sequence[int])
+	if not mapShapeAsList or any(map((0).__ge__, mapShapeAsList)):
+		message: str = f"I received `{mapShape = }`, but I need at least one positive integer dimension."
 		raise ValueError(message)
 
 	#=EndNotes##sortingDimensions=
 	# Do NOT sort the dimensions.
-	return tuple(listOFint)
+	return tuple(mapShapeAsList)
 
 #======== map folding ===================================
 

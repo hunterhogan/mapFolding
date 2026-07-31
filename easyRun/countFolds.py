@@ -15,7 +15,6 @@ import sys
 import time
 
 if TYPE_CHECKING:
-	from collections.abc import Sequence
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 
@@ -31,7 +30,6 @@ if __name__ == '__main__':
 			f"{ansiColorReset}\n"
 		)
 
-	listDimensions: Sequence[int] | None = None
 	pathLikeWriteTotal: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
 	CPUlimit: Limitation = None
@@ -57,11 +55,10 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 
 		timeStart = time.perf_counter()
-		foldsTotal: int = countFolds(listDimensions
+		foldsTotal: int = countFolds(mapShape
+						, flow
 						, pathLikeWriteTotal
-						, computationDivisions
 						, CPUlimit=CPUlimit
-						, mapShape=mapShape
-						, flow=flow)
+						, computationDivisions=computationDivisions)
 
 		_write()

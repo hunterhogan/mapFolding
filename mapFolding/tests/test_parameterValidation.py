@@ -28,7 +28,7 @@ from __future__ import annotations
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from itertools import permutations
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, validateListDimensions
+from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, validateMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import multiprocessing
@@ -53,7 +53,7 @@ def test_getLeavesTotal_edge_cases() -> None:
 		assertEqualTo(actual, baseline, getLeavesTotal.__name__, mapShape)
 
 @pytest.mark.parametrize(
-	'listDimensions,expected'
+	'mapShape,expected'
 	, [
 		([-4, 2], [-4, 2])
 		, ([-3], [-3])
@@ -71,16 +71,16 @@ def test_getLeavesTotal_edge_cases() -> None:
 		, ((3, 5, 7), [3, 5, 7])
 	]
 )
-def test_intInnit(listDimensions: Iterable[Any], expected: list[int]) -> None:
-	actual: list[int] = intInnit(listDimensions)
-	assertEqualTo(actual, expected, intInnit.__name__, listDimensions)
+def test_intInnit(mapShape: Iterable[Any], expected: list[int]) -> None:
+	actual: list[int] = intInnit(mapShape)
+	assertEqualTo(actual, expected, intInnit.__name__, mapShape)
 
 @pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_intInnit())
 def test_IntInnit_humpy(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
 
 @pytest.mark.parametrize(
-	'listDimensions,expected'
+	'mapShape,expected'
 	, [
 		(None, ValueError)
 		, (['a'], ValueError)
@@ -94,10 +94,10 @@ def test_IntInnit_humpy(nameOfTest: str, callablePytest: Callable[[], None]) -> 
 		, ([float('nan')], ValueError)
 	]
 )
-def test_intInnitError(listDimensions: Iterable[Any], expected: type[Exception]) -> None:
+def test_intInnitError(mapShape: Iterable[Any], expected: type[Exception]) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		intInnit(listDimensions)
-	assertEqualTo(type(exceptionInfo.value), expected, intInnit.__name__, listDimensions)
+		intInnit(mapShape)
+	assertEqualTo(type(exceptionInfo.value), expected, intInnit.__name__, mapShape)
 
 @pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_oopsieKwargsie())
 def test_OopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
@@ -125,7 +125,7 @@ def test_setCPUlimitNumba(CPUlimit: Limitation, expectedLimit: Any | int) -> Non
 	assertEqualTo(actual, expectedLimit, defineProcessorLimit.__name__, CPUlimit, 'numba')
 
 @pytest.mark.parametrize(
-	'listDimensions,expected'
+	'mapShape,expected'
 	, [
 		([1, 2, 3, 4, 5], (1, 2, 3, 4, 5))
 		, ([1, sys.maxsize], (1, sys.maxsize))
@@ -140,12 +140,12 @@ def test_setCPUlimitNumba(CPUlimit: Limitation, expectedLimit: Any | int) -> Non
 		, ((3, 5, 7), (3, 5, 7))
 	]
 )
-def test_validateListDimensions(listDimensions: Sequence[Any], expected: tuple[int, ...]) -> None:
-	actual: tuple[int, ...] = validateListDimensions(listDimensions)
-	assertEqualTo(actual, expected, validateListDimensions.__name__, listDimensions)
+def test_validateMapShape(mapShape: Sequence[Any], expected: tuple[int, ...]) -> None:
+	actual: tuple[int, ...] = validateMapShape(mapShape)
+	assertEqualTo(actual, expected, validateMapShape.__name__, mapShape)
 
 @pytest.mark.parametrize(
-	'listDimensions,expected'
+	'mapShape,expected'
 	, [
 		(None, ValueError)
 		, (['a'], ValueError)
@@ -161,7 +161,7 @@ def test_validateListDimensions(listDimensions: Sequence[Any], expected: tuple[i
 		, ([float('nan')], ValueError)
 	]
 )
-def test_validateListDimensionsError(listDimensions: Sequence[Any], expected: type[Exception]) -> None:
+def test_validateMapShapeError(mapShape: Sequence[Any], expected: type[Exception]) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		validateListDimensions(listDimensions)
-	assertEqualTo(type(exceptionInfo.value), expected, validateListDimensions.__name__, listDimensions)
+		validateMapShape(mapShape)
+	assertEqualTo(type(exceptionInfo.value), expected, validateMapShape.__name__, mapShape)

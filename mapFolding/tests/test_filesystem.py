@@ -22,7 +22,6 @@ stores computational results or adding new file formats.
 from __future__ import annotations
 
 from contextlib import redirect_stdout
-from mapFolding.beDRY import validateListDimensions
 from mapFolding.kitFilesystem import getFilenameFoldsTotal, getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal
 from mapFolding.oeis import getMapShape
 from mapFolding.tests import assertEqualTo
@@ -41,10 +40,9 @@ def test_saveFoldsTotal_fallback(path_tmpTesting: Path, foldsTotal: int) -> None
 	fallbackFiles: list[Path] = list(path_tmpTesting.glob('foldsTotalYO_*.txt'))
 	assertEqualTo(len(fallbackFiles), 1, saveFoldsTotal.__name__, pathFilename, foldsTotal)
 
-@pytest.mark.parametrize('listDimensions, expectedFilename', [([11, 13], 'p11x13.foldsTotal'), ([17, 13, 11], 'p11x13x17.foldsTotal')])
-def test_getFilenameFoldsTotal(listDimensions: list[int], expectedFilename: str) -> None:
+@pytest.mark.parametrize('mapShape, expectedFilename', [((11, 13), 'p11x13.foldsTotal'), ((17, 13, 11), 'p11x13x17.foldsTotal')])
+def test_getFilenameFoldsTotal(mapShape: tuple[int, ...], expectedFilename: str) -> None:
 	"""Test that getFilenameFoldsTotal generates correct filenames with dimensions sorted."""
-	mapShape: tuple[int, ...] = validateListDimensions(listDimensions)
 	filenameActual: str = getFilenameFoldsTotal(mapShape)
 	assertEqualTo(filenameActual, expectedFilename, getFilenameFoldsTotal.__name__, mapShape)
 
