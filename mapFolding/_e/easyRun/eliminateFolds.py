@@ -36,7 +36,7 @@ if __name__ == "__main__":
 	pathLikeWriteTotal: PathLike[str] | None = None
 	oeisID: str = ""
 	flow: str = ""
-	CPUlimit: Limitation = .5
+	CPUlimit: Limitation = 6
 	state: EliminationState | None = None
 
 	flow = "elimination"

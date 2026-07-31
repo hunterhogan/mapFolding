@@ -16,7 +16,7 @@ from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
 from mapFolding.oeis._metadata import dictionaryOEIS
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultA007822, dictionaryEstimatesMapFolding
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultFoldsSymmetric, dictionaryEstimatesMapFolding
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.RecipeJob import (
@@ -107,16 +107,16 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 def A007822(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
+	from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
 	foldsTotalEstimated: int = dictionaryOEIS['A007822']['valuesKnown'].get(n, 0)
-	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultA007822['module']['dataBasket']}"
-		, defaultA007822['variable']['stateDataclass'], defaultA007822['variable']['stateInstance'])
-	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultA007822['logicalPath']['synthetic']}.theorem2Numba')
-	identifierCallableSource: str = defaultA007822['function']['counting']
+	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
+		, defaultFoldsSymmetric['variable']['stateDataclass'], defaultFoldsSymmetric['variable']['stateInstance'])
+	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['logicalPath']['synthetic']}.theorem2Numba')
+	identifierCallableSource: str = defaultFoldsSymmetric['function']['counting']
 	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
-	sourceDataclassIdentifier: str = defaultA007822['variable']['stateDataclass']
-	sourceDataclassInstance: str = defaultA007822['variable']['stateInstance']
+	sourceDataclassIdentifier: str = defaultFoldsSymmetric['variable']['stateDataclass']
+	sourceDataclassInstance: str = defaultFoldsSymmetric['variable']['stateInstance']
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(settingsPackage.pathPackage)
 	sourcePackageIdentifier: str | None = settingsPackage.identifierPackage
 	pathPackage: PurePosixPath | None = None

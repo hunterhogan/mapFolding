@@ -5,8 +5,8 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import defaultA007822, IfThis
-from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsA007822 import ExprCallFilterAsymmetricFoldsState
+from mapFolding.someAssemblyRequired import defaultFoldsSymmetric, IfThis
+from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import ExprCallFilterAsymmetricFoldsState
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -18,10 +18,10 @@ if TYPE_CHECKING:
 
 # TODO figure out asynchronous + numba.
 
-astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultA007822['function']['initializeConcurrencyManager']), listParameters=[Make.Name('maxWorkers')]))
+astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultFoldsSymmetric['function']['initializeConcurrencyManager']), listParameters=[Make.Name('maxWorkers')]))
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
-	[Make.Attribute(Make.Name(defaultA007822['variable']['stateInstance']), defaultA007822['variable']['counting'], context=Make.Store())]
-	, value=Make.Call(Make.Name(defaultA007822['function']['getSymmetricFoldsTotal']))
+	[Make.Attribute(Make.Name(defaultFoldsSymmetric['variable']['stateInstance']), defaultFoldsSymmetric['variable']['counting'], context=Make.Store())]
+	, value=Make.Call(Make.Name(defaultFoldsSymmetric['function']['getSymmetricFoldsTotal']))
 )
 
 def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
@@ -40,12 +40,12 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
 	"""
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultFoldsSymmetric['function']['counting']))
 		, doThat=Then.extractIt
 		).captureLastMatch(astModule))
 
 	NodeChanger(
-		Be.Assign.valueIs(IfThis.isCallIdentifier(defaultA007822['function']['filterAsymmetricFolds']))
+		Be.Assign.valueIs(IfThis.isCallIdentifier(defaultFoldsSymmetric['function']['filterAsymmetricFolds']))
 		, Then.replaceWith(ExprCallFilterAsymmetricFoldsState)).visit(astFunctionDef_count)
 
 	NodeChanger(
@@ -54,7 +54,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	).visit(astFunctionDef_count)
 
 	NodeChanger(
-		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['counting']))
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultFoldsSymmetric['function']['counting']))
 		, doThat=Then.replaceWith(astFunctionDef_count)
 		).visit(astModule)
 	del astFunctionDef_count
@@ -77,15 +77,15 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	removeImports = NodeChanger(IfThis.isAnyOf(Be.ImportFrom, Be.Import), Then.removeIt)
 	removeImports.visit(astModule)
 
-	astModuleAsynchronousAnnex: ast.Module = getModule(logicalPathInfix=defaultA007822['logicalPath']['assembly'], identifierModule='_asynchronousAnnex')
+	astModuleAsynchronousAnnex: ast.Module = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['assembly'], identifierModule='_asynchronousAnnex')
 	imports.walkThis(astModuleAsynchronousAnnex)
 	removeImports.visit(astModuleAsynchronousAnnex)
 
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultA007822['function']['filterAsymmetricFolds']))
-			, Grab.nameAttribute(Then.replaceWith(f"_{defaultA007822['function']['filterAsymmetricFolds']}"))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultFoldsSymmetric['function']['filterAsymmetricFolds']))
+			, Grab.nameAttribute(Then.replaceWith(f"_{defaultFoldsSymmetric['function']['filterAsymmetricFolds']}"))
 		).visit(astModule)
 
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(f"_{defaultA007822['function']['filterAsymmetricFolds']}"))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(f"_{defaultFoldsSymmetric['function']['filterAsymmetricFolds']}"))
 			, Then.removeIt
 		).visit(astModuleAsynchronousAnnex)
 
@@ -99,9 +99,9 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 
 def makeA007822AsynchronousModules() -> None:
 	"""Make asynchronous modules for A007822."""
-	astModule: ast.Module = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['algorithm'])
-	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultA007822['module']['asynchronous'], defaultA007822['function']['counting']  # ruff:ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
-		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
+	astModule: ast.Module = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
+	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']  # ruff:ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
+		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':
 	makeA007822AsynchronousModules()

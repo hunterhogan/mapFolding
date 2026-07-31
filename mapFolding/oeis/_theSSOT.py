@@ -41,7 +41,7 @@ def getMapShape(oeisID: str, n: int) -> tuple[int, ...]:
 		case 'A001418':
 			mapShape = (n, n)
 		case 'A007822':
-			mapShape = (1, 2 * n + 1)
+			mapShape = (1, 2 * n)
 		case _:
 			message: str = f"I received `{oeisID = }`, but it is not implemented in `getMapShape`."
 			raise ValueError(message)

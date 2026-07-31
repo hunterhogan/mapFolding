@@ -1,4 +1,5 @@
-# ruff:file-ignore[import-outside-top-level]
+# ruff: file-ignore[redundant-literal-union]
+# ruff: file-ignore[import-outside-top-level]
 """You can use this module to access the central dispatch functions for all map-folding computations.
 
 This module provides the primary entry points for computing distinct foldings of multidimensional maps
@@ -54,7 +55,7 @@ from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateListDimensions
 from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
@@ -178,19 +179,19 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	elif flow == 'asynchronousSymmetric':
 		from mapFolding.dataBaskets import SymmetricFoldsState
-		from mapFolding.syntheticModules.A007822.asynchronous import doTheNeedful
+		from mapFolding.syntheticModules.foldsSymmetric.asynchronous import doTheNeedful
 		foldsTotal = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
 	elif flow.endswith('Symmetric'):
 		if flow == 'theorem2Symmetric':
-			from mapFolding.syntheticModules.A007822.theorem2 import doTheNeedful
+			from mapFolding.syntheticModules.foldsSymmetric.theorem2 import doTheNeedful
 		elif flow == 'theorem2CodonSymmetric':
-			from mapFolding.syntheticModules.A007822.codon.theorem2 import doTheNeedful
+			from mapFolding.syntheticModules.foldsSymmetric.codon.theorem2 import doTheNeedful
 		elif flow == 'theorem2NumbaSymmetric':
-			from mapFolding.syntheticModules.A007822.theorem2Numba import doTheNeedful
+			from mapFolding.syntheticModules.foldsSymmetric.theorem2Numba import doTheNeedful
 		elif flow == 'theorem2TrimmedSymmetric':
-			from mapFolding.syntheticModules.A007822.theorem2Trimmed import doTheNeedful
+			from mapFolding.syntheticModules.foldsSymmetric.theorem2Trimmed import doTheNeedful
 		else:
-			from mapFolding.syntheticModules.A007822.algorithm import doTheNeedful
+			from mapFolding.syntheticModules.foldsSymmetric.algorithm import doTheNeedful
 
 		from mapFolding.dataBaskets import SymmetricFoldsState
 		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
@@ -229,5 +230,7 @@ def countFolds(listDimensions: Sequence[int] | None = None
 
 	return foldsTotal
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+# DOCUMENT, possibly in multiple locations, that the map shape is (1, 2n) not (1, 2n+1). Or rather,
+# the algorithm uses (1, 2n).
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
 	return countFolds(None, pathLikeWriteTotal, None, CPUlimit=CPUlimit, mapShape=mapShape, flow=f'{flow}Symmetric')

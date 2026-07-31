@@ -56,22 +56,22 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
 	'oeisID, n, flow, CPUlimit'
 	, [
-		pytest.param('A007822', 4, 'algorithm', 0.5, id='algorithm')
-		, pytest.param('A007822', 4, 'asynchronous', 0.5, id='asynchronous')
-		, pytest.param('A007822', 4, 'theorem2', 0.5, id='theorem2')
+		pytest.param('A007822', 6, 'algorithm', 0.5, id='algorithm')
+		, pytest.param('A007822', 6, 'asynchronous', 0.5, id='asynchronous')
+		, pytest.param('A007822', 6, 'theorem2', 0.5, id='theorem2')
 		, pytest.param(
-			'A007822', 4, 'theorem2Codon', 0.5
+			'A007822', 6, 'theorem2Codon', 0.5
 			, id='theorem2Codon'
 			, marks=pytest.mark.skipif(
 				importlib.util.find_spec('codon') is None
 				, reason='codon-jit is not installed'
 			)
 		)
-		, pytest.param('A007822', 4, 'theorem2Numba', 0.5, id='theorem2Numba')
-		, pytest.param('A007822', 4, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
+		, pytest.param('A007822', 6, 'theorem2Numba', 0.5, id='theorem2Numba')
+		, pytest.param('A007822', 6, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
 	]
 )
-def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
+def test_countFoldsSymmetric(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 	"""Test A007822 flow options.
 
 	Parameters
@@ -88,7 +88,7 @@ def test_A007822(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
 	"""
 	pathLikeWriteTotal: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
-	mapShape: tuple[int, int] = (1, 2 * n)
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
 	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit)
 	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWriteTotal, CPUlimit)

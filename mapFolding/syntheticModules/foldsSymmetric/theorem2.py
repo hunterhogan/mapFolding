@@ -1,5 +1,5 @@
 from mapFolding.dataBaskets import SymmetricFoldsState
-from mapFolding.syntheticModules.A007822.initializeState import transitionOnGroupsOfFolds
+from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 
 def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while state.leaf1ndex > 4:
@@ -36,6 +36,12 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
                             state.countDimensionsGapped[state.leafConnectee] += 1
                             state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
                     state.indexDimension += 1
+                if not state.dimensionsUnconstrained:
+                    state.indexLeaf = 0
+                    while state.indexLeaf < state.leaf1ndex:
+                        state.gapsWhere[state.gap1ndexCeiling] = state.indexLeaf
+                        state.gap1ndexCeiling += 1
+                        state.indexLeaf += 1
                 state.indexMiniGap = state.gap1ndex
                 while state.indexMiniGap < state.gap1ndexCeiling:
                     state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.indexMiniGap]

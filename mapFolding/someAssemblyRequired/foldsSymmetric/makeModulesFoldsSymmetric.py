@@ -5,9 +5,9 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, parsePathFilena
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import default, defaultA007822, IfThis
+from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfThis
 from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
-from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsA007822 import (
+from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import (
 	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
@@ -23,18 +23,18 @@ if TYPE_CHECKING:
 def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
 	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
-			, Grab.idAttribute(Then.replaceWith(defaultA007822['variable']['stateDataclass']))
+			, Grab.idAttribute(Then.replaceWith(defaultFoldsSymmetric['variable']['stateDataclass']))
 		).visit(astModule)
 
 	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
-			, Grab.nameAttribute(Then.replaceWith(defaultA007822['variable']['stateDataclass']))
+			, Grab.nameAttribute(Then.replaceWith(defaultFoldsSymmetric['variable']['stateDataclass']))
 		).visit(astModule)
 
 	FunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
 		, doThat=Then.extractIt
 		).captureLastMatch(astModule))
-	FunctionDef_count.name = identifierCallable or defaultA007822['function']['counting']
+	FunctionDef_count.name = identifierCallable or defaultFoldsSymmetric['function']['counting']
 
 	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(FunctionDef_count)
 
@@ -59,7 +59,7 @@ def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCal
 	pathFilename: PurePath = numbaOnTheorem2(astModule, identifierModule, identifierCallable, logicalPathInfix, sourceCallableDispatcher)
 	astModule = parsePathFilename2astModule(pathFilename)
 
-	NodeChanger(Be.AnnAssign.valueIs(IfThis.isAttributeNamespaceIdentifier(defaultA007822['variable']['stateInstance'], 'indices'))
+	NodeChanger(Be.AnnAssign.valueIs(IfThis.isAttributeNamespaceIdentifier(defaultFoldsSymmetric['variable']['stateInstance'], 'indices'))
 			, lambda node: Grab.valueAttribute(Then.replaceWith(Make.Call(Make.Name('List'), [raiseIfNone(node.value)])))(node)
 		).visit(astModule)
 
@@ -72,26 +72,26 @@ def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCal
 def makeA007822Modules() -> None:
 	"""Make."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
-	pathFilename: PurePath = addSymmetryCheck(astModule, defaultA007822['module']['algorithm'], defaultA007822['function']['counting']
-		, defaultA007822['logicalPath']['synthetic'], None)
+	pathFilename: PurePath = addSymmetryCheck(astModule, defaultFoldsSymmetric['module']['algorithm'], defaultFoldsSymmetric['function']['counting']
+		, defaultFoldsSymmetric['logicalPath']['synthetic'], None)
 
-	astModule = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['algorithm'])
-	makeInitializeState(astModule, defaultA007822['module']['initializeState']
-		, defaultA007822['function']['initializeState'], defaultA007822['logicalPath']['synthetic'], None, identifiers=defaultA007822)
+	astModule = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
+	makeInitializeState(astModule, defaultFoldsSymmetric['module']['initializeState']
+		, defaultFoldsSymmetric['function']['initializeState'], defaultFoldsSymmetric['logicalPath']['synthetic'], None, identifiers=defaultFoldsSymmetric)
 
-	astModule = getModule(logicalPathInfix=defaultA007822['logicalPath']['synthetic'], identifierModule=defaultA007822['module']['algorithm'])
-	pathFilename = makeTheorem2(astModule, 'theorem2', defaultA007822['function']['counting']
-		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'], identifiers=defaultA007822)
-
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', defaultA007822['function']['counting']
-		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
-
-	makeTheorem2Codon(defaultA007822)
+	astModule = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
+	pathFilename = makeTheorem2(astModule, 'theorem2', defaultFoldsSymmetric['function']['counting']
+		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'], identifiers=defaultFoldsSymmetric)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = _numbaOnTheorem2(astModule, 'theorem2Numba', defaultA007822['function']['counting']
-		, defaultA007822['logicalPath']['synthetic'], defaultA007822['function']['dispatcher'])
+	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', defaultFoldsSymmetric['function']['counting']
+		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
+
+	makeTheorem2Codon(defaultFoldsSymmetric)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = _numbaOnTheorem2(astModule, 'theorem2Numba', defaultFoldsSymmetric['function']['counting']
+		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':
 	makeA007822Modules()
