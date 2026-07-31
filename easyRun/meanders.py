@@ -1,9 +1,10 @@
 # ruff:file-ignore[commented-out-code, undocumented-public-module, undocumented-public-function]
 from __future__ import annotations
 
+from hunterMakesPy import errorL33T
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import countMeanders
-from mapFolding.oeis._metadata import dictionaryOEIS  # ruff: ignore[import-private-name]
+from mapFolding.basecamp import countMeanders
+from mapFolding.oeis import getValuesKnown
 from typing import TYPE_CHECKING
 import gc
 import sys
@@ -15,12 +16,12 @@ if TYPE_CHECKING:
 
 def write() -> None:
 	sys.stdout.write(
-		f"{(match := (countTotal == dictionaryOEIS[oeisID]['valuesKnown'][n]))}\t"
+		f"{(match := (countTotal == totalKnown))}\t"
 		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 		f"{n}\t"
-		# f"{countTotal}\t"
-		# f"{dictionaryOEIS[oeisID]['valuesKnown'][n]}\t"
-		# f"{dictionaryOEIS[oeisID]['valuesKnown'][n] / countTotal}\t"
+		f"{countTotal}\t"
+		f"{totalKnown}\t"
+		f"{totalKnown / countTotal}\t"
 		f"{time.perf_counter() - timeStart:.2f}\t"
 		f"{ansiColorReset}\n"
 	)
@@ -50,11 +51,11 @@ if __name__ == '__main__':
 		"""
 
 		nList: list[int] = []
-		# nList.extend(range(2, 10))
-		# nList.extend(range(10, 28))
+		nList.extend(range(2, 10))
+		nList.extend(range(10, 28))
 		# nList.extend(range(28, 33))
 		# nList.extend(range(33, 38))
-		nList.extend(range(38, 43))
+		# nList.extend(range(38, 43))
 		# nList.extend(range(43, 45))
 		# nList.extend(range(45, 50))
 
@@ -62,7 +63,8 @@ if __name__ == '__main__':
 			gc.collect()
 			timeStart = time.perf_counter()
 			countTotal = countMeanders(oeisID, n, flow, pathLikeWriteTotal)
-			if n < dictionaryOEIS[oeisID]['valueUnknown']:
+			totalKnown = getValuesKnown(oeisID).get(n, -errorL33T)
+			if 0 <= totalKnown:
 				write()
 			else:
 				sys.stdout.write(f"{n} {countTotal} {time.perf_counter() - timeStart:.2f}\n")

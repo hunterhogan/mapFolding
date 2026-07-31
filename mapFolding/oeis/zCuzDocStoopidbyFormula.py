@@ -7,11 +7,12 @@ from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import errorL33T
-from mapFolding.basecamp import countFoldsSymmetric
+from mapFolding.basecamp import countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getMapShape
-from mapFolding.oeis._meanders import countMeanders
 from math import factorial, isqrt
 from typing import Literal
+
+# TODO Think of a non-arbitrary way to determine which `f` ought to be the default.
 
 @cache
 def A000136(

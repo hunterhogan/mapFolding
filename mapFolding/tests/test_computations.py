@@ -1,3 +1,9 @@
+# TODO Figure out why these imports are "circular". Improve the symbol organization to resolve this,
+# if possible. Otherwise, mark as sin.
+# ruff: file-ignore[import-outside-top-level]
+# from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba  # ruff: ignore[commented-out-code]
+# from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # ruff: ignore[commented-out-code]
+
 """Core computational verification and algorithm validation tests.
 
 (AI generated docstring)
@@ -29,10 +35,10 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
-from mapFolding.basecamp import countFolds, countFoldsSymmetric
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import countMeanders, getMapShape, oeisIDfor_n
+from mapFolding.oeis import getMapShape, oeisIDfor_n
 from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
@@ -48,7 +54,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
-	from mapFolding.oeis._byID import KeywordArgumentsCount
+	from mapFolding.theTypes import KeywordArgumentsCount
 	from os import PathLike
 	from pathlib import Path
 	from types import ModuleType
@@ -274,8 +280,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 		The temporary file path for generated module testing.
 
 	"""
-	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba  # ruff:ignore[import-outside-top-level]
-	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba  # ruff:ignore[import-outside-top-level]
+	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
+	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba
 
 	mapShape: tuple[int, ...] = oneTestCuzTestsOverwritingTests
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))

@@ -1,25 +1,19 @@
 from __future__ import annotations
 
-from mapFolding.basecamp import countFolds, countFoldsSymmetric
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import byFormula, getMapShape
-from mapFolding.oeis._meanders import countMeanders
 from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEIS
-from typing import Protocol, TYPE_CHECKING, TypedDict
+from typing import Protocol, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
 	from mapFolding.oeis._dataBaskets import MetadataOEISid
-	from os import PathLike
+	from mapFolding.theTypes import KeywordArgumentsCount
 	from typing import Unpack
-
-class KeywordArgumentsCount(TypedDict, total=False):
-	flow: str
-	pathLikeWriteTotal: PathLike[str] | None
-	CPUlimit: Limitation
 
 class _FormulaForN(Protocol):
 	def __call__(self, n: int, f: str = ...) -> int: ...
 
+# TODO Learn a better way to handle default values in this situation.
 def _evaluateFormulaForN(formulaForN: _FormulaForN, n: int, f: str) -> int:
 	if f:
 		foldsTotal: int = formulaForN(n, f)

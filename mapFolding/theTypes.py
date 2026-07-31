@@ -1,11 +1,15 @@
+# DOCUMENT
+# ruff: file-ignore[undocumented-public-class]
 """Types for defensive coding and for computation optimization."""
 
 from __future__ import annotations
 
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
-from typing import Any, TYPE_CHECKING, TypeVar
+from typing import Any, TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
+	from hunterMakesPy.theTypes import Limitation
+	from os import PathLike
 	from typing import TypeAlias
 
 #================== `TypeVar` when a NumPy integer type is mandatory =======
@@ -77,3 +81,10 @@ Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[NumPyElephino]]
 
 Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 """A `numpy.ndarray` with one axis and elements of type `NumPyFoldsTotal`."""
+
+#================== Function signatures ===========================================================
+
+class KeywordArgumentsCount(TypedDict, total=False):
+	flow: str
+	pathLikeWriteTotal: PathLike[str] | None
+	CPUlimit: Limitation
