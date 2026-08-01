@@ -24,11 +24,11 @@ if TYPE_CHECKING:
 	from typing import Final
 
 dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
-	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000,
+	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000,  # Probably less than 12 days with my T4 discovery.
 	(2, 21): 776374224866624,
 	(3, 15): 824761667826225,
 	(3, 3, 3, 3): 85109616000000000000000000000000,
-	(8, 8): 791274195985524900,  # A test estimated 300,000 hours to compute.
+	(8, 8): 791274195985524900,  # Two tests, months apart, estimated 300,000 hours to compute.
 }
 """Estimates of multidimensional map folding `foldsTotal`."""
 
@@ -67,7 +67,6 @@ default = Default(
 	}
 )
 
-# TODO Outside of the oeis directory, transition from A007822 to foldsSymmetric.
 # TODO Figure out how to centralize more variables. Example: I renamed
 # mapFolding\algorithms\symmetricFolds.py to mapFolding\algorithms\foldsSymmetric.py.
 defaultFoldsSymmetric: Default = deepcopy(default)

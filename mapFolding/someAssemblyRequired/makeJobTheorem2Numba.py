@@ -105,7 +105,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
 
-def A007822(n: int) -> None:
+def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
@@ -122,7 +122,7 @@ def A007822(n: int) -> None:
 	pathPackage: PurePosixPath | None = None
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
 	fileExtension: str = settingsPackage.fileExtension
-	pathFilenameFoldsTotal = pathModule / ('A007822_' + str(n))
+	pathFilenameFoldsTotal = pathModule / ('foldsSymmetric_' + str(n))
 	packageIdentifier: str = ''
 	logicalPathRoot: identifierDotAttribute | None = None
 	moduleIdentifier: str = pathFilenameFoldsTotal.stem

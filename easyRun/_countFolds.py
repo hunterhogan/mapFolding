@@ -6,10 +6,10 @@ prints colorized output indicating whether computed values match expected values
 """
 from __future__ import annotations
 
+from hunterMakesPy import errorL33T
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
-from mapFolding.oeis import getMapShape
-from mapFolding.oeis._metadata import dictionaryOEIS  # ruff: ignore[import-private-name]
+from mapFolding.oeis import getMapShape, getValuesKnown
 from typing import TYPE_CHECKING
 import sys
 import time
@@ -21,11 +21,11 @@ if TYPE_CHECKING:
 if __name__ == '__main__':
 	def _write() -> None:
 		sys.stdout.write(
-			f"{(match := foldsTotal == dictionaryOEIS[oeisID]['valuesKnown'].get(n))}\t"
+			f"{(match := foldsTotal == getValuesKnown(oeisID).get(n, -errorL33T))}\t"
 			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
 			f"{n}\t"
 			f"{foldsTotal}\t"
-			f"{dictionaryOEIS[oeisID]['valuesKnown'].get(n)}\t"
+			f"{getValuesKnown(oeisID).get(n, -errorL33T)}\t"
 			f"{time.perf_counter() - timeStart:.2f}\t"
 			f"{ansiColorReset}\n"
 		)
@@ -55,10 +55,6 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 
 		timeStart = time.perf_counter()
-		foldsTotal: int = countFolds(mapShape
-						, flow
-						, pathLikeWriteTotal
-						, CPUlimit=CPUlimit
-						, computationDivisions=computationDivisions)
+		foldsTotal: int = countFolds(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 
 		_write()

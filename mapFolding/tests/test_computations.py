@@ -78,7 +78,7 @@ if TYPE_CHECKING:
 	]
 )
 def test_countFoldsSymmetric(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
-	"""Test A007822 flow options.
+	"""Test foldsSymmetric flow options.
 
 	Parameters
 	----------
@@ -227,7 +227,7 @@ def test_oeisIDfor_n_byFormula(oeisID: str, oeis_n: int, f: str) -> None:
 		, pytest.param('A195646', 2, '', {'flow': 'daoOfMapFolding'}, id='A195646::countFolds')
 		, pytest.param('A000682', 3, '', {'flow': 'matrixMeanders'}, id='A000682::countMeanders')
 		, pytest.param('A005316', 3, '', {'flow': 'matrixMeanders'}, id='A005316::countMeanders')
-		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='A007822::countFoldsSymmetric')
+		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric::countFoldsSymmetric')
 	]
 )
 def test_oeisIDfor_n(oeisID: str, n: int, f: str, keywordArguments: KeywordArgumentsCount) -> None:

@@ -1,3 +1,4 @@
+# DOCUMENT
 # ruff:file-ignore[undocumented-public-module]
 from __future__ import annotations
 
@@ -10,11 +11,11 @@ import ast
 FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(logicalPathInfix='algorithms', identifierModule='foldsSymmetric'), defaultFoldsSymmetric['function']['filterAsymmetricFolds']))
 
 ImaString: str = f"{defaultFoldsSymmetric['variable']['stateInstance']} = {defaultFoldsSymmetric['function']['filterAsymmetricFolds']}({defaultFoldsSymmetric['variable']['stateInstance']})"
-A007822incrementCount = ast.parse(ImaString).body[0]
+foldsSymmetricIncrementCount = ast.parse(ImaString).body[0]
 del ImaString
 
 ImaString = f'{defaultFoldsSymmetric['variable']['stateInstance']}.{defaultFoldsSymmetric['variable']['counting']} = ({defaultFoldsSymmetric['variable']['stateInstance']}.{defaultFoldsSymmetric['variable']['counting']} + 1) // 2'
-A007822adjustFoldsTotal: ast.stmt = ast.parse(ImaString).body[0]
+adjustFoldsTotal: ast.stmt = ast.parse(ImaString).body[0]
 del ImaString
 
 ExprCallFilterAsymmetricFolds_leafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultFoldsSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Name('leafBelow')]))

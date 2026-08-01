@@ -1,3 +1,4 @@
+# DOCUMENT
 # ruff: file-ignore[undocumented-public-module]
 from __future__ import annotations
 

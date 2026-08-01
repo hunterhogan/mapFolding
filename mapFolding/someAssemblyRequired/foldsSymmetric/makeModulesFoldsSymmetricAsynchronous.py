@@ -36,7 +36,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	Why _must_ those things happen?
 	1. Filtering takes as long as finding the `groupOfFolds`, so we can't block.
 	2. Filtering must start immediately to keep up with the finding process.
-	3. To discover A007822(27), which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
+	3. To discover the foldsSymmetric count for n=27, which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
 	"""
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
@@ -97,11 +97,11 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 
 	return pathFilename
 
-def makeA007822AsynchronousModules() -> None:
-	"""Make asynchronous modules for A007822."""
+def makeFoldsSymmetricAsynchronousModules() -> None:
+	"""Make asynchronous modules for foldsSymmetric."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
 	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']  # ruff:ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':
-	makeA007822AsynchronousModules()
+	makeFoldsSymmetricAsynchronousModules()

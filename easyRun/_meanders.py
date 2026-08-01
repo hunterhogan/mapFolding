@@ -1,4 +1,4 @@
-# ruff:file-ignore[commented-out-code, undocumented-public-module, undocumented-public-function]
+# ruff:file-ignore[commented-out-code]
 from __future__ import annotations
 
 from hunterMakesPy import errorL33T

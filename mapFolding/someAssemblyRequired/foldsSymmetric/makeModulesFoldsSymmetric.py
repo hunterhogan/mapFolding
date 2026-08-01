@@ -8,7 +8,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfThis
 from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import (
-	A007822adjustFoldsTotal, A007822incrementCount, FunctionDef_filterAsymmetricFolds)
+	adjustFoldsTotal, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
@@ -36,11 +36,11 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 		).captureLastMatch(astModule))
 	FunctionDef_count.name = identifierCallable or defaultFoldsSymmetric['function']['counting']
 
-	NodeChanger(Be.Return, Then.insertThisAbove([A007822adjustFoldsTotal])).visit(FunctionDef_count)
+	NodeChanger(Be.Return, Then.insertThisAbove([adjustFoldsTotal])).visit(FunctionDef_count)
 
 	NodeChanger(
 		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(default['variable']['stateInstance'], default['variable']['counting']))
-		, doThat=Then.replaceWith(A007822incrementCount)
+		, doThat=Then.replaceWith(foldsSymmetricIncrementCount)
 		).visit(FunctionDef_count)
 
 	imports = LedgerOfImports(astModule)
@@ -69,7 +69,7 @@ def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCal
 
 	return pathFilename
 
-def makeA007822Modules() -> None:
+def makeFoldsSymmetricModules() -> None:
 	"""Make."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultFoldsSymmetric['module']['algorithm'], defaultFoldsSymmetric['function']['counting']
@@ -94,4 +94,4 @@ def makeA007822Modules() -> None:
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':
-	makeA007822Modules()
+	makeFoldsSymmetricModules()

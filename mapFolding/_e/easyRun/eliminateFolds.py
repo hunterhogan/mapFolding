@@ -17,7 +17,6 @@ import time
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
-	from pathlib import PurePath
 
 if __name__ == "__main__":
 
@@ -36,7 +35,7 @@ if __name__ == "__main__":
 	pathLikeWriteTotal: PathLike[str] | None = None
 	oeisID: str = ""
 	flow: str = ""
-	CPUlimit: Limitation = 6
+	CPUlimit: Limitation = -2
 	state: EliminationState | None = None
 
 	flow = "elimination"
@@ -54,7 +53,7 @@ if __name__ == "__main__":
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(7, 8):
+	for n in range(6, 8):
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
@@ -67,7 +66,7 @@ if __name__ == "__main__":
 			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
 			# state = pinLeavesDimensions0零一(state)
-			state.listPermutationSpace.reverse()
+			# state.listPermutationSpace.reverse()
 
 		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWriteTotal=pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow)
 
