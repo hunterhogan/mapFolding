@@ -419,9 +419,8 @@ class MatrixMeandersState:
 
 	n: int
 	"""The index of the meanders problem being solved."""
-	# TODO divorce oeisID from meanders, just as I did with mapFolding.
-	oeisID: str
-	"""'A000682', semi-meanders, or 'A005316', meanders."""
+	kind: str
+	"""'semi' for semi-meanders or 'meanders' for meanders."""
 
 	boundary: int
 	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""

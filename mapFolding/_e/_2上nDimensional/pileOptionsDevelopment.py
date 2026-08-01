@@ -1,7 +1,11 @@
+# pyright: reportArgumentType=false
 # pyright: reportAssignmentType=false
-# pyright: reportUnknownVariableType=false
+# pyright: reportReturnType=false
 # pyright: reportUnknownArgumentType=false
-# ruff:file-ignore[import-outside-top-level, commented-out-code, print, p-print]
+# pyright: reportUnknownVariableType=false
+# ruff: file-ignore[import-outside-top-level, commented-out-code, print, p-print]
+# ty: ignore[invalid-argument-type]
+# ty: ignore[invalid-assignment]
 from __future__ import annotations
 
 from bisect import bisect_left

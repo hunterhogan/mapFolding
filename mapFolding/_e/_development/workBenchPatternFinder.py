@@ -11,9 +11,9 @@ from hunterMakesPy import raiseIfNone
 from mapFolding._e import getIteratorOfLeaves, getLeafOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearest首, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
+from mapFolding._e._development.toolkit import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
-from mapFolding._e._development.toolkit import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pprint
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
+	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType] # ty: ignore[invalid-assignment]
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:

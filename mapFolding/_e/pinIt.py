@@ -241,10 +241,10 @@ def reduceLeafSpace(
 
 #-------- Functions that use the shared logic -----------------------------------------
 
-def _isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
+def isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
 	return isLeafOptions吗(pileLeafSpace[1])
 
-def _odd吗(state: EliminationState, dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
+def odd吗(state: EliminationState, dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
 	def workhorse(pileLeaf: tuple[Pile, Leaf]) -> bool:
 		return bool(oddLeaf吗(state.mapShape, dimension=dimension, leaf=pileLeaf[1]))
 	return workhorse
@@ -277,7 +277,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 
 	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
 	for dimension in range(state.dimensionsTotal):
-		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
+		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
 		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
 		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
 		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(sorted(parityEven.items()), 2)))
@@ -334,7 +334,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 				continue
 
 			if not (permutationSpace := reduceLeafSpace(permutationSpace
-					, filter(_isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
+					, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 					, leafAntiOptions
 			)):
 				#=SIN= Early return.

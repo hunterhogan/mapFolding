@@ -274,8 +274,8 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 		del arrayAnalyzed
 
 		if 45 <= state.n:  # Data collection for 'reference' directory.
-			# oeisID,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-			print(state.oeisID, state.n, state.boundary + 1, state.indexTarget, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff:ignore[print]
+			# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+			print(state.kind, state.n, state.boundary + 1, state.indexTarget, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff:ignore[print]
 		boundaryProgressBar.update()
 
 	boundaryProgressBar.close()

@@ -161,9 +161,15 @@ def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> N
 	assertEqualTo(actual, expected, countFolds.__name__, mapShape, flow, CPUlimit=CPUlimit)
 
 @pytest.mark.xdist_group(name='test_meanders')
-@pytest.mark.parametrize('oeisID', ('A000682', 'A005316'))
+@pytest.mark.parametrize(
+	'kind, oeisID'
+	, [
+		pytest.param('semi', 'A000682', id='semi')
+		, pytest.param('meanders', 'A005316', id='meanders')
+	]
+)
 @pytest.mark.parametrize('n, flow', (*CartesianProduct((2, 29), ('matrixNumPy', 'matrixPandas')), (3, 'matrixMeanders'), (10, 'matrixMeanders')))
-def test_meanders(oeisID: str, n: int, flow: str) -> None:
+def test_meanders(kind: str, oeisID: str, n: int, flow: str) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -171,6 +177,8 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 
 	Parameters
 	----------
+	kind : str
+		Semantic meander algorithm kind to validate.
 	oeisID : str
 		OEIS identifier to validate.
 	n : int
@@ -180,8 +188,8 @@ def test_meanders(oeisID: str, n: int, flow: str) -> None:
 
 	"""
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
-	actual: int = countMeanders(oeisID, n, flow, None)
-	assertEqualTo(actual, expected, countMeanders.__name__, oeisID, n, flow, None)
+	actual: int = countMeanders(kind, n, flow, None)
+	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
 @pytest.mark.parametrize(
 	'oeisID, f'

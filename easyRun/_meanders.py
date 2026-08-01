@@ -5,6 +5,7 @@ from hunterMakesPy import errorL33T
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countMeanders
 from mapFolding.oeis import getValuesKnown
+from pathlib import Path
 from typing import TYPE_CHECKING
 import gc
 import sys
@@ -30,15 +31,15 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	pathLikeWriteTotal: PathLike[str] | None = '/apps/mapFolding/mapFolding/jobs'  # pyright: ignore[reportAssignmentType] # ty: ignore[invalid-assignment]
+	pathLikeWriteTotal: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWriteTotal = None
 	flow = 'matrixMeanders'
 	flow = 'matrixPandas'
 	flow = 'matrixNumPy'
 
-	for oeisID in [
-			'A005316',
-			# 'A000682',
+	for oeisID, kind in [
+			('A005316', 'meanders'),
+			# ('A000682', 'semi'),
 				]:
 		sys.stdout.write(f"\n{oeisID}\n")
 
@@ -62,7 +63,7 @@ if __name__ == '__main__':
 		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
-			countTotal = countMeanders(oeisID, n, flow, pathLikeWriteTotal)
+			countTotal = countMeanders(kind, n, flow, pathLikeWriteTotal)
 			totalKnown = getValuesKnown(oeisID).get(n, -errorL33T)
 			if 0 <= totalKnown:
 				write()

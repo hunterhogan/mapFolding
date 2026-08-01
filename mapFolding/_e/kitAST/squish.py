@@ -10,7 +10,7 @@ from mapFolding._e.kitAST.infoBooth import default
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
-import autoflake  # pyright: ignore[reportMissingTypeStubs]
+import autoflake  # pyright: ignore[reportMissingTypeStubs] # TODO waiting for new version.
 import python_minifier
 import subprocess  # ruff:ignore[suspicious-subprocess-import]
 import sys

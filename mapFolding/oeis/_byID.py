@@ -142,8 +142,10 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 				foldsTotal = _evaluateFormulaForN(byFormula.A334615, n, f)
 			case 'A337581':
 				foldsTotal = _evaluateFormulaForN(byFormula.A337581, n, f)
-			case 'A000682' | 'A005316':
-				foldsTotal = countMeanders(oeisID, n, **keywordArguments)
+			case 'A000682':
+				foldsTotal = countMeanders('semi', n, **keywordArguments)
+			case 'A005316':
+				foldsTotal = countMeanders('meanders', n, **keywordArguments)
 			case 'A007822':
 				foldsTotal = countFoldsSymmetric(getMapShape(oeisID, n), **keywordArguments)
 			case _:

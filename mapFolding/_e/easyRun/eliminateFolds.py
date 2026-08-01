@@ -58,8 +58,13 @@ if __name__ == "__main__":
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
+			state = pinPilesAtEnds(state, 1)
+			permutationSpace = state.listPermutationSpace.pop()
+			for pile, leaf in [(2, 5), (3, 7)]:
+				permutationSpace = permutationSpace.atPilePinLeaf(pile, leaf)
+			state.listPermutationSpace.append(permutationSpace)
 			# state = pinPile零Ante首零(state)
-			state = pinPilesAtEnds(state, 4)
+			state = pinPilesAtEnds(state, 3)
 			# state = pinLeavesDimension首二(state)
 			# state = pin3beans2(state)
 			# state = pin首beans(state)

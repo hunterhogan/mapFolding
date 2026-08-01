@@ -70,20 +70,19 @@ from __future__ import annotations
 
 from collections import deque
 from gmpy2 import bit_flip
-from humpy_cytoolz import compose, concat, get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
+from humpy_cytoolz import concat, get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations, product as CartesianProduct
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost,
 	mapShapeIs2上nDimensions, notLeafOriginOrLeaf零)
-from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafPinned吗, notPileLast
 from mapFolding._e.pinIt import (
-	reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
+	isPileLeafOptions吗, odd吗, reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
+	reducePermutationSpace_nakedSubset)
 from more_itertools import extract, pairwise, triplewise
-from operator import itemgetter
 from typing import TYPE_CHECKING
 from Z0Z_tools import between吗, DOTitems, reverseLookup
 
@@ -177,14 +176,15 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
+		# TODO fix the typing problems in Z0Z_tools.
 		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast)
 								, filterLeaf(notLeafOriginOrLeaf零
 								, filterLeaf(leafAtPilePredecessors.__contains__
-								, permutationSpace.extractPinnedLeaves()))
+									, permutationSpace.extractPinnedLeaves()))
 		)):
-			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace
+			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace  # ty: ignore[invalid-argument-type]
 				, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
-				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
+				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])  # ty: ignore[invalid-argument-type]
 			)):
 				return None
 
@@ -221,8 +221,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
 	for dimension in range(state.dimensionsTotal):
-		odd吗: Callable[[tuple[Pile, Leaf]], bool] = compose(oddLeaf2上nDimensional吗(dimension), itemgetter(1))
-		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(odd吗, DOTitems(permutationSpace.extractPinnedLeaves()))
+		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
 		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
 		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
 		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(sorted(parityEven.items()), 2)))
@@ -271,11 +270,11 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 					return None
 				continue
 
-			else:  # elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+			else:
 				continue
 
 			if not (permutationSpace := reduceLeafSpace(permutationSpace
-					, filter(lambda pileLeaf: isLeafOptions吗(pileLeaf[1]), extract(permutationSpace.items(), pilesForbidden))  # ty:ignore[invalid-argument-type] # pyright: ignore[reportArgumentType]
+					, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 					, leafAntiOptions
 			)):
 				#=SIN= Early return.
@@ -334,7 +333,9 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		leafCount: int = permutationSpace.leafCount
 
 		pile1stOpen: int = 2
-		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves()))):
+		# TODO fix this typing issue.
+		leavesPinned: PinnedLeaves = filterLeaf(notLeafOriginOrLeaf零, permutationSpace.extractPinnedLeaves())  # ty: ignore[invalid-assignment]
+		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(permutationSpace
 				, DOTitems(filterLeaf(isLeafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))

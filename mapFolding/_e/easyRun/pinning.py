@@ -35,12 +35,17 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 
 if __name__ == '__main__':
 	state = EliminationState((2,) * 7)
+	state: EliminationState = pinPilesAtEnds(state, 1)
+	permutationSpace = state.listPermutationSpace.pop()
+	for pile, leaf in [(2, 5), (3, 7)]:
+		permutationSpace = permutationSpace.atPilePinLeaf(pile, leaf)
+	state.listPermutationSpace.append(permutationSpace)
 
 	printThis = True
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state: EliminationState = pinPilesAtEnds(state, 4)
+		state: EliminationState = pinPilesAtEnds(state, 3)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
@@ -50,12 +55,12 @@ if __name__ == '__main__':
 		print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
+		state: EliminationState = pinLeavesDimension首二(state)
 		state: EliminationState = pinPile零Ante首零(state)
 		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinLeavesDimension二(state)
 		state: EliminationState = pin首beans(state)
 		state: EliminationState = pin3beans2(state)
-		state: EliminationState = pinLeavesDimension首二(state)
 		print(state.sumsOfProductsOfDimensionsNearest首)
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))

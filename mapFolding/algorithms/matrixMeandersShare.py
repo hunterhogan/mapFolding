@@ -49,7 +49,7 @@ def areIntegersWide(state: MatrixMeandersNumPyState, *, arrayMeanders: ndarray[t
 	value.
 
 	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,*
-	A000682), then the flow will go to a function that does not use fixed size integers. When the
+	semi), then the flow will go to a function that does not use fixed size integers. When the
 	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
 	with fixed size integers. In that case, casting `MAXIMUMarcCode` to a fixed size merely delays the
 	transition from one function to the other by one iteration.
@@ -181,14 +181,14 @@ def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float =
 
 	Figure out an intelligent flow for so many factors.
 	"""
-	theDictionary: dict[str, dict[int, dict[int, int]]] = {'A005316': A005316_n_boundary_buckets, 'A000682': A000682_n_boundary_buckets}
-	bucketsTotal: int = theDictionary.get(state.oeisID, {}).get(state.n, {}).get(state.boundary, 0)
+	theDictionary: dict[str, dict[int, dict[int, int]]] = {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
+	bucketsTotal: int = theDictionary.get(state.kind, {}).get(state.n, {}).get(state.boundary, 0)
 	if bucketsTotal <= 0:
 		bucketsTotal = int(3.55 * 665523011)
 
 	return bucketsTotal
 
-A000682_n_boundary_buckets: dict[int, dict[int, int]] = {
+n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 	2: {1: 1},
 	3: {2: 3, 1: 2},
 	4: {3: 4, 2: 7, 1: 2},
@@ -1114,7 +1114,7 @@ A000682_n_boundary_buckets: dict[int, dict[int, int]] = {
 	},
 }
 
-A005316_n_boundary_buckets: dict[int, dict[int, int]] = {
+n_boundary_bucketsMeanders: dict[int, dict[int, int]] = {
 	2: {1: 1},
 	3: {2: 3, 1: 2},
 	4: {3: 2, 2: 4, 1: 3},
