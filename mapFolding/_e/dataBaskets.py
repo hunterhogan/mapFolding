@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-from collections import deque
 # TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
@@ -184,16 +183,16 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		if pile is None:
 			pile = first(filterLeaf(isLeafOptions吗, self))
 		if (leafOptions := self.getLeafOptions(pile)) is None:
-			deconstructed: Iterable[PermutationSpace] = deque([self])
+			deconstructed: Iterable[PermutationSpace] = [self]
 		else:
 			leavesToPin = leavesToPin or getIteratorOfLeaves(leafOptions)
 			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
 		return deconstructed
 
-	def deconstructByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> deque[PermutationSpace]:
+	def deconstructByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> list[PermutationSpace]:
 		"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
-		Return a `deque` containing this `PermutationSpace` if `leaf` is already pinned, or one
+		Return a `list` containing this `PermutationSpace` if `leaf` is already pinned, or one
 		`PermutationSpace` for each open `pile` in `leafDomain` with `leaf` pinned at `pile`.
 
 		Parameters
@@ -205,11 +204,11 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		Returns
 		-------
-		deconstructedPermutationSpace : deque[PermutationSpace]
-			Deque of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in
+		deconstructedPermutationSpace : list[PermutationSpace]
+			List of `PermutationSpace` dictionaries with `leaf` pinned at each open `pile` in
 			`leafDomain`.
 		"""
-		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
+		deconstructedPermutationSpace: list[PermutationSpace] = []
 		if self.leafNotPinned吗(leaf):
 			leafInPileRange: Callable[[int], bool] = compose(
 				leafInLeafOptions吗(leaf), partial(self.getLeafOptions, default=bit_mask(len(self)))
@@ -220,7 +219,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			deconstructedPermutationSpace.append(self)
 		return deconstructedPermutationSpace
 
-	def deconstructByDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> deque[PermutationSpace]:
+	def deconstructByDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> list[PermutationSpace]:
 		"""Pin several leaves across matching pile-domain tuples.
 
 		Parameters
@@ -232,11 +231,11 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		Returns
 		-------
-		deconstructedPermutationSpace : deque[PermutationSpace]
-			Deque of `PermutationSpace` dictionaries with the requested leaves pinned across
+		deconstructedPermutationSpace : list[PermutationSpace]
+			List of `PermutationSpace` dictionaries with the requested leaves pinned across
 			compatible pile tuples.
 		"""
-		deconstructedPermutationSpace: deque[PermutationSpace] = deque()
+		deconstructedPermutationSpace: list[PermutationSpace] = []
 
 		def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
@@ -572,9 +571,9 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listFolding: deque[Folding] = dataclasses.field(default_factory=deque[Folding], init=True)
+	listFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
 	"""A list of `Folding` patterns found."""
-	listPermutationSpace: deque[PermutationSpace] = dataclasses.field(default_factory=deque[PermutationSpace], init=True)
+	listPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
 	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	pile: Pile = -1
@@ -636,7 +635,7 @@ class EliminationState:
 		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
 			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
 		)
-		self.listPermutationSpace = deque(foldingGroup吗.get(False, ()))
+		self.listPermutationSpace = list(foldingGroup吗.get(False, ()))
 		self.listFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
 		return self
 
@@ -718,29 +717,29 @@ class EliminationState:
 	def reduceAllPermutationSpace(
 		self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]
 	) -> Self:
-		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace
-		self.listPermutationSpace = deque()
-		listPermutationSpaceIrreducible: deque[PermutationSpace] = deque()
+		listPermutationSpace: list[PermutationSpace] = self.listPermutationSpace
+		self.listPermutationSpace = []
+		listPermutationSpaceIrreducible: list[PermutationSpace] = []
 
 		while listPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
 			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
-			functionsReduction: deque[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = deque(
+			functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = list(
 				listFunctionsReduction
 			)
 			keepGoing: bool = True
 
 			while keepGoing:
 				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = (
-					functionsReduction.popleft()
+					functionsReduction.pop()
 				)
 				permutationSpace = reducePermutationSpace(self, raiseIfNone(permutationSpace))
 
 				if not permutationSpace:
 					keepGoing = False
 				elif sumPermutationSpace != sum(permutationSpace.values()):
-					functionsReduction = deque(listFunctionsReduction)
+					functionsReduction = list(listFunctionsReduction)
 					sumPermutationSpace = sum(permutationSpace.values())
 				elif not functionsReduction:
 					listPermutationSpaceIrreducible.append(permutationSpace)
@@ -778,8 +777,8 @@ class EliminationState:
 
 		[2] mapFolding._e.pin2上nDimensions
 		"""
-		listPermutationSpace: deque[PermutationSpace] = self.listPermutationSpace.copy()
-		self.listPermutationSpace = deque()
+		listPermutationSpace: list[PermutationSpace] = self.listPermutationSpace.copy()
+		self.listPermutationSpace = []
 		self.listPermutationSpace.extend(filterfalse(self.permutationSpaceCreaseViolation吗, listPermutationSpace))
 
 		return self

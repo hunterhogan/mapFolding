@@ -1,7 +1,6 @@
 # ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
-from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
@@ -160,7 +159,7 @@ def count(state: EliminationState) -> EliminationState:
 	solver.solve(model, foldingCollector)
 
 	state.groupsOfFolds = len(foldingCollector.listFolding)
-	state.listFolding = deque(map(tuple, foldingCollector.listFolding))
+	state.listFolding = list(map(tuple, foldingCollector.listFolding))
 
 	return state
 
@@ -200,7 +199,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 				for permutationSpace in state.listPermutationSpace
 		]
 
-		state.listPermutationSpace = deque()
+		state.listPermutationSpace = []
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc=f"PermutationSpace {len(listClaimTickets)}"):
 			sherpa: EliminationState = claimTicket.result()

@@ -4,7 +4,7 @@ Functions for 2^n-dimensional maps must go in other modules.
 """
 from __future__ import annotations
 
-from collections import Counter, deque
+from collections import Counter
 from functools import partial
 from gmpy2 import bit_clear
 from humpy_cytoolz import (
@@ -91,10 +91,10 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	, pile_k: Pile
 	, domainOf_leaf_r: Iterable[Pile] | None = None
 ) -> EliminationState:
-	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = deque()
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
 
-	listPermutationSpaceUnchanged: deque[PermutationSpace] = deque()
+	listPermutationSpaceUnchanged: list[PermutationSpace] = []
 	listExcludeLeaf_r: Iterable[PermutationSpace] = []
 
 	for permutationSpace in listPermutationSpace:
@@ -244,7 +244,7 @@ def reduceLeafSpace(
 def isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
 	return isLeafOptions吗(pileLeafSpace[1])
 
-def odd吗(state: EliminationState, dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
+def _odd吗(state: EliminationState, dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
 	def workhorse(pileLeaf: tuple[Pile, Leaf]) -> bool:
 		return bool(oddLeaf吗(state.mapShape, dimension=dimension, leaf=pileLeaf[1]))
 	return workhorse
@@ -275,9 +275,9 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 	pilesForbidden: Iterable[Pile] = []
 	permutationSpaceHasNewLeaf: bool = True
 
-	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
+	generators: list[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = []
 	for dimension in range(state.dimensionsTotal):
-		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
+		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
 		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
 		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
 		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(sorted(parityEven.items()), 2)))
@@ -499,8 +499,8 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 	return permutationSpace
 
 listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
-	reducePermutationSpace_LeafIsPinned
-	, _crossedCreases
+	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf1
-	, reducePermutationSpace_nakedSubset
+	, _crossedCreases
+	, reducePermutationSpace_LeafIsPinned
 )

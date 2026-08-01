@@ -62,7 +62,6 @@ Citations in BibTeX format at [mapFolding/citations](../../citations).
 """
 from __future__ import annotations
 
-from collections import deque
 from functools import cache
 from humpy_cytoolz import curry as syntacticCurry
 from itertools import combinations
@@ -215,7 +214,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
 
 	for dimension in range(_dimensionsTotal(mapShape)):
-		listPilePileCreaseByParity: list[deque[tuple[Pile, Pile]]] = [deque(), deque()]
+		listPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
 			if crease:
@@ -286,7 +285,7 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
 
 	for dimension in range(_dimensionsTotal(mapShape)):
-		listPilePileCreaseByParity: list[deque[tuple[Pile, Pile]]] = [deque(), deque()]
+		listPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
 			if crease:

@@ -48,6 +48,7 @@ cffconvert
 cffobj
 CFLAGS
 cfunc
+chevauchement
 Chevauchements
 chil
 Chilton

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections import deque
 from functools import partial
 from itertools import chain, repeat, starmap
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
@@ -18,7 +17,7 @@ if TYPE_CHECKING:
 	from multiprocessing.queues import Queue
 
 def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
-	return EliminationState(mapShape, listPermutationSpace=deque([permutationSpace])
+	return EliminationState(mapShape, listPermutationSpace=[permutationSpace]
 		).reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
 
 def deconstructPermutationSpaces(listPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
@@ -40,16 +39,16 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	queueStates: Queue[EliminationState] = processManager.Queue()
 
 	state.groupsOfFolds = len(state.listFolding)
-	state.listFolding = deque()
+	state.listFolding = []
 
-	listProcesses: deque[BaseProcess] = deque(starmap(
+	listProcesses: list[BaseProcess] = list(starmap(
 		partial(processManager.Process, target=consumePermutationSpaces, args=(state.mapShape, queuePermutationSpace, queueStates))
 		, repeat((), workersMaximum)
 	))
 	tuple(map(methodcaller('start'), listProcesses))
 
-	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = deque()
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
 
 	permutationSpacesLiving: int = len(listPermutationSpace)
 
@@ -57,7 +56,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		tuple(map(queuePermutationSpace.put, listPermutationSpace))
 		sherpa: EliminationState = queueStates.get()
 		state.groupsOfFolds += len(sherpa.listFolding)
-		listPermutationSpace = deque(deconstructPermutationSpaces(sherpa.listPermutationSpace))
+		listPermutationSpace = list(deconstructPermutationSpaces(sherpa.listPermutationSpace))
 		permutationSpacesLiving += -1 + len(listPermutationSpace)
 
 	tuple(map(queuePermutationSpace.put, repeat(PermutationSpace(), workersMaximum)))

@@ -54,7 +54,6 @@ References
 """
 from __future__ import annotations
 
-from collections import deque
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
@@ -85,7 +84,7 @@ if TYPE_CHECKING:
 
 #-------- Shared logic ---------------------------------------
 
-def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pileProcessingOrder: deque[Pile], *, CPUlimit: Limitation = None) -> EliminationState:
+def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pileProcessingOrder: list[Pile], *, CPUlimit: Limitation = None) -> EliminationState:
 	"""You can pin each `pile` in `pileProcessingOrder` by deconstructing open `PermutationSpace` dictionaries.
 
 	(AI generated docstring)
@@ -109,7 +108,7 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 		State that owns `state.listPermutationSpace` and map-shape metadata.
 	maximumSizeListPermutationSpace : int
 		Stop once `len(state.listPermutationSpace)` reaches `maximumSizeListPermutationSpace`.
-	pileProcessingOrder : deque[Pile]
+	pileProcessingOrder : list[Pile]
 		Processing order for `pile` values.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit` [6].
@@ -134,12 +133,13 @@ def _pinPiles(state: EliminationState, maximumSizeListPermutationSpace: int, pil
 	[6] mapFolding.defineProcessorLimit.
 	"""
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
+	pileProcessingOrder.reverse()
 
 	while pileProcessingOrder and (len(state.listPermutationSpace) < maximumSizeListPermutationSpace):
-		pile: Pile = pileProcessingOrder.popleft()
+		pile: Pile = pileProcessingOrder.pop()
 
 		thesePilesAreOpen: tuple[Iterator[PermutationSpace], Iterator[PermutationSpace]] = partition(partial(PermutationSpace.pileUndetermined吗, pile=pile), state.listPermutationSpace)
-		state.listPermutationSpace = deque(thesePilesAreOpen[False])
+		state.listPermutationSpace = list(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 			listClaimTickets: list[Future[EliminationState]] = [
@@ -311,7 +311,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeListP
 		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
 		raise ValueError(message)
 
-	pileProcessingOrder: deque[Pile] = deque()
+	pileProcessingOrder: list[Pile] = []
 	if 0 < depth:
 		pileProcessingOrder.extend([pileOrigin])
 	if 1 <= depth:
@@ -394,7 +394,7 @@ def pinPile零Ante首零(state: EliminationState, maximumSizeListPermutationSpac
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
 		return state
 
-	pileProcessingOrder: deque[Pile] = deque([neg(零) + 首零(state.dimensionsTotal)])
+	pileProcessingOrder: list[Pile] = [neg(零) + 首零(state.dimensionsTotal)]
 
 	return _pinPiles(state, maximumSizeListPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
@@ -457,8 +457,8 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 	if not state.listPermutationSpace:
 		state = pinPilesAtEnds(state, 0)
 
-	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = deque()
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
 
 	with ProcessPoolExecutor(defineProcessorLimit(CPUlimit)) as concurrencyManager:
 
@@ -565,8 +565,8 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
 
-	listPermutationSpace: deque[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = deque()
+	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	state.listPermutationSpace = []
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
