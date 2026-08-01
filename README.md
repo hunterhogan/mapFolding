@@ -11,7 +11,6 @@ First, the tools for transforming algorithms became far more sophisticated and p
 Second, when I finally understood the connections between map folding and meanders, I added meanders to this package, and applied my transformation tools to that algorithm.
 
 I used a weaker form of this package to [compute new terms for OEIS A001415](https://oeis.org/A001415), "Number of ways of folding a 2 X n strip of stamps."
-There are cool and powerful tools in here, but as of 2025 September 17, I am dissatisfied with the organization and documentation. It's annoying.
 
 ## Finding stuff
 

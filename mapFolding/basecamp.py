@@ -221,9 +221,40 @@ def countFolds(mapShape: Sequence[int]
 
 	return foldsTotal
 
-# DOCUMENT, possibly in multiple locations, that the map shape is (1, 2n) not (1, 2n+1). Or rather,
-# the algorithm uses (1, 2n).
 def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+	"""Count foldings constrained by rotational symmetry.
+
+	(AI generated docstring)
+
+	You can use this function to count the symmetric foldings described by OEIS A007822 [1]. For
+	sequence index `n`, set `mapShape` to `(1, 2 * n)`, not `(1, 2 * n + 1)`. Although A007822
+	describes foldings of `2 * n + 1` stamps, this calculation expects `mapShape` to be `(1, 2 * n)`.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		The strip dimensions, expressed as `(1, 2 * n)` for sequence index `n`.
+	flow : str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
+		The counting method. `''` selects the standard method. The other supported values select
+		alternative methods with the same result.
+	pathLikeWriteTotal : PathLike[str] | None = None
+		An optional file or directory path for saving the count. A directory path receives a filename
+		based on `mapShape`.
+	CPUlimit : Limitation = None
+		The processor limit for the `'asynchronous'` method. `None`, `False`, and `0` allow all
+		available processors; `True` limits the calculation to one processor. An `int` sets or reserves
+		a number of processors, and a `float` sets or reserves a fraction of available processors.
+
+	Returns
+	-------
+	symmetricFolds : int
+		The number of distinct foldings that satisfy the rotational-symmetry constraint.
+
+	References
+	----------
+	[1] A007822 - Number of symmetric foldings of 2n+1 stamps - OEIS
+		https://oeis.org/A007822
+	"""
 	return countFolds(mapShape, f'{flow}Symmetric', pathLikeWriteTotal, CPUlimit=CPUlimit)
 
 def countMeanders(kind: str, n: int, flow: str = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
@@ -236,7 +267,7 @@ def countMeanders(kind: str, n: int, flow: str = '', pathLikeWriteTotal: PathLik
 	----------
 	kind : str
 		'semi' or 'meanders'.
-	oeis_n : int
+	n : int
 		Sequence index.
 	flow : str = ''
 		'matrixMeanders' or '' for the native implementation, 'matrixNumPy', or 'matrixPandas'.

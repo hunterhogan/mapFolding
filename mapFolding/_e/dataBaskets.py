@@ -148,7 +148,39 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return (leavesPinned, cast('UndeterminedPiles', dissociatePile(self, *DOTkeys(leavesPinned))))
 
 	def deconstructAtPile(self, pile: Pile | None = None, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
-		# DOCUMENT Do not keep the original if you use any part of the return.
+		"""Create alternative `PermutationSpace` branches from `leavesToPin` candidates at `pile`.
+
+		(AI generated docstring)
+
+		You can use this method to replace one `PermutationSpace` with alternatives that pin one
+		candidate `Leaf` at `pile`. When `pile` is `None`, this method selects the first pile whose
+		value is a `LeafOptions`. When `leavesToPin` is false-valued, this method uses every `Leaf`
+		represented by the selected `LeafOptions`. Candidates already pinned in `self` are omitted.
+
+		If `pile` does not contain a `LeafOptions`, this method returns an iterable containing `self`
+		without copying `self`.
+
+		Parameters
+		----------
+		pile : Pile | None = None
+			`Pile` at which to pin each candidate `Leaf`. A value of `None` selects the first pile
+			whose value is a `LeafOptions`.
+		leavesToPin : Iterable[Leaf] = ()
+			Candidate `Leaf` values. A false-valued `leavesToPin` selects every `Leaf` represented by
+			the selected `LeafOptions`.
+
+		Returns
+		-------
+		deconstructed : Iterable[PermutationSpace]
+			Iterable that yields one new `PermutationSpace` for each candidate `Leaf` that is not
+			already pinned, or yields `self` once when `pile` does not contain a `LeafOptions`.
+
+		Collection Integrity
+		--------------------
+		Do not retain `self` in the same collection as any returned `PermutationSpace` that you
+		consume. Each new branch overlaps with `self`, and the fallback result contains the exact
+		`self` object rather than a copy.
+		"""
 		if pile is None:
 			pile = first(filterLeaf(isLeafOptions吗, self))
 		if (leafOptions := self.getLeafOptions(pile)) is None:

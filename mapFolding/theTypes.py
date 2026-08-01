@@ -1,5 +1,3 @@
-# DOCUMENT
-# ruff: file-ignore[undocumented-public-class]
 """Types for defensive coding and for computation optimization."""
 
 from __future__ import annotations
@@ -85,6 +83,20 @@ Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[NumPyFoldsTotal]]
 #================== Function signatures ===========================================================
 
 class KeywordArgumentsCount(TypedDict, total=False):
+	"""Define optional keyword arguments for map-folding count functions.
+
+	This `TypedDict` describes the optional keyword arguments that counting functions accept.
+
+	Attributes
+	----------
+	flow : str
+		Name of the counting algorithm or computational flow.
+	pathLikeWriteTotal : PathLike[str] | None
+		Filename or directory path where the computed total is written. `None` disables writing.
+	CPUlimit : bool | float | int | None
+		Processor-usage limit for the computation. `None` leaves processor usage unrestricted.
+	"""
+
 	flow: str
 	pathLikeWriteTotal: PathLike[str] | None
 	CPUlimit: Limitation
