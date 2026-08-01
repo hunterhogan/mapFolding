@@ -8,11 +8,10 @@ from collections import Counter, deque
 from functools import partial
 from gmpy2 import bit_clear
 from humpy_cytoolz import (
-	compose, concat, get, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, unique, valfilter as filterLeaf,
-	valfilter as filterLeafOptions, valfilter as filterValue)
-# TODO One or more things is messed up with humpy_*toolz.*.map
+	concat, get, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, valfilter as filterLeaf, valfilter as filterLeafOptions,
+	valfilter as filterValue)
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
-from itertools import chain, combinations, product as CartesianProduct, repeat, starmap
+from itertools import chain, combinations, product as CartesianProduct
 from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, howManyLeavesInLeafOptions, leafOptionsAND, leafOptionsLeafNone, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
@@ -20,8 +19,8 @@ from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import isLeafOptions吗, leafInLeafOptions吗, leafPinned吗
 from mapFolding._e.theTypes import DimensionIndex, LeafOptions, PinnedLeaves
 from more_itertools import extract, one
-from operator import itemgetter, methodcaller
-from typing import TYPE_CHECKING
+from operator import methodcaller
+from typing import TYPE_CHECKING, TypeIs
 from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisNotHaveThat吗
 
 if TYPE_CHECKING:
@@ -242,6 +241,14 @@ def reduceLeafSpace(
 
 #-------- Functions that use the shared logic -----------------------------------------
 
+def _isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
+	return isLeafOptions吗(pileLeafSpace[1])
+
+def _odd吗(state: EliminationState, dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
+	def workhorse(pileLeaf: tuple[Pile, Leaf]) -> bool:
+		return bool(oddLeaf吗(state.mapShape, dimension=dimension, leaf=pileLeaf[1]))
+	return workhorse
+
 def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
 	"""I use this to detect and eliminate crossed creases.
 
@@ -270,8 +277,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 
 	generators: deque[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = deque()
 	for dimension in range(state.dimensionsTotal):
-		odd吗: Callable[[tuple[Pile, Leaf]], bool] = compose(oddLeaf吗(state.mapShape, dimension=dimension), itemgetter(1))
-		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(odd吗, DOTitems(permutationSpace.extractPinnedLeaves()))
+		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
 		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
 		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
 		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(sorted(parityEven.items()), 2)))
@@ -324,11 +330,11 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 					return None
 				continue
 
-			else:  # elif not leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+			else:
 				continue
 
 			if not (permutationSpace := reduceLeafSpace(permutationSpace
-					, filter(lambda pileLeaf: isLeafOptions吗(pileLeaf[1]), extract(permutationSpace.items(), pilesForbidden))  # ty:ignore[invalid-argument-type] # pyright: ignore[reportArgumentType]
+					, filter(_isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 					, leafAntiOptions
 			)):
 				#=SIN= Early return.
@@ -418,9 +424,10 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 		leafCount: int = permutationSpace.leafCount
 
 		pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
+		pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
 
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
-		for pile, leafOptions in DOTitems(filterLeafOptions(thisNotHaveThat吗(unique(pilesUndetermined.values())), pilesUndetermined)):
+		for pile, leafOptions in pilesUndetermined.items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
 		for leafOptions, setPiles in DOTitems(itemfilter(lambda groupBy: (howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)):
