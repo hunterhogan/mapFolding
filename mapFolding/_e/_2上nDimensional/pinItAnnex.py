@@ -177,11 +177,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		leafCount: int = permutationSpace.leafCount
 
 		# TODO fix the typing problems in Z0Z_tools.
-		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast)
-								, filterLeaf(notLeafOriginOrLeaf零
-								, filterLeaf(leafAtPilePredecessors.__contains__
-									, permutationSpace.extractPinnedLeaves()))
-		)):
+		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(notLeafOriginOrLeaf零, filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves())))):  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
 			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace  # ty: ignore[invalid-argument-type]
 				, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
 				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])  # ty: ignore[invalid-argument-type]

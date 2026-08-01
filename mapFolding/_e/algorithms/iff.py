@@ -102,50 +102,44 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 
 	Mathematics
 	-----------
-	Let creases (k, k+1) and (r, r+1) have pile positions π(k), π(k+1), π(r), π(r+1)
-	respectively. The creases cross when the four pile positions violate one of the eight
-	forbidden orderings enumerated by Koehler (1968). This function evaluates the four simplified
-	orderings given the pile positions and crease-computation thunks.
+	Let creases (k, k+1) and (r, r+1) have pile positions π(k), π(k+1), π(r), π(r+1) respectively. The
+	creases cross when the four pile positions violate one of the eight forbidden orderings enumerated
+	by Koehler (1968). This function evaluates the four simplified orderings given the pile positions
+	and crease-computation thunks.
 
 	Mathematical reasons for the design of this function
 	----------------------------------------------------
 
-	1. To confirm that a multidimensional folding is valid, confirm that each of the constituent one-dimensional¹ foldings is valid.
-	2. To confirm that a one-dimensional folding is valid, check that all creases that might cross do not cross.
+		1. To confirm that a multidimensional folding is valid, confirm that each of the constituent
+			one-dimensional¹ foldings is valid.
+		2. To confirm that a one-dimensional folding is valid, check that all creases that might cross
+			do not cross.
 
-	A "crease" is a convenient lie: it is a shorthand description of two leaves that are physically connected to each other.
-	Leaves in a one-dimensional folding are physically connected to at most two other leaves: the leaf before and the leaf after.
-	When talking about a one-dimensional section of a multidimensional folding, we ignore the other dimensions and still reference
-	the leaves before and after. To check whether two creases cross, we must compare the four leaves of the two creases.
+	A "crease" is a convenient lie: it is a shorthand description of two leaves that are physically
+	connected to each other. Leaves in a one-dimensional folding are physically connected to at most
+	two other leaves: the leaf before and the leaf after. When talking about a one-dimensional section
+	of a multidimensional folding, we ignore the other dimensions and still reference the leaves
+	before and after. To check whether two creases cross, we must compare the four leaves of the two
+	creases.
 
-	¹ A so-called one-dimensional folding, map, or strip of stamps has two dimensions, but one of the dimensions has a width of 1.
+	¹ A so-called one-dimensional folding, map, or strip of stamps has two dimensions, but one of the
+	dimensions has a width of 1.
 
 	Idiosyncratic reasons for the design of this function
 	-----------------------------------------------------
 
-	I name the first `Leaf` of the first crease "`leaf`". I name the `Leaf` to which I am comparing `leaf` "`comparand`". A
-	crease² is a connection between a `Leaf` and the `Leaf` after it, therefore, the crease of "`leaf`" connects it to
-	"`leafCrease`". The crease of "`comparand`" connects it to "`comparandCrease`".
+	I name the first `Leaf` of the first crease "`leaf`". I name the `Leaf` to which I am comparing
+	`leaf` "`comparand`". A crease² is a connection between a `Leaf` and the `Leaf` after it,
+	therefore, the crease of "`leaf`" connects it to "`leafCrease`". The crease of "`comparand`"
+	connects it to "`comparandCrease`".
 
 	I name the `Pile` of `leaf` as "`pile`". I name the `Pile` of `comparand` as "`pileComparand`".
 
-	Nearly everyone else names the leaves with letters, such as k, k+1, r, and r+1. (Which stand for Kahlo and Rivera, of course.)
+	Nearly everyone else names the leaves with letters, such as k, k+1, r, and r+1. (Which stand for
+	Kahlo and Rivera, of course.)
 
 	² "increase" from Latin *in-* "in" + *crescere* "to grow" (from PIE root ⋆ker- "to grow").
 	https://www.etymonline.com/word/increase
-
-	Computational reasons for the design of this function
-	-----------------------------------------------------
-
-	If `leaf` and `comparand` do not have matching parity in the dimension, then their creases cannot cross. When you are
-	selecting the values of `leaf` and `comparand`, you ought to check that `leaf` and `comparand` have matching in the dimension.
-	This function cannot check the parity of `leaf` and `comparand`.
-
-	Computing a `Leaf` crease is not expensive, but 100,000,000 unnecessary-but-cheap-computations is expensive. Therefore,
-	instead of passing `leafCrease` and `comparandCrease`, pass the functions by which those values may be computed on demand.
-
-	Finally, because we need to compare the relative positions of the leaves, pass a function that returns the position of the
-	`Leaf` crease.
 	"""
 	if pile < pileComparand:
 		if pileComparandCrease < pile:

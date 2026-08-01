@@ -6,12 +6,14 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
-from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions
+from mapFolding._e._2上nDimensional import (
+	dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions)
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import listFunctionsReduction
 from mapFolding.theSSOT import settingsPackage
 from math import factorial, prod
+from more_itertools import triplewise
 from ortools.sat.python import cp_model
 from pathlib import Path
 from tqdm import tqdm
@@ -52,6 +54,22 @@ def count(state: EliminationState) -> EliminationState:
 #======== Rules for 2^n-dimensional maps ============================
 
 	if mapShapeIs2上nDimensions(state.mapShape):
+		#=SIN= `for` loops: CP-SAT requires one ordering constraint for each constrained leaf pair.
+		for leaf in range(state.productsOfDimensions[1], state.leavesTotal):
+			dimensionHead: int = dimensionNearest首(leaf)
+			leafStep: int = state.productsOfDimensions[dimensionHead]
+			for leafTail in filter(leaf.__ne__, range(leafStep, state.leavesTotal, leafStep)):
+				model.add(listPilingsInLeafOrder[leaf] < listPilingsInLeafOrder[leafTail])
+
+			dimensionTail: int = dimensionNearestTail(leaf)
+			if 0 < dimensionTail:
+				for leafHead in range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]):
+					model.add(listPilingsInLeafOrder[leafHead] < listPilingsInLeafOrder[leaf])
+
+		#=SIN= `for` loop: CP-SAT requires one non-consecutive-dimension constraint for each adjacent pile triple.
+		for leaf_k, leaf, leaf_r in triplewise(listLeavesInPileOrder):
+			model.add(leaf - leaf_k != leaf_r - leaf)
+
 		for aPile, leaf in leavesPinned.items():
 			if aPile == pileOrigin:
 				continue

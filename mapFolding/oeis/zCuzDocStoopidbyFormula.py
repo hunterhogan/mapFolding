@@ -7,8 +7,10 @@ from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import errorL33T
+from itertools import chain
 from mapFolding.basecamp import countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getMapShape
+from mapFolding.oeis._metadata import dictionaryOEIS
 from math import factorial, isqrt
 from typing import Literal
 
@@ -56,6 +58,7 @@ def A000682(
     | Literal[
         'A000560'
         , 'A301620'
+        , 'A259689'
         , 'A000136'
         , 'A223094'
         , 'A001010'
@@ -72,11 +75,20 @@ def A000682(
         , 'A337581'
     ] = 'A000560'
 ) -> int:
-    """A000560 or A301620 or A000136 or A223094 or A001010 or A060206 and A000560 or A077460, A005316, and A000560 or A223093 and A077014 or A223093 and A005316 or A000136 and A223094 or A223094 and A000682 or A000136, A077014, and A223095 or A259702 and A000682 or A333971 and A000682 or A334615, A000682, and A000560 or A337581"""
+    """A000560 or A301620 or A259689 or A000136 or A223094 or A001010 or A060206 and A000560 or A077460, A005316, and A000560 or A223093 and A077014 or A223093 and A005316 or A000136 and A223094 or A223094 and A000682 or A000136, A077014, and A223095 or A259702 and A000682 or A333971 and A000682 or A334615, A000682, and A000560 or A337581"""
     if n in {1, 2}:
         countTotal: int = 1
     elif f == 'A301620':
         countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
+    elif f == 'A259689':
+        countTotal = 2 ** (n - 2) + sum(
+            2 ** (n - 1 - n下j)
+            * sum(
+                A259689(((n下j - 1) ** 2) // 4 + n下k) * (n下k - 2)
+                for n下k in range(3, (n下j + 2) // 2 + 1)
+            )
+            for n下j in range(4, n)
+        )
     elif f == 'A000136':
         countTotal = A000136(n) // n
     elif f == 'A223094':
@@ -415,6 +427,36 @@ def A227167(n: int, f: str | Literal['A000136', 'A217310, A217318, and A005316']
         countTotal = -errorL33T
     return countTotal
 
+@cache
+def A259689(n: int, f: str | Literal['A000682'] = 'A000682') -> int:
+    """A000682"""
+    nFlattenedZeroBased: int = n - 2
+    rowLength: int = (isqrt(4 * nFlattenedZeroBased + 1) + 1) // 2
+    indexInRowsPair: int = nFlattenedZeroBased - rowLength * (rowLength - 1)
+    if indexInRowsPair < rowLength:
+        nRow: int = 2 * rowLength
+        n下k: int = indexInRowsPair + 2
+    else:
+        nRow = 2 * rowLength + 1
+        n下k = indexInRowsPair - rowLength + 2
+
+    if f == 'A000682':
+        if nRow >= 4 and n下k == nRow // 2:
+            countTotal: int = 2 ** ((nRow - 1) // 2) * (nRow - 4) + 2
+        elif nRow > 2 and n下k == (nRow + 2) // 2:
+            countTotal = 2 ** ((nRow - 1) // 2)
+        else:
+            countTotal = (
+                _A000682(nRow + 1)
+                - sum(
+                    n下kOther * dictionaryOEIS['A259689']['valuesKnown'][((nRow - 1) ** 2) // 4 + n下kOther]
+                    for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))
+                )
+            ) // n下k
+    else:
+        countTotal = -errorL33T
+    return countTotal
+
 def A259702(n: int, f: str | Literal['A000682', 'A301620'] = 'A000682') -> int:
     """A000682 or A301620"""
     if n <= 2:
@@ -428,13 +470,18 @@ def A259702(n: int, f: str | Literal['A000682', 'A301620'] = 'A000682') -> int:
     return countTotal
 
 @cache
-def A301620(n: int, f: str | Literal['A000682', 'A259702', 'A334615, A301620, and A000682'] = 'A000682') -> int:
-    """A000682 or A259702 or A334615, A301620, and A000682"""
+def A301620(n: int, f: str | Literal['A000682', 'A259689', 'A259702', 'A334615, A301620, and A000682'] = 'A000682') -> int:
+    """A000682 or A259689 or A259702 or A334615, A301620, and A000682"""
     if f == 'A334615, A301620, and A000682':
         if 2 <= n:
             countTotal: int = A334615(n + 2) + 2 * A301620(n - 1)
         else:
             countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
+    elif f == 'A259689':
+        countTotal = sum(
+            A259689(n ** 2 // 4 + n下k) * (n下k - 2)
+            for n下k in range(3, (n + 3) // 2 + 1)
+        )
     elif f == 'A259702':
         countTotal = 2 * A259702(n + 2)
     elif f == 'A000682':

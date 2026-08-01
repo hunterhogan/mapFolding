@@ -188,3 +188,4 @@ if __name__ == '__main__':
 
 	# type \apps\mapFolding\mapFolding\_e\_development\dataRaw\p2d7s*.csv | find /c /v ""
 	# 521292 of 562368 😢
+	# 523486

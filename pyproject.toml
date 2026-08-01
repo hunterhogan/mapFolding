@@ -64,7 +64,8 @@ optional-dependencies = { codon = [
   "py-spy",
   "pyarrow-stubs",
   "pytest-cov",
-  "setuptools"
+  "setuptools",
+  "sympy",
 ], numba = ["numba", "numba_progress"], ortools = ["ortools"], pandas = [
   "pandas",
   "pyarrow"

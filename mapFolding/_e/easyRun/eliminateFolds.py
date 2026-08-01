@@ -53,24 +53,19 @@ if __name__ == "__main__":
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(6, 8):
+	for n in range(7, 8):
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
-			state = pinPilesAtEnds(state, 1)
-			permutationSpace = state.listPermutationSpace.pop()
-			for pile, leaf in [(2, 5), (3, 7)]:
-				permutationSpace = permutationSpace.atPilePinLeaf(pile, leaf)
-			state.listPermutationSpace.append(permutationSpace)
 			# state = pinPile零Ante首零(state)
-			state = pinPilesAtEnds(state, 3)
+			# state = pinPilesAtEnds(state, 3)
 			# state = pinLeavesDimension首二(state)
 			# state = pin3beans2(state)
 			# state = pin首beans(state)
 			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
-			# state = pinLeavesDimensions0零一(state)
+			state = pinLeavesDimensions0零一(state)
 			# state.listPermutationSpace.reverse()
 
 		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWriteTotal=pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow)

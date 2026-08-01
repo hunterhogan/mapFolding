@@ -199,6 +199,7 @@ def test_meanders(kind: str, oeisID: str, n: int, flow: str) -> None:
 		, pytest.param('A000136', 'A000560', id='A000136::A000560')
 		, pytest.param('A000682', 'A000560', id='A000682::A000560')
 		, pytest.param('A000682', 'A301620', id='A000682::A301620')
+		, pytest.param('A000682', 'A259689', id='A000682::A259689')
 		, pytest.param('A000682', 'A000136', id='A000682::A000136')
 		, pytest.param('A000682', 'A223094', id='A000682::A223094')
 		, pytest.param('A001010', 'A000682 and A007822', id='A001010::A000682-and-A007822')
@@ -206,12 +207,14 @@ def test_meanders(kind: str, oeisID: str, n: int, flow: str) -> None:
 		, pytest.param('A223094', 'A000136 and A000682', id='A223094::A000136-and-A000682')
 		, pytest.param('A223094', 'A223094 and A000682', id='A223094::A223094-and-A000682')
 		, pytest.param('A223094', 'A000682', id='A223094::A000682')
+		, pytest.param('A259689', '', id='A259689')
 		, pytest.param('A001011', '', id='A001011')
 		, pytest.param('A005315', '', id='A005315')
 		, pytest.param('A060206', '', id='A060206')
 		, pytest.param('A077460', '', id='A077460')
 		, pytest.param('A078591', '', id='A078591')
 		, pytest.param('A301620', '', id='A301620')
+		, pytest.param('A301620', 'A259689', id='A301620::A259689')
 	]
 )
 @pytest.mark.parametrize(

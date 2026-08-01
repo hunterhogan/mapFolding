@@ -132,6 +132,8 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 				foldsTotal = _evaluateFormulaForN(byFormula.A223095, n, f)
 			case 'A227167':
 				foldsTotal = _evaluateFormulaForN(byFormula.A227167, n, f)
+			case 'A259689':
+				foldsTotal = _evaluateFormulaForN(byFormula.A259689, n, f)
 			case 'A259702':
 				foldsTotal = _evaluateFormulaForN(byFormula.A259702, n, f)
 			case 'A301620':

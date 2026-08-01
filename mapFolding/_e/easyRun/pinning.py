@@ -35,11 +35,6 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 
 if __name__ == '__main__':
 	state = EliminationState((2,) * 7)
-	state: EliminationState = pinPilesAtEnds(state, 1)
-	permutationSpace = state.listPermutationSpace.pop()
-	for pile, leaf in [(2, 5), (3, 7)]:
-		permutationSpace = permutationSpace.atPilePinLeaf(pile, leaf)
-	state.listPermutationSpace.append(permutationSpace)
 
 	printThis = True
 
@@ -47,7 +42,6 @@ if __name__ == '__main__':
 		timeStart: float = time.perf_counter()
 		state: EliminationState = pinPilesAtEnds(state, 3)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state: EliminationState = pinLeavesDimensions0零一(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
@@ -56,6 +50,7 @@ if __name__ == '__main__':
 
 	elif printThis:
 		state: EliminationState = pinLeavesDimension首二(state)
+		state: EliminationState = pinLeavesDimensions0零一(state)
 		state: EliminationState = pinPile零Ante首零(state)
 		state: EliminationState = pinLeavesDimension一(state)
 		state: EliminationState = pinLeavesDimension二(state)
