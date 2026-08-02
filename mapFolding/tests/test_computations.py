@@ -314,6 +314,6 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	assert loader is not None, messageTestFailure(loader, 'a module loader', 'importlib.util.spec_from_file_location', '__main__', pathFilenameModule)
 	loader.exec_module(module)
 
-	expected: str = str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests))
+	expected: str = str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests) or 0)
 	actual: str = pathFilenameFoldsTotal.read_text(encoding='utf-8').strip()
 	assertEqualTo(actual, expected, 'Path.read_text', pathFilenameFoldsTotal, encoding='utf-8')

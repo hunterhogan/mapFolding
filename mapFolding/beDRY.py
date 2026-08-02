@@ -171,14 +171,14 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 	return connectionGraph.astype(datatype)
 
 @cache
-def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
+def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int | None:
 	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
 
 	(AI generated docstring)
 
 	This function queries the comprehensive dictionary of known folding totals constructed from OEIS
-	sequence data. The function returns the total if the map shape matches a known value, or 0 if the
-	shape is not found in the OEIS sequences.
+	sequence data. The function returns the total if the map shape matches a known value, or None if
+	the shape is not found in the OEIS sequences.
 
 	Parameters
 	----------
@@ -187,9 +187,9 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 
 	Returns
 	-------
-	foldingsTotal : int
-		The known total number of distinct folding patterns for the given map shape, or 0 if the map
-		shape does not match any known values in the OEIS sequences.
+	foldingsTotal : int | None
+		The known total number of distinct folding patterns for the given map shape, or None if the
+		map shape does not match any known values in the OEIS sequences.
 
 	Examples
 	--------
@@ -215,7 +215,7 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int:
 	"""
 	from mapFolding.oeis import makeDictionaryFoldsTotalKnown
 	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
-	return lookupFoldsTotal.get(tuple(mapShape), 0)
+	return lookupFoldsTotal.get(tuple(mapShape))
 
 @cache
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:

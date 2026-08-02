@@ -408,10 +408,12 @@ class LeafSequenceState(MapFoldingState):
 		"""
 		super().__post_init__()
 		from mapFolding.beDRY import getFoldsTotalKnown
-		groupsOfFoldsKnown: int = getFoldsTotalKnown(self.mapShape) // self.leavesTotal
 		if self.leafSequence is None:
-			self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
-			self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
+			foldsTotalKnown: int | None = getFoldsTotalKnown(self.mapShape)
+			if foldsTotalKnown is not None:
+				groupsOfFoldsKnown: int = foldsTotalKnown // self.leavesTotal
+				self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
+				self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
 
 @dataclasses.dataclass(slots=True)
 class MatrixMeandersState:

@@ -37,6 +37,11 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from os import PathLike
 
+@pytest.mark.parametrize(('mapShape', 'expected'), (pytest.param((999, 999), None, id='mapShapeNotFound'),))
+def test_getFoldsTotalKnown(mapShape: tuple[int, ...], expected: int | None) -> None:
+	actual: int | None = getFoldsTotalKnown(mapShape)
+	assertEqualTo(actual, expected, getFoldsTotalKnown.__name__, mapShape)
+
 @pytest.mark.parametrize('pathLikeWriteTotal', (None,))
 @pytest.mark.parametrize('computationDivisions', ('maximum',))
 @pytest.mark.parametrize('CPUlimit', (None,))
@@ -49,7 +54,7 @@ def test_countFolds_computationDivisionsMaximum(
     , CPUlimit: int | float | None
     , computationDivisions: int | str | None
 ) -> None:
-	expected: int = getFoldsTotalKnown(mapShape)
+	expected: int = getFoldsTotalKnown(mapShape) or 0
 	actual: int = countFolds(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 	assertEqualTo(actual, expected, countFolds.__name__, mapShape, computationDivisions=computationDivisions, flow=flow)
 
