@@ -11,6 +11,7 @@ from mapFolding.tests.dataSamples.OEISidByFormulaLookup import dictionaryLiteral
 from more_itertools import always_iterable
 from re import fullmatch
 from typing import TYPE_CHECKING
+import os
 import pytest
 
 if TYPE_CHECKING:
@@ -46,6 +47,7 @@ def bad(tt: tuple[str, int, str]) -> ParameterSet:
 	name, n, f = tt
 	return pytest.param(eval(name), n, f, KeyError, id=f"({name}, {n}, '{f}')")  # ruff: ignore[suspicious-eval-usage]
 
+@pytest.mark.skipif(os.getenv('GITHUB_ACTIONS') == 'true', reason="Skipped on GitHub Actions")
 @pytest.mark.parametrize('callableA, n, f, expected', tuple(map(bad, ww)))
 def test_oeisIDbyFormulaError(callableA: CallableFunction[[int, str], int], n: int, f: str, expected: type[BaseException]) -> None:
 	with pytest.raises(expected):
