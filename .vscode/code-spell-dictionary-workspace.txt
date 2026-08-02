@@ -383,6 +383,8 @@ Summinator
 swopping
 sylow
 sympify
+tabf
+tabl
 taskset
 Tcff
 Tcls

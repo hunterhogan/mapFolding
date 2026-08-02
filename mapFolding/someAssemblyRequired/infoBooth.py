@@ -80,5 +80,5 @@ defaultFoldsSymmetric['module']['algorithm'] = 'algorithm'
 defaultFoldsSymmetric['module']['asynchronous'] = 'asynchronous'
 # TODO Ambitious: can I dynamically extract this value from the hand-made algorithm?
 defaultFoldsSymmetric['variable']['counting'] = 'symmetricFolds'
-# TODO: Didn't I make a clever function to dynamically extract this value?
+# TODO Didn't I make a clever function to dynamically extract this value?
 defaultFoldsSymmetric['variable']['stateDataclass'] = 'SymmetricFoldsState'

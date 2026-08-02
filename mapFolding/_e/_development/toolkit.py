@@ -1,15 +1,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from humpy_cytoolz import curry as syntacticCurry, valfilter as filterLeaf
+from humpy_cytoolz import valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e.filters import isLeaf吗
+from mapFolding._e.tests.test_pinning import beansWithoutCornbread
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from pprint import pformat
 from typing import TYPE_CHECKING
-from Z0Z_tools import DOTvalues
 import csv
 import numpy
 import pandas
@@ -19,10 +18,6 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 	from mapFolding._e.theTypes import PinnedLeaves
-
-@syntacticCurry
-def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
-	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 @dataclass
 class PermutationSpaceStatus:

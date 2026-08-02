@@ -6,7 +6,6 @@ from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding.oeis._metadata import dictionaryOEIS
-from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 
@@ -70,12 +69,3 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     moduleAsString = moduleAsString.replace(docstringModule, docstringModule + "\n\n" + moduleWarning)
 
     return writeStringToHere(moduleAsString, pathFilenameWrite)
-
-def do() -> None:
-    """Make docstrings for all functions corresponding to OEIS sequences."""
-    pathRoot: Path = settingsPackage.pathPackage / "oeis"
-    pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
-    transformOEISidByFormula(pathFilenameSource)
-
-if __name__ == "__main__":
-    do()

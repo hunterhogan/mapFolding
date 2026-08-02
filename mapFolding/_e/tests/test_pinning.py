@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from gmpy2 import mpz
+from humpy_cytoolz import curry as syntacticCurry
+from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
-# TODO move this out of development.
-from mapFolding._e._development.toolkit import beansWithoutCornbread
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
 from typing import TYPE_CHECKING
+from Z0Z_tools import DOTvalues
 import numpy
 import pytest
 
@@ -18,6 +19,10 @@ if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
+
+@syntacticCurry
+def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
+	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 @pytest.mark.parametrize("pinningFunction", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
