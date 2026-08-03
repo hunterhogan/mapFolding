@@ -6,9 +6,12 @@ from astToolkit.transformationTools import pythonCode2ast_expr
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
-from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
-from mapFolding.someAssemblyRequired import default, IfThis
+from mapFolding.beDRY import getFoldsTotalKnown
+from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.kitFilesystem import makePathFilenameFoldsTotal
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -18,8 +21,9 @@ import dataclasses
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
-	from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
-	from mapFolding.someAssemblyRequired import DatatypeConfiguration, ShatteredDataclass
+	from mapFolding import DatatypeLeavesTotal
+	from mapFolding.dataBaskets import SymmetricFoldsState
+	from mapFolding.someAssemblyRequired import ShatteredDataclass
 	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
 
 @dataclasses.dataclass(slots=True)
@@ -199,7 +203,7 @@ class RecipeJobTheorem2:
 		the provided configuration and sensible defaults.
 
 		"""
-		pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(self.state.mapShape))
+		pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFoldsTotal(self.state.mapShape))
 
 		if self.pathFilenameFoldsTotal is None:
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
@@ -212,6 +216,15 @@ class RecipeJobTheorem2:
 
 		if self.source_astModule is None:
 			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
+
+def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> RecipeJobTheorem2:
+	"""Create a binary executable for `mapShape`."""
+	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
+	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
+	pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFoldsTotal(state.mapShape, pathModule))
+	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal
+		, foldsTotalEstimated=foldsTotalEstimated, foldsTotalMultiplier=state.leavesTotal)
 
 #================== Bulk changes ======================================================================
 

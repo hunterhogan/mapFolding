@@ -12,16 +12,13 @@ from __future__ import annotations
 from astToolkit import parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.beDRY import getFoldsTotalKnown
-from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
-from mapFolding.kitFilesystem import getPathFilenameFoldsTotal
+from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.oeis._metadata import dictionaryOEIS
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultFoldsSymmetric, dictionaryEstimatesMapFolding
+from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultFoldsSymmetric
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.RecipeJob import (
-	addLauncher, customizeDatatypeViaImport, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
-from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -43,17 +40,6 @@ listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
 	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
 ]
-
-def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> None:
-	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
-	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
-	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
-	pathFilenameFoldsTotal = PurePosixPath(getPathFilenameFoldsTotal(state.mapShape, pathModule))
-	aJob = RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal
-		, foldsTotalEstimated=foldsTotalEstimated, foldsTotalMultiplier=state.leavesTotal)
-	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
-	makeJobNumba(aJob, spices)
 
 def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 	"""Generate an optimized Numba-compiled computation module for map folding calculations.
@@ -138,5 +124,6 @@ def makeFoldsSymmetric(n: int) -> None:
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
+	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
 	mapShape: tuple[DatatypeLeavesTotal, ...] = (6, 6)
-	fromMapShape(mapShape)
+	makeJobNumba(fromMapShape(mapShape), spices)

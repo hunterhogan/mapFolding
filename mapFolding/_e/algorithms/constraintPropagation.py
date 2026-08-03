@@ -1,4 +1,3 @@
-# ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
 from concurrent.futures import as_completed, ProcessPoolExecutor
@@ -22,6 +21,7 @@ import csv
 import uuid
 
 if TYPE_CHECKING:
+	from _csv import Writer
 	from concurrent.futures import Future
 	from mapFolding._e.theTypes import Leaf
 
@@ -91,8 +91,8 @@ def count(state: EliminationState) -> EliminationState:
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 		state.Theorem2Multiplier = 2
-		leafOrigin下_aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.productsOfDimensions))
-		model.add(listPilingsInLeafOrder[leafOrigin下_aDimension] < listPilingsInLeafOrder[2 * leafOrigin下_aDimension])
+		leafOrigin下aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.productsOfDimensions))
+		model.add(listPilingsInLeafOrder[leafOrigin下aDimension] < listPilingsInLeafOrder[2 * leafOrigin下aDimension])
 
 #======== Forbidden inequalities ============================
 	def addLessThan(comparatorLeft: Leaf, comparatorRight: Leaf) -> cp_model.IntVar:
@@ -102,20 +102,21 @@ def count(state: EliminationState) -> EliminationState:
 		return ruleΩ
 
 	def addForbiddenInequalityCycle(leaf_k: Leaf, leaf_r: Leaf, leaf_kCrease: Leaf, leaf_rCrease: Leaf) -> None:
-		k__小于_r: cp_model.IntVar = addLessThan(leaf_k, leaf_r)  # 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
-		r1_小于_k: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_k)
+		#=Meaning= 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
+		k__小于__r: cp_model.IntVar = addLessThan(leaf_k, leaf_r)
+		r1_小于__k: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_k)
 		k1_小于_r1: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_rCrease)
-		model.add_bool_or([k1_小于_r1.Not(), r1_小于_k.Not(), k__小于_r.Not()])		# [k+1 < r+1 < k < r]
+		model.add_bool_or([k1_小于_r1.Not(), r1_小于__k.Not(), k__小于__r.Not()])  # [k+1 < r+1 < k < r]
 
 		r__小于_k1: cp_model.IntVar = addLessThan(leaf_r, leaf_kCrease)
-		model.add_bool_or([r1_小于_k.Not(), k__小于_r.Not(), r__小于_k1.Not()])		# [r+1 < k < r < k+1]
+		model.add_bool_or([r1_小于__k.Not(), k__小于__r.Not(), r__小于_k1.Not()])  # [r+1 < k < r < k+1]
 
-		model.add_bool_or([k__小于_r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])  	# [k < r < k+1 < r+1]
+		model.add_bool_or([k__小于__r.Not(), r__小于_k1.Not(), k1_小于_r1.Not()])  # [k < r < k+1 < r+1]
 
 		k__小于_r1: cp_model.IntVar = addLessThan(leaf_k, leaf_rCrease)
 		r1_小于_k1: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_kCrease)
-		k1_小于_r: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_r)
-		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于_r.Not()])  	# [k < r+1 < k+1 < r]
+		k1_小于__r: cp_model.IntVar = addLessThan(leaf_kCrease, leaf_r)
+		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于__r.Not()])  # [k < r+1 < k+1 < r]
 
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:
 		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.dimensionsTotal))
@@ -130,15 +131,16 @@ def count(state: EliminationState) -> EliminationState:
 		if leaf_k == leaf_r:
 			continue
 
-		k下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_k)  # 下, xià: below, subscript
-		r下_indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_r)
+		#=Meaning= 下, xià: below, subscript
+		k下indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_k)
+		r下indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_r)
 
 		for aDimension in range(state.dimensionsTotal):
-			k1下_aDimension: Leaf | None = leafCreasePost(leaf_k, aDimension)
-			r1下_aDimension: Leaf | None = leafCreasePost(leaf_r, aDimension)
+			k1下aDimension: Leaf | None = leafCreasePost(leaf_k, aDimension)
+			r1下aDimension: Leaf | None = leafCreasePost(leaf_r, aDimension)
 
-			if k1下_aDimension and r1下_aDimension and ((k下_indicesCartesian[aDimension] - r下_indicesCartesian[aDimension]) % 2 == 0):
-				addForbiddenInequalityCycle(leaf_k, leaf_r, k1下_aDimension, r1下_aDimension)
+			if k1下aDimension and r1下aDimension and ((k下indicesCartesian[aDimension] - r下indicesCartesian[aDimension]) % 2 == 0):
+				addForbiddenInequalityCycle(leaf_k, leaf_r, k1下aDimension, r1下aDimension)
 
 #======== Solver ================================
 	solver = cp_model.CpSolver()
@@ -164,28 +166,7 @@ def count(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	"""Do the things necessary so that `count` operates efficiently.
-
-	Returns
-	-------
-	state : EliminationState
-		An updated `EliminationState`.
-
-	Raises
-	------
-	ValueError
-		If `state.mapShape` is empty or contains a zero dimension length.
-	"""
-	#======== Edge cases for "small" map shapes ============================
-	if (0 in state.mapShape) or not state.mapShape:
-		from mapFolding.oeis._metadata import makeDictionaryFoldsTotalKnown
-		dictionaryFoldsTotalKnown: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
-		if state.mapShape in dictionaryFoldsTotalKnown:
-			state.groupsOfFolds = dictionaryFoldsTotalKnown[state.mapShape]
-			return state
-		message: str = f"I received `{state.mapShape = }`, but I could not find a known folding total for this map shape. To see which map shapes and OEIS sequences this package supports, run `getOEISids` at a command prompt."
-		raise ValueError(message)
-
+	"""Do the things necessary so that `count` operates efficiently."""
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
@@ -207,8 +188,8 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			# TODO temporary data collection for p2d7
 			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
 				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
-				with Path.open(pathFilename, mode="w", newline="") as fileCSV:
-					csvWriter = csv.writer(fileCSV)
+				with Path.open(pathFilename, mode="w", newline="") as csvWrite:
+					csvWriter: Writer = csv.writer(csvWrite)
 					csvWriter.writerows(sherpa.listFolding)
 
 			state.groupsOfFolds += sherpa.groupsOfFolds

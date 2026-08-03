@@ -26,6 +26,10 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 	for listTuples in state.indices:
 		state.leafConnectee = 1
 		for indexLeft, indexRight in listTuples:
+			# TODO The entire `leafComparison` array is computed, so when a `leafComparison` is
+			# disqualified, all of the computations for the remaining tuples were unnecessary
+			# computations. However, with the current algorithm for computing `leafComparison`, it
+			# would be nearly impossible to efficiently validate tuples during the computation.
 			if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
 				state.leafConnectee = 0
 				break
