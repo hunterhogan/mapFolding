@@ -4,7 +4,7 @@ from __future__ import annotations
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
-from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import makePathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -15,10 +15,11 @@ if TYPE_CHECKING:
 
 def eliminateFolds(mapShape: tuple[int, ...] | None = None
 				, state: EliminationState | None = None
-				, pathLikeWriteTotal: PathLike[str] | None = None
+				, pathLikeWrite: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
 				, flow: str | None = None
+				, suffix: str = ".foldsTotal"
 				) -> int:
 	"""
 	Compute foldsTotal by elimination.
@@ -30,9 +31,9 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		"dimensions", such as in the seminal paper, "Multi-dimensional map-folding". Nevertheless, in contemporary Python
 		programming, in the context of these algorithms, the term "shape" makes it much easier to align the mathematics with the
 		syntax of the programming language.
-	pathLikeWriteTotal : PathLike[str] | None = None
+	pathLikeWrite : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
-		value of `foldsTotal`. If `pathLikeWriteTotal` is a path of only directories, `countFolds` creates a filename based
+		value of `foldsTotal`. If `pathLikeWrite` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.
 	CPUlimit : bool | float | int | None = None
 		If relevant, whether and how to limit the number of processors `countFolds` will use.
@@ -47,6 +48,8 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		with the same sign as the `float`.
 	flow : str | None = None
 		My stupid way of selecting the version of the algorithm to use in the computation.
+	suffix : str = ".foldsTotal"
+		The filename suffix for the saved count.
 
 	Returns
 	-------
@@ -77,11 +80,11 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 
 #-------- memorialization instructions ---------------------------------------------
 
-	if pathLikeWriteTotal is not None:
-		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(state.mapShape, pathLikeWriteTotal)
-		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+	if pathLikeWrite is None:
+		pathFilenameFoldsTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = None
+		pathFilenameFoldsTotal = makePathFilenameFoldsTotal(state.mapShape, pathLikeWrite, suffix=suffix)
+		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 
 #-------- Algorithm version -----------------------------------------------------
 

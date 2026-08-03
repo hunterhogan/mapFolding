@@ -92,12 +92,12 @@ def test_countFoldsSymmetric(oeisID: str, n: int, flow: str, CPUlimit: float) ->
 		CPU limit for the computation.
 
 	"""
-	pathLikeWriteTotal: PathLike[str] | None = None
+	pathLikeWrite: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
-	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit)
-	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWriteTotal, CPUlimit)
+	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWrite, CPUlimit)
 
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('oeisID, n, flow'

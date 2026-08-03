@@ -1,5 +1,5 @@
-# ruff:file-ignore[subclass-builtin]
 # TODO idk enough to choose between `UserDict` and subclassing `dict`.
+# ruff:file-ignore[subclass-builtin]
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 
 from __future__ import annotations
@@ -15,8 +15,8 @@ from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
-from mapFolding._e.theTypes import Folding, LeafOptions, LeafSpace, Pile
-from mapFolding.beDRY import getLeavesTotal
+from mapFolding._e.theTypes import Folding, LeafSpace, Pile
+from mapFolding.beDRY import getLeavesTotal, validateMapShape
 from math import prod
 from operator import attrgetter, methodcaller
 from typing import cast, overload, TYPE_CHECKING
@@ -26,7 +26,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
@@ -589,7 +589,7 @@ class EliminationState:
 	dimensionsTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
 	foldingCheckSum: int = dataclasses.field(init=False)
-	"""Unchanging triangular number check-sum for a valid `Folding`."""
+	"""Unchanging triangular number check-sum for a valid `Folding`, https://en.wikipedia.org/wiki/Triangular_number."""
 	leafLast: Leaf = dataclasses.field(init=False)
 	"""Unchanging 0-indexed largest `leaf` in a `Folding`."""
 	leavesTotal: int = dataclasses.field(init=False)
@@ -616,12 +616,13 @@ class EliminationState:
 
 	def __post_init__(self) -> None:
 		"""One-time computation of unchanging values."""
+		self.mapShape = validateMapShape(self.mapShape)
 		self.dimensionsTotal = len(self.mapShape)
 		self.leavesTotal = getLeavesTotal(self.mapShape)
 		if 0 < self.leavesTotal:
 			self.Theorem2aMultiplier = self.leavesTotal
 		self.leafLast = self.leavesTotal - 1
-		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2  # https://en.wikipedia.org/wiki/Triangular_number
+		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2
 		self.pilesTotal = self.leavesTotal
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.leavesTotal

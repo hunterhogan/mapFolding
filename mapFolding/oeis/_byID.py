@@ -41,7 +41,7 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 		counting implementation.
 	**keywordArguments
 		Keyword arguments for `countFolds`, `countMeanders`, or `countFoldsSymmetric`: `flow`,
-		`pathLikeWriteTotal`, and `CPUlimit`. These arguments are not passed to formula functions.
+		`pathLikeWrite`, and `CPUlimit`. These arguments are not passed to formula functions.
 
 	Returns
 	-------

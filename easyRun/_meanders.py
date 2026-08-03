@@ -31,8 +31,8 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	pathLikeWriteTotal: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
-	pathLikeWriteTotal = None
+	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
+	pathLikeWrite = None
 	flow = 'matrixMeanders'
 	flow = 'matrixPandas'
 	flow = 'matrixNumPy'
@@ -63,7 +63,7 @@ if __name__ == '__main__':
 		for n in nList:
 			gc.collect()
 			timeStart = time.perf_counter()
-			countTotal = countMeanders(kind, n, flow, pathLikeWriteTotal)
+			countTotal = countMeanders(kind, n, flow, pathLikeWrite)
 			totalKnown = getValuesKnown(oeisID).get(n, -errorL33T)
 			if 0 <= totalKnown:
 				write()

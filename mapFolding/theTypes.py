@@ -91,12 +91,15 @@ class KeywordArgumentsCount(TypedDict, total=False):
 	----------
 	flow : str
 		Name of the counting algorithm or computational flow.
-	pathLikeWriteTotal : PathLike[str] | None
+	pathLikeWrite : PathLike[str] | None
 		Filename or directory path where the computed total is written. `None` disables writing.
 	CPUlimit : bool | float | int | None
 		Processor-usage limit for the computation. `None` leaves processor usage unrestricted.
+	suffix : str
+		The filename suffix for the saved count.
 	"""
 
 	flow: str
-	pathLikeWriteTotal: PathLike[str] | None
+	pathLikeWrite: PathLike[str] | None
 	CPUlimit: Limitation
+	suffix: str

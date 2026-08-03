@@ -57,22 +57,23 @@ from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateMapShape
-from mapFolding.kitFilesystem import getPathFilenameFoldsTotal, getPathRootJobDEFAULT, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import makePathFilenameCountTotal, makePathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
-from pathlib import Path
 from typing import Literal, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
+	from pathlib import Path
 
 def countFolds(mapShape: Sequence[int]
 				, flow: str = ''
-				, pathLikeWriteTotal: PathLike[str] | None = None
+				, pathLikeWrite: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
 				, computationDivisions: int | str | None = None
+				, suffix: str = ".foldsTotal"
 				) -> int:
 	"""
 	Count the number of distinct ways to fold a map.
@@ -84,9 +85,9 @@ def countFolds(mapShape: Sequence[int]
 	----------
 	mapShape : Sequence[int]
 		A sequence containing the positive integer length of each dimension of the map to be folded.
-	pathLikeWriteTotal : PathLike[str] | None = None
+	pathLikeWrite : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
-		value of `foldsTotal`. If `pathLikeWriteTotal` is a path of only directories, `countFolds` creates a filename based
+		- `pathLikeWrite` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.
 	computationDivisions : int | str | None = None
 		Whether and how to divide the computational work.
@@ -151,11 +152,11 @@ def countFolds(mapShape: Sequence[int]
 
 #-------- memorialization instructions ---------------------------------------------
 
-	if pathLikeWriteTotal is not None:
-		pathFilenameFoldsTotal: Path | None = getPathFilenameFoldsTotal(mapShape, pathLikeWriteTotal)
-		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+	if pathLikeWrite is None:
+		pathFilenameFoldsTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = None
+		pathFilenameFoldsTotal = makePathFilenameFoldsTotal(mapShape, pathLikeWrite, suffix=suffix)
+		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 
 #-------- Algorithm version -----------------------------------------------------
 
@@ -221,7 +222,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return foldsTotal
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -237,13 +238,15 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchro
 	flow : str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
 		The counting method. `''` selects the standard method. The other supported values select
 		alternative methods with the same result.
-	pathLikeWriteTotal : PathLike[str] | None = None
+	pathLikeWrite : PathLike[str] | None = None
 		An optional file or directory path for saving the count. A directory path receives a filename
 		based on `mapShape`.
 	CPUlimit : Limitation = None
 		The processor limit for the `'asynchronous'` method. `None`, `False`, and `0` allow all
 		available processors; `True` limits the calculation to one processor. An `int` sets or reserves
 		a number of processors, and a `float` sets or reserves a fraction of available processors.
+	suffix : str = ".foldsTotal"
+		The filename suffix for the saved count.
 
 	Returns
 	-------
@@ -255,9 +258,9 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchro
 	[1] A007822 - Number of symmetric foldings of 2n+1 stamps - OEIS
 		https://oeis.org/A007822
 	"""
-	return countFolds(mapShape, f'{flow}Symmetric', pathLikeWriteTotal, CPUlimit=CPUlimit)
+	return countFolds(mapShape, f'{flow}Symmetric', pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
 
-def countMeanders(kind: str, n: int, flow: str = '', pathLikeWriteTotal: PathLike[str] | None = None, *, CPUlimit: Limitation = None) -> int:
+def countMeanders(kind: str, n: int, flow: str = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".countTotal") -> int:
 	"""Compute a native meander sequence term.
 
 	This entry point computes semi-meanders and meanders with a matrix meander algorithm. Formula and
@@ -271,7 +274,7 @@ def countMeanders(kind: str, n: int, flow: str = '', pathLikeWriteTotal: PathLik
 		Sequence index.
 	flow : str = ''
 		'matrixMeanders' or '' for the native implementation, 'matrixNumPy', or 'matrixPandas'.
-	pathLikeWriteTotal : PathLike[str] | None = None
+	pathLikeWrite : PathLike[str] | None = None
 		Optional output path for the computed total.
 	CPUlimit : bool | float | int | None = None
 		Processor limit from the shared counting entry-point contract.
@@ -300,19 +303,11 @@ def countMeanders(kind: str, n: int, flow: str = '', pathLikeWriteTotal: PathLik
 	"""
 #-------- memorialization instructions ---------------------------------------------
 
-	if pathLikeWriteTotal is not None:
-		filenameCountTotal: str = f"{kind}_n{n}.countTotal"
-		pathLikeSherpa = Path(pathLikeWriteTotal)
-		if pathLikeSherpa.is_dir():
-			pathFilenameFoldsTotal = pathLikeSherpa / filenameCountTotal
-		elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():
-			pathFilenameFoldsTotal = pathLikeSherpa
-		else:
-			pathFilenameFoldsTotal = getPathRootJobDEFAULT() / pathLikeSherpa
-		pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+	if pathLikeWrite is None:
+		pathFilenameCountTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = None
+		pathFilenameCountTotal = makePathFilenameCountTotal(pathLikeWrite, kind, str(n), suffix=suffix)
+		saveFoldsTotalFAILearly(pathFilenameCountTotal)
 
 #-------- Algorithm selection and execution ---------------------------------------------
 
@@ -368,7 +363,7 @@ def countMeanders(kind: str, n: int, flow: str = '', pathLikeWriteTotal: PathLik
 
 #-------- Follow memorialization instructions ---------------------------------------------
 
-	if pathFilenameFoldsTotal is not None:
-		saveFoldsTotal(pathFilenameFoldsTotal, countTotal)
+	if pathFilenameCountTotal is not None:
+		saveFoldsTotal(pathFilenameCountTotal, countTotal)
 
 	return countTotal

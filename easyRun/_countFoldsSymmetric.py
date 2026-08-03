@@ -26,7 +26,7 @@ if __name__ == '__main__':
 			f"{ansiColorReset}\n"
 		)
 
-	pathLikeWriteTotal: PathLike[str] | None = None
+	pathLikeWrite: PathLike[str] | None = None
 	CPUlimit: Limitation = None
 	flow = 'asynchronous'
 	flow = 'theorem2'
@@ -44,6 +44,6 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 
 		timeStart: float = time.perf_counter()
-		foldsTotal: int = countFoldsSymmetric(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit)
+		foldsTotal: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
 
 		_write()

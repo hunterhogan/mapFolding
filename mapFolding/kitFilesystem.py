@@ -1,28 +1,26 @@
-"""
-Persistent storage infrastructure for map folding computation results.
+"""Persistent storage utilities for map folding computation results.
 
 (AI generated docstring)
 
-As computational state management orchestrates the complex recursive analysis,
-this module ensures that the valuable results of potentially multi-day computations
-are safely preserved and reliably retrievable. Map folding problems can require
-extensive computational time, making robust result persistence critical for
-practical research and application.
+This module provides helpers to generate standardized filenames and paths for storing results produced
+by long-running map folding computations. It centralizes logic for platform-aware default locations,
+filename construction, safe path creation, and robust save/fallback behavior.
 
-The storage system provides standardized filename generation, platform-independent
-path resolution, and multiple fallback strategies to prevent data loss. Special
-attention is given to environments like Google Colab and cross-platform deployment
-scenarios. The storage patterns integrate with the configuration foundation to
-provide consistent behavior across different installation contexts.
-
-This persistence layer serves as the crucial bridge between the computational
-framework and the user interface, ensuring that computation results are available
-for the main interface to retrieve, validate, and present to users seeking
-solutions to their map folding challenges.
+Primary utilities
+-----------------
+makeFilenameCountTotal
+	Build a filesystem-safe filename for countTotal-style outputs.
+makePathFilenameCountTotal
+	Resolve or create a Path for a given filename or directory and ensure parent directories exist.
+makeFilenameFoldsTotal, makePathFilenameFoldsTotal
+	Variants tuned for foldsTotal outputs.
+saveFoldsTotal, saveFoldsTotalFAILearly
+	Functions that write computed results to disk with fallback and validation.
 """
 
 from __future__ import annotations
 
+from hunterMakesPy import errorL33T
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from sys import modules as sysModules, stdout
@@ -34,7 +32,96 @@ if TYPE_CHECKING:
 	from io import TextIOWrapper
 	from os import PathLike
 
-def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
+def makePathFilenameCountTotal(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
+	"""Create an absolute `pathlib.Path` for a 'countTotal' filename.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	pathLikeWrite : os.PathLike | None = None
+		Directory, filename, or relative path to use. If ``None``, the default job directory returned
+		by `getPathRootJobDEFAULT` is used. If a directory is provided, the standardized
+		filename is appended. If an absolute file path is provided, it is returned as-is.
+	*underscore : str
+		Positional segments used to build the filename stem; segments are joined with underscores.
+	suffix : str = ".countTotal"
+		Filename suffix/extension to use.
+	**dash : str
+		Keyword segments included via ``dash.items()``; each (key, value) pair is joined with ``'-'``
+		and included in the stem; all parts are joined by ``'_'``.
+
+	Returns
+	-------
+	pathFilename : pathlib.Path
+		Absolute path to the filename. Parent directories are created if necessary.
+	"""
+	filename: str = makeFilenameCountTotal(*underscore, suffix=suffix, **dash)
+	if pathLikeWrite is None:
+		pathFilename: Path = getPathRootJobDEFAULT() / filename
+	else:
+		pathLikeWrite = Path(pathLikeWrite)
+		if pathLikeWrite.is_dir():
+			pathFilename = pathLikeWrite / filename
+		elif pathLikeWrite.is_file() and pathLikeWrite.is_absolute():
+			pathFilename = pathLikeWrite
+		else:
+			pathFilename = getPathRootJobDEFAULT() / pathLikeWrite
+		pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	return pathFilename
+
+def makeFilenameCountTotal(*underscore: str, suffix: str = '.countTotal', **dash: str) -> str:
+	"""Build a standardized filename for countTotal-like outputs.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	*underscore : str
+		Positional segments to include in the filename stem; joined with underscores.
+	suffix : str = ".countTotal"
+		Filename suffix/extension to use.
+	**dash : str
+		Keyword segments included via ``dash.items()``; each (key, value) is joined with ``'-'`` and
+		included in the stem.
+
+	Returns
+	-------
+	filename : str
+		The generated filename string (stem + suffix).
+	"""
+	stem: str = '_'.join([*underscore, *map('-'.join, dash.items())])
+	return stem + suffix
+
+def makePathFilenameFoldsTotal(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.foldsTotal') -> Path:
+	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
+
+	To help reduce duplicate code and to increase predictability, this function creates a standardized
+	filename, has a default but configurable path, and creates the path.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A sequence of integers representing the map dimensions.
+	pathLikeWrite : PathLike[str] | None = getPathRootJobDEFAULT()
+		Path, filename, or relative path and filename. If None, uses default path. If a directory,
+		appends standardized filename.
+	suffix : str = '.foldsTotal'
+		Filename suffix/extension to use.
+
+	Returns
+	-------
+	pathFilenameFoldsTotal : Path
+		Absolute path and filename for storing the `foldsTotal` value.
+
+	Notes
+	-----
+	The function creates any necessary directories in the path if they don't exist.
+	"""
+	filename: str = makeFilenameFoldsTotal(mapShape, suffix)
+	return makePathFilenameCountTotal(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
+
+def makeFilenameFoldsTotal(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') -> str:
 	"""Create a standardized filename for a computed `foldsTotal` value.
 
 	(AI generated docstring)
@@ -47,6 +134,8 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	----------
 	mapShape : tuple[int, ...]
 		A sequence of integers representing the dimensions of the map.
+	suffix : str = '.foldsTotal'
+		Filename suffix/extension to use.
 
 	Returns
 	-------
@@ -60,44 +149,7 @@ def getFilenameFoldsTotal(mapShape: tuple[int, ...]) -> str:
 	the 'p' prefix comes from Lunnon's original code.
 
 	"""
-	return 'p' + 'x'.join(str(dimension) for dimension in sorted(mapShape)) + '.foldsTotal'
-
-def getPathFilenameFoldsTotal(mapShape: tuple[int, ...], pathLikeWriteTotal: PathLike[str] | None = None) -> Path:
-	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
-
-	To help reduce duplicate code and to increase predictability, this function creates a standardized
-	filename, has a default but configurable path, and creates the path.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A sequence of integers representing the map dimensions.
-	pathLikeWriteTotal : PathLike[str] | None = getPathRootJobDEFAULT()
-		Path, filename, or relative path and filename. If None, uses default path. If a directory,
-		appends standardized filename.
-
-	Returns
-	-------
-	pathFilenameFoldsTotal : Path
-		Absolute path and filename for storing the `foldsTotal` value.
-
-	Notes
-	-----
-	The function creates any necessary directories in the path if they don't exist.
-	"""
-	if pathLikeWriteTotal is None:
-		pathFilenameFoldsTotal: Path = getPathRootJobDEFAULT() / getFilenameFoldsTotal(mapShape)
-	else:
-		pathLikeSherpa = Path(pathLikeWriteTotal)
-		if pathLikeSherpa.is_dir():
-			pathFilenameFoldsTotal = pathLikeSherpa / getFilenameFoldsTotal(mapShape)
-		elif pathLikeSherpa.is_file() and pathLikeSherpa.is_absolute():
-			pathFilenameFoldsTotal = pathLikeSherpa
-		else:
-			pathFilenameFoldsTotal = getPathRootJobDEFAULT() / pathLikeSherpa
-
-	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-	return pathFilenameFoldsTotal
+	return makeFilenameCountTotal('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
 def getPathRootJobDEFAULT() -> Path:
 	"""Get the default root directory for map folding computation jobs.
@@ -232,12 +284,12 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str]) -> None:
 	if not Path(pathFilename).parent.exists():
 		message = f"I received `{pathFilename = }` 0.000139 seconds ago from a function that promised it created the parent directory, but the parent directory does not exist. Fix that now, so your computation doesn't get deleted later. And be compassionate to others."
 		raise FileNotFoundError(message)
-	foldsTotal = 149302889205120
-	_saveFoldsTotal(pathFilename, foldsTotal)
+	countTotal: int = errorL33T
+	_saveFoldsTotal(pathFilename, countTotal)
 	if not Path(pathFilename).exists():
 		message = f"I just wrote a test file to `{pathFilename = }`, but it does not exist. Fix that now, so your computation doesn't get deleted later. And continually improve your empathy skills."
 		raise FileNotFoundError(message)
-	foldsTotalRead = int(Path(pathFilename).read_text(encoding="utf-8"))
-	if foldsTotalRead != foldsTotal:
-		message = f"I wrote a test file to `{pathFilename = }` with contents of `{str(foldsTotal) = }`, but I read `{foldsTotalRead = }` from the file. Python says the values are not equal. Fix that now, so your computation doesn't get corrupted later. And be pro-social."
+	countTotalRead = int(Path(pathFilename).read_text(encoding="utf-8"))
+	if countTotalRead != countTotal:
+		message = f"I wrote a test file to `{pathFilename = }` with contents of `{str(countTotal) = }`, but I read `{countTotalRead = }` from the file. Python says the values are not equal. Fix that now, so your computation doesn't get corrupted later. And be pro-social."
 		raise FileNotFoundError(message)

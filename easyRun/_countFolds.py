@@ -30,7 +30,7 @@ if __name__ == '__main__':
 			f"{ansiColorReset}\n"
 		)
 
-	pathLikeWriteTotal: PathLike[str] | None = None
+	pathLikeWrite: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
 	CPUlimit: Limitation = None
 	flow = 'daoOfMapFolding'
@@ -55,6 +55,6 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 
 		timeStart = time.perf_counter()
-		foldsTotal: int = countFolds(mapShape, flow, pathLikeWriteTotal, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
+		foldsTotal: int = countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 
 		_write()

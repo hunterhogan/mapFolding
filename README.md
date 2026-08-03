@@ -131,7 +131,7 @@ Leave `flow=''` for the default implementation. The alternate selectors exist fo
 
 The Numba, Pandas, and Codon selectors require their corresponding extras. For OEIS sequences with multiple exact identities, the `f` argument to `oeisIDfor_n` selects a formula; leaving it empty uses the default route.
 
-Pass `pathLikeWriteTotal` to a counting function to preserve a result. An existing directory receives a generated filename such as `p2x6.foldsTotal`; an explicit target file is also supported. The destination is write-tested before computation, and an existing target is not overwritten.
+Pass `pathLikeWrite` to a counting function to preserve a result. An existing directory receives a generated filename such as `p2x6.foldsTotal`; an explicit target file is also supported. The destination is write-tested before computation, and an existing target is not overwritten.
 
 `countFolds` can split work with an integer, `computationDivisions='cpu'`, or `computationDivisions='maximum'`. Dividing this algorithm repeats substantial work and is usually slower, so leave `computationDivisions=None` unless you are deliberately studying the parallel implementation.
 

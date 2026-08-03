@@ -32,10 +32,10 @@ if __name__ == "__main__":
 			f"{ansiColorReset}\n"
 		)
 
-	pathLikeWriteTotal: PathLike[str] | None = None
+	pathLikeWrite: PathLike[str] | None = None
 	oeisID: str = ""
 	flow: str = ""
-	CPUlimit: Limitation = -2
+	CPUlimit: Limitation = -4
 	state: EliminationState | None = None
 
 	flow = "elimination"
@@ -66,9 +66,9 @@ if __name__ == "__main__":
 			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
 			state = pinLeavesDimensions0零一(state)
-			# state.listPermutationSpace.reverse()
+			state.listPermutationSpace.reverse()
 
-		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWriteTotal=pathLikeWriteTotal, CPUlimit=CPUlimit, flow=flow)
+		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
 
 		_write()
 
