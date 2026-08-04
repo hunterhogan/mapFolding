@@ -2,13 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
-from functools import cache, partial
-from humpy_cytoolz import keymap, merge
+from functools import cache
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import filterfalse
-from mapFolding.oeis import getMapShape
 from mapFolding.oeis._dataBaskets import MetadataOEISid
-from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, oeisIDsMapFolding, pathCache
+from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
 from operator import getitem, methodcaller
 from typing import TYPE_CHECKING
 from urllib3.exceptions import HTTPError
@@ -198,30 +196,6 @@ def getOEISidMetadata(oeisID: str) -> tuple[str, int]:
 		offset = -1
 	description: str = ' '.join(listDescriptionDeconstructed)
 	return description, offset
-
-def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
-	"""You can create a dictionary mapping map shapes to known folding totals from all OEIS sequences.
-
-	(AI generated docstring)
-
-	This function constructs a comprehensive lookup dictionary by extracting and transforming data
-	from all map-folding OEIS sequences in `dictionaryOEIS`. The function applies `getMapShape` to
-	each sequence's known indices to generate the corresponding map shapes,
-	then pairs each shape with its folding total.
-
-	Returns
-	-------
-	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
-		A dictionary where keys are tuple `mapShape` and values are the total number of distinct
-		folding patterns for `mapShape`.
-
-	Exclusions
-	----------
-	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents a
-	constrained subset rather than the total count for each `mapShape`.
-
-	"""
-	return merge(*[keymap(partial(getMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in oeisIDsMapFolding])
 
 def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	"""Construct metadata for every implemented OEIS sequence."""

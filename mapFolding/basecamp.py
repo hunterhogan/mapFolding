@@ -56,16 +56,19 @@ References
 from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
+from mapFolding.algorithms.matrixMeandersShare import initializeDictionaryMeanders
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateMapShape
+from mapFolding.dataBaskets import MapFoldingState, ParallelMapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import makePathFilenameCountTotal, makePathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 	from pathlib import Path
+	from typing import Literal
 
 def countFolds(mapShape: Sequence[int]
 				, flow: str = ''
@@ -137,8 +140,6 @@ def countFolds(mapShape: Sequence[int]
 	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
 	will almost certainly be slower for all map dimensions.
 	"""
-#-------- mapShape ---------------------------------------------------------------------
-
 	mapShape = validateMapShape(mapShape)
 
 #-------- task division instructions -----------------------------------------------------
@@ -155,41 +156,29 @@ def countFolds(mapShape: Sequence[int]
 	if pathLikeWrite is None:
 		pathFilenameFoldsTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = makePathFilenameFoldsTotal(mapShape, pathLikeWrite, suffix=suffix)
-		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+		pathFilenameFoldsTotal = saveFoldsTotalFAILearly(makePathFilenameFoldsTotal(mapShape, pathLikeWrite, suffix=suffix))
 
 #-------- Algorithm version -----------------------------------------------------
 
-	if 1 < taskDivisions:
-		from mapFolding.dataBaskets import ParallelMapFoldingState
+	if 0 in mapShape:
+		""" I don't think 0 is a valid number of panels in a dimension. I think some offset values on OEIS are wrong.
+		| oeisID  | offset | mapShape                      | Equivalencies to offset 1            |
+		| ------- | ------ | ----------------------------- | ------------------------------------ |
+		| A000136 | 1      | (1,) or (1, 1)                |                                      |
+		| A001415 | 0      | (2, 0)                        | a(1) = A000136(2), a(2) = A001418(2) |
+		| A001416 | 0      | (3, 0)                        | a(1) = A000136(3), a(3) = A001418(3) |
+		| A001417 | 0      | Let p ∈ {2}. ∴ (p,) * 0 or () | a(1) = A000136(2), a(2) = A001418(2) |
+		| A001418 | 1      | (1, 1)                        |                                      |
+		| A195646 | 0      | Let p ∈ {3}. ∴ (p,) * 0 or () | a(1) = A000136(3), a(2) = A001418(3) |
+		"""
+		foldsTotal = 1
+	elif 1 < taskDivisions:
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful
 
 		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
 		# `listStatesParallel` exists so you can research the parallel computation.
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
-
-	elif flow == 'asynchronousSymmetric':
-		from mapFolding.dataBaskets import SymmetricFoldsState
-		from mapFolding.syntheticModules.foldsSymmetric.asynchronous import doTheNeedful
-		foldsTotal = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
-	elif flow.endswith('Symmetric'):
-		if flow == 'theorem2Symmetric':
-			from mapFolding.syntheticModules.foldsSymmetric.theorem2 import doTheNeedful
-		elif flow == 'theorem2CodonSymmetric':
-			from mapFolding.syntheticModules.foldsSymmetric.codon.theorem2 import doTheNeedful
-		elif flow == 'theorem2NumbaSymmetric':
-			from mapFolding.syntheticModules.foldsSymmetric.theorem2Numba import doTheNeedful
-		elif flow == 'theorem2TrimmedSymmetric':
-			from mapFolding.syntheticModules.foldsSymmetric.theorem2Trimmed import doTheNeedful
-		else:
-			from mapFolding.syntheticModules.foldsSymmetric.algorithm import doTheNeedful
-
-		from mapFolding.dataBaskets import SymmetricFoldsState
-		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
-
-		symmetricState = doTheNeedful(symmetricState)
-		foldsTotal = symmetricState.symmetricFolds
 
 	else:
 		if flow in {'daoOfMapFolding', ''}:
@@ -210,7 +199,6 @@ def countFolds(mapShape: Sequence[int]
 		else:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
-		from mapFolding.dataBaskets import MapFoldingState
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		foldsTotal = mapFoldingState.foldsTotal
@@ -222,7 +210,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return foldsTotal
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -235,8 +223,8 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchro
 	----------
 	mapShape : tuple[int, ...]
 		The strip dimensions, expressed as `(1, 2 * n)` for sequence index `n`.
-	flow : str | Literal['asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
-		The counting method. `''` selects the standard method. The other supported values select
+	flow : str | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
+		The counting method. `'algorithm'` or `''` selects the standard method. The other supported values select
 		alternative methods with the same result.
 	pathLikeWrite : PathLike[str] | None = None
 		An optional file or directory path for saving the count. A directory path receives a filename
@@ -258,9 +246,46 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['asynchro
 	[1] A007822 - Number of symmetric foldings of 2n+1 stamps - OEIS
 		https://oeis.org/A007822
 	"""
-	return countFolds(mapShape, f'{flow}Symmetric', pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
+	mapShape = validateMapShape(mapShape)
 
-def countMeanders(kind: str, n: int, flow: str = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".countTotal") -> int:
+#-------- memorialization instructions ---------------------------------------------
+
+	if pathLikeWrite is None:
+		pathFilenameFoldsTotal: Path | None = None
+	else:
+		pathFilenameFoldsTotal = saveFoldsTotalFAILearly(makePathFilenameFoldsTotal(mapShape, pathLikeWrite, suffix=suffix))
+
+#-------- Algorithm version -----------------------------------------------------
+
+	if flow == 'asynchronous':
+		from mapFolding.syntheticModules.foldsSymmetric.asynchronous import doTheNeedful
+		foldsTotal = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
+	else:
+		match flow:
+			case 'theorem2':
+				from mapFolding.syntheticModules.foldsSymmetric.theorem2 import doTheNeedful
+			case 'theorem2Codon':
+				from mapFolding.syntheticModules.foldsSymmetric.codon.theorem2 import doTheNeedful
+			case 'theorem2Numba':
+				from mapFolding.syntheticModules.foldsSymmetric.theorem2Numba import doTheNeedful
+			case 'theorem2Trimmed':
+				from mapFolding.syntheticModules.foldsSymmetric.theorem2Trimmed import doTheNeedful
+			case 'algorithm' | _:
+				from mapFolding.syntheticModules.foldsSymmetric.algorithm import doTheNeedful
+
+		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
+
+		symmetricState = doTheNeedful(symmetricState)
+		foldsTotal = symmetricState.symmetricFolds
+
+#-------- Follow memorialization instructions ---------------------------------------------
+
+	if pathFilenameFoldsTotal is not None:
+		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+
+	return foldsTotal
+
+def countMeanders(kind: Literal['semi', 'meanders'], n: int, flow: str = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".countTotal") -> int:
 	"""Compute a native meander sequence term.
 
 	This entry point computes semi-meanders and meanders with a matrix meander algorithm. Formula and
@@ -268,8 +293,8 @@ def countMeanders(kind: str, n: int, flow: str = '', pathLikeWrite: PathLike[str
 
 	Parameters
 	----------
-	kind : str
-		'semi' or 'meanders'.
+	kind : Literal['semi', 'meanders']
+		Whether to compute semi-meanders or meanders.
 	n : int
 		Sequence index.
 	flow : str = ''
@@ -282,84 +307,35 @@ def countMeanders(kind: str, n: int, flow: str = '', pathLikeWrite: PathLike[str
 	Returns
 	-------
 	countTotal : int
-		The requested sequence term.
-
-	Raises
-	------
-	ValueError
-		If `kind` is not 'semi' or 'meanders'.
-
-	Examples
-	--------
-	>>> from mapFolding.oeis import countMeanders
-	>>> countMeanders('semi', 5, flow='matrixMeanders')
-	42
-
-	See Also
-	--------
-	mapFolding.oeis.oeisIDfor_n
-		Dispatch every implemented OEIS sequence.
-
+		The number of semi-meanders or meanders for the given index.
 	"""
 #-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWrite is None:
 		pathFilenameCountTotal: Path | None = None
 	else:
-		pathFilenameCountTotal = makePathFilenameCountTotal(pathLikeWrite, kind, str(n), suffix=suffix)
-		saveFoldsTotalFAILearly(pathFilenameCountTotal)
+		pathFilenameCountTotal = saveFoldsTotalFAILearly(makePathFilenameCountTotal(pathLikeWrite, kind, str(n), suffix=suffix))
 
 #-------- Algorithm selection and execution ---------------------------------------------
 
-	match flow:
-		case 'matrixNumPy':
-			from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-		case 'matrixPandas':
-			from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
-		case 'matrixMeanders' | _:
-			from mapFolding.algorithms.matrixMeanders import doTheNeedful
-			from mapFolding.dataBaskets import MatrixMeandersState as State
-
-	boundary: int = n - 1
-
-	# TODO Consider: If semi is essentially A000136 * leavesTotal, then my graphs of A000136 are
-	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
-	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
-	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows
-	# predictably. Cutting the count in half... In `doTheNeedful`, I used `while state.boundary > 0:`
-	# and the ratio trick to find the midpoint: it didn't work.
-	if kind == 'semi':
-		if n == 1:
-			return 1
-		elif n & 0b1:
-			arcCode: int = 0b101
-		else:
-			arcCode = 0b1
-		listArcCodes: list[int] = [(arcCode << 1) | arcCode]
-#										   0b1010 | 0b0101 is 0b1111, or 0xf
-#											 0b10 |   0b01 is   0b11, or 0x3
-
-		MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
-		while listArcCodes[-1] < MAXIMUMarcCode:
-			arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
-			listArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
-			# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
-			# See "mapFolding/reference/A000682facts.py"
-		dictionaryMeanders: dict[int, int] = dict.fromkeys(listArcCodes, 1)
-
-	elif kind == 'meanders':
-		if n & 0b1:
-			dictionaryMeanders: dict[int, int] = {0b1111: 1}  # 0xf
-		else:
-			dictionaryMeanders = {0b10110: 1}
+	if kind == 'semi' and n == 1:
+		countTotal: int = 1
 	else:
-		message: str = f"I received `{kind = }` for meander computation, but I only support 'semi' and 'meanders'."
-		raise ValueError(message)
+		match flow:
+			case 'matrixNumPy':
+				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+				from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+			case 'matrixPandas':
+				from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
+				from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
+			case 'matrixMeanders' | _:
+				from mapFolding.algorithms.matrixMeanders import doTheNeedful
+				from mapFolding.dataBaskets import MatrixMeandersState as State
 
-	state = State(n, kind, boundary, dictionaryMeanders)
-	countTotal: int = doTheNeedful(state)
+		boundary: int = n - 1
+		dictionaryMeanders: dict[int, int] = initializeDictionaryMeanders(kind, n, boundary)
+		state = State(n, kind, boundary, dictionaryMeanders)
+		countTotal: int = doTheNeedful(state)
 
 #-------- Follow memorialization instructions ---------------------------------------------
 

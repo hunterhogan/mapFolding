@@ -35,12 +35,12 @@ if __name__ == "__main__":
 	pathLikeWrite: PathLike[str] | None = None
 	oeisID: str = ""
 	flow: str = ""
-	CPUlimit: Limitation = -4
+	CPUlimit: Limitation = -2
 	state: EliminationState | None = None
 
 	flow = "elimination"
-	flow = "crease"
 	flow = "constraintPropagation"
+	flow = "crease"
 
 	oeisID = "A195646"
 	oeisID = "A000136"
@@ -53,20 +53,20 @@ if __name__ == "__main__":
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + "\n")
 
-	for n in range(7, 8):
+	for n in range(4, 6):
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
 			# state = pinPile零Ante首零(state)
-			# state = pinPilesAtEnds(state, 3)
+			state = pinPilesAtEnds(state, 3)
 			# state = pinLeavesDimension首二(state)
 			# state = pin3beans2(state)
 			# state = pin首beans(state)
 			# state = pinLeavesDimension一(state)
 			# state = pinLeavesDimension二(state)
 			state = pinLeavesDimensions0零一(state)
-			state.listPermutationSpace.reverse()
+			# state.listPermutationSpace.reverse()
 
 		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
 

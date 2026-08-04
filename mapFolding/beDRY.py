@@ -138,7 +138,7 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 		If the input is empty or contains non-positive values.
 	"""
 	mapShapeAsList: list[int] = intInnit(mapShape, 'mapShape', Sequence[int])
-	if not mapShapeAsList or any(map((0).__ge__, mapShapeAsList)):
+	if not mapShapeAsList or any(map((0).__gt__, mapShapeAsList)):
 		message: str = f"I received `{mapShape = }`, but I need at least one positive integer dimension."
 		raise ValueError(message)
 

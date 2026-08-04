@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from mapFolding.theSSOT import settingsPackage
-from more_itertools import loops
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -24,25 +23,3 @@ cacheDays: int = 30
 
 pathCache: Path = settingsPackage.pathPackage / "oeis" / ".cache"
 """Local directory path for storing cached OEIS sequence data and metadata."""
-
-def getMapShape(oeisID: str, n: int) -> tuple[int, ...]:
-	"""Get the map shape for a given OEIS ID and index n."""
-	match oeisID:
-		case 'A000136':
-			mapShape: tuple[int, ...] = (1, n)
-		case 'A001415':
-			mapShape = (2, n)
-		case 'A001416':
-			mapShape = (3, n)
-		case 'A001417':
-			mapShape = tuple(2 for _dimension in loops(n))
-		case 'A195646':
-			mapShape = tuple(3 for _dimension in loops(n))
-		case 'A001418':
-			mapShape = (n, n)
-		case 'A007822':
-			mapShape = (1, 2 * n)
-		case _:
-			message: str = f"I received `{oeisID = }`, but it is not implemented in `getMapShape`."
-			raise ValueError(message)
-	return mapShape

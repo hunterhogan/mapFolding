@@ -40,7 +40,7 @@ def test_saveFoldsTotal_fallback(path_tmpTesting: Path, foldsTotal: int) -> None
 	fallbackFiles: list[Path] = list(path_tmpTesting.glob('foldsTotalYO_*.txt'))
 	assertEqualTo(len(fallbackFiles), 1, saveFoldsTotal.__name__, pathFilename, foldsTotal)
 
-@pytest.mark.parametrize('mapShape, expectedFilename', [((11, 13), 'p11x13.foldsTotal'), ((17, 13, 11), 'p11x13x17.foldsTotal')])
+@pytest.mark.parametrize('mapShape, expectedFilename', [((11, 13), 'p11x13.foldsTotal'), ((317, 313, 311), 'p317x313x311.foldsTotal')])
 def test_getFilenameFoldsTotal(mapShape: tuple[int, ...], expectedFilename: str) -> None:
 	"""Test that getFilenameFoldsTotal generates correct filenames with dimensions sorted."""
 	filenameActual: str = makeFilenameFoldsTotal(mapShape)

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import raiseIfNone
-from typing import TYPE_CHECKING
+from typing import Literal, TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
@@ -2113,3 +2113,41 @@ n_boundary_bucketsMeanders: dict[int, dict[int, int]] = {
 		21: 614965718,
 	},
 }
+
+def initializeDictionaryMeanders(kind: Literal['semi', 'meanders'], n: int, boundary: int) -> dict[int, int]:
+	# TODO Consider: If semi is essentially A000136 * leavesTotal, then my graphs of A000136 are
+	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
+	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
+	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows
+	# predictably. Cutting the count in half... In `doTheNeedful`, I used `while state.boundary > 0:`
+	# and the ratio trick to find the midpoint: it didn't work.
+	if kind == 'semi':
+		if n == 1:
+			#=Sin= early return.
+			return {0b1: 1}
+		elif n & 0b1:
+			arcCode: int = 0b101
+		else:
+			arcCode = 0b1
+		listArcCodes: list[int] = [(arcCode << 1) | arcCode]
+#										   0b1010 | 0b0101 is 0b1111, or 0xf
+#											 0b10 |   0b01 is   0b11, or 0x3
+
+		MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
+		while listArcCodes[-1] < MAXIMUMarcCode:
+			arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
+			listArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+			# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
+			# See "mapFolding/reference/A000682facts.py"
+		dictionaryMeanders: dict[int, int] = dict.fromkeys(listArcCodes, 1)
+
+	elif kind == 'meanders':
+		if n & 0b1:
+			dictionaryMeanders = {0b1111: 1}  # 0xf
+		else:
+			dictionaryMeanders = {0b10110: 1}
+	else:
+		message: str = f"I received `{kind = }` for meander computation, but I only support 'semi' and 'meanders'."
+		raise ValueError(message)
+
+	return dictionaryMeanders

@@ -31,15 +31,15 @@ if __name__ == '__main__':
 	flow = 'asynchronous'
 	flow = 'theorem2'
 	flow = 'theorem2Codon'
-	flow = 'BOB'
 	flow = 'theorem2Trimmed'
 	flow = 'theorem2Numba'
+	flow = 'algorithm'
 
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')
 
-	for n in range(3, 6):
+	for n in range(1, 6):
 
 		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
 
