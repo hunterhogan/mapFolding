@@ -7,7 +7,7 @@ properties of such foldings, organized by `mapShape`.
 Data Structure
 --------------
 Each dictionary is keyed by `mapShape` (a tuple defining the n-dimensional hypercube). The naming
-convention `2dN` refers to a shape of `(2,) * N`, which yields `2^N` leaves. For example:
+convention `2^n-dimensional` refers to a shape of `(2,) * n`, which yields `2^n` leaves. For example:
 - `2^4-dimensional` means `(2, 2, 2, 2)` → 16 leavesTotal
 - `2^5-dimensional` means `(2, 2, 2, 2, 2)` → 32 leavesTotal
 - `2^6-dimensional` means `(2, 2, 2, 2, 2, 2)` → 64 leavesTotal

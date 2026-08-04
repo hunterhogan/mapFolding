@@ -8,6 +8,7 @@ from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from math import factorial
 from multiprocessing import get_context
 from operator import methodcaller
+from tqdm import tqdm
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -23,7 +24,7 @@ def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -
 def deconstructPermutationSpaces(listPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
 	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, listPermutationSpace))
 
-def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
+def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
 	tuple(map(queueStates.put, map(partial(pinByCrease, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
@@ -42,7 +43,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	state.listFolding = []
 
 	listProcesses: list[BaseProcess] = list(starmap(
-		partial(processManager.Process, target=consumePermutationSpaces, args=(state.mapShape, queuePermutationSpace, queueStates))
+		partial(processManager.Process, target=consumeQueue, args=(state.mapShape, queuePermutationSpace, queueStates))
 		, repeat((), workersMaximum)
 	))
 	tuple(map(methodcaller('start'), listProcesses))
@@ -50,14 +51,18 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
 
-	permutationSpacesLiving: int = len(listPermutationSpace)
+	queuePermutationSpacesLength: int = len(listPermutationSpace)
 
-	while permutationSpacesLiving:
+	tqdmQueue = tqdm(total=queuePermutationSpacesLength)
+	while queuePermutationSpacesLength:
 		tuple(map(queuePermutationSpace.put, listPermutationSpace))
 		sherpa: EliminationState = queueStates.get()
 		state.groupsOfFolds += len(sherpa.listFolding)
 		listPermutationSpace = list(deconstructPermutationSpaces(sherpa.listPermutationSpace))
-		permutationSpacesLiving += -1 + len(listPermutationSpace)
+		queuePermutationSpacesLength += -1 + len(listPermutationSpace)
+		tqdmQueue.total += len(listPermutationSpace)
+		tqdmQueue.update(1)
+	tqdmQueue.close()
 
 	tuple(map(queuePermutationSpace.put, repeat(PermutationSpace(), workersMaximum)))
 	tuple(map(methodcaller('join'), listProcesses))

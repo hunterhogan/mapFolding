@@ -5,7 +5,7 @@ This module contains empirically extracted combined domain data for leaves
 
 Each list is named `listDomain2上{dimensionsTotal}Dimensional` where `dimensionsTotal`
 is the exponent in the 2^n-dimensional mapShape, and it contains tuples representing
-valid pile positions for the specified leaves. The tuple order follows the original
+valid pile indices for the specified leaves. The tuple element sequence follows the original
 leaf argument order.
 """
 

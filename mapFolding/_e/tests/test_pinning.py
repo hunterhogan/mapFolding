@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from gmpy2 import mpz
 from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e._2上nDimensional.pinIt import (
@@ -14,7 +13,6 @@ import numpy
 import pytest
 
 if TYPE_CHECKING:
-	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
 	from hunterMakesPy.theTypes import Limitation
 	from mapFolding._e.dataBaskets import PermutationSpace
@@ -30,46 +28,39 @@ def test_pinningFunctions(
 	pinningFunction: CallableFunction[..., EliminationState],
 	dimensionsTotal: int,
 	CPUlimit: Limitation,
-	loadArrayFoldings2上nDimensional: Callable[[int], NDArray[numpy.uint8]],
+	arrayAlbum2上nDimensional: NDArray[numpy.uint8],
 ) -> None:
 	state: EliminationState = EliminationState((2,) * dimensionsTotal)
-	arrayFoldings: NDArray[numpy.uint8] = loadArrayFoldings2上nDimensional(dimensionsTotal)
 
 	state = pinningFunction(state, CPUlimit=CPUlimit)
 
 	countPermutationSpaces: int = len(state.listPermutationSpace)
 	assertEqualTo(0 < countPermutationSpaces, True, pinningFunction.__name__, state.mapShape, countPermutationSpaces=countPermutationSpaces)
 
-	requiredRowsTotal: int = int(arrayFoldings.shape[0])
-	listMaskRequiredRowsMatchThisPermutationSpace: list[numpy.ndarray] = []
+	foldingsTotalExpected: int = int(arrayAlbum2上nDimensional.shape[0])
+	listSelectorsFoldingsByPermutationSpace: list[numpy.ndarray] = []
 
 	for permutationSpace in state.listPermutationSpace:
-		maskRequiredRowsMatchThisPermutationSpace: numpy.ndarray = numpy.ones(requiredRowsTotal, dtype=bool)
+		selectorFoldingsMatchingPermutationSpace: numpy.ndarray = numpy.ones(foldingsTotalExpected, dtype=bool)
 		for pile, leafSpace in permutationSpace.extractPinnedLeaves().items():
-			if isinstance(leafSpace, int):
-				maskRequiredRowsMatchThisPermutationSpace &= (arrayFoldings[:, pile] == leafSpace)
-				continue
-			if isinstance(leafSpace, mpz):
-				allowedLeaves: numpy.ndarray = numpy.fromiter((bool(leafSpace[leaf]) for leaf in range(state.leavesTotal)), dtype=bool, count=state.leavesTotal)
-				maskRequiredRowsMatchThisPermutationSpace &= allowedLeaves[arrayFoldings[:, pile]]
-		listMaskRequiredRowsMatchThisPermutationSpace.append(maskRequiredRowsMatchThisPermutationSpace)
+			selectorFoldingsMatchingPermutationSpace &= (arrayAlbum2上nDimensional[:, pile] == leafSpace)
+		listSelectorsFoldingsByPermutationSpace.append(selectorFoldingsMatchingPermutationSpace)
 
-	masksStacked: numpy.ndarray = numpy.column_stack(listMaskRequiredRowsMatchThisPermutationSpace)
-	coverageCountPerRow: numpy.ndarray = masksStacked.sum(axis=1)
-	indicesOverlappedRequiredRows: numpy.ndarray = numpy.nonzero(2 <= coverageCountPerRow)[0]
+	matrixSelectorsFoldingsByPermutationSpace: numpy.ndarray = numpy.column_stack(listSelectorsFoldingsByPermutationSpace)
+	arrayPermutationSpacesTotalByFolding: numpy.ndarray = matrixSelectorsFoldingsByPermutationSpace.sum(axis=1)
+	indicesFoldingsAssignedMultiplePermutationSpaces: numpy.ndarray = numpy.nonzero(2 <= arrayPermutationSpacesTotalByFolding)[0]
 
 	countOverlappingDictionaries: int = 0
-	if 0 < indicesOverlappedRequiredRows.size:
-		for maskRequiredRowsMatchThisPermutationSpace in listMaskRequiredRowsMatchThisPermutationSpace:
-			if bool(maskRequiredRowsMatchThisPermutationSpace[indicesOverlappedRequiredRows].any()):
+	if 0 < indicesFoldingsAssignedMultiplePermutationSpaces.size:
+		for selectorFoldingsMatchingPermutationSpace in listSelectorsFoldingsByPermutationSpace:
+			if bool(selectorFoldingsMatchingPermutationSpace[indicesFoldingsAssignedMultiplePermutationSpaces].any()):
 				countOverlappingDictionaries += 1
 
-	maskRequiredRowsCoveredByAnyPermutationSpace: numpy.ndarray = numpy.logical_or.reduce(listMaskRequiredRowsMatchThisPermutationSpace)
-	requiredRowsCoveredTotal: int = int(maskRequiredRowsCoveredByAnyPermutationSpace.sum())
+	selectorFoldingsCoveredByAnyPermutationSpace: numpy.ndarray = numpy.logical_or.reduce(listSelectorsFoldingsByPermutationSpace)
+	foldingsCoveredTotal: int = int(selectorFoldingsCoveredByAnyPermutationSpace.sum())
 
-	beansOrCornbread: Callable[[PermutationSpace], bool] = beansWithoutCornbread(state)
-	countBeansWithoutCornbread: int = len(list(filter(beansOrCornbread, state.listPermutationSpace)))
+	countBeansWithoutCornbread: int = len(list(filter(beansWithoutCornbread(state), state.listPermutationSpace)))
 
-	assertEqualTo(requiredRowsCoveredTotal, requiredRowsTotal, pinningFunction.__name__, state.mapShape, requiredRowsCoveredTotal=requiredRowsCoveredTotal, requiredRowsTotal=requiredRowsTotal)
+	assertEqualTo(foldingsCoveredTotal, foldingsTotalExpected, pinningFunction.__name__, state.mapShape, foldingsCoveredTotal=foldingsCoveredTotal, foldingsRequiredTotal=foldingsTotalExpected)
 	assertEqualTo(countOverlappingDictionaries, 0, pinningFunction.__name__, state.mapShape, countOverlappingDictionaries=countOverlappingDictionaries)
 	assertEqualTo(countBeansWithoutCornbread, 0, pinningFunction.__name__, state.mapShape, countBeansWithoutCornbread=countBeansWithoutCornbread)

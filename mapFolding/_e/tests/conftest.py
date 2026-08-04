@@ -14,7 +14,13 @@ if TYPE_CHECKING:
 	from pytest import FixtureRequest
 	import numpy
 
+#================== Filesystem ======================================================
+
 pathDataSamples: Path = Path(settingsPackage.pathPackage, "_e/tests/dataSamples").absolute()
+
+@pytest.fixture
+def path_tmpTesting(tmp_path: Path) -> Path:
+	return tmp_path
 
 #================== Test-function parameters ======================================================
 
@@ -38,35 +44,19 @@ def rtol(request: FixtureRequest) -> float:
 	"""The `rtol` (***r***elative ***tol***erance) parameter value for `numpy.allclose`."""
 	return 1e-05
 
-@pytest.fixture
-def loadArrayFoldings2上nDimensional() -> Callable[[int], NDArray[numpy.uint8]]:
-	"""Factory fixture for loading pickled array foldings data.
+#================== Fixtures ======================================================
 
-	Returns
-	-------
-	loaderFunction : Callable[[int], NDArray[numpy.uint8]]
-		Function that loads 2^n-dimensional array foldings for a given dimensionsTotal.
-	"""
-	def loader(dimensionsTotal: int) -> NDArray[numpy.uint8]:
-		pathFilename: Path = pathDataSamples / f"arrayFoldings2上{dimensionsTotal}Dimensional.pkl"
-		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())
-		return arrayFoldings
-
-	return loader
-
-@pytest.fixture
-def path_tmpTesting(tmp_path: Path) -> Path:
-	return tmp_path
-
-@pytest.fixture
-def expected(
-	request: FixtureRequest, loadArrayFoldings2上nDimensional: Callable[[int], NDArray[numpy.uint8]]
-) -> NDArray[numpy.uint8]:
-	return loadArrayFoldings2上nDimensional(int(request.param))
+@pytest.fixture()
+def arrayAlbum2上nDimensional(dimensionsTotal: int) -> NDArray[numpy.uint8]:
+	return pickle.loads((pathDataSamples / f'arrayFoldings2上{dimensionsTotal}Dimensional.pkl').read_bytes())
 
 @pytest.fixture(params=(None,))
 def CPUlimit(request: pytest.FixtureRequest) -> Limitation:
 	return request.param
+
+@pytest.fixture()
+def expectedAlbum(request: FixtureRequest, arrayAlbum2上nDimensional: Callable[[int], NDArray[numpy.uint8]]) -> NDArray[numpy.uint8]:
+	return arrayAlbum2上nDimensional(int(request.param))
 
 @pytest.fixture(params=(2, 3, 4), ids=lambda pileDepth: f"pileDepth={pileDepth}")
 def pileDepthPinningTests(request: pytest.FixtureRequest) -> int:

@@ -23,9 +23,8 @@ from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
-	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_7_5_4,
-	p2上nDimensionalDomain7_6, p2上nDimensionalDomain首二_首零二_首零一二_首一二, p2上nDimensionalDomain首零一二_首一二,
-	p2上nDimensionalDomain首零二_首二)
+	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_7_5_4, p2上nDimensionalDomain7_6,
+	p2上nDimensionalDomain首二_首零二_首零一二_首一二, p2上nDimensionalDomain首零一二_首一二, p2上nDimensionalDomain首零二_首二)
 from more_itertools import all_unique as allUnique吗, unique_to_each
 from typing import TYPE_CHECKING
 import pytest

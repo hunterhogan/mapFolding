@@ -16,10 +16,10 @@ if TYPE_CHECKING:
 def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
 	"""Create a Python module containing combined domain data for multiple leaves across multiple map shapes.
 
-	This function extracts the actual combined domain (the set of valid pile position tuples) for a group of leaves from pickled
+	This function extracts the actual combined domain (the set of valid pile index tuples) for a group of leaves from pickled
 	folding data. The data is used for verification in pytest tests comparing computed domains against empirical data.
 
-	The combined domain is a set of tuples where each tuple represents the pile positions for the specified leaves in a valid
+	The combined domain is a set of tuples where each tuple represents the pile indices for the specified leaves in a valid
 	folding. For example, if `listLeaves` is `[4, 5, 6, 7]`, each tuple has 4 elements representing the pile where each of those
 	leaves appears in a folding.
 
@@ -69,9 +69,9 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 		listResolvedLeaves: list[int] = [resolveLeaf(leafSpec, dimensionsTotal) for leafSpec in listLeaves]
 
 		listCombinedTuples: list[tuple[int, ...]] = []
-		for indexRow in range(len(dataframeFoldings)):
-			rowFolding: pandas.Series = dataframeFoldings.iloc[indexRow]
-			tuplePiles: tuple[int, ...] = tuple(int(rowFolding[rowFolding == leaf].index[0]) for leaf in listResolvedLeaves)
+		for indexFolding in range(len(dataframeFoldings)):
+			seriesFolding: pandas.Series = dataframeFoldings.iloc[indexFolding]
+			tuplePiles: tuple[int, ...] = tuple(int(seriesFolding[seriesFolding == leaf].index[0]) for leaf in listResolvedLeaves)
 			listCombinedTuples.append(tuplePiles)
 
 		listUniqueTuples: list[tuple[int, ...]] = sorted(set(listCombinedTuples))
@@ -85,7 +85,7 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 		'',
 		'Each list is named `listDomain2上{dimensionsTotal}Dimensional` where `dimensionsTotal`',  # ruff:ignore[missing-f-string-syntax]
 		'is the exponent in the 2^n-dimensional mapShape, and it contains tuples representing',
-		'valid pile positions for the specified leaves. The tuple order follows the original',
+		'valid pile indices for the specified leaves. The tuple element sequence follows the original',
 		'leaf argument order.',
 		'"""',
 		'',

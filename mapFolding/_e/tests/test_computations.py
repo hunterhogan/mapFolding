@@ -43,7 +43,7 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 	CPUlimit : float
 		CPU limit for the computation.
 	"""
-	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 	state: EliminationState | None = None
 	pathLikeWrite: None = None
 	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWrite, CPUlimit, flow)
@@ -52,14 +52,14 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: str, n: int, flow: str, C
 	*[pytest.param(ValueError, oeisID, dictionaryOEIS[oeisID]["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
 ])
 def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
-	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+	mapShape: tuple[int, ...] = getMapShape(oeisID, n)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 	state: EliminationState | None = None
 	pathLikeWrite: None = None
 	with pytest.raises(expected):
 		eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
 
-# @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
-@pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")
+# @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"2^{n}-dimensional")
+@pytest.mark.parametrize("n", [4], ids=lambda n: f"2^{n}-dimensional")
 @pytest.mark.parametrize("flow", ["crease"])
 # @pytest.mark.parametrize("flow", ["crease", "constraintPropagation"])
 def test_eliminateFoldsPinnedState(pinningFunctionEliminateFolds2上nDimensional: Callable[..., EliminationState], CPUlimit: float, n: int, flow: str) -> None:
@@ -77,8 +77,8 @@ def test_eliminateFoldsPinnedState(pinningFunctionEliminateFolds2上nDimensional
 
 	assertEqualTo(actualFoldsTotal, expectedFoldsTotal, 'eliminateFolds', functionName, oeisID, n, flow)
 
-# @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"n={n}")
-@pytest.mark.parametrize("n", [4], ids=lambda n: f"n={n}")
+# @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"2^{n}-dimensional")
+@pytest.mark.parametrize("n", [4], ids=lambda n: f"2^{n}-dimensional")
 @pytest.mark.parametrize("flow", ["crease"])
 # @pytest.mark.parametrize("flow", ["crease", "constraintPropagation"])
 def test_eliminateFoldsPinPilesAtEnds(pileDepthPinningTests: int, CPUlimit: float, n: int, flow: str) -> None:
