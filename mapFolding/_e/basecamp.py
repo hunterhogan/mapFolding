@@ -13,14 +13,15 @@ if TYPE_CHECKING:
 	from os import PathLike
 	from pathlib import Path
 
-def eliminateFolds(mapShape: tuple[int, ...] | None = None
-				, state: EliminationState | None = None
-				, pathLikeWrite: PathLike[str] | None = None
-				, *
-				, CPUlimit: Limitation = None
-				, flow: str | None = None
-				, suffix: str = ".foldsTotal"
-				) -> int:
+def eliminateFolds(
+	mapShape: tuple[int, ...] | None = None
+	, state: EliminationState | None = None
+	, pathLikeWrite: PathLike[str] | None = None
+	, *
+	, CPUlimit: Limitation = None
+	, flow: str | None = None
+	, suffix: str = '.foldsTotal'
+) -> int:
 	"""
 	Compute foldsTotal by elimination.
 
@@ -66,19 +67,15 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		`eliminateFolds` raises a `NotImplementedError` because the crease algorithm is only
 		implemented for maps of that
 	"""
-#-------- state ---------------------------------------------------------------------
-
 	if not state:
 		if not mapShape:
-			message: str = f"I received these values: `{mapShape = }` and `{state = }`, but I was unable to select a map of which to count the folds."
+			message: str = f'I received `{mapShape = }` and `{state = }`, and I was unable to select a `mapShape`.'
 			raise ValueError(message)
 		state = EliminationState(mapShape)
 
-#-------- concurrency limit -----------------------------------------------------
-
 	concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
 
-#-------- memorialization instructions ---------------------------------------------
+	#-------- Memorialization instructions ---------------------------------------------
 
 	if pathLikeWrite is None:
 		pathFilenameFoldsTotal: Path | None = None
@@ -86,25 +83,28 @@ def eliminateFolds(mapShape: tuple[int, ...] | None = None
 		pathFilenameFoldsTotal = makePathFilenameFoldsTotal(state.mapShape, pathLikeWrite, suffix=suffix)
 		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
 
-#-------- Algorithm version -----------------------------------------------------
+	#-------- Algorithm version -----------------------------------------------------
 
-	match flow:
-		case 'constraintPropagation':
-			from mapFolding._e.algorithms.constraintPropagation import doTheNeedful
-		case 'crease':
-			if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=4):
-				from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
-			else:
-				message: str = "As of 25 December 2025, this algorithm only works on mapShape = (2,) * n, n >= 4. Did I forget to update this barrier?"
-				raise NotImplementedError(message)
-		case 'elimination' | _:
-			from mapFolding._e.algorithms.elimination import doTheNeedful
+	if 0 in state.mapShape:
+		foldsTotal: int = 1
+	else:
+		match flow:
+			case 'constraintPropagation':
+				from mapFolding._e.algorithms.constraintPropagation import doTheNeedful
+			case 'crease':
+				if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=4):
+					from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
+				else:
+					message: str = f'`{flow = }` is restricted to `mapShape` = (2,) * n, 4 <= n. Did I forget to update this check?'
+					raise NotImplementedError(message)
+			case 'elimination' | _:
+				from mapFolding._e.algorithms.elimination import doTheNeedful
 
-	state = doTheNeedful(state, concurrencyLimit)
+		foldsTotal = doTheNeedful(state, concurrencyLimit).foldsTotal
 
-#-------- Follow memorialization instructions ---------------------------------------------
+	#-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
-		saveFoldsTotal(pathFilenameFoldsTotal, state.foldsTotal)
+		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
 
-	return state.foldsTotal
+	return foldsTotal

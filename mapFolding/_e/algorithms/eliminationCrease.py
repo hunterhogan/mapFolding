@@ -60,7 +60,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		state.groupsOfFolds += len(sherpa.listFolding)
 		listPermutationSpace = list(deconstructPermutationSpaces(sherpa.listPermutationSpace))
 		queuePermutationSpacesLength += -1 + len(listPermutationSpace)
-		tqdmQueue.total += len(listPermutationSpace)
+		tqdmQueue.total += len(listPermutationSpace)  # ty: ignore[unsupported-operator]
 		tqdmQueue.update(1)
 	tqdmQueue.close()
 

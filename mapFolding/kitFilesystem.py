@@ -239,14 +239,14 @@ def saveFoldsTotal(pathFilename: PathLike[str], foldsTotal: int) -> None:
 			randomnessPlanB: list[str] = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
 			filenameInfixUnique: str = ''.join(randomnessPlanB)
 			pathFilenamePlanB: str = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
-			writeStreamFallback: TextIOWrapper = open(pathFilenamePlanB, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
-			writeStreamFallback.write(str(foldsTotal))
-			writeStreamFallback.close()
+			streamWriteFallback: TextIOWrapper = open(pathFilenamePlanB, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
+			streamWriteFallback.write(str(foldsTotal))
+			streamWriteFallback.close()
 			stdout.write(str(pathFilenamePlanB))
 		except Exception:  # ruff:ignore[blind-except]
 			stdout.write(str(foldsTotal))
 
-def saveFoldsTotalFAILearly(pathFilename: PathLike[str]) -> None:
+def saveFoldsTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) -> 形PathLike:
 	"""Preemptively test file write capabilities before beginning computation.
 
 	(AI generated docstring)
@@ -259,6 +259,11 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str]) -> None:
 	----------
 	pathFilename : PathLike[str]
 		The path and filename where computation results will be saved.
+
+	Returns
+	-------
+	pathFilename : PathLike[str]
+		The validated path and filename for saving results.
 
 	Raises
 	------
@@ -293,3 +298,5 @@ def saveFoldsTotalFAILearly(pathFilename: PathLike[str]) -> None:
 	if countTotalRead != countTotal:
 		message = f"I wrote a test file to `{pathFilename = }` with contents of `{str(countTotal) = }`, but I read `{countTotalRead = }` from the file. Python says the values are not equal. Fix that now, so your computation doesn't get corrupted later. And be pro-social."
 		raise FileNotFoundError(message)
+
+	return pathFilename
