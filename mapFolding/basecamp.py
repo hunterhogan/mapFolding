@@ -59,7 +59,7 @@ from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.algorithms.matrixMeandersShare import initializeDictionaryMeanders
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateMapShape
 from mapFolding.dataBaskets import MapFoldingState, ParallelMapFoldingState, SymmetricFoldsState
-from mapFolding.kitFilesystem import makePathFilenameCountTotal, makePathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -156,7 +156,7 @@ def countFolds(mapShape: Sequence[int]
 	if pathLikeWrite is None:
 		pathFilenameFoldsTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = saveFoldsTotalFAILearly(makePathFilenameFoldsTotal(mapShape, pathLikeWrite, suffix=suffix))
+		pathFilenameFoldsTotal = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
 
 #-------- Algorithm version -----------------------------------------------------
 
@@ -206,7 +206,7 @@ def countFolds(mapShape: Sequence[int]
 #-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
-		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+		saveTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal
 
@@ -253,7 +253,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['algorith
 	if pathLikeWrite is None:
 		pathFilenameFoldsTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = saveFoldsTotalFAILearly(makePathFilenameFoldsTotal(mapShape, pathLikeWrite, suffix=suffix))
+		pathFilenameFoldsTotal = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
 
 #-------- Algorithm version -----------------------------------------------------
 
@@ -281,7 +281,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['algorith
 #-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
-		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+		saveTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal
 
@@ -314,7 +314,7 @@ def countMeanders(kind: Literal['semi', 'meanders'], n: int, flow: str = '', pat
 	if pathLikeWrite is None:
 		pathFilenameCountTotal: Path | None = None
 	else:
-		pathFilenameCountTotal = saveFoldsTotalFAILearly(makePathFilenameCountTotal(pathLikeWrite, kind, str(n), suffix=suffix))
+		pathFilenameCountTotal = saveTotalFAILearly(makePathFilenameCount(pathLikeWrite, kind, str(n), suffix=suffix))
 
 #-------- Algorithm selection and execution ---------------------------------------------
 
@@ -340,6 +340,6 @@ def countMeanders(kind: Literal['semi', 'meanders'], n: int, flow: str = '', pat
 #-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameCountTotal is not None:
-		saveFoldsTotal(pathFilenameCountTotal, countTotal)
+		saveTotal(pathFilenameCountTotal, countTotal)
 
 	return countTotal

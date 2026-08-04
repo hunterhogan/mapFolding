@@ -4,7 +4,7 @@ from __future__ import annotations
 from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import defineProcessorLimit
-from mapFolding.kitFilesystem import makePathFilenameFoldsTotal, saveFoldsTotal, saveFoldsTotalFAILearly
+from mapFolding.kitFilesystem import makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -80,8 +80,8 @@ def eliminateFolds(
 	if pathLikeWrite is None:
 		pathFilenameFoldsTotal: Path | None = None
 	else:
-		pathFilenameFoldsTotal = makePathFilenameFoldsTotal(state.mapShape, pathLikeWrite, suffix=suffix)
-		saveFoldsTotalFAILearly(pathFilenameFoldsTotal)
+		pathFilenameFoldsTotal = makePathFilenameFolds(state.mapShape, pathLikeWrite, suffix=suffix)
+		saveTotalFAILearly(pathFilenameFoldsTotal)
 
 	#-------- Algorithm version -----------------------------------------------------
 
@@ -105,6 +105,6 @@ def eliminateFolds(
 	#-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameFoldsTotal is not None:
-		saveFoldsTotal(pathFilenameFoldsTotal, foldsTotal)
+		saveTotal(pathFilenameFoldsTotal, foldsTotal)
 
 	return foldsTotal

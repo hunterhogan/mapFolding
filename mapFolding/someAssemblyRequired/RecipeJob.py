@@ -8,7 +8,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.kitFilesystem import makePathFilenameFoldsTotal
+from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -203,7 +203,7 @@ class RecipeJobTheorem2:
 		the provided configuration and sensible defaults.
 
 		"""
-		pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFoldsTotal(self.state.mapShape))
+		pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFolds(self.state.mapShape))
 
 		if self.pathFilenameFoldsTotal is None:
 			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
@@ -222,7 +222,7 @@ def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> RecipeJobTheorem2
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
-	pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFoldsTotal(state.mapShape, pathModule))
+	pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
 	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal
 		, foldsTotalEstimated=foldsTotalEstimated, foldsTotalMultiplier=state.leavesTotal)
 

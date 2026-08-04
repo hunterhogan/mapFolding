@@ -21,8 +21,9 @@ saveFoldsTotal, saveFoldsTotalFAILearly
 from __future__ import annotations
 
 from hunterMakesPy import errorL33T
+from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding.theSSOT import settingsPackage
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
 import os
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
 	from io import TextIOWrapper
 	from os import PathLike
 
-def makePathFilenameCountTotal(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
+def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
 	"""Create an absolute `pathlib.Path` for a 'countTotal' filename.
 
 	(AI generated docstring)
@@ -56,7 +57,7 @@ def makePathFilenameCountTotal(pathLikeWrite: PathLike[str] | None = None, *unde
 	pathFilename : pathlib.Path
 		Absolute path to the filename. Parent directories are created if necessary.
 	"""
-	filename: str = makeFilenameCountTotal(*underscore, suffix=suffix, **dash)
+	filename: str = makeFilenameCount(*underscore, suffix=suffix, **dash)
 	if pathLikeWrite is None:
 		pathFilename: Path = getPathRootJobDEFAULT() / filename
 	else:
@@ -70,7 +71,7 @@ def makePathFilenameCountTotal(pathLikeWrite: PathLike[str] | None = None, *unde
 		pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilename
 
-def makeFilenameCountTotal(*underscore: str, suffix: str = '.countTotal', **dash: str) -> str:
+def makeFilenameCount(*underscore: str, suffix: str = '.countTotal', **dash: str) -> str:
 	"""Build a standardized filename for countTotal-like outputs.
 
 	(AI generated docstring)
@@ -93,7 +94,7 @@ def makeFilenameCountTotal(*underscore: str, suffix: str = '.countTotal', **dash
 	stem: str = '_'.join([*underscore, *map('-'.join, dash.items())])
 	return stem + suffix
 
-def makePathFilenameFoldsTotal(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.foldsTotal') -> Path:
+def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.foldsTotal') -> Path:
 	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
 
 	To help reduce duplicate code and to increase predictability, this function creates a standardized
@@ -118,10 +119,10 @@ def makePathFilenameFoldsTotal(mapShape: tuple[int, ...] = (), pathLikeWrite: Pa
 	-----
 	The function creates any necessary directories in the path if they don't exist.
 	"""
-	filename: str = makeFilenameFoldsTotal(mapShape, suffix)
-	return makePathFilenameCountTotal(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
+	filename: str = makeFilenameFolds(mapShape, suffix)
+	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
 
-def makeFilenameFoldsTotal(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') -> str:
+def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') -> str:
 	"""Create a standardized filename for a computed `foldsTotal` value.
 
 	(AI generated docstring)
@@ -149,7 +150,7 @@ def makeFilenameFoldsTotal(mapShape: tuple[int, ...], suffix: str = '.foldsTotal
 	the 'p' prefix comes from Lunnon's original code.
 
 	"""
-	return makeFilenameCountTotal('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
+	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
 def getPathRootJobDEFAULT() -> Path:
 	"""Get the default root directory for map folding computation jobs.
@@ -178,75 +179,56 @@ def getPathRootJobDEFAULT() -> Path:
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 
-def _saveFoldsTotal(pathFilename: PathLike[str], foldsTotal: int) -> None:
-	"""Save a `foldsTotal` value to a file.
+def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
+	"""Save `countTotal` value to disk with multiple fallback mechanisms.
 
 	(AI generated docstring)
 
-	This function provides the core file writing functionality used by the public `saveFoldsTotal`
-	function. It handles the basic operations of creating parent directories and writing the integer
-	value as text to the specified file location.
-
-	Parameters
-	----------
-	pathFilename : PathLike[str]
-		Path where the `foldsTotal` value should be saved.
-	foldsTotal : int
-		The integer value to save.
-
-	Notes
-	-----
-	This is an internal function that doesn't include error handling or fallback mechanisms. Use
-	`saveFoldsTotal` for production code that requires robust error handling.
-
-	"""
-	pathFilenameFoldsTotal = Path(pathFilename)
-	pathFilenameFoldsTotal.parent.mkdir(parents=True, exist_ok=True)
-	pathFilenameFoldsTotal.write_text(str(foldsTotal), encoding='utf-8')
-
-def saveFoldsTotal(pathFilename: PathLike[str], foldsTotal: int) -> None:
-	"""Save `foldsTotal` value to disk with multiple fallback mechanisms.
-
-	(AI generated docstring)
-
-	This function attempts to save the computed `foldsTotal` value to the specified location, with
+	This function attempts to save the computed `countTotal` value to the specified location, with
 	backup strategies in case the primary save attempt fails. The robustness is critical since these
 	computations may take days to complete.
 
 	Parameters
 	----------
 	pathFilename : PathLike[str]
-		Target save location for the `foldsTotal` value.
-	foldsTotal : int
+		Target save location for the `countTotal` value.
+	countTotal : int
 		The computed value to save.
+
+	Returns
+	-------
+	pathFilenameWritten : PurePosixPath
+		The path where the value was successfully saved, or an empty string if all attempts failed.
+		`PurePosixPath` because it is easier to persist the `PurePosixPath` object across platforms,
+		and it is harder to accidentally modify the value: protect the programmer from themselves. :)
 
 	Notes
 	-----
 	If the primary save fails, the function will attempt alternative save methods. Print the value
 	prominently to `stdout`. Create a fallback file in the current working directory. As a last
-	resort, simply print the value.
+	resort, simply print the value of `countTotal`.
 
-	The fallback filename includes a unique identifier based on the value itself to prevent conflicts.
-
+	The fallback filename includes a unique identifier based on the `countTotal` value itself to
+	prevent conflicts.
 	"""
 	try:
-		_saveFoldsTotal(pathFilename, foldsTotal)
+		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
 	except Exception as ERRORmessage:  # ruff:ignore[blind-except]
 		try:  # ruff:ignore[too-many-statements-in-try-clause]
-			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
+			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
 			stdout.writelines(str(ERRORmessage))
-			stdout.write(f"\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n\n{foldsTotal = }\n\nfoldsTotal foldsTotal foldsTotal foldsTotal foldsTotal\n")
-			randomnessPlanB: list[str] = (int(str(foldsTotal).strip()[-1]) + 1) * ['YO_']
-			filenameInfixUnique: str = ''.join(randomnessPlanB)
-			pathFilenamePlanB: str = os.path.join(os.getcwd(), 'foldsTotal' + filenameInfixUnique + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
-			streamWriteFallback: TextIOWrapper = open(pathFilenamePlanB, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
-			streamWriteFallback.write(str(foldsTotal))
+			stdout.write(banner + f"\n{countTotal = }\n" + banner)
+			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
+			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
+			streamWriteFallback.write(str(countTotal))
 			streamWriteFallback.close()
-			stdout.write(str(pathFilenamePlanB))
+			stdout.write(pathFilenameWritten)
 		except Exception:  # ruff:ignore[blind-except]
-			stdout.write(str(foldsTotal))
+			stdout.write(str(countTotal))
+			pathFilenameWritten = ''
+	return PurePosixPath(pathFilenameWritten)
 
-def saveFoldsTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) -> 形PathLike:
+def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) -> 形PathLike:
 	"""Preemptively test file write capabilities before beginning computation.
 
 	(AI generated docstring)
@@ -290,7 +272,7 @@ def saveFoldsTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLik
 		message = f"I received `{pathFilename = }` 0.000139 seconds ago from a function that promised it created the parent directory, but the parent directory does not exist. Fix that now, so your computation doesn't get deleted later. And be compassionate to others."
 		raise FileNotFoundError(message)
 	countTotal: int = errorL33T
-	_saveFoldsTotal(pathFilename, countTotal)
+	writeStringToHere(str(countTotal), pathFilename)
 	if not Path(pathFilename).exists():
 		message = f"I just wrote a test file to `{pathFilename = }`, but it does not exist. Fix that now, so your computation doesn't get deleted later. And continually improve your empathy skills."
 		raise FileNotFoundError(message)
