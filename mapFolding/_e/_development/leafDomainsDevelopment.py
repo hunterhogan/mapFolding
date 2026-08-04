@@ -6,9 +6,10 @@ from hunterMakesPy import decreasing, inclusive, raiseIfNone
 from mapFolding._e import leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import (
 	dimensionFourthNearest首, dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionSecondNearest首, dimensionThirdNearest首,
-	howManyDimensionsHaveOddParity, mapShapeIs2上nDimensions, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
+	howManyDimensionsHaveOddParity, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.leafDomains import getLeafDomain
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
 from typing import TYPE_CHECKING

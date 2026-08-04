@@ -1,9 +1,8 @@
 # ruff:file-ignore[import-outside-top-level]
 from __future__ import annotations
 
-from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding.beDRY import defineProcessorLimit
+from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
 from mapFolding.kitFilesystem import makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -92,7 +91,7 @@ def eliminateFolds(
 			case 'constraintPropagation':
 				from mapFolding._e.algorithms.constraintPropagation import doTheNeedful
 			case 'crease':
-				if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=4):
+				if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=4):
 					from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 				else:
 					message: str = f'`{flow = }` is restricted to `mapShape` = (2,) * n, 4 <= n. Did I forget to update this check?'

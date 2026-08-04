@@ -7,9 +7,9 @@ from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
 from mapFolding._e import getSumsOfProductsOfDimensionsNearest首
 from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, howManyDimensionsHaveOddParity, leafInSubHyperplane,
-	mapShapeIs2上nDimensions, 一, 零, 首一, 首零, 首零一)
+	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, howManyDimensionsHaveOddParity, leafInSubHyperplane, 一, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from operator import neg
 from typing import TYPE_CHECKING
 
@@ -24,7 +24,7 @@ def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Le
 	the leaf is in a specific pile.
 	"""
 	dictionaryConditionalLeafPredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = {}
-	if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
+	if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=6):
 		dictionaryConditionalLeafPredecessors = _getDictionaryConditionalLeafPredecessors(state.mapShape)
 	return dictionaryConditionalLeafPredecessors
 @cache

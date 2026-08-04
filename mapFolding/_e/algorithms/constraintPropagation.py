@@ -4,11 +4,11 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
-from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, mapShapeIs2上nDimensions)
+from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import listFunctionsReduction
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.theSSOT import settingsPackage
 from math import factorial, prod
 from more_itertools import triplewise

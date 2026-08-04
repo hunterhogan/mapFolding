@@ -4,8 +4,8 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask
 from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e import leafOrigin, makeLeafOptions
-from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, mapShapeIs2上nDimensions, 零, 首零)
+from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, 零, 首零
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

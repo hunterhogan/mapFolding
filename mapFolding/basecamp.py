@@ -55,9 +55,8 @@ References
 """
 from __future__ import annotations
 
-from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding.algorithms.matrixMeandersShare import initializeDictionaryMeanders
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, validateMapShape
+from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import MapFoldingState, ParallelMapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage

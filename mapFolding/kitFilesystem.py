@@ -33,6 +33,35 @@ if TYPE_CHECKING:
 	from io import TextIOWrapper
 	from os import PathLike
 
+#================== Prepare =======================================================================
+
+def getPathRootJobDEFAULT() -> Path:
+	"""Get the default root directory for map folding computation jobs.
+
+	(AI generated docstring)
+
+	This function determines the appropriate default directory for storing computation results based
+	on the current runtime environment. It uses platform-specific directories for normal environments
+	and adapts to special environments like Google Colab.
+
+	Returns
+	-------
+	pathJobDEFAULT : Path
+		Path to the default directory for storing computation results.
+
+	Notes
+	-----
+	For standard environments, uses `platformdirs` to find appropriate user data directory. For Google
+	Colab, uses a specific path in Google Drive. Creates the directory if it doesn't exist.
+
+	"""
+	if 'google.colab' in sysModules:
+		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / settingsPackage.identifierPackage
+	else:
+		pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=settingsPackage.identifierPackage, appauthor=False, ensure_exists=True))
+	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
+	return pathJobDEFAULT
+
 def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
 	"""Create an absolute `pathlib.Path` for a 'countTotal' filename.
 
@@ -152,81 +181,7 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') ->
 	"""
 	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
-def getPathRootJobDEFAULT() -> Path:
-	"""Get the default root directory for map folding computation jobs.
-
-	(AI generated docstring)
-
-	This function determines the appropriate default directory for storing computation results based
-	on the current runtime environment. It uses platform-specific directories for normal environments
-	and adapts to special environments like Google Colab.
-
-	Returns
-	-------
-	pathJobDEFAULT : Path
-		Path to the default directory for storing computation results.
-
-	Notes
-	-----
-	For standard environments, uses `platformdirs` to find appropriate user data directory. For Google
-	Colab, uses a specific path in Google Drive. Creates the directory if it doesn't exist.
-
-	"""
-	if 'google.colab' in sysModules:
-		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / settingsPackage.identifierPackage
-	else:
-		pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=settingsPackage.identifierPackage, appauthor=False, ensure_exists=True))
-	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
-	return pathJobDEFAULT
-
-def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
-	"""Save `countTotal` value to disk with multiple fallback mechanisms.
-
-	(AI generated docstring)
-
-	This function attempts to save the computed `countTotal` value to the specified location, with
-	backup strategies in case the primary save attempt fails. The robustness is critical since these
-	computations may take days to complete.
-
-	Parameters
-	----------
-	pathFilename : PathLike[str]
-		Target save location for the `countTotal` value.
-	countTotal : int
-		The computed value to save.
-
-	Returns
-	-------
-	pathFilenameWritten : PurePosixPath
-		The path where the value was successfully saved, or an empty string if all attempts failed.
-		`PurePosixPath` because it is easier to persist the `PurePosixPath` object across platforms,
-		and it is harder to accidentally modify the value: protect the programmer from themselves. :)
-
-	Notes
-	-----
-	If the primary save fails, the function will attempt alternative save methods. Print the value
-	prominently to `stdout`. Create a fallback file in the current working directory. As a last
-	resort, simply print the value of `countTotal`.
-
-	The fallback filename includes a unique identifier based on the `countTotal` value itself to
-	prevent conflicts.
-	"""
-	try:
-		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
-	except Exception as ERRORmessage:  # ruff:ignore[blind-except]
-		try:  # ruff:ignore[too-many-statements-in-try-clause]
-			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
-			stdout.writelines(str(ERRORmessage))
-			stdout.write(banner + f"\n{countTotal = }\n" + banner)
-			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
-			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
-			streamWriteFallback.write(str(countTotal))
-			streamWriteFallback.close()
-			stdout.write(pathFilenameWritten)
-		except Exception:  # ruff:ignore[blind-except]
-			stdout.write(str(countTotal))
-			pathFilenameWritten = ''
-	return PurePosixPath(pathFilenameWritten)
+#================== Confirm =======================================================================
 
 def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) -> 形PathLike:
 	"""Preemptively test file write capabilities before beginning computation.
@@ -282,3 +237,54 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 		raise FileNotFoundError(message)
 
 	return pathFilename
+
+#================== Write =========================================================================
+
+def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
+	"""Save `countTotal` value to disk with multiple fallback mechanisms.
+
+	(AI generated docstring)
+
+	This function attempts to save the computed `countTotal` value to the specified location, with
+	backup strategies in case the primary save attempt fails. The robustness is critical since these
+	computations may take days to complete.
+
+	Parameters
+	----------
+	pathFilename : PathLike[str]
+		Target save location for the `countTotal` value.
+	countTotal : int
+		The computed value to save.
+
+	Returns
+	-------
+	pathFilenameWritten : PurePosixPath
+		The path where the value was successfully saved, or an empty string if all attempts failed.
+		`PurePosixPath` because it is easier to persist the `PurePosixPath` object across platforms,
+		and it is harder to accidentally modify the value: protect the programmer from themselves. :)
+
+	Notes
+	-----
+	If the primary save fails, the function will attempt alternative save methods. Print the value
+	prominently to `stdout`. Create a fallback file in the current working directory. As a last
+	resort, simply print the value of `countTotal`.
+
+	The fallback filename includes a unique identifier based on the `countTotal` value itself to
+	prevent conflicts.
+	"""
+	try:
+		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
+	except Exception as ERRORmessage:  # ruff:ignore[blind-except]
+		try:  # ruff:ignore[too-many-statements-in-try-clause]
+			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
+			stdout.writelines(str(ERRORmessage))
+			stdout.write(banner + f"\n{countTotal = }\n" + banner)
+			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
+			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
+			streamWriteFallback.write(str(countTotal))
+			streamWriteFallback.close()
+			stdout.write(pathFilenameWritten)
+		except Exception:  # ruff:ignore[blind-except]
+			stdout.write(str(countTotal))
+			pathFilenameWritten = ''
+	return PurePosixPath(pathFilenameWritten)

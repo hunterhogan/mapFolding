@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain, repeat, starmap
-from mapFolding._e._2上nDimensional import mapShapeIs2上nDimensions
 from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from math import factorial
 from multiprocessing import get_context
 from operator import methodcaller

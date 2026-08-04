@@ -10,9 +10,6 @@ from mapFolding._e._2上nDimensional.semiotics import (
 from mapFolding._e._2上nDimensional.filters import notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零
 
 # isort: split
-from mapFolding._e._2上nDimensional.beDRY import mapShapeIs2上nDimensions as mapShapeIs2上nDimensions
-
-# isort: split
 from mapFolding._e._2上nDimensional.measure import (
 	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearestTail as dimensionNearestTail, dimensionNearest首 as dimensionNearest首,
 	dimensionsConsecutiveAtTail as dimensionsConsecutiveAtTail, dimensionSecondNearest首 as dimensionSecondNearest首,

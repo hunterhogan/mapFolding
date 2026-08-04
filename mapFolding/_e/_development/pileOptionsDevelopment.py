@@ -17,10 +17,10 @@ from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
 from mapFolding._e import getIteratorOfLeaves, leafOrigin, makeLeafOptions
 from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, mapShapeIs2上nDimensions, 零, 首一, 首二, 首零,
-	首零一)
+	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getLeafOptions
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import flatten
 from pprint import pprint
 from typing import TYPE_CHECKING

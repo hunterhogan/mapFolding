@@ -69,19 +69,20 @@ References
 from __future__ import annotations
 
 from gmpy2 import bit_flip
-from humpy_cytoolz import concat, get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
+from humpy_cytoolz import get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
-from itertools import combinations, product as CartesianProduct
+from itertools import combinations
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost,
-	mapShapeIs2上nDimensions, notLeafOriginOrLeaf零)
+	notLeafOriginOrLeaf零)
 from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafPinned吗, notPileLast
 from mapFolding._e.pinIt import (
 	isPileLeafOptions吗, reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
 	reducePermutationSpace_nakedSubset)
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import extract, pairwise, triplewise
 from typing import TYPE_CHECKING
 from Z0Z_tools import between吗, DOTitems, reverseLookup
@@ -89,7 +90,7 @@ from Z0Z_tools import between吗, DOTitems, reverseLookup
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafOptions, Pile, PinnedLeaves
+	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile, PinnedLeaves
 
 #======== Reducing `LeafOptions` ===============================
 
@@ -164,7 +165,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		The updated `permutationSpace` if valid; otherwise `None`.
 	"""
 	#-------------- Guard -------------------------------------------
-	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToPinThis=6):
+	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=6):
 		return permutationSpace
 
 	#-------------- Initialize ------------------------------------

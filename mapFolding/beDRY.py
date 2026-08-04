@@ -323,3 +323,20 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[NumPyIntegerT
 
 	"""
 	return numpy.zeros(shape, dtype=datatype)
+
+def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToRideThis: int = 3) -> bool:
+	"""Test whether `mapShape` is a sufficiently sized 2ⁿ-dimensional map.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		Map shape as a tuple of dimension lengths.
+	youMustBeDimensionsTallToRideThis : int = 3
+		Minimum number of required dimensions.
+
+	Returns
+	-------
+	is2上nDimensions : bool
+		`True` when `mapShape` is a 2ⁿ-dimensional map with the required minimum dimension count.
+	"""
+	return (youMustBeDimensionsTallToRideThis <= len(mapShape)) and all(map((2).__eq__, mapShape))
