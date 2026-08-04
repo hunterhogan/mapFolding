@@ -8,14 +8,14 @@ Data Structure
 --------------
 Each dictionary is keyed by `mapShape` (a tuple defining the n-dimensional hypercube). The naming
 convention `2dN` refers to a shape of `(2,) * N`, which yields `2^N` leaves. For example:
-- `2d4` means `(2, 2, 2, 2)` → 16 leavesTotal
-- `2d5` means `(2, 2, 2, 2, 2)` → 32 leavesTotal
-- `2d6` means `(2, 2, 2, 2, 2, 2)` → 64 leavesTotal
+- `2^4-dimensional` means `(2, 2, 2, 2)` → 16 leavesTotal
+- `2^5-dimensional` means `(2, 2, 2, 2, 2)` → 32 leavesTotal
+- `2^6-dimensional` means `(2, 2, 2, 2, 2, 2)` → 64 leavesTotal
 
 Synonyms:
-- n=4: (2,)*4, 2d4, 16 leavesTotal, A001417(4)
-- n=5: (2,)*5, 2d5, 32 leavesTotal, A001417(5)
-- n=6: (2,)*6, 2d6, 64 leavesTotal, A001417(6)
+- n=4: (2,)*4, 2^4-dimensional, 16 leavesTotal, A001417(4)
+- n=5: (2,)*5, 2^5-dimensional, 32 leavesTotal, A001417(5)
+- n=6: (2,)*6, 2^6-dimensional, 64 leavesTotal, A001417(6)
 
 Future Extensions
 -----------------
@@ -27,14 +27,14 @@ When adding test data for new `mapShape`, follow these guidelines:
 
 from typing import Any
 
-mapShape2d4: tuple[int, ...] = (2, 2, 2, 2)
-mapShape2d5: tuple[int, ...] = (2, 2, 2, 2, 2)
-mapShape2d6: tuple[int, ...] = (2, 2, 2, 2, 2, 2)
+mapShape2上4Dimensional: tuple[int, ...] = (2, 2, 2, 2)
+mapShape2上5Dimensional: tuple[int, ...] = (2, 2, 2, 2, 2)
+mapShape2上6Dimensional: tuple[int, ...] = (2, 2, 2, 2, 2, 2)
 
 # Leaf domain data: for each leaf, the (start, stop, step) defining its domain range
 # Extracted empirically from pickled foldings data via getDataFrameFoldings
 dictionaryLeafDomainKnown: dict[tuple[int, ...], dict[int, tuple[int, int, int]]] = {
-	mapShape2d4: {
+	mapShape2上4Dimensional: {
 		0: (0, 1, 2),
 		1: (1, 2, 2),
 		2: (3, 10, 2),
@@ -52,7 +52,7 @@ dictionaryLeafDomainKnown: dict[tuple[int, ...], dict[int, tuple[int, int, int]]
 		14: (5, 14, 2),
 		15: (4, 13, 2),
 	},
-	mapShape2d5: {
+	mapShape2上5Dimensional: {
 		0: (0, 1, 2),
 		1: (1, 2, 2),
 		2: (3, 18, 2),
@@ -86,7 +86,7 @@ dictionaryLeafDomainKnown: dict[tuple[int, ...], dict[int, tuple[int, int, int]]
 		30: (6, 29, 2),
 		31: (5, 28, 2),
 	},
-	mapShape2d6: {
+	mapShape2上6Dimensional: {
 		0: (0, 1, 2),
 		1: (1, 2, 2),
 		2: (3, 34, 2),
@@ -155,14 +155,14 @@ dictionaryLeafDomainKnown: dict[tuple[int, ...], dict[int, tuple[int, int, int]]
 }
 
 dictionaryLeafOptionsKnown: dict[tuple[int, ...], dict[int, tuple[int, ...]]] = {
-	mapShape2d4: {
+	mapShape2上4Dimensional: {
 		0: (0,), 1: (1,), 2: (3, 5, 9), 3: (2, 7, 11, 13), 4: (3, 5, 6, 10, 15),
 		5: (2, 7, 11, 13, 14), 6: (3, 5, 6, 9, 10, 15), 7: (2, 4, 7, 11, 13, 14),
 		8: (3, 5, 6, 10, 12, 15), 9: (2, 4, 7, 11, 13, 14), 10: (5, 6, 9, 10, 12, 15),
 		11: (4, 7, 11, 13, 14), 12: (5, 6, 10, 12, 15), 13: (4, 11, 13, 14),
 		14: (9, 10, 12), 15: (8,),
 	},
-	mapShape2d5: {
+	mapShape2上5Dimensional: {
 		0: (0,), 1: (1,), 2: (3, 5, 9, 17), 3: (2, 7, 11, 13, 19, 21, 25),
 		4: (3, 5, 6, 9, 10, 15, 18, 23, 27, 29), 5: (2, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31),
 		6: (3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 30), 7: (2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31),
@@ -179,7 +179,7 @@ dictionaryLeafOptionsKnown: dict[tuple[int, ...], dict[int, tuple[int, ...]]] = 
 		28: (9, 10, 12, 18, 20, 23, 24, 27, 29, 30), 29: (8, 19, 21, 22, 25, 26, 28),
 		30: (17, 18, 20, 24), 31: (16,),
 	},
-	mapShape2d6: {
+	mapShape2上6Dimensional: {
 		0: (0,), 1: (1,), 2: (3, 5, 9, 17, 33), 3: (2, 7, 11, 13, 19, 21, 25, 35, 37, 41, 49),
 		4: (3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 34, 39, 43, 45, 51, 53, 57),
 		5: (2, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31, 35, 37, 38, 41, 42, 47, 49, 50, 55, 59, 61),
@@ -245,7 +245,7 @@ dictionaryLeafOptionsKnown: dict[tuple[int, ...], dict[int, tuple[int, ...]]] = 
 }
 
 dictionaryCreasesIncreaseKnown: dict[tuple[int, ...], dict[int, list[int]]] = {
-	mapShape2d5: {
+	mapShape2上5Dimensional: {
 		0: [1],
 		1: [3, 5, 9, 17],
 		2: [6, 10, 18],
@@ -279,7 +279,7 @@ dictionaryCreasesIncreaseKnown: dict[tuple[int, ...], dict[int, list[int]]] = {
 		30: [22, 26, 28, 31],
 		31: [15, 23, 27, 29],
 	},
-	mapShape2d6: {
+	mapShape2上6Dimensional: {
 		0: [1],
 		1: [3, 5, 9, 17, 33],
 		2: [6, 10, 18, 34],
@@ -348,7 +348,7 @@ dictionaryCreasesIncreaseKnown: dict[tuple[int, ...], dict[int, list[int]]] = {
 }
 
 dictionaryCreasesDecreaseKnown: dict[tuple[int, ...], dict[int, list[int]]] = {
-	mapShape2d5: {
+	mapShape2上5Dimensional: {
 		0: [],
 		1: [0],
 		2: [3],
@@ -382,7 +382,7 @@ dictionaryCreasesDecreaseKnown: dict[tuple[int, ...], dict[int, list[int]]] = {
 		30: [14, 22, 26],
 		31: [23, 27, 29, 30],
 	},
-	mapShape2d6: {
+	mapShape2上6Dimensional: {
 		0: [],
 		1: [0],
 		2: [3],

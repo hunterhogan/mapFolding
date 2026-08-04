@@ -39,20 +39,30 @@ def rtol(request: FixtureRequest) -> float:
 	return 1e-05
 
 @pytest.fixture
-def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
+def loadArrayFoldings2上nDimensional() -> Callable[[int], NDArray[numpy.uint8]]:
 	"""Factory fixture for loading pickled array foldings data.
 
 	Returns
 	-------
 	loaderFunction : Callable[[int], NDArray[numpy.uint8]]
-		Function that loads arrayFoldings for a given dimensionsTotal.
+		Function that loads 2^n-dimensional array foldings for a given dimensionsTotal.
 	"""
 	def loader(dimensionsTotal: int) -> NDArray[numpy.uint8]:
-		pathFilename: Path = pathDataSamples / f"arrayFoldingsP2d{dimensionsTotal}.pkl"
+		pathFilename: Path = pathDataSamples / f"arrayFoldings2上{dimensionsTotal}Dimensional.pkl"
 		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())
 		return arrayFoldings
 
 	return loader
+
+@pytest.fixture
+def path_tmpTesting(tmp_path: Path) -> Path:
+	return tmp_path
+
+@pytest.fixture
+def expected(
+	request: FixtureRequest, loadArrayFoldings2上nDimensional: Callable[[int], NDArray[numpy.uint8]]
+) -> NDArray[numpy.uint8]:
+	return loadArrayFoldings2上nDimensional(int(request.param))
 
 @pytest.fixture(params=(None,))
 def CPUlimit(request: pytest.FixtureRequest) -> Limitation:

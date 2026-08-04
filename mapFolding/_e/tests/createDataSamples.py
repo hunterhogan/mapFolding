@@ -32,7 +32,7 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 		- Integers for absolute leaf indices (e.g., `4`, `5`, `6`, `7`)
 		- Callables that take `dimensionsTotal` and return a leaf index (e.g., `首二`, `首零二`)
 	pathFilename : PurePath | None = None
-		The output file path. If `None`, defaults to `_e/tests/dataSamples/p2DnDomain{leafNames}.py`.
+		The output file path. If `None`, defaults to `_e/tests/dataSamples/p2上nDimensionalDomain{leafNames}.py`.
 	settings : dict[str, dict[str, Any]] | None = None
 		Settings for `writePython` formatter. If `None`, uses defaults.
 
@@ -55,7 +55,7 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 	filenameLeafPart: str = '_'.join(listLeafNames)
 
 	if pathFilename is None:
-		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/tests/dataSamples/p2DnDomain{filenameLeafPart}.py")
+		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/tests/dataSamples/p2上nDimensionalDomain{filenameLeafPart}.py")
 	else:
 		pathFilename = Path(pathFilename)
 
@@ -83,8 +83,8 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 		'This module contains empirically extracted combined domain data for leaves',
 		f'{listLeafNames} across multiple map-shape configurations.',
 		'',
-		'Each list is named `listDomain2D{dimensionsTotal}` where `dimensionsTotal`',  # ruff:ignore[missing-f-string-syntax]
-		'is the exponent in the 2^dimensionsTotal mapShape, and it contains tuples representing',
+		'Each list is named `listDomain2上{dimensionsTotal}Dimensional` where `dimensionsTotal`',  # ruff:ignore[missing-f-string-syntax]
+		'is the exponent in the 2^n-dimensional mapShape, and it contains tuples representing',
 		'valid pile positions for the specified leaves. The tuple order follows the original',
 		'leaf argument order.',
 		'"""',
@@ -92,7 +92,7 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 	]
 
 	for dimensionsTotal in sorted(dictionaryDomainsByDimensions):
-		variableName: str = f"listDomain2D{dimensionsTotal}"
+		variableName: str = f"listDomain2上{dimensionsTotal}Dimensional"
 		listPythonSource.extend((f'{variableName}: list[tuple[int, ...]] = {dictionaryDomainsByDimensions[dimensionsTotal]!r}', ''))
 
 	pythonSource: str = '\n'.join(listPythonSource)

@@ -5,9 +5,9 @@ leaf domains, pile ranges, and addend dictionaries for map folding elimination a
 
 The test data is stored in `_e/tests/dataSamples/A001417.py` and supports multiple `mapShape`
 configurations. Currently, data exists for:
-- (2,)*4 → 16 leaves (2d4)
-- (2,)*5 → 32 leaves (2d5)
-- (2,)*6 → 64 leaves (2d6)
+- (2,)*4 → 16 leaves (2^4-dimensional)
+- (2,)*5 → 32 leaves (2^5-dimensional)
+- (2,)*6 → 64 leaves (2^6-dimensional)
 
 When adding new test data for additional `mapShape` values, add the data to `A001417.py`
 and the tests will automatically pick them up via parametrization.
@@ -23,8 +23,9 @@ from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
-	A001417, p2DnDomain3_2_首一_首零一, p2DnDomain5_4, p2DnDomain6_7_5_4, p2DnDomain7_6, p2DnDomain首二_首零二_首零一二_首一二, p2DnDomain首零一二_首一二,
-	p2DnDomain首零二_首二)
+	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_7_5_4,
+	p2上nDimensionalDomain7_6, p2上nDimensionalDomain首二_首零二_首零一二_首一二, p2上nDimensionalDomain首零一二_首一二,
+	p2上nDimensionalDomain首零二_首二)
 from more_itertools import all_unique as allUnique吗, unique_to_each
 from typing import TYPE_CHECKING
 import pytest
@@ -80,22 +81,24 @@ def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
 		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getLeafDomain.range.stop', leaf, mapShape)
 		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getLeafDomain.range.step', leaf, mapShape)
 
-@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
+@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
 @pytest.mark.parametrize("domainFunction,moduleAuthoritativeData", [
-	(getDomainDimension一, p2DnDomain3_2_首一_首零一)
-	, (getDomainDimension二, p2DnDomain6_7_5_4)
-	, (getDomainDimension首二, p2DnDomain首二_首零二_首零一二_首一二)
-	, (getDomain二一零and二一, p2DnDomain7_6)
-	, (getDomain二零and二, p2DnDomain5_4)
-	, (getDomain首零一二and首一二, p2DnDomain首零一二_首一二)
-	, (getDomain首零二and首二, p2DnDomain首零二_首二)
+	(getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一)
+	, (getDomainDimension二, p2上nDimensionalDomain6_7_5_4)
+	, (getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二)
+	, (getDomain二一零and二一, p2上nDimensionalDomain7_6)
+	, (getDomain二零and二, p2上nDimensionalDomain5_4)
+	, (getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二)
+	, (getDomain首零二and首二, p2上nDimensionalDomain首零二_首二)
 ], ids=lambda domainFunction: domainFunction.__name__)
 def test_getLeafDomainsCombined(domainFunction: CallableFunction[[EliminationState], Sequence[tuple[int, ...]]], moduleAuthoritativeData: ModuleType, dimensionsTotal: int) -> None:
 	"""Verify combined domain function against authoritative dataset: completeness, uniqueness, correctness."""
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state: EliminationState = EliminationState(mapShape=mapShape)
 	tuplesDomainActual: tuple[tuple[int, ...], ...] = tuple(domainFunction(state))
-	tuplesDomainAuthoritativeData: tuple[tuple[int, ...], ...] = getattr(moduleAuthoritativeData, f"listDomain2D{dimensionsTotal}")
+	tuplesDomainAuthoritativeData: tuple[tuple[int, ...], ...] = getattr(
+		moduleAuthoritativeData, f"listDomain2上{dimensionsTotal}Dimensional"
+	)
 
 	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(tuplesDomainAuthoritativeData, tuplesDomainActual)
 	tuplesMissingFromActual = tuple(tuplesMissingFromActual)
@@ -118,7 +121,7 @@ def test_getLeafOptions(mapShape: tuple[int, ...]) -> None:
 
 		assertEqualTo(tupleLeavesPileActual, tupleLeavesPileAuthoritativeData, 'getLeafOptions', pile, mapShape)
 
-@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
+@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
 @pytest.mark.parametrize("creaseKind,creaseFunction,dictionaryExpectedByMapShape", [("increase", getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown), ("decrease", getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown)], ids=["increase", "decrease"])
 def test_getLeavesCrease(creaseKind: str, creaseFunction: CallableFunction[[EliminationState, int], Iterable[int]], dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]], dimensionsTotal: int) -> None:
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal

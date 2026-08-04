@@ -25,10 +25,15 @@ def beansWithoutCornbread(state: EliminationState, permutationSpace: Permutation
 	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
 @pytest.mark.parametrize("pinningFunction", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))
-@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2d{dimensionsTotal}")
-def test_pinningFunctions(pinningFunction: CallableFunction[..., EliminationState], dimensionsTotal: int, CPUlimit: Limitation, loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]]) -> None:
+@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
+def test_pinningFunctions(
+	pinningFunction: CallableFunction[..., EliminationState],
+	dimensionsTotal: int,
+	CPUlimit: Limitation,
+	loadArrayFoldings2上nDimensional: Callable[[int], NDArray[numpy.uint8]],
+) -> None:
 	state: EliminationState = EliminationState((2,) * dimensionsTotal)
-	arrayFoldings: NDArray[numpy.uint8] = loadArrayFoldings(dimensionsTotal)
+	arrayFoldings: NDArray[numpy.uint8] = loadArrayFoldings2上nDimensional(dimensionsTotal)
 
 	state = pinningFunction(state, CPUlimit=CPUlimit)
 
