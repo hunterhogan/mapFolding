@@ -91,6 +91,7 @@ if TYPE_CHECKING:
 
 #======== Forbidden inequalities ============================
 
+@cache
 def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComparandCrease: Pile) -> bool:
 	"""Validate that two creases do not cross by checking forbidden pile orderings.
 
