@@ -5,8 +5,8 @@ from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
 from mapFolding._e import getIteratorOfLeaves, getSumsOfProductsOfDimensionsNearest首
 from mapFolding._e._2上nDimensional import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, getLeavesCreaseAnte,
-	getLeavesCreasePost, howManyDimensionsHaveOddParity, leafInSubHyperplane, notLeafOriginOrLeaf零, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零,
-	首零一, 首零一二)
+	getLeavesCreasePost, howManyDimensionsHaveOddParity, leafInSubHyperplane, moreThanLeaf零吗, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一,
+	首零一二)
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from more_itertools import last
 from operator import getitem, neg
@@ -264,7 +264,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if state.dimensionsTotal - zeroIndexed - dimensionHead == zerosAtThe首:
 			sumsOfProductsOfDimensionsNearest首InSubSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - zerosAtThe首)
 			addendForUnknownReasons: int = -1
-			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(notLeafOriginOrLeaf零, sumsOfProductsOfDimensionsNearest首InSubSubHyperplane)]
+			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(moreThanLeaf零吗, sumsOfProductsOfDimensionsNearest首InSubSubHyperplane)]
 			listRemoveLeaves.extend(leavesWeDontWant)
 
 	if isOdd吗(leafAt二):

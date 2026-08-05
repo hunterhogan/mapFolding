@@ -22,7 +22,7 @@ With relatively little effort you could use `astToolkit` (pip install astToolkit
 `state.productsOfDimensions[dimensionIndex]`. With `astToolkit`, you create a transformation that you can apply after any update.
 """
 
-_dimensionLength: int = 2  # Hypothetically, change to 3 for 3^d-dimensional maps.
+_dimensionLength: int = 2  # Hypothetically, change to 3 for 3ⁿ-dimensional maps.
 
 _dimensionIndex: DimensionIndex = 0						# == 0
 

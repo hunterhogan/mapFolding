@@ -7,7 +7,7 @@ from mapFolding._e._2上nDimensional.semiotics import (
 	首零二 as 首零二, 首零二三 as 首零二三)
 
 # isort: split
-from mapFolding._e._2上nDimensional.filters import notLeafOriginOrLeaf零 as notLeafOriginOrLeaf零
+from mapFolding._e._2上nDimensional.filters import moreThanLeaf零吗 as moreThanLeaf零吗
 
 # isort: split
 from mapFolding._e._2上nDimensional.measure import (

@@ -8,11 +8,11 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafSpace
 
-def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
-	"""Test to ensure `leaf` is not `leafOrigin` (0) or `leaf零` (1).
+def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
+	"""Test to ensure `leaf` is greater than `leafOrigin` (0) and `leaf零` (1).
 
-	You can use `notLeafOriginOrLeaf零` in an `if` statement, or you can pass `notLeafOriginOrLeaf零` as a predicate to a
-	filtering utility described in the module docstring.
+	You can use `moreThanLeaf零吗` in an `if` statement, or you can pass `moreThanLeaf零吗` as a
+	predicate to a filtering utility described in the module docstring.
 
 	Parameters
 	----------
@@ -32,4 +32,5 @@ def notLeafOriginOrLeaf零(leaf: LeafSpace) -> bool:
 
 @syntacticCurry
 def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
+	# DOCUMENT
 	return isBit1吗(leaf, dimension)
