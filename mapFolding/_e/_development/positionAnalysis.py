@@ -9,7 +9,7 @@ from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getDictionaryConditionalLeafSuccessors,
 	howManyDimensionsHaveOddParity, 零)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e._development.toolkit import getDataFrameFoldings
+from mapFolding.kitFilesystem import getDataFrameFoldings
 from pprint import pprint
 from typing import TYPE_CHECKING
 import numpy

@@ -38,6 +38,7 @@ ignore = [
   "docstring-missing-exception",
   "docstring-missing-returns",
   "docstring-tab-indentation",
+  "docstring-missing-yields",
   "explicit-f-string-type-conversion",
   "FIX",
   "I",

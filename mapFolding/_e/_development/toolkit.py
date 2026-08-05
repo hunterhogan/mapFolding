@@ -1,17 +1,18 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import partial
 from humpy_cytoolz import valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e.filters import isLeaf吗
 from mapFolding._e.tests.test_pinning import beansWithoutCornbread
+from mapFolding.kitFilesystem import getDataFrameFoldings
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from pprint import pformat
 from typing import TYPE_CHECKING
 import csv
 import numpy
-import pandas
 import sys
 
 if TYPE_CHECKING:
@@ -59,16 +60,6 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 
 #======== Specialized tools ===============================
 
-def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:
-	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
-	dataframeFoldings: pandas.DataFrame | None = None
-	if pathFilename.exists():
-		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))  # ruff:ignore[suspicious-pickle-usage]
-	else:
-		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
-		sys.stderr.write(message + '\n')
-	return dataframeFoldings
-
 def verifyPinning2Dn(state: EliminationState) -> None:
 	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:
 		return permutationSpace.extractPinnedLeaves()
@@ -105,7 +96,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 			for indexDictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
 				sys.stdout.write(pformat(filterLeaf(isLeaf吗, state.listPermutationSpace[indexDictionary]), width=140) + '\n')
 
-		beansOrCornbread: Callable[[PermutationSpace], bool] = beansWithoutCornbread(state)
+		beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
 		listBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.listPermutationSpace))
 		if listBeans:
 			sys.stdout.write(f"{ansiColors.MagentaOnBlack}{len(listBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")

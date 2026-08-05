@@ -11,9 +11,9 @@ from hunterMakesPy import raiseIfNone
 from mapFolding._e import getIteratorOfLeaves, getLeafOptions
 from mapFolding._e._2上nDimensional import (
 	dimensionNearest首, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
-from mapFolding._e._development.toolkit import getDataFrameFoldings
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding.kitFilesystem import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pprint

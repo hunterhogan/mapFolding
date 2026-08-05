@@ -6,7 +6,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding._e import getLeafDomain, pileOrigin
 from mapFolding._e._2上nDimensional import dimensionNearestTail, 零
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e._development.toolkit import getDataFrameFoldings
+from mapFolding.kitFilesystem import getDataFrameFoldings
 from typing import Any, TYPE_CHECKING
 import numpy
 import pandas

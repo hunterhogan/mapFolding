@@ -1,3 +1,4 @@
+# ruff: file-ignore[suspicious-pickle-usage]
 """Persistent storage utilities for map folding computation results.
 
 (AI generated docstring)
@@ -16,24 +17,43 @@ makeFilenameFoldsTotal, makePathFilenameFoldsTotal
 	Variants tuned for foldsTotal outputs.
 saveFoldsTotal, saveFoldsTotalFAILearly
 	Functions that write computed results to disk with fallback and validation.
-"""
 
+See Also
+--------
+hunterMakesPy.filesystemToolkit.writeStringToHere
+hunterMakesPy.filesystemToolkit.importLogicalPath2Identifier
+hunterMakesPy.filesystemToolkit.importPathFilename2Identifier
+hunterMakesPy.filesystemToolkit.writePython
+
+astToolkit
+- reading
+- writing
+- containers with methods
+"""
 from __future__ import annotations
 
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
+from mapFolding import ansiColorReset, ansiColors
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
+import csv
 import os
+import pandas
 import platformdirs
+import sys
 
 if TYPE_CHECKING:
+	from _csv import Writer
+	from collections.abc import Iterable, Iterator
 	from io import TextIOWrapper
+	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.theTypes import Folding
 	from os import PathLike
 
-#================== Prepare =======================================================================
+#================== Create appropriate paths and filenames =========================================
 
 def getPathRootJobDEFAULT() -> Path:
 	"""Get the default root directory for map folding computation jobs.
@@ -181,7 +201,7 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') ->
 	"""
 	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
-#================== Confirm =======================================================================
+#================== Confirm the ability to read or write ===========================================
 
 def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) -> 形PathLike:
 	"""Preemptively test file write capabilities before beginning computation.
@@ -288,3 +308,38 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 			stdout.write(str(countTotal))
 			pathFilenameWritten = ''
 	return PurePosixPath(pathFilenameWritten)
+
+def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	with pathFilename.open(encoding="utf-8", mode="w", newline="", buffering=2**16) as streamWrite:
+		csvWriter: Writer = csv.writer(streamWrite)
+		csvWriter.writerows(album)
+	return pathFilename
+
+#================== Read ==========================================================================
+
+# TODO generalize `getDataFrameFoldings`.
+def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:  # ruff: ignore[undocumented-public-function]
+	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
+	dataframeFoldings: pandas.DataFrame | None = None
+	if pathFilename.exists():
+		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))
+	else:
+		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
+		sys.stderr.write(message + '\n')
+	return dataframeFoldings
+
+def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
+		return tuple(tuple(map(int, row)) for row in csv.reader(streamRead))
+
+def streamAlbum(pathFilename: Path) -> Iterable[Folding]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
+		csvReader: Iterator[list[str]] = csv.reader(streamRead)
+		for row in csvReader:
+			yield tuple(map(int, row))
+
+# Perhaps:
+#================== Find or enumerate files based on their purpose, not filename or path ==========
