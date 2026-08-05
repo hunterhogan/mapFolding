@@ -4,8 +4,7 @@
 from __future__ import annotations
 
 from functools import partial
-from humpy_cytoolz import assoc as associateKeyValue
-from hunterMakesPy import decreasing, inclusive
+from hunterMakesPy import decreasing, inclusive, zeroIndexed
 from itertools import chain
 from mapFolding._e import leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import creaseViolation吗
@@ -14,6 +13,7 @@ from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getMapShape, getValuesKnown
 from mapFolding.theSSOT import settingsPackage
 from pprint import pprint
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -22,13 +22,13 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 # DEVELOPMENT Major overhaul
-# `Folding` -> `PinnedLeaves`.
-# creaseAnte -> creasePost.
+# ⌧ `Folding` -> `PinnedLeaves`. This requires overwriting keys or reading/changing a ton of keys.
+# ⌧ creaseAnte -> creasePost. ante makes it easier to count backwards from the last leaf.
 # `leavesTotal` -> a function for incrementing the map size.
 # 	E.g., getMapNext: Callable[[int], tuple[int, ...]] = partial(getMapShape, 'A001417')
-# Don't create all `PinnedLeaves`: create 1/2, Theorem 2, or 1/d!, Theorem 4. See mapFolding._e.algorithms.elimination theorem2b and theorem4.
+# Don't create all `Folding`: create 1/2, Theorem 2, or 1/d!, Theorem 4. See mapFolding._e.algorithms.elimination theorem2b and theorem4.
 # Check each crease as it is added. A violation will invalidate an entire branch. As opposed to
-#   building a complete set of new `PinnedLeaves` before checking any creases. At the moment, I think
+#   building a complete set of new `Folding` before checking any creases. At the moment, I think
 #   no algorithm is _this_ efficient. "Lazy" construction allows many steps of each algorithm to be
 #   efficient, but I never tried to achieve this level of efficiency.
 # Save and load albums. csv of Leaf in Pile order, with header row. See, e.g., mapFolding/_e/_development/dataRaw/p2d4.csv
@@ -83,32 +83,33 @@ def makeAlbums(leavesTotal: int) -> dict[int, tuple[Folding, ...]]:
 def _makeDescendants(folding: Folding) -> Iterable[Folding]:
 	# DEVELOPMENT With a 1Xn map, an increase in map size only adds one leaf. There are only n-ways to insert 1 leaf.
 	# With a 2Xn map, there are 2 new leaves, so there are <=n*(n-1) ways to insert 2 leaves.
-	return filter(_foldingValid吗, map(partial(_insertLeafLastAtPile, folding), range(len(folding), pileOrigin, decreasing)))
+	return filter(_foldingValid吗, map(partial(_insertLeafAtPile, folding, len(folding)), range(len(folding), pileOrigin, decreasing)))
 
-def _insertLeafLastAtPile(folding: Folding, pile: Pile) -> Folding:
-	# DEVELOPMENT With `PinnedLeaves`, use `associateKeyValue`.
-	return (*folding[:pile], len(folding), *folding[pile:])
+def _insertLeafAtPile(folding: Folding, leaf: Leaf, pile: Pile) -> Folding:
+	return (*folding[:pile], leaf, *folding[pile:])
 
 def _foldingValid吗(folding: Folding) -> bool:
 	# DEVELOPMENT You don't need to check every pair of creases because the existing folding is valid.
 	# You just need to check new creases against same-parity-in-dimension creases.
 	dictionaryLeafPile: dict[Leaf, Pile] = dict(zip(folding, range(len(folding)), strict=True))
 	leafLastCreaseAnte: Leaf = len(folding) - 2
+	pileCreasePile: tuple[Pile, Pile] = (dictionaryLeafPile[leafLastCreaseAnte], dictionaryLeafPile[leafLastCreaseAnte + 1])
 	# DEVELOPMENT The step size of two is essentially hardcoding the parity of `leafComparand` to match the parity of `leafLastCreaseAnte`.
-	return not any(map(partial(_creaseViolation吗, dictionaryLeafPile, leafLastCreaseAnte), range(leafLastCreaseAnte - 2, leafOrigin - inclusive, 2 * decreasing)))
+	return not any(map(partial(_creaseViolation吗, dictionaryLeafPile, pileCreasePile), range(leafLastCreaseAnte - 2, leafOrigin - inclusive, 2 * decreasing)))
 
-def _creaseViolation吗(dictionaryLeafPile: dict[Leaf, Pile], leaf: Leaf, leafComparand: Leaf) -> bool:
+def _creaseViolation吗(dictionaryLeafPile: dict[Leaf, Pile], pileCreasePile: tuple[Pile, Pile], leafComparand: Leaf) -> bool:
 	# DEVELOPMENT With the proper sorting, you only need to check a subset of the new pairs of creases.
 	# Don't sort here: sort once when the dictionary is created--maybe. It depends on how you generate the creases to be checked.
-	creasesPileSorted: list[tuple[Pile, Pile]] = sorted((
-				(dictionaryLeafPile[leaf], dictionaryLeafPile[leaf + 1])
+	creasesPileSorted: list[tuple[Pile, Pile]] = sorted((pileCreasePile
 				, (dictionaryLeafPile[leafComparand], dictionaryLeafPile[leafComparand + 1])
 			))
 	return creaseViolation吗(creasesPileSorted[0][0], creasesPileSorted[1][0], creasesPileSorted[0][1], creasesPileSorted[1][1])
 
 if __name__ == '__main__':
-	leavesTotal: int = 15
+	leavesTotal: int = 14
+	start: float = perf_counter()
 	aa = makeAlbums(leavesTotal)
+	print(f"{perf_counter() - start:.2f}")
 	vv = getValuesKnown('A000682')
 	pprint(aa[2], width=160, compact=True)
 	print([len(aa[n]) == vv[n] for n in range(2, leavesTotal + inclusive)])
