@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-# TODO `partial` vs `humpy_cytoolz.functoolz.curry`: which is better?
 from functools import partial
 from gmpy2 import bit_mask
 from humpy_cytoolz import (
@@ -211,7 +210,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		deconstructedPermutationSpace: list[PermutationSpace] = []
 		if self.leafNotPinned吗(leaf):
 			leafInPileRange: Callable[[int], bool] = compose(
-				leafInLeafOptions吗(leaf), partial(self.getLeafOptions, default=bit_mask(len(self)))
+				partial(leafInLeafOptions吗, leaf), partial(self.getLeafOptions, default=bit_mask(len(self)))
 			)
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
 			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(self.pileUndetermined吗, leafDomain))))

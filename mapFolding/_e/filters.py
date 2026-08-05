@@ -42,7 +42,6 @@ References
 """
 from __future__ import annotations
 
-from humpy_cytoolz import curry as syntacticCurry
 from mapFolding._e.theTypes import Leaf, LeafOptions
 from typing import TYPE_CHECKING
 
@@ -52,7 +51,6 @@ if TYPE_CHECKING:
 
 #======== Boolean antecedents ================================================
 
-@syntacticCurry
 def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	"""Test whether `leaf` is present in `leafOptions`.
 
@@ -79,7 +77,6 @@ def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 	"""
 	return leafOptions.bit_test(leaf)
 
-@syntacticCurry
 def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 	"""Return `True` if `leaf` is pinned in `leavesPinned`.
 
@@ -97,7 +94,6 @@ def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 	"""
 	return leaf in leavesPinned.values()
 
-@syntacticCurry
 def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	"""Return True if `pile` is not the last pile.
 

@@ -489,7 +489,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(filterValue((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
 		if leavesWithDomainOf1:
 			leaf: Leaf = leavesWithDomainOf1.pop()
-			sherpa: PermutationSpace | None = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(DOTkeys(filterLeaf(leafInLeafOptions吗(leaf), pilesUndetermined))), leaf))
+			sherpa: PermutationSpace | None = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(DOTkeys(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined))), leaf))
 			if (sherpa is None) or (not sherpa):
 				#=SIN= Early return: failed pin propagation irreversibly invalidates the candidate.
 				return None

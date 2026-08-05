@@ -68,6 +68,7 @@ References
 """
 from __future__ import annotations
 
+from functools import partial
 from gmpy2 import bit_flip
 from humpy_cytoolz import get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
@@ -178,7 +179,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		leafCount: int = permutationSpace.leafCount
 
 		# TODO fix the typing problems in Z0Z_tools.
-		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), filterLeaf(moreThanLeaf零吗, filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves())))):  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
+		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), filterLeaf(moreThanLeaf零吗, filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves())))):  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
 			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace  # ty: ignore[invalid-argument-type]
 				, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
 				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])  # ty: ignore[invalid-argument-type]
@@ -335,7 +336,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		pile1stOpen: int = 2
 		# TODO fix this typing issue.
 		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves())  # ty: ignore[invalid-assignment]
-		for pile, leaf in DOTitems(filterPile(notPileLast(state.pileLast), leavesPinned)):
+		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(permutationSpace
 				, DOTitems(filterLeaf(isLeafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))

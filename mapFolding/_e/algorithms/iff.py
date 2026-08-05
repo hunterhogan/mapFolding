@@ -63,7 +63,6 @@ Citations in BibTeX format at [mapFolding/citations](../../citations).
 from __future__ import annotations
 
 from functools import cache
-from humpy_cytoolz import curry as syntacticCurry
 from itertools import combinations
 from mapFolding.beDRY import getLeavesTotal
 from math import prod
@@ -396,7 +395,6 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 		leafCrease = leaf + productOfDimensions(mapShape, dimension)
 	return leafCrease
 
-@syntacticCurry
 @cache
 def oddLeaf吗(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 	r"""Compute and memoize the parity bit of `leaf` in `dimension`.

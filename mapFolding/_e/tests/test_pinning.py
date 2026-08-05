@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from humpy_cytoolz import curry as syntacticCurry
+from functools import partial
 from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
 
-@syntacticCurry
 def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
 	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
 
@@ -59,7 +58,7 @@ def test_pinningFunctions(
 	selectorFoldingsCoveredByAnyPermutationSpace: numpy.ndarray = numpy.logical_or.reduce(listSelectorsFoldingsByPermutationSpace)
 	foldingsCoveredTotal: int = int(selectorFoldingsCoveredByAnyPermutationSpace.sum())
 
-	countBeansWithoutCornbread: int = len(list(filter(beansWithoutCornbread(state), state.listPermutationSpace)))
+	countBeansWithoutCornbread: int = len(list(filter(partial(beansWithoutCornbread, state), state.listPermutationSpace)))
 
 	assertEqualTo(foldingsCoveredTotal, foldingsTotalExpected, pinningFunction.__name__, state.mapShape, foldingsCoveredTotal=foldingsCoveredTotal, foldingsRequiredTotal=foldingsTotalExpected)
 	assertEqualTo(countOverlappingDictionaries, 0, pinningFunction.__name__, state.mapShape, countOverlappingDictionaries=countOverlappingDictionaries)

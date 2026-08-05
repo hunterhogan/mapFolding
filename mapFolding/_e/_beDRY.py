@@ -26,7 +26,7 @@ Disaggregation and deconstruction functions
 	leafOptionsLeafNone
 		You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
 	leafOptionsAND
-		You can AND a `LeafOptions` with a disposable mask in a curry-friendly parameter order.
+		You can AND a `LeafOptions` with a disposable mask.
 
 Be DRY functions
 	getProductsOfDimensions
@@ -54,7 +54,7 @@ from __future__ import annotations
 
 from functools import partial, reduce
 from gmpy2 import bit_clear, bit_mask, bit_set
-from humpy_cytoolz import curry as syntacticCurry, unique
+from humpy_cytoolz import unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
 from mapFolding._e.filters import isLeafOptions吗
@@ -64,7 +64,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace
+	from mapFolding._e.theTypes import Leaf, LeafOptions
 
 #======== `LeafOptions` functions ================================================
 
@@ -220,20 +220,16 @@ def leafOptionsLeafNone(leafOptions: LeafOptions, /) -> LeafOptions | Leaf | Non
 			whoAmI = None
 	return whoAmI
 
-@syntacticCurry
 def leafOptionsAND(leafOptionsDISPOSABLE: LeafOptions, leafOptions: LeafOptions) -> LeafOptions:
-	"""Compute the bitwise AND of two `LeafOptions` with curry-friendly parameter order.
+	"""Compute the bitwise AND of two `LeafOptions`.
 
 	You can use this function to mask `leafOptions` with `leafOptionsDISPOSABLE` [1]. The
-	function performs bitwise AND and returns the intersection of the two leaf sets. The
-	parameter order is reversed from typical AND operations to support currying [2]: you can
-	partially apply `leafOptionsDISPOSABLE` to create a reusable masking function.
+	function performs bitwise AND and returns the intersection of the two leaf sets.
 
 	Parameters
 	----------
 	leafOptionsDISPOSABLE : LeafOptions
-		Bitset mask applied to `leafOptions`. This parameter is the first parameter to enable
-		currying: you can fix `leafOptionsDISPOSABLE` and reuse the resulting function.
+		Bitset mask applied to `leafOptions`.
 	leafOptions : LeafOptions
 		Bitset to be masked by `leafOptionsDISPOSABLE`.
 
@@ -241,31 +237,6 @@ def leafOptionsAND(leafOptionsDISPOSABLE: LeafOptions, leafOptions: LeafOptions)
 	-------
 	maskedLeafOptions : LeafOptions
 		Bitwise AND of `leafOptions` and `leafOptionsDISPOSABLE`.
-
-	Examples
-	--------
-	The function is used with `leafOptionsLeafNone` to normalize masked domains.
-
-		if (ImaLeafSpaceNotAWalrusSubscript := leafOptionsLeafNone(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
-			return {}
-
-	The function is used to mask pile domains during constraint propagation.
-
-		leafSpace: LeafSpace | None = leafOptionsLeafNone(leafOptionsAND(leafAntiOptions, leafOptions))
-
-	Important
-	---------
-	The parameter order is reversed from typical bitwise AND operations. The first parameter
-	`leafOptionsDISPOSABLE` is the mask, and the second parameter `leafOptions` is the value
-	being masked. This order facilitates currying.
-
-	References
-	----------
-	[1] gmpy2.mpz bitwise operations - gmpy2 documentation
-		https://gmpy2.readthedocs.io/en/latest/mpz.html#mpz-methods
-	[2] cytoolz.functoolz.curry
-		https://toolz.readthedocs.io/en/latest/api.html#toolz.functoolz.curry
-
 	"""
 	return leafOptions & leafOptionsDISPOSABLE
 
