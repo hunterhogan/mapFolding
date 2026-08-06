@@ -1,0 +1,9 @@
+extend = "../ruff.toml"
+
+[lint]
+ignore = [
+  "import-private-name",
+  "commented-out-code",
+  "undocumented-public-function",
+  "undocumented-public-module",
+]

@@ -1,10 +1,7 @@
-# ruff:file-ignore[commented-out-code]
 from __future__ import annotations
 
-from hunterMakesPy import errorL33T
-from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countMeanders
-from mapFolding.oeis import getValuesKnown
+from mapFolding.beDRY import printEasyRunBenchmark, printEasyRunHeader
 from pathlib import Path
 from typing import TYPE_CHECKING
 import gc
@@ -14,18 +11,6 @@ import warnings
 
 if TYPE_CHECKING:
 	from os import PathLike
-
-def write() -> None:
-	sys.stdout.write(
-		f"{(match := (countTotal == totalKnown))}\t"
-		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
-		f"{n}\t"
-		f"{countTotal}\t"
-		f"{totalKnown}\t"
-		f"{totalKnown / countTotal}\t"
-		f"{time.perf_counter() - timeStart:.2f}\t"
-		f"{ansiColorReset}\n"
-	)
 
 if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
@@ -40,8 +25,8 @@ if __name__ == '__main__':
 	for oeisID, kind in [
 			('A005316', 'meanders'),
 			# ('A000682', 'semi'),
-				]:
-		sys.stdout.write(f"\n{oeisID}\n")
+		]:
+		printEasyRunHeader(oeisID, flow)
 
 		"""# Identifiers. improve
 		"generate up to four targets."
@@ -62,13 +47,10 @@ if __name__ == '__main__':
 
 		for n in nList:
 			gc.collect()
-			timeStart = time.perf_counter()
-			countTotal = countMeanders(kind, n, flow, pathLikeWrite)
-			totalKnown = getValuesKnown(oeisID).get(n, -errorL33T)
-			if 0 <= totalKnown:
-				write()
-			else:
-				sys.stdout.write(f"{n} {countTotal} {time.perf_counter() - timeStart:.2f}\n")
+			timeStart: float = time.perf_counter()
+			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+
+			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 
 r"""
 

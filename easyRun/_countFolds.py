@@ -6,12 +6,10 @@ prints colorized output indicating whether computed values match expected values
 """
 from __future__ import annotations
 
-from hunterMakesPy import errorL33T
-from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
-from mapFolding.oeis import getValuesKnown, makeMapShape
+from mapFolding.beDRY import printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.oeis import makeMapShape
 from typing import TYPE_CHECKING
-import sys
 import time
 
 if TYPE_CHECKING:
@@ -19,16 +17,6 @@ if TYPE_CHECKING:
 	from os import PathLike
 
 if __name__ == '__main__':
-	def _write() -> None:
-		sys.stdout.write(
-			f"{(match := foldsTotal == getValuesKnown(oeisID).get(n, -errorL33T))}\t"
-			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
-			f"{n}\t"
-			f"{foldsTotal}\t"
-			f"{getValuesKnown(oeisID).get(n, -errorL33T)}\t"
-			f"{time.perf_counter() - timeStart:.2f}\t"
-			f"{ansiColorReset}\n"
-		)
 
 	pathLikeWrite: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
@@ -46,15 +34,13 @@ if __name__ == '__main__':
 	oeisID = 'A001415'
 	oeisID = 'A000136'
 
-	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
-	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
-	sys.stdout.write(ansiColorReset + '\n')
+	printEasyRunHeader(oeisID, flow)
 
 	for n in range(3, 25):
 
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 
-		timeStart = time.perf_counter()
+		timeStart: float = time.perf_counter()
 		foldsTotal: int = countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 
-		_write()
+		printEasyRunBenchmark(oeisID, n, foldsTotal, timeStart, ratio=False)

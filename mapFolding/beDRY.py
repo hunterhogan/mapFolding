@@ -4,12 +4,15 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from functools import cache
-from hunterMakesPy import inclusive
+from hunterMakesPy import errorL33T, inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
+from mapFolding import ansiColorReset, ansiColors
+from mapFolding.oeis import getValuesKnown
 from numpy import int64 as numpy_int64
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
+import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
@@ -340,3 +343,22 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 		`True` when `mapShape` is a 2ⁿ-dimensional map with the required minimum dimension count.
 	"""
 	return (youMustBeDimensionsTallToRideThis <= len(mapShape)) and all(map((2).__eq__, mapShape))
+
+
+def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
+	known = getValuesKnown(oeisID).get(n, -errorL33T)
+	match = computed == known
+	sys.stdout.write(
+		f"{match}\t"
+		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
+		f"{n}\t{computed}\t{known}\t"
+	)
+	if ratio and computed:
+		sys.stdout.write(f"{known / computed}\t")
+	sys.stdout.write(f"{time.perf_counter() - timeStart:.2f}\t{ansiColorReset}\n")
+
+
+def printEasyRunHeader(oeisID: str, flow: str) -> None:
+	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
+	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
+	sys.stdout.write(ansiColorReset + '\n')

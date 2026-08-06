@@ -1,17 +1,14 @@
-# ruff:file-ignore[commented-out-code]
-# pyright: basic
+# pyright: reportUnusedImport=false
 from __future__ import annotations
 
-from hunterMakesPy import errorL33T
-from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding.oeis import getValuesKnown, makeMapShape
+from mapFolding.beDRY import printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.oeis import makeMapShape
 from typing import TYPE_CHECKING
-import sys
 import time
 
 if TYPE_CHECKING:
@@ -20,18 +17,6 @@ if TYPE_CHECKING:
 	from os import PathLike
 
 if __name__ == "__main__":
-
-	def _write() -> None:
-		sys.stdout.write(
-			f"{(match := foldsTotal == getValuesKnown(oeisID).get(n, errorL33T))}\t"
-			f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
-			f"{n}\t"
-			# f"{mapShape}\t"
-			f"{foldsTotal}\t"
-			f"{getValuesKnown(oeisID).get(n, errorL33T)}\t"
-			f"{time.perf_counter() - timeStart:.2f}\t"
-			f"{ansiColorReset}\n"
-		)
 
 	pathLikeWrite: PathLike[str] | None = None
 	oeisID: OEISid = ""
@@ -50,9 +35,7 @@ if __name__ == "__main__":
 	oeisID = "A001415"
 	oeisID = "A001417"
 
-	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
-	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
-	sys.stdout.write(ansiColorReset + "\n")
+	printEasyRunHeader(oeisID, flow)
 
 	for n in range(4, 6):
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
@@ -69,9 +52,9 @@ if __name__ == "__main__":
 			state = pinLeavesDimensions0零一(state)
 			# state.listPermutationSpace.reverse()
 
-		foldsTotal: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
+		computed: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
 
-		_write()
+		printEasyRunBenchmark(oeisID, n, computed, timeStart, ratio=False)
 
 r"""
 title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on mapFolding\_e\easyRun\eliminateFolds.py & title I'm done
