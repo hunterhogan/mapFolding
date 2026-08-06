@@ -28,7 +28,7 @@ from __future__ import annotations
 from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getFoldsTotalKnown, getTaskDivisions
-from mapFolding.oeis import getMapShape
+from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import pytest
@@ -45,7 +45,7 @@ def test_getFoldsTotalKnown(mapShape: tuple[int, ...], expected: int | None) -> 
 @pytest.mark.parametrize('pathLikeWrite', (None,))
 @pytest.mark.parametrize('computationDivisions', ('maximum',))
 @pytest.mark.parametrize('CPUlimit', (None,))
-@pytest.mark.parametrize('mapShape', [pytest.param(getMapShape('A001417', 5), id='A001417::n5')])
+@pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A001417', 5), id='A001417::n5')])
 @pytest.mark.parametrize('flow', ('',))
 def test_countFolds_computationDivisionsMaximum(
 	mapShape: tuple[int, ...]
@@ -62,7 +62,7 @@ def test_countFolds_computationDivisionsMaximum(
 @pytest.mark.parametrize('computationDivisions', ({'wrong': 'value'},))
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize(
-	'mapShape', [pytest.param(getMapShape('A000136', 3), id='A000136::n3'), pytest.param(getMapShape('A001415', 3), id='A001415::n3')]
+	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
 @pytest.mark.parametrize('flow', ('',))
 @pytest.mark.parametrize('expected', (ValueError,))
@@ -82,7 +82,7 @@ def test_countFolds_computationDivisionsError(
 @pytest.mark.parametrize('computationDivisions', ('cpu',))
 @pytest.mark.parametrize('CPUlimit', [{'invalid': True}, ['weird']])
 @pytest.mark.parametrize(
-	'mapShape', [pytest.param(getMapShape('A000136', 3), id='A000136::n3'), pytest.param(getMapShape('A001415', 3), id='A001415::n3')]
+	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
 @pytest.mark.parametrize('flow', ('',))
 @pytest.mark.parametrize('expected', (TypeError,))

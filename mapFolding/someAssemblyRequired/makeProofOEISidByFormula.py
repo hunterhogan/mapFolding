@@ -16,12 +16,10 @@ from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
 from astToolkit.containers import IngredientsModule, LedgerOfImports
-from astToolkit.transformationTools import makeDictionaryFunctionDef, write_astModule
+from astToolkit.transformationTools import makeDictionaryFunctionDef, pythonCode2ast_expr, write_astModule
 from humpy_cytoolz import valmap
-from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding.tests.conftest import pathDataSamples
 from mapFolding.theSSOT import settingsPackage
-from pprint import pformat
 from typing import TYPE_CHECKING
 import ast
 
@@ -69,25 +67,33 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 		else:
 			NodeChanger(IfThis.isCallIdentifier(oeisID), Grab.funcAttribute(Then.replaceWith(Make.Name('_' + oeisID)))).visit(astModule)
 			astModule.body.append(Make.FunctionDef('_' + oeisID, Make.arguments(list_arg=[Make.arg('n', Make.Name('int'))])
-								, body=[Make.Return(Make.Subscript(Make.Subscript(Make.Subscript(Make.Name('dictionaryOEIS'), slice=Make.Constant(oeisID)), slice=Make.Constant('valuesKnown')), slice=Make.Name('n')))]
+								, body=[Make.Return(Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=Make.Name('n')))]
 								, returns=Make.Name('int')))
 			NodeTourist(IfThis.isSubscriptIdentifier('Literal')
 				, Then.updateKeyValueIn(lambda _node: oeisID, Then.extractIt(DOT.slice), dictionaryLiterals)  # ruff: ignore[function-uses-loop-variable]
 			).visit(FunctionDef)
 
-	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis._metadata', list_alias=[Make.alias('dictionaryOEIS')]))
-
+	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis', list_alias=[Make.alias('getValuesKnown')]))
 	pathFilename: Path = write_astModule(astModule, pathFilenameWrite, identifierPackage=settingsPackage.identifierPackage)
 
-	dictionaryLiterals = valmap(ast.literal_eval, dictionaryLiterals)
 	pathFilenameDataSamples: Path = pathDataSamples / f"OEISidByFormulaLookup{settingsPackage.fileExtension}"
-	string: str = 'dictionaryLiterals = ' + pformat(dictionaryLiterals, indent=4, width=120)
-	writeStringToHere(string, pathFilenameDataSamples)
+
+	dictionaryLiterals = valmap(ast.literal_eval, dictionaryLiterals)
+	moduleDataSamples = IngredientsModule()
+	moduleDataSamples.imports.addImportFrom_asStr('typing', 'LiteralString')
+	moduleDataSamples.appendPrologue(statement=Make.AnnAssign(Make.Name('dictionaryLiterals', Make.Store())
+		, Make.Subscript(Make.Name('dict'), slice=Make.Tuple([Make.Name('LiteralString')
+			, Make.BitOr.join([Make.Subscript(Make.Name('tuple')
+				, slice=Make.Tuple([Make.Name('LiteralString'), Make.Constant(Ellipsis)])), Make.Name('LiteralString')])]))
+		, value=pythonCode2ast_expr(repr(dictionaryLiterals))
+	))
+
+	moduleDataSamples.write_astModule(pathFilenameDataSamples)
 
 	return pathFilename
 
 # TODO sympy equation solver.
-def _makeSympy(pathFilenameSource: Path) -> Path:
+def _makeSympy(pathFilenameSource: Path) -> Path:  # pyright: ignore[reportUnusedFunction]
 	pathFilenameWrite: Path = pathFilenameSource.with_stem('Z0Z_sympy')
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)
 	dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
@@ -98,16 +104,16 @@ def _makeSympy(pathFilenameSource: Path) -> Path:
 	ingredients.appendPrologue(statement=Make.Assign([Make.Name('n', Make.Store())], value=Make.Call(Make.Attribute(Make.Name('sympy'), 'symbols')
 		, listParameters=[Make.Constant('n')], list_keyword=[Make.keyword('integer', value=Make.Constant(value=True))])))
 
-	for oeisID, FunctionDef in dictionaryFunctionDef.items():  # ruff: ignore[incorrect-dict-iterator, unused-loop-control-variable]
+	for oeisID, FunctionDef in dictionaryFunctionDef.items():  # pyright: ignore[reportUnusedVariable] # ruff: ignore[incorrect-dict-iterator, unused-loop-control-variable]
 		ingredients.appendPrologue(statement=Make.Assign([Make.Name(oeisID, Make.Store())], value=Make.Call(Make.Attribute(Make.Name('sympy'), 'Function'), listParameters=[Make.Constant(oeisID)])))
 
 		if not oeisID.startswith('_'):
 			NodeChanger(IfThis.isCallIdentifier(oeisID), Grab.funcAttribute(Then.replaceWith(Make.Name('_' + oeisID)))).visit(astModule)
 			astModule.body.append(Make.FunctionDef('_' + oeisID, Make.arguments(list_arg=[Make.arg('n', Make.Name('int'))])
-								, body=[Make.Return(Make.Subscript(Make.Subscript(Make.Subscript(Make.Name('dictionaryOEIS'), slice=Make.Constant(oeisID)), slice=Make.Constant('valuesKnown')), slice=Make.Name('n')))]
+								, body=[Make.Return(Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=Make.Name('n')))]
 								, returns=Make.Name('int')))
 
-	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis._metadata', list_alias=[Make.alias('dictionaryOEIS')]))
+	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis', list_alias=[Make.alias('getValuesKnown')]))
 
 	pathFilename: Path = write_astModule(astModule, pathFilenameWrite, identifierPackage=settingsPackage.identifierPackage)
 

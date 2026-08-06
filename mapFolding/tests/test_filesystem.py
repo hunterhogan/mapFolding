@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from mapFolding.kitFilesystem import getPathRootJobDEFAULT, makeFilenameFolds, makePathFilenameFolds, saveTotal
-from mapFolding.oeis import getMapShape
+from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
 from pathlib import Path
 import io
@@ -47,7 +47,7 @@ def test_getFilenameFoldsTotal(mapShape: tuple[int, ...], expectedFilename: str)
 	assertEqualTo(filenameActual, expectedFilename, makeFilenameFolds.__name__, mapShape)
 
 @pytest.mark.parametrize(
-	'mapShape', [pytest.param(getMapShape('A000136', 3), id='A000136::n3'), pytest.param(getMapShape('A001415', 3), id='A001415::n3')]
+	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
 def test_getPathFilenameFoldsTotal_defaultPath(mapShape: tuple[int, ...]) -> None:
 	"""Test getPathFilenameFoldsTotal with default path."""
@@ -57,7 +57,7 @@ def test_getPathFilenameFoldsTotal_defaultPath(mapShape: tuple[int, ...]) -> Non
 	assertEqualTo(pathFilenameFoldsTotal.parent, getPathRootJobDEFAULT(), makePathFilenameFolds.__name__, mapShape)
 
 @pytest.mark.parametrize(
-	'mapShape', [pytest.param(getMapShape('A000136', 3), id='A000136::n3'), pytest.param(getMapShape('A001415', 3), id='A001415::n3')]
+	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
 def test_getPathFilenameFoldsTotal_relativeFilename(mapShape: tuple[int, ...]) -> None:
 	"""Test getPathFilenameFoldsTotal with relative filename."""
@@ -67,7 +67,7 @@ def test_getPathFilenameFoldsTotal_relativeFilename(mapShape: tuple[int, ...]) -
 	assertEqualTo(pathFilenameFoldsTotal, getPathRootJobDEFAULT() / relativeFilename, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=relativeFilename)
 
 @pytest.mark.parametrize(
-	'mapShape', [pytest.param(getMapShape('A000136', 3), id='A000136::n3'), pytest.param(getMapShape('A001415', 3), id='A001415::n3')]
+	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
 def test_getPathFilenameFoldsTotal_createsDirs(path_tmpTesting: Path, mapShape: tuple[int, ...]) -> None:
 	"""Test that getPathFilenameFoldsTotal creates necessary directories."""

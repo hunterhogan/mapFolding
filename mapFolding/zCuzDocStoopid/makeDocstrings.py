@@ -5,11 +5,12 @@ from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astMod
 from astToolkit.transformationTools import makeDictionaryFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from mapFolding.oeis._metadata import dictionaryOEIS
+from mapFolding.oeis import getMetadata
 from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
+    from mapFolding.oeis._dataBaskets import MetadataOEISid
     from pathlib import Path
 
 #------------------ General Settings ----------------------------------------------------------------------------------
@@ -30,14 +31,15 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
         if not oeisID.startswith('A') or not oeisID[1:7].isdigit():
             continue
         functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
+        metadata: MetadataOEISid = getMetadata(oeisID)
 
         ImaDocstring: str = f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{dictionaryOEIS[oeisID]['description']}"
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{metadata['description']}"
 
-    The domain of {oeisID} starts at {dictionaryOEIS[oeisID]['offset']}, therefore for values of `n` < {dictionaryOEIS[oeisID]['offset']}, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is {dictionaryOEIS[oeisID]['valueUnknown']}.
+    The domain of {oeisID} starts at {metadata['offset']}, therefore for values of `n` < {metadata['offset']}, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is {metadata['valueUnknown']}.
 
     Parameters
     ----------
@@ -47,7 +49,7 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     Returns
     -------
     a(n) : int
-        {dictionaryOEIS[oeisID]['description']}
+        {metadata['description']}
 
     Would You Like to Know More?
     ----------------------------

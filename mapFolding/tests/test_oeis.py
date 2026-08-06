@@ -27,8 +27,8 @@ which is crucial for maintaining package reliability in production environments.
 from __future__ import annotations
 
 from contextlib import redirect_stdout
-from mapFolding.oeis import getOEISids, OEIS_for_n, oeisIDfor_n
-from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEIS
+from mapFolding.oeis import getMetadata, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
+from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from typing import TYPE_CHECKING
 import io
@@ -39,7 +39,8 @@ import unittest.mock
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
-	from typing import Any
+	from mapFolding.theTypes import OEISid
+	from typing import Any, LiteralString
 
 def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: Callable[..., Any], *arguments: Any) -> None:
 	"""Template for tests expecting SystemExit.
@@ -73,24 +74,24 @@ def standardizedSystemExit(expected: str | int | Sequence[int], functionTarget: 
 	else:
 		assertEqualTo(exitCode, expected, functionName, *arguments)
 
-def test__validateOEISid_valid_id(oeisID: str) -> None:
-	actual: str = _formatOEISid(oeisID)
-	assertEqualTo(actual, oeisID, _formatOEISid.__name__, oeisID)
+def test__validateOEISid_valid_id(oeisID: OEISid) -> None:
+	actual: str = formatOEISid(oeisID)
+	assertEqualTo(actual, oeisID, formatOEISid.__name__, oeisID)
 
-def test__validateOEISid_valid_id_case_insensitive(oeisID: str) -> None:
+def test__validateOEISid_valid_id_case_insensitive(oeisID: OEISid) -> None:
 	expected: str = oeisID.upper()
-	actualLower: str = _formatOEISid(oeisID.lower())
-	actualUpper: str = _formatOEISid(oeisID.upper())
-	actualSwapcase: str = _formatOEISid(oeisID.swapcase())
-	assertEqualTo(actualLower, expected, _formatOEISid.__name__, oeisID.lower())
-	assertEqualTo(actualUpper, expected, _formatOEISid.__name__, oeisID.upper())
-	assertEqualTo(actualSwapcase, expected, _formatOEISid.__name__, oeisID.swapcase())
+	actualLower: str = formatOEISid(oeisID.lower())
+	actualUpper: str = formatOEISid(oeisID.upper())
+	actualSwapcase: str = formatOEISid(oeisID.swapcase())
+	assertEqualTo(actualLower, expected, formatOEISid.__name__, oeisID.lower())
+	assertEqualTo(actualUpper, expected, formatOEISid.__name__, oeisID.upper())
+	assertEqualTo(actualSwapcase, expected, formatOEISid.__name__, oeisID.swapcase())
 
 parameters_test_aOFn_invalid_n = [(-random.randint(1, 100), 'randomNegative'), ('foo', 'string'), (1.5, 'float')]
 badValues, badValuesIDs = zip(*parameters_test_aOFn_invalid_n, strict=True)
 
 @pytest.mark.parametrize('badN', badValues, ids=badValuesIDs)
-def test_aOFn_invalid_n(oeisID_1random: str, badN: Any) -> None:
+def test_aOFn_invalid_n(oeisID_1random: LiteralString, badN: Any) -> None:
 	"""Check that negative or non-integer n raises ValueError."""
 	expected: type[ValueError] = ValueError
 	with pytest.raises(expected) as exceptionInfo:
@@ -113,9 +114,9 @@ def testHelpText() -> None:
 	helpText = outputStream.getvalue()
 
 	# Verify content
-	for oeisID in dictionaryOEIS:
+	for oeisID in oeisIDsImplemented:
 		assertEqualTo(oeisID in helpText, True, getOEISids.__name__, oeisID)
-		assertEqualTo(dictionaryOEIS[oeisID]['description'] in helpText, True, getOEISids.__name__, oeisID)
+		assertEqualTo(getMetadata(oeisID)['description'] in helpText, True, getOEISids.__name__, oeisID)
 
 	# Extract and verify examples
 
@@ -131,6 +132,7 @@ def testHelpText() -> None:
 	assertEqualTo(cliMatch.groups(), (oeisID, str(n)), getOEISids.__name__)
 
 	# Verify the example works
+	# TODO Why is a str not a str?
 	expectedValue = oeisIDfor_n(oeisID, n)
 
 	# Test CLI execution of the example
@@ -164,4 +166,4 @@ def testCLI_HelpFlag() -> None:
 		helpOutput = outputStream.getvalue()
 		assertEqualTo('Available OEIS sequences:' in helpOutput, True, OEIS_for_n.__name__, '--help')
 		assertEqualTo('Usage examples:' in helpOutput, True, OEIS_for_n.__name__, '--help')
-		assertEqualTo(all(oeisID in helpOutput for oeisID in dictionaryOEIS), True, OEIS_for_n.__name__, '--help')
+		assertEqualTo(all(oeisID in helpOutput for oeisID in oeisIDsImplemented), True, OEIS_for_n.__name__, '--help')

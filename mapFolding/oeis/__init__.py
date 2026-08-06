@@ -1,10 +1,13 @@
 """OEIS."""
 from __future__ import annotations
 
-from mapFolding.oeis._metadata import getValuesKnown as getValuesKnown
+from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, oeisIDsMapFoldingImplemented as oeisIDsMapFoldingImplemented
 
 # isort: split
-from mapFolding.oeis._needsAHome import getMapShape as getMapShape, makeDictionaryFoldsTotalKnown as makeDictionaryFoldsTotalKnown
+from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown as getValuesKnown
+
+# isort: split
+from mapFolding.oeis.__main__ import makeDictionaryFoldsTotalKnown as makeDictionaryFoldsTotalKnown, makeMapShape as makeMapShape
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n

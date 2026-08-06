@@ -97,7 +97,7 @@ print(countMeanders('meanders', 4))  # 3; OEIS A005316
 | Count rotationally symmetric foldings          | `mapFolding.basecamp.countFoldsSymmetric(mapShape, ...)` |
 | Count semi-meanders or meanders                | `mapFolding.basecamp.countMeanders(kind, n, ...)`        |
 | Calculate any implemented OEIS term            | `mapFolding.oeis.oeisIDfor_n(oeisID, n, ...)`            |
-| Convert a map-folding OEIS index to dimensions | `mapFolding.oeis.getMapShape(oeisID, n)`                 |
+| Convert a map-folding OEIS index to dimensions | `mapFolding.oeis.makeMapShape(oeisID, n)`                |
 | Retrieve cached known values                   | `mapFolding.oeis.getValuesKnown(oeisID)`                 |
 | List implemented sequences                     | `getOEISids`                                             |
 

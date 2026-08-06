@@ -1,27 +1,17 @@
 from __future__ import annotations
 
+from hunterMakesPy.parseParameters import intInnit
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
-from mapFolding.oeis import byFormula, getMapShape
-from mapFolding.oeis._metadata import _formatOEISid, dictionaryOEIS
-from typing import Protocol, TYPE_CHECKING
+from mapFolding.oeis import byFormula, getMetadata, makeMapShape, oeisIDsMapFoldingImplemented
+from mapFolding.oeis._beDRY import formatOEISid
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding.oeis._dataBaskets import MetadataOEISid
-	from mapFolding.theTypes import KeywordArgumentsCount
-	from typing import Unpack
+	from mapFolding.theTypes import KeywordArgumentsCount, OEISid
+	from typing import LiteralString, Unpack
 
-class _FormulaForN(Protocol):
-	def __call__(self, n: int, f: str = ...) -> int: ...
-
-# TODO Learn a better way to handle default values in this situation.
-def _evaluateFormulaForN(formulaForN: _FormulaForN, n: int, f: str) -> int:
-	if f:
-		foldsTotal: int = formulaForN(n, f)
-	else:
-		foldsTotal = formulaForN(n)
-	return foldsTotal
-
-def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[KeywordArgumentsCount]) -> int:
+def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywordArguments: Unpack[KeywordArgumentsCount]) -> int:
 	"""You can calculate the value a(n) for a specified OEIS ID and index.
 
 	(AI generated docstring)
@@ -74,83 +64,97 @@ def oeisIDfor_n(oeisID: str, n: int, f: str = '', **keywordArguments: Unpack[Key
 		https://oeis.org/
 	[2] mapFolding.basecamp.countFolds
 	"""
-	oeisID = _formatOEISid(oeisID)
+	oeisID = formatOEISid(oeisID)
+
+	# TODO =EndNotes= unambiguous but technically malformed user input: Be nice. Try to deal with
+	# _unambiguous_ input that is malformed, such as an integer value passed as a `str` or `float`
+	# type, instead of halting execution. `hunterMakesPy.parseParameters` and `datastructures` have
+	# easy-to-implement, robust functions to do the hard work.
+	if not isinstance(n, int):
+		qq: list[int] = intInnit([n], 'n', int)
+		if len(qq) == 1:
+			n = qq.pop()
 
 	if not isinstance(n, int) or n < 0:
-		message: str = f"I received `{n = }` in the form of `{type(n) = }`, but it must be non-negative integer in the form of `{int}`."
+		message: str = f"I received `{n = }` in the form of `{type(n) = }`, but I need a non-negative integer in the form of `{int}`."
 		raise ValueError(message)
 
-	metadataOEISid: MetadataOEISid = dictionaryOEIS[oeisID]
+	metadata: MetadataOEISid = getMetadata(oeisID)
 
-	if n < metadataOEISid['offset']:
-		message: str = f"I received `{n = }`, but OEIS sequence `{oeisID = }` is not defined for values below `offset = {metadataOEISid['offset']}`."
+	if n < metadata['offset']:
+		message: str = f"I received `{n = }`, but OEIS sequence `{oeisID = }` is not defined for values below `offset = {metadata['offset']}`."
 		raise ArithmeticError(message)
 
-	if n <= 1:
-		foldsTotal: int = metadataOEISid['valuesKnown'][n]
+	if n == metadata['offset']:
+		foldsTotal: int = metadata['valuesKnown'][n]
+	elif not f and oeisID in oeisIDsMapFoldingImplemented:
+		foldsTotal = countFolds(mapShape=makeMapShape(oeisID, n), **keywordArguments)
 	else:
 		match oeisID:
-			case 'A000136' if f:
+			case 'A000682' if not f:
+				foldsTotal = countMeanders('semi', n, **keywordArguments)
+			case 'A005316' if not f:
+				foldsTotal = countMeanders('meanders', n, **keywordArguments)
+			case 'A007822' if not f:
+				foldsTotal = countFoldsSymmetric(makeMapShape(oeisID, n), **keywordArguments)
+			case 'A007822':
+				foldsTotal = byFormula.A007822(n, f)
+			case 'A000136':
 				foldsTotal = byFormula.A000136(n, f)
 			case 'A000560':
-				foldsTotal = _evaluateFormulaForN(byFormula.A000560, n, f)
-			case 'A000682' if f:
+				foldsTotal = byFormula.A000560(n, f)
+			case 'A000682':
 				foldsTotal = byFormula.A000682(n, f)
 			case 'A001010':
-				foldsTotal = _evaluateFormulaForN(byFormula.A001010, n, f)
+				foldsTotal = byFormula.A001010(n, f)
 			case 'A001011':
-				foldsTotal = _evaluateFormulaForN(byFormula.A001011, n, f)
+				foldsTotal = byFormula.A001011(n, f)
 			case 'A005315':
-				foldsTotal = _evaluateFormulaForN(byFormula.A005315, n, f)
-			case 'A005316' if f:
+				foldsTotal = byFormula.A005315(n, f)
+			case 'A005316':
 				foldsTotal = byFormula.A005316(n, f)
 			case 'A060206':
-				foldsTotal = _evaluateFormulaForN(byFormula.A060206, n, f)
+				foldsTotal = byFormula.A060206(n, f)
 			case 'A077014':
-				foldsTotal = _evaluateFormulaForN(byFormula.A077014, n, f)
+				foldsTotal = byFormula.A077014(n, f)
 			case 'A077054':
-				foldsTotal = _evaluateFormulaForN(byFormula.A077054, n, f)
+				foldsTotal = byFormula.A077054(n, f)
 			case 'A077460':
-				foldsTotal = _evaluateFormulaForN(byFormula.A077460, n, f)
+				foldsTotal = byFormula.A077460(n, f)
 			case 'A078591':
-				foldsTotal = _evaluateFormulaForN(byFormula.A078591, n, f)
+				foldsTotal = byFormula.A078591(n, f)
 			case 'A078592':
-				foldsTotal = _evaluateFormulaForN(byFormula.A078592, n, f)
+				foldsTotal = byFormula.A078592(n, f)
 			case 'A085973':
-				foldsTotal = _evaluateFormulaForN(byFormula.A085973, n, f)
+				foldsTotal = byFormula.A085973(n, f)
 			case 'A208357':
-				foldsTotal = _evaluateFormulaForN(byFormula.A208357, n, f)
+				foldsTotal = byFormula.A208357(n, f)
 			case 'A217310':
-				foldsTotal = _evaluateFormulaForN(byFormula.A217310, n, f)
+				foldsTotal = byFormula.A217310(n, f)
 			case 'A217318':
-				foldsTotal = _evaluateFormulaForN(byFormula.A217318, n, f)
+				foldsTotal = byFormula.A217318(n, f)
 			case 'A223093':
-				foldsTotal = _evaluateFormulaForN(byFormula.A223093, n, f)
+				foldsTotal = byFormula.A223093(n, f)
 			case 'A223094':
-				foldsTotal = _evaluateFormulaForN(byFormula.A223094, n, f)
+				foldsTotal = byFormula.A223094(n, f)
 			case 'A223095':
-				foldsTotal = _evaluateFormulaForN(byFormula.A223095, n, f)
+				foldsTotal = byFormula.A223095(n, f)
 			case 'A227167':
-				foldsTotal = _evaluateFormulaForN(byFormula.A227167, n, f)
+				foldsTotal = byFormula.A227167(n, f)
 			case 'A259689':
-				foldsTotal = _evaluateFormulaForN(byFormula.A259689, n, f)
+				foldsTotal = byFormula.A259689(n, f)
 			case 'A259702':
-				foldsTotal = _evaluateFormulaForN(byFormula.A259702, n, f)
+				foldsTotal = byFormula.A259702(n, f)
 			case 'A301620':
-				foldsTotal = _evaluateFormulaForN(byFormula.A301620, n, f)
+				foldsTotal = byFormula.A301620(n, f)
 			case 'A333971':
-				foldsTotal = _evaluateFormulaForN(byFormula.A333971, n, f)
+				foldsTotal = byFormula.A333971(n, f)
 			case 'A334615':
-				foldsTotal = _evaluateFormulaForN(byFormula.A334615, n, f)
+				foldsTotal = byFormula.A334615(n, f)
 			case 'A337581':
-				foldsTotal = _evaluateFormulaForN(byFormula.A337581, n, f)
-			case 'A000682':
-				foldsTotal = countMeanders('semi', n, **keywordArguments)
-			case 'A005316':
-				foldsTotal = countMeanders('meanders', n, **keywordArguments)
-			case 'A007822':
-				foldsTotal = countFoldsSymmetric(getMapShape(oeisID, n), **keywordArguments)
+				foldsTotal = byFormula.A337581(n, f)
 			case _:
-				foldsTotal = countFolds(mapShape=getMapShape(oeisID, n), **keywordArguments)
+				message = f"I received `{oeisID = }`, but I couldn't find a formula for it."
+				raise ValueError(message)
 
 	return foldsTotal

@@ -13,7 +13,7 @@ from astToolkit import parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import SymmetricFoldsState
-from mapFolding.oeis._metadata import dictionaryOEIS
+from mapFolding.oeis import getValuesKnown
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultFoldsSymmetric
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
@@ -95,7 +95,7 @@ def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
-	foldsTotalEstimated: int = dictionaryOEIS['A007822']['valuesKnown'].get(n, 0)
+	foldsTotalEstimated: int = getValuesKnown('A007822').get(n, 0)
 	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
 		, defaultFoldsSymmetric['variable']['stateDataclass'], defaultFoldsSymmetric['variable']['stateInstance'])
 	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['logicalPath']['synthetic']}.theorem2Numba')

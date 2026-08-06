@@ -4,17 +4,18 @@ from __future__ import annotations
 from hunterMakesPy import errorL33T
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFoldsSymmetric
-from mapFolding.oeis import getMapShape, getValuesKnown
+from mapFolding.oeis import getValuesKnown, makeMapShape
 from typing import TYPE_CHECKING
 import sys
 import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
+	from mapFolding.theTypes import OEISid
 	from os import PathLike
 
 if __name__ == '__main__':
-	oeisID: str = 'A007822'
+	oeisID: OEISid = 'A007822'
 	def _write() -> None:
 		sys.stdout.write(
 			f"{(match := foldsTotal == getValuesKnown(oeisID).get(n, -errorL33T))}\t"
@@ -41,7 +42,7 @@ if __name__ == '__main__':
 
 	for n in range(1, 6):
 
-		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 
 		timeStart: float = time.perf_counter()
 		foldsTotal: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)

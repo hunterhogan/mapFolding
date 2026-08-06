@@ -38,8 +38,7 @@ from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import getMapShape, oeisIDfor_n
-from mapFolding.oeis._metadata import dictionaryOEIS
+from mapFolding.oeis import getValuesKnown, makeMapShape, oeisIDfor_n
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -54,10 +53,11 @@ import warnings
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
-	from mapFolding.theTypes import KeywordArgumentsCount
+	from mapFolding.theTypes import KeywordArgumentsCount, OEISid
 	from os import PathLike
 	from pathlib import Path
 	from types import ModuleType
+	from typing import LiteralString
 
 @pytest.mark.parametrize(
 	'oeisID, n, flow, CPUlimit'
@@ -77,7 +77,7 @@ if TYPE_CHECKING:
 		, pytest.param('A007822', 6, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
 	]
 )
-def test_countFoldsSymmetric(oeisID: str, n: int, flow: str, CPUlimit: float) -> None:
+def test_countFoldsSymmetric(oeisID: LiteralString, n: int, flow: str, CPUlimit: float) -> None:
 	"""Test foldsSymmetric flow options.
 
 	Parameters
@@ -94,8 +94,8 @@ def test_countFoldsSymmetric(oeisID: str, n: int, flow: str, CPUlimit: float) ->
 	"""
 	pathLikeWrite: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
-	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
-	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
+	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
+	expected: int = getValuesKnown(oeisID)[n]
 	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
 	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWrite, CPUlimit)
 
@@ -128,7 +128,7 @@ def test_countFoldsSymmetric(oeisID: str, n: int, flow: str, CPUlimit: float) ->
 		]
 	]
 )
-def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> None:
+def test_countFolds(oeisID: OEISid, n: int, flow: str, CPUlimit: float | None) -> None:
 	"""Validate that different computational flows produce valid results.
 
 	(AI generated docstring)
@@ -155,8 +155,8 @@ def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> N
 	if flow == 'theorem2Codon' and importlib.util.find_spec('codon') is None:
 		pytest.skip('codon-jit is not installed')
 
-	mapShape: tuple[int, ...] = getMapShape(oeisID, n)
-	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
+	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
+	expected: int = getValuesKnown(oeisID)[n]
 	actual: int = countFolds(mapShape, flow, CPUlimit=CPUlimit)
 	assertEqualTo(actual, expected, countFolds.__name__, mapShape, flow, CPUlimit=CPUlimit)
 
@@ -169,7 +169,7 @@ def test_countFolds(oeisID: str, n: int, flow: str, CPUlimit: float | None) -> N
 	]
 )
 @pytest.mark.parametrize('n, flow', (*CartesianProduct((2, 29), ('matrixNumPy', 'matrixPandas')), (3, 'matrixMeanders'), (10, 'matrixMeanders')))
-def test_meanders(kind: str, oeisID: str, n: int, flow: str) -> None:
+def test_meanders(kind: LiteralString, oeisID: OEISid, n: int, flow: str) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -187,7 +187,7 @@ def test_meanders(kind: str, oeisID: str, n: int, flow: str) -> None:
 		Computation flow to validate.
 
 	"""
-	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
+	expected: int = getValuesKnown(oeisID)[n]
 	actual: int = countMeanders(kind, n, flow, None)
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
@@ -222,8 +222,8 @@ def test_meanders(kind: str, oeisID: str, n: int, flow: str) -> None:
 	, [pytest.param(0, id='offset'), pytest.param(2, id='offsetPlus2'), pytest.param(5, id='offsetPlus5')]
 	, indirect=True
 )
-def test_oeisIDfor_n_byFormula(oeisID: str, oeis_n: int, f: str) -> None:
-	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][oeis_n]
+def test_oeisIDfor_n_byFormula(oeisID: OEISid, oeis_n: int, f: LiteralString) -> None:
+	expected: int = getValuesKnown(oeisID)[oeis_n]
 	actual: int = oeisIDfor_n(oeisID, oeis_n, f=f)
 	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, oeis_n, f=f)
 
@@ -241,7 +241,7 @@ def test_oeisIDfor_n_byFormula(oeisID: str, oeis_n: int, f: str) -> None:
 		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric::countFoldsSymmetric')
 	]
 )
-def test_oeisIDfor_n(oeisID: str, n: int, f: str, keywordArguments: KeywordArgumentsCount) -> None:
+def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString, keywordArguments: KeywordArgumentsCount) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
 
 	Tests the `oeisIDfor_n` function by comparing its calculated output against
@@ -260,14 +260,14 @@ def test_oeisIDfor_n(oeisID: str, n: int, f: str, keywordArguments: KeywordArgum
 		Sequence index to validate.
 
 	"""
-	expected: int = dictionaryOEIS[oeisID]['valuesKnown'][n]
+	expected: int = getValuesKnown(oeisID)[n]
 	actual: int = oeisIDfor_n(oeisID, n, f, **keywordArguments)
 	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, n, f, **keywordArguments)
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.
 	"""Return one deterministic map shape suitable for code generation tests."""
-	return getMapShape('A000136', 3)
+	return makeMapShape('A000136', 3)
 
 @pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
 def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:

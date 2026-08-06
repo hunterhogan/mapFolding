@@ -67,7 +67,7 @@ if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 	from pathlib import Path
-	from typing import Literal
+	from typing import Literal, LiteralString
 
 def countFolds(mapShape: Sequence[int]
 				, flow: str = ''
@@ -284,7 +284,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['algorith
 
 	return foldsTotal
 
-def countMeanders(kind: Literal['semi', 'meanders'], n: int, flow: str = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".countTotal") -> int:
+def countMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, flow: str = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".countTotal") -> int:
 	"""Compute a native meander sequence term.
 
 	This entry point computes semi-meanders and meanders with a matrix meander algorithm. Formula and

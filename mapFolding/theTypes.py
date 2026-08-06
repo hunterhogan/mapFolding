@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from numpy import dtype, int_ as numpy_int, integer, ndarray, uint64 as numpy_uint64
-from typing import Any, TYPE_CHECKING, TypedDict, TypeVar
+from typing import Any, LiteralString, TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 	from typing import TypeAlias
+
+type OEISid = LiteralString
 
 #================== `TypeVar` when a NumPy integer type is mandatory =======
 

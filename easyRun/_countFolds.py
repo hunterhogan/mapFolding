@@ -9,7 +9,7 @@ from __future__ import annotations
 from hunterMakesPy import errorL33T
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.basecamp import countFolds
-from mapFolding.oeis import getMapShape, getValuesKnown
+from mapFolding.oeis import getValuesKnown, makeMapShape
 from typing import TYPE_CHECKING
 import sys
 import time
@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
 	for n in range(3, 25):
 
-		mapShape: tuple[int, ...] = getMapShape(oeisID, n)
+		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 
 		timeStart = time.perf_counter()
 		foldsTotal: int = countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
