@@ -23,19 +23,19 @@ from warnings import warn
 import pandas
 
 if TYPE_CHECKING:
-	from mapFolding.dataBaskets import MatrixMeandersNumPyState
+	from mapFolding.dataBaskets import MatrixMeandersState
 
-def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
+def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""Count meanders with matrix transfer algorithm using pandas DataFrame.
 
 	Parameters
 	----------
-	state : MatrixMeandersNumPyState
+	state : MatrixMeandersState
 		The algorithm state containing current `boundary`, `dictionaryMeanders`, and thresholds.
 
 	Returns
 	-------
-	state : MatrixMeandersNumPyState
+	state : MatrixMeandersState
 		Updated state with new `boundary` and `dictionaryMeanders`.
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
@@ -324,7 +324,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 	del dataframeAnalyzed
 	return state
 
-def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
+def doTheNeedful(state: MatrixMeandersState) -> int:
 	"""Compute `crossings` with a transfer matrix algorithm implemented in pandas.
 
 	Parameters

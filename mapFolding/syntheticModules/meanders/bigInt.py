@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, walkDyckPath
-from mapFolding.dataBaskets import MatrixMeandersNumPyState
+from mapFolding.dataBaskets import MatrixMeandersState
 
-def countBigInt(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
+def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update

@@ -1,9 +1,6 @@
-# pyright: reportUnusedImport=false
 from __future__ import annotations
 
-from mapFolding._e._2上nDimensional.pinIt import (
-	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
-	pin首beans)
+from mapFolding._e._2上nDimensional import pinIt
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import printEasyRunBenchmark, printEasyRunHeader
@@ -42,14 +39,14 @@ if __name__ == "__main__":
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
 			state = EliminationState(mapShape)
-			# state = pinPile零Ante首零(state)
-			state = pinPilesAtEnds(state, 3)
-			# state = pinLeavesDimension首二(state)
-			# state = pin3beans2(state)
-			# state = pin首beans(state)
-			# state = pinLeavesDimension一(state)
-			# state = pinLeavesDimension二(state)
-			state = pinLeavesDimensions0零一(state)
+			state = pinIt.pinPile零Ante首零(state)
+			state = pinIt.pinPilesAtEnds(state, 3)
+			state = pinIt.pinLeavesDimension首二(state)
+			state = pinIt.pin3beans2(state)
+			state = pinIt.pin首beans(state)
+			state = pinIt.pinLeavesDimension一(state)
+			state = pinIt.pinLeavesDimension二(state)
+			state = pinIt.pinLeavesDimensions0零一(state)
 			# state.listPermutationSpace.reverse()
 
 		computed: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)

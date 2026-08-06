@@ -1,9 +1,5 @@
+#=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
 # ruff: file-ignore[import-outside-top-level]
-# ruff: file-ignore[redundant-literal-union]
-# ruff: file-ignore[unused-function-argument]
-# ty:ignore[invalid-argument-type]
-# TODO the following diagnostic suggest to me that there is a better paradigm for the flow control.
-# pyright: reportArgumentType=false
 """You can use this module to access the central dispatch functions for all map-folding computations.
 
 This module provides the primary entry points for computing distinct foldings of multidimensional maps
@@ -57,7 +53,7 @@ from __future__ import annotations
 
 from mapFolding.algorithms.matrixMeandersShare import initializeDictionaryMeanders
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, mapShapeIs2上nDimensions, validateMapShape
-from mapFolding.dataBaskets import MapFoldingState, ParallelMapFoldingState, SymmetricFoldsState
+from mapFolding.dataBaskets import MapFoldingState, MatrixMeandersState, ParallelMapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -70,7 +66,7 @@ if TYPE_CHECKING:
 	from typing import Literal, LiteralString
 
 def countFolds(mapShape: Sequence[int]
-				, flow: str = ''
+				, flow: Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 				, pathLikeWrite: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
@@ -80,64 +76,61 @@ def countFolds(mapShape: Sequence[int]
 	"""
 	Count the number of distinct ways to fold a map.
 
-	Mathematicians also describe this as folding a strip of stamps, and they usually call the total "number of distinct ways to
-	fold" a map the map's "foldings."
+	Mathematicians also describe this as folding a strip of stamps, and they usually call the total
+	"number of distinct ways to fold" a map the map's "foldings."
 
 	Parameters
 	----------
 	mapShape : Sequence[int]
 		A sequence containing the positive integer length of each dimension of the map to be folded.
 	pathLikeWrite : PathLike[str] | None = None
-		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
-		- `pathLikeWrite` is a path of only directories, `countFolds` creates a filename based
-		on the map dimensions.
+		A filename, a path of only directories, or a path with directories and a filename to which
+		`countFolds` will write the total. If `pathLikeWrite` is a path of only directories,
+		`countFolds` creates a filename based on the map dimensions.
 	computationDivisions : int | str | None = None
 		Whether and how to divide the computational work.
 		- `None`: no division of the computation into tasks.
-		- `int`: into how many tasks `countFolds` will divide the computation. The values 0 or 1 are identical to `None`. It is
-		mathematically impossible to divide the computation into more tasks than the map's total leaves.
+		- `int`: into how many tasks `countFolds` will divide the computation. The values 0 or 1 are
+		identical to `None`. It is mathematically impossible to divide the computation into more tasks
+		than the map's total leaves.
 		- 'maximum': divides the computation into `leavesTotal`-many tasks.
 		- 'cpu': divides the computation into the number of available CPUs.
 	CPUlimit : bool | float | int | None = None
 		If relevant, whether and how to limit the number of processors `countFolds` will use.
-		- `False`, `None`, or `0`: No limits on processor usage; uses all available processors. All other values will
-		potentially limit processor usage.
+		- `False`, `None`, or `0`: No limits on processor usage; uses all available processors. All
+		other values will potentially limit processor usage.
 		- `True`: Yes, limit the processor usage; limits to 1 processor.
 		- `int >= 1`: The maximum number of available processors to use.
-		- `0 < float < 1`: The maximum number of processors to use expressed as a fraction of available processors.
-		- `-1 < float < 0`: The number of processors to *not* use expressed as a fraction of available processors.
+		- `0 < float < 1`: The maximum number of processors to use expressed as a fraction of
+		available processors.
+		- `-1 < float < 0`: The number of processors to *not* use expressed as a fraction of available
+		processors.
 		- `int <= -1`: The number of available processors to *not* use.
-		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds` truncates the value to an `int`
-		with the same sign as the `float`.
-	flow : str = ''
-		My stupid way of selecting the version of the algorithm to use in the computation. There are certainly better ways to do
-		this, but I have not yet solved this issue. As of 2025 Aug 14, these values will work:
-		- '' selects the default algorithm
-		- 'daoOfMapFolding'
-		- 'numba'
-		- 'theorem2'
-		- 'theorem2Codon'
-		- 'theorem2Numba'
-		- 'theorem2Trimmed'
+		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds`
+		truncates the value to an `int` with the same sign as the `float`.
+	flow : Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
+		My stupid way of selecting the version of the algorithm to use in the computation. There are
+		certainly better ways to do this, but I have not yet solved this issue.
 
 	Returns
 	-------
 	foldsTotal : int
 		Number of distinct ways to fold a map of the given dimensions.
 
-	Note well
-	---------
+	Using `computationDivisions`
+	----------------------------
 	You probably do not want to divide your computation into tasks.
 
-	If you want to compute a large `foldsTotal`, dividing the computation into tasks is usually a bad idea. Dividing the
-	algorithm into tasks is inherently inefficient: efficient division into tasks means there would be no overlap in the
-	work performed by each task. When dividing this algorithm, the amount of overlap is between 50% and 90% by all
-	tasks: at least 50% of the work done by every task must be done by each task. If you improve the computation time,
-	it will only change by -10 to -50% depending on (at the very least) the ratio of the map dimensions and the number
-	of leaves. If an undivided computation would take 10 hours on your computer, for example, the computation will still
-	take at least 5 hours but you might reduce the time to 9 hours. Most of the time, however, you will increase the
-	computation time. If logicalCores >= `leavesTotal`, it will probably be faster. If logicalCores <= 2 * `leavesTotal`, it
-	will almost certainly be slower for all map dimensions.
+	Dividing the algorithm into tasks is inherently inefficient: between 50% and 90% of the work done
+	by every task must be done by each task. In some cases, you will increase the total computation
+	time, but if you improve the computation time, it will only change by -10 to -50% depending on (at
+	the very least) the ratio of the map dimensions, the number of leaves, and the ratio of
+	`leavesTotal` to logicalCores.
+
+	If an undivided computation would take 10 hours on your computer, for example, the computation
+	will take at least 5 hours, you might reduce the time to 9 hours, but most of the time, you will
+	increase the computation time. If logicalCores >= `leavesTotal`, the computation will probably be
+	faster. If logicalCores <= 2 * `leavesTotal`, it will almost certainly be slower.
 	"""
 	mapShape = validateMapShape(mapShape)
 
@@ -180,23 +173,26 @@ def countFolds(mapShape: Sequence[int]
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
 	else:
-		if flow in {'daoOfMapFolding', ''}:
+		if flow == 'daoOfMapFolding':
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
-		elif flow == 'numba':
-			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-		elif any(map((2).__lt__, mapShape)) or mapShapeIs2上nDimensions(mapShape):
-			if flow == 'theorem2':
-				from mapFolding.syntheticModules.theorem2 import doTheNeedful
-			elif flow == 'theorem2Codon':
-				from mapFolding.syntheticModules.codon.theorem2 import doTheNeedful
-			elif flow == 'theorem2Numba':
-				from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
-			elif flow == 'theorem2Trimmed':
-				from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
-			else:
-				from mapFolding.syntheticModules.theorem2 import doTheNeedful
+		elif any(map((2).__lt__, mapShape)) or mapShapeIs2上nDimensions(mapShape, youMustBeDimensionsTallToRideThis=2):
+			match flow:
+				case 'theorem2':
+					from mapFolding.syntheticModules.theorem2 import doTheNeedful
+				case 'theorem2Codon':
+					from mapFolding.syntheticModules.codon.theorem2 import doTheNeedful
+				case 'theorem2Numba':
+					from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
+				case 'theorem2Trimmed':
+					from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+				case _:
+					from mapFolding.syntheticModules.theorem2 import doTheNeedful
 		else:
-			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+			match flow:
+				case 'numba':
+					from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+				case _:
+					from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 		mapFoldingState = doTheNeedful(mapFoldingState)
@@ -209,7 +205,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return foldsTotal
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -284,11 +280,18 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: str | Literal['algorith
 
 	return foldsTotal
 
-def countMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, flow: str = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".countTotal") -> int:
+#=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
+# ruff: ignore[unused-function-argument]
+def countMeanders(
+	kind: Literal['semi', 'meanders'] | LiteralString
+	, n: int
+	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
+	, pathLikeWrite: PathLike[str] | None = None
+	, *
+	, CPUlimit: Limitation = None
+	, suffix: str = ".countTotal"
+) -> int:
 	"""Compute a native meander sequence term.
-
-	This entry point computes semi-meanders and meanders with a matrix meander algorithm. Formula and
-	symmetric-folding dispatch belongs to `oeisIDfor_n`.
 
 	Parameters
 	----------
@@ -296,12 +299,12 @@ def countMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, flo
 		Whether to compute semi-meanders or meanders.
 	n : int
 		Sequence index.
-	flow : str = ''
-		'matrixMeanders' or '' for the native implementation, 'matrixNumPy', or 'matrixPandas'.
+	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
+		Algorithm selection.
 	pathLikeWrite : PathLike[str] | None = None
 		Optional output path for the computed total.
 	CPUlimit : bool | float | int | None = None
-		Processor limit from the shared counting entry-point contract.
+		Unused.
 
 	Returns
 	-------
@@ -323,17 +326,14 @@ def countMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, flo
 		match flow:
 			case 'matrixNumPy':
 				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
-				from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
 			case 'matrixPandas':
 				from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-				from mapFolding.dataBaskets import MatrixMeandersNumPyState as State
 			case 'matrixMeanders' | _:
 				from mapFolding.algorithms.matrixMeanders import doTheNeedful
-				from mapFolding.dataBaskets import MatrixMeandersState as State
 
 		boundary: int = n - 1
 		dictionaryMeanders: dict[int, int] = initializeDictionaryMeanders(kind, n, boundary)
-		state = State(n, kind, boundary, dictionaryMeanders)
+		state: MatrixMeandersState = MatrixMeandersState(n, kind, boundary, dictionaryMeanders)
 		countTotal: int = doTheNeedful(state)
 
 #-------- Follow memorialization instructions ---------------------------------------------

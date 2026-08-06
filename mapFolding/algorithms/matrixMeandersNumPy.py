@@ -4,7 +4,7 @@ from __future__ import annotations
 from contextlib import suppress
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
-from mapFolding.dataBaskets import MatrixMeandersNumPyState, ShapeArray, ShapeSlicer
+from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
 from mapFolding.theTypes import dtypeArcCode
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from tqdm.auto import tqdm
@@ -17,17 +17,17 @@ if TYPE_CHECKING:
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
 	from typing import Any
 
-def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
+def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
 
 	Parameters
 	----------
-	state : MatrixMeandersNumPyState
+	state : MatrixMeandersState
 		The algorithm state.
 
 	Returns
 	-------
-	state : MatrixMeandersNumPyState
+	state : MatrixMeandersState
 		Updated state including `boundary` and `arrayMeanders`.
 
 	Notes
@@ -60,7 +60,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
 	while 0 < state.boundary and not areIntegersWide(state, arrayMeanders=arrayMeanders):
-		def recordAnalysis(arrayAnalyzed: memmap[tuple[Any, ...], dtype[dtypeArcCode]], state: MatrixMeandersNumPyState, arcCode: ndarray[tuple[int], dtype[dtypeArcCode]], arrayMeanders: memmap[tuple[Any, ...], dtype[dtypeArcCode]]) -> MatrixMeandersNumPyState:
+		def recordAnalysis(arrayAnalyzed: memmap[tuple[Any, ...], dtype[dtypeArcCode]], state: MatrixMeandersState, arcCode: ndarray[tuple[int], dtype[dtypeArcCode]], arrayMeanders: memmap[tuple[Any, ...], dtype[dtypeArcCode]]) -> MatrixMeandersState:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
 
 			This abstraction makes it easier to implement `numpy.memmap` or other options.
@@ -292,7 +292,7 @@ def count(state: MatrixMeandersNumPyState) -> MatrixMeandersNumPyState:
 
 	return state
 
-def doTheNeedful(state: MatrixMeandersNumPyState) -> int:
+def doTheNeedful(state: MatrixMeandersState) -> int:
 	"""Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
 
 	Parameters

@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from functools import cache
 from hunterMakesPy import raiseIfNone
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
-	from mapFolding.dataBaskets import MatrixMeandersNumPyState
+	from mapFolding.dataBaskets import MatrixMeandersState
 	from mapFolding.theTypes import dtypeArcCode
 	from numpy import dtype, ndarray
-	from typing import Any
+	from typing import Any, Literal, LiteralString
 	import pandas
 
 """Goals:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 - Convert duplicate code to procedures.
 """
 
-def areIntegersWide(state: MatrixMeandersNumPyState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+def areIntegersWide(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
@@ -155,7 +155,7 @@ arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]
 	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
 """
 
-def getBucketsTotal(state: MatrixMeandersNumPyState, safetyMultiplicand: float = 1.2) -> int:  # ruff:ignore[unused-function-argument]
+def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:  # ruff:ignore[unused-function-argument]
 	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
 
 	Warning
@@ -2114,7 +2114,7 @@ n_boundary_bucketsMeanders: dict[int, dict[int, int]] = {
 	},
 }
 
-def initializeDictionaryMeanders(kind: Literal['semi', 'meanders'], n: int, boundary: int) -> dict[int, int]:
+def initializeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
 	# TODO Consider: If semi is essentially A000136 * leavesTotal, then my graphs of A000136 are
 	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
 	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The

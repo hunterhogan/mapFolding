@@ -15,14 +15,11 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	import ast
 
-identifierDataclassNumPyHARDCODED = 'MatrixMeandersNumPyState'
-
 logicalPathInfixMeanders: str = default['logicalPath']['synthetic'] + '.meanders'
 
 def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
-	"""Make `countBigInt` module for meanders using `MatrixMeandersNumPyState` dataclass."""
-	identifierDataclassNumPy: str = identifierDataclassNumPyHARDCODED
-	_logicalPathDataclass, identifierDataclassOld, identifierDataclassInstance = findDataclass(astModuleToIngredientsFunction(astModule, raiseIfNone(sourceCallableDispatcher)))
+	"""Make `countBigInt` module for meanders using `MatrixMeandersState` dataclass."""
+	_logicalPathDataclass, _identifierDataclassOld, identifierDataclassInstance = findDataclass(astModuleToIngredientsFunction(astModule, raiseIfNone(sourceCallableDispatcher)))
 
 	NodeChanger(findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
 		, doThat=Grab.nameAttribute(Then.replaceWith(raiseIfNone(callableIdentifier)))
@@ -30,15 +27,6 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 
 	# Remove `doTheNeedful`
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher)), Then.removeIt).visit(astModule)
-
-	# Change to `MatrixMeandersNumPyState`
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(identifierDataclassOld))
-			, Grab.idAttribute(Then.replaceWith(identifierDataclassNumPy))
-		).visit(astModule)
-
-	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclassOld))
-			, Grab.nameAttribute(Then.replaceWith(identifierDataclassNumPy))
-		).visit(astModule)
 
 	# while (0 < state.boundary and areIntegersWide(state)):
 	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])

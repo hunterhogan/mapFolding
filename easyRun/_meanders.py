@@ -11,6 +11,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from os import PathLike
+	from typing import LiteralString
 
 if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
@@ -22,10 +23,12 @@ if __name__ == '__main__':
 	flow = 'matrixPandas'
 	flow = 'matrixNumPy'
 
-	for oeisID, kind in [
+	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			('A005316', 'meanders'),
 			# ('A000682', 'semi'),
-		]:
+		]
+
+	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
 		printEasyRunHeader(oeisID, flow)
 
 		"""# Identifiers. improve
@@ -48,7 +51,7 @@ if __name__ == '__main__':
 		for n in nList:
 			gc.collect()
 			timeStart: float = time.perf_counter()
-			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 

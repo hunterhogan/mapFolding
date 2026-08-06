@@ -439,6 +439,12 @@ class MatrixMeandersState:
 	MAXIMUMarcCode: int = 0
 	"""The maximum value of `arcCode` for the current iteration of the transfer matrix."""
 
+	bitWidthLimitArcCode: int | None = None
+	bitWidthLimitCrossings: int | None = None
+
+	indexTarget: int = 0
+	"""What is being indexed depends on the algorithm flavor."""
+
 	def reduceBoundary(self) -> None:
 		"""Prepare for the next iteration of the transfer matrix algorithm by reducing `boundary` by 1 and updating related fields."""
 		self.boundary -= 1
@@ -466,6 +472,10 @@ class MatrixMeandersState:
 		"""Set `bitWidth` from the current `dictionaryMeanders`."""
 		self.bitWidth = max(self.dictionaryMeanders.keys()).bit_length()
 
+	def setBitWidthNumPy(self, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]]) -> None:
+		"""Set `bitWidth` from the current `arrayMeanders`."""
+		self.bitWidth = int(arrayMeanders.max()).bit_length()
+
 	def setMAXIMUMarcCode(self) -> None:
 		"""Compute the maximum value of `arcCode` for the current iteration of the transfer matrix."""
 		self.MAXIMUMarcCode = 1 << (2 * self.boundary + 4)
@@ -476,32 +486,6 @@ class MatrixMeandersState:
 		self.setBitsLocator()
 		self.setMAXIMUMarcCode()
 
-#======== Managing data structures in `matrixMeandersNumPy` algorithm =======
-
-class ShapeArray(NamedTuple):
-	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
-
-	length: int
-	indices: int
-
-class ShapeSlicer(NamedTuple):
-	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
-
-	length: EllipsisType | slice
-	indices: int
-
-@dataclasses.dataclass(slots=True)
-class MatrixMeandersNumPyState(MatrixMeandersState):
-	"""Hold the state of a meanders transfer matrix algorithm computation implemented in NumPy (*Num*erical *Py*thon) or pandas."""
-
-	bitWidthLimitArcCode: int | None = None
-	bitWidthLimitCrossings: int | None = None
-
-	indexTarget: int = 0
-	"""What is being indexed depends on the algorithm flavor."""
-
-	def __post_init__(self) -> None:
-		"""Post init."""
 		if self.bitWidthLimitArcCode is None:
 			bitWidthOfFixedSizeInteger_: int = numpy.dtype(dtypeArcCode).itemsize * 8  # bits
 
@@ -525,6 +509,16 @@ class MatrixMeandersNumPyState(MatrixMeandersState):
 
 			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
 
-	def setBitWidthNumPy(self, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]]) -> None:
-		"""Set `bitWidth` from the current `arrayMeanders`."""
-		self.bitWidth = int(arrayMeanders.max()).bit_length()
+#======== Managing data structures in `matrixMeandersNumPy` algorithm =======
+
+class ShapeArray(NamedTuple):
+	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
+
+	length: int
+	indices: int
+
+class ShapeSlicer(NamedTuple):
+	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
+
+	length: EllipsisType | slice
+	indices: int
