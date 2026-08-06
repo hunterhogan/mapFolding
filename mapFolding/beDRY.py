@@ -1,4 +1,5 @@
-# ruff:file-ignore[import-outside-top-level] `numba`, `makeDictionaryFoldsTotalKnown`.
+#=Sin= `numba`, `makeDictionaryFoldsTotalKnown`, `getValuesKnown`.
+# ruff:file-ignore[import-outside-top-level]
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 from __future__ import annotations
 
@@ -7,11 +8,11 @@ from functools import cache
 from hunterMakesPy import errorL33T, inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import getValuesKnown
 from numpy import int64 as numpy_int64
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
+import sys
 import time
 
 if TYPE_CHECKING:
@@ -344,10 +345,34 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 	"""
 	return (youMustBeDimensionsTallToRideThis <= len(mapShape)) and all(map((2).__eq__, mapShape))
 
-
 def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
-	known = getValuesKnown(oeisID).get(n, -errorL33T)
-	match = computed == known
+	"""Print a benchmark comparison line for an OEIS sequence value.
+
+	Outputs a tab-separated line showing whether the computed value matches the known OEIS value, the
+	index, both values, optionally their ratio, and elapsed time.
+
+	Parameters
+	----------
+	oeisID : str
+		The OEIS sequence identifier (e.g., 'A000136').
+	n : int
+		The index/term number in the sequence.
+	computed : int
+		The computed value to compare against the known OEIS value.
+	timeStart : float
+		The start time from `time.perf_counter()` for elapsed time calculation.
+	ratio : bool = False
+		If True and `computed` is non-zero, also print the ratio `known / computed`.
+
+	Notes
+	-----
+	The output uses ANSI color codes: green for match, red for mismatch. The known value is retrieved
+	from the OEIS data via `getValuesKnown`. If the sequence or term is not found, `known` will be a
+	large negative sentinel value.
+	"""
+	from mapFolding.oeis import getValuesKnown
+	known: int = getValuesKnown(oeisID).get(n, -errorL33T)
+	match: bool = computed == known
 	sys.stdout.write(
 		f"{match}\t"
 		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
@@ -357,8 +382,24 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		sys.stdout.write(f"{known / computed}\t")
 	sys.stdout.write(f"{time.perf_counter() - timeStart:.2f}\t{ansiColorReset}\n")
 
-
 def printEasyRunHeader(oeisID: str, flow: str) -> None:
+	"""Print a colored header line for an easy run benchmark session.
+
+	Outputs the OEIS ID and flow identifier in distinct colors based on their hash values, followed by
+	a color reset.
+
+	Parameters
+	----------
+	oeisID : str
+		The OEIS sequence identifier (e.g., 'A000136').
+	flow : str
+		A flow identifier string (e.g., 'main', 'test', 'benchmark').
+
+	Notes
+	-----
+	Colors are selected by converting the string to a base-36 integer and modulo the number of
+	available ANSI colors. This provides consistent coloring for the same identifiers across runs.
+	"""
 	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
 	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
 	sys.stdout.write(ansiColorReset + '\n')

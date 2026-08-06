@@ -309,8 +309,35 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 			pathFilenameWritten = ''
 	return PurePosixPath(pathFilenameWritten)
 
-def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
+	"""Write an album of foldings to a CSV file.
+
+	(AI generated docstring)
+
+	Each `Folding` in the album is written as a row in a CSV file, where each
+	element (a `Leaf` index) becomes a cell. The file is opened with a large
+	buffer (64 KiB) for efficient I/O during potentially large writes.
+
+	Parameters
+	----------
+	album : Iterable[Folding]
+		An iterable of `Folding` objects to write. Each `Folding` is a tuple of
+		integers (leaf indices).
+	pathFilename : pathlib.Path
+		Destination path for the CSV file. Parent directories are not created
+		automatically; ensure they exist before calling.
+
+	Returns
+	-------
+	pathFilename : pathlib.Path
+		The path to the file that was written.
+
+	Notes
+	-----
+	The CSV format uses no quoting by default (standard `csv.writer` behavior),
+	which is safe because `Leaf` values are integers. The large buffer size
+	(`2**16` bytes) reduces the number of system calls when writing many rows.
+	"""
 	with pathFilename.open(encoding="utf-8", mode="w", newline="", buffering=2**16) as streamWrite:
 		csvWriter: Writer = csv.writer(streamWrite)
 		csvWriter.writerows(album)
@@ -329,13 +356,66 @@ def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:  #
 		sys.stderr.write(message + '\n')
 	return dataframeFoldings
 
-def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
+	"""Read an entire album of foldings from a CSV file into memory.
+
+	(AI generated docstring)
+
+	Each row in the CSV file is parsed into a `Folding` (a tuple of integers).
+	All rows are materialized into a tuple before returning, so the entire file
+	is loaded into memory.
+
+	Parameters
+	----------
+	pathFilename : pathlib.Path
+		Path to a CSV file previously written by `writeAlbum`.
+
+	Returns
+	-------
+	album : tuple[Folding, ...]
+		A tuple of `Folding` objects, one per row in the CSV file. Each
+		`Folding` is a tuple of integers (leaf indices).
+
+	See Also
+	--------
+	streamAlbum : Lazily iterate over foldings without loading the entire file.
+	writeAlbum : Write an album of foldings to a CSV file.
+	"""
 	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
 		return tuple(tuple(map(int, row)) for row in csv.reader(streamRead))
 
-def streamAlbum(pathFilename: Path) -> Iterable[Folding]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
+	"""Lazily iterate over foldings in a CSV file, yielding one at a time.
+
+	(AI generated docstring)
+
+	Unlike `readAlbum`, this function does not load the entire file into memory.
+	Instead, it opens the file and yields each row as a `Folding` (a tuple of
+	integers) as it is read. This is useful for processing large albums without
+	consuming excessive memory.
+
+	Parameters
+	----------
+	pathFilename : pathlib.Path
+		Path to a CSV file previously written by `writeAlbum`.
+
+	Yields
+	------
+	folding : Folding
+		Each row from the CSV file, converted to a tuple of integers (leaf
+		indices).
+
+	Notes
+	-----
+	The file remains open for the lifetime of the iterator. If the iterator is
+	not fully consumed, the file handle is closed when the generator is
+	garbage-collected or explicitly closed.
+
+	See Also
+	--------
+	readAlbum : Read an entire album into memory at once.
+	writeAlbum : Write an album of foldings to a CSV file.
+	"""
 	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
 		csvReader: Iterator[list[str]] = csv.reader(streamRead)
 		for row in csvReader:

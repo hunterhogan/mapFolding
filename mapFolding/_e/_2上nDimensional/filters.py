@@ -30,5 +30,26 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 	return 零 < leaf
 
 def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
-	# DOCUMENT
+	"""Test whether the bit at `dimension` position is set in `leaf`.
+
+	You can use `oddLeaf2上nDimensional吗` in an `if` statement, or you can pass `oddLeaf2上
+	nDimensional吗` as a predicate to a filtering utility described in the module docstring.
+
+	Parameters
+	----------
+	dimension : DimensionIndex
+		The bit position to test.
+	leaf : Leaf
+		The leaf index to test.
+
+	Returns
+	-------
+	isOddLeaf : bool
+		`True` if the bit at position `dimension` is set in `leaf`.
+
+	References
+	----------
+	[1] gmpy2 - `bit_test` function
+		https://gmpy2.readthedocs.io/en/latest/gmpy2.html#gmpy2.bit_test
+	"""
 	return isBit1吗(leaf, dimension)
