@@ -1,6 +1,6 @@
-# pyright: reportUnknownArgumentType=false
-# pyright: reportUnknownVariableType=false
+# pyright: reportUnknownArgumentType=false, reportUnknownVariableType=false, reportAssignmentType=false
 # ruff:file-ignore[commented-out-code, print, p-print]
+# ty: ignore[invalid-assignment]
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
-	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()  # pyright: ignore[reportAssignmentType] # ty: ignore[invalid-assignment]
+	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
@@ -271,11 +271,11 @@ pp3  = (3, 5, 9, 17, 33)
 		for excluder, listExcluded in dictionaryExcluded.items():
 			continue
 
-			invert = int(excluder ^ 63)  # pyright: ignore[reportUnknownArgumentType, reportOperatorIssue]
-			creasePostSS = tuple(getLeavesCreasePost(state, invert))  # pyright: ignore[reportArgumentType]
+			invert = int(excluder ^ 63)
+			creasePostSS = tuple(getLeavesCreasePost(state, invert))
 			allCreasePostSSInRange = set(creasePostSS).intersection(pileRange31)
-			creaseAnte = tuple(getLeavesCreaseAnte(state, excluder))  # pyright: ignore[reportArgumentType]
-			creasePost = tuple(getLeavesCreasePost(state, excluder))  # pyright: ignore[reportArgumentType]
+			creaseAnte = tuple(getLeavesCreaseAnte(state, excluder))
+			creasePost = tuple(getLeavesCreasePost(state, excluder))
 			allCreaseAnteInRange = set(creaseAnte).intersection(pileRange31)
 			allCreasePostInRange = set(creasePost).intersection(pileRange31)
 			notExcluded = allCreasePostInRange.difference(listExcluded)

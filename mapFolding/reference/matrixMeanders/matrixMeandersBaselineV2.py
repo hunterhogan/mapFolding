@@ -103,7 +103,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 			# Z0Z_alignedBridges
 			if bifurcationZuluHasCurves and bifurcationAlphaHasCurves:
 				# One Truth-check to select a code path
-				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven # pyright: ignore[reportPossiblyUnboundVariable]
+				bifurcationsCanBePairedTogether = (bifurcationZuluIsEven << 1) | bifurcationAlphaIsEven 
 
 				if bifurcationsCanBePairedTogether != 0:  # Case 0 (False, False)
 					XOrHere2makePair = 0b1
@@ -121,7 +121,7 @@ def count(bridges: int, startingCurveLocations: dict[int, int]) -> int:
 						bifurcationZulu ^= XOrHere2makePair
 
 					# Cases 1, 2, and 3 all compute curveLocationAnalysis
-					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 # pyright: ignore[reportPossiblyUnboundVariable]
+					curveLocationAnalysis = ((bifurcationZulu >> 2) << 1) | bifurcationAlphaShiftRight2 
 					if curveLocationAnalysis < curveLocationsMAXIMUM:
 						dictionaryCurveLocations[curveLocationAnalysis] = dictionaryCurveLocations.get(curveLocationAnalysis, 0) + distinctCrossings
 

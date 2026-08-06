@@ -196,7 +196,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		rowsDeallocatedTotal += allocateBridgesSimple
 		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
 
-		curveLocationsBridgesSimpleLessThanMaximum = None; del curveLocationsBridgesSimpleLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
+		curveLocationsBridgesSimpleLessThanMaximum = None; del curveLocationsBridgesSimpleLessThanMaximum
 		del allocateBridgesSimple
 		goByeBye()
 
@@ -217,7 +217,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		numpy.left_shift(curveLocationsGroupAlpha, 3, out=curveLocationsGroupAlpha)
 		numpy.bitwise_or(curveLocationsGroupAlpha, arrayLockbox, out=curveLocationsGroupAlpha)
 
-		arrayLockbox = None; del arrayLockbox  # pyright: ignore[reportAssignmentType] # noqa: E702
+		arrayLockbox = None; del arrayLockbox
 		goByeBye()
 
 		rowsAggregatedTotal = aggregateData2CurveLocations(arrayCurveLocations
@@ -231,9 +231,9 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		rowsDeallocatedTotal += allocateGroupAlphaCurves
 		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
 
-		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha  # pyright: ignore[reportAssignmentType] # noqa: E702
+		curveLocationsGroupAlpha = None; del curveLocationsGroupAlpha
 		del allocateGroupAlphaCurves
-		selectGroupAlphaCurves = None; del selectGroupAlphaCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupAlphaCurves = None; del selectGroupAlphaCurves 
 		goByeBye()
 
 #------------------------------------------------ groupZulu -----------------------------------------------------------
@@ -260,9 +260,9 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		rowsDeallocatedTotal += allocateGroupZuluCurves
 		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
 
-		curveLocationsGroupZulu = None; del curveLocationsGroupZulu  # pyright: ignore[reportAssignmentType] # noqa: E702
+		curveLocationsGroupZulu = None; del curveLocationsGroupZulu
 		del allocateGroupZuluCurves
-		selectGroupZuluCurves = None; del selectGroupZuluCurves # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectGroupZuluCurves = None; del selectGroupZuluCurves 
 		goByeBye()
 
 #------------------------------------------------ bridgesAligned ------------------------------------------------------
@@ -283,7 +283,7 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 # Without changing `flipTheExtra_0b1`, above works, but `out=` does not. Why? Elephino.
 # flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha], casting='unsafe', out=arrayCurveGroups[selectBridgesGroupAlphaPairedToOdd, columnGroupAlpha])
 
-		selectBridgesGroupAlphaPairedToOdd = None; del selectBridgesGroupAlphaPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectBridgesGroupAlphaPairedToOdd = None; del selectBridgesGroupAlphaPairedToOdd 
 
 # bridgesAligned -------------------------------- bridgesGroupZuluPairedToOdd ------------------------------------------
 # this code block MODIFIES `arrayCurveGroups` NOTE
@@ -292,9 +292,9 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu] = flipTheExtra_0b1(arrayCurveGroups[selectBridgesGroupZuluPairedToOdd, columnGroupZulu])
 
 		set_threshold(1, 1, 1)  # Re-enable the garbage collector.
-		selectBridgesGroupZuluPairedToOdd = None; del selectBridgesGroupZuluPairedToOdd # pyright: ignore[reportAssignmentType]  # noqa: E702
-		selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
-		selectGroupZuluAtEven = None; del selectGroupZuluAtEven # pyright: ignore[reportAssignmentType]  # noqa: E702
+		selectBridgesGroupZuluPairedToOdd = None; del selectBridgesGroupZuluPairedToOdd 
+		selectGroupAlphaAtEven = None; del selectGroupAlphaAtEven 
+		selectGroupZuluAtEven = None; del selectGroupZuluAtEven 
 		goByeBye()
 
 # All computations for `bridgesAlignedAtEven` are handled by the computations for `bridgesAligned`.
@@ -317,21 +317,21 @@ def count64(bridges: int, arrayCurveGroups: DataArray3columns, bridgesMinimum: i
 		rowsDeallocatedTotal += allocateBridgesAligned
 		arrayCurveLocations.resize((((rowsAllocatedTotal - rowsDeallocatedTotal) + rowsAggregatedTotal), columnsArrayCurveLocations))
 
-		arrayCurveGroups = None; del arrayCurveGroups # pyright: ignore[reportAssignmentType]  # noqa: E702
-		curveLocationsBridgesAlignedLessThanMaximum = None; del curveLocationsBridgesAlignedLessThanMaximum  # pyright: ignore[reportAssignmentType] # noqa: E702
+		arrayCurveGroups = None; del arrayCurveGroups 
+		curveLocationsBridgesAlignedLessThanMaximum = None; del curveLocationsBridgesAlignedLessThanMaximum
 		del allocateBridgesAligned
 		del curveLocationsMAXIMUM
 		del rowsAllocatedTotal
 		del rowsDeallocatedTotal
 		del Z0Z_indexStart
 		del rowsAggregatedTotal
-		selectBridgesAligned = None; del selectBridgesAligned  # pyright: ignore[reportAssignmentType] # noqa: E702
+		selectBridgesAligned = None; del selectBridgesAligned
 		goByeBye()
 
 #------------------------------------------------ aggregation ---------------------------------------------------------
 		arrayCurveGroups = aggregateCurveLocations2CurveGroups(arrayCurveLocations)
 
-		arrayCurveLocations = None; del arrayCurveLocations # pyright: ignore[reportAssignmentType]  # noqa: E702
+		arrayCurveLocations = None; del arrayCurveLocations 
 		goByeBye()
 
 	return (bridges, arrayCurveGroups)

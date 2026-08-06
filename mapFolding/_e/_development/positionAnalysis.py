@@ -1,4 +1,6 @@
-# ruff:file-ignore[print, p-print]
+# pyright: reportAssignmentType=false, reportUnnecessaryComparison=false
+# ruff: file-ignore[print, p-print]
+# ty: ignore[invalid-assignment]
 from __future__ import annotations
 
 from gmpy2 import bit_mask
@@ -63,7 +65,7 @@ def getLeafUnconditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	positionsAnalyzed: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[:, valuesPresentEveryRow]
 
 	comparisonCube: numpy.ndarray[Any, numpy.dtype[numpy.bool_]] = positionsAnalyzed[:, :, None] < positionsAnalyzed[:, None, :]
-	alwaysEarlierMatrix: numpy.ndarray[tuple[Any, ...], numpy.dtype[numpy.bool_]] = comparisonCube.all(axis=0)  # pyright: ignore[reportAssignmentType]  # ty:ignore[invalid-assignment]
+	alwaysEarlierMatrix: numpy.ndarray[tuple[Any, ...], numpy.dtype[numpy.bool_]] = comparisonCube.all(axis=0)
 	numpy.fill_diagonal(alwaysEarlierMatrix, val=False)
 
 	indicesEarlier: numpy.ndarray[Any, numpy.dtype[numpy.intp]]
@@ -107,7 +109,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	"""
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
-	if columnsToExclude is not None:  # pyright: ignore[reportUnnecessaryComparison]
+	if columnsToExclude is not None:
 		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
 	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
 
@@ -121,7 +123,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
 	positionsMatrix[rowIndices, arraySequences] = columnIndices
 
-	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0  # pyright: ignore[reportUnnecessaryComparison]
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
@@ -189,7 +191,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 	"""
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
-	if columnsToExclude is not None:  # pyright: ignore[reportUnnecessaryComparison]
+	if columnsToExclude is not None:
 		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
 	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
 
@@ -203,7 +205,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
 	positionsMatrix[rowIndices, arraySequences] = columnIndices
 
-	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0  # pyright: ignore[reportUnnecessaryComparison]
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
@@ -246,7 +248,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 	"""When a leaf is at the last pile in its domain, identify leaves that must come after it."""
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
-	if columnsToExclude is not None:  # pyright: ignore[reportUnnecessaryComparison]
+	if columnsToExclude is not None:
 		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
 	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
 
@@ -260,7 +262,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
 	positionsMatrix[rowIndices, arraySequences] = columnIndices
 
-	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0  # pyright: ignore[reportUnnecessaryComparison]
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
@@ -301,7 +303,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLater: Leaf) -> pandas.DataFrame:
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[Pile] | None = [pileOrigin, 零, state.pileLast]
-	if columnsToExclude is not None:  # pyright: ignore[reportUnnecessaryComparison]
+	if columnsToExclude is not None:
 		dataframeSequences = dataframeSequences.drop(columns=columnsToExclude)
 	arraySequences: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = dataframeSequences.to_numpy(dtype=numpy.int16)
 
@@ -315,7 +317,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 	columnIndices: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = numpy.broadcast_to(numpy.arange(positionsCount, dtype=numpy.int16), (rowsCount, positionsCount))
 	positionsMatrix[rowIndices, arraySequences] = columnIndices
 
-	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0  # pyright: ignore[reportUnnecessaryComparison]
+	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
