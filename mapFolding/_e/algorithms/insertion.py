@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable, Collection, Iterable, Sequence
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding._e.theTypes import Folding, Leaf, Pile, PinnedLeaves, LeafOptions, LeafSpace
+	from mapFolding._e.theTypes import Folding, Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves
 	from pathlib import Path
 
 # mapShape: tuple[int, ...] = getMapNext(n)

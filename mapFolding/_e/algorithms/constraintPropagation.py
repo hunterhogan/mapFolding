@@ -9,21 +9,20 @@ from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import listFunctionsReduction
 from mapFolding.beDRY import mapShapeIs2上nDimensions
+from mapFolding.kitFilesystem import writeAlbum
 from mapFolding.theSSOT import settingsPackage
 from math import factorial, prod
 from more_itertools import triplewise
 from ortools.sat.python import cp_model
-from pathlib import Path
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 from Z0Z_tools import between吗, DOTvalues
-import csv
 import uuid
 
 if TYPE_CHECKING:
-	from _csv import Writer
 	from concurrent.futures import Future
 	from mapFolding._e.theTypes import Leaf
+	from pathlib import Path
 
 def count(state: EliminationState) -> EliminationState:
 	model = cp_model.CpModel()
@@ -170,7 +169,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
-		state = state.reduceAllPermutationSpace(listFunctionsReduction)
+		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
 
 	state.permutationSpace = PermutationSpace()
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
@@ -188,9 +187,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			# TODO temporary data collection for p2d7
 			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
 				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
-				with Path.open(pathFilename, mode="w", newline="") as csvWrite:
-					csvWriter: Writer = csv.writer(csvWrite)
-					csvWriter.writerows(sherpa.listFolding)
+				writeAlbum(sherpa.listFolding, pathFilename)
 
 			state.groupsOfFolds += sherpa.groupsOfFolds
 			state.Theorem2aMultiplier = sherpa.Theorem2aMultiplier

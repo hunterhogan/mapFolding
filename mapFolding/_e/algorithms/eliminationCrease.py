@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
 	return EliminationState(mapShape, listPermutationSpace=[permutationSpace]
-		).reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).removeCreaseViolations().moveToListFolding()
+		).removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).moveToListFolding()
 
 def deconstructPermutationSpaces(listPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
 	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, listPermutationSpace))
@@ -40,7 +40,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	queueStates: Queue[EliminationState] = processManager.Queue()
 
 	state.groupsOfFolds = len(state.listFolding)
-	state.listFolding = []
+	# state.listFolding = []
 
 	listProcesses: list[BaseProcess] = list(starmap(
 		partial(processManager.Process, target=consumeQueue, args=(state.mapShape, queuePermutationSpace, queueStates))
@@ -58,6 +58,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		tuple(map(queuePermutationSpace.put, listPermutationSpace))
 		sherpa: EliminationState = queueStates.get()
 		state.groupsOfFolds += len(sherpa.listFolding)
+		state.listFolding.extend(sherpa.listFolding)
 		listPermutationSpace = list(deconstructPermutationSpaces(sherpa.listPermutationSpace))
 		queuePermutationSpacesLength += -1 + len(listPermutationSpace)
 		tqdmQueue.total += len(listPermutationSpace)  # ty: ignore[unsupported-operator]

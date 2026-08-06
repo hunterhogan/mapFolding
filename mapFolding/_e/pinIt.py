@@ -122,7 +122,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 		listExcludeLeaf_r = excludeLeafAtPile(listExcludeLeaf_r, leaf_r, pile_r)
 
 	state.listPermutationSpace.extend(listExcludeLeaf_r)
-	state.reduceAllPermutationSpace(listFunctionsReduction).removeCreaseViolations()
+	state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
 
 	state.listPermutationSpace.extend(listPermutationSpaceUnchanged)
 

@@ -59,7 +59,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Parameters
 		----------
 		missing : PermutationSpace | UndeterminedPiles | PinnedLeaves
-			`LeafSpace` by `Pile` in `missing`.
+			`Pile: LeafSpace` in `missing`.
 
 		Returns
 		-------
@@ -714,9 +714,7 @@ class EliminationState:
 			, self.pile in getLeafDomain(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(
-		self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]
-	) -> Self:
+	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
 		listPermutationSpace: list[PermutationSpace] = self.listPermutationSpace
 		self.listPermutationSpace = []
 		listPermutationSpaceIrreducible: list[PermutationSpace] = []
