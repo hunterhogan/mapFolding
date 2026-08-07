@@ -6,7 +6,8 @@ from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAr
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, listFunctionsReductionDEFAULT
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k
+from mapFolding._e.reduceIt import listFunctionsReductionDEFAULT
 from math import factorial
 from more_itertools import all_unique as allUnique吗
 from multiprocessing import get_context

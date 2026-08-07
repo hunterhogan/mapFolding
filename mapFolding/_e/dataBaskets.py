@@ -15,6 +15,7 @@ from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
+from mapFolding._e.reduceIt import listFunctionsReductionDEFAULT
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile, PinnedLeaves
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
 from math import prod
@@ -713,8 +714,7 @@ class EliminationState:
 	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
 					, *, quick: bool = False) -> Self:
 		# TODO think about this.
-		from mapFolding._e.pinIt import (  # ruff: ignore[import-outside-top-level]
-			listFunctionsReductionDEFAULT, listFunctionsReductionQuickDEFAULT)
+		from mapFolding._e.reduceIt import listFunctionsReductionQuickDEFAULT  # ruff: ignore[import-outside-top-level]
 		listQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
 		if quick:
 			listQuick = self.listFunctionsReductionQuick or listFunctionsReductionQuickDEFAULT

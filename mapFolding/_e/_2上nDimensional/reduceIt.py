@@ -79,10 +79,9 @@ from mapFolding._e._2上nDimensional import (
 	moreThanLeaf零吗)
 from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafPinned吗, notPileLast
-from mapFolding._e.pinIt import (
-	isPileLeafOptions吗, reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
-	reducePermutationSpace_nakedSubset)
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, isPileLeafOptions吗, leafPinned吗, notPileLast
+from mapFolding._e.reduceIt import (
+	reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
 from mapFolding._e.theTypes import Leaf, Pile
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import extract, pairwise, triplewise

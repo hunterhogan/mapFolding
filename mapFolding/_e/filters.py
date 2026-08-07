@@ -42,12 +42,11 @@ References
 """
 from __future__ import annotations
 
-from mapFolding._e.theTypes import Leaf, LeafOptions
-from typing import TYPE_CHECKING
+from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+from typing import TYPE_CHECKING, TypeIs
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves
-	from typing import TypeIs
+	from mapFolding._e.theTypes import LeafSpace, PinnedLeaves
 
 #======== Boolean antecedents ================================================
 
@@ -170,3 +169,6 @@ def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 		Determine whether a `Pile` already has a pinned `Leaf`.
 	"""
 	return isinstance(leafSpace, LeafOptions)
+
+def isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
+	return isLeafOptions吗(pileLeafSpace[1])
