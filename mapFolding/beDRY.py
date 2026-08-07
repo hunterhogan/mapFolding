@@ -1,19 +1,14 @@
-#=Sin= `numba`, `makeDictionaryFoldsTotalKnown`, `getValuesKnown`.
-# ruff: file-ignore[import-outside-top-level]
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 from __future__ import annotations
 
 from collections.abc import Sequence
 from functools import cache
-from hunterMakesPy import errorL33T, inclusive
+from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
-from mapFolding import ansiColorReset, ansiColors
 from numpy import int64 as numpy_int64
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
-import sys
-import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
@@ -49,15 +44,14 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 	When using Numba, this function must be called before importing any Numba-jitted function for this
 	processor limit to affect the Numba-jitted function.
 	"""
-	if concurrencyPackage == 'numba':
-		from numba import get_num_threads, set_num_threads
-		concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
-		set_num_threads(concurrencyLimit)
-		concurrencyLimit = get_num_threads()
-	elif concurrencyPackage in {'multiprocessing', None}:
-		concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
-	else:
-		concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
+	match concurrencyPackage:
+		case 'numba':
+			#=Sin= `numba` is optional.
+			# ruff: ignore[import-outside-top-level]
+			from mapFolding._optionalNumba import defineProcessorLimitNumba
+			concurrencyLimit: int = defineProcessorLimitNumba(CPUlimit)
+		case 'multiprocessing' | _:
+			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
 
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:
@@ -173,53 +167,6 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 	"""
 	connectionGraph: Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
 	return connectionGraph.astype(datatype)
-
-@cache
-def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int | None:
-	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
-
-	(AI generated docstring)
-
-	This function queries the comprehensive dictionary of known folding totals constructed from OEIS
-	sequence data. The function returns the total if the map shape matches a known value, or None if
-	the shape is not found in the OEIS sequences.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A tuple of integers representing the dimensions of the map.
-
-	Returns
-	-------
-	foldingsTotal : int | None
-		The known total number of distinct folding patterns for the given map shape, or None if the
-		map shape does not match any known values in the OEIS sequences.
-
-	Examples
-	--------
-	>>> from mapFolding.oeis import librarianLookupsFoldsTotalKnown
-	>>> librarianLookupsFoldsTotalKnown((2, 3))
-	10
-
-	Implementation Details
-	----------------------
-	Map shapes are matched exactly as provided without internal sorting or normalization. The function
-	uses `functools.cache` [1] for memoization to avoid reconstructing the lookup dictionary on
-	repeated calls.
-
-	See Also
-	--------
-	mapFolding.oeis.librarianConstructsDictionaryFoldsTotalKnown
-		Construct the underlying lookup dictionary.
-
-	References
-	----------
-	[1] functools.cache - Python standard library
-		https://docs.python.org/3/library/functools.html#functools.cache
-	"""
-	from mapFolding.oeis import makeDictionaryFoldsTotalKnown
-	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
-	return lookupFoldsTotal.get(tuple(mapShape))
 
 @cache
 def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
@@ -344,62 +291,3 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 		`True` when `mapShape` is a 2ⁿ-dimensional map with the required minimum dimension count.
 	"""
 	return (youMustBeDimensionsTallToRideThis <= len(mapShape)) and all(map((2).__eq__, mapShape))
-
-def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
-	"""Print a benchmark comparison line for an OEIS sequence value.
-
-	Outputs a tab-separated line showing whether the computed value matches the known OEIS value, the
-	index, both values, optionally their ratio, and elapsed time.
-
-	Parameters
-	----------
-	oeisID : str
-		The OEIS sequence identifier (e.g., 'A000136').
-	n : int
-		The index/term number in the sequence.
-	computed : int
-		The computed value to compare against the known OEIS value.
-	timeStart : float
-		The start time from `time.perf_counter()` for elapsed time calculation.
-	ratio : bool = False
-		If True and `computed` is non-zero, also print the ratio `known / computed`.
-
-	Notes
-	-----
-	The output uses ANSI color codes: green for match, red for mismatch. The known value is retrieved
-	from the OEIS data via `getValuesKnown`. If the sequence or term is not found, `known` will be a
-	large negative sentinel value.
-	"""
-	from mapFolding.oeis import getValuesKnown
-	known: int = getValuesKnown(oeisID).get(n, -errorL33T)
-	match: bool = computed == known
-	sys.stdout.write(
-		f"{match}\t"
-		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
-		f"{n}\t{computed}\t{known}\t"
-	)
-	if ratio and computed:
-		sys.stdout.write(f"{known / computed}\t")
-	sys.stdout.write(f"{time.perf_counter() - timeStart:.2f}\t{ansiColorReset}\n")
-
-def printEasyRunHeader(oeisID: str, flow: str) -> None:
-	"""Print a colored header line for an easy run benchmark session.
-
-	Outputs the OEIS ID and flow identifier in distinct colors based on their hash values, followed by
-	a color reset.
-
-	Parameters
-	----------
-	oeisID : str
-		The OEIS sequence identifier (e.g., 'A000136').
-	flow : str
-		A flow identifier string (e.g., 'main', 'test', 'benchmark').
-
-	Notes
-	-----
-	Colors are selected by converting the string to a base-36 integer and modulo the number of
-	available ANSI colors. This provides consistent coloring for the same identifiers across runs.
-	"""
-	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
-	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
-	sys.stdout.write(ansiColorReset + '\n')

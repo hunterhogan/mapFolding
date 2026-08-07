@@ -37,7 +37,6 @@ from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis._theSSOT import cacheDays
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from sys import modules as sysModules, stdout
@@ -428,7 +427,7 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 		for row in csvReader:
 			yield tuple(map(int, row))
 
-def getCacheOrURL(pathFilenameCache: Path, url: str) -> str:
+def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	"""I use this to manage cached data retrieval with HTTP conditional requests.
 
 	This caching layer minimizes network traffic by checking local cache validity based on file
@@ -440,6 +439,8 @@ def getCacheOrURL(pathFilenameCache: Path, url: str) -> str:
 	----------
 	pathFilenameCache : Path
 		Path to the local cache file for storing retrieved data.
+	cacheDays : int
+		Number of days to consider the cache valid.
 	url : str
 		URL to retrieve the data from if cache is invalid or missing.
 

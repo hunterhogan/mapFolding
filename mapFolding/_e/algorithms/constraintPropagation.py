@@ -186,7 +186,8 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			# TODO temporary data collection for p2d7
 			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
 				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
-				from mapFolding.kitFilesystem import writeAlbum  # ruff: ignore[import-outside-top-level]
+				# ruff: ignore[import-outside-top-level]
+				from mapFolding.kitFilesystem import writeAlbum
 				writeAlbum(sherpa.listFolding, pathFilename)
 
 			state.groupsOfFolds += sherpa.groupsOfFolds

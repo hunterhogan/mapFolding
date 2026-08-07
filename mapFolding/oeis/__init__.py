@@ -7,7 +7,9 @@ from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, o
 from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown as getValuesKnown
 
 # isort: split
-from mapFolding.oeis.__main__ import makeDictionaryFoldsTotalKnown as makeDictionaryFoldsTotalKnown, makeMapShape as makeMapShape
+from mapFolding.oeis.__main__ import (
+	getFoldsTotalKnown as getFoldsTotalKnown, makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark,
+	printEasyRunHeader as printEasyRunHeader)
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n

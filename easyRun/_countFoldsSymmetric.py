@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 from mapFolding.basecamp import countFoldsSymmetric
-from mapFolding.beDRY import printEasyRunBenchmark, printEasyRunHeader
-from mapFolding.oeis import makeMapShape
+from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time
 

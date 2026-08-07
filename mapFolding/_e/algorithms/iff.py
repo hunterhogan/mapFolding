@@ -352,23 +352,7 @@ def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 
 @cache
 def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
-	"""You can compute and memoize the crease-post `Leaf` for `leaf` in `dimension`.
-
-	(AI generated docstring)
-
-	Mathematics
-	-----------
-	A crease in `dimension` connects leaf k to leaf k+1 along the coordinate axis of `dimension`.
-	This function computes the k+1 leaf (crease-post) given leaf k. The crease-post is found by
-	adding the mixed-radix stride for `dimension` to the `Leaf` index. When `leaf` is at the
-	boundary of `dimension`, no crease-post exists.
-
-	A crease-post `Leaf` is the adjacent leaf one step forward in `dimension`, expressed in
-	`Leaf` index space. When `leaf` is already at the boundary coordinate of `dimension`, the
-	crease-post `Leaf` does not exist and `getCreasePost` returns `None`.
-
-	`getCreasePost` uses the `functools.cache` decorator for memoization [1] and uses
-	`productOfDimensions` for stride computation [2].
+	"""Compute the `Leaf`, if any, attached by the crease "after" (post) `leaf` in `dimension`.
 
 	Parameters
 	----------
@@ -383,12 +367,6 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 	-------
 	leafCreasePost : Leaf | None
 		The crease-post `Leaf` index, or `None` when the crease-post `Leaf` does not exist.
-
-	References
-	----------
-	[1] functools.cache
-		https://docs.python.org/3/library/functools.html#functools.cache
-	[2] mapFolding._e.algorithms.iff.productOfDimensions
 	"""
 	leafCrease: Leaf | None = None
 	if ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) + 1 < mapShape[dimension]:

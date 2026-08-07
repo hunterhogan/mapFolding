@@ -37,20 +37,25 @@ if __name__ == '__main__':
 	printThis = True
 
 	if printThis:
+		timeStart: float = time.perf_counter()
 		state = makeAlbum2上nDimensional吗(5, 14)
+		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		state.listPermutationSpace.extend(state.listPinnedLeaves)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+		state.listPinnedLeaves = []
+		from mapFolding._e._development.toolkit import verifyPinning2Dn
+
+		verifyPinning2Dn(state)
+		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
+
+		state.moveToListFolding()
 		if state.listPermutationSpace:
 			# pprint(state, width=200, compact=True)
 			state = doTheNeedful(state, 14)
+		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 		recordAlbum2上nDimensional吗(state)
 
-		timeStart: float = time.perf_counter()
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		from mapFolding._e._development.toolkit import verifyPinning2Dn
-		verifyPinning2Dn(state)
-		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
-		printStatisticsPermutations(state)
-		print(f"{len(state.listPermutationSpace)=}")
+		# printStatisticsPermutations(state)
+		# print(f"{len(state.listPermutationSpace)=}")
 
 	elif printThis:
 		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 28))))

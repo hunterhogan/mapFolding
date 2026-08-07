@@ -6,9 +6,9 @@ from astToolkit.transformationTools import pythonCode2ast_expr
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
-from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitFilesystem import makePathFilenameFolds
+from mapFolding.oeis import getFoldsTotalKnown
 from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, dictionaryEstimatesMapFolding, IfThis
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds

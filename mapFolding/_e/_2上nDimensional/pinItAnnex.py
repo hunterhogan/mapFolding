@@ -194,7 +194,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 
 	return permutationSpace
 
-def _odd吗(dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
+def _odd吗(_mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
 	def workhorse(pileLeaf: tuple[Pile, Leaf]) -> bool:
 		return bool(oddLeaf2上nDimensional吗(dimension, leaf=pileLeaf[1]))
 	return workhorse
@@ -230,7 +230,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 		leafCount: int = permutationSpace.leafCount
 
 		for dimension in range(state.dimensionsTotal):
-			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
+			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
 
 			for upDown, leftRight in ((False, True), (True, False)):
 				leavesPinnedParityOpposite: PinnedLeaves = dict(get(upDown, groupedByParity, ()))

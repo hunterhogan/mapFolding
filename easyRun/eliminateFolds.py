@@ -3,8 +3,7 @@ from __future__ import annotations
 from mapFolding._e._2上nDimensional import pinIt
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding.beDRY import printEasyRunBenchmark, printEasyRunHeader
-from mapFolding.oeis import makeMapShape
+from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time
 

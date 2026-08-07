@@ -1,6 +1,6 @@
 # TODO `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
 # pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
-# ruff: file-ignore[function-call-in-dataclass-default-argument, import-outside-top-level]
+# ruff: file-ignore[function-call-in-dataclass-default-argument]
 # ty: ignore[invalid-assignment, unresolved-attribute]
 """
 Computational state orchestration for map folding analysis.
@@ -353,64 +353,6 @@ class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `d
 		super().__post_init__()
 		if self.taskDivisions == 0:
 			self.taskDivisions = DatatypeLeavesTotal(int(self.leavesTotal))
-
-@dataclasses.dataclass
-class LeafSequenceState(MapFoldingState):
-	"""Specialized computational state for tracking leaf sequences during analysis.
-
-	(AI generated docstring)
-
-	This class extends the base MapFoldingState with additional capability
-	for recording and analyzing the sequence of leaf connections discovered
-	during map folding computations. It integrates with the OEIS (Online
-	Encyclopedia of Integer Sequences) system to leverage known sequence
-	data for optimization and validation.
-
-	The leaf sequence tracking is particularly valuable for research and
-	verification purposes, allowing detailed analysis of how folding patterns
-	emerge and enabling comparison with established mathematical sequences.
-
-	Attributes
-	----------
-	leafSequence : Array1DLeavesTotal = None
-		Array storing the sequence of leaf connections discovered.
-
-	"""
-
-	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]})
-	"""
-	Array storing the sequence of leaf connections discovered during computation.
-
-	This array records the order in which leaf connections are established
-	during the folding analysis. The sequence provides insights into the
-	algorithmic progression and can be compared against known mathematical
-	sequences for validation and optimization purposes.
-	"""
-
-	def __post_init__(self) -> None:
-		"""Initialize sequence tracking arrays with OEIS integration.
-
-		(AI generated docstring)
-
-		This method performs base initialization then sets up the leaf sequence
-		tracking array. It queries the OEIS system for known fold totals
-		corresponding to the current map shape, using this information to
-		optimally size the sequence tracking array.
-
-		Notes
-		-----
-		The sequence array is automatically initialized to record the starting
-		leaf connection, providing a foundation for subsequent sequence tracking.
-
-		"""
-		super().__post_init__()
-		from mapFolding.beDRY import getFoldsTotalKnown
-		if self.leafSequence is None:
-			foldsTotalKnown: int | None = getFoldsTotalKnown(self.mapShape)
-			if foldsTotalKnown is not None:
-				groupsOfFoldsKnown: int = foldsTotalKnown // self.leavesTotal
-				self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
-				self.leafSequence[self.groupsOfFolds] = self.leaf1ndex
 
 @dataclasses.dataclass(slots=True)
 class MatrixMeandersState:

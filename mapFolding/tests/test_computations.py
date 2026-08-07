@@ -36,9 +36,8 @@ from __future__ import annotations
 from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
-from mapFolding.beDRY import getFoldsTotalKnown
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import getValuesKnown, makeMapShape, oeisIDfor_n
+from mapFolding.oeis import getFoldsTotalKnown, getValuesKnown, makeMapShape, oeisIDfor_n
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -77,7 +76,7 @@ if TYPE_CHECKING:
 		, pytest.param('A007822', 6, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
 	]
 )
-def test_countFoldsSymmetric(oeisID: LiteralString, n: int, flow: str, CPUlimit: float) -> None:
+def test_countFoldsSymmetric(oeisID: LiteralString, n: int, flow: LiteralString, CPUlimit: float) -> None:
 	"""Test foldsSymmetric flow options.
 
 	Parameters
@@ -128,7 +127,7 @@ def test_countFoldsSymmetric(oeisID: LiteralString, n: int, flow: str, CPUlimit:
 		]
 	]
 )
-def test_countFolds(oeisID: OEISid, n: int, flow: str, CPUlimit: float | None) -> None:
+def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float | None) -> None:
 	"""Validate that different computational flows produce valid results.
 
 	(AI generated docstring)
@@ -169,7 +168,7 @@ def test_countFolds(oeisID: OEISid, n: int, flow: str, CPUlimit: float | None) -
 	]
 )
 @pytest.mark.parametrize('n, flow', (*CartesianProduct((2, 29), ('matrixNumPy', 'matrixPandas')), (3, 'matrixMeanders'), (10, 'matrixMeanders')))
-def test_meanders(kind: LiteralString, oeisID: OEISid, n: int, flow: str) -> None:
+def test_meanders(kind: LiteralString, oeisID: OEISid, n: int, flow: LiteralString) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values.
 
 	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
@@ -183,7 +182,7 @@ def test_meanders(kind: LiteralString, oeisID: OEISid, n: int, flow: str) -> Non
 		OEIS identifier to validate.
 	n : int
 		Sequence index to validate.
-	flow : str
+	flow : LiteralString
 		Computation flow to validate.
 
 	"""

@@ -1,4 +1,3 @@
-# ruff: file-ignore[import-outside-top-level]
 """Transfer matrix algorithm implementations in NumPy (*Num*erical *Py*thon) and pandas.
 
 Citations
@@ -17,6 +16,7 @@ from __future__ import annotations
 
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
+from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import dtypeArcCode, dtypeCrossings
 from typing import TYPE_CHECKING
 from warnings import warn
@@ -339,7 +339,6 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 	"""
 	while 0 < state.boundary:
 		if areIntegersWide(state):
-			from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 			state = countBigInt(state)
 		else:
 			state = count(state)

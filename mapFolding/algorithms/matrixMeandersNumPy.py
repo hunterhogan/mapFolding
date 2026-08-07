@@ -1,10 +1,10 @@
-# ruff: file-ignore[import-outside-top-level]
 from __future__ import annotations
 
 from contextlib import suppress
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
+from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import dtypeArcCode
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from tqdm.auto import tqdm
@@ -307,7 +307,6 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 	"""
 	while 0 < state.boundary:
 		if areIntegersWide(state):
-			from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 			state = countBigInt(state)
 		else:
 			state = count(state)

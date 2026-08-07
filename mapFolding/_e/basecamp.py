@@ -1,3 +1,4 @@
+#=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
 # ruff: file-ignore[import-outside-top-level]
 from __future__ import annotations
 

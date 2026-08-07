@@ -9,6 +9,7 @@ from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDim
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k
+from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from mapFolding.oeis import makeMapShape
 from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
@@ -27,12 +28,12 @@ def makeDescendants(folding: Folding, n: int) -> EliminationState:
 	"""Process a single folding and return resulting state."""
 	state: EliminationState = EliminationState(makeMapShape('A001417', n)
 		, listFunctionsReduction=listFunctionsReduction2上nDimensional
-		, listFunctionsReductionQuick=listFunctionsReduction2上nDimensional)
+		, listFunctionsReductionQuick=listFunctionsReductionQuick2上nDimensional)
 	state.listPermutationSpace.append(PermutationSpace(getDictionaryLeafOptions(state)))
 
 	for r, k in pairwise(reversed(folding)):
 		state = excludeLeaf_rBeforeLeaf_k(state, k, r)
-		state.moveToListFolding()
+		state.moveToListPinnedLeaves()
 
 	# d = 5
 	# folding[-1] == 首一(len(mapShape))
@@ -44,7 +45,6 @@ def makeDescendants(folding: Folding, n: int) -> EliminationState:
 
 def makeAlbum2上nDimensional吗(n: int, workersMaximum: int) -> EliminationState:
 	"""Construct album `n`."""
-	from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum  # ruff: ignore[import-outside-top-level]
 	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', n - 1), pathAlbum, suffix='.album'))
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
@@ -58,12 +58,12 @@ def makeAlbum2上nDimensional吗(n: int, workersMaximum: int) -> EliminationStat
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc='for folding in album'):
 			sherpa: EliminationState = claimTicket.result()
 			state.listPermutationSpace.extend(sherpa.listPermutationSpace)
+			state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
 			state.listFolding.extend(sherpa.listFolding)
 
 	return state
 
 def recordAlbum2上nDimensional吗(state: EliminationState) -> Path:
-	from mapFolding.kitFilesystem import makePathFilenameFolds, writeAlbum  # ruff: ignore[import-outside-top-level]
 	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, pathAlbum, suffix='.album')
 	writeAlbum(sorted(state.listFolding), pathFilenameAlbum)
 	return pathFilenameAlbum

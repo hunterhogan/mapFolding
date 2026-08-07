@@ -27,7 +27,7 @@ which is crucial for maintaining package reliability in production environments.
 from __future__ import annotations
 
 from contextlib import redirect_stdout
-from mapFolding.oeis import getMetadata, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
+from mapFolding.oeis import getFoldsTotalKnown, getMetadata, getOEISids, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from typing import TYPE_CHECKING
@@ -105,6 +105,7 @@ def test_aOFn_zeroDim_A001418() -> None:
 	assertEqualTo(type(exceptionInfo.value), expected, oeisIDfor_n.__name__, 'A001418', 0)
 
 #===== Command Line Interface Tests =====
+
 def testHelpText() -> None:
 	"""Test that help text is complete and examples are valid."""
 	outputStream = io.StringIO()
@@ -167,3 +168,8 @@ def testCLI_HelpFlag() -> None:
 		assertEqualTo('Available OEIS sequences:' in helpOutput, True, OEIS_for_n.__name__, '--help')
 		assertEqualTo('Usage examples:' in helpOutput, True, OEIS_for_n.__name__, '--help')
 		assertEqualTo(all(oeisID in helpOutput for oeisID in oeisIDsImplemented), True, OEIS_for_n.__name__, '--help')
+
+@pytest.mark.parametrize(('mapShape', 'expected'), (pytest.param((999, 999), None, id='mapShapeNotFound'),))
+def test_getFoldsTotalKnown(mapShape: tuple[int, ...], expected: int | None) -> None:
+	actual: int | None = getFoldsTotalKnown(mapShape)
+	assertEqualTo(actual, expected, getFoldsTotalKnown.__name__, mapShape)

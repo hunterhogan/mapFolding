@@ -15,7 +15,7 @@ from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
-from mapFolding._e.theTypes import Folding, LeafSpace, Pile
+from mapFolding._e.theTypes import Folding, LeafSpace, Pile, PinnedLeaves
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
 from math import prod
 from operator import attrgetter, methodcaller
@@ -26,7 +26,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
@@ -580,6 +580,7 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
 
+	listPinnedLeaves: list[PinnedLeaves] = dataclasses.field(default_factory=list[PinnedLeaves], init=True)
 	listFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
 	"""A list of `Folding` patterns found."""
 	pile: Pile = -1
@@ -618,30 +619,20 @@ class EliminationState:
 			(self.groupsOfFolds, self.Theorem2aMultiplier, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier)
 		)
 
-	def __post_init__(self) -> None:
-		"""One-time computation of unchanging values."""
-		self.mapShape = validateMapShape(self.mapShape)
-		self.dimensionsTotal = len(self.mapShape)
-		self.leavesTotal = getLeavesTotal(self.mapShape)
-		if 0 < self.leavesTotal:
-			self.Theorem2aMultiplier = self.leavesTotal
-		self.leafLast = self.leavesTotal - 1
-		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2
-		self.pilesTotal = self.leavesTotal
-		self.pileLast = self.pilesTotal - 1
-		self.首 = self.leavesTotal
-		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(
-			self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal
-		)
-
 	def moveToListFolding(self) -> Self:
 		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
 			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
 		)
 		self.listPermutationSpace = list(foldingGroup吗.get(False, ()))
 		self.listFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
+		return self
+
+	def moveToListPinnedLeaves(self) -> Self:
+		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
+			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
+		)
+		self.listPermutationSpace = list(foldingGroup吗.get(False, ()))
+		self.listPinnedLeaves.extend(foldingGroup吗.get(True, ()))  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 		return self
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
@@ -721,7 +712,9 @@ class EliminationState:
 
 	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
 					, *, quick: bool = False) -> Self:
-		from mapFolding._e.pinIt import listFunctionsReductionDEFAULT, listFunctionsReductionQuickDEFAULT
+		# TODO think about this.
+		from mapFolding._e.pinIt import (  # ruff: ignore[import-outside-top-level]
+			listFunctionsReductionDEFAULT, listFunctionsReductionQuickDEFAULT)
 		listQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
 		if quick:
 			listQuick = self.listFunctionsReductionQuick or listFunctionsReductionQuickDEFAULT
@@ -791,3 +784,21 @@ class EliminationState:
 		self.listPermutationSpace.extend(filterfalse(self.permutationSpaceCreaseViolation吗, listPermutationSpace))
 
 		return self
+
+	def __post_init__(self) -> None:
+		"""One-time computation of unchanging values."""
+		self.mapShape = validateMapShape(self.mapShape)
+		self.dimensionsTotal = len(self.mapShape)
+		self.leavesTotal = getLeavesTotal(self.mapShape)
+		if 0 < self.leavesTotal:
+			self.Theorem2aMultiplier = self.leavesTotal
+		self.leafLast = self.leavesTotal - 1
+		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2
+		self.pilesTotal = self.leavesTotal
+		self.pileLast = self.pilesTotal - 1
+		self.首 = self.leavesTotal
+		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
+		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
+		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(
+			self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal
+		)

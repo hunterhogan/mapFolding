@@ -19,6 +19,7 @@ from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, 
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
+from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -29,9 +30,9 @@ if TYPE_CHECKING:
 	from mapFolding import DatatypeLeavesTotal
 	import ast
 
-# TODO Dynamically calculate the bitwidth of each datatype. NOTE I've delayed dynamic calculation because I don't know how to
-# calculate what 'elephino' needs. But perhaps I can dynamically calculate 'leavesTotal' and 'foldsTotal' and hardcode 'elephino.'
-# That would probably be an improvement.
+# TODO Dynamically calculate the bitwidth of each datatype.
+# DEVELOPMENT I delayed dynamic calculation because I didn't know how to calculate what 'elephino'
+# needs. I now have a safe upper bound for that. Somewhere.
 listDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeElephino'),
@@ -93,7 +94,6 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds  # ruff: ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
 	foldsTotalEstimated: int = getValuesKnown('A007822').get(n, 0)
 	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"

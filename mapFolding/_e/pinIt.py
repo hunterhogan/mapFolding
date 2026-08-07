@@ -8,23 +8,23 @@ from collections import Counter
 from functools import partial
 from gmpy2 import bit_clear
 from humpy_cytoolz import (
-	concat, get, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, valfilter as filterLeaf, valfilter as filterLeafOptions,
+	get, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, valfilter as filterLeaf, valfilter as filterLeafOptions,
 	valfilter as filterValue)
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
-from itertools import chain, combinations, product as CartesianProduct
+from itertools import chain, combinations
 from mapFolding._e import (
 	getIteratorOfLeaves, getLeafDomain, howManyLeavesInLeafOptions, leafOptionsAND, leafOptionsLeafNone, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import isLeafOptions吗, leafInLeafOptions吗, leafPinned吗
-from mapFolding._e.theTypes import DimensionIndex, LeafOptions, PinnedLeaves
+from mapFolding._e.theTypes import LeafOptions, PinnedLeaves
 from more_itertools import extract, one
 from operator import methodcaller
 from typing import TYPE_CHECKING, TypeIs
-from Z0Z_tools import between吗, DOTitems, DOTkeys, DOTvalues, reverseLookup, thisNotHaveThat吗
+from Z0Z_tools import between吗, DOTitems, DOTvalues, reverseLookup, thisNotHaveThat吗
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from collections.abc import Callable, Iterable, Sequence
 	from mapFolding._e.theTypes import Leaf, LeafSpace, Pile, UndeterminedPiles
 
 #======== Group by =======================
@@ -116,16 +116,18 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	state.listPermutationSpace = listExcludeLeaf_r
 	del listExcludeLeaf_r, listPermutationSpace
 
-	# DEVELOPMENT If I were to use `domainOf_leaf_r = domainOf_leaf_r or getLeafDomain(self,
-	# leaf_r)`, then an empty `Iterable` would be replaced by `getLeafDomain(self, leaf_r)`. That
-	# would be good if it prevents an error state. Or, allowing to pass an empty `Iterable` might
-	# enable a no-op, which could be good. TODO make a conscious choice.
+	# TODO Choose between `if domainOf_leaf_r is None:` and
+	# `domainOf_leaf_r = domainOf_leaf_r or getLeafDomain(self, leaf_r)`.
+
+	# DEVELOPMENT
+	# Replace an empty `Iterable` to prevent an error state, or as a convenient default.
+	# Or passing an empty `Iterable` enables a no-op.
 	if domainOf_leaf_r is None:
 		domainOf_leaf_r = getLeafDomain(state, leaf_r)
 
 	for pile_r in filter(between吗(0, pile_k - inclusive), domainOf_leaf_r):
 		state.removeCreaseViolations().reduceAllPermutationSpace(quick=True)
-		state.listPermutationSpace = excludeLeafAtPile(state.listPermutationSpace, leaf_r, pile_r)
+		state.listPermutationSpace = excludeLeafAtPile_inListPermutationSpace(state.listPermutationSpace, leaf_r, pile_r)
 
 	state.removeCreaseViolations().reduceAllPermutationSpace()
 
@@ -133,7 +135,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 
 	return state
 
-def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> list[PermutationSpace]:
+def excludeLeafAtPile_inListPermutationSpace(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> list[PermutationSpace]:
 	"""Return a new list of `PermutationSpace` without `leaf` at `pile`.
 
 	Parameters
@@ -165,14 +167,15 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 		listPermutationSpace.append(permutationSpace)
 	return listPermutationSpace
 
+#======== One `PermutationSpace` ===============================
+
+def atPileExcludeLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> PermutationSpace:
+	return permutationSpace
+
 #======== Reducing `LeafOptions` ===============================
 #-------- Shared logic -----------------------------------------
 
-def reduceLeafSpace(
-	permutationSpace: PermutationSpace
-	, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]]
-	, leafAntiOptions: LeafOptions
-) -> PermutationSpace:
+def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]], leafAntiOptions: LeafOptions) -> PermutationSpace:
 	"""Update permutation space by removing forbidden leaves from specified piles.
 
 	(AI generated docstring)
@@ -250,9 +253,9 @@ def reduceLeafSpace(
 def isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
 	return isLeafOptions吗(pileLeafSpace[1])
 
-def _odd吗(state: EliminationState, dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
+def _odd吗(mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile, Leaf]], bool]:
 	def workhorse(pileLeaf: tuple[Pile, Leaf]) -> bool:
-		return bool(oddLeaf吗(state.mapShape, dimension=dimension, leaf=pileLeaf[1]))
+		return bool(oddLeaf吗(mapShape, dimension=dimension, leaf=pileLeaf[1]))
 	return workhorse
 
 def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
@@ -281,70 +284,68 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 	pilesForbidden: Iterable[Pile] = []
 	permutationSpaceHasNewLeaf: bool = True
 
-	generators: list[CartesianProduct[tuple[DimensionIndex, PinnedLeaves, tuple[tuple[Pile, Leaf], tuple[Pile, Leaf]]]]] = []
-	for dimension in range(state.dimensionsTotal):
-		grouped: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
-		parityEven: PinnedLeaves = dict(get(False, grouped, ()))
-		parityOdd: PinnedLeaves = dict(get(True, grouped, ()))
-		generators.append(CartesianProduct((dimension,), (parityOdd,), combinations(sorted(parityEven.items()), 2)))
-		generators.append(CartesianProduct((dimension,), (parityEven,), combinations(sorted(parityOdd.items()), 2)))
-
 	while permutationSpaceHasNewLeaf:
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		for dimension, leavesPinnedParityOpposite, ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in concat(generators):
-			leaf_kCrease: Leaf | None = getCreasePost(state.mapShape, leaf_k, dimension)
-			if leaf_kCrease is None:
-				continue
-			leaf_rCrease: Leaf | None = getCreasePost(state.mapShape, leaf_r, dimension)
-			if leaf_rCrease is None:
-				continue
+		for dimension in range(state.dimensionsTotal):
+			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
 
-			if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
-				pileOf_kCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_kCrease))
-			if leaf_rCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_rCrease):
-				pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
+			for upDown, leftRight in ((False, True), (True, False)):
+				leavesPinnedParityOpposite: PinnedLeaves = dict(get(upDown, groupedByParity, ()))
 
-			if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-				leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
+				for ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in combinations(sorted(get(leftRight, groupedByParity, ())), 2):
+					leaf_kCrease: Leaf | None = getCreasePost(state.mapShape, leaf_k, dimension)
+					if leaf_kCrease is None:
+						continue
+					leaf_rCrease: Leaf | None = getCreasePost(state.mapShape, leaf_r, dimension)
+					if leaf_rCrease is None:
+						continue
 
-				if pileOf_k < pileOf_r < pileOf_kCrease:
-					pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
-				elif pileOf_kCrease < pileOf_r < pileOf_k:
-					pilesForbidden = frozenset([*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)])
-				elif (pileOf_r < pileOf_kCrease < pileOf_k) or (pileOf_kCrease < pileOf_k < pileOf_r):
-					pilesForbidden = range(pileOf_kCrease + 1, pileOf_k)
-				elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r):
-					pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
+					if leaf_kCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_kCrease):
+						pileOf_kCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_kCrease))
+					if leaf_rCreaseIsPinned := leafPinned吗(leavesPinnedParityOpposite, leaf_rCrease):
+						pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
 
-			elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-				leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
+					if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
+						leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
 
-				if pileOf_rCrease < pileOf_k < pileOf_r:
-					pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
-				elif pileOf_r < pileOf_k < pileOf_rCrease:
-					pilesForbidden = frozenset([*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)])
-				elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k):
-					pilesForbidden = range(pileOf_r + 1, pileOf_rCrease)
-				elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k):
-					pilesForbidden = range(pileOf_rCrease + 1, pileOf_r)
+						if pileOf_k < pileOf_r < pileOf_kCrease:
+							pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
+						elif pileOf_kCrease < pileOf_r < pileOf_k:
+							pilesForbidden = frozenset([*range(pileOf_kCrease), *range(pileOf_k + 1, state.pileLast + inclusive)])
+						elif (pileOf_r < pileOf_kCrease < pileOf_k) or (pileOf_kCrease < pileOf_k < pileOf_r):
+							pilesForbidden = range(pileOf_kCrease + 1, pileOf_k)
+						elif (pileOf_r < pileOf_k < pileOf_kCrease) or (pileOf_k < pileOf_kCrease < pileOf_r):
+							pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
-			elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-				if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
-					#=SIN= Early return.
-					return None
-				continue
+					elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+						leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
 
-			else:
-				continue
+						if pileOf_rCrease < pileOf_k < pileOf_r:
+							pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
+						elif pileOf_r < pileOf_k < pileOf_rCrease:
+							pilesForbidden = frozenset([*range(pileOf_r), *range(pileOf_rCrease + 1, state.pileLast + inclusive)])
+						elif (pileOf_k < pileOf_r < pileOf_rCrease) or (pileOf_r < pileOf_rCrease < pileOf_k):
+							pilesForbidden = range(pileOf_r + 1, pileOf_rCrease)
+						elif (pileOf_k < pileOf_rCrease < pileOf_r) or (pileOf_rCrease < pileOf_r < pileOf_k):
+							pilesForbidden = range(pileOf_rCrease + 1, pileOf_r)
 
-			if not (permutationSpace := reduceLeafSpace(permutationSpace
-					, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
-					, leafAntiOptions
-			)):
-				#=SIN= Early return.
-				return None
+					elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
+						if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
+							#=SIN= Early return.
+							return None
+						continue
+
+					else:
+						continue
+
+					if not (permutationSpace := reduceLeafSpace(permutationSpace
+							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
+							, leafAntiOptions
+					)):
+						#=SIN= Early return.
+						return None
 
 		if leafCount < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
@@ -489,13 +490,13 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 
 		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
-			#=SIN= Early return: a leaf with no possible pile irreversibly invalidates the candidate.
+			#=SIN= Early return: every leaf must have a domain size of at least one.
 			return None
 
-		leavesWithDomainOf1: set[Leaf] = set(DOTkeys(filterValue((1).__eq__, counterLeafDomainSize))).difference(leavesPinned.values()).difference([state.leavesTotal])
-		if leavesWithDomainOf1:
-			leaf: Leaf = leavesWithDomainOf1.pop()
-			sherpa: PermutationSpace | None = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(DOTkeys(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined))), leaf))
+		leavesNotPinnedWithDomainOf1: set[Leaf] = set(filterValue((1).__eq__, counterLeafDomainSize)).difference(leavesPinned.values()).difference([state.leavesTotal])
+		if leavesNotPinnedWithDomainOf1:
+			leaf: Leaf = leavesNotPinnedWithDomainOf1.pop()
+			sherpa: PermutationSpace | None = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined)), leaf))
 			if (sherpa is None) or (not sherpa):
 				#=SIN= Early return: failed pin propagation irreversibly invalidates the candidate.
 				return None
