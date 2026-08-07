@@ -248,11 +248,28 @@ To cite this software, use the metadata in [`CITATION.cff`](https://github.com/h
 - [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bib)
 - [Available at oeis.org.](https://oeis.org)
 
-## License
+## Extending OEIS sequences
 
-`mapFolding` is licensed under the [Creative Commons Attribution-NonCommercial 4.0 International License](https://github.com/hunterhogan/mapFolding/blob/main/LICENSE).
+OEIS limits my proposed changes to a sequence to three sequences at a time. I have values to extend the following sequences, but I cannot submit them all at the same time.
+
+- A060206
+- A077014
+- A077460
+- A085973
+- A208357
+- A217310
+- A217318
+- A223093
+- A223094
+- A223095
+- A259702
+- A333971
+- A334615
+- A337581
 
 ## My recovery
 
 [![2011 August: Homeless since](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
 [![YouTube channel subscribers](https://img.shields.io/youtube/channel/subscribers/UC3Gx7kz61009NbhpRtPP7tw)](https://www.youtube.com/@HunterHogan)
+
+[![CC-BY-NC-4.0](https://raw.githubusercontent.com/hunterhogan/mapFolding/refs/heads/main/.github/CC-BY-NC-4.0.png)](https://creativecommons.org/licenses/by-nc/4.0/)
