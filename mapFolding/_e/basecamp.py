@@ -1,4 +1,4 @@
-# ruff:file-ignore[import-outside-top-level]
+# ruff: file-ignore[import-outside-top-level]
 from __future__ import annotations
 
 from mapFolding._e.dataBaskets import EliminationState

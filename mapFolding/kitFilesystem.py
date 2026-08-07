@@ -301,17 +301,17 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	"""
 	try:
 		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
-	except Exception as ERRORmessage:  # ruff:ignore[blind-except]
-		try:  # ruff:ignore[too-many-statements-in-try-clause]
+	except Exception as ERRORmessage:  # ruff: ignore[blind-except]
+		try:  # ruff: ignore[too-many-statements-in-try-clause]
 			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(banner + f"\n{countTotal = }\n" + banner)
-			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff:ignore[os-getcwd, os-path-join]
-			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff:ignore[builtin-open, open-file-with-context-handler]
+			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff: ignore[os-getcwd, os-path-join]
+			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff: ignore[builtin-open, open-file-with-context-handler]
 			streamWriteFallback.write(str(countTotal))
 			streamWriteFallback.close()
 			stdout.write(pathFilenameWritten)
-		except Exception:  # ruff:ignore[blind-except]
+		except Exception:  # ruff: ignore[blind-except]
 			stdout.write(str(countTotal))
 			pathFilenameWritten = ''
 	return PurePosixPath(pathFilenameWritten)

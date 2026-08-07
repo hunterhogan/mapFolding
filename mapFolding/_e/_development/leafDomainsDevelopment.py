@@ -779,5 +779,5 @@ def getDictionaryLeafDomains(state: EliminationState) -> dict[int, range]:
 	"""For each `leaf`, the associated Python `range` defines the mathematical domain:
 	1. every `pile` at which `leaf` may be found in a `folding` and
 	2. in the set of all valid foldings, every `pile` at which `leaf` must be found.
-	"""  # ruff:ignore[missing-blank-line-after-summary]
+	"""  # ruff: ignore[missing-blank-line-after-summary]
 	return {leaf: getLeafDomain(state, leaf) for leaf in range(state.leavesTotal)}

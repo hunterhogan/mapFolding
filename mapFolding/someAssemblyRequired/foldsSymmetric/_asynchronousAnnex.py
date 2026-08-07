@@ -1,7 +1,7 @@
 # The real module is generated from this incomplete module. Comments are not preserved.
-# ruff:file-ignore[global-statement, typing-only-first-party-import]
+# ruff: file-ignore[global-statement, typing-only-first-party-import]
 # pyright: reportArgumentType=false
-# ty:ignore[invalid-argument-type]
+# ty: ignore[invalid-argument-type]
 from __future__ import annotations
 
 from copy import deepcopy

@@ -1,4 +1,4 @@
-# ruff:file-ignore[import-outside-top-level]
+# ruff: file-ignore[import-outside-top-level]
 from __future__ import annotations
 
 from contextlib import suppress
@@ -275,7 +275,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		if 45 <= state.n:  # Data collection for 'reference' directory.
 			# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-			print(state.kind, state.n, state.boundary + 1, state.indexTarget, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff:ignore[print]
+			print(state.kind, state.n, state.boundary + 1, state.indexTarget, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
 		boundaryProgressBar.update()
 
 	boundaryProgressBar.close()

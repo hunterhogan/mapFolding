@@ -1,4 +1,4 @@
-# ruff:file-ignore[import-outside-top-level]
+# ruff: file-ignore[import-outside-top-level]
 """Transfer matrix algorithm implementations in NumPy (*Num*erical *Py*thon) and pandas.
 
 Citations
@@ -79,7 +79,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			dataframeMeanders['analyzed'] *= bitsTarget
 			del bitsTarget
-			dataframeMeanders = dataframeMeanders.loc[(1 < dataframeMeanders['analyzed'])]  # `if (bitsAlfaHasArcs and bitsZuluHasArcs)`  # ty:ignore[invalid-assignment]
+			dataframeMeanders = dataframeMeanders.loc[(1 < dataframeMeanders['analyzed'])]  # `if (bitsAlfaHasArcs and bitsZuluHasArcs)`  # ty: ignore[invalid-assignment]
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator				# `bitsAlfa`
@@ -107,7 +107,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			# `if bitsAlfaAtEven and not bitsZuluAtEven`, modify `bitsAlfaPairedToOdd`
 			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = dtypeArcCode(
-				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]))  # ty:ignore[invalid-assignment]
+				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]))  # ty: ignore[invalid-assignment]
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1
@@ -320,7 +320,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()  # pyright: ignore[reportAttributeAccessIssue]  # ty:ignore[invalid-assignment]
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[invalid-assignment]
 	del dataframeAnalyzed
 	return state
 

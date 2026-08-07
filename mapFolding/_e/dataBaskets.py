@@ -1,5 +1,5 @@
 # TODO idk enough to choose between `UserDict` and subclassing `dict`.
-# ruff:file-ignore[subclass-builtin]
+# ruff: file-ignore[subclass-builtin]
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 
 from __future__ import annotations

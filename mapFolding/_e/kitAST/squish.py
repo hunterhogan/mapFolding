@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 	import ast
 
 launcher = """
-# ruff:file-ignore[commented-out-code, print]
+# ruff: file-ignore[commented-out-code, print]
 if __name__ == "__main__":
 	CPUlimit: int | float | None = None
 	state: EliminationState = EliminationState((2,) * 5)

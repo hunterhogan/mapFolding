@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from pathlib import PurePath
 
-def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
+def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
 	"""Generate initialization module for counting variable setup.
 
 	(AI generated docstring)

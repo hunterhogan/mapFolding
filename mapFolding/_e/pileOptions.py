@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import LeafOptions, Pile, UndeterminedPiles
 
 def getLeafOptions(state: EliminationState, pile: Pile) -> LeafOptions:
-	from mapFolding._e._2上nDimensional.pileOptions import _getLeafOptions  # ruff:ignore[import-outside-top-level]
+	from mapFolding._e._2上nDimensional.pileOptions import _getLeafOptions  # ruff: ignore[import-outside-top-level]
 	return _getLeafOptions(pile, state.dimensionsTotal, state.mapShape, state.leavesTotal)
 
 def getDictionaryLeafOptions(state: EliminationState) -> UndeterminedPiles:

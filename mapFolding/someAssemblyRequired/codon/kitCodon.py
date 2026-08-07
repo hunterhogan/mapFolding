@@ -2,12 +2,12 @@
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, Then
-from astToolkit.containers import IngredientsFunction  # ruff:ignore[typing-only-third-party-import]
-from collections.abc import Iterator, Sequence  # ruff:ignore[typing-only-standard-library-import]
+from astToolkit.containers import IngredientsFunction  # ruff: ignore[typing-only-third-party-import]
+from collections.abc import Iterator, Sequence  # ruff: ignore[typing-only-standard-library-import]
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import IfThis
 from more_itertools import unique_everseen
-import ast  # ruff:ignore[typing-only-standard-library-import]
+import ast  # ruff: ignore[typing-only-standard-library-import]
 
 identifierCompatibleValue: str = 'compatibleValue'
 

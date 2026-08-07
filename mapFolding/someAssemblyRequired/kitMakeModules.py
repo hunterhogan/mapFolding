@@ -78,7 +78,7 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	identifierDataclass: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 	logicalPathDataclass = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff:ignore[private-member-access]
+	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
 		for nameTuple in listNameTuples:
 			if nameTuple[0] == identifierDataclass:
 				logicalPathDataclass = moduleWithLogicalPath

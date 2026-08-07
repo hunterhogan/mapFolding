@@ -155,7 +155,7 @@ arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]
 	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
 """
 
-def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:  # ruff:ignore[unused-function-argument]
+def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:  # ruff: ignore[unused-function-argument]
 	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
 
 	Warning

@@ -1,5 +1,5 @@
 #=Sin= `numba`, `makeDictionaryFoldsTotalKnown`, `getValuesKnown`.
-# ruff:file-ignore[import-outside-top-level]
+# ruff: file-ignore[import-outside-top-level]
 """Oft-needed computations or actions, especially for multi-dimensional map folding."""
 from __future__ import annotations
 

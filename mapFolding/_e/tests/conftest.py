@@ -1,4 +1,4 @@
-# ruff:file-ignore[suspicious-pickle-usage]
+# ruff: file-ignore[suspicious-pickle-usage]
 from __future__ import annotations
 
 from mapFolding.theSSOT import settingsPackage

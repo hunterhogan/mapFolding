@@ -1,4 +1,4 @@
-# ruff:file-ignore[print, multi-value-repeated-key-literal, prohibited-trailing-comma, tab-after-comma, whitespace-after-open-bracket, tab-before-operator]
+# ruff: file-ignore[print, multi-value-repeated-key-literal, prohibited-trailing-comma, tab-after-comma, whitespace-after-open-bracket, tab-before-operator]
 from __future__ import annotations
 
 p2d6 = {0: [0],

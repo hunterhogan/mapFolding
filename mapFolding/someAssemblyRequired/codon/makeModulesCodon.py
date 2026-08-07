@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
-from collections.abc import Callable  # ruff:ignore[typing-only-standard-library-import]
+from collections.abc import Callable  # ruff: ignore[typing-only-standard-library-import]
 from copy import deepcopy
 from mapFolding.someAssemblyRequired import Default, default, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.codon.kitCodon import decorateCallableWithCodon, variableCompatibility
@@ -13,7 +13,7 @@ from mapFolding.someAssemblyRequired.kitTransformations import (
 from mapFolding.theSSOT import settingsPackage
 from more_itertools import consume
 from pathlib import Path, PurePath
-import ast  # ruff:ignore[typing-only-standard-library-import]
+import ast  # ruff: ignore[typing-only-standard-library-import]
 
 def _dataclassImports(
 	logicalPathDataclass: identifierDotAttribute

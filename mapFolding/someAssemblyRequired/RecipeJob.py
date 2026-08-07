@@ -253,9 +253,9 @@ def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> 
 	Ima___Assign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[identifier]
 	match elementConstructor:
 		case 'scalar':
-			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # ruff:ignore[suspicious-eval-usage]
+			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # ruff: ignore[suspicious-eval-usage]
 		case 'array':
-			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # ruff:ignore[suspicious-eval-usage]
+			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # ruff: ignore[suspicious-eval-usage]
 			dataAs_ast_expr: ast.expr = pythonCode2ast_expr(dataAsStrRLE)
 			cast('ast.Call', Ima___Assign.value).args = [dataAs_ast_expr]
 		case _:
@@ -309,9 +309,9 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 				ImaAnnAssign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff:ignore[suspicious-eval-usage]
+						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff: ignore[suspicious-eval-usage]
 					case 'array':
-						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # ruff:ignore[suspicious-eval-usage]
+						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # ruff: ignore[suspicious-eval-usage]
 						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
 						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
 					case _:
@@ -342,7 +342,7 @@ def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) 
 	"""
 	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
-			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff:ignore[suspicious-eval-usage]
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff: ignore[suspicious-eval-usage]
 		).visit(ingredientsCount.astFunctionDef)
 
 #================== Launchers =======================================================================

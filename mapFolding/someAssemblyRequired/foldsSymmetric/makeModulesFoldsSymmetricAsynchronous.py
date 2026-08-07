@@ -24,7 +24,7 @@ AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	, value=Make.Call(Make.Name(defaultFoldsSymmetric['function']['getSymmetricFoldsTotal']))
 )
 
-def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
+def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
 	"""Make the check for symmetry in each folding pattern in a group of folds asynchronous to the rest of the symmetric map folding algorithm.
 
 	To do asynchronous filtering, a few things must happen.
@@ -100,7 +100,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 def makeFoldsSymmetricAsynchronousModules() -> None:
 	"""Make asynchronous modules for foldsSymmetric."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
-	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']  # ruff:ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
+	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']  # ruff: ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':

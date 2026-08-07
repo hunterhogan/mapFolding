@@ -148,7 +148,7 @@ class IfThis(astToolkit_IfThis):
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
 			A predicate function that returns `True` for `If` nodes with the specified test condition.
 		"""
-		return Be.If.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty:ignore[invalid-return-type]
+		return Be.If.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.If]]:
@@ -172,7 +172,7 @@ class IfThis(astToolkit_IfThis):
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
 			A predicate function that returns `True` for `If` nodes with the specified test condition.
 		"""
-		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty:ignore[invalid-return-type]
+		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isWhile0LessThanAttributeNamespaceIdentifier(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.While]]:
@@ -197,7 +197,7 @@ class IfThis(astToolkit_IfThis):
 			A predicate function that returns `True` for `While` nodes with the specified test
 			condition.
 		"""
-		return Be.While.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty:ignore[invalid-return-type]
+		return Be.While.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.While]]:
@@ -222,4 +222,4 @@ class IfThis(astToolkit_IfThis):
 			A predicate function that returns `True` for `While` nodes with the specified test
 			condition.
 		"""
-		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty:ignore[invalid-return-type]
+		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty: ignore[invalid-return-type]

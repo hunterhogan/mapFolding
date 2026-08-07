@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	import ast
 
-def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff:ignore[unused-function-argument]
+def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
 	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
 			, Grab.idAttribute(Then.replaceWith(defaultFoldsSymmetric['variable']['stateDataclass']))

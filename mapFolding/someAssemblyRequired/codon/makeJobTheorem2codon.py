@@ -3,14 +3,14 @@ from __future__ import annotations
 
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import DatatypeLeavesTotal  # ruff:ignore[typing-only-first-party-import]
+from mapFolding import DatatypeLeavesTotal  # ruff: ignore[typing-only-first-party-import]
 from mapFolding.someAssemblyRequired import DatatypeConfiguration
 from mapFolding.someAssemblyRequired.codon.kitCodon import variableCompatibility
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from pathlib import Path
 import python_minifier
-import subprocess  # ruff:ignore[suspicious-subprocess-import]
+import subprocess  # ruff: ignore[suspicious-subprocess-import]
 import sys
 
 listDatatypeConfigurations: list[DatatypeConfiguration] = [

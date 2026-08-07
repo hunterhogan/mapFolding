@@ -93,7 +93,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds  # ruff:ignore[import-outside-top-level]
+	from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds  # ruff: ignore[import-outside-top-level]
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
 	foldsTotalEstimated: int = getValuesKnown('A007822').get(n, 0)
 	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
