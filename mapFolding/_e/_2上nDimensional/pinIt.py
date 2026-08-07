@@ -63,7 +63,9 @@ from mapFolding._e._2上nDimensional import (
 from mapFolding._e._2上nDimensional.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
-from mapFolding._e._2上nDimensional.pinItAnnex import listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional
+from mapFolding._e._2上nDimensional.pinItAnnex import (
+	listFunctionsReduction2上nDimensional as listFunctionsReduction2上nDimensional,
+	listFunctionsReductionQuick2上nDimensional as listFunctionsReductionQuick2上nDimensional)
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions

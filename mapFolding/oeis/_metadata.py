@@ -4,7 +4,6 @@ from functools import cache, partial
 from humpy_cytoolz import compose, get_in
 from hunterMakesPy import errorL33T
 from itertools import filterfalse
-from mapFolding.kitFilesystem import getCacheOrURL
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.oeis._dataBaskets import MetadataOEISid
 from mapFolding.oeis._theSSOT import oeisIDsImplemented, pathCache
@@ -91,6 +90,7 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 	filename: str = f"b{oeisID[1:]}.txt"
 	pathFilenameCache: Path = pathCache / filename
 	url: str = f"https://oeis.org/{oeisID}/{filename}"
+	from mapFolding.kitFilesystem import getCacheOrURL
 
 	oeisData: str = getCacheOrURL(pathFilenameCache, url)
 
@@ -133,6 +133,7 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	oeisID = formatOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
 	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
+	from mapFolding.kitFilesystem import getCacheOrURL
 
 	oeisData: str = getCacheOrURL(pathFilenameCache, url)
 

@@ -428,3 +428,12 @@ listFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, Per
 	_byCrease2上nDimensional,
 	reducePermutationSpace_LeafIsPinned,
 )
+
+listFunctionsReductionQuick2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+	_noConsecutiveDimensions2上nDimensional,
+	_headsBeforeTails2上nDimensional,
+	reducePermutationSpace_nakedSubset,
+	reducePermutationSpace_leafDomainOf1,
+	_byCrease2上nDimensional,
+	reducePermutationSpace_LeafIsPinned,
+)

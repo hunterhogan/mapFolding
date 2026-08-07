@@ -6,7 +6,7 @@ from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAr
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, listFunctionsReduction
+from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k, listFunctionsReductionDEFAULT
 from math import factorial
 from more_itertools import all_unique as allUnique吗
 from multiprocessing import get_context
@@ -32,7 +32,7 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 
 def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
 	return EliminationState(mapShape, listPermutationSpace=[permutationSpace]
-		).removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction).moveToListFolding()
+		).removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReductionDEFAULT).moveToListFolding()
 
 def deconstructPermutationSpaces(listPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
 	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, listPermutationSpace))
@@ -47,7 +47,7 @@ def theorem2b(state: EliminationState) -> EliminationState:
 		leaf_k: int = state.productsOfDimensions[dimension]
 		leaf_r: int = 2 * leaf_k
 		state = excludeLeaf_rBeforeLeaf_k(state, leaf_k, leaf_r)
-		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
+		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReductionDEFAULT)
 	return state
 
 def theorem4(state: EliminationState) -> EliminationState:
@@ -55,7 +55,7 @@ def theorem4(state: EliminationState) -> EliminationState:
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 		for index_k, index_r in pairwise(indicesSameDimensionLength):
 			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
-			state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
+			state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReductionDEFAULT)
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
@@ -66,7 +66,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
-		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
+		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReductionDEFAULT)
 
 		state = theorem4(state)
 		state = theorem2b(state)

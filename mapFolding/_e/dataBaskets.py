@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from functools import partial
 from gmpy2 import bit_mask
 from humpy_cytoolz import (
@@ -23,7 +24,7 @@ from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable, Iterator, Sequence
+	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
 	from typing import Self
@@ -567,18 +568,22 @@ class EliminationState:
 	mapShape: tuple[int, ...] = dataclasses.field(init=True)
 	"""Dimensions of the map being analyzed for folding patterns."""
 
+	listPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
+	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
+
+	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
+	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
+
+	listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace | None]], init=True)
+	listFunctionsReductionQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace | None]], init=True)
+
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
 
 	listFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
 	"""A list of `Folding` patterns found."""
-	listPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
-	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
-
 	pile: Pile = -1
 	"""The `pile` on the workbench."""
-	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
-	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	Theorem2aMultiplier: int = 1
 	Theorem2Multiplier: int = 1
@@ -714,7 +719,13 @@ class EliminationState:
 			, self.pile in getLeafDomain(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]]) -> Self:
+	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
+					, *, quick: bool = False) -> Self:
+		from mapFolding._e.pinIt import listFunctionsReductionDEFAULT, listFunctionsReductionQuickDEFAULT
+		listQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
+		if quick:
+			listQuick = self.listFunctionsReductionQuick or listFunctionsReductionQuickDEFAULT
+		listFunctionsReduction = listFunctionsReduction or listQuick or self.listFunctionsReduction or listFunctionsReductionDEFAULT
 		listPermutationSpace: list[PermutationSpace] = self.listPermutationSpace
 		self.listPermutationSpace = []
 		listPermutationSpaceIrreducible: list[PermutationSpace] = []

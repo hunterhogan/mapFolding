@@ -6,8 +6,7 @@ from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions
 from mapFolding._e._2上nDimensional import (
-	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, pinIt)
-from mapFolding._e._development.toolkit import verifyPinning2Dn
+	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一)
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
 from mapFolding._e.dataBaskets import EliminationState
@@ -33,29 +32,32 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state: EliminationState = EliminationState((2,) * 7)
+	state: EliminationState = EliminationState((2,) * 5)
 
 	printThis = True
 
 	if printThis:
-		timeStart: float = time.perf_counter()
 		state = makeAlbum2上nDimensional吗(5, 14)
+		if state.listPermutationSpace:
+			# pprint(state, width=200, compact=True)
+			state = doTheNeedful(state, 14)
+		recordAlbum2上nDimensional吗(state)
+
+		timeStart: float = time.perf_counter()
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state = state.removeCreaseViolations().reduceAllPermutationSpace(pinIt.listFunctionsReduction2上nDimensional)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		state = doTheNeedful(state, 14)
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
-		# verifyPinning2Dn(state)
+		from mapFolding._e._development.toolkit import verifyPinning2Dn
+		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		printStatisticsPermutations(state)
 		print(f"{len(state.listPermutationSpace)=}")
-		recordAlbum2上nDimensional吗(state)
 
 	elif printThis:
-		pprint(state.listFolding)
-		pprint(state)
-		pprint(state.listPermutationSpace)
+		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 28))))
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
+		print(list(getLeafDomain(state, 首一(5) + 4)))
+		pprint(state.listFolding)
+		pprint(state.listPermutationSpace)
 		state = pinIt.pinPilesAtEnds(state, 3)
 		state = pinIt.pinLeavesDimension首二(state)
 		state = pinIt.pinLeavesDimensions0零一(state)
@@ -69,5 +71,3 @@ if __name__ == '__main__':
 		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
 		print(*getLeavesCreasePost(state, 22))
 		print(*getLeavesCreaseAnte(state, 53))
-		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 60))))
-		print(list(getLeafDomain(state, 37)))

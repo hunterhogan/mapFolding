@@ -91,7 +91,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	, pile_k: Pile
 	, domainOf_leaf_r: Iterable[Pile] | None = None
 ) -> EliminationState:
-	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
+	listPermutationSpace: Iterable[PermutationSpace] = state.listPermutationSpace
 	state.listPermutationSpace = []
 
 	listPermutationSpaceUnchanged: list[PermutationSpace] = []
@@ -102,7 +102,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 			listExcludeLeaf_r.append(permutationSpace)
 
 		elif leafInLeafOptions吗(leaf_k, permutationSpace.getLeafOptions(pile_k, LeafOptions(0))):
-			permutationSpaceCopy = permutationSpace.copy()
+			permutationSpaceCopy: PermutationSpace = permutationSpace.copy()
 			permutationSpaceCopy[pile_k] = bit_clear(permutationSpaceCopy[pile_k], leaf_k)
 			state.listPermutationSpace.append(permutationSpaceCopy)
 
@@ -110,6 +110,11 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 
 		else:
 			listPermutationSpaceUnchanged.append(permutationSpace)
+
+	state.removeCreaseViolations().reduceAllPermutationSpace()
+	listPermutationSpaceUnchanged.extend(state.listPermutationSpace)
+	state.listPermutationSpace = listExcludeLeaf_r
+	del listExcludeLeaf_r, listPermutationSpace
 
 	# DEVELOPMENT If I were to use `domainOf_leaf_r = domainOf_leaf_r or getLeafDomain(self,
 	# leaf_r)`, then an empty `Iterable` would be replaced by `getLeafDomain(self, leaf_r)`. That
@@ -119,17 +124,17 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 		domainOf_leaf_r = getLeafDomain(state, leaf_r)
 
 	for pile_r in filter(between吗(0, pile_k - inclusive), domainOf_leaf_r):
-		listExcludeLeaf_r = excludeLeafAtPile(listExcludeLeaf_r, leaf_r, pile_r)
+		state.removeCreaseViolations().reduceAllPermutationSpace(quick=True)
+		state.listPermutationSpace = excludeLeafAtPile(state.listPermutationSpace, leaf_r, pile_r)
 
-	state.listPermutationSpace.extend(listExcludeLeaf_r)
-	state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
+	state.removeCreaseViolations().reduceAllPermutationSpace()
 
 	state.listPermutationSpace.extend(listPermutationSpaceUnchanged)
 
 	return state
 
-def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> Iterator[PermutationSpace]:
-	"""Return a new list of pinned-leaves dictionaries that forbid `leaf` at `pile`.
+def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> list[PermutationSpace]:
+	"""Return a new list of `PermutationSpace` without `leaf` at `pile`.
 
 	Parameters
 	----------
@@ -138,26 +143,27 @@ def excludeLeafAtPile(listPermutationSpace: Iterable[PermutationSpace], leaf: Le
 	leaf : int
 		`leaf` to exclude from `pile`.
 	pile : int
-		`pile` at which `leaf` must not be fixed.
+		`pile` at which `leaf` must not be found.
 
-	Yields
-	------
-	listPermutationSpace : Iterable[PermutationSpace]
+	Returns
+	-------
+	listPermutationSpace : list[PermutationSpace]
 		Expanded / filtered list respecting the exclusion constraint.
 
 	See Also
 	--------
-	PermutationSpace.deconstructPermutationSpaceAtPile : Performs the expansion for one dictionary.
-	requireLeafPinnedAtPile : Complementary operation that forces a `leaf` at a `pile`.
+	requireLeafPinnedAtPile
+		Complementary operation that forces a `leaf` at a `pile`.
 	"""
 	listPermutationSpace, _pinnedAtPile = segregateLeafPinnedAtPile(listPermutationSpace, leaf, pile)
-	pilePinned: dict[bool, list[PermutationSpace]] = toolz_groupby(methodcaller('pilePinned吗', pile), listPermutationSpace)
+	groupByPilePinned: dict[bool, list[PermutationSpace]] = toolz_groupby(methodcaller('pilePinned吗', pile), listPermutationSpace)
 
-	yield from pilePinned.get(True, [])
+	listPermutationSpace = groupByPilePinned.get(True, [])
 
-	for permutationSpace in pilePinned.get(False, []):
+	for permutationSpace in groupByPilePinned.get(False, []):
 		permutationSpace[pile] = bit_clear(permutationSpace[pile], leaf)
-		yield permutationSpace
+		listPermutationSpace.append(permutationSpace)
+	return listPermutationSpace
 
 #======== Reducing `LeafOptions` ===============================
 #-------- Shared logic -----------------------------------------
@@ -498,9 +504,15 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 			permutationSpaceHasNewLeaf = True
 	return permutationSpace
 
-listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+listFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
 	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf1
 	, _crossedCreases
+	, reducePermutationSpace_LeafIsPinned
+)
+
+listFunctionsReductionQuickDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+	reducePermutationSpace_nakedSubset
+	, reducePermutationSpace_leafDomainOf1
 	, reducePermutationSpace_LeafIsPinned
 )

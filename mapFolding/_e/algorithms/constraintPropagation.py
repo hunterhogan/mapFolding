@@ -7,9 +7,8 @@ from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDim
 from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
-from mapFolding._e.pinIt import listFunctionsReduction
+from mapFolding._e.pinIt import listFunctionsReductionDEFAULT
 from mapFolding.beDRY import mapShapeIs2上nDimensions
-from mapFolding.kitFilesystem import writeAlbum
 from mapFolding.theSSOT import settingsPackage
 from math import factorial, prod
 from more_itertools import triplewise
@@ -169,7 +168,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not state.listPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.listPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
-		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction)
+		state = state.removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReductionDEFAULT)
 
 	state.permutationSpace = PermutationSpace()
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
@@ -187,6 +186,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			# TODO temporary data collection for p2d7
 			if (sherpa.dimensionsTotal == 7) and (sherpa.listFolding):
 				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
+				from mapFolding.kitFilesystem import writeAlbum  # ruff: ignore[import-outside-top-level]
 				writeAlbum(sherpa.listFolding, pathFilename)
 
 			state.groupsOfFolds += sherpa.groupsOfFolds
