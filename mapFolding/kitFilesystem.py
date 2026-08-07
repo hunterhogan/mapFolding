@@ -32,18 +32,24 @@ astToolkit
 """
 from __future__ import annotations
 
+from datetime import datetime, timedelta, UTC
+from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import ansiColorReset, ansiColors
+from mapFolding.oeis._theSSOT import cacheDays
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
+from urllib3.exceptions import HTTPError
+import contextlib
 import csv
 import os
 import pandas
 import platformdirs
 import sys
+import urllib3
 
 if TYPE_CHECKING:
 	from _csv import Writer
@@ -52,6 +58,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import EliminationState
 	from mapFolding._e.theTypes import Folding
 	from os import PathLike
+	from urllib3.response import BaseHTTPResponse
 
 #================== Create appropriate paths and filenames =========================================
 
@@ -420,6 +427,62 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 		csvReader: Iterator[list[str]] = csv.reader(streamRead)
 		for row in csvReader:
 			yield tuple(map(int, row))
+
+def getCacheOrURL(pathFilenameCache: Path, url: str) -> str:
+	"""I use this to manage cached data retrieval with HTTP conditional requests.
+
+	This caching layer minimizes network traffic by checking local cache validity based on file
+	modification time and using HTTP If-Modified-Since headers [1] for efficient updates. The function
+	implements a three-tier strategy: prefer valid cache, use conditional HTTP requests with the
+	`urllib3` [2] library when cache is stale, fall back to stale cache on network errors.
+
+	Parameters
+	----------
+	pathFilenameCache : Path
+		Path to the local cache file for storing retrieved data.
+	url : str
+		URL to retrieve the data from if cache is invalid or missing.
+
+	Returns
+	-------
+	data : str
+		The retrieved data as a string.
+
+	References
+	----------
+	[1] HTTP If-Modified-Since - RFC 9110
+		https://www.rfc-editor.org/rfc/rfc9110.html#name-if-modified-since
+	[2] urllib3 - Context7
+		https://urllib3.readthedocs.io/en/stable/
+	"""
+	preferCache: bool = False
+	data: str = ''
+	cacheDatetime: datetime | None = None
+
+	if pathFilenameCache.exists():
+		cacheDatetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
+		preferCache = datetime.now(tz=UTC) - cacheDatetime < timedelta(days=cacheDays)
+		data = pathFilenameCache.read_text(encoding="utf-8")
+
+	if not preferCache:
+		if not url.startswith(("http:", "https:")):
+			message: str = f"I received {url = }, but it must start with 'http:' or 'https:'"
+			raise ValueError(message)
+
+		headers: dict[str, str] | None = None
+		if cacheDatetime is not None:
+			headers = {"If-Modified-Since": format_datetime(cacheDatetime, usegmt=True)}
+
+		httpPoolManager: urllib3.PoolManager = urllib3.PoolManager(retries=False)
+		with contextlib.suppress(HTTPError, AttributeError):
+			response: BaseHTTPResponse = httpPoolManager.request("GET", url, headers=headers, preload_content=True, decode_content=True)
+			if response.status == 304:
+				pathFilenameCache.touch()  # Update cache file's modification time to server time.
+			elif response.status == 200:
+				writeStringToHere(data := response.data.decode("utf-8"), pathFilenameCache)
+		httpPoolManager.clear()
+
+	return data
 
 # Perhaps:
 #================== Find or enumerate files based on their purpose, not filename or path ==========

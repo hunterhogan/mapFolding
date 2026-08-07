@@ -5,15 +5,14 @@ from ast import parse as ast_parse
 from astToolkit import Be, IfThis, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule, LedgerOfImports
 from humpy_cytoolz import juxt
-from itertools import repeat
+from itertools import repeat, starmap
 from mapFolding._e.kitAST.infoBooth import default
+from mapFolding.someAssemblyRequired.kitLinux import toCodon
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
 import autoflake  # pyright: ignore[reportMissingTypeStubs] # TODO waiting for new version.
 import python_minifier
-import subprocess  # ruff:ignore[suspicious-subprocess-import]
-import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
@@ -39,35 +38,32 @@ if __name__ == "__main__":
 
 """
 
-ledgerTYPE_CHECKING = LedgerOfImports()
-module1 = IngredientsModule()
+def assimilateEliminationCrease(identifierModuleBorg: str) -> Path:
+	def assimilateFunction(logicalPathAssimilee: identifierDotAttribute, identifierFunction: str) -> None:
+		moduleBorg.appendIngredientsFunction(astModuleToIngredientsFunction(dissectModule(logicalPathAssimilee), identifierFunction))
 
-def _dissectModule(logicalPath: identifierDotAttribute) -> ast.Module:
-	moduleDissect: ast.Module = parseLogicalPath2astModule(logicalPath, optimize=2)
+	def assimilateModule(logicalPathAssimilee: identifierDotAttribute) -> None:
+		moduleAssimilee: ast.Module = dissectModule(logicalPathAssimilee)
 
-	findThis: Callable[[ast.AST], TypeIs[ast.If]] = Be.If.testIs(Be.Name.idIs('TYPE_CHECKING'.__eq__))
-	NodeTourist(findThis, ledgerTYPE_CHECKING.walkThis).visit(moduleDissect)
-	NodeChanger(findThis, Then.removeIt).visit(moduleDissect)
+		moduleBorg.imports.walkThis(moduleAssimilee)
+		NodeChanger(IfThis.isAnyOf(Be.Import, Be.ImportFrom), Then.removeIt).visit(moduleAssimilee)
 
-	return moduleDissect
+		moduleBorg.appendEpilogue(moduleAssimilee)
 
-def assimilateFunction(logicalPath: identifierDotAttribute, identifierFunction: str) -> None:
-	module1.appendIngredientsFunction(astModuleToIngredientsFunction(_dissectModule(logicalPath), identifierFunction))
+	def dissectModule(logicalPathAssimilee: identifierDotAttribute) -> ast.Module:
+		moduleDissect: ast.Module = parseLogicalPath2astModule(logicalPathAssimilee, optimize=2)
 
-def assimilateModule(logicalPath: identifierDotAttribute) -> None:
-	moduleDissect: ast.Module = _dissectModule(logicalPath)
+		# Remove docstrings that ast.parse didn't think were docstrings.
+		NodeChanger(Be.Expr.valueIs(Be.Constant.valueIs(lambda node: isinstance(node, str))), Then.removeIt).visit(moduleDissect)
 
-	module1.imports.walkThis(moduleDissect)
-	NodeChanger(IfThis.isAnyOf(Be.Import, Be.ImportFrom), Then.removeIt).visit(moduleDissect)
+		findThis: Callable[[ast.AST], TypeIs[ast.If]] = Be.If.testIs(Be.Name.idIs('TYPE_CHECKING'.__eq__))
+		NodeTourist(findThis, ledgerTYPE_CHECKING.walkThis).visit(moduleDissect)
+		NodeChanger(findThis, Then.removeIt).visit(moduleDissect)
 
-	NodeChanger(Be.Expr.valueIs(Be.Constant.valueIs(lambda fu: isinstance(fu, str))), Then.removeIt).visit(moduleDissect)
+		return moduleDissect
 
-	module1.appendEpilogue(moduleDissect)
-
-def assimilateEliminationCrease(identifierModule: str) -> Path:
-	pathFilename = Path(*default['logicalPath']['synthetic'].split('.'), identifierModule + settingsPackage.fileExtension)
-
-	listModules: list[identifierDotAttribute] = [
+	listFunctionsHARDCODED: list[tuple[identifierDotAttribute, str]] = [('mapFolding.beDRY', 'getLeavesTotal'), ('mapFolding.beDRY', 'defineProcessorLimit')]
+	listModulesHARDCODED: list[identifierDotAttribute] = [
 		*tuple(map("{0}._e.{1}".format, repeat(settingsPackage.identifierPackage), (
 			'theTypes', 'semiotics', 'leafDomains', 'pileOptions', '_disaggregation', '_beDRY', 'dataBaskets', 'filters', 'pinIt'
 		)))
@@ -78,46 +74,36 @@ def assimilateEliminationCrease(identifierModule: str) -> Path:
 		, f"{default['logicalPath']['algorithm']}.iff"
 		, f"{default['logicalPath']['algorithm']}.{default['module']['algorithm']}"
 	]
+	listPackagesHARDCODED: list[identifierDotAttribute] = [*tuple(map("{0}.{1}".format, repeat(settingsPackage.identifierPackage), ('beDRY', '_e', '_e._2上nDimensional')))]
 
-	listPackages: list[identifierDotAttribute] = [
-		*tuple(map("{0}.{1}".format, repeat(settingsPackage.identifierPackage), ('beDRY', '_e', '_e._2上nDimensional')))
-		, *listModules
-	]
+	listFunctions: list[tuple[identifierDotAttribute, str]] = listFunctionsHARDCODED
+	listModules: list[identifierDotAttribute] = listModulesHARDCODED
+	listPackages: list[identifierDotAttribute] = [*listPackagesHARDCODED, *listModules]
 
-	assimilateFunction('mapFolding.beDRY', 'getLeavesTotal')
-	assimilateFunction('mapFolding.beDRY', 'defineProcessorLimit')
+	ledgerTYPE_CHECKING = LedgerOfImports()
+	moduleBorg = IngredientsModule()
+
+	tuple(starmap(assimilateFunction, listFunctions))
 	tuple(map(assimilateModule, listModules))
 
-	tuple(map(juxt(ledgerTYPE_CHECKING.removeImportFrom, module1.removeImportFrom), listPackages, repeat(None)))
+	tuple(map(juxt(ledgerTYPE_CHECKING.removeImportFrom, moduleBorg.removeImportFrom), listPackages, repeat(None)))
 
-	module1.appendPrologue(statement=Make.If(Make.Name('TYPE_CHECKING'), ledgerTYPE_CHECKING.makeList_ast()))
-	module1.appendLauncher(ast_parse(launcher))
+	moduleBorg.appendPrologue(statement=Make.If(Make.Name('TYPE_CHECKING'), ledgerTYPE_CHECKING.makeList_ast()))
+	moduleBorg.appendLauncher(ast_parse(launcher))
 
-	return module1.write_astModule(pathFilename, settingsPackage.identifierPackage)
+	pathFilename = Path(*default['logicalPath']['synthetic'].split('.'), identifierModuleBorg + settingsPackage.fileExtension)
+	return moduleBorg.write_astModule(pathFilename, settingsPackage.identifierPackage)
 
+# TODO If I keep this functionality, do the disk i/o with an appropriate function.
 def minify(pathFilename: Path) -> Path:
 	pathFilename.with_stem('min').write_text(python_minifier.minify(autoflake.fix_code(pathFilename.read_text(encoding='utf-8'), remove_unused_variables=True)
 		, remove_literal_statements=True, rename_globals=True, prefer_single_line=False), encoding='utf-8')
 	return pathFilename.with_stem('min')
 
+# TODO If I keep this functionality, do the disk i/o with an appropriate function.
 def toASCII(pathFilename: Path) -> Path:
 	pathFilename.with_stem('ascii').write_text(anyascii(pathFilename.read_text(encoding='utf-8')).replace(', /', '').replace(', *,', ','), encoding='ascii')
 	return pathFilename.with_stem('ascii')
-
-def toCodon(pathFilename: Path) -> Path:
-	if sys.platform == 'linux':
-		buildCommand: list[str] = ['codon', 'build', '--exe', '--release', '--mcpu=native'
-			, '--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions'
-			, '-o', str(pathFilename.with_suffix(''))
-			, str(pathFilename)
-		]
-
-		subprocess.run(buildCommand, check=False)
-		subprocess.run(['/usr/bin/strip', str(pathFilename.with_suffix(''))], check=False)
-
-		sys.stdout.write(f"sudo systemd-run --unit={pathFilename.parent.name} --nice=-10 --property=CPUAffinity=0 {pathFilename.with_suffix('')}\n")
-
-	return pathFilename.with_suffix('')
 
 if __name__ == '__main__':
 	toCodon(minify(assimilateEliminationCrease('module1')))

@@ -53,6 +53,7 @@ optional-dependencies = { codon = [
   "anyascii",
   "autoflake",
   "codon-jit>=0.4.6; sys_platform == 'linux'",
+  "lief; sys_platform == 'linux'",
   "python-minifier"
 ], development = [
   "gmpy2-stubs",

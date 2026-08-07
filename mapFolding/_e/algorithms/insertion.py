@@ -1,3 +1,4 @@
+# DEVELOPMENT module.
 # pyright: reportUnusedVariable=false, reportUnusedImport=false
 # ruff: file-ignore[commented-out-code, print]
 """Find `groupsOfFolds` based on Sade's 1949 insertion algorithm."""

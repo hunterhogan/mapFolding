@@ -1,9 +1,7 @@
-# pyright: reportUnnecessaryComparison=false
-# pyright: reportAssignmentType=false
-# pyright: reportUnknownMemberType=false
-# pyright: reportAttributeAccessIssue=false
-# ty:ignore[invalid-assignment,unresolved-attribute]
-# ruff:file-ignore[function-call-in-dataclass-default-argument, import-outside-top-level]
+# TODO `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
+# pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
+# ruff: file-ignore[function-call-in-dataclass-default-argument, import-outside-top-level]
+# ty: ignore[invalid-assignment, unresolved-attribute]
 """
 Computational state orchestration for map folding analysis.
 
@@ -110,7 +108,6 @@ class MapFoldingState:
 	leafConnectee: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""Target leaf for connection operations."""
 
-# TODO `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
 	dimensionsUnconstrained: DatatypeLeavesTotal = dataclasses.field(default=None, init=True)
 	"""Count of dimensions not subject to folding constraints."""
 

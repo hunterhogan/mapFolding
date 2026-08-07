@@ -83,6 +83,7 @@ from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafPinned吗, no
 from mapFolding._e.pinIt import (
 	isPileLeafOptions吗, reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned,
 	reducePermutationSpace_nakedSubset)
+from mapFolding._e.theTypes import Leaf, Pile
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import extract, pairwise, triplewise
 from typing import TYPE_CHECKING
@@ -91,7 +92,7 @@ from Z0Z_tools import between吗, DOTitems, reverseLookup
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile, PinnedLeaves
+	from mapFolding._e.theTypes import LeafOptions, PinnedLeaves
 
 #======== Reducing `LeafOptions` ===============================
 
@@ -178,11 +179,13 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		# TODO fix the typing problems in Z0Z_tools.
-		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), filterLeaf(moreThanLeaf零吗, filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves())))):  # pyright: ignore[reportUnknownArgumentType, reportUnknownVariableType]
-			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace  # ty: ignore[invalid-argument-type]
+		# TODO fix the typing problems in `valfilter`.
+		ee = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
+		ww = filterLeaf(moreThanLeaf零吗, ee, factory=dict[Pile, Leaf])
+		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), ww)):
+			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace
 				, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
-				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])  # ty: ignore[invalid-argument-type]
+				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 			)):
 				return None
 
@@ -335,7 +338,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 		pile1stOpen: int = 2
 		# TODO fix this typing issue.
-		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves())  # ty: ignore[invalid-assignment]
+		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(permutationSpace
