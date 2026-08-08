@@ -273,9 +273,9 @@ def A005315(n: int, f: LiteralString | Literal['A005316', 'A077460, A005316, and
     return countTotal
 
 @cache
-def A005316(n: int, f: LiteralString | Literal['A005315 and A005316', 'A000682 and A223093', 'A077014', 'A077054 and A005316', 'A077460, A005315, and A060206', 'A078592 and A005316', 'A227167, A217310, and A217318'] | None=None) -> int:
+def A005316(n: int, f: LiteralString | Literal['A000682 and A223093', 'A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315', 'A227167, A217310, and A217318'] | None=None) -> int:
     """
-    Compute A005316(n) as a function of A005315 and A005316 or A000682 and A223093 or A077014 or A077054 and A005316 or A077460, A005315, and A060206 or A078592 and A005316 or A227167, A217310, and A217318.
+    Compute A005316(n) as a function of A000682 and A223093 or A077014 or A077054 and A005315 or A077460, A005315, and A060206 or A078592 and A005315 or A227167, A217310, and A217318.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316 is: "Meandric numbers: number of ways a river can cross a road n times."
 
@@ -303,9 +303,9 @@ def A005316(n: int, f: LiteralString | Literal['A005315 and A005316', 'A000682 a
         match f:
             case 'A077014':
                 countTotal = A077014(n) // (2 - n % 2)
-            case 'A077054 and A005316':
+            case 'A077054 and A005315':
                 if n % 2:
-                    countTotal = _A005316(n)
+                    countTotal = A005315((n + 1) // 2)
                 else:
                     countTotal = A077054(n // 2)
             case 'A077460, A005315, and A060206':
@@ -313,18 +313,13 @@ def A005316(n: int, f: LiteralString | Literal['A005315 and A005316', 'A000682 a
                     countTotal = 4 * A077460(n) - A005315(n) - A060206((n - 1) // 2)
                 else:
                     countTotal = (4 * A077460(n) - A005315(n)) // 2
-            case 'A078592 and A005316':
+            case 'A078592 and A005315':
                 if n % 2:
-                    countTotal = _A005316(n)
+                    countTotal = A005315((n + 1) // 2)
                 else:
                     countTotal = 2 * A078592(n // 2) - _A005316(n // 2)
             case 'A227167, A217310, and A217318':
                 countTotal = A227167(n) - A217310(n) - A217318(n)
-            case 'A005315 and A005316':
-                if n % 2:
-                    countTotal = A005315((n + 1) // 2)
-                else:
-                    countTotal = _A005316(n)
             case 'A000682 and A223093' | _:
                 countTotal = (_A000682(n + 1) - A223093(n)) // (2 - n % 2)
     return countTotal
@@ -361,9 +356,9 @@ def A007822(n: int, f: LiteralString | Literal['A001010'] | None=None) -> int:
                 countTotal = A001010(2 * n - 1) // 2
     return countTotal
 
-def A060206(n: int, f: LiteralString | Literal['A000682', 'A077460, A005315, A005316, and A000682'] | None=None) -> int:
+def A060206(n: int, f: LiteralString | Literal['A000682', 'A077460, A005315, and A005316'] | None=None) -> int:
     """
-    Compute A060206(n) as a function of A000682 or A077460, A005315, A005316, and A000682.
+    Compute A060206(n) as a function of A000682 or A077460, A005315, and A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206 is: "Number of rotationally symmetric closed meanders of length 4n+2."
 
@@ -386,11 +381,11 @@ def A060206(n: int, f: LiteralString | Literal['A000682', 'A077460, A005315, A00
         https://oeis.org/A060206
     """
     match f:
-        case 'A077460, A005315, A005316, and A000682':
+        case 'A077460, A005315, and A005316':
             if 0 < n:
                 countTotal: int = 4 * A077460(2 * n + 1) - A005315(2 * n + 1) - _A005316(2 * n + 1)
             else:
-                countTotal = _A000682(2 * n + 1)
+                countTotal = A077460(2 * n + 1)
         case 'A000682' | _:
             countTotal = _A000682(2 * n + 1)
     return countTotal

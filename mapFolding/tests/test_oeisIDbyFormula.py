@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 	from typing import LiteralString
 
+# TODO finish this module.
+
 def qq(oeisIDAndAnnotation: tuple[LiteralString, str | tuple[str, ...]]) -> CartesianProduct[tuple[LiteralString, int, str]]:
 	oeisID: OEISid = oeisIDAndAnnotation[0]
 	domainOf_f: Iterator[str] = always_iterable(oeisIDAndAnnotation[1], str)
