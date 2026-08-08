@@ -9,7 +9,6 @@ from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import isPileLeafOptions吗, leafInLeafOptions吗, leafPinned吗
 from more_itertools import extract, one
 from typing import TYPE_CHECKING
@@ -17,6 +16,7 @@ from Z0Z_tools import DOTitems, DOTvalues, reverseLookup, thisNotHaveThat吗
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Sequence
+	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]], leafAntiOptions: LeafOptions) -> PermutationSpace:
@@ -87,7 +87,8 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 		leafSpace: LeafSpace | None = _e.leafOptionsLeafNone(_e.leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
 			#=SIN= Early return.
-			return PermutationSpace()
+			permutationSpace.clear()
+			return permutationSpace
 		else:
 			permutationSpace[pile] = leafSpace
 	return permutationSpace
