@@ -21,7 +21,7 @@ def assert_approx[个](actual: 个, expected: 个, pytest_rel: float, pytest_abs
 def messageTestFailure(actual: Any, expected: Any, function: str, *arguments: Any, **keywordArguments: Any) -> str:
 	"""Format assertion message for any test comparison."""
 	parameters: list[str] = [*map(repr, arguments), *starmap('{}={!r}'.format, keywordArguments.items())]
-	return f'{function}({", ".join(parameters)}) = {actual!r}, but {expected = }.'
+	return f'{function}({", ".join(parameters)})={actual!r}; {expected=}'
 
 #================== Assert NumPy arrays ========================================================================
 

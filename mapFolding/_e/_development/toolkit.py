@@ -75,7 +75,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		]
 		if listDictionaryPinned:
 			sys.stdout.write(ansiColors.YellowOnBlack)
-			sys.stdout.write(pformat(listDictionaryPinned[0:5], width=140) + '\n')
+			sys.stdout.write(pformat(listDictionaryPinned[0:5], width=200) + '\n')
 		else:
 			sys.stdout.write(ansiColors.GreenOnBlack)
 		sys.stdout.write(f"{len(listDictionaryPinned)} surplus dictionaries.\n")

@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+from hunterMakesPy import raiseIfNone
+from itertools import starmap
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
-from mapFolding.oeis import getMetadata, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
+from mapFolding.oeis import getFoldsTotalKnown, getMetadata, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
 from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
+	from hunterMakesPy.theTypes import Limitation
 	from mapFolding.theTypes import OEISid
 
 def _getPinningFunctionName(pinningFunction: Callable[..., EliminationState]) -> str:
@@ -20,6 +23,22 @@ def _getPinningFunctionName(pinningFunction: Callable[..., EliminationState]) ->
 @pytest.fixture(params=(pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPile零Ante首零, pin首beans), ids=_getPinningFunctionName)
 def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest) -> Callable[..., EliminationState]:
 	return request.param
+
+@pytest.fixture
+def expectedFromMapShape(mapShape: tuple[int, ...]) -> int:
+	return raiseIfNone(getFoldsTotalKnown(mapShape))
+
+# ruff: ignore[commented-out-code]
+# @pytest.mark.parametrize("flow", ["elimination"])
+# @pytest.mark.parametrize("mapShape", [
+# 	*[pytest.param(tuple(starmap(makeMapShape, (("A000136", 3), ("A001415", 3), ("A001416", 2), ("A001417", 3), ("A001418", 2), ("A195646", 1)))))]
+# ])
+# def test_eliminateFolds(mapShape: tuple[int, ...], flow: str, expectedFromMapShape: int) -> None:
+# 	"""Validate `eliminateFolds` and different flows produce valid results."""
+# 	state: EliminationState | None = None
+# 	pathLikeWrite: None = None
+# 	CPUlimit: Limitation = None
+# 	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow), expectedFromMapShape, 'eliminateFolds', mapShape, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(getValuesKnown(oeisID)[n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4),)]  # , ('A001417', 5))]
@@ -46,7 +65,7 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: OEISid, n: int, flow: str
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 	state: EliminationState | None = None
 	pathLikeWrite: None = None
-	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, state, pathLikeWrite, CPUlimit, flow)
+	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(ValueError, oeisID, getMetadata(oeisID)["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],

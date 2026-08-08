@@ -5,7 +5,8 @@ from __future__ import annotations
 
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise
-from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, listFunctionsReductionQuick2上nDimensional
+from mapFolding._e import getLeafDomain
+from mapFolding._e._2上nDimensional.reduceIt import listFunctionsReduction2上nDimensional, listFunctionsReductionQuick2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k
@@ -23,23 +24,18 @@ if TYPE_CHECKING:
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_development' / 'albums'
 
-# ruff: file-ignore[commented-out-code]
-def makeDescendants(folding: Folding, n: int) -> EliminationState:
+def makeDescendants(folding: Folding, n: int, position: int) -> EliminationState:
 	"""Process a single folding and return resulting state."""
 	state: EliminationState = EliminationState(makeMapShape('A001417', n)
 		, listFunctionsReduction=listFunctionsReduction2上nDimensional
 		, listFunctionsReductionQuick=listFunctionsReductionQuick2上nDimensional)
 	state.listPermutationSpace.append(PermutationSpace(getDictionaryLeafOptions(state)))
+	state.reduceAllPermutationSpace(quick=True)
 
-	for r, k in pairwise(reversed(folding)):
-		state = excludeLeaf_rBeforeLeaf_k(state, k, r)
-		state.moveToListPinnedLeaves()
+	for r, k in tqdm(pairwise(reversed(folding[2:None])), total=len(folding) - 3, disable=False, position=position, leave=False):
+		state = excludeLeaf_rBeforeLeaf_k(state, k, r, getLeafDomain(state, k), getLeafDomain(state, r))
 
-	# d = 5
-	# folding[-1] == 首一(len(mapShape))
-	# 首一(5), leaf8 domain = [15, 17, 19, 21, 23, 25, 27, 29]
-	# pileLast = 31, which has leaf16 pinned, pile29 is the largest same-parity open pile for leaf8.
-	# neg(零) + 首零(5) = 15
+	state.removeCreaseViolations().reduceAllPermutationSpace()
 
 	return state
 
@@ -49,8 +45,8 @@ def makeAlbum2上nDimensional吗(n: int, workersMaximum: int) -> EliminationStat
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 		listClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(makeDescendants, folding, n)
-			for folding in album
+			concurrencyManager.submit(makeDescendants, folding, n, position % workersMaximum + 1)
+			for position, folding in enumerate(album)
 		]
 
 		state: EliminationState = EliminationState(makeMapShape('A001417', n))

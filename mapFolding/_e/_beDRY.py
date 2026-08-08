@@ -183,7 +183,7 @@ def leafOptionsLeafNone(leafOptions: LeafOptions, /) -> LeafOptions | Leaf | Non
 	Parameters
 	----------
 	leafOptions : LeafOptions
-		Candidate `LeafOptions` value.
+		`LeafOptions` to inspect.
 
 	Returns
 	-------

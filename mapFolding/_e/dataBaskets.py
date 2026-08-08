@@ -12,11 +12,12 @@ from humpy_cytoolz import (
 from hunterMakesPy import raiseIfNone
 from itertools import combinations, filterfalse
 from mapFolding._e import (
-	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首)
+	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首,
+	leafOptionsLeafNone, makeLeafAntiOptions)
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.reduceIt import listFunctionsReductionDEFAULT
-from mapFolding._e.theTypes import Folding, LeafSpace, Pile, PinnedLeaves
+from mapFolding._e.theTypes import Folding, LeafOptions, LeafSpace, Pile, PinnedLeaves
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
 from math import prod
 from operator import attrgetter, methodcaller
@@ -27,7 +28,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, LeafOptions, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
@@ -331,7 +332,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			The `Leaf` at `permutationSpace[pile]` if `permutationSpace[pile]` is a `Leaf`, otherwise
 			`default`.
 		"""
-		ImaLeaf: LeafSpace | None = self.get(pile)
+		self._solidifyLeafSpaceAtPile(pile)
+		ImaLeaf: LeafSpace = self[pile]
 		if isLeaf吗(ImaLeaf):
 			return ImaLeaf
 		return default
@@ -357,7 +359,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		leafOptionsOrNone : LeafOptions | None
 			`LeafOptions` value from `permutationSpace[pile]`, or `default`.
 		"""
-		ImaLeafOptions: LeafSpace | None = self.get(pile)
+		self._solidifyLeafSpaceAtPile(pile)
+		ImaLeafOptions: LeafSpace = self[pile]
 		if isLeafOptions吗(ImaLeafOptions):
 			return ImaLeafOptions
 		return default
@@ -418,7 +421,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		leafIsPinnedAtPile : bool
 			`True` if this `PermutationSpace` includes `pile: leaf`.
 		"""
-		return leaf == self.get(pile)
+		self._solidifyLeafSpaceAtPile(pile)
+		return leaf == self[pile]
 
 	# TODO Consider implementing another method to make a `Folding` or _maybe_ cleverly overloading
 	# this method (I'm deeply skeptical that overload is a good idea). `makeFolding` handles _my_
@@ -480,6 +484,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		`mapFolding._e.filters.isLeafOptions吗`
 			Narrow an existing `LeafSpace` value to `LeafOptions`.
 		"""
+		self._solidifyLeafSpaceAtPile(pile)
 		return isLeaf吗(self[pile])
 
 	def pileUndetermined吗(self, pile: Pile) -> bool:
@@ -508,7 +513,32 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		`mapFolding._e.filters.isLeaf吗`
 			Narrow an existing `LeafSpace` value to `Leaf`.
 		"""
+		self._solidifyLeafSpaceAtPile(pile)
 		return not isLeaf吗(self[pile])
+
+	def _solidifyLeafSpace(self) -> None:
+		count: int = self.leafCount
+		if count < len(self):
+			tuple(map(self._solidifyLeafSpaceAtPile, self))
+			ww: PinnedLeaves = self.extractPinnedLeaves()
+			qq: LeafOptions = makeLeafAntiOptions(len(self), ww.values())
+			for pile in filterfalse(ww.__contains__, self):
+				self[pile] &= qq  # ty: ignore[invalid-argument-type]
+			tuple(map(self._solidifyLeafSpaceAtPile, ww))
+			if count < self.leafCount:
+				self._solidifyLeafSpace()
+
+	def _solidifyLeafSpaceAtPile(self, pile: Pile) -> None:
+		rangeOfPile: LeafSpace | None = self[pile]
+		if isLeafOptions吗(rangeOfPile):
+			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
+			rangeOfPile = leafOptionsLeafNone(rangeOfPile)
+			if isLeafOptions吗(rangeOfPile):
+				self[pile] = rangeOfPile
+			if rangeOfPile is None:
+				self.valid = False
+
+	valid: bool = True
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:
@@ -719,7 +749,7 @@ class EliminationState:
 		if quick:
 			listQuick = self.listFunctionsReductionQuick or listFunctionsReductionQuickDEFAULT
 		listFunctionsReduction = listFunctionsReduction or listQuick or self.listFunctionsReduction or listFunctionsReductionDEFAULT
-		listPermutationSpace: list[PermutationSpace] = self.listPermutationSpace
+		listPermutationSpace: list[PermutationSpace] = list(filter(attrgetter('valid'), self.listPermutationSpace))
 		self.listPermutationSpace = []
 		listPermutationSpaceIrreducible: list[PermutationSpace] = []
 

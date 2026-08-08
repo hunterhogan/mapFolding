@@ -20,33 +20,34 @@ if __name__ == "__main__":
 	CPUlimit: Limitation = -2
 	state: EliminationState | None = None
 
-	flow = "elimination"
 	flow = "constraintPropagation"
 	flow = "crease"
+	flow = "elimination"
 
 	oeisID = "A195646"
 	oeisID = "A000136"
 	oeisID = "A001418"
+	oeisID = "A001417"
 	oeisID = "A001416"
 	oeisID = "A001415"
-	oeisID = "A001417"
 
 	printEasyRunHeader(oeisID, flow)
 
-	for n in range(4, 6):
+	for n in range(2, 4):
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
-			state = EliminationState(mapShape)
-			state = pinIt.pinPile零Ante首零(state)
-			state = pinIt.pinPilesAtEnds(state, 3)
-			state = pinIt.pinLeavesDimension首二(state)
-			state = pinIt.pin3beans2(state)
-			state = pinIt.pin首beans(state)
-			state = pinIt.pinLeavesDimension一(state)
-			state = pinIt.pinLeavesDimension二(state)
-			state = pinIt.pinLeavesDimensions0零一(state)
+			# state = EliminationState(mapShape)
+			# state = pinIt.pinPile零Ante首零(state)
+			# state = pinIt.pinPilesAtEnds(state, 3)
+			# state = pinIt.pinLeavesDimension首二(state)
+			# state = pinIt.pin3beans2(state)
+			# state = pinIt.pin首beans(state)
+			# state = pinIt.pinLeavesDimension一(state)
+			# state = pinIt.pinLeavesDimension二(state)
+			# state = pinIt.pinLeavesDimensions0零一(state)
 			# state.listPermutationSpace.reverse()
+			pass
 
 		computed: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
 

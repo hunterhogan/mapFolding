@@ -7,11 +7,12 @@ from __future__ import annotations
 from functools import partial
 from gmpy2 import bit_clear
 from humpy_cytoolz import groupby as toolz_groupby
-from hunterMakesPy import inclusive
+from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding import _e
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.filters import leafInLeafOptions吗
-from mapFolding._e.theTypes import LeafOptions
+from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
+from mapFolding._e.theTypes import LeafOptions, LeafSpace
+from more_itertools import filter_map
 from operator import methodcaller
 from typing import TYPE_CHECKING
 from Z0Z_tools import between吗
@@ -73,7 +74,7 @@ def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Lea
 	"""
 	if domain_k is None:
 		domain_k = _e.getLeafDomain(state, leaf_k)
-	for pile_k in reversed(tuple(domain_k)):
+	for pile_k in sorted(domain_k, reverse=True):
 		state = excludeLeaf_rBeforeLeaf_kAtPile_k(state, leaf_k, leaf_r, pile_k, domainOf_leaf_r=domain_r)
 	return state
 
@@ -106,8 +107,9 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 
 	state.removeCreaseViolations().reduceAllPermutationSpace()
 	listPermutationSpaceUnchanged.extend(state.listPermutationSpace)
-	state.listPermutationSpace = listExcludeLeaf_r
-	del listExcludeLeaf_r, listPermutationSpace
+	state.listPermutationSpace = []
+	listPermutationSpace = listExcludeLeaf_r
+	del listExcludeLeaf_r
 
 	# TODO Choose between `if domainOf_leaf_r is None:` and
 	# `domainOf_leaf_r = domainOf_leaf_r or getLeafDomain(self, leaf_r)`.
@@ -118,9 +120,10 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	if domainOf_leaf_r is None:
 		domainOf_leaf_r = _e.getLeafDomain(state, leaf_r)
 
-	for pile_r in filter(between吗(0, pile_k - inclusive), domainOf_leaf_r):
-		state.removeCreaseViolations().reduceAllPermutationSpace(quick=True)
-		state.listPermutationSpace = excludeLeafAtPile_inListPermutationSpace(state.listPermutationSpace, leaf_r, pile_r)
+	for pile_r in filter(pile_k.__gt__, sorted(domainOf_leaf_r, reverse=True)):
+		listPermutationSpace = atPileExcludeLeaf_inListPermutationSpace(listPermutationSpace, pile_r, leaf_r)
+
+	state.listPermutationSpace = listPermutationSpace
 
 	state.removeCreaseViolations().reduceAllPermutationSpace()
 
@@ -128,7 +131,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 
 	return state
 
-def excludeLeafAtPile_inListPermutationSpace(listPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> list[PermutationSpace]:
+def atPileExcludeLeaf_inListPermutationSpace(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leaf: Leaf) -> list[PermutationSpace]:
 	"""Return a new list of `PermutationSpace` without `leaf` at `pile`.
 
 	Parameters
@@ -160,7 +163,47 @@ def excludeLeafAtPile_inListPermutationSpace(listPermutationSpace: Iterable[Perm
 		listPermutationSpace.append(permutationSpace)
 	return listPermutationSpace
 
+def Z0Z_atPileExcludeLeaf_inListPermutationSpace(listPermutationSpace: Iterable[PermutationSpace], pile: Pile, leaf: Leaf) -> list[PermutationSpace]:
+	"""Return a new list of `PermutationSpace` without `leaf` at `pile`.
+
+	Parameters
+	----------
+	listPermutationSpace : Iterable[PermutationSpace]
+		Collection of partial pinning dictionaries to transform.
+	leaf : int
+		`leaf` to exclude from `pile`.
+	pile : int
+		`pile` at which `leaf` must not be found.
+
+	Returns
+	-------
+	listPermutationSpace : list[PermutationSpace]
+		Expanded / filtered list respecting the exclusion constraint.
+
+	See Also
+	--------
+	requireLeafPinnedAtPile
+		Complementary operation that forces a `leaf` at a `pile`.
+	"""
+	excluder: Callable[[PermutationSpace], PermutationSpace | None] = partial(atPileExcludeLeaf, pile=pile, leaf=leaf)
+	return list(filter_map(excluder, listPermutationSpace))
+
 #======== One `PermutationSpace` ===============================
 
-def atPileExcludeLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> PermutationSpace:
-	return permutationSpace
+def atPileExcludeLeaf(permutationSpace: PermutationSpace, pile: Pile, leaf: Leaf) -> PermutationSpace | None:
+	returnMe: PermutationSpace | None = permutationSpace.copy()
+	rangeOfPile: LeafSpace | None = returnMe[pile]
+	if isLeafOptions吗(rangeOfPile):
+		# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
+		rangeOfPile = _e.leafOptionsLeafNone(rangeOfPile)
+	if rangeOfPile == leaf or rangeOfPile is None:
+		returnMe = None
+	elif isLeaf吗(rangeOfPile):
+		returnMe[pile] = rangeOfPile
+	# The range size of `pile` is more than 1.
+	else:
+		rangeOfPile = rangeOfPile.bit_clear(leaf)
+		# If the range size is now 1, convert to `Leaf`.
+		rangeOfPile = _e.leafOptionsLeafNone(rangeOfPile)
+		returnMe[pile] = raiseIfNone(rangeOfPile)
+	return returnMe
