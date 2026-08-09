@@ -1,10 +1,10 @@
 """Make docstrings."""
 from __future__ import annotations
 
-from astToolkit import Grab, IfThis, Make, NodeChanger, parsePathFilename2astModule, Then
-from astToolkit.transformationTools import makeDictionaryFunctionDef
+from astToolkit import Be, Grab, IfThis, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit.transformationTools import makeDictionaryFunctionDef, unjoinBinOP
 from hunterMakesPy import raiseIfNone
-from hunterMakesPy.filesystemToolkit import writeStringToHere
+from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding.oeis import getMetadata
 from typing import TYPE_CHECKING
 import ast
@@ -24,16 +24,25 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
     dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
 
-    oeisID = 'Error during transformation'  # `ast.FunctionDef.name` of function in `pathFilenameSource`.
-    functionOf: str = 'Error during transformation'  # The value of `functionOf` is in the docstring of function `oeisID` in `pathFilenameSource`.
-
     for oeisID, FunctionDef in dictionaryFunctionDef.items():
-        if not oeisID.startswith('A') or not oeisID[1:7].isdigit():
-            continue
-        functionOf = raiseIfNone(ast.get_docstring(FunctionDef))
-        metadata: MetadataOEISid = getMetadata(oeisID)
+        if oeisID.startswith('A') and len(oeisID) == 7 and oeisID[1:7].isdigit():
+            list_f_astConstant: list[ast.expr] = []
+            NodeTourist(Be.MatchValue, Grab.valueAttribute(Then.appendTo(list_f_astConstant))).visit(FunctionDef)
+            if 1 == len(list_f_astConstant):
+                slice_ast_expr: ast.expr = list_f_astConstant[0]
+            else:
+                slice_ast_expr = Make.Tuple(list_f_astConstant)
 
-        ImaDocstring: str = f"""
+            list_arg: list[ast.expr] = unjoinBinOP(FunctionDef.args.args[1], ast.BitOr)
+            list_arg.reverse()
+            list_arg.insert(0, Make.Subscript(Make.Name('Literal'), slice=slice_ast_expr))
+            NodeChanger(Be.arg.argIs('f'.__eq__), Grab.annotationAttribute(Then.replaceWith(Make.BitOr.join(list_arg)))).visit(FunctionDef)
+
+            list_f: list[str] = list(map(ast.literal_eval, list_f_astConstant))
+            functionOf: str = ' or '.join(list_f)
+            metadata: MetadataOEISid = getMetadata(oeisID)
+
+            ImaDocstring: str = f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{metadata['description']}"
@@ -57,17 +66,16 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
         https://oeis.org/{oeisID}
     """
 
-        astExprDocstring: ast.Expr = Make.Expr(Make.Constant(ImaDocstring))
+            astExprDocstring: ast.Expr = Make.Expr(Make.Constant(ImaDocstring))
 
-        NodeChanger(
-            findThis=IfThis.isFunctionDefIdentifier(oeisID)
-            , doThat=Grab.bodyAttribute(Grab.index(0, Then.replaceWith(astExprDocstring)))
-        ).visit(astModule)
+            NodeChanger(IfThis.isFunctionDefIdentifier(oeisID)
+                , Grab.bodyAttribute(Grab.index(0, Then.insertThisAbove([astExprDocstring])))
+            ).visit(astModule)
 
     ast.fix_missing_locations(astModule)
 
     docstringModule: str = raiseIfNone(ast.get_docstring(astModule))
-    moduleAsString: str = ast.unparse(astModule) + "\n"
+    moduleAsString: str = ast.unparse(astModule)
     moduleAsString = moduleAsString.replace(docstringModule, docstringModule + "\n\n" + moduleWarning)
 
-    return writeStringToHere(moduleAsString, pathFilenameWrite)
+    return writePython(moduleAsString, pathFilenameWrite)

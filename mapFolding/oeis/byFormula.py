@@ -3,6 +3,7 @@
 This is a generated file; edit the source file.
 """
 from __future__ import annotations
+
 from functools import cache
 from itertools import chain
 from mapFolding.basecamp import countFoldsSymmetric, countMeanders
@@ -11,9 +12,9 @@ from math import factorial, isqrt
 from typing import Literal, LiteralString
 
 @cache
-def A000136(n: int, f: LiteralString | Literal['A000682', 'A000560', 'A001011 and A001010', 'A223094 and A000682', 'A223095, A077014, and A000682', 'A227167'] | None=None) -> int:
+def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A000682', 'A223095, A077014, and A000682', 'A227167', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A000136(n) as a function of A000682 or A000560 or A001011 and A001010 or A223094 and A000682 or A223095, A077014, and A000682 or A227167.
+    Compute A000136(n) as a function of A000560 or A001011 and A001010 or A223094 and A000682 or A223095, A077014, and A000682 or A227167 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136 is: "Number of ways of folding a strip of n labeled stamps."
 
@@ -53,9 +54,9 @@ def A000136(n: int, f: LiteralString | Literal['A000682', 'A000560', 'A001011 an
                 countTotal = n * _A000682(n)
     return countTotal
 
-def A000560(n: int, f: LiteralString | Literal['A000682', 'A000136'] | None=None) -> int:
+def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A000560(n) as a function of A000682 or A000136.
+    Compute A000560(n) as a function of A000136 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is: "Number of symmetric ways of folding a strip of n labeled stamps."
 
@@ -85,9 +86,9 @@ def A000560(n: int, f: LiteralString | Literal['A000682', 'A000136'] | None=None
     return countTotal
 
 @cache
-def A000682(n: int, f: LiteralString | Literal['A000560', 'A301620', 'A259689', 'A000136', 'A223094', 'A001010', 'A060206 and A000560', 'A077460, A005316, and A000560', 'A223093 and A077014', 'A223093 and A005316', 'A000136 and A223094', 'A223094 and A000682', 'A000136, A077014, and A223095', 'A259702 and A000682', 'A333971 and A000682', 'A334615, A000682, and A000560', 'A337581'] | None=None) -> int:
+def A000682(n: int, f: Literal['A301620', 'A259689', 'A000136', 'A223094', 'A001010', 'A060206 and A000560', 'A077460, A005316, and A000560', 'A223093 and A077014', 'A223093 and A005316', 'A000136 and A223094', 'A223094 and A000682', 'A000136, A077014, and A223095', 'A259702 and A000682', 'A333971 and A000682', 'A334615, A000682, and A000560', 'A337581', 'A000560'] | LiteralString | None=None) -> int:
     """
-    Compute A000682(n) as a function of A000560 or A301620 or A259689 or A000136 or A223094 or A001010 or A060206 and A000560 or A077460, A005316, and A000560 or A223093 and A077014 or A223093 and A005316 or A000136 and A223094 or A223094 and A000682 or A000136, A077014, and A223095 or A259702 and A000682 or A333971 and A000682 or A334615, A000682, and A000560 or A337581.
+    Compute A000682(n) as a function of A301620 or A259689 or A000136 or A223094 or A001010 or A060206 and A000560 or A077460, A005316, and A000560 or A223093 and A077014 or A223093 and A005316 or A000136 and A223094 or A223094 and A000682 or A000136, A077014, and A223095 or A259702 and A000682 or A333971 and A000682 or A334615, A000682, and A000560 or A337581 or A000560.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682 is: "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times."
 
@@ -159,9 +160,9 @@ def A000682(n: int, f: LiteralString | Literal['A000560', 'A301620', 'A259689', 
                 countTotal = 2 * A000560(n - 1)
     return countTotal
 
-def A001010(n: int, f: LiteralString | Literal['A000682 and A007822', 'A001011 and A000136'] | None=None) -> int:
+def A001010(n: int, f: Literal['A001011 and A000136', 'A000682 and A007822'] | LiteralString | None=None) -> int:
     """
-    Compute A001010(n) as a function of A000682 and A007822 or A001011 and A000136.
+    Compute A001010(n) as a function of A001011 and A000136 or A000682 and A007822.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is: "Number of symmetric foldings of a strip of n blank stamps."
 
@@ -196,7 +197,7 @@ def A001010(n: int, f: LiteralString | Literal['A000682 and A007822', 'A001011 a
                     countTotal = 2 * _A000682(n // 2 + 1)
     return countTotal
 
-def A001011(n: int, f: LiteralString | Literal['A000136 and A001010'] | None=None) -> int:
+def A001011(n: int, f: Literal['A000136 and A001010'] | LiteralString | None=None) -> int:
     """
     Compute A001011(n) as a function of A000136 and A001010.
 
@@ -229,9 +230,9 @@ def A001011(n: int, f: LiteralString | Literal['A000136 and A001010'] | None=Non
     return countTotal
 
 @cache
-def A005315(n: int, f: LiteralString | Literal['A005316', 'A077460, A005316, and A060206', 'A078591', 'A085973 and A077054', 'A208357'] | None=None) -> int:
+def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085973 and A077054', 'A208357', 'A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A005315(n) as a function of A005316 or A077460, A005316, and A060206 or A078591 or A085973 and A077054 or A208357.
+    Compute A005315(n) as a function of A077460, A005316, and A060206 or A078591 or A085973 and A077054 or A208357 or A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005315 is: "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times."
 
@@ -273,9 +274,9 @@ def A005315(n: int, f: LiteralString | Literal['A005316', 'A077460, A005316, and
     return countTotal
 
 @cache
-def A005316(n: int, f: LiteralString | Literal['A000682 and A223093', 'A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315', 'A227167, A217310, and A217318'] | None=None) -> int:
+def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315', 'A227167, A217310, and A217318', 'A000682 and A223093'] | LiteralString | None=None) -> int:
     """
-    Compute A005316(n) as a function of A000682 and A223093 or A077014 or A077054 and A005315 or A077460, A005315, and A060206 or A078592 and A005315 or A227167, A217310, and A217318.
+    Compute A005316(n) as a function of A077014 or A077054 and A005315 or A077460, A005315, and A060206 or A078592 and A005315 or A227167, A217310, and A217318 or A000682 and A223093.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316 is: "Meandric numbers: number of ways a river can cross a road n times."
 
@@ -324,7 +325,7 @@ def A005316(n: int, f: LiteralString | Literal['A000682 and A223093', 'A077014',
                 countTotal = (_A000682(n + 1) - A223093(n)) // (2 - n % 2)
     return countTotal
 
-def A007822(n: int, f: LiteralString | Literal['A001010'] | None=None) -> int:
+def A007822(n: int, f: Literal['A001010'] | LiteralString | None=None) -> int:
     """
     Compute A007822(n) as a function of A001010.
 
@@ -356,9 +357,9 @@ def A007822(n: int, f: LiteralString | Literal['A001010'] | None=None) -> int:
                 countTotal = A001010(2 * n - 1) // 2
     return countTotal
 
-def A060206(n: int, f: LiteralString | Literal['A000682', 'A077460, A005315, and A005316'] | None=None) -> int:
+def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A060206(n) as a function of A000682 or A077460, A005315, and A005316.
+    Compute A060206(n) as a function of A077460, A005315, and A005316 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206 is: "Number of rotationally symmetric closed meanders of length 4n+2."
 
@@ -390,9 +391,9 @@ def A060206(n: int, f: LiteralString | Literal['A000682', 'A077460, A005315, and
             countTotal = _A000682(2 * n + 1)
     return countTotal
 
-def A077014(n: int, f: LiteralString | Literal['A005316', 'A000682 and A223093', 'A223095, A000136, and A000682'] | None=None) -> int:
+def A077014(n: int, f: Literal['A000682 and A223093', 'A223095, A000136, and A000682', 'A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A077014(n) as a function of A005316 or A000682 and A223093 or A223095, A000136, and A000682.
+    Compute A077014(n) as a function of A000682 and A223093 or A223095, A000136, and A000682 or A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077014 is: "Number of ways that a directed line (or river) that starts in the south can cross an east-west road n times."
 
@@ -429,9 +430,9 @@ def A077014(n: int, f: LiteralString | Literal['A005316', 'A000682 and A223093',
                 countTotal = _A005316(n) * (2 - n % 2)
     return countTotal
 
-def A077054(n: int, f: LiteralString | Literal['A005316', 'A085973 and A005315'] | None=None) -> int:
+def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A077054(n) as a function of A005316 or A085973 and A005315.
+    Compute A077054(n) as a function of A085973 and A005315 or A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077054 is: "Number of ways a river can cross a road 2n times."
 
@@ -463,9 +464,9 @@ def A077054(n: int, f: LiteralString | Literal['A005316', 'A085973 and A005315']
                 countTotal = _A005316(2 * n)
     return countTotal
 
-def A077460(n: int, f: LiteralString | Literal['A005315, A005316, and A060206', 'A005316, A005315, and A060206', 'A000682 and A005316'] | None=None) -> int:
+def A077460(n: int, f: Literal['A005316, A005315, and A060206', 'A005315, A005316, and A060206', 'A000682 and A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A077460(n) as a function of A005315, A005316, and A060206 or A005316, A005315, and A060206 or A000682 and A005316.
+    Compute A077460(n) as a function of A005316, A005315, and A060206 or A005315, A005316, and A060206 or A000682 and A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
 
@@ -508,9 +509,9 @@ def A077460(n: int, f: LiteralString | Literal['A005315, A005316, and A060206', 
                     countTotal = (_A005316(2 * n - 1) + 2 * _A005316(n)) // 4
     return countTotal
 
-def A078591(n: int, f: LiteralString | Literal['A005315', 'A005316'] | None=None) -> int:
+def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None) -> int:
     """
-    Compute A078591(n) as a function of A005315 or A005316.
+    Compute A078591(n) as a function of A005316 or A005315.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078591 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
 
@@ -542,7 +543,7 @@ def A078591(n: int, f: LiteralString | Literal['A005315', 'A005316'] | None=None
                 countTotal = A005315(n) // 2
     return countTotal
 
-def A078592(n: int, f: LiteralString | Literal['A005316'] | None=None) -> int:
+def A078592(n: int, f: Literal['A005316'] | LiteralString | None=None) -> int:
     """
     Compute A078592(n) as a function of A005316.
 
@@ -574,9 +575,9 @@ def A078592(n: int, f: LiteralString | Literal['A005316'] | None=None) -> int:
                 countTotal = (_A005316(2 * n) + _A005316(n)) // 2
     return countTotal
 
-def A085973(n: int, f: LiteralString | Literal['A077054 and A005315', 'A005316'] | None=None) -> int:
+def A085973(n: int, f: Literal['A005316', 'A077054 and A005315'] | LiteralString | None=None) -> int:
     """
-    Compute A085973(n) as a function of A077054 and A005315 or A005316.
+    Compute A085973(n) as a function of A005316 or A077054 and A005315.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A085973 is: "Number of ways a loop can cross two parallel roads 2n times."
 
@@ -608,9 +609,9 @@ def A085973(n: int, f: LiteralString | Literal['A077054 and A005315', 'A005316']
                 countTotal = A077054(n) + A005315(n)
     return countTotal
 
-def A208357(n: int, f: LiteralString | Literal['A005315', 'A005316'] | None=None) -> int:
+def A208357(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None) -> int:
     """
-    Compute A208357(n) as a function of A005315 or A005316.
+    Compute A208357(n) as a function of A005316 or A005315.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A208357 is: "Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut."
 
@@ -639,9 +640,9 @@ def A208357(n: int, f: LiteralString | Literal['A005315', 'A005316'] | None=None
             countTotal = A005315(n + 1) ** 2
     return countTotal
 
-def A217310(n: int, f: LiteralString | Literal['A223093', 'A227167, A217318, and A005316'] | None=None) -> int:
+def A217310(n: int, f: Literal['A227167, A217318, and A005316', 'A223093'] | LiteralString | None=None) -> int:
     """
-    Compute A217310(n) as a function of A223093 or A227167, A217318, and A005316.
+    Compute A217310(n) as a function of A227167, A217318, and A005316 or A223093.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310 is: "The number of meandering curves of order n, with only one extremity covered by its arcs."
 
@@ -670,9 +671,9 @@ def A217310(n: int, f: LiteralString | Literal['A223093', 'A227167, A217318, and
             countTotal = A223093(n) * (1 + n % 2)
     return countTotal
 
-def A217318(n: int, f: LiteralString | Literal['A223095 and A000034', 'A227167, A217310, and A005316'] | None=None) -> int:
+def A217318(n: int, f: Literal['A227167, A217310, and A005316', 'A223095 and A000034'] | LiteralString | None=None) -> int:
     """
-    Compute A217318(n) as a function of A223095 and A000034 or A227167, A217310, and A005316.
+    Compute A217318(n) as a function of A227167, A217310, and A005316 or A223095 and A000034.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318 is: "The number of meandering curves of order n, with both extremity covered by its arcs."
 
@@ -701,9 +702,9 @@ def A217318(n: int, f: LiteralString | Literal['A223095 and A000034', 'A227167, 
             countTotal = A223095(n) * (1 + n % 2) // 2
     return countTotal
 
-def A223093(n: int, f: LiteralString | Literal['A000682 and A077014', 'A217310', 'A223094 and A223095'] | None=None) -> int:
+def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A077014'] | LiteralString | None=None) -> int:
     """
-    Compute A223093(n) as a function of A000682 and A077014 or A217310 or A223094 and A223095.
+    Compute A223093(n) as a function of A217310 or A223094 and A223095 or A000682 and A077014.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093 is: "Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards)."
 
@@ -734,9 +735,9 @@ def A223093(n: int, f: LiteralString | Literal['A000682 and A077014', 'A217310',
             countTotal = _A000682(n + 1) - A077014(n)
     return countTotal
 
-def A223094(n: int, f: LiteralString | Literal['A000136 and A000682', 'A223094 and A000682', 'A000682', 'A223095 and A223093'] | None=None) -> int:
+def A223094(n: int, f: Literal['A223094 and A000682', 'A000682', 'A223095 and A223093', 'A000136 and A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A223094(n) as a function of A000136 and A000682 or A223094 and A000682 or A000682 or A223095 and A223093.
+    Compute A223094(n) as a function of A223094 and A000682 or A000682 or A223095 and A223093 or A000136 and A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is: "Number of foldings of n labeled stamps in which leaf n is inwards."
 
@@ -773,9 +774,9 @@ def A223094(n: int, f: LiteralString | Literal['A000136 and A000682', 'A223094 a
                 countTotal = A000136(n) - _A000682(n + 1)
     return countTotal
 
-def A223095(n: int, f: LiteralString | Literal['A223094 and A223093', 'A000136, A077014, and A000682', 'A217318'] | None=None) -> int:
+def A223095(n: int, f: Literal['A000136, A077014, and A000682', 'A217318', 'A223094 and A223093'] | LiteralString | None=None) -> int:
     """
-    Compute A223095(n) as a function of A223094 and A223093 or A000136, A077014, and A000682 or A217318.
+    Compute A223095(n) as a function of A000136, A077014, and A000682 or A217318 or A223094 and A223093.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095 is: "Number of foldings of n labeled stamps in which both end leaves are inwards."
 
@@ -806,9 +807,9 @@ def A223095(n: int, f: LiteralString | Literal['A223094 and A223093', 'A000136, 
             countTotal = A223094(n) - A223093(n)
     return countTotal
 
-def A227167(n: int, f: LiteralString | Literal['A000136', 'A217310, A217318, and A005316'] | None=None) -> int:
+def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | LiteralString | None=None) -> int:
     """
-    Compute A227167(n) as a function of A000136 or A217310, A217318, and A005316.
+    Compute A227167(n) as a function of A217310, A217318, and A005316 or A000136.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A227167 is: "The number of meandering curves of order n."
 
@@ -838,7 +839,7 @@ def A227167(n: int, f: LiteralString | Literal['A000136', 'A217310, A217318, and
     return countTotal
 
 @cache
-def A259689(n: int, f: LiteralString | Literal['A000682'] | None=None) -> int:
+def A259689(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A259689(n) as a function of A000682.
 
@@ -881,9 +882,9 @@ def A259689(n: int, f: LiteralString | Literal['A000682'] | None=None) -> int:
                 countTotal = (_A000682(nRow + 1) - sum((n下kOther * getValuesKnown('A259689')[(nRow - 1) ** 2 // 4 + n下kOther] for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))))) // n下k
     return countTotal
 
-def A259702(n: int, f: LiteralString | Literal['A000682', 'A301620'] | None=None) -> int:
+def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A259702(n) as a function of A000682 or A301620.
+    Compute A259702(n) as a function of A301620 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702 is: "Row sums of A259701 except first column."
 
@@ -916,9 +917,9 @@ def A259702(n: int, f: LiteralString | Literal['A000682', 'A301620'] | None=None
     return countTotal
 
 @cache
-def A301620(n: int, f: LiteralString | Literal['A000682', 'A259689', 'A259702', 'A334615, A301620, and A000682'] | None=None) -> int:
+def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259702', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A301620(n) as a function of A000682 or A259689 or A259702 or A334615, A301620, and A000682.
+    Compute A301620(n) as a function of A334615, A301620, and A000682 or A259689 or A259702 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620 is: "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches."
 
@@ -954,7 +955,7 @@ def A301620(n: int, f: LiteralString | Literal['A000682', 'A259689', 'A259702', 
             countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
     return countTotal
 
-def A333971(n: int, f: LiteralString | Literal['A000682'] | None=None) -> int:
+def A333971(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A333971(n) as a function of A000682.
 
@@ -986,9 +987,9 @@ def A333971(n: int, f: LiteralString | Literal['A000682'] | None=None) -> int:
                 countTotal = 4 * (_A000682(n - 1) - _A000682(n - 2))
     return countTotal
 
-def A334615(n: int, f: LiteralString | Literal['A000682', 'A301620'] | None=None) -> int:
+def A334615(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A334615(n) as a function of A000682 or A301620.
+    Compute A334615(n) as a function of A301620 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A334615 is: "a(n) is the number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch configuration and no arch of length 1 adjacent to the center of the top arch configuration."
 
@@ -1020,7 +1021,7 @@ def A334615(n: int, f: LiteralString | Literal['A000682', 'A301620'] | None=None
                 countTotal = _A000682(n) - 4 * _A000682(n - 1) + 4 * _A000682(n - 2)
     return countTotal
 
-def A337581(n: int, f: LiteralString | Literal['A000682'] | None=None) -> int:
+def A337581(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A337581(n) as a function of A000682.
 
@@ -1044,11 +1045,11 @@ def A337581(n: int, f: LiteralString | Literal['A000682'] | None=None) -> int:
     OEIS : webpage
         https://oeis.org/A337581
     """
-    if n in {2, 3}:
-        countTotal: int = n - 1
-    else:
-        match f:
-            case 'A000682' | _:
+    match f:
+        case 'A000682' | _:
+            if n in {2, 3}:
+                countTotal: int = n - 1
+            else:
                 countTotal = 4 * _A000682(n - 2)
     return countTotal
 

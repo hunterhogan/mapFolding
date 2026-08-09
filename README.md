@@ -252,7 +252,7 @@ To cite this software, use the metadata in [`CITATION.cff`](https://github.com/h
 
 OEIS limits my proposed changes to a sequence to three sequences at a time. I have values to extend the following sequences, but I cannot submit them all at the same time.
 
-- A060206
+- A060206, submitted.
 - A077460
 - A085973
 - A208357
@@ -263,7 +263,7 @@ OEIS limits my proposed changes to a sequence to three sequences at a time. I ha
 - A223095
 - A333971
 - A334615
-- A337581
+- A337581, submitted.
 
 ## My recovery
 
