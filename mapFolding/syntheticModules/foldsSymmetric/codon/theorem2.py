@@ -21,9 +21,9 @@ def countSymmetricFoldsState[DatatypeFoldsTotal, DatatypeElephino, DatatypeLeave
                     leafComparison[leafConnectee.__index__()] = compatibleValue(leafComparison[leafConnectee.__index__()], (indexMiniGap - compatibleValue(indexMiniGap, indexLeaf) + leavesTotal) % leavesTotal)
                     indexLeaf = compatibleValue(indexLeaf, indexMiniGap)
                     leafConnectee += compatibleValue(leafConnectee, 1)
-                for listTuples in indices:
+                for boxOfTuples in indices:
                     leafConnectee = compatibleValue(leafConnectee, 1)
-                    for indexLeft, indexRight in listTuples:
+                    for indexLeft, indexRight in boxOfTuples:
                         if leafComparison[indexLeft.__index__()] != compatibleValue(leafComparison[indexLeft.__index__()], leafComparison[indexRight.__index__()]):
                             leafConnectee = compatibleValue(leafConnectee, 0)
                             break

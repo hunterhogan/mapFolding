@@ -26,20 +26,20 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
 
     for oeisID, FunctionDef in dictionaryFunctionDef.items():
         if oeisID.startswith('A') and len(oeisID) == 7 and oeisID[1:7].isdigit():
-            list_f_astConstant: list[ast.expr] = []
-            NodeTourist(Be.MatchValue, Grab.valueAttribute(Then.appendTo(list_f_astConstant))).visit(FunctionDef)
-            if 1 == len(list_f_astConstant):
-                slice_ast_expr: ast.expr = list_f_astConstant[0]
+            boxOf_f_astConstant: list[ast.expr] = []
+            NodeTourist(Be.MatchValue, Grab.valueAttribute(Then.appendTo(boxOf_f_astConstant))).visit(FunctionDef)
+            if 1 == len(boxOf_f_astConstant):
+                slice_ast_expr: ast.expr = boxOf_f_astConstant[0]
             else:
-                slice_ast_expr = Make.Tuple(list_f_astConstant)
+                slice_ast_expr = Make.Tuple(boxOf_f_astConstant)
 
-            list_arg: list[ast.expr] = unjoinBinOP(FunctionDef.args.args[1], ast.BitOr)
-            list_arg.reverse()
-            list_arg.insert(0, Make.Subscript(Make.Name('Literal'), slice=slice_ast_expr))
-            NodeChanger(Be.arg.argIs('f'.__eq__), Grab.annotationAttribute(Then.replaceWith(Make.BitOr.join(list_arg)))).visit(FunctionDef)
+            boxOf_arg: list[ast.expr] = unjoinBinOP(FunctionDef.args.args[1], ast.BitOr)
+            boxOf_arg.reverse()
+            boxOf_arg.insert(0, Make.Subscript(Make.Name('Literal'), slice=slice_ast_expr))
+            NodeChanger(Be.arg.argIs('f'.__eq__), Grab.annotationAttribute(Then.replaceWith(Make.BitOr.join(boxOf_arg)))).visit(FunctionDef)
 
-            list_f: list[str] = list(map(ast.literal_eval, list_f_astConstant))
-            functionOf: str = ' or '.join(list_f)
+            boxOf_f: list[str] = list(map(ast.literal_eval, boxOf_f_astConstant))
+            functionOf: str = ' or '.join(boxOf_f)
             metadata: MetadataOEISid = getMetadata(oeisID)
 
             ImaDocstring: str = f"""

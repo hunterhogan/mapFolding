@@ -78,8 +78,8 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	identifierDataclass: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 	logicalPathDataclass = None
-	for moduleWithLogicalPath, listNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
-		for nameTuple in listNameTuples:
+	for moduleWithLogicalPath, boxOfNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
+		for nameTuple in boxOfNameTuples:
 			if nameTuple[0] == identifierDataclass:
 				logicalPathDataclass = moduleWithLogicalPath
 				break
@@ -90,14 +90,14 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 
 def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *identifierModule: str | None) -> identifierDotAttribute:
 	"""Get logical path from components."""
-	listLogicalPathParts: list[str] = []
+	boxOfLogicalPathParts: list[str] = []
 	if identifierPackage:
-		listLogicalPathParts.append(identifierPackage)
+		boxOfLogicalPathParts.append(identifierPackage)
 	if logicalPathInfix:
-		listLogicalPathParts.append(logicalPathInfix)
+		boxOfLogicalPathParts.append(logicalPathInfix)
 	if identifierModule:
-		listLogicalPathParts.extend([module for module in identifierModule if module is not None])
-	return '.'.join(listLogicalPathParts)
+		boxOfLogicalPathParts.extend([module for module in identifierModule if module is not None])
+	return '.'.join(boxOfLogicalPathParts)
 
 def getModule(identifierPackage: str | None = settingsPackage.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = default['module']['algorithm']) -> ast.Module:
 	"""Get Module."""

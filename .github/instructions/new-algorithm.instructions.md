@@ -69,7 +69,7 @@ applyTo: 'mapFolding/_e/**'
 1. `basecamp.eliminateFolds(...)` builds or receives `EliminationState`.
 2. A flow works over `PermutationSpace` values, usually through `pinIt.py` and/or `pin2上nDimensional*.py`.
 3. `algorithms/iff.py` validates or prunes candidates.
-4. Results accumulate in `state.groupsOfFolds`, `state.listFolding`, and `state.foldsTotal`.
+4. Results accumulate in `state.groupsOfFolds`, `state.boxOfFolding`, and `state.foldsTotal`.
 
 ## Deep-dive references
 

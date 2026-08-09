@@ -86,7 +86,7 @@ def _restoreFieldsExcludedFromInit(
 	, shatteredDataclass: ShatteredDataclass
 ) -> list[ast.Assign]:
 	identifiersInitialized: set[str | None] = set(map(
-		DOT.arg, shatteredDataclass.list_keyword_field__field4init))
+		DOT.arg, shatteredDataclass.boxOf_keyword_field__field4init))
 
 	def isExcludedFromInit(identifier: str) -> bool:
 		return identifier not in identifiersInitialized

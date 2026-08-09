@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain, repeat, starmap
-from mapFolding._e._2上nDimensional.pinIt import listFunctionsReduction2上nDimensional, pinPilesAtEnds
+from mapFolding._e._2上nDimensional.pinIt import boxOfFunctionsReduction2上nDimensional, pinPilesAtEnds
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from math import factorial
@@ -18,11 +18,11 @@ if TYPE_CHECKING:
 	from multiprocessing.queues import Queue
 
 def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
-	return EliminationState(mapShape, listPermutationSpace=[permutationSpace]
-		).removeCreaseViolations().reduceAllPermutationSpace(listFunctionsReduction2上nDimensional).moveToListFolding()
+	return EliminationState(mapShape, boxOfPermutationSpace=[permutationSpace]
+		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
 
-def deconstructPermutationSpaces(listPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
-	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, listPermutationSpace))
+def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
+	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, boxOfPermutationSpace))
 
 def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
 	tuple(map(queueStates.put, map(partial(pinByCrease, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
@@ -32,41 +32,40 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
-	if not state.listPermutationSpace:
+	if not state.boxOfPermutationSpace:
 		state = pinPilesAtEnds(state, 1)
 
 	processManager: BaseContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
 	queueStates: Queue[EliminationState] = processManager.Queue()
 
-	state.groupsOfFolds = len(state.listFolding)
-	# state.listFolding = []
+	state.groupsOfFolds = len(state.boxOfFolding)
 
-	listProcesses: list[BaseProcess] = list(starmap(
+	boxOfProcesses: list[BaseProcess] = list(starmap(
 		partial(processManager.Process, target=consumeQueue, args=(state.mapShape, queuePermutationSpace, queueStates))
 		, repeat((), workersMaximum)
 	))
-	tuple(map(methodcaller('start'), listProcesses))
+	tuple(map(methodcaller('start'), boxOfProcesses))
 
-	listPermutationSpace: list[PermutationSpace] = state.listPermutationSpace
-	state.listPermutationSpace = []
+	boxOfPermutationSpace: list[PermutationSpace] = state.boxOfPermutationSpace
+	state.boxOfPermutationSpace = []
 
-	queuePermutationSpacesLength: int = len(listPermutationSpace)
+	queuePermutationSpacesLength: int = len(boxOfPermutationSpace)
 
 	tqdmQueue = tqdm(total=queuePermutationSpacesLength)
 	while queuePermutationSpacesLength:
-		tuple(map(queuePermutationSpace.put, listPermutationSpace))
+		tuple(map(queuePermutationSpace.put, boxOfPermutationSpace))
 		sherpa: EliminationState = queueStates.get()
-		state.groupsOfFolds += len(sherpa.listFolding)
-		state.listFolding.extend(sherpa.listFolding)
-		listPermutationSpace = list(deconstructPermutationSpaces(sherpa.listPermutationSpace))
-		queuePermutationSpacesLength += -1 + len(listPermutationSpace)
-		tqdmQueue.total += len(listPermutationSpace)  # ty: ignore[unsupported-operator]
+		state.groupsOfFolds += len(sherpa.boxOfFolding)
+		state.boxOfFolding.extend(sherpa.boxOfFolding)
+		boxOfPermutationSpace = list(deconstructPermutationSpaces(sherpa.boxOfPermutationSpace))
+		queuePermutationSpacesLength += -1 + len(boxOfPermutationSpace)
+		tqdmQueue.total += len(boxOfPermutationSpace)  # ty: ignore[unsupported-operator]
 		tqdmQueue.update(1)
 	tqdmQueue.close()
 
 	tuple(map(queuePermutationSpace.put, repeat(PermutationSpace(), workersMaximum)))
-	tuple(map(methodcaller('join'), listProcesses))
+	tuple(map(methodcaller('join'), boxOfProcesses))
 
 	queuePermutationSpace.close()
 	queuePermutationSpace.join_thread()

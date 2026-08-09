@@ -8,9 +8,9 @@ from itertools import pairwise
 from mapFolding._e import getLeafDomain
 from mapFolding._e._2上nDimensional import 首一
 from mapFolding._e._2上nDimensional.pinIt import pin首beans
-from mapFolding._e._2上nDimensional.reduceIt import listFunctionsReduction2上nDimensional, listFunctionsReductionQuick2上nDimensional
+from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional, boxOfFunctionsReductionQuick2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pinIt import atPileExcludeLeaf_inListPermutationSpace, excludeLeaf_rBeforeLeaf_k
+from mapFolding._e.pinIt import atPileExcludeLeaf_inboxOfPermutationSpace, excludeLeaf_rBeforeLeaf_k
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from mapFolding.oeis import makeMapShape
 from mapFolding.theSSOT import settingsPackage
@@ -33,7 +33,7 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 		domain_r: Iterable[int] = getLeafDomain(state, r)
 		pilesForOthers: set[int] = set(range(len(folding) - pile)).intersection(domain_r)
 		for pile in pilesForOthers:
-			state.listPermutationSpace = atPileExcludeLeaf_inListPermutationSpace(state.listPermutationSpace, pile, r)
+			state.boxOfPermutationSpace = atPileExcludeLeaf_inboxOfPermutationSpace(state.boxOfPermutationSpace, pile, r)
 
 		state = excludeLeaf_rBeforeLeaf_k(state, k, r, getLeafDomain(state, k), domain_r)
 
@@ -49,23 +49,23 @@ def makeAlbum2上nDimensional吗(state: EliminationState, workersMaximum: int) -
 	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.dimensionsTotal - 1), pathAlbum, suffix='.album'))
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-		listClaimTickets: list[Future[EliminationState]] = []
+		boxOfClaimTickets: list[Future[EliminationState]] = []
 		for position, folding, in enumerate(album):
-			stateCopy: EliminationState = EliminationState(state.mapShape, state.listPermutationSpace.copy()
-						, listFunctionsReduction=listFunctionsReduction2上nDimensional
-					, listFunctionsReductionQuick=listFunctionsReductionQuick2上nDimensional)
-			listClaimTickets.append(concurrencyManager.submit(makeDescendants, folding, stateCopy, position % workersMaximum + 1))
+			stateCopy: EliminationState = EliminationState(state.mapShape, state.boxOfPermutationSpace.copy()
+						, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional
+					, boxOfFunctionsReductionQuick=boxOfFunctionsReductionQuick2上nDimensional)
+			boxOfClaimTickets.append(concurrencyManager.submit(makeDescendants, folding, stateCopy, position % workersMaximum + 1))
 
-		state.listPermutationSpace = []
+		state.boxOfPermutationSpace = []
 
-		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc='for folding in album'):
+		for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets), disable=False, desc='for folding in album'):
 			sherpa: EliminationState = claimTicket.result()
-			state.listPermutationSpace.extend(sherpa.listPermutationSpace)
-			state.listFolding.extend(sherpa.listFolding)
+			state.boxOfPermutationSpace.extend(sherpa.boxOfPermutationSpace)
+			state.boxOfFolding.extend(sherpa.boxOfFolding)
 
 	return state
 
 def recordAlbum2上nDimensional吗(state: EliminationState) -> Path:
 	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, pathAlbum, suffix='.album')
-	writeAlbum(sorted(state.listFolding), pathFilenameAlbum)
+	writeAlbum(sorted(state.boxOfFolding), pathFilenameAlbum)
 	return pathFilenameAlbum

@@ -1,7 +1,6 @@
 # DEVELOPMENT module.
 # pyright: reportUnknownArgumentType=false, reportUnknownVariableType=false, reportAssignmentType=false
 # ruff: file-ignore[commented-out-code, print, p-print]
-# ty: ignore[invalid-assignment]
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -28,10 +27,10 @@ if TYPE_CHECKING:
 def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
-	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
+	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryLeafOptions(state)[pileTarget])).difference(set(listLeaves))) for leaves, listLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryLeafOptions(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
 
@@ -269,7 +268,7 @@ pp3  = (3, 5, 9, 17, 33)
 			continue
 			print(pile, set(getIteratorOfLeaves(getLeafOptions(state, pile))).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
 
-		for excluder, listExcluded in dictionaryExcluded.items():
+		for excluder, boxOfExcluded in dictionaryExcluded.items():
 			continue
 
 			invert = int(excluder ^ 63)
@@ -279,8 +278,8 @@ pp3  = (3, 5, 9, 17, 33)
 			creasePost = tuple(getLeavesCreasePost(state, excluder))
 			allCreaseAnteInRange = set(creaseAnte).intersection(pileRange31)
 			allCreasePostInRange = set(creasePost).intersection(pileRange31)
-			notExcluded = allCreasePostInRange.difference(listExcluded)
-			# print(excluder, invert, allCreasePostSSInRange.intersection(listExcluded), notExcluded, allCreasePostSSInRange.difference(listExcluded), set(creasePostSS).symmetric_difference(creasePost), creasePostSS, allCreasePostSSInRange)
+			notExcluded = allCreasePostInRange.difference(boxOfExcluded)
+			# print(excluder, invert, allCreasePostSSInRange.intersection(boxOfExcluded), notExcluded, allCreasePostSSInRange.difference(boxOfExcluded), set(creasePostSS).symmetric_difference(creasePost), creasePostSS, allCreasePostSSInRange)
 			# print(excluder.__format__('06b'), excluder, f"{notExcluded}\t", f"{creasePost}", sep='\t')
 			print(excluder, f"{allCreaseAnteInRange=}", f"{allCreasePostInRange=}", sep='\t')
-			print(excluder, f"{allCreaseAnteInRange.difference(listExcluded)}", f"{allCreasePostInRange.difference(listExcluded)}", sep='\t')
+			print(excluder, f"{allCreaseAnteInRange.difference(boxOfExcluded)}", f"{allCreasePostInRange.difference(boxOfExcluded)}", sep='\t')

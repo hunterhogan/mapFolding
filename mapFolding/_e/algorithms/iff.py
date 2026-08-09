@@ -214,12 +214,12 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
 
 	for dimension in range(_dimensionsTotal(mapShape)):
-		listPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
+		boxOfPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
 			if crease:
-				listPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, leafToPile[crease]))
-		for groupedParity in listPilePileCreaseByParity:
+				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, leafToPile[crease]))
+		for groupedParity in boxOfPilePileCreaseByParity:
 			if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
 				for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
 					#=SIN= Early return.
@@ -285,12 +285,12 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
 
 	for dimension in range(_dimensionsTotal(mapShape)):
-		listPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
+		boxOfPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
 			if crease:
-				listPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, leafToPile[crease]))
-		for groupedParity in listPilePileCreaseByParity:
+				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, leafToPile[crease]))
+		for groupedParity in boxOfPilePileCreaseByParity:
 			if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
 				for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
 					#=SIN= Early return.

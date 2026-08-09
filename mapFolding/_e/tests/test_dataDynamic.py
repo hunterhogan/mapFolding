@@ -96,7 +96,7 @@ def test_getLeafDomainsCombined(domainFunction: CallableFunction[[EliminationSta
 	state: EliminationState = EliminationState(mapShape=mapShape)
 	tuplesDomainActual: tuple[tuple[int, ...], ...] = tuple(domainFunction(state))
 	tuplesDomainAuthoritativeData: tuple[tuple[int, ...], ...] = getattr(
-		moduleAuthoritativeData, f"listDomain2上{dimensionsTotal}Dimensional"
+		moduleAuthoritativeData, f"boxOfDomain2上{dimensionsTotal}Dimensional"
 	)
 
 	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(tuplesDomainAuthoritativeData, tuplesDomainActual)
@@ -128,17 +128,17 @@ def test_getLeavesCrease(creaseKind: str, creaseFunction: CallableFunction[[Elim
 	dictionaryExpectedByLeaf: dict[int, list[int]] = dictionaryExpectedByMapShape[mapShape]
 
 	for leaf in range(state.leavesTotal):
-		listLeavesActual: list[int] = list(creaseFunction(state, leaf))
-		listLeavesExpectedSorted: list[int] = dictionaryExpectedByLeaf[leaf]
+		boxOfLeavesActual: list[int] = list(creaseFunction(state, leaf))
+		boxOfLeavesExpectedSorted: list[int] = dictionaryExpectedByLeaf[leaf]
 
-		assertEqualTo(sorted(listLeavesActual), listLeavesExpectedSorted, creaseFunction.__name__, mapShape, leaf)
+		assertEqualTo(sorted(boxOfLeavesActual), boxOfLeavesExpectedSorted, creaseFunction.__name__, mapShape, leaf)
 
-		assertEqualTo(allUnique吗(listLeavesActual), True, creaseFunction.__name__, mapShape, leaf)
+		assertEqualTo(allUnique吗(boxOfLeavesActual), True, creaseFunction.__name__, mapShape, leaf)
 
-		for leafPost in listLeavesActual:
+		for leafPost in boxOfLeavesActual:
 			assertEqualTo(0 <= leafPost < state.leavesTotal, True, creaseFunction.__name__, mapShape, leaf, leafPost=leafPost)
 			bitFlip: int = leaf ^ leafPost
 			assertEqualTo((bitFlip > 0) and ((bitFlip & (bitFlip - 1)) == 0), True, creaseFunction.__name__, mapShape, leaf, leafPost=leafPost, bitFlip=bitFlip)
 
-		listBitFlips: list[int] = [leaf ^ leafPost for leafPost in listLeavesActual]
-		assertEqualTo(listBitFlips, sorted(listBitFlips), creaseFunction.__name__, mapShape, leaf)
+		boxOfBitFlips: list[int] = [leaf ^ leafPost for leafPost in boxOfLeavesActual]
+		assertEqualTo(boxOfBitFlips, sorted(boxOfBitFlips), creaseFunction.__name__, mapShape, leaf)

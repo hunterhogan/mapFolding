@@ -102,17 +102,17 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
 		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
 		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
-		list_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
-		list_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
-		listIdentifiersStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'scalar' and not dictionaryDeReConstruction[field].init)],
-		listAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
-		listName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
-		listUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
+		boxOf_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
+		boxOf_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
+		boxOfIdentifiersStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'scalar' and not dictionaryDeReConstruction[field].init)],
+		boxOfAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
+		boxOfName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
+		boxOfUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
 		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
 		)
-	shatteredDataclass.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclass.listName4Parameters, ast.Store())
-	shatteredDataclass.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(identifierDataclass), list_keyword=shatteredDataclass.list_keyword_field__field4init))
-	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.listAnnotations))
+	shatteredDataclass.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclass.boxOfName4Parameters, ast.Store())
+	shatteredDataclass.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(identifierDataclass), list_keyword=shatteredDataclass.boxOf_keyword_field__field4init))
+	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.boxOfAnnotations))
 
 	shatteredDataclass.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
 	shatteredDataclass.imports.addImportFrom_asStr(logicalPathDataclass, identifierDataclass)
@@ -149,7 +149,7 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 		The modified function ingredients with dataclass dependencies removed.
 
 	"""
-	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.list_argAnnotated4ArgumentsSpecification)
+	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated4ArgumentsSpecification)
 	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))).visit(ingredientsTarget.astFunctionDef)
 	ingredientsTarget.astFunctionDef = unparseFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
@@ -189,8 +189,8 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 		The modified caller function with appropriate unpacking and repacking around the target call.
 
 	"""
-	AssignAndCall: ast.Assign = Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=Make.Call(Make.Name(identifierCallee), shatteredDataclass.listName4Parameters))
+	AssignAndCall: ast.Assign = Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=Make.Call(Make.Name(identifierCallee), shatteredDataclass.boxOfName4Parameters))
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.replaceWith(AssignAndCall)).visit(ingredientsCaller.astFunctionDef)
-	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.listUnpack)).visit(ingredientsCaller.astFunctionDef)
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.boxOfUnpack)).visit(ingredientsCaller.astFunctionDef)
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredientsCaller.astFunctionDef)
 	return ingredientsCaller

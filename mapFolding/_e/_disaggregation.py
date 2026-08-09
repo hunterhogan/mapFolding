@@ -35,11 +35,11 @@ def getIteratorOfLeaves(leafOptions: LeafOptions) -> Iterator[Leaf]:
 
 	The function is used to enumerate candidate leaves for constraint propagation.
 
-		model.add_allowed_assignments([listLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
+		model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
 
 	The function is used to enumerate leaves for pinning attempts.
 
-		sherpa.listPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructPermutationSpaceAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
+		sherpa.boxOfPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructPermutationSpaceAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(leafOptions)))))
 
 	References
 	----------

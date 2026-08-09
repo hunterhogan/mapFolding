@@ -14,7 +14,7 @@ import pandas
 if TYPE_CHECKING:
 	from pandas import DataFrame, Series
 
-def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None = None) -> pandas.DataFrame:
+def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | None = None) -> pandas.DataFrame:
 	"""Measure the relative entropy and distributional properties of leaves across folding sequences.
 
 	This function analyzes how leaves are distributed across their mathematical domains by comparing
@@ -26,7 +26,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 	----------
 	state : EliminationState
 		The elimination state containing the map shape and dimension information.
-	listLeavesAnalyzed : list[int] | None = None
+	boxOfLeavesAnalyzed : list[int] | None = None
 		Specific leaves to analyze. If None, analyzes all leaves except the trivial ones
 		(0, 1, and leavesTotal-1) which always occupy the same pile.
 
@@ -57,13 +57,13 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 	"""
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
-	if listLeavesAnalyzed is None:
+	if boxOfLeavesAnalyzed is None:
 		leavesExcluded: set[int] = {pileOrigin, 零, state.leavesTotal - 零}
-		listLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
+		boxOfLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
 
-	listEntropyRecords: list[dict[str, Any]] = []
+	boxOfEntropyRecords: list[dict[str, Any]] = []
 
-	for leaf in listLeavesAnalyzed:
+	for leaf in boxOfLeavesAnalyzed:
 		domainLeaf: range = getLeafDomain(state, leaf)
 		domainSize: int = len(domainLeaf)
 
@@ -77,7 +77,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 
 		arrayPileCounts: numpy.ndarray = numpy.bincount(dataframeMelted['variable'].astype(int), minlength=state.leavesTotal)
 		arrayPileCountsInDomain: numpy.ndarray = arrayPileCounts[list(domainLeaf)]
-		arrayFrequencies: numpy.ndarray = arrayPileCountsInDomain / arrayPileCountsInDomain.sum()
+		arrayFrequencies: numpy.ndarray[tuple[Any, ...], numpy.dtype[numpy.int_]] = arrayPileCountsInDomain / arrayPileCountsInDomain.sum()
 
 		maskNonzero: numpy.ndarray = arrayFrequencies > 0
 		entropyActual: float = float(-numpy.sum(arrayFrequencies[maskNonzero] * numpy.log2(arrayFrequencies[maskNonzero])))
@@ -88,7 +88,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 		frequencyMean: float = 1.0 / domainSize
 		concentrationMaximum: float = frequencyMaximum / frequencyMean if frequencyMean > 0 else 0.0
 
-		listEntropyRecords.append({
+		boxOfEntropyRecords.append({
 			'leaf': leaf,
 			'domainSize': domainSize,
 			'entropyActual': entropyActual,
@@ -100,7 +100,7 @@ def measureEntropy(state: EliminationState, listLeavesAnalyzed: list[int] | None
 			'trailingZeros': dimensionNearestTail(leaf),
 		})
 
-	return pandas.DataFrame(listEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
+	return pandas.DataFrame(boxOfEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
 
 def analyzeEntropyForDimension(dimensionsTotal: int = 6) -> None:
 	"""Analyze entropy for all non-trivial leaves in a given dimension configuration."""

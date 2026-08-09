@@ -294,16 +294,16 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	"""
 	ingredientsFunction.imports.update(raiseIfNone(job.shatteredDataclass).imports)
 
-	list_argCuzMyBrainRefusesToThink: list[ast.arg] = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
-	list_arg_arg: list[str] = [ast_arg.arg for ast_arg in list_argCuzMyBrainRefusesToThink]
-	listName: list[ast.Name] = []
-	NodeTourist(Be.Name, Then.appendTo(listName)).visit(ingredientsFunction.astFunctionDef)
-	listIdentifiers: list[str] = [astName.id for astName in listName]
-	listIdentifiersNotUsed: list[str] = list(set(list_arg_arg) - set(listIdentifiers))
+	boxOf_argCuzMyBrainRefusesToThink: list[ast.arg] = ingredientsFunction.astFunctionDef.args.args + ingredientsFunction.astFunctionDef.args.posonlyargs + ingredientsFunction.astFunctionDef.args.kwonlyargs
+	boxOf_arg_arg: list[str] = [ast_arg.arg for ast_arg in boxOf_argCuzMyBrainRefusesToThink]
+	boxOfName: list[ast.Name] = []
+	NodeTourist(Be.Name, Then.appendTo(boxOfName)).visit(ingredientsFunction.astFunctionDef)
+	boxOfIdentifiers: list[str] = [astName.id for astName in boxOfName]
+	boxOfIdentifiersNotUsed: list[str] = list(set(boxOf_arg_arg) - set(boxOfIdentifiers))
 
-	for ast_arg in list_argCuzMyBrainRefusesToThink:
+	for ast_arg in boxOf_argCuzMyBrainRefusesToThink:
 		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).field2AnnAssign:
-			if ast_arg.arg in listIdentifiersNotUsed:
+			if ast_arg.arg in boxOfIdentifiersNotUsed:
 				pass
 			else:
 				ImaAnnAssign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[ast_arg.arg]
@@ -315,13 +315,13 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
 						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
 					case _:
-						list_exprDOTannotation: list[ast.expr] = []
-						list_exprDOTvalue: list[ast.expr] = []
+						boxOf_exprDOTannotation: list[ast.expr] = []
+						boxOf_exprDOTvalue: list[ast.expr] = []
 						for dimension in job.state.mapShape:
-							list_exprDOTannotation.append(Make.Name(elementConstructor))
-							list_exprDOTvalue.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
-						cast('ast.Tuple', cast('ast.Subscript', cast('ast.AnnAssign', ImaAnnAssign).annotation).slice).elts = list_exprDOTannotation
-						cast('ast.Tuple', ImaAnnAssign.value).elts = list_exprDOTvalue
+							boxOf_exprDOTannotation.append(Make.Name(elementConstructor))
+							boxOf_exprDOTvalue.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
+						cast('ast.Tuple', cast('ast.Subscript', cast('ast.AnnAssign', ImaAnnAssign).annotation).slice).elts = boxOf_exprDOTannotation
+						cast('ast.Tuple', ImaAnnAssign.value).elts = boxOf_exprDOTvalue
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 
@@ -340,7 +340,7 @@ def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) 
 	ingredientsCount : IngredientsFunction
 		Container holding the counting function's AST to be transformed.
 	"""
-	for identifier in raiseIfNone(job.shatteredDataclass).listIdentifiersStaticScalars:
+	for identifier in raiseIfNone(job.shatteredDataclass).boxOfIdentifiersStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
 			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff: ignore[suspicious-eval-usage]
 		).visit(ingredientsCount.astFunctionDef)
@@ -350,7 +350,7 @@ def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) 
 def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba | None = None) -> None:
 	"""Add a standalone launcher section to a computation module."""
 	ingredientsModule.imports.addImport_asStr('time')
-	listLauncherBody: list[ast.stmt] = [Make.Assign(
+	boxOfLauncherBody: list[ast.stmt] = [Make.Assign(
 		[Make.Name('timeStart', Make.Store())]
 		, Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')))]
 
@@ -366,7 +366,7 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		).visit(ingredientsFunction.astFunctionDef)
 		NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
 		ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
-		listLauncherBody.extend([
+		boxOfLauncherBody.extend([
 			Make.With([Make.withitem(Make.Call(Make.Name('ProgressBar'), list_keyword=[
 				Make.keyword('total', Make.Constant(job.foldsTotalEstimated // job.foldsTotalMultiplier))
 				, Make.keyword('update_interval', Make.Constant(2))])
@@ -378,11 +378,11 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Name(
 			raiseIfNone(job.shatteredDataclass).countingVariableName.id)))).visit(ingredientsFunction.astFunctionDef)
 		ingredientsFunction.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
-		listLauncherBody.append(Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Call(
+		boxOfLauncherBody.append(Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Call(
 			deepcopy(raiseIfNone(job.shatteredDataclass).countingVariableAnnotation), [
 			Make.Mult().join([Make.Call(Make.Name(job.identifierCallable)), Make.Constant(job.foldsTotalMultiplier)])])))
 
-	listLauncherBody.extend([
+	boxOfLauncherBody.extend([
 		Make.Expr(Make.Call(Make.Name('print'), [Make.Sub().join([
 			Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')), Make.Name('timeStart')])]))
 		, Make.Expr(Make.Call(Make.Name('print'), [Make.Constant(f'\nmap {job.state.mapShape} ='), Make.Name('foldsTotal')]))
@@ -392,12 +392,12 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 			Make.Call(Make.Name('str'), [Make.Name('foldsTotal')])]))
 		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'close')))])
 	ingredientsModule.appendLauncher(statement=Make.If(
-		Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')]), listLauncherBody))
+		Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')]), boxOfLauncherBody))
 
 #================== Datatypes =======================================================================
 
 # TODO Use this concept in general modules, not just custom jobs.
-def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, listDatatypeConfigurations: list[DatatypeConfiguration]) -> tuple[IngredientsFunction, IngredientsModule]:
+def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfDatatypeConfigurations: list[DatatypeConfiguration]) -> tuple[IngredientsFunction, IngredientsModule]:
 	"""Customize data types in the given ingredients by adjusting imports.
 
 	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
@@ -415,7 +415,7 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	datatypesIngredientsObjects : tuple[IngredientsFunction, IngredientsModule]
 		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
 	"""
-	for datatypeConfig in listDatatypeConfigurations:
+	for datatypeConfig in boxOfDatatypeConfigurations:
 		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
 		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
 

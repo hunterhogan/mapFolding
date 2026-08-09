@@ -14,7 +14,7 @@ from itertools import combinations, filterfalse
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
-from mapFolding._e.reduceIt import listFunctionsReductionDEFAULT
+from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
 from math import prod
@@ -261,27 +261,27 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 				"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
 				if self.leafNotPinned吗(leaves[index]):
 					"""`leaves[index]` is not pinned, so it needs a pile.
-					In each iteration of `leavesDomain`, `listOfPiles`, the pile it needs is `listOfPiles[index]`.
-					Therefore, if `listOfPiles[index]` is open, filter in the iteration. If `listOfPiles[index]` is occupied, filter out the iteration."""
+					In each iteration of `leavesDomain`, `boxOfPiles`, the pile it needs is `boxOfPiles[index]`.
+					Therefore, if `boxOfPiles[index]` is open, filter in the iteration. If `boxOfPiles[index]` is occupied, filter out the iteration."""
 					leavesDomain = filter(pileOpenByIndex(index), leavesDomain)
-					"""`leaves[index]` is not pinned, it wants `listOfPiles[index]`, and `listOfPiles[index]` is open.
-					Is `leaves[index]` in the pile-range of `listOfPiles[index]`?"""
+					"""`leaves[index]` is not pinned, it wants `boxOfPiles[index]`, and `boxOfPiles[index]` is open.
+					Is `leaves[index]` in the pile-range of `boxOfPiles[index]`?"""
 					leavesDomain = filter(leafInPileRangeByIndex(index), leavesDomain)
 				else:
 					"""`leaves[index]` is pinned.
-					In each iteration of `leavesDomain`, `listOfPiles`, the pile in which `leaves[index]` is pinned must match `listOfPiles[index]`.
-					Therefore, if the pile in which `leaves[index]` is pinned matches `listOfPiles[index]`, filter in the iteration. Otherwise, filter out the iteration."""
+					In each iteration of `leavesDomain`, `boxOfPiles`, the pile in which `leaves[index]` is pinned must match `boxOfPiles[index]`.
+					Therefore, if the pile in which `leaves[index]` is pinned matches `boxOfPiles[index]`, filter in the iteration. Otherwise, filter out the iteration."""
 					leavesDomain = filter(isPinnedAtPileByIndex(leaves[index], index), leavesDomain)
 
-			for listOfPiles in leavesDomain:
+			for boxOfPiles in leavesDomain:
 				"""Properly and safely deconstruct `permutationSpace` by the combined domain of leaves.
 				The parameter `leavesDomain` is the full domain of the leaves, so deconstructing with `leavesDomain` preserves the permutation space.
 				For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
 				I apply filters that prevent pinning the same leaf twice.
-				Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[index]` at `listOfPiles[index]` without corrupting the permutation space."""
+				Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[index]` at `boxOfPiles[index]` without corrupting the permutation space."""
 				permutationSpaceForListOfPiles: PermutationSpace = self.copy()
 				for index in range(len(leaves)):
-					permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(listOfPiles[index], leaves[index])
+					permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(boxOfPiles[index], leaves[index])
 				deconstructedPermutationSpace.append(permutationSpaceForListOfPiles)
 		else:
 			deconstructedPermutationSpace.append(self)
@@ -426,7 +426,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	# this method (I'm deeply skeptical that overload is a good idea). `makeFolding` handles _my_
 	# current needs. If I had to create ONE `makeFolding` function/method with the most utility,
 	# however, it would NOT look like this function. 2026 July 10: off the top of my head, passing
-	# `listPileLeaf: Sequence[tuple[Pile, Leaf]]` would be better than the current function and is
+	# `boxOfPileLeaf: Sequence[tuple[Pile, Leaf]]` would be better than the current function and is
 	# probably close to the ideal generalized function.
 	def makeFolding(self, leavesToInsert: Sequence[Leaf] = ()) -> Folding:
 		"""Complete this `PermutationSpace` as a `Folding`.
@@ -551,9 +551,9 @@ class EliminationState:
 		Dimension lengths of the map being analyzed.
 	groupsOfFolds : int = 0
 		Count of distinct `Folding` pattern groups found so far.
-	listFolding : list[`Folding`]
+	boxOfFolding : list[`Folding`]
 		List of `Folding` patterns found.
-	listPermutationSpace : list[`PermutationSpace`]
+	boxOfPermutationSpace : list[`PermutationSpace`]
 		List of exclusive `PermutationSpace` dictionaries.
 	pile : `Pile` = -1
 		The current `pile` on the workbench.
@@ -597,19 +597,19 @@ class EliminationState:
 	mapShape: tuple[int, ...] = dataclasses.field(init=True)
 	"""Dimensions of the map being analyzed for folding patterns."""
 
-	listPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
+	boxOfPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
 	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
-	listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
-	listFunctionsReductionQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
+	boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
+	boxOfFunctionsReductionQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
 
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
+	boxOfFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
 	"""A list of `Folding` patterns found."""
 	pile: Pile = -1
 	"""The `pile` on the workbench."""
@@ -647,12 +647,12 @@ class EliminationState:
 			(self.groupsOfFolds, self.Theorem2aMultiplier, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier)
 		)
 
-	def moveToListFolding(self) -> Self:
+	def moveToBoxOfFolding(self) -> Self:
 		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
-			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
+			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.boxOfPermutationSpace
 		)
-		self.listPermutationSpace = list(foldingGroup吗.get(False, ()))
-		self.listFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
+		self.boxOfPermutationSpace = list(foldingGroup吗.get(False, ()))
+		self.boxOfFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
 		return self
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
@@ -660,7 +660,7 @@ class EliminationState:
 
 		`permutationSpaceCreaseViolation吗` is a pruning predicate used before counting or expanding a
 		candidate `PermutationSpace`. `removeCreaseViolationsFromEliminationState` uses
-		`permutationSpaceCreaseViolation吗` to filter `state.listPermutationSpace` [5], and a caller
+		`permutationSpaceCreaseViolation吗` to filter `state.boxOfPermutationSpace` [5], and a caller
 		such as `mapFolding._e.pin2上nDimensions` uses `removeCreaseViolationsFromEliminationState`
 		[6] as part of building a reduced search space.
 
@@ -710,14 +710,14 @@ class EliminationState:
 		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.extractPinnedLeaves())}
 
 		for dimension in range(self.dimensionsTotal):
-			listPileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
+			boxOfPileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 			for pile, leaf in permutationSpace.extractPinnedLeaves().items():
 				crease: int | None = getCreasePost(self.mapShape, leaf, dimension)
 				if crease:
 					pileCrease: int | None = leafToPile.get(crease)
 					if pileCrease:
-						listPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
-			for groupedParity in listPileCreaseByParity:
+						boxOfPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
+			for groupedParity in boxOfPileCreaseByParity:
 				if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
 					for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
 						return True
@@ -730,20 +730,20 @@ class EliminationState:
 			, self.pile in _e.getLeafDomain(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
+	def reduceAllPermutationSpace(self, boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
 					, *, quick: bool = False) -> Self:
 		# TODO think about this.
-		from mapFolding._e.reduceIt import listFunctionsReductionQuickDEFAULT  # ruff: ignore[import-outside-top-level]
-		listQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
+		from mapFolding._e.reduceIt import boxOfFunctionsReductionQuickDEFAULT  # ruff: ignore[import-outside-top-level]
+		boxOfQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
 		if quick:
-			listQuick = self.listFunctionsReductionQuick or listFunctionsReductionQuickDEFAULT
-		listFunctionsReduction = listFunctionsReduction or listQuick or self.listFunctionsReduction or listFunctionsReductionDEFAULT
-		listPermutationSpace: list[PermutationSpace] = list(filter(attrgetter('valid'), self.listPermutationSpace))
-		self.listPermutationSpace = []
-		listPermutationSpaceIrreducible: list[PermutationSpace] = []
+			boxOfQuick = self.boxOfFunctionsReductionQuick or boxOfFunctionsReductionQuickDEFAULT
+		boxOfFunctionsReduction = boxOfFunctionsReduction or boxOfQuick or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
+		boxOfPermutationSpace: list[PermutationSpace] = list(filter(attrgetter('valid'), self.boxOfPermutationSpace))
+		self.boxOfPermutationSpace = []
+		boxOfPermutationSpaceIrreducible: list[PermutationSpace] = []
 
-		functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = list(listFunctionsReduction)
-		for permutationSpace in listPermutationSpace:
+		functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = list(boxOfFunctionsReduction)
+		for permutationSpace in boxOfPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
 			index: int = len(functionsReduction)
@@ -756,18 +756,18 @@ class EliminationState:
 				if not permutationSpace.valid:
 					index = 0
 				elif sumPermutationSpace != sum(permutationSpace.values()):
-					index = len(listFunctionsReduction)
+					index = len(boxOfFunctionsReduction)
 					sumPermutationSpace = sum(permutationSpace.values())
 				elif index == 0:
-					listPermutationSpaceIrreducible.append(permutationSpace)
+					boxOfPermutationSpaceIrreducible.append(permutationSpace)
 
 		else:
-			self.listPermutationSpace.extend(listPermutationSpaceIrreducible)
+			self.boxOfPermutationSpace.extend(boxOfPermutationSpaceIrreducible)
 
 		return self
 
 	def removeCreaseViolations(self) -> Self:
-		"""You can filter `state.listPermutationSpace` by removing crease-crossing candidates.
+		"""You can filter `state.boxOfPermutationSpace` by removing crease-crossing candidates.
 
 		(AI generated docstring)
 
@@ -785,7 +785,7 @@ class EliminationState:
 		Returns
 		-------
 		self : Self
-			The same instance with `self.listPermutationSpace` filtered.
+			The same instance with `self.boxOfPermutationSpace` filtered.
 
 		References
 		----------
@@ -793,9 +793,9 @@ class EliminationState:
 
 		[2] mapFolding._e.pin2上nDimensions
 		"""
-		listPermutationSpace: list[PermutationSpace] = self.listPermutationSpace.copy()
-		self.listPermutationSpace = []
-		self.listPermutationSpace.extend(filterfalse(self.permutationSpaceCreaseViolation吗, listPermutationSpace))
+		boxOfPermutationSpace: list[PermutationSpace] = self.boxOfPermutationSpace.copy()
+		self.boxOfPermutationSpace = []
+		self.boxOfPermutationSpace.extend(filterfalse(self.permutationSpaceCreaseViolation吗, boxOfPermutationSpace))
 
 		return self
 

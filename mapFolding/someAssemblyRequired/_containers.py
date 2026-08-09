@@ -81,22 +81,22 @@ class ShatteredDataclass:
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Import records for the dataclass and its constituent field types."""
 
-	list_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
+	boxOf_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
 	"""Function argument nodes with type annotations for parameter specification."""
 
-	list_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
+	boxOf_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
 	"""Keyword arguments for dataclass initialization using field=field format."""
 
-	listIdentifiersStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
-	"""Identifiers of unchanging scalar fields with `init=False`; mutually exclusive with `list_keyword_field__field4init`."""
+	boxOfIdentifiersStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
+	"""Identifiers of unchanging scalar fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
 
-	listAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
+	boxOfAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
 	"""Type annotations for each dataclass field in declaration order."""
 
-	listName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list[ast.Name])
+	boxOfName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list[ast.Name])
 	"""Name nodes for each dataclass field used as function parameters."""
 
-	listUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list[ast.AnnAssign])
+	boxOfUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list[ast.AnnAssign])
 	"""Annotated assignment statements to extract individual fields from dataclass instances."""
 
 	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict[ast.AST, ast.Name])

@@ -2,11 +2,11 @@
 
 ## Bifurcate `PermutationSpace` if a `LeafOptions` has exactly two leaves
 
-This is a very blunt attack, but it might be useful. After `updateListPermutationSpacePileRangesOfLeaves`, something like
-`(any(valfilter(bit_count == 3)), extractUndeterminedPiles, state.listPermutationSpace)` to find all `LeafOptions` with
+This is a very blunt attack, but it might be useful. After `updateboxOfPermutationSpacePileRangesOfLeaves`, something like
+`(any(valfilter(bit_count == 3)), extractUndeterminedPiles, state.boxOfPermutationSpace)` to find all `LeafOptions` with
 exactly two leaves, then split the corresponding `PermutationSpace` into two `PermutationSpace` objects, replacing
 `LeafOptions` with `int`. Should I then run the new `PermutationSpace` back through
-`updateListPermutationSpacePileRangesOfLeaves`? I _feel_ like `notEnoughOpenPiles`, for example, will eliminate some of the new
+`updateboxOfPermutationSpacePileRangesOfLeaves`? I _feel_ like `notEnoughOpenPiles`, for example, will eliminate some of the new
 `PermutationSpace` objects, which is the point.
 
 ## Sophisticated bifurcation/separation of `PermutationSpace`

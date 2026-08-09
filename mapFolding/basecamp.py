@@ -169,7 +169,7 @@ def countFolds(mapShape: Sequence[int]
 
 		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
-		# `listStatesParallel` exists so you can research the parallel computation.
+		# `boxOfStatesParallel` exists so you can research the parallel computation.
 		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
 	else:

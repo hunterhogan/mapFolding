@@ -23,7 +23,7 @@ For each leaf:
 
 I would like to make a comprehensive and authoritative list of variables and formulas for their maximum bit-width. This is not it, but it does help align identifiers from different algorithms.
 
-Assume `listDimensions`:
+Assume `boxOfDimensions`:
 
 1. is in an implemented OEIS sequence, and
 2. is <= the first unknown in the OEIS sequence.
@@ -53,7 +53,7 @@ Assume `listDimensions`:
 | integer  | n           | leafConnectee           |               | m      | m      |
 | integer  | n           | leafIndex               |               | m      | m      |
 | integer  | 256*        | leavesTotal             |               | n      |        |
-| 1D array | 19 (2x19)   | listDimensions          | mapShape      | p      | p      |
+| 1D array | 19 (2x19)   | boxOfDimensions          | mapShape      | p      | p      |
 | 1D array | (container) | my                      |               |        |        |
 | 1D array | (container) | the                     | static        |        |        |
 | 2D array | (container) | track                   | s             |        |        |

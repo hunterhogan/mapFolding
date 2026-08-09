@@ -7,7 +7,7 @@ from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions
 from mapFolding._e._2上nDimensional import (
 	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一)
-from mapFolding._e._2上nDimensional.reduceIt import listFunctionsReduction2上nDimensional, listFunctionsReductionQuick2上nDimensional
+from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional, boxOfFunctionsReductionQuick2上nDimensional
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
 from mapFolding._e.dataBaskets import EliminationState
@@ -24,18 +24,18 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import LeafOptions
 
 def printStatisticsPermutations(state: EliminationState) -> None:
-	def prodOfDOTvalues(listLeafOptions: Iterable[LeafOptions]) -> int:
-		return prod(map(howManyLeavesInLeafOptions, listLeafOptions))
+	def prodOfDOTvalues(boxOfLeafOptions: Iterable[LeafOptions]) -> int:
+		return prod(map(howManyLeavesInLeafOptions, boxOfLeafOptions))
 
 	permutationsPermutationSpaceTotal: Callable[[Iterable[Any]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('extractUndeterminedPiles'))))
 	print(len(str(mm := fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
 	print(len(str(rr := prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
-	print(len(str(pp := permutationsPermutationSpaceTotal(state.listPermutationSpace))), pp, "Pinning these leaves")
+	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
 	state: EliminationState = EliminationState((2,) * 6
-				, listFunctionsReduction=listFunctionsReduction2上nDimensional
-		, listFunctionsReductionQuick=listFunctionsReductionQuick2上nDimensional)
+				, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional
+		, boxOfFunctionsReductionQuick=boxOfFunctionsReductionQuick2上nDimensional)
 
 	printThis = True
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 		from mapFolding._e._development.toolkit import verifyPinning2Dn
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
-		print(f"{len(state.listPermutationSpace)=}")
+		print(f"{len(state.boxOfPermutationSpace)=}")
 
 		state = makeAlbum2上nDimensional吗(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
@@ -56,10 +56,10 @@ if __name__ == '__main__':
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 
-		print(f"{len(state.listPermutationSpace)=}")
+		print(f"{len(state.boxOfPermutationSpace)=}")
 
-		state.moveToListFolding()
-		if state.listPermutationSpace:
+		state.moveToBoxOfFolding()
+		if state.boxOfPermutationSpace:
 			state = doTheNeedful(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
@@ -73,8 +73,8 @@ if __name__ == '__main__':
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
 		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
-		pprint(state.listFolding)
-		pprint(state.listPermutationSpace)
+		pprint(state.boxOfFolding)
+		pprint(state.boxOfPermutationSpace)
 		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 28))))
 		print(*getLeavesCreaseAnte(state, 53))
 		print(*getLeavesCreasePost(state, 22))

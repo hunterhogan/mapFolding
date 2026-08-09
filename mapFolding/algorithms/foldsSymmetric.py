@@ -1,3 +1,5 @@
+#=Sin= no typechecking block to avoid ast transformation problems.
+# ruff: file-ignore[typing-only-first-party-import]
 """Count the number of symmetric folds in the group of folds defined by `leafBelow`.
 
 Notes
@@ -9,6 +11,8 @@ Notes
 	- `numpy.take(..., out=...)`
 	- `numpy.all(..., axis=...)`
 """
+from __future__ import annotations
+
 from mapFolding.dataBaskets import SymmetricFoldsState
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
@@ -23,9 +27,9 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 
 		state.leafConnectee += 1
 
-	for listTuples in state.indices:
+	for boxOfTuples in state.indices:
 		state.leafConnectee = 1
-		for indexLeft, indexRight in listTuples:
+		for indexLeft, indexRight in boxOfTuples:
 			# TODO The entire `leafComparison` array is computed, so when a `leafComparison` is
 			# disqualified, all of the computations for the remaining tuples were unnecessary
 			# computations. However, with the current algorithm for computing `leafComparison`, it

@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 # TODO Dynamically calculate the bitwidth of each datatype.
 # DEVELOPMENT I delayed dynamic calculation because I didn't know how to calculate what 'elephino'
 # needs. I now have a safe upper bound for that. Somewhere.
-listDatatypeConfigurations: list[DatatypeConfiguration] = [
+boxOfDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='DatatypeFoldsTotal'),
@@ -83,7 +83,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
-	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfDatatypeConfigurations)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 

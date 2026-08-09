@@ -67,9 +67,9 @@ def _makeDescendants(folding: Folding) -> tuple[Folding, ...]:
 	# pile combinations = bb Choose cc = bb! / (cc! * (bb - cc)!)
 	# If I use LeafOptions, I _think_ it will be easier for me to use the functions from the
 	# `elimination` algorithms. I can start with LeafOptions, which means PermutationSpace, run
-	# `reduceLeafSpace` (without crossed creases, which takes most of the time), `moveToListFolding`,
+	# `reduceLeafSpace` (without crossed creases, which takes most of the time), `moveToBoxOfFolding`,
 	# `deconstructAtPile` on max(Pile), repeat starting at `reduceLeafSpace` until
-	# listPermutationSpace is empty. Then send listFolding to the custom `_foldingValid吗`, which will
+	# boxOfPermutationSpace is empty. Then send boxOfFolding to the custom `_foldingValid吗`, which will
 	# need to have dimensions added to it.
 
 	# OR, make a new crossed creases based on the limited `_foldingValid吗` function.
@@ -126,7 +126,7 @@ if __name__ == '__main__':
 # if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 # 	state.Theorem2Multiplier = 2
 # 	leafOrigin下aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.productsOfDimensions))
-# 	model.add(listPilingsInLeafOrder[leafOrigin下aDimension] < listPilingsInLeafOrder[2 * leafOrigin下aDimension])
+# 	model.add(boxOfPilingsInLeafOrder[leafOrigin下aDimension] < boxOfPilingsInLeafOrder[2 * leafOrigin下aDimension])
 
 # `leafOrigin下aDimension: int = last...` chooses the largest per-dimension leafOrigin, and I'm
 # worried that value will change, such as with n X n maps.
@@ -139,7 +139,7 @@ if __name__ == '__main__':
 # 		leaf_k: int = state.productsOfDimensions[dimension]
 # 		leaf_r: int = 2 * leaf_k
 # 		state = excludeLeaf_rBeforeLeaf_k(state, leaf_k, leaf_r)
-# 		state = state.reduceAllPermutationSpace(listFunctionsReduction).removeCreaseViolations()
+# 		state = state.reduceAllPermutationSpace(boxOfFunctionsReduction).removeCreaseViolations()
 # 	return state
 
 # constraintPropagation and `elimination` would assign leaf_k = 1 because productsOfDimensions for

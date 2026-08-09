@@ -129,7 +129,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
-	listConditionalRelationships: list[dict[str, int]] = []
+	boxOfConditionalRelationships: list[dict[str, int]] = []
 
 	for leafLater in range(state.leavesTotal):
 		columnEarliestOriginal: int = leafLater.bit_count() + (2 ** (dimensionNearestTail(leafLater) + 1) - 2)
@@ -153,13 +153,13 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 			isEarlierAlwaysPresentAndPrecedes: bool = bool(numpy.all((positionsOfEarlier >= 0) & (positionsOfEarlier < columnEarliestIndex)))
 			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in setUnconditional:
-				listConditionalRelationships.append({
+				boxOfConditionalRelationships.append({
 					'Earlier': leafEarlier,
 					'Later': leafLater,
 					'AtColumn': columnEarliestOriginal
 				})
 
-	dataframeConditionalPrecedence: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships).sort_values(['Later', 'Earlier']).reset_index(drop=True)
+	dataframeConditionalPrecedence: pandas.DataFrame = pandas.DataFrame(boxOfConditionalRelationships).sort_values(['Later', 'Earlier']).reset_index(drop=True)
 
 	return dataframeConditionalPrecedence
 
@@ -211,7 +211,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
-	listConditionalRelationships: list[dict[str, int]] = []
+	boxOfConditionalRelationships: list[dict[str, int]] = []
 
 	for leafLater in range(state.leavesTotal):
 		pileLastOfLeafOriginal: int = int(bit_mask(state.dimensionsTotal) ^ bit_mask(state.dimensionsTotal - dimensionNearest首(leafLater))) - howManyDimensionsHaveOddParity(leafLater) + 1
@@ -235,13 +235,13 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 
 			isEarlierAlwaysPresentAndPrecedes: bool = bool(numpy.all((positionsOfEarlier >= 0) & (positionsOfEarlier < pileLastOfLeafIndex)))
 			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in setUnconditional:
-				listConditionalRelationships.append({
+				boxOfConditionalRelationships.append({
 					'Earlier': leafEarlier,
 					'Later': leafLater,
 					'AtColumn': pileLastOfLeafOriginal
 				})
 
-	dataframeConditionalPrecedenceAtLastPile: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships).sort_values(['Later', 'Earlier']).reset_index(drop=True)
+	dataframeConditionalPrecedenceAtLastPile: pandas.DataFrame = pandas.DataFrame(boxOfConditionalRelationships).sort_values(['Later', 'Earlier']).reset_index(drop=True)
 
 	return dataframeConditionalPrecedenceAtLastPile
 
@@ -268,7 +268,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
-	listConditionalRelationships: list[dict[str, int]] = []
+	boxOfConditionalRelationships: list[dict[str, int]] = []
 
 	for leafEarlier in range(state.leavesTotal):
 		pileLastOfLeafOriginal: int = int(bit_mask(state.dimensionsTotal) ^ bit_mask(state.dimensionsTotal - dimensionNearest首(leafEarlier))) - howManyDimensionsHaveOddParity(leafEarlier) + 1
@@ -291,13 +291,13 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 			positionsOfLater: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsSubset[:, leafLater]
 			isLaterAlwaysPresentAndFollows: bool = bool(numpy.all((positionsOfLater >= 0) & (pileLastOfLeafIndex < positionsOfLater)))
 			if isLaterAlwaysPresentAndFollows and (leafEarlier, leafLater) not in setUnconditional:
-				listConditionalRelationships.append({
+				boxOfConditionalRelationships.append({
 					'Earlier': leafEarlier,
 					'Later': leafLater,
 					'AtColumn': pileLastOfLeafOriginal,
 				})
 
-	dataframeConditionalSuccession: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['Earlier', 'Later']).reset_index(drop=True)
+	dataframeConditionalSuccession: pandas.DataFrame = pandas.DataFrame(boxOfConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['Earlier', 'Later']).reset_index(drop=True)
 
 	return dataframeConditionalSuccession
 
@@ -325,7 +325,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 
 	leafDomain: range = getLeafDomain(state, leafLater)
 
-	listConditionalRelationships: list[dict[str, int]] = []
+	boxOfConditionalRelationships: list[dict[str, int]] = []
 	for pileOfLeafOriginal in leafDomain:
 		if pileOfLeafOriginal <= 1:
 			continue
@@ -349,13 +349,13 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 			leafEarlier: Leaf = int(leafEarlierCandidate)
 			if (leafEarlier, leafLater) in setUnconditional:
 				continue
-			listConditionalRelationships.append({
+			boxOfConditionalRelationships.append({
 				'Earlier': leafEarlier,
 				'Later': leafLater,
 				'AtColumn': pileOfLeafOriginal,
 			})
 
-	dataframeConditionalPrecedenceAcrossDomain: pandas.DataFrame = pandas.DataFrame(listConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['AtColumn', 'Earlier']).reset_index(drop=True)
+	dataframeConditionalPrecedenceAcrossDomain: pandas.DataFrame = pandas.DataFrame(boxOfConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['AtColumn', 'Earlier']).reset_index(drop=True)
 	return dataframeConditionalPrecedenceAcrossDomain
 
 def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationState, leafLater: Leaf) -> list[list[Pile]]:
@@ -366,33 +366,33 @@ def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationSta
 	else:
 		pilesSortedUnique = sorted({int(pile) for pile in dataframeConditional['AtColumn'].tolist()})
 
-	listPileGroups: list[list[Pile]] = []
+	boxOfPileGroups: list[list[Pile]] = []
 	for pile in pilesSortedUnique:
-		if not listPileGroups:
-			listPileGroups.append([pile])
-		elif pile == listPileGroups[-1][-1] + 2:
-			listPileGroups[-1].append(pile)
+		if not boxOfPileGroups:
+			boxOfPileGroups.append([pile])
+		elif pile == boxOfPileGroups[-1][-1] + 2:
+			boxOfPileGroups[-1].append(pile)
 		else:
-			listPileGroups.append([pile])
-	return listPileGroups
+			boxOfPileGroups.append([pile])
+	return boxOfPileGroups
 
 def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leaf: Leaf) -> list[Pile]:
-	listPileGroups: list[list[Pile]] = getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state, leaf)
-	listPilesAtEnd: list[Pile] = []
-	if listPileGroups:
-		listPilesAtEnd = listPileGroups[-1]
-	return listPilesAtEnd
+	boxOfPileGroups: list[list[Pile]] = getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state, leaf)
+	boxOfPilesAtEnd: list[Pile] = []
+	if boxOfPileGroups:
+		boxOfPilesAtEnd = boxOfPileGroups[-1]
+	return boxOfPilesAtEnd
 
-def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, listLeavesAnalyzed: list[Leaf] | None = None) -> dict[Leaf, list[Pile]]:
-	if listLeavesAnalyzed is None:
+def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, boxOfLeavesAnalyzed: list[Leaf] | None = None) -> dict[Leaf, list[Pile]]:
+	if boxOfLeavesAnalyzed is None:
 		leavesExcluded: set[Leaf] = {pileOrigin, 零, state.leavesTotal - 零}
-		listLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
+		boxOfLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
 
 	dictionaryPilesAtDomainEnds: dict[Leaf, list[Pile]] = {}
-	for leaf in listLeavesAnalyzed:
-		listPilesAtEnd: list[Pile] = getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state, leaf)
-		if listPilesAtEnd:
-			dictionaryPilesAtDomainEnds[leaf] = listPilesAtEnd
+	for leaf in boxOfLeavesAnalyzed:
+		boxOfPilesAtEnd: list[Pile] = getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state, leaf)
+		if boxOfPilesAtEnd:
+			dictionaryPilesAtDomainEnds[leaf] = boxOfPilesAtEnd
 	return dictionaryPilesAtDomainEnds
 
 if __name__ == '__main__':

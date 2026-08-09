@@ -1,7 +1,7 @@
 # DEVELOPMENT module.
 # pyright: reportArgumentType=false, reportAssignmentType=false, reportReturnType=false, reportUnknownArgumentType=false, reportUnknownVariableType=false
 # ruff: file-ignore[import-outside-top-level, commented-out-code, print, p-print]
-# ty: ignore[invalid-argument-type, invalid-assignment]
+# ty: ignore[invalid-argument-type]
 from __future__ import annotations
 
 from bisect import bisect_left
@@ -74,12 +74,12 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
-	return {leaves: sorted(set(listLeaves)) for leaves, listLeaves in groupedBy.items()}
+	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pile: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	from mapFolding._e.pileOptions import getDictionaryLeafOptions
-	return {leaves: sorted(filterfalse(listLeaves.__contains__, (getIteratorOfLeaves(getDictionaryLeafOptions(state)[pile]))))
-		for leaves, listLeaves in DOTitems(_getGroupedBy(state, pile, groupByLeavesAtPiles))}
+	return {leaves: sorted(filterfalse(boxOfLeaves.__contains__, (getIteratorOfLeaves(getDictionaryLeafOptions(state)[pile]))))
+		for leaves, boxOfLeaves in DOTitems(_getGroupedBy(state, pile, groupByLeavesAtPiles))}
 
 if __name__ == '__main__':
 

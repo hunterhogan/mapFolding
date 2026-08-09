@@ -22,27 +22,27 @@ if TYPE_CHECKING:
 
 @dataclass
 class PermutationSpaceStatus:
-	listSurplusDictionaries: list[PermutationSpace]
+	boxOfSurplusDictionaries: list[PermutationSpace]
 	maskUnion: numpy.ndarray
 	indicesOverlappingRows: numpy.ndarray
 	indicesOverlappingPermutationSpace: set[int]
 	rowsRequired: int
 	rowsTotal: int
 
-def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSpace: Sequence[PermutationSpace]) -> PermutationSpaceStatus:
+def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, boxOfPermutationSpace: Sequence[PermutationSpace]) -> PermutationSpaceStatus:
 	rowsTotal: int = int(arrayFoldings.shape[0])
-	listMasks: list[numpy.ndarray] = []
-	listSurplusDictionaries: list[PermutationSpace] = []
-	for permutationSpace in listPermutationSpace:
+	boxOfMasks: list[numpy.ndarray] = []
+	boxOfSurplusDictionaries: list[PermutationSpace] = []
+	for permutationSpace in boxOfPermutationSpace:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
 		for pile, leaf in filterLeaf(isLeaf吗, permutationSpace).items():
 			maskMatches &= (arrayFoldings[:, pile] == leaf)
 		if not bool(maskMatches.any()):
-			listSurplusDictionaries.append(permutationSpace)
-		listMasks.append(maskMatches)
+			boxOfSurplusDictionaries.append(permutationSpace)
+		boxOfMasks.append(maskMatches)
 
-	if listMasks:
-		masksStacked: numpy.ndarray = numpy.column_stack(listMasks)
+	if boxOfMasks:
+		masksStacked: numpy.ndarray = numpy.column_stack(boxOfMasks)
 	else:
 		masksStacked = numpy.zeros((rowsTotal, 0), dtype=bool)
 
@@ -52,11 +52,11 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, listPermutationSp
 	indicesOverlappingRows: numpy.ndarray = numpy.flatnonzero(coverageCountPerRow >= 2)
 	indicesOverlappingPermutationSpace: set[int] = set()
 	if indicesOverlappingRows.size > 0:
-		for indexMask, mask in enumerate(listMasks):
+		for indexMask, mask in enumerate(boxOfMasks):
 			if bool(mask[indicesOverlappingRows].any()):
 				indicesOverlappingPermutationSpace.add(indexMask)
 
-	return PermutationSpaceStatus(listSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingPermutationSpace, rowsRequired, rowsTotal)
+	return PermutationSpaceStatus(boxOfSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingPermutationSpace, rowsRequired, rowsTotal)
 
 #======== Specialized tools ===============================
 
@@ -66,41 +66,41 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 	arrayFoldings = getDataFrameFoldings(state)
 	if arrayFoldings is not None:
 		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
-		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.listPermutationSpace)
+		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.boxOfPermutationSpace)
 
-		listSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.listSurplusDictionaries
-		listDictionaryPinned: list[PinnedLeaves] = [
+		boxOfSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.boxOfSurplusDictionaries
+		boxOfDictionaryPinned: list[PinnedLeaves] = [
 			getPermutationSpaceWithLeafValuesOnly(permutationSpace)
-			for permutationSpace in listSurplusDictionariesOriginal
+			for permutationSpace in boxOfSurplusDictionariesOriginal
 		]
-		if listDictionaryPinned:
+		if boxOfDictionaryPinned:
 			sys.stdout.write(ansiColors.YellowOnBlack)
-			sys.stdout.write(pformat(listDictionaryPinned[0:5], width=200) + '\n')
+			sys.stdout.write(pformat(boxOfDictionaryPinned[0:5], width=200) + '\n')
 		else:
 			sys.stdout.write(ansiColors.GreenOnBlack)
-		sys.stdout.write(f"{len(listDictionaryPinned)} surplus dictionaries.\n")
+		sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
 		sys.stdout.write(ansiColorReset)
 
 		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/_development/excel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
 
-		if listDictionaryPinned:
+		if boxOfDictionaryPinned:
 			with pathFilename.open('w', encoding='utf-8', newline='') as writeStream:
 				writerCSV = csv.writer(writeStream)
-				listPiles: list[int] = list(range(state.leavesTotal))
-				writerCSV.writerow(listPiles)
-				for permutationSpace in listDictionaryPinned:
-					writerCSV.writerow([permutationSpace.get(pile, '') for pile in listPiles])
+				boxOfPiles: list[int] = list(range(state.leavesTotal))
+				writerCSV.writerow(boxOfPiles)
+				for permutationSpace in boxOfDictionaryPinned:
+					writerCSV.writerow([permutationSpace.get(pile, '') for pile in boxOfPiles])
 
 		if pinningCoverage.indicesOverlappingPermutationSpace:
 			sys.stdout.write(f"{ansiColors.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
 			for indexDictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
-				sys.stdout.write(pformat(filterLeaf(isLeaf吗, state.listPermutationSpace[indexDictionary]), width=140) + '\n')
+				sys.stdout.write(pformat(filterLeaf(isLeaf吗, state.boxOfPermutationSpace[indexDictionary]), width=140) + '\n')
 
 		beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
-		listBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.listPermutationSpace))
-		if listBeans:
-			sys.stdout.write(f"{ansiColors.MagentaOnBlack}{len(listBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")
-			sys.stdout.write(pformat(getPermutationSpaceWithLeafValuesOnly(listBeans[0]), width=140) + '\n')
+		boxOfBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.boxOfPermutationSpace))
+		if boxOfBeans:
+			sys.stdout.write(f"{ansiColors.MagentaOnBlack}{len(boxOfBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")
+			sys.stdout.write(pformat(getPermutationSpaceWithLeafValuesOnly(boxOfBeans[0]), width=140) + '\n')
 
 		maskUnion: numpy.ndarray = pinningCoverage.maskUnion
 		rowsRequired: int = pinningCoverage.rowsRequired
@@ -137,35 +137,35 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 	setComputed: set[tuple[int, ...]] = set(domainComputed)
 	setKnown: set[tuple[int, ...]] = set(domainKnown)
 
-	listMissing: list[tuple[int, ...]] = sorted(setKnown - setComputed)
-	listSurplus: list[tuple[int, ...]] = sorted(setComputed - setKnown)
-	listMatched: list[tuple[int, ...]] = sorted(setComputed & setKnown)
+	boxOfMissing: list[tuple[int, ...]] = sorted(setKnown - setComputed)
+	boxOfSurplus: list[tuple[int, ...]] = sorted(setComputed - setKnown)
+	boxOfMatched: list[tuple[int, ...]] = sorted(setComputed & setKnown)
 
 	comparisonResults: dict[str, list[tuple[int, ...]]] = {
-		'missing': listMissing,
-		'surplus': listSurplus,
-		'matched': listMatched,
+		'missing': boxOfMissing,
+		'surplus': boxOfSurplus,
+		'matched': boxOfMatched,
 	}
 
 	if printResults:
 		countComputed: int = len(setComputed)
 		countKnown: int = len(setKnown)
-		countMissing: int = len(listMissing)
-		countSurplus: int = len(listSurplus)
-		countMatched: int = len(listMatched)
+		countMissing: int = len(boxOfMissing)
+		countSurplus: int = len(boxOfSurplus)
+		countMatched: int = len(boxOfMatched)
 
 		sys.stdout.write(f"Domain comparison: {countComputed} computed vs {countKnown} known\n")
 		sys.stdout.write(f"  Matched: {countMatched} ({100 * countMatched / countKnown:.1f}% of known)\n")
 
-		if listMissing:
+		if boxOfMissing:
 			sys.stdout.write(f"  Missing ({countMissing} tuples in known but not in computed):\n")
-			sys.stdout.write(pformat(listMissing, width=140, compact=True) + '\n')
+			sys.stdout.write(pformat(boxOfMissing, width=140, compact=True) + '\n')
 
-		if listSurplus:
+		if boxOfSurplus:
 			sys.stdout.write(f"  Surplus ({countSurplus} tuples in computed but not in known):\n")
-			sys.stdout.write(pformat(listSurplus, width=140, compact=True) + '\n')
+			sys.stdout.write(pformat(boxOfSurplus, width=140, compact=True) + '\n')
 
-		if not listMissing and not listSurplus:
+		if not boxOfMissing and not boxOfSurplus:
 			sys.stdout.write("  Perfect match!\n")
 
 	return comparisonResults

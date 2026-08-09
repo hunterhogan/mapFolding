@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import pinIt
 from mapFolding._e.basecamp import eliminateFolds
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import EliminationState  # ruff: ignore[typing-only-third-party-import]
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time
@@ -27,9 +27,9 @@ if __name__ == "__main__":
 	oeisID = "A195646"
 	oeisID = "A000136"
 	oeisID = "A001418"
-	oeisID = "A001417"
 	oeisID = "A001416"
 	oeisID = "A001415"
+	oeisID = "A001417"
 
 	printEasyRunHeader(oeisID, flow)
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
 			# state = pinIt.pinLeavesDimension一(state)
 			# state = pinIt.pinLeavesDimension二(state)
 			# state = pinIt.pinLeavesDimensions0零一(state)
-			# state.listPermutationSpace.reverse()
+			# state.boxOfPermutationSpace.reverse()
 			pass
 
 		computed: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)

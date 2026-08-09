@@ -9,7 +9,7 @@ from mapFolding.dataBaskets import SymmetricFoldsState
 from queue import Queue
 from threading import Lock, Thread
 
-listThreads: list[Thread] = []
+boxOfThreads: list[Thread] = []
 queueFutures: Queue[SymmetricFoldsState] = Queue()
 symmetricFoldsTotal: int = 0
 LOCKsymmetricFoldsTotal = Lock()
@@ -18,8 +18,8 @@ STOPsignal = object()
 # pyright: reportArgumentType=false
 
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> None:
-	global listThreads, symmetricFoldsTotal, queueFutures
-	listThreads = []
+	global boxOfThreads, symmetricFoldsTotal, queueFutures
+	boxOfThreads = []
 	queueFutures = Queue()
 	symmetricFoldsTotal = symmetricFolds
 
@@ -27,7 +27,7 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> No
 	while indexThread < maxWorkers:
 		thread = Thread(target=_threadDoesSomething, name=f"thread{indexThread}", daemon=True)
 		thread.start()
-		listThreads.append(thread)
+		boxOfThreads.append(thread)
 		indexThread += 1
 
 def _threadDoesSomething() -> None:
@@ -48,8 +48,8 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
 	queueFutures.put_nowait(deepcopy(state))
 
 def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
-	for _thread in listThreads:
+	for _thread in boxOfThreads:
 		queueFutures.put(STOPsignal)
-	for thread in listThreads:
+	for thread in boxOfThreads:
 		thread.join()
 	return symmetricFoldsTotal

@@ -62,8 +62,8 @@ def assimilateEliminationCrease(identifierModuleBorg: str) -> Path:
 
 		return moduleDissect
 
-	listFunctionsHARDCODED: list[tuple[identifierDotAttribute, str]] = [('mapFolding.beDRY', 'getLeavesTotal'), ('mapFolding.beDRY', 'defineProcessorLimit')]
-	listModulesHARDCODED: list[identifierDotAttribute] = [
+	boxOfFunctionsHARDCODED: list[tuple[identifierDotAttribute, str]] = [('mapFolding.beDRY', 'getLeavesTotal'), ('mapFolding.beDRY', 'defineProcessorLimit')]
+	boxOfModulesHARDCODED: list[identifierDotAttribute] = [
 		*tuple(map("{0}._e.{1}".format, repeat(settingsPackage.identifierPackage), (
 			'theTypes', 'semiotics', 'leafDomains', 'pileOptions', '_disaggregation', '_beDRY', 'dataBaskets', 'filters', 'pinIt'
 		)))
@@ -74,19 +74,19 @@ def assimilateEliminationCrease(identifierModuleBorg: str) -> Path:
 		, f"{default['logicalPath']['algorithm']}.iff"
 		, f"{default['logicalPath']['algorithm']}.{default['module']['algorithm']}"
 	]
-	listPackagesHARDCODED: list[identifierDotAttribute] = [*tuple(map("{0}.{1}".format, repeat(settingsPackage.identifierPackage), ('beDRY', '_e', '_e._2上nDimensional')))]
+	boxOfPackagesHARDCODED: list[identifierDotAttribute] = [*tuple(map("{0}.{1}".format, repeat(settingsPackage.identifierPackage), ('beDRY', '_e', '_e._2上nDimensional')))]
 
-	listFunctions: list[tuple[identifierDotAttribute, str]] = listFunctionsHARDCODED
-	listModules: list[identifierDotAttribute] = listModulesHARDCODED
-	listPackages: list[identifierDotAttribute] = [*listPackagesHARDCODED, *listModules]
+	boxOfFunctions: list[tuple[identifierDotAttribute, str]] = boxOfFunctionsHARDCODED
+	boxOfModules: list[identifierDotAttribute] = boxOfModulesHARDCODED
+	boxOfPackages: list[identifierDotAttribute] = [*boxOfPackagesHARDCODED, *boxOfModules]
 
 	ledgerTYPE_CHECKING = LedgerOfImports()
 	moduleBorg = IngredientsModule()
 
-	tuple(starmap(assimilateFunction, listFunctions))
-	tuple(map(assimilateModule, listModules))
+	tuple(starmap(assimilateFunction, boxOfFunctions))
+	tuple(map(assimilateModule, boxOfModules))
 
-	tuple(map(juxt(ledgerTYPE_CHECKING.removeImportFrom, moduleBorg.removeImportFrom), listPackages, repeat(None)))
+	tuple(map(juxt(ledgerTYPE_CHECKING.removeImportFrom, moduleBorg.removeImportFrom), boxOfPackages, repeat(None)))
 
 	moduleBorg.appendPrologue(statement=Make.If(Make.Name('TYPE_CHECKING'), ledgerTYPE_CHECKING.makeList_ast()))
 	moduleBorg.appendLauncher(ast_parse(launcher))

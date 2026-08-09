@@ -247,36 +247,36 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		return None
 
 	datatypeModuleDecorator: str = Z0Z_numbaDataTypeModule
-	list_argsDecorator: Sequence[ast.expr] = []
+	boxOf_argsDecorator: Sequence[ast.expr] = []
 
-	list_arg4signature_or_function: list[ast.expr] = []
+	boxOf_arg4signature_or_function: list[ast.expr] = []
 	for parameter in ingredientsFunction.astFunctionDef.args.args:
 		# For now, let Numba infer them.
 		signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
 		if signatureElement:
-			list_arg4signature_or_function.append(signatureElement)
+			boxOf_arg4signature_or_function.append(signatureElement)
 		continue
 
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
-		list_argsDecorator = [Make.Call(Make.Name(theReturn.id)
-							, list_arg4signature_or_function or [], [])]
-	elif list_arg4signature_or_function:
-		list_argsDecorator = [Make.Tuple(list_arg4signature_or_function)]
+		boxOf_argsDecorator = [Make.Call(Make.Name(theReturn.id)
+							, boxOf_arg4signature_or_function or [], [])]
+	elif boxOf_arg4signature_or_function:
+		boxOf_argsDecorator = [Make.Tuple(boxOf_arg4signature_or_function)]
 
 	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
 	# TODO This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
-	listDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
+	boxOfDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	# Leave this line in so that global edits will change it.
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_argsDecorator, listDecoratorKeywords)
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=listDecoratorKeywords)  # ruff: ignore[redefined-while-unused]
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator, boxOfDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=boxOfDecoratorKeywords)  # ruff: ignore[redefined-while-unused]
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction

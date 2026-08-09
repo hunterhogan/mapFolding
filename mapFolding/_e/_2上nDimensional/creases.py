@@ -33,11 +33,11 @@ def _getCreases(state: EliminationState, leaf: Leaf, *, increase: bool = True) -
 	return _makeCreases(leaf, state.dimensionsTotal)[increase]
 @cache
 def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tuple[Leaf, ...]]:
-	listLeavesCrease: list[Leaf] = [int(bit_flip(leaf, dimension)) for dimension in range(dimensionsTotal)]
+	boxOfLeavesCrease: list[Leaf] = [int(bit_flip(leaf, dimension)) for dimension in range(dimensionsTotal)]
 
 	if leaf == leafOrigin:  # A special case I've been unable to figure out how to incorporate in the formula.
-		listLeavesCreasePost: list[Leaf] = [1]
-		listLeavesCreaseAnte: list[Leaf] = []
+		boxOfLeavesCreasePost: list[Leaf] = [1]
+		boxOfLeavesCreaseAnte: list[Leaf] = []
 	else:
 		slicingIndices: int = isOdd吗(howManyDimensionsHaveOddParity(leaf))
 
@@ -49,9 +49,9 @@ def _makeCreases(leaf: Leaf, dimensionsTotal: int) -> tuple[tuple[Leaf, ...], tu
 				slicerAnte = slice(slicerAnte.start + dimensionNearestTail(leaf), slicerAnte.stop)
 			if slicerPost.start == 1:
 				slicerPost = slice(slicerPost.start + dimensionNearestTail(leaf), slicerPost.stop)
-		listLeavesCreaseAnte: list[Leaf] = listLeavesCrease[slicerAnte]
-		listLeavesCreasePost: list[Leaf] = listLeavesCrease[slicerPost]
+		boxOfLeavesCreaseAnte: list[Leaf] = boxOfLeavesCrease[slicerAnte]
+		boxOfLeavesCreasePost: list[Leaf] = boxOfLeavesCrease[slicerPost]
 
 		if leaf == 1:  # A special case I've been unable to figure out how to incorporate in the formula.
-			listLeavesCreaseAnte = [0]
-	return (tuple(listLeavesCreaseAnte), tuple(listLeavesCreasePost))
+			boxOfLeavesCreaseAnte = [0]
+	return (tuple(boxOfLeavesCreaseAnte), tuple(boxOfLeavesCreasePost))

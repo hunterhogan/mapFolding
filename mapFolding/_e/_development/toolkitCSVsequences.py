@@ -28,12 +28,12 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 					if line[0] == ',' or line[-1] == ',' or ',,' in line:
 						continue
 
-					listPrefixParts: list[str] = line.split(',', 5)
-					if len(listPrefixParts) < 6:
+					boxOfPrefixParts: list[str] = line.split(',', 5)
+					if len(boxOfPrefixParts) < 6:
 						continue
-					if not listPrefixParts[4].isdigit():
+					if not boxOfPrefixParts[4].isdigit():
 						continue
-					leafFifth: int = int(listPrefixParts[4])
+					leafFifth: int = int(boxOfPrefixParts[4])
 					if leafFifth not in setLeavesAllowedAfterTwo:
 						continue
 
@@ -61,7 +61,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 	tupleHeaderExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
 
 	setSequences: set[tuple[int, ...]] = set()
-	listSequencesUnique: list[tuple[int, ...]] = []
+	boxOfSequencesUnique: list[tuple[int, ...]] = []
 
 	duplicatesDetected: bool = False
 	invalidLinesDetected: bool = False
@@ -72,10 +72,10 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 		for indexLine, lineRaw in enumerate(readStream):
 			line: str = lineRaw.rstrip('\n').rstrip('\r')
 			if indexLine == 0 and line.startswith("0,1,2,"):
-				listHeaderParts: list[str] = line.split(',')
-				if len(listHeaderParts) == state.leavesTotal:
+				boxOfHeaderParts: list[str] = line.split(',')
+				if len(boxOfHeaderParts) == state.leavesTotal:
 					try:
-						tupleHeaderFound: tuple[int, ...] = tuple(int(part) for part in listHeaderParts)
+						tupleHeaderFound: tuple[int, ...] = tuple(int(part) for part in boxOfHeaderParts)
 					except ValueError:
 						tupleHeaderFound = ()
 					if tupleHeaderFound == tupleHeaderExpected:
@@ -107,19 +107,19 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 				duplicatesDetected = True
 				continue
 			setSequences.add(tupleSequence)
-			listSequencesUnique.append(tupleSequence)
+			boxOfSequencesUnique.append(tupleSequence)
 
 	if not (duplicatesDetected or invalidLinesDetected or not sortedAlready):
 		return
 
-	listSequencesSorted: list[tuple[int, ...]] = sorted(listSequencesUnique)
+	boxOfSequencesSorted: list[tuple[int, ...]] = sorted(boxOfSequencesUnique)
 	pathFilenameBackup: Path = pathSorted / pathFilenameTarget.name
 	pathFilenameTarget.replace(pathFilenameBackup)
 	with pathFilenameTarget.open('w', encoding="utf-8", newline='') as writeStream:
 		if lineHeader is not None:
 			writeStream.write(lineHeader)
 			writeStream.write('\n')
-		for tupleSequence in listSequencesSorted:
+		for tupleSequence in boxOfSequencesSorted:
 			writeStream.write(','.join(str(value) for value in tupleSequence))
 			writeStream.write('\n')
 
@@ -148,13 +148,13 @@ def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> Non
 					if line[0] == ',' or line[-1] == ',' or ',,' in line:
 						continue
 
-					listPrefixParts: list[str] = line.split(',', 4)
-					if len(listPrefixParts) < 5:
+					boxOfPrefixParts: list[str] = line.split(',', 4)
+					if len(boxOfPrefixParts) < 5:
 						continue
-					if not listPrefixParts[2].isdigit() or not listPrefixParts[3].isdigit():
+					if not boxOfPrefixParts[2].isdigit() or not boxOfPrefixParts[3].isdigit():
 						continue
-					leafThird: int = int(listPrefixParts[2])
-					leafFourth: int = int(listPrefixParts[3])
+					leafThird: int = int(boxOfPrefixParts[2])
+					leafFourth: int = int(boxOfPrefixParts[3])
 					if leafThird not in setLeavesAllowedAfterOne:
 						continue
 					if leafFourth not in dictionaryAllowedAfterThird[leafThird]:

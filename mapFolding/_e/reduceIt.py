@@ -335,13 +335,13 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 				permutationSpaceHasNewLeaf = True
 	return permutationSpace
 
-listFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
+boxOfFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf1
 	, _crossedCreases
 	, reducePermutationSpace_LeafIsPinned
 )
-listFunctionsReductionQuickDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
+boxOfFunctionsReductionQuickDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf1
 	, reducePermutationSpace_LeafIsPinned

@@ -33,32 +33,32 @@ def test_pinningFunctions(
 
 	state = pinningFunction(state, CPUlimit=CPUlimit)
 
-	countPermutationSpaces: int = len(state.listPermutationSpace)
+	countPermutationSpaces: int = len(state.boxOfPermutationSpace)
 	assertEqualTo(0 < countPermutationSpaces, True, pinningFunction.__name__, state.mapShape, countPermutationSpaces=countPermutationSpaces)
 
 	foldingsTotalExpected: int = int(arrayAlbum2上nDimensional.shape[0])
-	listSelectorsFoldingsByPermutationSpace: list[numpy.ndarray] = []
+	boxOfSelectorsFoldingsByPermutationSpace: list[numpy.ndarray] = []
 
-	for permutationSpace in state.listPermutationSpace:
+	for permutationSpace in state.boxOfPermutationSpace:
 		selectorFoldingsMatchingPermutationSpace: numpy.ndarray = numpy.ones(foldingsTotalExpected, dtype=bool)
 		for pile, leafSpace in permutationSpace.extractPinnedLeaves().items():
 			selectorFoldingsMatchingPermutationSpace &= (arrayAlbum2上nDimensional[:, pile] == leafSpace)
-		listSelectorsFoldingsByPermutationSpace.append(selectorFoldingsMatchingPermutationSpace)
+		boxOfSelectorsFoldingsByPermutationSpace.append(selectorFoldingsMatchingPermutationSpace)
 
-	matrixSelectorsFoldingsByPermutationSpace: numpy.ndarray = numpy.column_stack(listSelectorsFoldingsByPermutationSpace)
+	matrixSelectorsFoldingsByPermutationSpace: numpy.ndarray = numpy.column_stack(boxOfSelectorsFoldingsByPermutationSpace)
 	arrayPermutationSpacesTotalByFolding: numpy.ndarray = matrixSelectorsFoldingsByPermutationSpace.sum(axis=1)
 	indicesFoldingsAssignedMultiplePermutationSpaces: numpy.ndarray = numpy.nonzero(2 <= arrayPermutationSpacesTotalByFolding)[0]
 
 	countOverlappingDictionaries: int = 0
 	if 0 < indicesFoldingsAssignedMultiplePermutationSpaces.size:
-		for selectorFoldingsMatchingPermutationSpace in listSelectorsFoldingsByPermutationSpace:
+		for selectorFoldingsMatchingPermutationSpace in boxOfSelectorsFoldingsByPermutationSpace:
 			if bool(selectorFoldingsMatchingPermutationSpace[indicesFoldingsAssignedMultiplePermutationSpaces].any()):
 				countOverlappingDictionaries += 1
 
-	selectorFoldingsCoveredByAnyPermutationSpace: numpy.ndarray = numpy.logical_or.reduce(listSelectorsFoldingsByPermutationSpace)
+	selectorFoldingsCoveredByAnyPermutationSpace: numpy.ndarray = numpy.logical_or.reduce(boxOfSelectorsFoldingsByPermutationSpace)
 	foldingsCoveredTotal: int = int(selectorFoldingsCoveredByAnyPermutationSpace.sum())
 
-	countBeansWithoutCornbread: int = len(list(filter(partial(beansWithoutCornbread, state), state.listPermutationSpace)))
+	countBeansWithoutCornbread: int = len(list(filter(partial(beansWithoutCornbread, state), state.boxOfPermutationSpace)))
 
 	assertEqualTo(foldingsCoveredTotal, foldingsTotalExpected, pinningFunction.__name__, state.mapShape, foldingsCoveredTotal=foldingsCoveredTotal, foldingsRequiredTotal=foldingsTotalExpected)
 	assertEqualTo(countOverlappingDictionaries, 0, pinningFunction.__name__, state.mapShape, countOverlappingDictionaries=countOverlappingDictionaries)

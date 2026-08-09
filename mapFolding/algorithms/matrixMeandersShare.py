@@ -2130,17 +2130,17 @@ def initializeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralStri
 			arcCode: int = 0b101
 		else:
 			arcCode = 0b1
-		listArcCodes: list[int] = [(arcCode << 1) | arcCode]
+		boxOfArcCodes: list[int] = [(arcCode << 1) | arcCode]
 #										   0b1010 | 0b0101 is 0b1111, or 0xf
 #											 0b10 |   0b01 is   0b11, or 0x3
 
 		MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
-		while listArcCodes[-1] < MAXIMUMarcCode:
+		while boxOfArcCodes[-1] < MAXIMUMarcCode:
 			arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
-			listArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+			boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
 			# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
 			# See "mapFolding/reference/A000682facts.py"
-		dictionaryMeanders: dict[int, int] = dict.fromkeys(listArcCodes, 1)
+		dictionaryMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
 
 	elif kind == 'meanders':
 		if n & 0b1:

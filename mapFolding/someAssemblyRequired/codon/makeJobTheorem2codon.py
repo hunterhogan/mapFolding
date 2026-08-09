@@ -13,7 +13,7 @@ import python_minifier
 import subprocess  # ruff: ignore[suspicious-subprocess-import]
 import sys
 
-listDatatypeConfigurations: list[DatatypeConfiguration] = [
+boxOfDatatypeConfigurations: list[DatatypeConfiguration] = [
 	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeElephino'),
 	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numpy', typeIdentifier='int64', type_asname='DatatypeFoldsTotal'),
@@ -42,10 +42,10 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 	ingredientsModule = IngredientsModule()
 	addLauncher(ingredientsModule, ingredientsCount, job)
 	ingredientsCount = variableCompatibility(
-		ingredientsCount, raiseIfNone(job.shatteredDataclass).list_argAnnotated4ArgumentsSpecification)
+		ingredientsCount, raiseIfNone(job.shatteredDataclass).boxOf_argAnnotated4ArgumentsSpecification)
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
-	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, listDatatypeConfigurations)
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfDatatypeConfigurations)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 

@@ -17,9 +17,9 @@ def count(symmetricFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1nd
                     leafComparison[leafConnectee] = (indexMiniGap - indexLeaf + leavesTotal) % leavesTotal
                     indexLeaf = indexMiniGap
                     leafConnectee += 1
-                for listTuples in indices:
+                for boxOfTuples in indices:
                     leafConnectee = 1
-                    for indexLeft, indexRight in listTuples:
+                    for indexLeft, indexRight in boxOfTuples:
                         if leafComparison[indexLeft] != leafComparison[indexRight]:
                             leafConnectee = 0
                             break

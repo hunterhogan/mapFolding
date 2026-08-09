@@ -13,21 +13,21 @@ if TYPE_CHECKING:
 	from typing import Any
 	import pandas
 
-def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], listLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
+def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], boxOfLeaves: Sequence[int | Callable[[int], int]], pathFilename: PurePath | None = None, settings: dict[str, dict[str, Any]] | None = None) -> PurePath:
 	"""Create a Python module containing combined domain data for multiple leaves across multiple map shapes.
 
 	This function extracts the actual combined domain (the set of valid pile index tuples) for a group of leaves from pickled
 	folding data. The data is used for verification in pytest tests comparing computed domains against empirical data.
 
 	The combined domain is a set of tuples where each tuple represents the pile indices for the specified leaves in a valid
-	folding. For example, if `listLeaves` is `[4, 5, 6, 7]`, each tuple has 4 elements representing the pile where each of those
+	folding. For example, if `boxOfLeaves` is `[4, 5, 6, 7]`, each tuple has 4 elements representing the pile where each of those
 	leaves appears in a folding.
 
 	Parameters
 	----------
 	sequenceDimensionsTotal : Sequence[int]
 		The dimension counts to process (e.g., `[4, 5, 6]` for 2^4, 2^5, 2^6 leaf maps).
-	listLeaves : Sequence[int | Callable[[int], int]]
+	boxOfLeaves : Sequence[int | Callable[[int], int]]
 		The leaves whose combined domain to extract. Elements can be:
 		- Integers for absolute leaf indices (e.g., `4`, `5`, `6`, `7`)
 		- Callables that take `dimensionsTotal` and return a leaf index (e.g., `首二`, `首零二`)
@@ -51,8 +51,8 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 			leafSpecName = getattr(leafSpec, "__name__", leafSpecName)
 		return leafSpecName
 
-	listLeafNames: list[str] = [getLeafName(leafSpec) for leafSpec in listLeaves]
-	filenameLeafPart: str = '_'.join(listLeafNames)
+	boxOfLeafNames: list[str] = [getLeafName(leafSpec) for leafSpec in boxOfLeaves]
+	filenameLeafPart: str = '_'.join(boxOfLeafNames)
 
 	if pathFilename is None:
 		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/tests/dataSamples/p2上nDimensionalDomain{filenameLeafPart}.py")
@@ -66,24 +66,24 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 		state: EliminationState = EliminationState(mapShape)
 		dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
-		listResolvedLeaves: list[int] = [resolveLeaf(leafSpec, dimensionsTotal) for leafSpec in listLeaves]
+		boxOfResolvedLeaves: list[int] = [resolveLeaf(leafSpec, dimensionsTotal) for leafSpec in boxOfLeaves]
 
-		listCombinedTuples: list[tuple[int, ...]] = []
+		boxOfCombinedTuples: list[tuple[int, ...]] = []
 		for indexFolding in range(len(dataframeFoldings)):
 			seriesFolding: pandas.Series = dataframeFoldings.iloc[indexFolding]
-			tuplePiles: tuple[int, ...] = tuple(int(seriesFolding[seriesFolding == leaf].index[0]) for leaf in listResolvedLeaves)
-			listCombinedTuples.append(tuplePiles)
+			tuplePiles: tuple[int, ...] = tuple(int(seriesFolding[seriesFolding == leaf].index[0]) for leaf in boxOfResolvedLeaves)
+			boxOfCombinedTuples.append(tuplePiles)
 
-		listUniqueTuples: list[tuple[int, ...]] = sorted(set(listCombinedTuples))
-		dictionaryDomainsByDimensions[dimensionsTotal] = listUniqueTuples
+		boxOfUniqueTuples: list[tuple[int, ...]] = sorted(set(boxOfCombinedTuples))
+		dictionaryDomainsByDimensions[dimensionsTotal] = boxOfUniqueTuples
 
-	listPythonSource: list[str] = [
+	boxOfPythonSource: list[str] = [
 		'"""Verification data for combined leaf domains.',
 		'',
 		'This module contains empirically extracted combined domain data for leaves',
-		f'{listLeafNames} across multiple map-shape configurations.',
+		f'{boxOfLeafNames} across multiple map-shape configurations.',
 		'',
-		'Each list is named `listDomain2上{dimensionsTotal}Dimensional` where `dimensionsTotal`',  # ruff: ignore[missing-f-string-syntax]
+		'Each list is named `boxOfDomain2上{dimensionsTotal}Dimensional` where `dimensionsTotal`',  # ruff: ignore[missing-f-string-syntax]
 		'is the exponent in the 2^n-dimensional mapShape, and it contains tuples representing',
 		'valid pile indices for the specified leaves. The tuple element sequence follows the original',
 		'leaf argument order.',
@@ -92,10 +92,10 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], lis
 	]
 
 	for dimensionsTotal in sorted(dictionaryDomainsByDimensions):
-		variableName: str = f"listDomain2上{dimensionsTotal}Dimensional"
-		listPythonSource.extend((f'{variableName}: list[tuple[int, ...]] = {dictionaryDomainsByDimensions[dimensionsTotal]!r}', ''))
+		variableName: str = f"boxOfDomain2上{dimensionsTotal}Dimensional"
+		boxOfPythonSource.extend((f'{variableName}: list[tuple[int, ...]] = {dictionaryDomainsByDimensions[dimensionsTotal]!r}', ''))
 
-	pythonSource: str = '\n'.join(listPythonSource)
+	pythonSource: str = '\n'.join(boxOfPythonSource)
 	writePython(pythonSource, pathFilename, settings)
 
 	return pathFilename

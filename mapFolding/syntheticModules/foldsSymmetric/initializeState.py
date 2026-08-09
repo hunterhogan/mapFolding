@@ -12,9 +12,9 @@ def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState
                     state.leafComparison[state.leafConnectee] = (state.indexMiniGap - state.indexLeaf + state.leavesTotal) % state.leavesTotal
                     state.indexLeaf = state.indexMiniGap
                     state.leafConnectee += 1
-                for listTuples in state.indices:
+                for boxOfTuples in state.indices:
                     state.leafConnectee = 1
-                    for indexLeft, indexRight in listTuples:
+                    for indexLeft, indexRight in boxOfTuples:
                         if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
                             state.leafConnectee = 0
                             break

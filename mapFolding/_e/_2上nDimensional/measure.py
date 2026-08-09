@@ -66,7 +66,7 @@ def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int
 	```python
 		if ((isEven吗(leafAt二Ante首) or (isOdd吗(leafAt二Ante首) and (dimensionIndex(dimension) <
 		dimensionsConsecutiveAtTail(state, leafAt二Ante首))))):
-			listRemoveLeaves.extend([dimension])
+			boxOfRemoveLeaves.extend([dimension])
 	```
 	"""
 	return bit_scan1(invertLeafIn2上nDimensions(state.dimensionsTotal, integerNonnegative)) or 0
@@ -160,7 +160,7 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 		if (dimensionThirdNearest首(pileOfLeaf零) == 一)
 		and (二+零 <= dimensionNearest首(pileOfLeaf 零)):
 			indexDomain0: int = (pilesTotal // 2) + 1
-			listIndicesPilesExcluded.extend([indexDomain0])
+			boxOfIndicesPilesExcluded.extend([indexDomain0])
 	```
 
 	References
@@ -260,7 +260,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	--------
 	```python
 		if howManyDimensionsHaveOddParity(leafAt二Ante首) == 1:
-			listRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
+			boxOfRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
 	```
 
 	References
@@ -396,7 +396,7 @@ def ptount(integerAbove3: int, /) -> int:
 	--------
 	```python
 		if isOdd吗(leafAt一零):
-			listCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt 一零)])
+			boxOfCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt 一零)])
 	```
 
 	References

@@ -1,28 +1,28 @@
 # What I think I know about my "elimination" algorithm
 
 - [What I think I know about my "elimination" algorithm](#what-i-think-i-know-about-my-elimination-algorithm)
-  - [Rules for maintaining a valid permutation space](#rules-for-maintaining-a-valid-permutation-space)
-  - [Data structures for better performance](#data-structures-for-better-performance)
-  - [2^n-dimensional maps](#2n-dimensional-maps)
-    - [Given a `Folding` with `leaf` adjacent to `leaf_r`, the difference of `leaf` and `leaf_r` is a power of 2, with many restrictions](#given-a-folding-with-leaf-adjacent-to-leaf_r-the-difference-of-leaf-and-leaf_r-is-a-power-of-2-with-many-restrictions)
-    - [Given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`](#given-leaves-k-and-r-if-dimensionnearest首k--dimensionnearesttailr-then-pileof_k--pileof_r)
-    - [Pairs of leaves with low entropy](#pairs-of-leaves-with-low-entropy)
-    - [Crease neighbors are `bit_flip` neighbors](#crease-neighbors-are-bit_flip-neighbors)
-    - [Addends for "next" and "prior" leaves match crease neighbors](#addends-for-next-and-prior-leaves-match-crease-neighbors)
-    - [Progressions within a dimension](#progressions-within-a-dimension)
-    - [Bit inversion symmetry](#bit-inversion-symmetry)
-    - [Leaf domains are directly tied to `sumsOfProductsOfDimensions` and `sumsOfProductsOfDimensionsNearest首`](#leaf-domains-are-directly-tied-to-sumsofproductsofdimensions-and-sumsofproductsofdimensionsnearest首)
-    - [Leaf precedence hierarchy](#leaf-precedence-hierarchy)
-    - [Pile-range formulas: relationship between pile ranges and leaf domains](#pile-range-formulas-relationship-between-pile-ranges-and-leaf-domains)
-    - [Constraint propagation system](#constraint-propagation-system)
-    - [Domain-based exclusions at specific piles](#domain-based-exclusions-at-specific-piles)
-    - [Divisibility and Theorem multipliers](#divisibility-and-theorem-multipliers)
-    - [Low-entropy leaf pairs: structure of "beans and cornbread"](#low-entropy-leaf-pairs-structure-of-beans-and-cornbread)
-    - [Pinning pile `(2,6)` — differences and addend lists](#pinning-pile-26--differences-and-addend-lists)
-    - [General observations for analyzing pinning](#general-observations-for-analyzing-pinning)
-    - [Leaf metadata per dimension](#leaf-metadata-per-dimension)
-    - [Forbidden inequalities (IFF checking)](#forbidden-inequalities-iff-checking)
-  - [Semiotics, notation, and givens](#semiotics-notation-and-givens)
+	- [Rules for maintaining a valid permutation space](#rules-for-maintaining-a-valid-permutation-space)
+	- [Data structures for better performance](#data-structures-for-better-performance)
+	- [2^n-dimensional maps](#2n-dimensional-maps)
+		- [Given a `Folding` with `leaf` adjacent to `leaf_r`, the difference of `leaf` and `leaf_r` is a power of 2, with many restrictions](#given-a-folding-with-leaf-adjacent-to-leaf_r-the-difference-of-leaf-and-leaf_r-is-a-power-of-2-with-many-restrictions)
+		- [Given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`](#given-leaves-k-and-r-if-dimensionnearest首k--dimensionnearesttailr-then-pileof_k--pileof_r)
+		- [Pairs of leaves with low entropy](#pairs-of-leaves-with-low-entropy)
+		- [Crease neighbors are `bit_flip` neighbors](#crease-neighbors-are-bit_flip-neighbors)
+		- [Addends for "next" and "prior" leaves match crease neighbors](#addends-for-next-and-prior-leaves-match-crease-neighbors)
+		- [Progressions within a dimension](#progressions-within-a-dimension)
+		- [Bit inversion symmetry](#bit-inversion-symmetry)
+		- [Leaf domains are directly tied to `sumsOfProductsOfDimensions` and `sumsOfProductsOfDimensionsNearest首`](#leaf-domains-are-directly-tied-to-sumsofproductsofdimensions-and-sumsofproductsofdimensionsnearest首)
+		- [Leaf precedence hierarchy](#leaf-precedence-hierarchy)
+		- [Pile-range formulas: relationship between pile ranges and leaf domains](#pile-range-formulas-relationship-between-pile-ranges-and-leaf-domains)
+		- [Constraint propagation system](#constraint-propagation-system)
+		- [Domain-based exclusions at specific piles](#domain-based-exclusions-at-specific-piles)
+		- [Divisibility and Theorem multipliers](#divisibility-and-theorem-multipliers)
+		- [Low-entropy leaf pairs: structure of "beans and cornbread"](#low-entropy-leaf-pairs-structure-of-beans-and-cornbread)
+		- [Pinning pile `(2,6)` — differences and addend boxOfs](#pinning-pile-26--differences-and-addend-boxofs)
+		- [General observations for analyzing pinning](#general-observations-for-analyzing-pinning)
+		- [Leaf metadata per dimension](#leaf-metadata-per-dimension)
+		- [Forbidden inequalities (IFF checking)](#forbidden-inequalities-iff-checking)
+	- [Semiotics, notation, and givens](#semiotics-notation-and-givens)
 
 ## Rules for maintaining a valid permutation space
 
@@ -41,7 +41,7 @@
 | iterator    | Fixed    | Yes     | Lazy processing   | Memory-efficient; single-use only.                      |
 | range       | Fixed    | Yes     | Integer sequences | $O(1)$ memory; $O(1)$ membership check.                 |
 | frozenset   | Fixed    | No      | Membership keys   | Hashable; used as keys for other sets/dicts.            |
-| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than lists; faster iteration.     |
+| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than boxOfs; faster iteration.     |
 | NamedTuple  | Fixed    | Yes     | Named records     | Tuple performance with object-like access.              |
 | set         | Changing | No      | Uniqueness        | $O(1)$ lookup; high memory overhead (\~32 bytes/item).  |
 | Counter     | Changing | Yes     | Tallying          | Specialized for frequencies; supports multiset math.    |
@@ -144,11 +144,11 @@ This is verified empirically in the hypothesis code.
 The addends that produce the next-in-sequence and prior-in-sequence leaves from a given `leaf` are exactly the crease-post and crease-ante neighbors (respectively), obtained via `bit_flip`. In other words:
 
 ```python
-listAddendLeaves == listLeavesNext        # True for all leaves
-listAddendPriorLeaves == listLeavesPrior  # True for all leaves
+boxOfAddendLeaves == boxOfLeavesNext        # True for all leaves
+boxOfAddendPriorLeaves == boxOfLeavesPrior  # True for all leaves
 ```
 
-where `listLeavesNext` and `listLeavesPrior` are slices of `[bit_flip(leaf, dimension) for dimension in range(dimensionsTotal)]` selected by the same slicing logic as `getLeavesCreasePost` and `getLeavesCreaseAnte`.
+where `boxOfLeavesNext` and `boxOfLeavesPrior` are slices of `[bit_flip(leaf, dimension) for dimension in range(dimensionsTotal)]` selected by the same slicing logic as `getLeavesCreasePost` and `getLeavesCreaseAnte`.
 
 ### Progressions within a dimension
 
@@ -279,16 +279,16 @@ Predictable pairs of low-entropy pairs follow a "mirroring" pattern:
 2. `(leaf二一, leaf二一零)` and `(leaf二零, leaf二)`.
 3. `(leaf首二, leaf首零二)` and `(leaf首零一二, leaf首一二)`.
 
-### Pinning pile `(2,6)` — differences and addend lists
+### Pinning pile `(2,6)` — differences and addend boxOfs
 
-For a $2^6$-dimensional map investigated empirically, each leaf has a set of "addends" that produce its next-in-sequence and prior-in-sequence neighbors. These addend lists have specific structures: they start with a step that depends on the leaf's dimension-origin membership, and grow by appending products-of-dimensions terms.
+For a $2^6$-dimensional map investigated empirically, each leaf has a set of "addends" that produce its next-in-sequence and prior-in-sequence neighbors. These addend boxOfs have specific structures: they start with a step that depends on the leaf's dimension-origin membership, and grow by appending products-of-dimensions terms.
 
 For leaf-pairs $(l, r)$ in consecutive piles, the "satellite" leaves (other leaves whose piles are constrained by the pair) can be computed:
 
 ```python
 # For leaf-pair (l, r) with l > r:
-ll = [l + cumulative_sum(listLeft[0:i]) for i ...]
-rr = [r + cumulative_sum(listRight[0:i]) for i ...]
+ll = [l + cumulative_sum(boxOfLeft[0:i]) for i ...]
+rr = [r + cumulative_sum(boxOfRight[0:i]) for i ...]
 # With the "larger" leaf getting one extra addend term at the tail.
 ```
 

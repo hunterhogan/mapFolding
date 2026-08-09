@@ -8,7 +8,7 @@ dictionary_nToBitWidthCrossings: dict[int, int] = {
     , 40: 58, 41: 60, 42: 61, 43: 63, 44: 64, 45: 67, 46: 68, 47: 70, 48: 71, 49: 73
     , 50: 75, 51: 77, 52: 78, 53: 80, 54: 82, 55: 84}
 
-listBitWidthIncreases: list[int] = [0, 0, 1, 0, 2, 0, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2
+boxOfBitWidthIncreases: list[int] = [0, 0, 1, 0, 2, 0, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2
 	, 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1
     , 3, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2]
 bitWidthIncreaseMaximum = 3

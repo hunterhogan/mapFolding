@@ -86,7 +86,7 @@ def unRepackParallelMapFoldingState(state: ParallelMapFoldingState) -> ParallelM
 
 def doTheNeedful(state: ParallelMapFoldingState, concurrencyLimit: int) -> tuple[int, list[ParallelMapFoldingState]]:
     stateParallel = deepcopy(state)
-    listStatesParallel: list[ParallelMapFoldingState] = [stateParallel] * stateParallel.taskDivisions
+    boxOfStatesParallel: list[ParallelMapFoldingState] = [stateParallel] * stateParallel.taskDivisions
     groupsOfFoldsTotal: int = 0
     dictionaryConcurrency: dict[int, ConcurrentFuture[ParallelMapFoldingState]] = {}
     with ProcessPoolExecutor(concurrencyLimit) as concurrencyManager:
@@ -95,7 +95,7 @@ def doTheNeedful(state: ParallelMapFoldingState, concurrencyLimit: int) -> tuple
             state.taskIndex = indexSherpa
             dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(unRepackParallelMapFoldingState, state)
         for indexSherpa in range(stateParallel.taskDivisions):
-            listStatesParallel[indexSherpa] = dictionaryConcurrency[indexSherpa].result()
-            groupsOfFoldsTotal += listStatesParallel[indexSherpa].groupsOfFolds
+            boxOfStatesParallel[indexSherpa] = dictionaryConcurrency[indexSherpa].result()
+            groupsOfFoldsTotal += boxOfStatesParallel[indexSherpa].groupsOfFolds
     foldsTotal: int = groupsOfFoldsTotal * stateParallel.leavesTotal
-    return (foldsTotal, listStatesParallel)
+    return (foldsTotal, boxOfStatesParallel)

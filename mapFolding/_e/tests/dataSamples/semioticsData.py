@@ -1,5 +1,5 @@
 # Static test data for mapFolding/_semiotics.py and mapFolding/_e/_semiotics.py
-# This module contains only static data—dictionaries, lists, tuples, constants, and type aliases.
+# This module contains only static data—dictionaries, boxOfs, tuples, constants, and type aliases.
 
 from typing import Final
 

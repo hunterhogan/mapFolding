@@ -118,7 +118,7 @@ for indexUniversal in range(state.dimensionsTotal - 2):
         leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
         leafPredecessor首零 = leafPredecessor + 首零(state.dimensionsTotal)
         pileFirst = magicalSequence[indexUniversal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
-        for pile in listOfPiles[listOfPiles.index(pileFirst): None]:
+        for pile in boxOfPiles[boxOfPiles.index(pileFirst): None]:
             dictionary首零Plus零[pile].append(leafPredecessor)
             dictionary首零Plus零[pile].append(leafPredecessor首零)
 ```
