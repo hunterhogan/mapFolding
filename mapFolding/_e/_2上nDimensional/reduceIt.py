@@ -86,7 +86,7 @@ from mapFolding._e.theTypes import Leaf, Pile
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import extract, pairwise, triplewise
 from typing import TYPE_CHECKING
-from Z0Z_tools import between吗, DOTitems, reverseLookup
+from Z0Z_tools import DOTitems, reverseLookup
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -180,13 +180,13 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		# TODO fix the typing problems in `valfilter`.
+		# TODO Z0Z_tools, fix the typing problems in `valfilter`.
 		ee = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
 		ww = filterLeaf(moreThanLeaf零吗, ee, factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), ww)):
 			if pile in leafAtPilePredecessors[leaf]:
 				permutationSpace = reduceLeafSpace(permutationSpace
-					, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
+					, DOTitems(filterPile(pile.__lt__, permutationSpace.extractUndeterminedPiles()))
 					, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 				)
 				if not permutationSpace.valid:
@@ -343,7 +343,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		leafCount: int = permutationSpace.leafCount
 
 		pile1stOpen: int = 2
-		# TODO fix this typing issue.
+		# TODO Z0Z_tools, fix this typing issue.
 		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)

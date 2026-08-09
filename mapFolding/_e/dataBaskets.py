@@ -11,13 +11,11 @@ from humpy_cytoolz import (
 	assoc as associateKeyValue, compose, dissoc as dissociatePile, first, groupby as toolz_groupby, merge, valfilter as filterLeaf)
 from hunterMakesPy import raiseIfNone
 from itertools import combinations, filterfalse
-from mapFolding._e import (
-	getIteratorOfLeaves, getLeafDomain, getProductsOfDimensions, getSumsOfProductsOfDimensions, getSumsOfProductsOfDimensionsNearest首,
-	leafOptionsLeafNone, makeLeafAntiOptions)
+from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
 from mapFolding._e.reduceIt import listFunctionsReductionDEFAULT
-from mapFolding._e.theTypes import Folding, LeafOptions, LeafSpace, Pile, PinnedLeaves
+from mapFolding._e.theTypes import Folding, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
 from math import prod
 from operator import attrgetter, methodcaller
@@ -28,7 +26,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, UndeterminedPiles
+	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
@@ -187,7 +185,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		if (leafOptions := self.getLeafOptions(pile)) is None:
 			deconstructed: Iterable[PermutationSpace] = [self]
 		else:
-			leavesToPin = leavesToPin or getIteratorOfLeaves(leafOptions)
+			leavesToPin = leavesToPin or _e.getIteratorOfLeaves(leafOptions)
 			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
 		return deconstructed
 
@@ -520,11 +518,11 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		count: int = self.leafCount
 		if count < len(self):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
-			ww: PinnedLeaves = self.extractPinnedLeaves()
-			qq: LeafOptions = makeLeafAntiOptions(len(self), ww.values())
-			for pile in filterfalse(ww.__contains__, self):
-				self[pile] &= qq  # ty: ignore[invalid-argument-type]
-			tuple(map(self._solidifyLeafSpaceAtPile, ww))
+			leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
+			leafAntiOptions: LeafOptions = _e.makeLeafAntiOptions(len(self), leavesPinned.values())
+			for pile in filterfalse[Pile](leavesPinned.__contains__, self):
+				self[pile] &= leafAntiOptions
+			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
 			if count < self.leafCount:
 				self._solidifyLeafSpace()
 
@@ -532,10 +530,10 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		rangeOfPile: LeafSpace | None = self[pile]
 		if isLeafOptions吗(rangeOfPile):
 			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
-			rangeOfPile = leafOptionsLeafNone(rangeOfPile)
+			rangeOfPile = _e.leafOptionsLeafNone(rangeOfPile)
 			if isLeafOptions吗(rangeOfPile):
 				self[pile] = rangeOfPile
-			if rangeOfPile is None:
+			elif rangeOfPile is None:
 				self.valid = False
 
 	valid: bool = True
@@ -729,7 +727,7 @@ class EliminationState:
 		return all((
 			self.permutationSpace.leafNotPinned吗(leaf)
 			, self.permutationSpace.pileUndetermined吗(self.pile)
-			, self.pile in getLeafDomain(self, leaf)
+			, self.pile in _e.getLeafDomain(self, leaf)
 		))
 
 	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
@@ -813,8 +811,8 @@ class EliminationState:
 		self.pilesTotal = self.leavesTotal
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.leavesTotal
-		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(
+		self.productsOfDimensions = _e.getProductsOfDimensions(self.mapShape)
+		self.sumsOfProductsOfDimensions = _e.getSumsOfProductsOfDimensions(self.mapShape)
+		self.sumsOfProductsOfDimensionsNearest首 = _e.getSumsOfProductsOfDimensionsNearest首(
 			self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal
 		)

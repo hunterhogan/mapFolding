@@ -169,6 +169,7 @@ def howManyLeavesInLeafOptions(leafOptions: LeafOptions) -> int:
 	"""
 	return leafOptions.bit_count() - 1
 
+# SEMIOTICS
 def leafOptionsLeafNone(leafOptions: LeafOptions, /) -> LeafOptions | Leaf | None:
 	"""You can normalize a `LeafOptions` into a `Leaf`, `LeafOptions`, or `None` when the range is degenerate.
 

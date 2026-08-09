@@ -276,7 +276,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 			itemfilter(lambda groupBy: (_e.howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
 		):
 			pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
-			# TODO Fix valfilter annotations, then clean up this code.
+			# TODO Z0Z_tools, Fix valfilter annotations, then clean up this code.
 			pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
 
 			permutationSpace = reduceLeafSpace(permutationSpace
@@ -328,7 +328,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
 			permutationSpace.valid = False
 		else:
-			# TODO fix valfilter annotations, then clean up this code.
+			# TODO Z0Z_tools, fix valfilter annotations, then clean up this code.
 			leaf: Leaf | None = first(set(filterValue((1).__eq__, counterLeafDomainSize)).difference(leavesPinned.values()).difference([state.leavesTotal]), None)  # pyright: ignore[reportUnknownArgumentType]
 			if leaf is not None:
 				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined)), leaf))  # pyright: ignore[reportUnknownArgumentType]
