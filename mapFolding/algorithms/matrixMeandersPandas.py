@@ -320,7 +320,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[invalid-assignment]
+	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
 	del dataframeAnalyzed
 	return state
 

@@ -88,7 +88,7 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 		raise ValueError(message)
 
 	countingVariable: str | None = None
-	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)):  # pyright: ignore [reportArgumentType]
+	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)):
 		Official_fieldOrder.append(aField.name)
 		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
 		if aField.metadata.get('theCountingIdentifier', False):

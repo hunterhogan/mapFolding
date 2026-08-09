@@ -611,7 +611,6 @@ class EliminationState:
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
 
-	listPinnedLeaves: list[PinnedLeaves] = dataclasses.field(default_factory=list[PinnedLeaves], init=True)
 	listFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
 	"""A list of `Folding` patterns found."""
 	pile: Pile = -1
@@ -656,14 +655,6 @@ class EliminationState:
 		)
 		self.listPermutationSpace = list(foldingGroup吗.get(False, ()))
 		self.listFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
-		return self
-
-	def moveToListPinnedLeaves(self) -> Self:
-		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
-			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.listPermutationSpace
-		)
-		self.listPermutationSpace = list(foldingGroup吗.get(False, ()))
-		self.listPinnedLeaves.extend(foldingGroup吗.get(True, ()))  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 		return self
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:

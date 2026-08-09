@@ -93,25 +93,16 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	return pathFilename
 
 # TODO sympy equation solver.
-def _makeSympy(pathFilenameSource: Path) -> Path:  # pyright: ignore[reportUnusedFunction]
+def makeSympy(pathFilenameSource: Path) -> Path:
+	"""Omg."""
 	pathFilenameWrite: Path = pathFilenameSource.with_stem('Z0Z_sympy')
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)
-	dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
 
 	ingredients = IngredientsModule(imports=LedgerOfImports(astModule))
 	ingredients.imports.addImport_asStr('sympy')
 
 	ingredients.appendPrologue(statement=Make.Assign([Make.Name('n', Make.Store())], value=Make.Call(Make.Attribute(Make.Name('sympy'), 'symbols')
 		, listParameters=[Make.Constant('n')], list_keyword=[Make.keyword('integer', value=Make.Constant(value=True))])))
-
-	for oeisID, FunctionDef in dictionaryFunctionDef.items():  # pyright: ignore[reportUnusedVariable] # ruff: ignore[incorrect-dict-iterator, unused-loop-control-variable]
-		ingredients.appendPrologue(statement=Make.Assign([Make.Name(oeisID, Make.Store())], value=Make.Call(Make.Attribute(Make.Name('sympy'), 'Function'), listParameters=[Make.Constant(oeisID)])))
-
-		if not oeisID.startswith('_'):
-			NodeChanger(IfThis.isCallIdentifier(oeisID), Grab.funcAttribute(Then.replaceWith(Make.Name('_' + oeisID)))).visit(astModule)
-			astModule.body.append(Make.FunctionDef('_' + oeisID, Make.arguments(list_arg=[Make.arg('n', Make.Name('int'))])
-								, body=[Make.Return(Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=Make.Name('n')))]
-								, returns=Make.Name('int')))
 
 	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis', list_alias=[Make.alias('getValuesKnown')]))
 

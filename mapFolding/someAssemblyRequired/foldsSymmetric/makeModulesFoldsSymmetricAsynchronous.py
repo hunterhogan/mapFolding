@@ -97,10 +97,10 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 
 	return pathFilename
 
-def makeFoldsSymmetricAsynchronousModules() -> None:
+def makeFoldsSymmetricAsynchronousModules() -> PurePath:
 	"""Make asynchronous modules for foldsSymmetric."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
-	pathFilename: PurePath = addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']  # ruff: ignore[unused-variable] # pyright: ignore[reportUnusedVariable]
+	return addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':

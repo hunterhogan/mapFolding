@@ -47,7 +47,3 @@ Furthermore, now that the package includes OEIS A000136, 1 x N stamps/maps, sort
 ## TypeAlias
 
 Use `type` by default. Switch to `TypeAlias` whenever it promotes self-documenting code, especially through semiotics. Examples, I prefer `isinstance(x, LeafOptions)` to `isinstance(x, mpz)`; `dimension = DimensionIndex(2)` is more self-documenting than `dimension = int(2)`.
-
-## walrus
-
-Using the walrus operator here `if not (permutationSpace := _reduceLeafSpace...` means that type checkers are ok with `permutationSpace: PermutationSpace`. If I assigned without the `if` check, `permutationSpace = _reduceLeafSpace...`, then the annotation would need to be `permutationSpace: PermutationSpace | None` because `_reduceLeafSpace` can return `None`. Furthermore, not creating an intermediate variable is more efficient.

@@ -20,12 +20,12 @@ if __name__ == '__main__':
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
 	flow = 'matrixMeanders'
-	flow = 'matrixPandas'
 	flow = 'matrixNumPy'
+	flow = 'matrixPandas'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			('A005316', 'meanders'),
-			# ('A000682', 'semi'),
+			('A000682', 'semi'),
 		]
 
 	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:

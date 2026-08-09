@@ -8,22 +8,6 @@ from mapFolding.beDRY import makeDataContainer
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import getFoldsTotalKnown
 import dataclasses
-import numpy
-import typing
-
-def _extract_numpy_dtype(t: typing.Any) -> typing.Any:
-	if isinstance(t, type) and issubclass(t, numpy.generic):
-		return typing.cast("typing.Any", t)
-	for arg in typing.get_args(t):
-		try:
-			res = _extract_numpy_dtype(arg)
-			if res is not None:
-				return res
-		except TypeError:
-			pass
-	message: str = f"No numpy.generic type found in {t}"
-	raise TypeError(message)
-
 
 @dataclasses.dataclass(slots=True)
 class LeafSequenceState(MapFoldingState):
@@ -46,7 +30,7 @@ class LeafSequenceState(MapFoldingState):
 		Array storing the sequence of leaf connections discovered.
 	"""
 
-	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True)
+	leafSequence: Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': Array1DLeavesTotal.__args__[1].__args__[0]})
 	"""
 	Array storing the sequence of leaf connections discovered during computation.
 
@@ -75,9 +59,7 @@ class LeafSequenceState(MapFoldingState):
 			foldsTotalKnown: int | None = getFoldsTotalKnown(self.mapShape)
 			if foldsTotalKnown is not None:
 				groupsOfFoldsKnown: int = foldsTotalKnown // self.leavesTotal
-				hints = typing.get_type_hints(self.__class__)
-				dtype = _extract_numpy_dtype(hints['leafSequence'])
-				self.leafSequence = makeDataContainer(groupsOfFoldsKnown, dtype)
+				self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
 				# I previously collected a lot of data using `Leaf` numbers from 1 to `leavesTotal`,
 				# so I initialized the array with `self.leaf1ndex` instead of `leafOrigin`.
 				self.leafSequence[self.groupsOfFolds] = leafOrigin

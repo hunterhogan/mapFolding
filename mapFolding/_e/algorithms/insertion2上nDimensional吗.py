@@ -6,10 +6,11 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from itertools import pairwise
 from mapFolding._e import getLeafDomain
+from mapFolding._e._2上nDimensional import 首一
+from mapFolding._e._2上nDimensional.pinIt import pin首beans
 from mapFolding._e._2上nDimensional.reduceIt import listFunctionsReduction2上nDimensional, listFunctionsReductionQuick2上nDimensional
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
-from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.pinIt import atPileExcludeLeaf_inListPermutationSpace, excludeLeaf_rBeforeLeaf_k
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from mapFolding.oeis import makeMapShape
 from mapFolding.theSSOT import settingsPackage
@@ -24,53 +25,43 @@ if TYPE_CHECKING:
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_development' / 'albums'
 
-def makeDescendants(folding: Folding, n: int, position: int) -> EliminationState:
+def makeDescendants(folding: Folding, state: EliminationState, position: int) -> EliminationState:
 	"""Process a single folding and return resulting state."""
-	state: EliminationState = EliminationState(makeMapShape('A001417', n)
-		, listFunctionsReduction=listFunctionsReduction2上nDimensional
-		, listFunctionsReductionQuick=listFunctionsReductionQuick2上nDimensional)
-	state.listPermutationSpace.append(PermutationSpace(getDictionaryLeafOptions(state)))
-	state.reduceAllPermutationSpace(quick=True)
+	for pile, (r, k) in tqdm(enumerate(pairwise(reversed(folding[2:None])), start=1), total=len(folding) - 3, disable=False, position=position, leave=False):
+		if r == 2:
+			continue
+		domain_r: Iterable[int] = getLeafDomain(state, r)
+		pilesForOthers: set[int] = set(range(len(folding) - pile)).intersection(domain_r)
+		for pile in pilesForOthers:
+			state.listPermutationSpace = atPileExcludeLeaf_inListPermutationSpace(state.listPermutationSpace, pile, r)
 
-	for r, k in tqdm(pairwise(reversed(folding[2:None])), total=len(folding) - 3, disable=False, position=position, leave=False):
-		state = excludeLeaf_rBeforeLeaf_k(state, k, r, getLeafDomain(state, k), getLeafDomain(state, r))
+		state = excludeLeaf_rBeforeLeaf_k(state, k, r, getLeafDomain(state, k), domain_r)
+
+		if r == 首一(state.dimensionsTotal):
+			state = pin首beans(state, CPUlimit=True)
 
 	state.removeCreaseViolations().reduceAllPermutationSpace()
 
 	return state
 
-def makeAlbum2上nDimensional吗(n: int, workersMaximum: int) -> EliminationState:
+def makeAlbum2上nDimensional吗(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Construct album `n`."""
-	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', n - 1), pathAlbum, suffix='.album'))
+	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.dimensionsTotal - 1), pathAlbum, suffix='.album'))
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-		listClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(makeDescendants, folding, n, position % workersMaximum + 1)
-			for position, folding in enumerate(album)
-		]
+		listClaimTickets: list[Future[EliminationState]] = []
+		for position, folding, in enumerate(album):
+			stateCopy: EliminationState = EliminationState(state.mapShape, state.listPermutationSpace.copy()
+						, listFunctionsReduction=listFunctionsReduction2上nDimensional
+					, listFunctionsReductionQuick=listFunctionsReductionQuick2上nDimensional)
+			listClaimTickets.append(concurrencyManager.submit(makeDescendants, folding, stateCopy, position % workersMaximum + 1))
 
-		state: EliminationState = EliminationState(makeMapShape('A001417', n))
+		state.listPermutationSpace = []
 
 		for claimTicket in tqdm(as_completed(listClaimTickets), total=len(listClaimTickets), disable=False, desc='for folding in album'):
 			sherpa: EliminationState = claimTicket.result()
 			state.listPermutationSpace.extend(sherpa.listPermutationSpace)
-			state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
 			state.listFolding.extend(sherpa.listFolding)
-
-	return state
-
-def profileMakeAlbum2上nDimensional吗(n: int, _workersMaximum: int) -> EliminationState:
-	"""Construct album `n`."""
-	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', n - 1), pathAlbum, suffix='.album'))
-
-	state: EliminationState = EliminationState(makeMapShape('A001417', n))
-	for folding in tqdm(album):
-		sherpa: EliminationState = makeDescendants(folding, n, 1)
-		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
-		state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
-		state.listFolding.extend(sherpa.listFolding)
-
-	state.removeCreaseViolations().reduceAllPermutationSpace()
 
 	return state
 

@@ -1,6 +1,5 @@
 # The real module is generated from this incomplete module. Comments are not preserved.
 # ruff: file-ignore[global-statement, typing-only-first-party-import]
-# pyright: reportArgumentType=false
 # ty: ignore[invalid-argument-type]
 from __future__ import annotations
 
@@ -16,6 +15,7 @@ symmetricFoldsTotal: int = 0
 LOCKsymmetricFoldsTotal = Lock()
 # TODO There isn't a better way to do this?
 STOPsignal = object()
+# pyright: reportArgumentType=false
 
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> None:
 	global listThreads, symmetricFoldsTotal, queueFutures

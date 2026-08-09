@@ -195,7 +195,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}", stacklevel=2)
 		return astCallable
 
-	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:  # pyright: ignore[reportUnusedFunction]
+	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:
 		"""Generate Numba-compatible type signatures for function parameters.
 
 		(AI generated docstring)

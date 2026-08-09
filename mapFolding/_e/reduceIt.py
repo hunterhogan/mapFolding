@@ -181,8 +181,8 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 					else:
 						continue
 
-					permutationSpace = reduceLeafSpace(permutationSpace  # pyright: ignore[reportUnknownArgumentType]
-							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
+					permutationSpace = reduceLeafSpace(permutationSpace
+							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 							, leafAntiOptions
 					)
 					if not permutationSpace.valid:
@@ -226,7 +226,6 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 
 	return permutationSpace
 
-# TODO remove =EndNotes##walrus=
 def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and exploit naked subset constraints.
 
@@ -268,18 +267,18 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
-		# TODO Fix valfilter annotations, then clean up this code.
-		pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
+		groupByLeafSpace: dict[LeafSpace, set[Pile]] = {}
+		for pile, leafOptions in permutationSpace.items():
+			groupByLeafSpace.setdefault(leafOptions, set()).add(pile)
 
-		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
-		for pile, leafOptions in pilesUndetermined.items():
-			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
-
-		groupByLeafOptions: dict[LeafOptions, set[Pile]] = filterValue(lambda setPiles: 1 < len(setPiles), groupByLeafOptions)
+		groupByLeafOptions: dict[LeafOptions, set[Pile]] = filterValue(lambda setPiles: 1 < len(setPiles), groupByLeafSpace)  # pyright: ignore[reportUnknownVariableType, reportUnknownLambdaType, reportUnknownArgumentType, reportAssignmentType] # ty: ignore[invalid-assignment]
 		for leafOptions, setPiles in DOTitems(
 			itemfilter(lambda groupBy: (_e.howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
 		):
+			pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
+			# TODO Fix valfilter annotations, then clean up this code.
+			pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
+
 			permutationSpace = reduceLeafSpace(permutationSpace
 				, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
 				, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
@@ -329,6 +328,7 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
 			permutationSpace.valid = False
 		else:
+			# TODO fix valfilter annotations, then clean up this code.
 			leaf: Leaf | None = first(set(filterValue((1).__eq__, counterLeafDomainSize)).difference(leavesPinned.values()).difference([state.leavesTotal]), None)  # pyright: ignore[reportUnknownArgumentType]
 			if leaf is not None:
 				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined)), leaf))  # pyright: ignore[reportUnknownArgumentType]

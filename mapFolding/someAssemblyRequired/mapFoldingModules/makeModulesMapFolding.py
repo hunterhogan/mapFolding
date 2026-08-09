@@ -147,7 +147,9 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	astTuple: ast.Tuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportAssignmentType, reportArgumentType]  # ty: ignore[invalid-assignment]
+	# TODO Remember why I can't get the TypeChecker to see ast.Tuple, and document it.
+	# ty: ignore[invalid-assignment]
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportAssignmentType, reportArgumentType]  #
 	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
 		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
