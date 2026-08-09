@@ -605,8 +605,8 @@ class EliminationState:
 	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
-	listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace | None]], init=True)
-	listFunctionsReductionQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace | None]], init=True)
+	listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
+	listFunctionsReductionQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
 
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
@@ -741,11 +741,11 @@ class EliminationState:
 			, self.pile in getLeafDomain(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
+	def reduceAllPermutationSpace(self, listFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
 					, *, quick: bool = False) -> Self:
 		# TODO think about this.
 		from mapFolding._e.reduceIt import listFunctionsReductionQuickDEFAULT  # ruff: ignore[import-outside-top-level]
-		listQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] | None = None
+		listQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
 		if quick:
 			listQuick = self.listFunctionsReductionQuick or listFunctionsReductionQuickDEFAULT
 		listFunctionsReduction = listFunctionsReduction or listQuick or self.listFunctionsReduction or listFunctionsReductionDEFAULT
@@ -753,29 +753,24 @@ class EliminationState:
 		self.listPermutationSpace = []
 		listPermutationSpaceIrreducible: list[PermutationSpace] = []
 
-		while listPermutationSpace:
+		functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = list(listFunctionsReduction)
+		for permutationSpace in listPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
-			permutationSpace: PermutationSpace | None = listPermutationSpace.pop()
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
-			functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = list(
-				listFunctionsReduction
-			)
-			keepGoing: bool = True
+			index: int = len(functionsReduction)
 
-			while keepGoing:
-				reducePermutationSpace: Callable[[EliminationState, PermutationSpace], PermutationSpace | None] = (
-					functionsReduction.pop()
-				)
-				permutationSpace = reducePermutationSpace(self, raiseIfNone(permutationSpace))
+			while index:
+				index -= 1
+				reducer: Callable[[EliminationState, PermutationSpace], PermutationSpace] = functionsReduction[index]
+				permutationSpace: PermutationSpace = reducer(self, permutationSpace)
 
-				if not permutationSpace:
-					keepGoing = False
+				if not permutationSpace.valid:
+					index = 0
 				elif sumPermutationSpace != sum(permutationSpace.values()):
-					functionsReduction = list(listFunctionsReduction)
+					index = len(listFunctionsReduction)
 					sumPermutationSpace = sum(permutationSpace.values())
-				elif not functionsReduction:
+				elif index == 0:
 					listPermutationSpaceIrreducible.append(permutationSpace)
-					keepGoing = False
 
 		else:
 			self.listPermutationSpace.extend(listPermutationSpaceIrreducible)

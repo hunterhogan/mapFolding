@@ -8,7 +8,8 @@ from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions, ho
 from mapFolding._e._2上nDimensional import (
 	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一)
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
-from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
+from mapFolding._e.algorithms.insertion2上nDimensional吗 import (
+	makeAlbum2上nDimensional吗, profileMakeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from math import prod
@@ -38,17 +39,18 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
-		state = makeAlbum2上nDimensional吗(6, 14)
+		# state = profileMakeAlbum2上nDimensional吗(5, 14)
+		state = makeAlbum2上nDimensional吗(5, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
-		from mapFolding._e._development.toolkit import verifyPinning2Dn
+		# from mapFolding._e._development.toolkit import verifyPinning2Dn
 
 		# verifyPinning2Dn(state)
 		# print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 		print(f"{len(state.listPermutationSpace)=}")
 
-		state = pinIt.pinLeavesDimension首二(state)
-		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
+		# state = pinIt.pinLeavesDimension首二(state)
+		# print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
 		state.moveToListFolding()
 		if state.listPermutationSpace:

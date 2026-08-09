@@ -10,7 +10,7 @@ from itertools import chain, combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isPileLeafOptions吗, leafInLeafOptions吗, leafPinned吗
-from more_itertools import extract, one
+from more_itertools import extract, first, one
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTvalues, reverseLookup, thisNotHaveThat吗
 
@@ -87,7 +87,7 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 		leafSpace: LeafSpace | None = _e.leafOptionsLeafNone(_e.leafOptionsAND(leafAntiOptions, leafOptions))
 		if leafSpace is None:
 			#=SIN= Early return.
-			permutationSpace.clear()
+			permutationSpace.valid = False
 			return permutationSpace
 		else:
 			permutationSpace[pile] = leafSpace
@@ -98,7 +98,7 @@ def _odd吗(mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile, 
 		return bool(oddLeaf吗(mapShape, dimension=dimension, leaf=pileLeaf[1]))
 	return workhorse
 
-def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and eliminate crossed creases.
 
 	I use this constraint encoder to detect configurations where two creases would cross physically
@@ -173,26 +173,28 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 
 					elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
 						if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
+							permutationSpace.valid = False
 							#=SIN= Early return.
-							return None
+							return permutationSpace
 						continue
 
 					else:
 						continue
 
-					if not (permutationSpace := reduceLeafSpace(permutationSpace
-							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
+					permutationSpace = reduceLeafSpace(permutationSpace  # pyright: ignore[reportUnknownArgumentType]
+							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))  # pyright: ignore[reportUnknownArgumentType, reportUnknownMemberType]
 							, leafAntiOptions
-					)):
+					)
+					if not permutationSpace.valid:
 						#=SIN= Early return.
-						return None
+						return permutationSpace
 
 		if leafCount < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to propagate leaf pinning constraints.
 
 	I use this constraint encoder to enforce that every pinned leaf can appear at only one pile. For
@@ -209,27 +211,23 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 
 	Returns
 	-------
-	updatedPermutationSpace : PermutationSpace | None
-		The updated `permutationSpace` if valid; otherwise `None`.
+	updatedPermutationSpace : PermutationSpace
+		The updated `permutationSpace`.
 
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 
-	while permutationSpaceHasNewLeaf:
+	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
-		#=EndNotes##walrus=
-		if not (permutationSpace := reduceLeafSpace(
-				permutationSpace, DOTitems(pilesUndetermined), _e.makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned))
-		)):
-			#=SIN= Early return: an empty pile domain irreversibly invalidates the candidate.
-			return None
+		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), _e.makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned)))
 		if len(leavesPinned) < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+# TODO remove =EndNotes##walrus=
+def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and exploit naked subset constraints.
 
 	I use this constraint encoder to detect naked subsets in the permutation space and remove
@@ -266,32 +264,33 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 	permutationSpaceHasNewLeaf: bool = True
 	leafOptionsKey: int = 0
 	piles: int = 1
-	while permutationSpaceHasNewLeaf:
+	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
 		pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
+		# TODO Fix valfilter annotations, then clean up this code.
 		pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
 
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
 		for pile, leafOptions in pilesUndetermined.items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
-		for leafOptions, setPiles in DOTitems(itemfilter(lambda groupBy: (_e.howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)):
-
-			if not (permutationSpace := reduceLeafSpace(permutationSpace
-					, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
-					, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
-			)):
-				#=SIN= Early return.
-				return None
+		groupByLeafOptions: dict[LeafOptions, set[Pile]] = filterValue(lambda setPiles: 1 < len(setPiles), groupByLeafOptions)
+		for leafOptions, setPiles in DOTitems(
+			itemfilter(lambda groupBy: (_e.howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
+		):
+			permutationSpace = reduceLeafSpace(permutationSpace
+				, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
+				, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
+			)
 
 		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and pin leaves with domain size one.
 
 	I use this constraint encoder to detect leaves that can appear at only one pile (domain size one)
@@ -312,15 +311,15 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 
 	Returns
 	-------
-	updatedPermutationSpace : PermutationSpace | None
-		The updated `permutationSpace` if valid; otherwise `None`.
+	updatedPermutationSpace : PermutationSpace
+		The updated `permutationSpace` if valid; otherwise with `valid` set to `False`.
 
 	References
 	----------
 	[1] mapFolding._e.dataBaskets.PermutationSpace.atPilePinLeaf
 	"""
 	permutationSpaceHasNewLeaf: bool = True
-	while permutationSpaceHasNewLeaf:
+	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
@@ -328,28 +327,21 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(_e.getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 
 		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
-			#=SIN= Early return: every leaf must have a domain size of at least one.
-			return None
-
-		leavesNotPinnedWithDomainOf1: set[Leaf] = set(filterValue((1).__eq__, counterLeafDomainSize)).difference(leavesPinned.values()).difference([state.leavesTotal])
-		if leavesNotPinnedWithDomainOf1:
-			leaf: Leaf = leavesNotPinnedWithDomainOf1.pop()
-			sherpa: PermutationSpace | None = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined)), leaf))
-			if (sherpa is None) or (not sherpa):
-				#=SIN= Early return: failed pin propagation irreversibly invalidates the candidate.
-				return None
-			else:
-				permutationSpace = sherpa
-			permutationSpaceHasNewLeaf = True
+			permutationSpace.valid = False
+		else:
+			leaf: Leaf | None = first(set(filterValue((1).__eq__, counterLeafDomainSize)).difference(leavesPinned.values()).difference([state.leavesTotal]), None)  # pyright: ignore[reportUnknownArgumentType]
+			if leaf is not None:
+				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined)), leaf))  # pyright: ignore[reportUnknownArgumentType]
+				permutationSpaceHasNewLeaf = True
 	return permutationSpace
 
-listFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+listFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf1
 	, _crossedCreases
 	, reducePermutationSpace_LeafIsPinned
 )
-listFunctionsReductionQuickDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+listFunctionsReductionQuickDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf1
 	, reducePermutationSpace_LeafIsPinned

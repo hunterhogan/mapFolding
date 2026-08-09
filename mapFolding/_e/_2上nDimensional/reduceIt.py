@@ -95,7 +95,7 @@ if TYPE_CHECKING:
 
 #======== Reducing `LeafOptions` ===============================
 
-def _byCrease2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def _byCrease2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce crease adjacency constraints.
 
 	I use this constraint encoder to enforce that when a leaf is pinned at a pile and the
@@ -133,17 +133,19 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 			else:
 				continue
 
-			if not (permutationSpace := reduceLeafSpace(permutationSpace, pilesToUpdate
+			permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate
 					, makeLeafAntiOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
-			)):
-				return None
+			)
+			if not permutationSpace.valid:
+				#=SIN= Early return.
+				return permutationSpace
 
 		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def _conditionalPredecessors2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def _conditionalPredecessors2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce conditional predecessor constraints.
 
 	I use this constraint encoder to enforce that when a `Leaf` is pinned at a `Pile` and the `Leaf`
@@ -182,11 +184,14 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		ee = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
 		ww = filterLeaf(moreThanLeaf零吗, ee, factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), ww)):
-			if (pile in leafAtPilePredecessors[leaf]) and not (permutationSpace := reduceLeafSpace(permutationSpace
-				, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
-				, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
-			)):
-				return None
+			if pile in leafAtPilePredecessors[leaf]:
+				permutationSpace = reduceLeafSpace(permutationSpace
+					, DOTitems(filterPile(between吗(pile + inclusive, state.pileLast - inclusive), permutationSpace.extractUndeterminedPiles()))
+					, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
+				)
+				if not permutationSpace.valid:
+					#=SIN= Early return.
+					return permutationSpace
 
 		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
@@ -198,7 +203,7 @@ def _odd吗(_mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile,
 		return bool(oddLeaf2上nDimensional吗(dimension, leaf=pileLeaf[1]))
 	return workhorse
 
-def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and eliminate crossed creases.
 
 	I use this constraint encoder to detect configurations where two creases would cross physically
@@ -270,25 +275,27 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 					elif leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
 						if creaseViolation吗(pileOf_k, pileOf_r, pileOf_kCrease, pileOf_rCrease):
 							#=SIN= Early return.
-							return None
+							permutationSpace.valid = False
+							return permutationSpace
 						continue
 
 					else:
 						continue
 
-					if not (permutationSpace := reduceLeafSpace(permutationSpace
+					permutationSpace = reduceLeafSpace(permutationSpace
 							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 							, leafAntiOptions
-					)):
+					)
+					if not permutationSpace.valid:
 						#=SIN= Early return.
-						return None
+						return permutationSpace
 
 		if leafCount < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce head-before-tail ordering constraints.
 
 	I use this constraint encoder to enforce that leaves with large coordinates in a dimension (tail)
@@ -340,25 +347,31 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)
-			if 0 < dimensionHead and not (permutationSpace := reduceLeafSpace(permutationSpace
-				, DOTitems(filterLeaf(isLeafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
-				, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
-			)):
-				return None
+			if 0 < dimensionHead:
+				permutationSpace = reduceLeafSpace(permutationSpace
+					, DOTitems(filterLeaf(isLeafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
+					, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
+				)
+				if not permutationSpace.valid:
+					#=SIN= Early return.
+					return permutationSpace
 
 			dimensionTail: int = dimensionNearestTail(leaf)
-			if 0 < dimensionTail and not (permutationSpace := reduceLeafSpace(permutationSpace
-				, DOTitems(filterPile(pile.__lt__, filterPile(state.pileLast.__gt__, permutationSpace.extractUndeterminedPiles())))
-				, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
-			)):
-				return None
+			if 0 < dimensionTail:
+				permutationSpace = reduceLeafSpace(permutationSpace
+					, DOTitems(filterPile(pile.__lt__, permutationSpace.extractUndeterminedPiles()))
+					, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
+				)
+				if not permutationSpace.valid:
+					#=SIN= Early return.
+					return permutationSpace
 
 		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace | None:
+def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce non-consecutive dimension constraints.
 
 	I use this constraint encoder to detect arithmetic progressions in pinned leaves and forbid
@@ -406,10 +419,11 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 			else:
 				continue
 
-			if 0 <= leafForbidden < state.leavesTotal and not (permutationSpace :=
-				reduceLeafSpace(permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden]))
-			):
-				return None
+			if 0 <= leafForbidden < state.leavesTotal:
+				permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden]))
+				if not permutationSpace.valid:
+					#=SIN= Early return.
+					return permutationSpace
 
 		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
@@ -417,7 +431,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 	return permutationSpace
 
 # TODO The order of the functions can cause tests to fail. I don't think that ought to happen.
-listFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+listFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	_noConsecutiveDimensions2上nDimensional,
 	_crossedCreases2上nDimensional,
 	_conditionalPredecessors2上nDimensional,
@@ -428,7 +442,7 @@ listFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, Per
 	reducePermutationSpace_LeafIsPinned,
 )
 
-listFunctionsReductionQuick2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace | None]] = (
+listFunctionsReductionQuick2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	_noConsecutiveDimensions2上nDimensional,
 	_headsBeforeTails2上nDimensional,
 	reducePermutationSpace_nakedSubset,

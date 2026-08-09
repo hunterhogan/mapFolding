@@ -59,6 +59,21 @@ def makeAlbum2上nDimensional吗(n: int, workersMaximum: int) -> EliminationStat
 
 	return state
 
+def profileMakeAlbum2上nDimensional吗(n: int, _workersMaximum: int) -> EliminationState:
+	"""Construct album `n`."""
+	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', n - 1), pathAlbum, suffix='.album'))
+
+	state: EliminationState = EliminationState(makeMapShape('A001417', n))
+	for folding in tqdm(album):
+		sherpa: EliminationState = makeDescendants(folding, n, 1)
+		state.listPermutationSpace.extend(sherpa.listPermutationSpace)
+		state.listPinnedLeaves.extend(sherpa.listPinnedLeaves)
+		state.listFolding.extend(sherpa.listFolding)
+
+	state.removeCreaseViolations().reduceAllPermutationSpace()
+
+	return state
+
 def recordAlbum2上nDimensional吗(state: EliminationState) -> Path:
 	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, pathAlbum, suffix='.album')
 	writeAlbum(sorted(state.listFolding), pathFilenameAlbum)

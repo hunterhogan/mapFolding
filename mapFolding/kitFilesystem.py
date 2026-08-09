@@ -45,12 +45,12 @@ from urllib3.exceptions import HTTPError
 import contextlib
 import csv
 import os
-import pandas
 import platformdirs
 import sys
 import urllib3
 
 if TYPE_CHECKING:
+	from pandas import DataFrame
 	from _csv import Writer
 	from collections.abc import Iterable, Iterator
 	from io import TextIOWrapper
@@ -352,7 +352,8 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 #================== Read ==========================================================================
 
 # TODO generalize `getDataFrameFoldings`.
-def getDataFrameFoldings(state: EliminationState) -> pandas.DataFrame | None:  # ruff: ignore[undocumented-public-function]
+def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:
+	import pandas
 	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
 	dataframeFoldings: pandas.DataFrame | None = None
 	if pathFilename.exists():

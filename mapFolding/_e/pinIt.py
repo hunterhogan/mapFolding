@@ -7,7 +7,7 @@ from __future__ import annotations
 from functools import partial
 from gmpy2 import bit_clear
 from humpy_cytoolz import groupby as toolz_groupby
-from hunterMakesPy import inclusive, raiseIfNone
+from hunterMakesPy import raiseIfNone
 from mapFolding import _e
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
@@ -15,7 +15,6 @@ from mapFolding._e.theTypes import LeafOptions, LeafSpace
 from more_itertools import filter_map
 from operator import methodcaller
 from typing import TYPE_CHECKING
-from Z0Z_tools import between吗
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
@@ -105,9 +104,6 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 		else:
 			listPermutationSpaceUnchanged.append(permutationSpace)
 
-	state.removeCreaseViolations().reduceAllPermutationSpace()
-	listPermutationSpaceUnchanged.extend(state.listPermutationSpace)
-	state.listPermutationSpace = []
 	listPermutationSpace = listExcludeLeaf_r
 	del listExcludeLeaf_r
 
@@ -123,7 +119,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	for pile_r in filter(pile_k.__gt__, sorted(domainOf_leaf_r, reverse=True)):
 		listPermutationSpace = atPileExcludeLeaf_inListPermutationSpace(listPermutationSpace, pile_r, leaf_r)
 
-	state.listPermutationSpace = listPermutationSpace
+	state.listPermutationSpace.extend(listPermutationSpace)
 
 	state.removeCreaseViolations().reduceAllPermutationSpace()
 
