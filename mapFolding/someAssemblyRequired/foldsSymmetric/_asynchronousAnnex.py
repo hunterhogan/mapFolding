@@ -4,8 +4,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from mapFolding import DatatypeFoldsTotal
 from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.theTypes import 形FoldsTotal
 from queue import Queue
 from threading import Lock, Thread
 
@@ -47,7 +47,7 @@ def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
 	queueFutures.put_nowait(deepcopy(state))
 
-def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
+def getSymmetricFoldsTotal() -> 形FoldsTotal:
 	for _thread in boxOfThreads:
 		queueFutures.put(STOPsignal)
 	for thread in boxOfThreads:

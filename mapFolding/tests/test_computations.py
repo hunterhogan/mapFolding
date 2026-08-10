@@ -52,7 +52,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
-	from mapFolding.theTypes import KeywordArgumentsCount, OEISid
+	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
 	from os import PathLike
 	from pathlib import Path
 	from types import ModuleType
@@ -240,7 +240,7 @@ def test_oeisIDfor_n_byFormula(oeisID: OEISid, oeis_n: int, f: LiteralString) ->
 		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric::countFoldsSymmetric')
 	]
 )
-def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString, keywordArguments: KeywordArgumentsCount) -> None:
+def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString, keywordArguments: 形KeywordArgumentsCount) -> None:
 	"""Verify OEIS sequence value calculations against known reference values.
 
 	Tests the `oeisIDfor_n` function by comparing its calculated output against

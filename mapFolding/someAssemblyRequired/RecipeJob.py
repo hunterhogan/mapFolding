@@ -9,7 +9,7 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getFoldsTotalKnown
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, default, dictionaryEstimatesMapFolding, IfThis
+from mapFolding.someAssemblyRequired import default, dictionaryEstimatesMapFolding, IfThis, Settings形
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
@@ -21,7 +21,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
-	from mapFolding import DatatypeLeavesTotal
+	from mapFolding.theTypes import 形LeavesTotal
 	from mapFolding.dataBaskets import SymmetricFoldsState
 	from mapFolding.someAssemblyRequired import ShatteredDataclass
 	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
@@ -78,11 +78,11 @@ class RecipeJobTheorem2:
 		Target dataclass instance identifier.
 	logicalPathModuleDataclass : identifierDotAttribute | None
 		Logical path to target dataclass module.
-	DatatypeFoldsTotal : TypeAlias
+	形FoldsTotal : TypeAlias
 		Type alias for fold count datatype.
-	DatatypeElephino : TypeAlias
+	形Elephino : TypeAlias
 		Type alias for intermediate computation datatype.
-	DatatypeLeavesTotal : TypeAlias
+	形LeavesTotal : TypeAlias
 		Type alias for leaf count datatype.
 	"""
 
@@ -217,7 +217,7 @@ class RecipeJobTheorem2:
 		if self.source_astModule is None:
 			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
 
-def fromMapShape(mapShape: tuple[DatatypeLeavesTotal, ...]) -> RecipeJobTheorem2:
+def fromMapShape(mapShape: tuple[形LeavesTotal, ...]) -> RecipeJobTheorem2:
 	"""Create a binary executable for `mapShape`."""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
@@ -397,11 +397,11 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 #================== Datatypes =======================================================================
 
 # TODO Use this concept in general modules, not just custom jobs.
-def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfDatatypeConfigurations: list[DatatypeConfiguration]) -> tuple[IngredientsFunction, IngredientsModule]:
+def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
 	"""Customize data types in the given ingredients by adjusting imports.
 
 	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
-	preserving _abstract_ names for datatypes, such as `Array1DLeavesTotal` and `DatatypeFoldsTotal`. This function well
+	preserving _abstract_ names for datatypes, such as `形Array1DLeavesTotal` and `形FoldsTotal`. This function well
 	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
 	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
 	for example, `mapFolding.syntheticModules.foldsSymmetric.asynchronousNumba` or its equivalent), ought to still have the abstract
@@ -415,7 +415,7 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	datatypesIngredientsObjects : tuple[IngredientsFunction, IngredientsModule]
 		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
 	"""
-	for datatypeConfig in boxOfDatatypeConfigurations:
+	for datatypeConfig in boxOfSettings形:
 		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
 		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
 

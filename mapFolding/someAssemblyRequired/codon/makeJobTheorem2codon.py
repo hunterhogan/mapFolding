@@ -3,23 +3,23 @@ from __future__ import annotations
 
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding import DatatypeLeavesTotal  # ruff: ignore[typing-only-first-party-import]
-from mapFolding.someAssemblyRequired import DatatypeConfiguration
+from mapFolding.someAssemblyRequired import Settings形
 from mapFolding.someAssemblyRequired.codon.kitCodon import variableCompatibility
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
+from mapFolding.theTypes import 形LeavesTotal  # ruff: ignore[typing-only-first-party-import]
 from pathlib import Path
 import python_minifier
 import subprocess  # ruff: ignore[suspicious-subprocess-import]
 import sys
 
-boxOfDatatypeConfigurations: list[DatatypeConfiguration] = [
-	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='DatatypeElephino'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numpy', typeIdentifier='int64', type_asname='DatatypeFoldsTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
-	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
+boxOfSettings形: list[Settings形] = [
+	Settings形(datatypeIdentifier='形LeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形LeavesTotal'),
+	Settings形(datatypeIdentifier='形Elephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Elephino'),
+	Settings形(datatypeIdentifier='形FoldsTotal', typeModule='numpy', typeIdentifier='int64', type_asname='形FoldsTotal'),
+	Settings形(datatypeIdentifier='形Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DLeavesTotal'),
+	Settings形(datatypeIdentifier='形Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DElephino'),
+	Settings形(datatypeIdentifier='形Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DLeavesTotal'),
 ]
 
 def makeJob(job: RecipeJobTheorem2) -> None:
@@ -45,7 +45,7 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		ingredientsCount, raiseIfNone(job.shatteredDataclass).boxOf_argAnnotated4ArgumentsSpecification)
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
-	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfDatatypeConfigurations)
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfSettings形)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
@@ -74,5 +74,5 @@ def makeJob(job: RecipeJobTheorem2) -> None:
 		sys.stdout.write(f"sudo systemd-run --unit={job.moduleIdentifier} --nice=-10 --property=CPUAffinity=0 {job.pathFilenameModule.with_suffix('')}\n")
 
 if __name__ == '__main__':
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (2, 14)
+	mapShape: tuple[形LeavesTotal, ...] = (2, 14)
 	makeJob(fromMapShape(mapShape))

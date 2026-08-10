@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from mapFolding.dataBaskets import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, SymmetricFoldsState)
+	SymmetricFoldsState, 形Array1DElephino, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形Elephino, 形FoldsTotal, 形LeavesTotal)
 from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 import codon
 
 @codon.jit
-def countSymmetricFoldsState[DatatypeFoldsTotal, DatatypeElephino, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array3DLeavesTotal](symmetricFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, 次Dimension: DatatypeLeavesTotal, 次Leaf: DatatypeLeavesTotal, 次MiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, leafComparison: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, indices: list[list[tuple[int, int]]], leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, list[list[tuple[int, int]]], DatatypeLeavesTotal]:
+def countSymmetricFoldsState[形FoldsTotal, 形Elephino, 形LeavesTotal, 形Array1DLeavesTotal, 形Array1DElephino, 形Array3DLeavesTotal](symmetricFolds: 形FoldsTotal, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形LeavesTotal, 次Leaf: 形LeavesTotal, 次MiniGap: 形Elephino, leaf1ndex: 形LeavesTotal, leafConnectee: 形LeavesTotal, dimensionsUnconstrained: 形LeavesTotal, countDimensionsGapped: 形Array1DLeavesTotal, gapRangeStart: 形Array1DElephino, gapsWhere: 形Array1DLeavesTotal, leafAbove: 形Array1DLeavesTotal, leafBelow: 形Array1DLeavesTotal, leafComparison: 形Array1DLeavesTotal, connectionGraph: 形Array3DLeavesTotal, dimensionsTotal: 形LeavesTotal, indices: list[list[tuple[int, int]]], leavesTotal: 形LeavesTotal) -> tuple[形FoldsTotal, 形Elephino, 形Elephino, 形LeavesTotal, 形LeavesTotal, 形Elephino, 形LeavesTotal, 形LeavesTotal, 形LeavesTotal, 形Array1DLeavesTotal, 形Array1DElephino, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形LeavesTotal, list[list[tuple[int, int]]], 形LeavesTotal]:
 
     def compatibleValue[Reference, Value](_reference: Reference, value: Value) -> Reference:
         return Reference(value)
@@ -18,7 +18,7 @@ def countSymmetricFoldsState[DatatypeFoldsTotal, DatatypeElephino, DatatypeLeave
                 leafConnectee = compatibleValue(leafConnectee, 1)
                 while leafConnectee < compatibleValue(leafConnectee, leavesTotal + compatibleValue(leavesTotal, 1)):
                     次MiniGap = compatibleValue(次MiniGap, leafBelow[次Leaf.__index__()])
-                    leafComparison[leafConnectee.__index__()] = compatibleValue(leafComparison[leafConnectee.__index__()], (次MiniGap - compatibleValue(次MiniGap, 次Leaf) + leavesTotal) % leavesTotal)
+                    leafComparison[leafConnectee.__index__()] = compatibleValue(leafComparison[leafConnectee.__index__()], (leavesTotal + compatibleValue(leavesTotal, 次MiniGap) - 次Leaf) % leavesTotal)
                     次Leaf = compatibleValue(次Leaf, 次MiniGap)
                     leafConnectee += compatibleValue(leafConnectee, 1)
                 for boxOfTuples in indices:
@@ -69,27 +69,27 @@ def countSymmetricFoldsState[DatatypeFoldsTotal, DatatypeElephino, DatatypeLeave
 
 def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state = transitionOnGroupsOfFolds(state)
-    mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
-    symmetricFolds: DatatypeFoldsTotal = state.symmetricFolds
-    gap1ndex: DatatypeElephino = state.gap1ndex
-    gap1ndexCeiling: DatatypeElephino = state.gap1ndexCeiling
-    次Dimension: DatatypeLeavesTotal = state.次Dimension
-    次Leaf: DatatypeLeavesTotal = state.次Leaf
-    次MiniGap: DatatypeElephino = state.次MiniGap
-    leaf1ndex: DatatypeLeavesTotal = state.leaf1ndex
-    leafConnectee: DatatypeLeavesTotal = state.leafConnectee
-    dimensionsUnconstrained: DatatypeLeavesTotal = state.dimensionsUnconstrained
-    countDimensionsGapped: Array1DLeavesTotal = state.countDimensionsGapped
-    gapRangeStart: Array1DElephino = state.gapRangeStart
-    gapsWhere: Array1DLeavesTotal = state.gapsWhere
-    leafAbove: Array1DLeavesTotal = state.leafAbove
-    leafBelow: Array1DLeavesTotal = state.leafBelow
-    leafComparison: Array1DLeavesTotal = state.leafComparison
-    connectionGraph: Array3DLeavesTotal = state.connectionGraph
-    dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
+    mapShape: tuple[形LeavesTotal, ...] = state.mapShape
+    symmetricFolds: 形FoldsTotal = state.symmetricFolds
+    gap1ndex: 形Elephino = state.gap1ndex
+    gap1ndexCeiling: 形Elephino = state.gap1ndexCeiling
+    次Dimension: 形LeavesTotal = state.次Dimension
+    次Leaf: 形LeavesTotal = state.次Leaf
+    次MiniGap: 形Elephino = state.次MiniGap
+    leaf1ndex: 形LeavesTotal = state.leaf1ndex
+    leafConnectee: 形LeavesTotal = state.leafConnectee
+    dimensionsUnconstrained: 形LeavesTotal = state.dimensionsUnconstrained
+    countDimensionsGapped: 形Array1DLeavesTotal = state.countDimensionsGapped
+    gapRangeStart: 形Array1DElephino = state.gapRangeStart
+    gapsWhere: 形Array1DLeavesTotal = state.gapsWhere
+    leafAbove: 形Array1DLeavesTotal = state.leafAbove
+    leafBelow: 形Array1DLeavesTotal = state.leafBelow
+    leafComparison: 形Array1DLeavesTotal = state.leafComparison
+    connectionGraph: 形Array3DLeavesTotal = state.connectionGraph
+    dimensionsTotal: 形LeavesTotal = state.dimensionsTotal
     indices: list[list[tuple[int, int]]] = state.indices
-    leavesTotal: DatatypeLeavesTotal = state.leavesTotal
-    symmetricFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, indices, leavesTotal = countSymmetricFoldsState(DatatypeFoldsTotal(symmetricFolds), DatatypeElephino(gap1ndex), DatatypeElephino(gap1ndexCeiling), DatatypeLeavesTotal(次Dimension), DatatypeLeavesTotal(次Leaf), DatatypeElephino(次MiniGap), DatatypeLeavesTotal(leaf1ndex), DatatypeLeavesTotal(leafConnectee), DatatypeLeavesTotal(dimensionsUnconstrained), countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, DatatypeLeavesTotal(dimensionsTotal), indices, DatatypeLeavesTotal(leavesTotal))
+    leavesTotal: 形LeavesTotal = state.leavesTotal
+    symmetricFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, dimensionsTotal, indices, leavesTotal = countSymmetricFoldsState(形FoldsTotal(symmetricFolds), 形Elephino(gap1ndex), 形Elephino(gap1ndexCeiling), 形LeavesTotal(次Dimension), 形LeavesTotal(次Leaf), 形Elephino(次MiniGap), 形LeavesTotal(leaf1ndex), 形LeavesTotal(leafConnectee), 形LeavesTotal(dimensionsUnconstrained), countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, leafComparison, connectionGraph, 形LeavesTotal(dimensionsTotal), indices, 形LeavesTotal(leavesTotal))
     state = SymmetricFoldsState(mapShape=mapShape, symmetricFolds=symmetricFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, 次Dimension=次Dimension, 次Leaf=次Leaf, 次MiniGap=次MiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, leafComparison=leafComparison)
     state.connectionGraph = connectionGraph
     state.dimensionsTotal = dimensionsTotal

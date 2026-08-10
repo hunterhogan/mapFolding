@@ -239,9 +239,9 @@ class DeReConstructField2ast:
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
 			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
 			dtype_asnameName: ast.Name = self.astAnnotation
-			if dtype_asnameName.id == 'Array3DLeavesTotal':
+			if dtype_asnameName.id == '形Array3DLeavesTotal':
 				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
-			if dtype_asnameName.id == 'Array2DLeavesTotal':
+			if dtype_asnameName.id == '形Array2DLeavesTotal':
 				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8')]))
 			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
 			constructor = 'array'
@@ -264,7 +264,7 @@ class DeReConstructField2ast:
 		if isinstance(self.astAnnotation, ast.Name):
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
 
-class DatatypeConfiguration(NamedTuple):
+class Settings形(NamedTuple):
 	"""Configuration for mapping framework datatypes to compiled datatypes.
 
 	This configuration class defines how abstract datatypes used in the map folding framework should

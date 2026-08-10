@@ -17,7 +17,7 @@ from __future__ import annotations
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
-from mapFolding.theTypes import dtypeArcCode, dtypeCrossings
+from mapFolding.theTypes import 形ArcCode, 形Crossings
 from typing import TYPE_CHECKING
 from warnings import warn
 import pandas
@@ -39,8 +39,8 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		Updated state with new `boundary` and `dictionaryMeanders`.
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
-		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryMeanders.keys(), copy=False, dtype=dtypeArcCode)
-		, 'crossings': pandas.Series(name='crossings', data=state.dictionaryMeanders.values(), copy=False, dtype=dtypeCrossings)
+		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryMeanders.keys(), copy=False, dtype=形ArcCode)
+		, 'crossings': pandas.Series(name='crossings', data=state.dictionaryMeanders.values(), copy=False, dtype=形Crossings)
 		}
 	)
 	state.dictionaryMeanders.clear()
@@ -106,7 +106,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 			bitsTarget &= state.bitsLocator            								# `bitsAlfa`
 
 			# `if bitsAlfaAtEven and not bitsZuluAtEven`, modify `bitsAlfaPairedToOdd`
-			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = dtypeArcCode(
+			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = 形ArcCode(
 				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]))  # ty: ignore[invalid-assignment]
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
@@ -114,7 +114,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator     			# `bitsZulu`
 
 			# `if bitsZuluAtEven and not bitsAlfaAtEven`, modify `bitsZuluPairedToOdd`
-			dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = dtypeArcCode(
+			dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = 形ArcCode(
 				flipTheExtra_0b1AsUfunc(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']))
 
 			#--------- Step 3 compute `arcCode` -------------------------------
@@ -266,12 +266,12 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 				dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['analyzed']] = (
 					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['analyzed']
-								].to_numpy(dtype=dtypeArcCode, copy=False)
+								].to_numpy(dtype=形ArcCode, copy=False)
 				)
 
 				dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['crossings']] = (
 					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['crossings']
-								].to_numpy(dtype=dtypeCrossings, copy=False)
+								].to_numpy(dtype=形Crossings, copy=False)
 				)
 
 				state.次Target = 次StopAnalyzed
@@ -281,9 +281,9 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 			return dataframeMeanders
 
 		dataframeMeanders = pandas.DataFrame({
-			'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=dtypeArcCode)
-			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=dtypeArcCode)
-			, 'crossings': pandas.Series(name='crossings', data=dataframeAnalyzed['crossings'], copy=False, dtype=dtypeCrossings)
+			'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=形ArcCode)
+			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=形ArcCode)
+			, 'crossings': pandas.Series(name='crossings', data=dataframeAnalyzed['crossings'], copy=False, dtype=形Crossings)
 			}
 		)
 
@@ -294,8 +294,8 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		state.setBitsLocator()
 		length: int = getBucketsTotal(state)
 		dataframeAnalyzed = pandas.DataFrame({
-			'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=dtypeArcCode)
-			, 'crossings': pandas.Series(name='crossings', data=0, index=pandas.RangeIndex(length), dtype=dtypeCrossings)
+			'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=形ArcCode)
+			, 'crossings': pandas.Series(name='crossings', data=0, index=pandas.RangeIndex(length), dtype=形Crossings)
 			}, index=pandas.RangeIndex(length)
 		)
 

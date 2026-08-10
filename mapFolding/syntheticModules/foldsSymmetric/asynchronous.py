@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from mapFolding import DatatypeFoldsTotal
 from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.theTypes import 形FoldsTotal
 from queue import Queue
 from threading import Lock, Thread
 
@@ -37,7 +37,7 @@ def _threadDoesSomething() -> None:
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
     queueFutures.put_nowait(deepcopy(state))
 
-def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
+def getSymmetricFoldsTotal() -> 形FoldsTotal:
     for _thread in boxOfThreads:
         queueFutures.put(STOPsignal)
     for thread in boxOfThreads:
@@ -50,7 +50,7 @@ def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.leafConnectee = 1
     while state.leafConnectee < state.leavesTotal + 1:
         state.次MiniGap = state.leafBelow[state.次Leaf]
-        state.leafComparison[state.leafConnectee] = (state.次MiniGap - state.次Leaf + state.leavesTotal) % state.leavesTotal
+        state.leafComparison[state.leafConnectee] = (state.leavesTotal + state.次MiniGap - state.次Leaf) % state.leavesTotal
         state.次Leaf = state.次MiniGap
         state.leafConnectee += 1
     for boxOfTuples in state.indices:

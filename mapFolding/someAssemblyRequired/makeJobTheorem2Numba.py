@@ -14,7 +14,7 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsMod
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.oeis import getValuesKnown
-from mapFolding.someAssemblyRequired import DatatypeConfiguration, defaultFoldsSymmetric
+from mapFolding.someAssemblyRequired import defaultFoldsSymmetric, Settings形
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.someAssemblyRequired.RecipeJob import (
@@ -27,19 +27,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding import DatatypeLeavesTotal
+	from mapFolding.theTypes import 形LeavesTotal
 	import ast
 
 # TODO Dynamically calculate the bitwidth of each datatype.
 # DEVELOPMENT I delayed dynamic calculation because I didn't know how to calculate what 'elephino'
 # needs. I now have a safe upper bound for that. Somewhere.
-boxOfDatatypeConfigurations: list[DatatypeConfiguration] = [
-	DatatypeConfiguration(datatypeIdentifier='DatatypeLeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeElephino', typeModule='numba', typeIdentifier='uint8', type_asname='DatatypeElephino'),
-	DatatypeConfiguration(datatypeIdentifier='DatatypeFoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='DatatypeFoldsTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DLeavesTotal'),
-	DatatypeConfiguration(datatypeIdentifier='Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='Array1DElephino'),
-	DatatypeConfiguration(datatypeIdentifier='Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='Array3DLeavesTotal'),
+boxOfSettings形: list[Settings形] = [
+	Settings形(datatypeIdentifier='形LeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='形LeavesTotal'),
+	Settings形(datatypeIdentifier='形Elephino', typeModule='numba', typeIdentifier='uint8', type_asname='形Elephino'),
+	Settings形(datatypeIdentifier='形FoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='形FoldsTotal'),
+	Settings形(datatypeIdentifier='形Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DLeavesTotal'),
+	Settings形(datatypeIdentifier='形Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DElephino'),
+	Settings形(datatypeIdentifier='形Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DLeavesTotal'),
 ]
 
 def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
@@ -83,7 +83,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
 
-	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfDatatypeConfigurations)
+	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfSettings形)
 
 	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
 
@@ -125,5 +125,5 @@ def makeFoldsSymmetric(n: int) -> None:
 
 if __name__ == '__main__':
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
-	mapShape: tuple[DatatypeLeavesTotal, ...] = (6, 6)
+	mapShape: tuple[形LeavesTotal, ...] = (6, 6)
 	makeJobNumba(fromMapShape(mapShape), spices)

@@ -11,7 +11,7 @@ def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState
                 state.leafConnectee = 1
                 while state.leafConnectee < state.leavesTotal + 1:
                     state.次MiniGap = state.leafBelow[state.次Leaf]
-                    state.leafComparison[state.leafConnectee] = (state.次MiniGap - state.次Leaf + state.leavesTotal) % state.leavesTotal
+                    state.leafComparison[state.leafConnectee] = (state.leavesTotal + state.次MiniGap - state.次Leaf) % state.leavesTotal
                     state.次Leaf = state.次MiniGap
                     state.leafConnectee += 1
                 for boxOfTuples in state.indices:

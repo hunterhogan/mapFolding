@@ -7,7 +7,7 @@ import numpy
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import MatrixMeandersState
-	from mapFolding.theTypes import dtypeArcCode
+	from mapFolding.theTypes import 形ArcCode
 	from numpy import dtype, ndarray
 	from typing import Any, Literal, LiteralString
 	import pandas
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 - Convert duplicate code to procedures.
 """
 
-def areIntegersWide(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[dtypeArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+def areIntegersWide(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters

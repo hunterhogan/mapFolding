@@ -5,14 +5,14 @@ from collections.abc import Sequence
 from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
-from numpy import int64 as numpy_int64
+from mapFolding.theTypes import 形NumPyLeavesTotal
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding import Array1DLeavesTotal, Array2DLeavesTotal, Array3DLeavesTotal, NumPyIntegerType
+	from mapFolding.theTypes import 形Array1DLeavesTotal, 形Array2DLeavesTotal, 形Array3DLeavesTotal, 形NumPyIntegerType
 	from numpy import dtype as numpy_dtype, ndarray
 	from typing import Any
 
@@ -146,7 +146,7 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 
 #======== map folding ===================================
 
-def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]:
+def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[形NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
 
 	Parameters
@@ -155,17 +155,17 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 		A tuple of integers representing the dimensions of the map.
 	leavesTotal : int
 		The total number of leaves in the map.
-	datatype : type[NumPyIntegerType]
+	datatype : type[形NumPyIntegerType]
 		The NumPy integer type to use for the array elements, ensuring proper memory usage and
 		compatibility with the computation state.
 
 	Returns
 	-------
-	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[NumPyIntegerType]]
+	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]
 		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the
 		specified `datatype`, representing all possible connections between leaves.
 	"""
-	connectionGraph: Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
+	connectionGraph: 形Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
 	return connectionGraph.astype(datatype)
 
 @cache
@@ -205,7 +205,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 		productDimensions *= dimension
 	return productDimensions
 
-def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray[tuple[int, int, int], numpy_dtype[numpy_int64]]:
+def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> 形Array3DLeavesTotal:
 	"""Implement connection graph generation for map folding.
 
 	Parameters
@@ -217,7 +217,7 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 
 	Returns
 	-------
-	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[numpy_int64]]
+	connectionGraph : 形Array3DLeavesTotal
 		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) where each
 		entry [d,i,j] represents the leaf that would be connected to leaf j when inserting leaf i in
 		dimension d.
@@ -231,14 +231,14 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 	rules, boundary conditions, and dimensional constraints.
 	"""
 	dimensionsTotal: int = len(mapShape)
-	cumulativeProduct: Array1DLeavesTotal = numpy.multiply.accumulate([1, *list(mapShape)], dtype=numpy_int64)
-	arrayDimensions: Array1DLeavesTotal = numpy.array(mapShape, dtype=numpy_int64)
-	coordinateSystem: Array2DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=numpy_int64)
+	cumulativeProduct: 形Array1DLeavesTotal = numpy.multiply.accumulate([1, *list(mapShape)], dtype=形NumPyLeavesTotal)
+	arrayDimensions: 形Array1DLeavesTotal = numpy.array(mapShape, dtype=形NumPyLeavesTotal)
+	coordinateSystem: 形Array2DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=形NumPyLeavesTotal)
 	for 次Dimension in range(dimensionsTotal):
 		for leaf1ndex in range(1, leavesTotal + inclusive):
 			coordinateSystem[次Dimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[次Dimension]) % arrayDimensions[次Dimension] + 1)
 
-	connectionGraph: Array3DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=numpy_int64)
+	connectionGraph: 形Array3DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=形NumPyLeavesTotal)
 	for 次Dimension in range(dimensionsTotal):
 		for activeLeaf1ndex in range(1, leavesTotal + inclusive):
 			for connectee1ndex in range(1, activeLeaf1ndex + inclusive):
@@ -255,7 +255,7 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[次Dimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:
+def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[形NumPyIntegerType]) -> ndarray[Any, numpy_dtype[形NumPyIntegerType]]:
 	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
 	By centralizing data container creation, you can more easily make global changes.
@@ -264,12 +264,12 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[NumPyIntegerT
 	----------
 	shape : int | tuple[Any, ...]
 		The array shape, either as a single axis length or a tuple of axes lengths.
-	datatype : type[NumPyIntegerType]
+	datatype : type[形NumPyIntegerType]
 		The `numpy.integer` type for the array elements.
 
 	Returns
 	-------
-	container : ndarray[Any, numpy_dtype[NumPyIntegerType]]
+	container : ndarray[Any, numpy_dtype[形NumPyIntegerType]]
 		A zero-filled `ndarray` with the specified `shape` and `datatype`.
 
 	"""

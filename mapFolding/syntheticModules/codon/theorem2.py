@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from mapFolding.dataBaskets import (
-	Array1DElephino, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeElephino, DatatypeFoldsTotal, DatatypeLeavesTotal, MapFoldingState)
+	MapFoldingState, 形Array1DElephino, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形Elephino, 形FoldsTotal, 形LeavesTotal)
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 import codon
 
 @codon.jit
-def countMapFoldingState[DatatypeFoldsTotal, DatatypeElephino, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array3DLeavesTotal](groupsOfFolds: DatatypeFoldsTotal, gap1ndex: DatatypeElephino, gap1ndexCeiling: DatatypeElephino, 次Dimension: DatatypeLeavesTotal, 次MiniGap: DatatypeElephino, leaf1ndex: DatatypeLeavesTotal, leafConnectee: DatatypeLeavesTotal, dimensionsUnconstrained: DatatypeLeavesTotal, countDimensionsGapped: Array1DLeavesTotal, gapRangeStart: Array1DElephino, gapsWhere: Array1DLeavesTotal, leafAbove: Array1DLeavesTotal, leafBelow: Array1DLeavesTotal, connectionGraph: Array3DLeavesTotal, dimensionsTotal: DatatypeLeavesTotal, leavesTotal: DatatypeLeavesTotal) -> tuple[DatatypeFoldsTotal, DatatypeElephino, DatatypeElephino, DatatypeLeavesTotal, DatatypeElephino, DatatypeLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal, Array1DLeavesTotal, Array1DElephino, Array1DLeavesTotal, Array1DLeavesTotal, Array1DLeavesTotal, Array3DLeavesTotal, DatatypeLeavesTotal, DatatypeLeavesTotal]:
+def countMapFoldingState[形FoldsTotal, 形Elephino, 形LeavesTotal, 形Array1DLeavesTotal, 形Array1DElephino, 形Array3DLeavesTotal](groupsOfFolds: 形FoldsTotal, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形LeavesTotal, 次MiniGap: 形Elephino, leaf1ndex: 形LeavesTotal, leafConnectee: 形LeavesTotal, dimensionsUnconstrained: 形LeavesTotal, countDimensionsGapped: 形Array1DLeavesTotal, gapRangeStart: 形Array1DElephino, gapsWhere: 形Array1DLeavesTotal, leafAbove: 形Array1DLeavesTotal, leafBelow: 形Array1DLeavesTotal, connectionGraph: 形Array3DLeavesTotal, dimensionsTotal: 形LeavesTotal, leavesTotal: 形LeavesTotal) -> tuple[形FoldsTotal, 形Elephino, 形Elephino, 形LeavesTotal, 形Elephino, 形LeavesTotal, 形LeavesTotal, 形LeavesTotal, 形Array1DLeavesTotal, 形Array1DElephino, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形LeavesTotal, 形LeavesTotal]:
 
     def compatibleValue[Reference, Value](_reference: Reference, value: Value) -> Reference:
         return Reference(value)
@@ -54,25 +54,25 @@ def countMapFoldingState[DatatypeFoldsTotal, DatatypeElephino, DatatypeLeavesTot
 
 def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
     state = transitionOnGroupsOfFolds(state)
-    mapShape: tuple[DatatypeLeavesTotal, ...] = state.mapShape
-    groupsOfFolds: DatatypeFoldsTotal = state.groupsOfFolds
-    gap1ndex: DatatypeElephino = state.gap1ndex
-    gap1ndexCeiling: DatatypeElephino = state.gap1ndexCeiling
-    次Dimension: DatatypeLeavesTotal = state.次Dimension
-    次Leaf: DatatypeLeavesTotal = state.次Leaf
-    次MiniGap: DatatypeElephino = state.次MiniGap
-    leaf1ndex: DatatypeLeavesTotal = state.leaf1ndex
-    leafConnectee: DatatypeLeavesTotal = state.leafConnectee
-    dimensionsUnconstrained: DatatypeLeavesTotal = state.dimensionsUnconstrained
-    countDimensionsGapped: Array1DLeavesTotal = state.countDimensionsGapped
-    gapRangeStart: Array1DElephino = state.gapRangeStart
-    gapsWhere: Array1DLeavesTotal = state.gapsWhere
-    leafAbove: Array1DLeavesTotal = state.leafAbove
-    leafBelow: Array1DLeavesTotal = state.leafBelow
-    connectionGraph: Array3DLeavesTotal = state.connectionGraph
-    dimensionsTotal: DatatypeLeavesTotal = state.dimensionsTotal
-    leavesTotal: DatatypeLeavesTotal = state.leavesTotal
-    groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = countMapFoldingState(DatatypeFoldsTotal(groupsOfFolds), DatatypeElephino(gap1ndex), DatatypeElephino(gap1ndexCeiling), DatatypeLeavesTotal(次Dimension), DatatypeElephino(次MiniGap), DatatypeLeavesTotal(leaf1ndex), DatatypeLeavesTotal(leafConnectee), DatatypeLeavesTotal(dimensionsUnconstrained), countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, DatatypeLeavesTotal(dimensionsTotal), DatatypeLeavesTotal(leavesTotal))
+    mapShape: tuple[形LeavesTotal, ...] = state.mapShape
+    groupsOfFolds: 形FoldsTotal = state.groupsOfFolds
+    gap1ndex: 形Elephino = state.gap1ndex
+    gap1ndexCeiling: 形Elephino = state.gap1ndexCeiling
+    次Dimension: 形LeavesTotal = state.次Dimension
+    次Leaf: 形LeavesTotal = state.次Leaf
+    次MiniGap: 形Elephino = state.次MiniGap
+    leaf1ndex: 形LeavesTotal = state.leaf1ndex
+    leafConnectee: 形LeavesTotal = state.leafConnectee
+    dimensionsUnconstrained: 形LeavesTotal = state.dimensionsUnconstrained
+    countDimensionsGapped: 形Array1DLeavesTotal = state.countDimensionsGapped
+    gapRangeStart: 形Array1DElephino = state.gapRangeStart
+    gapsWhere: 形Array1DLeavesTotal = state.gapsWhere
+    leafAbove: 形Array1DLeavesTotal = state.leafAbove
+    leafBelow: 形Array1DLeavesTotal = state.leafBelow
+    connectionGraph: 形Array3DLeavesTotal = state.connectionGraph
+    dimensionsTotal: 形LeavesTotal = state.dimensionsTotal
+    leavesTotal: 形LeavesTotal = state.leavesTotal
+    groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal = countMapFoldingState(形FoldsTotal(groupsOfFolds), 形Elephino(gap1ndex), 形Elephino(gap1ndexCeiling), 形LeavesTotal(次Dimension), 形Elephino(次MiniGap), 形LeavesTotal(leaf1ndex), 形LeavesTotal(leafConnectee), 形LeavesTotal(dimensionsUnconstrained), countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, 形LeavesTotal(dimensionsTotal), 形LeavesTotal(leavesTotal))
     state = MapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, 次Dimension=次Dimension, 次Leaf=次Leaf, 次MiniGap=次MiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow)
     state.connectionGraph = connectionGraph
     state.dimensionsTotal = dimensionsTotal
