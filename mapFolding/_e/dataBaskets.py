@@ -604,7 +604,6 @@ class EliminationState:
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
-	boxOfFunctionsReductionQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
 
 	groupsOfFolds: int = 0
 	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
@@ -730,14 +729,8 @@ class EliminationState:
 			, self.pile in _e.getLeafDomain(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(self, boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
-					, *, quick: bool = False) -> Self:
-		# TODO think about this.
-		from mapFolding._e.reduceIt import boxOfFunctionsReductionQuickDEFAULT  # ruff: ignore[import-outside-top-level]
-		boxOfQuick: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None
-		if quick:
-			boxOfQuick = self.boxOfFunctionsReductionQuick or boxOfFunctionsReductionQuickDEFAULT
-		boxOfFunctionsReduction = boxOfFunctionsReduction or boxOfQuick or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
+	def reduceAllPermutationSpace(self, boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None) -> Self:
+		boxOfFunctionsReduction = boxOfFunctionsReduction or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
 		boxOfPermutationSpace: list[PermutationSpace] = list(filter(attrgetter('valid'), self.boxOfPermutationSpace))
 		self.boxOfPermutationSpace = []
 		boxOfPermutationSpaceIrreducible: list[PermutationSpace] = []

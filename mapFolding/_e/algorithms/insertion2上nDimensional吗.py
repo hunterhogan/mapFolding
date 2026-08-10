@@ -8,7 +8,7 @@ from itertools import pairwise
 from mapFolding._e import getLeafDomain
 from mapFolding._e._2上nDimensional import 首一
 from mapFolding._e._2上nDimensional.pinIt import pin首beans
-from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional, boxOfFunctionsReductionQuick2上nDimensional
+from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pinIt import atPileExcludeLeaf_inboxOfPermutationSpace, excludeLeaf_rBeforeLeaf_k
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
@@ -53,7 +53,7 @@ def makeAlbum2上nDimensional吗(state: EliminationState, workersMaximum: int) -
 		for position, folding, in enumerate(album):
 			stateCopy: EliminationState = EliminationState(state.mapShape, state.boxOfPermutationSpace.copy()
 						, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional
-					, boxOfFunctionsReductionQuick=boxOfFunctionsReductionQuick2上nDimensional)
+					)
 			boxOfClaimTickets.append(concurrencyManager.submit(makeDescendants, folding, stateCopy, position % workersMaximum + 1))
 
 		state.boxOfPermutationSpace = []

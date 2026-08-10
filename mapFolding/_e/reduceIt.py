@@ -2,22 +2,21 @@ from __future__ import annotations
 
 from collections import Counter
 from functools import partial
-from humpy_cytoolz import (
-	get, groupby as toolz_groupby, itemfilter, keyfilter as filterPile, valfilter as filterLeaf, valfilter as filterLeafOptions,
-	valfilter as filterValue)
+from humpy_cytoolz import dissoc, get, groupby as toolz_groupby, valfilter as filterLeaf, valfilter as filterValue
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import isPileLeafOptions吗, leafInLeafOptions吗, leafPinned吗
+from mapFolding._e.theTypes import Leaf, LeafOptions
 from more_itertools import extract, first, one
 from typing import TYPE_CHECKING
-from Z0Z_tools import DOTitems, DOTvalues, reverseLookup, thisNotHaveThat吗
+from Z0Z_tools import DOTitems, DOTvalues, reverseLookup
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Sequence
 	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-	from mapFolding._e.theTypes import Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]], leafAntiOptions: LeafOptions) -> PermutationSpace:
 	"""Update permutation space by removing forbidden leaves from specified piles.
@@ -261,45 +260,30 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 	"""
 	permutationSpaceHasNewLeaf: bool = True
-	leafOptionsKey: int = 0
-	piles: int = 1
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		groupByLeafSpace: dict[LeafSpace, set[Pile]] = {}
-		for pile, leafOptions in permutationSpace.items():
-			groupByLeafSpace.setdefault(leafOptions, set()).add(pile)
+		pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
+		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
+		for pile, leafOptions in pilesUndetermined.items():
+			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
 
-		groupByLeafOptions: dict[LeafOptions, set[Pile]] = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByLeafSpace)  # pyright: ignore[reportUnknownVariableType, reportUnknownLambdaType, reportUnknownArgumentType, reportAssignmentType] # ty: ignore[invalid-assignment]
-		for leafOptions, boxOfPiles in DOTitems(
-			itemfilter(lambda groupBy: (_e.howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
-		):
-			pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
-			# TODO Z0Z_tools, Fix valfilter annotations, then clean up this code.
-			pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
+		groupByLeafOptions = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByLeafOptions)
+		for leafOptions, boxOfPiles in groupByLeafOptions.items():
+			if _e.howManyLeavesInLeafOptions(leafOptions) == len(boxOfPiles):
 
-			permutationSpace = reduceLeafSpace(permutationSpace
-				, DOTitems(filterPile(thisNotHaveThat吗(boxOfPiles), pilesUndetermined))
-				, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
-			)
+				permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles))
+					, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
+				)
 
 		if permutationSpace.leafCount < leafCount:
 			permutationSpaceHasNewLeaf = True
 
 	return permutationSpace
 
-def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to detect and pin leaves with domain size one.
-
-	I use this constraint encoder to detect leaves that can appear at only one pile (domain size one)
-	and pin those leaves. I compute the domain size for each leaf by counting how many piles contain
-	that leaf (either pinned or in `LeafOptions`). When a leaf appears at exactly one pile, I pin that
-	leaf at that pile using `PermutationSpace.atPilePinLeaf` [1] and propagate the pinning using
-	`reducePermutationSpace_leafDomainOf1`.
-
-	The function also validates that every leaf has nonzero domain size. When any leaf has zero domain
-	(cannot appear anywhere), I invalidate `permutationSpace` by returning `None`.
+def reducePermutationSpace_leafDomainOf0or1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+	"""Detect leaves with domain size of one or no domain.
 
 	Parameters
 	----------
@@ -312,10 +296,6 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 	-------
 	updatedPermutationSpace : PermutationSpace
 		The updated `permutationSpace` if valid; otherwise with `valid` set to `False`.
-
-	References
-	----------
-	[1] mapFolding._e.dataBaskets.PermutationSpace.atPilePinLeaf
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
@@ -323,26 +303,20 @@ def reducePermutationSpace_leafDomainOf1(state: EliminationState, permutationSpa
 
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
 
-		counterLeafDomainSize: Counter[Leaf] = Counter(chain(chain.from_iterable(map(_e.getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
+		countDomainSizes: Counter[Leaf] = Counter(chain(chain.from_iterable(map(_e.getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 
-		if set(range(state.leavesTotal)).difference(counterLeafDomainSize.keys()):
+		if set(range(state.leavesTotal)).difference(countDomainSizes.keys()):
 			permutationSpace.valid = False
 		else:
-			# TODO Z0Z_tools, fix valfilter annotations, then clean up this code.
-			leaf: Leaf | None = first(set(filterValue((1).__eq__, counterLeafDomainSize)).difference(leavesPinned.values()).difference([state.leavesTotal]), None)  # pyright: ignore[reportUnknownArgumentType]
+			leaf: Leaf | None = first(set(filterValue((1).__eq__, countDomainSizes, factory=dict[Leaf, int])).difference(leavesPinned.values()).difference([state.leavesTotal]), None)
 			if leaf is not None:
-				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined)), leaf))  # pyright: ignore[reportUnknownArgumentType]
+				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined, factory=dict[Leaf, LeafOptions])), leaf))
 				permutationSpaceHasNewLeaf = True
 	return permutationSpace
 
 boxOfFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	reducePermutationSpace_nakedSubset
-	, reducePermutationSpace_leafDomainOf1
+	, reducePermutationSpace_leafDomainOf0or1
 	, _crossedCreases
-	, reducePermutationSpace_LeafIsPinned
-)
-boxOfFunctionsReductionQuickDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
-	reducePermutationSpace_nakedSubset
-	, reducePermutationSpace_leafDomainOf1
 	, reducePermutationSpace_LeafIsPinned
 )

@@ -9,8 +9,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import getLeafDomain, pileOrigin
 from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getDictionaryConditionalLeafSuccessors,
-	howManyDimensionsHaveOddParity, 零)
+	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeafSuccessors, howManyDimensionsHaveOddParity, 零)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from pprint import pprint
@@ -402,5 +401,5 @@ if __name__ == '__main__':
 	dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
 	print(ansiColors.BlackOnCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
 	pprint(dictionaryPilesAtDomainEnds, width=140)
-	pprint(getDictionaryConditionalLeafPredecessors(state), width=380, compact=True)
-	pprint(getDictionaryConditionalLeafSuccessors(state), width=380, compact=True)
+	pprint(getLeafPredecessors(state), width=380, compact=True)
+	pprint(getLeafSuccessors(state), width=380, compact=True)

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, Pile
 
 # TODO getDictionaryConditionalLeafPredecessors development
-def getDictionaryConditionalLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
+def getLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafPredecessor`].
 
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
@@ -152,7 +152,7 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	return dictionaryPrecedence
 
 # TODO getDictionaryConditionalLeafSuccessors development
-def getDictionaryConditionalLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
+def getLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafSuccessor`]."""
 	return _getDictionaryConditionalLeafSuccessors(state.mapShape)
 @cache
@@ -162,7 +162,7 @@ def _getDictionaryConditionalLeafSuccessors(mapShape: tuple[int, ...]) -> dict[L
 
 	dictionarySuccessor: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 
-	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
+	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = getLeafPredecessors(state)
 
 	for leafLater, dictionaryPiles in dictionaryPrecedence.items():
 		boxOfDomainLater: tuple[Pile, ...] = tuple(dictionaryDomains[leafLater])

@@ -75,13 +75,12 @@ from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations
 from mapFolding._e import leafOrigin, makeLeafAntiOptions
 from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryConditionalLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost,
-	moreThanLeaf零吗)
+	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, moreThanLeaf零吗)
 from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, isPileLeafOptions吗, leafPinned吗, notPileLast
 from mapFolding._e.reduceIt import (
-	reduceLeafSpace, reducePermutationSpace_leafDomainOf1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
+	reduceLeafSpace, reducePermutationSpace_leafDomainOf0or1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
 from mapFolding._e.theTypes import Leaf, Pile
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import extract, pairwise, triplewise
@@ -172,7 +171,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		return permutationSpace
 
 	#-------------- Initialize ------------------------------------
-	leafAtPilePredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
+	leafAtPilePredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = getLeafPredecessors(state)
 	permutationSpaceHasNewLeaf: bool = True
 
 	while permutationSpaceHasNewLeaf:
@@ -180,10 +179,9 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		# TODO Z0Z_tools, fix the typing problems in `valfilter`.
-		ee = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
-		ww = filterLeaf(moreThanLeaf零吗, ee, factory=dict[Pile, Leaf])
-		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), ww)):
+		leavesPinned: PinnedLeaves = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
+		leavesPinned = filterLeaf(moreThanLeaf零吗, leavesPinned, factory=dict[Pile, Leaf])
+		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			if pile in leafAtPilePredecessors[leaf]:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.extractUndeterminedPiles()))
@@ -343,7 +341,6 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		leafCount: int = permutationSpace.leafCount
 
 		pile1stOpen: int = 2
-		# TODO Z0Z_tools, fix this typing issue.
 		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)
@@ -437,16 +434,7 @@ boxOfFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, Pe
 	_conditionalPredecessors2上nDimensional,
 	_headsBeforeTails2上nDimensional,
 	reducePermutationSpace_nakedSubset,
-	reducePermutationSpace_leafDomainOf1,
-	_byCrease2上nDimensional,
-	reducePermutationSpace_LeafIsPinned,
-)
-
-boxOfFunctionsReductionQuick2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
-	_noConsecutiveDimensions2上nDimensional,
-	_headsBeforeTails2上nDimensional,
-	reducePermutationSpace_nakedSubset,
-	reducePermutationSpace_leafDomainOf1,
+	reducePermutationSpace_leafDomainOf0or1,
 	_byCrease2上nDimensional,
 	reducePermutationSpace_LeafIsPinned,
 )

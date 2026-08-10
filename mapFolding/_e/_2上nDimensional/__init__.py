@@ -26,5 +26,4 @@ from mapFolding._e._2上nDimensional.leafDomains import (
 
 # isort: split
 from mapFolding._e._2上nDimensional.conditionalOrdering import (
-	getDictionaryConditionalLeafPredecessors as getDictionaryConditionalLeafPredecessors,
-	getDictionaryConditionalLeafSuccessors as getDictionaryConditionalLeafSuccessors)
+	getLeafPredecessors as getLeafPredecessors, getLeafSuccessors as getLeafSuccessors)

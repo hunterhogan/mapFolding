@@ -62,8 +62,8 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 		A dictionary mapping sequence indices to their corresponding values, or a fallback dictionary
 		containing {-1: -1} if retrieval fails.
 	"""
-	# TODO Z0Z_tools, create humpy_cytoolz.get_in overloads.
-	return get_in((formatOEISid(oeisID), 'valuesKnown'), dictionaryOEIS, {-1: -1})
+	# TODO Z0Z_tools, fix humpy_cytoolz.get_in overloads.
+	return get_in((str(formatOEISid(oeisID)), 'valuesKnown'), dictionaryOEIS, dict[int, int]([(-errorL33T, -errorL33T)]))
 
 #================== Meat grinders =================================================================
 

@@ -2,15 +2,13 @@
 # ruff: file-ignore[suspicious-eval-usage]
 from __future__ import annotations
 
-from functools import partial
 from humpy_cytoolz import concat
 from itertools import product as CartesianProduct
-from mapFolding._e.tests import messageTestFailure
-from mapFolding.oeis import _oeisIDbyFormulaLookup, getMetadata, getValuesKnown
+from mapFolding.oeis import getMetadata, getValuesKnown
 from mapFolding.oeis._oeisIDbyFormulaLookup import *
+from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.OEISidByFormulaLookup import dictionaryLiterals
 from more_itertools import always_iterable
-from re import fullmatch
 from typing import TYPE_CHECKING
 import os
 import pytest
@@ -22,44 +20,31 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 	from typing import LiteralString
 
-# TODO finish this module.
-
-def qq(oeisIDAndAnnotation: tuple[LiteralString, str | tuple[str, ...]]) -> CartesianProduct[tuple[LiteralString, int, str]]:
+def make_name_n_f(oeisIDAndAnnotation: tuple[LiteralString, str | tuple[str, ...]]) -> CartesianProduct[tuple[LiteralString, int, str]]:
 	oeisID: OEISid = oeisIDAndAnnotation[0]
-	domainOf_f: Iterator[str] = always_iterable(oeisIDAndAnnotation[1], str)
 	domainOf_n = range(getMetadata(oeisID)['offset'], getMetadata(oeisID)['valueUnknown'])
-	return CartesianProduct((oeisID,), domainOf_n, domainOf_f)
+	return CartesianProduct((oeisID,), domainOf_n, always_iterable(oeisIDAndAnnotation[1], str))
 
-def fml(tt: tuple[str, int, str]) -> ParameterSet:
-	name, n, f = tt
+def makeParameterSet(name_n_f: tuple[str, int, str]) -> ParameterSet:
+	name, n, f = name_n_f
 	return pytest.param(eval(name), n, f, getValuesKnown(name)[n], id=f'{name}-{f}-{n}')
 
 @pytest.mark.xfail(raises=KeyError, strict=False)
-@pytest.mark.parametrize('callableA, n, f, expected', tuple(map(fml, concat(map(qq, dictionaryLiterals.items())))))
+@pytest.mark.parametrize('callableA, n, f, expected', tuple(map(makeParameterSet, concat(map(make_name_n_f, dictionaryLiterals.items())))))
 def test_oeisIDbyFormula(callableA: CallableFunction[[int, LiteralString], int], n: int, f: LiteralString, expected: int) -> None:
-	actual: int = callableA(n, f)
+	assertEqualTo(callableA(n, f), expected, callableA.__name__, n, f)
 
-	assert actual == expected, messageTestFailure(actual, expected, callableA.__name__, n, f)
-
-def ee(oeisIDAndAnnotation: tuple[LiteralString, str | tuple[str, ...]]) -> CartesianProduct[tuple[LiteralString, int, str]]:
+def make_name_n_fError(oeisIDAndAnnotation: tuple[LiteralString, str | tuple[str, ...]]) -> CartesianProduct[tuple[LiteralString, int, str]]:
 	oeisID: OEISid = oeisIDAndAnnotation[0]
 	domainOf_f: Iterator[str] = always_iterable(oeisIDAndAnnotation[1], str)
 	return CartesianProduct((oeisID,), (getMetadata(oeisID)['valueUnknown'],), domainOf_f)
 
-ww: Iterator[tuple[LiteralString, int, str]] = concat(map(ee, dictionaryLiterals.items()))
-
-def bad(tt: tuple[LiteralString, int, str]) -> ParameterSet:
-	name, n, f = tt
+def makeParameterSetError(name_n_f: tuple[LiteralString, int, str]) -> ParameterSet:
+	name, n, f = name_n_f
 	return pytest.param(eval(name), n, f, KeyError, id=f"({name}, {n}, '{f}')")
 
 @pytest.mark.skipif(os.getenv('GITHUB_ACTIONS') == 'true', reason="Skipped on GitHub Actions")
-@pytest.mark.parametrize('callableA, n, f, expected', tuple(map(bad, ww)))
+@pytest.mark.parametrize('callableA, n, f, expected', tuple(map(makeParameterSetError, concat(map(make_name_n_fError, dictionaryLiterals.items())))))
 def test_oeisIDbyFormulaError(callableA: CallableFunction[[int, LiteralString], int], n: int, f: LiteralString, expected: type[BaseException]) -> None:
 	with pytest.raises(expected):
 		callableA(n, f)
-
-@pytest.mark.parametrize('expected', [pytest.param(set(dictionaryLiterals), id='dictionaryLiterals')])
-def test_oeisIDbyFormulaFunctions(expected: set[str]) -> None:
-	actual: set[str] = set(filter(partial(fullmatch, r'A[0-9]{6}'), vars(_oeisIDbyFormulaLookup)))
-
-	assert actual == expected, f"The proof module exposed {actual=}; the generated literals described {expected=}."

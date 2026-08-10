@@ -1,4 +1,5 @@
 from __future__ import annotations
+from humpy_cytoolz import get_in
 
 from functools import cache
 from hunterMakesPy import raiseIfNone
@@ -182,8 +183,7 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 	Figure out an intelligent flow for so many factors.
 	"""
 	theDictionary: dict[str, dict[int, dict[int, int]]] = {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
-	# TODO Use humpy_cytoolz.get_in to get the value from the dictionary, with a default of 0 if any key is missing.
-	bucketsTotal: int = theDictionary.get(state.kind, {}).get(state.n, {}).get(state.boundary, 0)
+	bucketsTotal: int = get_in([state.kind, state.n, state.boundary], theDictionary, default=0)
 	if bucketsTotal <= 0:
 		bucketsTotal = int(3.55 * 665523011)
 

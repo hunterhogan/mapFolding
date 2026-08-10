@@ -5,9 +5,8 @@ from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions, howManyLeavesInLeafOptions
-from mapFolding._e._2上nDimensional import (
-	getDictionaryConditionalLeafPredecessors, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一)
-from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional, boxOfFunctionsReductionQuick2上nDimensional
+from mapFolding._e._2上nDimensional import getDictionaryLeafDomains, getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
+from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
 from mapFolding._e.dataBaskets import EliminationState
@@ -33,9 +32,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state: EliminationState = EliminationState((2,) * 6
-				, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional
-		, boxOfFunctionsReductionQuick=boxOfFunctionsReductionQuick2上nDimensional)
+	state: EliminationState = EliminationState((2,) * 5, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional)
 
 	printThis = True
 
@@ -72,7 +69,7 @@ if __name__ == '__main__':
 		state = pinIt.pinLeavesDimension二(state)
 		pprint(dictionaryLeafDomains := getDictionaryLeafDomains(state))
 		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
-		pprint(getDictionaryConditionalLeafPredecessors(state), width=260)
+		pprint(getLeafPredecessors(state), width=260)
 		pprint(state.boxOfFolding)
 		pprint(state.boxOfPermutationSpace)
 		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 28))))
