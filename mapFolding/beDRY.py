@@ -234,25 +234,25 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> ndarray
 	cumulativeProduct: Array1DLeavesTotal = numpy.multiply.accumulate([1, *list(mapShape)], dtype=numpy_int64)
 	arrayDimensions: Array1DLeavesTotal = numpy.array(mapShape, dtype=numpy_int64)
 	coordinateSystem: Array2DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=numpy_int64)
-	for indexDimension in range(dimensionsTotal):
+	for 次Dimension in range(dimensionsTotal):
 		for leaf1ndex in range(1, leavesTotal + inclusive):
-			coordinateSystem[indexDimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[indexDimension]) % arrayDimensions[indexDimension] + 1)
+			coordinateSystem[次Dimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[次Dimension]) % arrayDimensions[次Dimension] + 1)
 
 	connectionGraph: Array3DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=numpy_int64)
-	for indexDimension in range(dimensionsTotal):
+	for 次Dimension in range(dimensionsTotal):
 		for activeLeaf1ndex in range(1, leavesTotal + inclusive):
 			for connectee1ndex in range(1, activeLeaf1ndex + inclusive):
-				isFirstCoord: bool = coordinateSystem[indexDimension, connectee1ndex] == 1
-				isLastCoord: bool = coordinateSystem[indexDimension, connectee1ndex] == arrayDimensions[indexDimension]
-				exceedsActive: bool = connectee1ndex + cumulativeProduct[indexDimension] > activeLeaf1ndex
-				isEvenParity: bool = (coordinateSystem[indexDimension, activeLeaf1ndex] & 1) == (coordinateSystem[indexDimension, connectee1ndex] & 1)
+				isFirstCoord: bool = coordinateSystem[次Dimension, connectee1ndex] == 1
+				isLastCoord: bool = coordinateSystem[次Dimension, connectee1ndex] == arrayDimensions[次Dimension]
+				exceedsActive: bool = connectee1ndex + cumulativeProduct[次Dimension] > activeLeaf1ndex
+				isEvenParity: bool = (coordinateSystem[次Dimension, activeLeaf1ndex] & 1) == (coordinateSystem[次Dimension, connectee1ndex] & 1)
 
 				if (isEvenParity and isFirstCoord) or (not isEvenParity and (isLastCoord or exceedsActive)):
-					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
+					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex
 				elif isEvenParity and not isFirstCoord:
-					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[indexDimension]
+					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex - cumulativeProduct[次Dimension]
 				elif not isEvenParity and not (isLastCoord or exceedsActive):
-					connectionGraph[indexDimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[indexDimension]
+					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[次Dimension]
 	return connectionGraph
 
 def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[NumPyIntegerType]) -> ndarray[Any, numpy_dtype[NumPyIntegerType]]:

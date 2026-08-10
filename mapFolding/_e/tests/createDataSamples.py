@@ -69,10 +69,10 @@ def makeVerificationDataLeavesDomain(sequenceDimensionsTotal: Sequence[int], box
 		boxOfResolvedLeaves: list[int] = [resolveLeaf(leafSpec, dimensionsTotal) for leafSpec in boxOfLeaves]
 
 		boxOfCombinedTuples: list[tuple[int, ...]] = []
-		for indexFolding in range(len(dataframeFoldings)):
-			seriesFolding: pandas.Series = dataframeFoldings.iloc[indexFolding]
-			tuplePiles: tuple[int, ...] = tuple(int(seriesFolding[seriesFolding == leaf].index[0]) for leaf in boxOfResolvedLeaves)
-			boxOfCombinedTuples.append(tuplePiles)
+		for 次Folding in range(len(dataframeFoldings)):
+			seriesFolding: pandas.Series = dataframeFoldings.iloc[次Folding]
+			boxOfPiles: tuple[int, ...] = tuple(int(seriesFolding[seriesFolding == leaf].index[0]) for leaf in boxOfResolvedLeaves)
+			boxOfCombinedTuples.append(boxOfPiles)
 
 		boxOfUniqueTuples: list[tuple[int, ...]] = sorted(set(boxOfCombinedTuples))
 		dictionaryDomainsByDimensions[dimensionsTotal] = boxOfUniqueTuples

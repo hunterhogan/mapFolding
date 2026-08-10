@@ -54,11 +54,11 @@ class MapFoldingState:
 		The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed.
 	gap1ndexCeiling : DatatypeElephino = DatatypeElephino(0)
 		The upper bound of `gap1ndex`.
-	indexDimension : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Dimension : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 		The current 0-indexed position of the dimension during computation.
-	indexLeaf : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Leaf : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 		The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`.
-	indexMiniGap : DatatypeElephino = DatatypeElephino(0)
+	次MiniGap : DatatypeElephino = DatatypeElephino(0)
 		The current 0-indexed position of a 'gap' in a loop during computation.
 	leaf1ndex : DatatypeLeavesTotal = DatatypeLeavesTotal(1)
 		The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed.
@@ -97,11 +97,11 @@ class MapFoldingState:
 	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
 	"""The upper bound of `gap1ndex`."""
-	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Dimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""The current 0-indexed position of the dimension during computation."""
-	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Leaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
-	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
+	次MiniGap: DatatypeElephino = DatatypeElephino(0)
 	"""The current 0-indexed position of a 'gap' in a loop during computation."""
 	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
@@ -183,11 +183,11 @@ class SymmetricFoldsState:
 		The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed.
 	gap1ndexCeiling : DatatypeElephino = DatatypeElephino(0)
 		The upper bound of `gap1ndex`.
-	indexDimension : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Dimension : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 		The current 0-indexed position of the dimension during computation.
-	indexLeaf : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Leaf : DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 		The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`.
-	indexMiniGap : DatatypeElephino = DatatypeElephino(0)
+	次MiniGap : DatatypeElephino = DatatypeElephino(0)
 		The current 0-indexed position of a 'gap' in a loop during computation.
 	leaf1ndex : DatatypeLeavesTotal = DatatypeLeavesTotal(1)
 		The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed.
@@ -226,11 +226,11 @@ class SymmetricFoldsState:
 	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: DatatypeElephino = DatatypeElephino(0)
 	"""The upper bound of `gap1ndex`."""
-	indexDimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Dimension: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""The current 0-indexed position of the dimension during computation."""
-	indexLeaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	次Leaf: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
-	indexMiniGap: DatatypeElephino = DatatypeElephino(0)
+	次MiniGap: DatatypeElephino = DatatypeElephino(0)
 	"""The current 0-indexed position of a 'gap' in a loop during computation."""
 	leaf1ndex: DatatypeLeavesTotal = DatatypeLeavesTotal(1)
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
@@ -277,7 +277,7 @@ class SymmetricFoldsState:
 		leavesTotalAsInt = int(self.leavesTotal)
 		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		self.indices = [[((index + folding) % (self.leavesTotal + 1), (-2 - index + folding) % (self.leavesTotal + 1)) for index in range(self.leavesTotal // 2)] for folding in range(self.leavesTotal + 1)]
+		self.indices = [[((次 + folding) % (self.leavesTotal + 1), (-2 - 次 + folding) % (self.leavesTotal + 1)) for 次 in range(self.leavesTotal // 2)] for folding in range(self.leavesTotal + 1)]
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = DatatypeLeavesTotal(int(self.dimensionsTotal))
@@ -329,7 +329,7 @@ class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `d
 	`leavesTotal` during initialization, providing optimal task granularity.
 	"""
 
-	taskIndex: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
+	task次: DatatypeLeavesTotal = DatatypeLeavesTotal(0)
 	"""
 	Index of the current task when using task divisions.
 
@@ -381,7 +381,7 @@ class MatrixMeandersState:
 	bitWidthLimitArcCode: int | None = None
 	bitWidthLimitCrossings: int | None = None
 
-	indexTarget: int = 0
+	次Target: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
 
 	def reduceBoundary(self) -> None:

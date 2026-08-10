@@ -237,51 +237,51 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		deconstructedPermutationSpace: list[PermutationSpace] = []
 
-		def pileOpenByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
+		def pileOpenByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				return self.pileUndetermined吗(domain[index])
+				return self.pileUndetermined吗(domain[次])
 
 			return workhorse
 
-		def leafInPileRangeByIndex(index: int) -> CallableFunction[[Sequence[Pile]], bool]:
+		def leafInPileRangeByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				leafOptions: LeafOptions = raiseIfNone(self.getLeafOptions(domain[index], default=bit_mask(len(self))))
-				return leafInLeafOptions吗(leaves[index], leafOptions)
+				leafOptions: LeafOptions = raiseIfNone(self.getLeafOptions(domain[次], default=bit_mask(len(self))))
+				return leafInLeafOptions吗(leaves[次], leafOptions)
 
 			return workhorse
 
-		def isPinnedAtPileByIndex(leaf: Leaf, index: int) -> CallableFunction[[Sequence[Pile]], bool]:
+		def isPinnedAtPileByIndex(leaf: Leaf, 次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				return self.leafPinnedAtPile吗(leaf, domain[index])
+				return self.leafPinnedAtPile吗(leaf, domain[次])
 
 			return workhorse
 
 		if any(map(self.leafNotPinned吗, leaves)):
-			for index in range(len(leaves)):
+			for 次 in range(len(leaves)):
 				"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
-				if self.leafNotPinned吗(leaves[index]):
-					"""`leaves[index]` is not pinned, so it needs a pile.
-					In each iteration of `leavesDomain`, `boxOfPiles`, the pile it needs is `boxOfPiles[index]`.
-					Therefore, if `boxOfPiles[index]` is open, filter in the iteration. If `boxOfPiles[index]` is occupied, filter out the iteration."""
-					leavesDomain = filter(pileOpenByIndex(index), leavesDomain)
-					"""`leaves[index]` is not pinned, it wants `boxOfPiles[index]`, and `boxOfPiles[index]` is open.
-					Is `leaves[index]` in the pile-range of `boxOfPiles[index]`?"""
-					leavesDomain = filter(leafInPileRangeByIndex(index), leavesDomain)
+				if self.leafNotPinned吗(leaves[次]):
+					"""`leaves[次]` is not pinned, so it needs a pile.
+					In each iteration of `leavesDomain`, `boxOfPiles`, the pile it needs is `boxOfPiles[次]`.
+					Therefore, if `boxOfPiles[次]` is open, filter in the iteration. If `boxOfPiles[次]` is occupied, filter out the iteration."""
+					leavesDomain = filter(pileOpenByIndex(次), leavesDomain)
+					"""`leaves[次]` is not pinned, it wants `boxOfPiles[次]`, and `boxOfPiles[次]` is open.
+					Is `leaves[次]` in the pile-range of `boxOfPiles[次]`?"""
+					leavesDomain = filter(leafInPileRangeByIndex(次), leavesDomain)
 				else:
-					"""`leaves[index]` is pinned.
-					In each iteration of `leavesDomain`, `boxOfPiles`, the pile in which `leaves[index]` is pinned must match `boxOfPiles[index]`.
-					Therefore, if the pile in which `leaves[index]` is pinned matches `boxOfPiles[index]`, filter in the iteration. Otherwise, filter out the iteration."""
-					leavesDomain = filter(isPinnedAtPileByIndex(leaves[index], index), leavesDomain)
+					"""`leaves[次]` is pinned.
+					In each iteration of `leavesDomain`, `boxOfPiles`, the pile in which `leaves[次]` is pinned must match `boxOfPiles[次]`.
+					Therefore, if the pile in which `leaves[次]` is pinned matches `boxOfPiles[次]`, filter in the iteration. Otherwise, filter out the iteration."""
+					leavesDomain = filter(isPinnedAtPileByIndex(leaves[次], 次), leavesDomain)
 
 			for boxOfPiles in leavesDomain:
 				"""Properly and safely deconstruct `permutationSpace` by the combined domain of leaves.
 				The parameter `leavesDomain` is the full domain of the leaves, so deconstructing with `leavesDomain` preserves the permutation space.
 				For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
 				I apply filters that prevent pinning the same leaf twice.
-				Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[index]` at `boxOfPiles[index]` without corrupting the permutation space."""
+				Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[次]` at `boxOfPiles[次]` without corrupting the permutation space."""
 				permutationSpaceForListOfPiles: PermutationSpace = self.copy()
-				for index in range(len(leaves)):
-					permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(boxOfPiles[index], leaves[index])
+				for 次 in range(len(leaves)):
+					permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(boxOfPiles[次], leaves[次])
 				deconstructedPermutationSpace.append(permutationSpaceForListOfPiles)
 		else:
 			deconstructedPermutationSpace.append(self)
@@ -746,19 +746,19 @@ class EliminationState:
 		for permutationSpace in boxOfPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
 			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
-			index: int = len(functionsReduction)
+			次: int = len(functionsReduction)
 
-			while index:
-				index -= 1
-				reducer: Callable[[EliminationState, PermutationSpace], PermutationSpace] = functionsReduction[index]
+			while 次:
+				次 -= 1
+				reducer: Callable[[EliminationState, PermutationSpace], PermutationSpace] = functionsReduction[次]
 				permutationSpace: PermutationSpace = reducer(self, permutationSpace)
 
 				if not permutationSpace.valid:
-					index = 0
+					次 = 0
 				elif sumPermutationSpace != sum(permutationSpace.values()):
-					index = len(boxOfFunctionsReduction)
+					次 = len(boxOfFunctionsReduction)
 					sumPermutationSpace = sum(permutationSpace.values())
-				elif index == 0:
+				elif 次 == 0:
 					boxOfPermutationSpaceIrreducible.append(permutationSpace)
 
 		else:

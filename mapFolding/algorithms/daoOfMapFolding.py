@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mapFolding.dataBaskets import MapFoldingState
 
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
@@ -17,10 +19,10 @@ def activeLeafUnconstrainedInThisDimension(state: MapFoldingState) -> MapFolding
 	return state
 
 def filterCommonGaps(state: MapFoldingState) -> MapFoldingState:
-	state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.indexMiniGap]
-	if state.countDimensionsGapped[state.gapsWhere[state.indexMiniGap]] == state.dimensionsUnconstrained:
+	state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.次MiniGap]
+	if state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] == state.dimensionsUnconstrained:
 		state = incrementActiveGap(state)
-	state.countDimensionsGapped[state.gapsWhere[state.indexMiniGap]] = 0
+	state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] = 0
 	return state
 
 def gapAvailable(state: MapFoldingState) -> bool:
@@ -35,25 +37,25 @@ def incrementGap1ndexCeiling(state: MapFoldingState) -> MapFoldingState:
 	return state
 
 def incrementIndexMiniGap(state: MapFoldingState) -> MapFoldingState:
-	state.indexMiniGap += 1
+	state.次MiniGap += 1
 	return state
 
 def initializeIndexMiniGap(state: MapFoldingState) -> MapFoldingState:
-	state.indexMiniGap = state.gap1ndex
+	state.次MiniGap = state.gap1ndex
 	return state
 
 def initializeVariablesToFindGaps(state: MapFoldingState) -> MapFoldingState:
 	state.dimensionsUnconstrained = state.dimensionsTotal
 	state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
-	state.indexDimension = 0
+	state.次Dimension = 0
 	return state
 
 def insertActiveLeaf(state: MapFoldingState) -> MapFoldingState:
-	state.indexLeaf = 0
-	while state.indexLeaf < state.leaf1ndex:
-		state.gapsWhere[state.gap1ndexCeiling] = state.indexLeaf
+	state.次Leaf = 0
+	while state.次Leaf < state.leaf1ndex:
+		state.gapsWhere[state.gap1ndexCeiling] = state.次Leaf
 		state.gap1ndexCeiling += 1
-		state.indexLeaf += 1
+		state.次Leaf += 1
 	return state
 
 def insertActiveLeafAtGap(state: MapFoldingState) -> MapFoldingState:
@@ -80,27 +82,27 @@ def lookForGaps(state: MapFoldingState) -> MapFoldingState:
 	return state
 
 def lookupLeafConnecteeInConnectionGraph(state: MapFoldingState) -> MapFoldingState:
-	state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leaf1ndex]
+	state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
 	return state
 
 def loopingLeavesConnectedToActiveLeaf(state: MapFoldingState) -> bool:
 	return state.leafConnectee != state.leaf1ndex
 
 def loopingThroughTheDimensions(state: MapFoldingState) -> bool:
-	return state.indexDimension < state.dimensionsTotal
+	return state.次Dimension < state.dimensionsTotal
 
 def loopingToActiveGapCeiling(state: MapFoldingState) -> bool:
-	return state.indexMiniGap < state.gap1ndexCeiling
+	return state.次MiniGap < state.gap1ndexCeiling
 
 def noGapsHere(state: MapFoldingState) -> bool:
 	return (state.leaf1ndex > 0) and (state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1])
 
 def tryAnotherLeafConnectee(state: MapFoldingState) -> MapFoldingState:
-	state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
+	state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
 	return state
 
 def tryNextDimension(state: MapFoldingState) -> MapFoldingState:
-	state.indexDimension += 1
+	state.次Dimension += 1
 	return state
 
 def undoLastLeafPlacement(state: MapFoldingState) -> MapFoldingState:

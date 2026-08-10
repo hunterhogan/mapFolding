@@ -45,8 +45,8 @@ def count(state: EliminationState) -> EliminationState:
 
 	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
-		for index_k, index_r in pairwise(indicesSameDimensionLength):
-			model.add(boxOfPilingsInLeafOrder[state.productsOfDimensions[index_k]] < boxOfPilingsInLeafOrder[state.productsOfDimensions[index_r]])
+		for 次k, 次r in pairwise(indicesSameDimensionLength):
+			model.add(boxOfPilingsInLeafOrder[state.productsOfDimensions[次k]] < boxOfPilingsInLeafOrder[state.productsOfDimensions[次r]])
 
 #======== Rules for 2^n-dimensional maps ============================
 

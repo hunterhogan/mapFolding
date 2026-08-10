@@ -271,8 +271,8 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 		for pile, leafOptions in permutationSpace.items():
 			groupByLeafSpace.setdefault(leafOptions, set()).add(pile)
 
-		groupByLeafOptions: dict[LeafOptions, set[Pile]] = filterValue(lambda setPiles: 1 < len(setPiles), groupByLeafSpace)  # pyright: ignore[reportUnknownVariableType, reportUnknownLambdaType, reportUnknownArgumentType, reportAssignmentType] # ty: ignore[invalid-assignment]
-		for leafOptions, setPiles in DOTitems(
+		groupByLeafOptions: dict[LeafOptions, set[Pile]] = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByLeafSpace)  # pyright: ignore[reportUnknownVariableType, reportUnknownLambdaType, reportUnknownArgumentType, reportAssignmentType] # ty: ignore[invalid-assignment]
+		for leafOptions, boxOfPiles in DOTitems(
 			itemfilter(lambda groupBy: (_e.howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
 		):
 			pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
@@ -280,7 +280,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 			pilesUndetermined: UndeterminedPiles = filterLeafOptions(thisNotHaveThat吗(set(pilesUndetermined.values())), pilesUndetermined)
 
 			permutationSpace = reduceLeafSpace(permutationSpace
-				, DOTitems(filterPile(thisNotHaveThat吗(setPiles), pilesUndetermined))
+				, DOTitems(filterPile(thisNotHaveThat吗(boxOfPiles), pilesUndetermined))
 				, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
 			)
 

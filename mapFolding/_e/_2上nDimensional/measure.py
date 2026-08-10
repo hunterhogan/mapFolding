@@ -159,8 +159,8 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	```python
 		if (dimensionThirdNearest首(pileOfLeaf零) == 一)
 		and (二+零 <= dimensionNearest首(pileOfLeaf 零)):
-			indexDomain0: int = (pilesTotal // 2) + 1
-			boxOfIndicesPilesExcluded.extend([indexDomain0])
+			次Domain0: int = (pilesTotal // 2) + 1
+			boxOfIndicesPilesExcluded.extend([次Domain0])
 	```
 
 	References
@@ -205,8 +205,8 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	--------
 	```python
 		if dimensionThirdNearest首(pileOfLeaf零) == 一+零:
-			indexDomain0 = pilesTotal // 4 if dimensionFourthNearest首(pileOfLeaf零) == 一:
-				indicesDomain0ToExclude.extend([indexDomain0])
+			次Domain0 = pilesTotal // 4 if dimensionFourthNearest首(pileOfLeaf零) == 一:
+				indicesDomain0ToExclude.extend([次Domain0])
 	```
 
 	References

@@ -865,13 +865,13 @@ def A259689(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     nFlattenedZeroBased: int = n - 2
     rowLength: int = (isqrt(4 * nFlattenedZeroBased + 1) + 1) // 2
-    indexInRowsPair: int = nFlattenedZeroBased - rowLength * (rowLength - 1)
-    if indexInRowsPair < rowLength:
+    次InRowsPair: int = nFlattenedZeroBased - rowLength * (rowLength - 1)
+    if 次InRowsPair < rowLength:
         nRow: int = 2 * rowLength
-        n下k: int = indexInRowsPair + 2
+        n下k: int = 次InRowsPair + 2
     else:
         nRow = 2 * rowLength + 1
-        n下k = indexInRowsPair - rowLength + 2
+        n下k = 次InRowsPair - rowLength + 2
     match f:
         case 'A000682' | _:
             if nRow >= 4 and n下k == nRow // 2:

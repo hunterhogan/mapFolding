@@ -49,7 +49,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		def aggregateArcCodes()  -> None:
 			nonlocal dataframeAnalyzed
-			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.indexTarget].groupby('analyzed', sort=False)['crossings'].aggregate('sum').reset_index()
+			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.次Target].groupby('analyzed', sort=False)['crossings'].aggregate('sum').reset_index()
 
 		def analyzeArcCodesAligned(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
 			"""Compute `arcCode` from `bitsAlfa` and `bitsZulu` if at least one is an even number.
@@ -257,26 +257,26 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 			"""Abstraction makes it easier to do things such as write to disk."""
 			nonlocal dataframeAnalyzed
 
-			indexStopAnalyzed: int = state.indexTarget + int((0 < dataframeMeanders['analyzed']).sum())
+			次StopAnalyzed: int = state.次Target + int((0 < dataframeMeanders['analyzed']).sum())
 
-			if state.indexTarget < indexStopAnalyzed:
-				if len(dataframeAnalyzed.index) < indexStopAnalyzed:
-					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {indexStopAnalyzed=}; n={state.n}, {state.boundary=}.", stacklevel=2)
-					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(indexStopAnalyzed), fill_value=0)
+			if state.次Target < 次StopAnalyzed:
+				if len(dataframeAnalyzed.index) < 次StopAnalyzed:
+					warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {次StopAnalyzed=}; n={state.n}, {state.boundary=}.", stacklevel=2)
+					dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(次StopAnalyzed), fill_value=0)
 
-				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['analyzed']] = (
+				dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['analyzed']] = (
 					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['analyzed']
 								].to_numpy(dtype=dtypeArcCode, copy=False)
 				)
 
-				dataframeAnalyzed.loc[state.indexTarget:indexStopAnalyzed - 1, ['crossings']] = (
+				dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['crossings']] = (
 					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['crossings']
 								].to_numpy(dtype=dtypeCrossings, copy=False)
 				)
 
-				state.indexTarget = indexStopAnalyzed
+				state.次Target = 次StopAnalyzed
 
-			del indexStopAnalyzed
+			del 次StopAnalyzed
 
 			return dataframeMeanders
 
@@ -302,7 +302,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		state.boundary -= 1
 		state.setMAXIMUMarcCode()
 
-		state.indexTarget = 0
+		state.次Target = 0
 
 		dataframeMeanders: pandas.DataFrame = analyzeArcCodesSimple(dataframeMeanders)
 		dataframeMeanders = recordArcCodes(dataframeMeanders)

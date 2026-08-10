@@ -52,9 +52,9 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, boxOfPermutationS
 	indicesOverlappingRows: numpy.ndarray = numpy.flatnonzero(coverageCountPerRow >= 2)
 	indicesOverlappingPermutationSpace: set[int] = set()
 	if indicesOverlappingRows.size > 0:
-		for indexMask, mask in enumerate(boxOfMasks):
+		for 次Mask, mask in enumerate(boxOfMasks):
 			if bool(mask[indicesOverlappingRows].any()):
-				indicesOverlappingPermutationSpace.add(indexMask)
+				indicesOverlappingPermutationSpace.add(次Mask)
 
 	return PermutationSpaceStatus(boxOfSurplusDictionaries, maskUnion, indicesOverlappingRows, indicesOverlappingPermutationSpace, rowsRequired, rowsTotal)
 
@@ -93,8 +93,8 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 
 		if pinningCoverage.indicesOverlappingPermutationSpace:
 			sys.stdout.write(f"{ansiColors.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
-			for indexDictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
-				sys.stdout.write(pformat(filterLeaf(isLeaf吗, state.boxOfPermutationSpace[indexDictionary]), width=140) + '\n')
+			for 次Dictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
+				sys.stdout.write(pformat(filterLeaf(isLeaf吗, state.boxOfPermutationSpace[次Dictionary]), width=140) + '\n')
 
 		beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
 		boxOfBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.boxOfPermutationSpace))
@@ -109,8 +109,8 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		if rowsRequired < rowsTotal:
 			color = ansiColors.RedOnWhite
 			indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
-			for indexRow in indicesMissingRows[0:2]:
-				sys.stdout.write(f"{color}{arrayFoldings[indexRow, :]}\n")
+			for 次Row in indicesMissingRows[0:2]:
+				sys.stdout.write(f"{color}{arrayFoldings[次Row, :]}\n")
 		sys.stdout.write(f"{color}Required rows: {rowsRequired}/{rowsTotal}{ansiColorReset}\n")
 
 def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKnown: Sequence[tuple[int, ...]], *, printResults: bool = True) -> dict[str, list[tuple[int, ...]]]:
@@ -134,12 +134,12 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 		- 'matched': tuples present in both domains
 
 	"""
-	setComputed: set[tuple[int, ...]] = set(domainComputed)
-	setKnown: set[tuple[int, ...]] = set(domainKnown)
+	boxOfComputed: set[tuple[int, ...]] = set(domainComputed)
+	boxOfKnown: set[tuple[int, ...]] = set(domainKnown)
 
-	boxOfMissing: list[tuple[int, ...]] = sorted(setKnown - setComputed)
-	boxOfSurplus: list[tuple[int, ...]] = sorted(setComputed - setKnown)
-	boxOfMatched: list[tuple[int, ...]] = sorted(setComputed & setKnown)
+	boxOfMissing: list[tuple[int, ...]] = sorted(boxOfKnown - boxOfComputed)
+	boxOfSurplus: list[tuple[int, ...]] = sorted(boxOfComputed - boxOfKnown)
+	boxOfMatched: list[tuple[int, ...]] = sorted(boxOfComputed & boxOfKnown)
 
 	comparisonResults: dict[str, list[tuple[int, ...]]] = {
 		'missing': boxOfMissing,
@@ -148,8 +148,8 @@ def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKn
 	}
 
 	if printResults:
-		countComputed: int = len(setComputed)
-		countKnown: int = len(setKnown)
+		countComputed: int = len(boxOfComputed)
+		countKnown: int = len(boxOfKnown)
 		countMissing: int = len(boxOfMissing)
 		countSurplus: int = len(boxOfSurplus)
 		countMatched: int = len(boxOfMatched)

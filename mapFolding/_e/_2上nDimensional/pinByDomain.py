@@ -126,11 +126,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		boxOfRemoveLeaves.extend([首零一二(state.dimensionsTotal)])
 	if isOdd吗(leafAt一零):
 		dimensionHeadSecond: int = raiseIfNone(dimensionSecondNearest首(leafAt一零))
-		indexBy首Second: int = dimensionHeadSecond * decreasing + decreasing  # Are you confused and/or annoyed by this? Blame Python. (Or figure out a better formula.)
+		次By首Second: int = dimensionHeadSecond * decreasing + decreasing  # Are you confused and/or annoyed by this? Blame Python. (Or figure out a better formula.)
 		boxOfRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionHeadSecond)])
 		if leafAt一零 < 首零(state.dimensionsTotal):
 			sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - 1)
-			boxOfRemoveLeaves.extend([一, leafAt一零 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), leafAt一零 + getitem(sumsOfProductsOfDimensionsNearest首InSubHyperplane, indexBy首Second)])
+			boxOfRemoveLeaves.extend([一, leafAt一零 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), leafAt一零 + getitem(sumsOfProductsOfDimensionsNearest首InSubHyperplane, 次By首Second)])
 			if dimensionHeadSecond == 2:
 				boxOfRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + getitem(state.productsOfDimensions, dimensionNearest首(leafAt一零)), getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + 首零(state.dimensionsTotal)])
 			if dimensionHeadSecond == 3:

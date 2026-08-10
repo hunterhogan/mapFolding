@@ -397,7 +397,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 	pilesTotal: int = len(domain零)
 	pilesFewerDomain0: int = pilesTotal - len(domain0)
 
-	for indexDomain零, pileOfLeaf零 in enumerate(filter(between吗(pileOrigin, 首零(dimensionsTotal) - 零), domain零)):
+	for 次Domain零, pileOfLeaf零 in enumerate(filter(between吗(pileOrigin, 首零(dimensionsTotal) - 零), domain零)):
 		indicesDomain0ToExclude: list[int] = []
 
 		dimensionTail: int = dimensionNearestTail(pileOfLeaf零 - isOdd吗(pileOfLeaf零))
@@ -406,32 +406,32 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 #-------- Two identifiers with different values -------------------
 		# One default value from each option is a type of defensive coding, and the type checkers won't complain about possibly unbound values.
 		excludeBelowAddend: int = 0
-		steppingBasisForUnknownReasons: int = indexDomain零
+		steppingBasisForUnknownReasons: int = 次Domain零
 		if ImaDomain二零and二:
 			excludeBelowAddend = 0
 			steppingBasisForUnknownReasons = int(bit_mask(dimensionTail - 1).bit_flip(0))  # How the hell did I figure out this bizarre formula?
 		elif ImaDomain二一零and二一:
-			excludeBelowAddend = int(isEven吗(indexDomain零) or dimensionTail)
-			steppingBasisForUnknownReasons = indexDomain零
+			excludeBelowAddend = int(isEven吗(次Domain零) or dimensionTail)
+			steppingBasisForUnknownReasons = 次Domain零
 
 # - - - - Two special cases that 1) might be inherent, such as the differences in `pilesFewerDomain0`, or 2) might be because the formulas could be better. I'd bet on number 2.
 		if ImaDomain二零and二:
 			if pileOfLeaf零 == 二:
-				indicesDomain0ToExclude.extend([*range(indexDomain零 + 1)])
+				indicesDomain0ToExclude.extend([*range(次Domain零 + 1)])
 			if pileOfLeaf零 == (首一(dimensionsTotal) + 首二(dimensionsTotal) + 首三(dimensionsTotal)):
-				indexDomain0: int = int(7 * pilesTotal / 8)
-				indexDomain0 -= pilesFewerDomain0
-				indicesDomain0ToExclude.extend([indexDomain0])
+				次Domain0: int = int(7 * pilesTotal / 8)
+				次Domain0 -= pilesFewerDomain0
+				indicesDomain0ToExclude.extend([次Domain0])
 # ******* end *******
 
 #-------- `excludeBelow` `index` ---------------------------------
-		excludeBelow: int = indexDomain零 + excludeBelowAddend
+		excludeBelow: int = 次Domain零 + excludeBelowAddend
 		excludeBelow -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeBelow))
 
 #-------- `excludeAbove` `index` ---------------------------------
 		if pileOfLeaf零 <= 首一(dimensionsTotal):
-			excludeAbove: int = indexDomain零 + (3 * pilesTotal // 4)
+			excludeAbove: int = 次Domain零 + (3 * pilesTotal // 4)
 			excludeAbove -= pilesFewerDomain0
 			indicesDomain0ToExclude.extend(range(excludeAbove, pilesTotal))
 		if 首一(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal):
@@ -446,31 +446,31 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 		if dimensionTail == 1:
 			if (首二(dimensionsTotal) < pileOfLeaf零 < 首零(dimensionsTotal) - 零) and (2 < dimensionNearest首(pileOfLeaf零)):
 				if dimensionSecondNearest首(pileOfLeaf零) == 零:
-					indexDomain0: int = pilesTotal // 2
-					indexDomain0 -= pilesFewerDomain0
-					if 4 < domain0[indexDomain0].bit_length():
-						indicesDomain0ToExclude.extend([indexDomain0])
+					次Domain0: int = pilesTotal // 2
+					次Domain0 -= pilesFewerDomain0
+					if 4 < domain0[次Domain0].bit_length():
+						indicesDomain0ToExclude.extend([次Domain0])
 					if 首一(dimensionsTotal) < pileOfLeaf零:
-						indexDomain0 = -(pilesTotal // 4 - isOdd吗(pileOfLeaf零))
-						indexDomain0 -= -(pilesFewerDomain0)
-						indicesDomain0ToExclude.extend([indexDomain0])
+						次Domain0 = -(pilesTotal // 4 - isOdd吗(pileOfLeaf零))
+						次Domain0 -= -(pilesFewerDomain0)
+						indicesDomain0ToExclude.extend([次Domain0])
 				if dimensionSecondNearest首(pileOfLeaf零) == 一:
-					indexDomain0 = pilesTotal // 2 + 2
-					indexDomain0 -= pilesFewerDomain0
-					if domain0[indexDomain0] < 首零(dimensionsTotal):
-						indicesDomain0ToExclude.extend([indexDomain0])
-					indexDomain0 = -(pilesTotal // 4 - 2)
-					indexDomain0 -= -(pilesFewerDomain0)
+					次Domain0 = pilesTotal // 2 + 2
+					次Domain0 -= pilesFewerDomain0
+					if domain0[次Domain0] < 首零(dimensionsTotal):
+						indicesDomain0ToExclude.extend([次Domain0])
+					次Domain0 = -(pilesTotal // 4 - 2)
+					次Domain0 -= -(pilesFewerDomain0)
 					if 首一(dimensionsTotal) < pileOfLeaf零:
-						indicesDomain0ToExclude.extend([indexDomain0])
+						indicesDomain0ToExclude.extend([次Domain0])
 
 				if dimensionSecondNearest首(pileOfLeaf零) == 一 + 零:
-					indexDomain0 = -(pilesTotal // 4)
-					indexDomain0 -= -(pilesFewerDomain0)
-					indicesDomain0ToExclude.extend([indexDomain0])
+					次Domain0 = -(pilesTotal // 4)
+					次Domain0 -= -(pilesFewerDomain0)
+					indicesDomain0ToExclude.extend([次Domain0])
 
-				indexDomain0 = 3 * pilesTotal // 4
-				indexDomain0 -= pilesFewerDomain0
+				次Domain0 = 3 * pilesTotal // 4
+				次Domain0 -= pilesFewerDomain0
 				# NOTE thinking:  首一二(dimensionsTotal)
 				if pileOfLeaf零 < 首一二(dimensionsTotal):
 					dimensionIndexPart首: int = dimensionsTotal
@@ -478,26 +478,26 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 					dimensionIndexPart二: int = dimensionIndex(二)
 
 					# Compute the index from the head `首`
-					indexSumsOfProductsOfDimensions: int = dimensionIndexPart首 - (dimensionIndexPart一 + dimensionIndexPart二)
+					次SumsOfProductsOfDimensions: int = dimensionIndexPart首 - (dimensionIndexPart一 + dimensionIndexPart二)
 
-					addend: int = sumsOfProductsOfDimensions[indexSumsOfProductsOfDimensions]
+					addend: int = sumsOfProductsOfDimensions[次SumsOfProductsOfDimensions]
 					if ImaDomain二一零and二一:
 						addend -= 1  # decreasing?
 					pileOfLeaf0: int = addend + 首零(dimensionsTotal)
-					indexDomain0 = domain0.index(pileOfLeaf0)
+					次Domain0 = domain0.index(pileOfLeaf0)
 
-					indicesDomain0ToExclude.extend([indexDomain0])
+					indicesDomain0ToExclude.extend([次Domain0])
 
 				if dimensionThirdNearest首(pileOfLeaf零) == 零:
 					if dimensionSecondNearest首(pileOfLeaf零) == 一 + 零:
-						indicesDomain0ToExclude.extend([indexDomain0 - 2])
+						indicesDomain0ToExclude.extend([次Domain0 - 2])
 					if dimensionNearest首(pileOfLeaf零) == 一 + 零:
-						indicesDomain0ToExclude.extend([indexDomain0 - 2])
+						indicesDomain0ToExclude.extend([次Domain0 - 2])
 
 		elif 首一(dimensionsTotal) + 首三(dimensionsTotal) + isOdd吗(pileOfLeaf零) == pileOfLeaf零:
-			indexDomain0 = (3 * pilesTotal // 4) - 1
-			indexDomain0 -= pilesFewerDomain0
-			indicesDomain0ToExclude.extend([indexDomain0])
+			次Domain0 = (3 * pilesTotal // 4) - 1
+			次Domain0 -= pilesFewerDomain0
+			indicesDomain0ToExclude.extend([次Domain0])
 
 		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, indicesDomain0ToExclude)])
 
@@ -556,33 +556,33 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 #-------- Exclude "knock-out" indices ---------------------------------
 		if dimensionTail == 1:
 			if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二 + 零 <= dimensionNearest首(pileOfLeaf零)):
-				indexDomain0: int = (pilesTotal // 2) + 1
-				indexDomain0 -= pilesFewerDomain0
-				boxOfIndicesPilesExcluded.extend([indexDomain0])
-				indexDomain0: int = (pilesTotal // 4) + 1
-				indexDomain0 -= pilesFewerDomain0
-				boxOfIndicesPilesExcluded.extend([indexDomain0])
+				次Domain0: int = (pilesTotal // 2) + 1
+				次Domain0 -= pilesFewerDomain0
+				boxOfIndicesPilesExcluded.extend([次Domain0])
+				次Domain0: int = (pilesTotal // 4) + 1
+				次Domain0 -= pilesFewerDomain0
+				boxOfIndicesPilesExcluded.extend([次Domain0])
 				if pileOfLeaf零 < 首零一(dimensionsTotal):
-					boxOfIndicesPilesExcluded.extend([indexDomain0 - 2])
+					boxOfIndicesPilesExcluded.extend([次Domain0 - 2])
 
 			if howManyDimensionsHaveOddParity(pileOfLeaf零) == 一:
-				indexDomain0 = (pilesTotal // 4) + 3
-				indexDomain0 -= pilesFewerDomain0
+				次Domain0 = (pilesTotal // 4) + 3
+				次Domain0 -= pilesFewerDomain0
 				if dimensionSecondNearest首(pileOfLeaf零) == 一:
-					boxOfIndicesPilesExcluded.extend([indexDomain0])
+					boxOfIndicesPilesExcluded.extend([次Domain0])
 				if dimensionSecondNearest首(pileOfLeaf零) == 二:
-					boxOfIndicesPilesExcluded.extend([indexDomain0])
+					boxOfIndicesPilesExcluded.extend([次Domain0])
 				if (((dimensionNearest首(pileOfLeaf零) == dimensionsTotal - 1) and (dimensionSecondNearest首(pileOfLeaf零) == dimensionsTotal - 3))
 					or (dimensionSecondNearest首(pileOfLeaf零) == 二)):
-					boxOfIndicesPilesExcluded.extend([indexDomain0 - 2])
-					indexDomain0 = (pilesTotal // 2) - 1
-					indexDomain0 -= pilesFewerDomain0
-					boxOfIndicesPilesExcluded.extend([indexDomain0])
+					boxOfIndicesPilesExcluded.extend([次Domain0 - 2])
+					次Domain0 = (pilesTotal // 2) - 1
+					次Domain0 -= pilesFewerDomain0
+					boxOfIndicesPilesExcluded.extend([次Domain0])
 
 		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), isOdd吗(pileOfLeaf零))) == pileOfLeaf零:
-			indexDomain0 = (pilesTotal // 4) + 2
-			indexDomain0 -= pilesFewerDomain0
-			boxOfIndicesPilesExcluded.extend([indexDomain0])
+			次Domain0 = (pilesTotal // 4) + 2
+			次Domain0 -= pilesFewerDomain0
+			boxOfIndicesPilesExcluded.extend([次Domain0])
 
 		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, boxOfIndicesPilesExcluded)])
 
@@ -602,7 +602,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 	pilesTotal: int = len(domain零)
 	pilesFewerDomain0: int = pilesTotal - len(domain0)
 
-	for indexDomain零, pileOfLeaf零 in enumerate(domain零):
+	for 次Domain零, pileOfLeaf零 in enumerate(domain零):
 		if pileOfLeaf零 < 首零(dimensionsTotal):
 			continue
 		indicesDomain0ToExclude: list[int] = []
@@ -611,56 +611,56 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 #-------- `excludeBelow` `index` ---------------------------------
 		if 首零一(dimensionsTotal) < pileOfLeaf零:
-			excludeBelow: int = indexDomain零 + 1 - (3 * pilesTotal // 4)
+			excludeBelow: int = 次Domain零 + 1 - (3 * pilesTotal // 4)
 		else:
 			excludeBelow = (首零一(dimensionsTotal) - direction(pileOfLeaf零, isOdd吗(pileOfLeaf零))) // 2
 		excludeBelow -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeBelow))
 
 #-------- `excludeAbove` `index` ---------------------------------
-		excludeAbove: int = indexDomain零 + 1 - int(bit_mask(dimensionTail))
+		excludeAbove: int = 次Domain零 + 1 - int(bit_mask(dimensionTail))
 		excludeAbove -= pilesFewerDomain0
 		indicesDomain0ToExclude.extend(range(excludeAbove, pilesTotal))
 
 #-------- Exclude by stepping: exclude ((2^dimensionTail - 1) / (2^dimensionTail))-many indices, e.g., 1/2, 3/4, 15/16, after `index` -----------------
-		steppingBasisForUnknownReasons: int = indexDomain零
+		steppingBasisForUnknownReasons: int = 次Domain零
 		for dimension in range(dimensionTail):
 			indicesDomain0ToExclude.extend(range(steppingBasisForUnknownReasons - int(bit_mask(dimension)), decreasing, decreasing * int(bit_flip(0, dimension + 1))))
 
 #-------- Exclude "knock-out" indices ---------------------------------
 		if dimensionTail == 1:
 			if (dimensionThirdNearest首(pileOfLeaf零) == 一) and (二 + 零 <= dimensionNearest首(pileOfLeaf零)):
-				indexDomain0: int = pilesTotal // 2
-				indexDomain0 -= pilesFewerDomain0
-				indicesDomain0ToExclude.extend([indexDomain0])
-				indexDomain0: int = pilesTotal // 4
-				indexDomain0 -= pilesFewerDomain0
-				indicesDomain0ToExclude.extend([indexDomain0])
+				次Domain0: int = pilesTotal // 2
+				次Domain0 -= pilesFewerDomain0
+				indicesDomain0ToExclude.extend([次Domain0])
+				次Domain0: int = pilesTotal // 4
+				次Domain0 -= pilesFewerDomain0
+				indicesDomain0ToExclude.extend([次Domain0])
 				if pileOfLeaf零 < 首零一(dimensionsTotal):
-					indicesDomain0ToExclude.extend([indexDomain0 - 2])
+					indicesDomain0ToExclude.extend([次Domain0 - 2])
 			if dimensionThirdNearest首(pileOfLeaf零) == 一 + 零:
-				indexDomain0 = pilesTotal // 4
-				indexDomain0 -= pilesFewerDomain0
+				次Domain0 = pilesTotal // 4
+				次Domain0 -= pilesFewerDomain0
 				if dimensionFourthNearest首(pileOfLeaf零) == 一:
-					indicesDomain0ToExclude.extend([indexDomain0])
+					indicesDomain0ToExclude.extend([次Domain0])
 			if howManyDimensionsHaveOddParity(pileOfLeaf零) == 一:
-				indexDomain0 = (pilesTotal // 4) + 2
-				indexDomain0 -= pilesFewerDomain0
+				次Domain0 = (pilesTotal // 4) + 2
+				次Domain0 -= pilesFewerDomain0
 				if dimensionSecondNearest首(pileOfLeaf零) == 一:
-					indexDomain0 = domain0.index(首零(dimensionsTotal) - 一)
-					indicesDomain0ToExclude.extend([indexDomain0])
+					次Domain0 = domain0.index(首零(dimensionsTotal) - 一)
+					indicesDomain0ToExclude.extend([次Domain0])
 				if dimensionSecondNearest首(pileOfLeaf零) == 二:
-					indicesDomain0ToExclude.extend([indexDomain0])
+					indicesDomain0ToExclude.extend([次Domain0])
 				if (首零二(dimensionsTotal) < pileOfLeaf零) and (二 + 零 <= dimensionNearest首(pileOfLeaf零)):
-					indicesDomain0ToExclude.extend([indexDomain0 - 2])
-					indexDomain0 = (pilesTotal // 2) - 2
-					indexDomain0 -= pilesFewerDomain0
-					indicesDomain0ToExclude.extend([indexDomain0])
+					indicesDomain0ToExclude.extend([次Domain0 - 2])
+					次Domain0 = (pilesTotal // 2) - 2
+					次Domain0 -= pilesFewerDomain0
+					indicesDomain0ToExclude.extend([次Domain0])
 
 		elif (首零一(dimensionsTotal) - direction(首三(dimensionsTotal), isOdd吗(pileOfLeaf零))) == pileOfLeaf零:
-			indexDomain0 = (pilesTotal // 4) + 1
-			indexDomain0 -= pilesFewerDomain0
-			indicesDomain0ToExclude.extend([indexDomain0])
+			次Domain0 = (pilesTotal // 4) + 1
+			次Domain0 -= pilesFewerDomain0
+			indicesDomain0ToExclude.extend([次Domain0])
 
 		domainCombined.extend([(pileOfLeaf零, pileOfLeaf0) for pileOfLeaf0 in exclude(domain0, indicesDomain0ToExclude)])
 

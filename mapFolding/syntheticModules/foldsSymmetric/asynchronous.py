@@ -45,18 +45,18 @@ def getSymmetricFoldsTotal() -> DatatypeFoldsTotal:
     return symmetricFoldsTotal
 
 def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.indexLeaf = 1
+    state.次Leaf = 1
     state.leafComparison[0] = 1
     state.leafConnectee = 1
     while state.leafConnectee < state.leavesTotal + 1:
-        state.indexMiniGap = state.leafBelow[state.indexLeaf]
-        state.leafComparison[state.leafConnectee] = (state.indexMiniGap - state.indexLeaf + state.leavesTotal) % state.leavesTotal
-        state.indexLeaf = state.indexMiniGap
+        state.次MiniGap = state.leafBelow[state.次Leaf]
+        state.leafComparison[state.leafConnectee] = (state.次MiniGap - state.次Leaf + state.leavesTotal) % state.leavesTotal
+        state.次Leaf = state.次MiniGap
         state.leafConnectee += 1
     for boxOfTuples in state.indices:
         state.leafConnectee = 1
-        for indexLeft, indexRight in boxOfTuples:
-            if state.leafComparison[indexLeft] != state.leafComparison[indexRight]:
+        for 次Left, 次Right in boxOfTuples:
+            if state.leafComparison[次Left] != state.leafComparison[次Right]:
                 state.leafConnectee = 0
                 break
         state.symmetricFolds += state.leafConnectee
@@ -79,10 +79,10 @@ def activeLeafUnconstrainedInThisDimension(state: SymmetricFoldsState) -> Symmet
     return state
 
 def filterCommonGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.indexMiniGap]
-    if state.countDimensionsGapped[state.gapsWhere[state.indexMiniGap]] == state.dimensionsUnconstrained:
+    state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.次MiniGap]
+    if state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] == state.dimensionsUnconstrained:
         state = incrementActiveGap(state)
-    state.countDimensionsGapped[state.gapsWhere[state.indexMiniGap]] = 0
+    state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] = 0
     return state
 
 def gapAvailable(state: SymmetricFoldsState) -> bool:
@@ -97,25 +97,25 @@ def incrementGap1ndexCeiling(state: SymmetricFoldsState) -> SymmetricFoldsState:
     return state
 
 def incrementIndexMiniGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.indexMiniGap += 1
+    state.次MiniGap += 1
     return state
 
 def initializeIndexMiniGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.indexMiniGap = state.gap1ndex
+    state.次MiniGap = state.gap1ndex
     return state
 
 def initializeVariablesToFindGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.dimensionsUnconstrained = state.dimensionsTotal
     state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
-    state.indexDimension = 0
+    state.次Dimension = 0
     return state
 
 def insertActiveLeaf(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.indexLeaf = 0
-    while state.indexLeaf < state.leaf1ndex:
-        state.gapsWhere[state.gap1ndexCeiling] = state.indexLeaf
+    state.次Leaf = 0
+    while state.次Leaf < state.leaf1ndex:
+        state.gapsWhere[state.gap1ndexCeiling] = state.次Leaf
         state.gap1ndexCeiling += 1
-        state.indexLeaf += 1
+        state.次Leaf += 1
     return state
 
 def insertActiveLeafAtGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
@@ -142,27 +142,27 @@ def lookForGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
     return state
 
 def lookupLeafConnecteeInConnectionGraph(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leaf1ndex]
+    state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
     return state
 
 def loopingLeavesConnectedToActiveLeaf(state: SymmetricFoldsState) -> bool:
     return state.leafConnectee != state.leaf1ndex
 
 def loopingThroughTheDimensions(state: SymmetricFoldsState) -> bool:
-    return state.indexDimension < state.dimensionsTotal
+    return state.次Dimension < state.dimensionsTotal
 
 def loopingToActiveGapCeiling(state: SymmetricFoldsState) -> bool:
-    return state.indexMiniGap < state.gap1ndexCeiling
+    return state.次MiniGap < state.gap1ndexCeiling
 
 def noGapsHere(state: SymmetricFoldsState) -> bool:
     return state.leaf1ndex > 0 and state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1]
 
 def tryAnotherLeafConnectee(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.leafConnectee = state.connectionGraph[state.indexDimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
+    state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
     return state
 
 def tryNextDimension(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.indexDimension += 1
+    state.次Dimension += 1
     return state
 
 def undoLastLeafPlacement(state: SymmetricFoldsState) -> SymmetricFoldsState:

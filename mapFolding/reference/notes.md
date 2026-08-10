@@ -36,7 +36,7 @@ Assume `boxOfDimensions`:
 | 2D array | max(p)      | coordinateSystem        |               | C      | c      |
 | 1D array | n           | cumulativeProduct       |               | P      | bigP   |
 | 1D array | d           | countDimensionsGapped   |               | count  | count  |
-| integer  | d           | indexDimension          |               | i      | i      |
+| integer  | d           | 次Dimension          |               | i      | i      |
 | integer  | d           | dimensionsUnconstrained |               | dd     | dd     |
 | integer  | 8*          | dimensionsTotal         |               | d      | dim    |
 | integer  |             | distance                |               | delta  | delta  |
@@ -45,8 +45,8 @@ Assume `boxOfDimensions`:
 | integer  |             | gap1ndexCeiling         |               | gg     | gg     |
 | 1D array |             | gapRangeStart           |               | gapter | gapter |
 | 1D array | n-1         | gapsWhere               |               | gap    | gap    |
-| integer  | gg-1        | indexMiniGap            |               | j      | j      |
-| integer  | n           | indexLeaf               |               | m      | m      |
+| integer  | gg-1        | 次MiniGap            |               | j      | j      |
+| integer  | n           | 次Leaf               |               | m      | m      |
 | integer  | n+1         | leaf1ndex               |               | l      | l      |
 | 1D array | n+1         | leafAbove               |               | A      | a      |
 | 1D array | n+1         | leafBelow               |               | B      | b      |

@@ -54,8 +54,8 @@ def theorem2b(state: EliminationState) -> EliminationState:
 def theorem4(state: EliminationState) -> EliminationState:
 	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
-		for index_k, index_r in pairwise(indicesSameDimensionLength):
-			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[index_k], state.productsOfDimensions[index_r])
+		for 次k, 次r in pairwise(indicesSameDimensionLength):
+			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[次k], state.productsOfDimensions[次r])
 			state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 	return state
 

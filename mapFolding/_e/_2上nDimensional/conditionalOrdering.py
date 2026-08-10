@@ -60,15 +60,15 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	for aPile in boxOfPiles[boxOfPiles.index(一 + 零): boxOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) + inclusive]:
 		dictionaryPrecedence[leaf][aPile].append((零) + 首零(state.dimensionsTotal))
 
-	for indexUniversal in range(state.dimensionsTotal - 2):
-		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[indexUniversal + 2]
+	for 次Universal in range(state.dimensionsTotal - 2):
+		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[次Universal + 2]
 		leavesPredecessorInThisSeries: int = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
 		for addend in range(leavesPredecessorInThisSeries):
 			leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
 			pileFirst: int = (
-				sumsOfProductsOfDimensionsNearest首[indexUniversal]
+				sumsOfProductsOfDimensionsNearest首[次Universal]
 				+ state.sumsOfProductsOfDimensions[2]
-				+ state.productsOfDimensions[state.dimensionsTotal - (indexUniversal + 2)]
+				+ state.productsOfDimensions[state.dimensionsTotal - (次Universal + 2)]
 				- ((pileStepAbsolute * 2 * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
 					* (1 + (2 == (howManyDimensionsHaveOddParity(leafPredecessor) + isEven吗(leafPredecessor)) == dimensionNearest首(leafPredecessor)))
 				)
@@ -93,22 +93,22 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 			for aPile in boxOfPiles[boxOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-			if (indexUniversal < state.dimensionsTotal - 4) and isOdd吗(dimensionNearestTail(leafPredecessor - isOdd吗(leafPredecessor))):
+			if (次Universal < state.dimensionsTotal - 4) and isOdd吗(dimensionNearestTail(leafPredecessor - isOdd吗(leafPredecessor))):
 				pileFirst = (
-					sumsOfProductsOfDimensionsNearest首InSubHyperplane[indexUniversal]
-					+ state.sumsOfProductsOfDimensions[2 + 1 + indexUniversal]
+					sumsOfProductsOfDimensionsNearest首InSubHyperplane[次Universal]
+					+ state.sumsOfProductsOfDimensions[2 + 1 + 次Universal]
 					- (pileStepAbsolute
 						* 2
 						* (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1
-							+ isEven吗(leafPredecessor首零) * indexUniversal
-							- isEven吗(leafPredecessor首零) * (int(not (bool(indexUniversal))))
+							+ isEven吗(leafPredecessor首零) * 次Universal
+							- isEven吗(leafPredecessor首零) * (int(not (bool(次Universal))))
 						)
 					)
 					+ state.productsOfDimensions[state.dimensionsTotal - 1
-												+ addend * (int(not (bool(indexUniversal))))
-												- (indexUniversal + 2)]
+												+ addend * (int(not (bool(次Universal))))
+												- (次Universal + 2)]
 				)
-				for aPile in boxOfPiles[boxOfPiles.index(pileFirst) + indexUniversal: boxOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) - indexUniversal + inclusive]:
+				for aPile in boxOfPiles[boxOfPiles.index(pileFirst) + 次Universal: boxOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) - 次Universal + inclusive]:
 					dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
 	del leaf, boxOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute, sumsOfProductsOfDimensionsNearest首InSubHyperplane
@@ -121,13 +121,13 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in boxOfPiles}
 	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)
 	pileStepAbsolute = 4
-	for indexUniversal in range(state.dimensionsTotal - 2):
-		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[indexUniversal + 2]
+	for 次Universal in range(state.dimensionsTotal - 2):
+		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[次Universal + 2]
 		leavesPredecessorInThisSeries = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
 		for addend in range(leavesPredecessorInThisSeries):
 			leafPredecessor: int = leafPredecessorTheFirst + (addend * decreasing)
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
-			pileFirst = sumsOfProductsOfDimensionsNearest首[indexUniversal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
+			pileFirst = sumsOfProductsOfDimensionsNearest首[次Universal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
 			for aPile in boxOfPiles[boxOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
@@ -165,16 +165,16 @@ def _getDictionaryConditionalLeafSuccessors(mapShape: tuple[int, ...]) -> dict[L
 	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = getDictionaryConditionalLeafPredecessors(state)
 
 	for leafLater, dictionaryPiles in dictionaryPrecedence.items():
-		tupleDomainLater: tuple[Pile, ...] = tuple(dictionaryDomains[leafLater])
+		boxOfDomainLater: tuple[Pile, ...] = tuple(dictionaryDomains[leafLater])
 		dictionaryPilesByPredecessor: defaultdict[Leaf, set[Pile]] = defaultdict(set)
 		for pileLater, boxOfLeafPredecessors in dictionaryPiles.items():
 			for leafEarlier in boxOfLeafPredecessors:
 				dictionaryPilesByPredecessor[leafEarlier].add(pileLater)
 
-		for leafEarlier, setPilesRequiring in dictionaryPilesByPredecessor.items():
-			tupleDomainEarlier: tuple[Pile, ...] = tuple(dictionaryDomains[leafEarlier])
-			boxOfOptionalPiles: list[Pile] = sorted(pile for pile in tupleDomainLater if pile not in setPilesRequiring)
-			for pileEarlier in tupleDomainEarlier:
+		for leafEarlier, boxOfPilesRequiring in dictionaryPilesByPredecessor.items():
+			boxOfDomainEarlier: tuple[Pile, ...] = tuple(dictionaryDomains[leafEarlier])
+			boxOfOptionalPiles: list[Pile] = sorted(pile for pile in boxOfDomainLater if pile not in boxOfPilesRequiring)
+			for pileEarlier in boxOfDomainEarlier:
 				optionalLessEqualCount: int = bisect_right(boxOfOptionalPiles, pileEarlier)
 				if optionalLessEqualCount == 0:
 					boxOfSuccessors: list[Leaf] = dictionarySuccessor.setdefault(leafEarlier, {}).setdefault(pileEarlier, [])

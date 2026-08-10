@@ -121,7 +121,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	countGapsCodeBlock: Sequence[ast.stmt] = raiseIfNone(captureCountGapsCodeBlock.captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	thisIsMyTaskIndexCodeBlock = Make.If(Make.Or.join([Make.Compare(Make.Name('leaf1ndex'), ops=[Make.NotEq()], comparators=[Make.Name('taskDivisions')])
-				, Make.Compare(Make.Mod.join([Make.Name('leafConnectee'), Make.Name('taskDivisions')]), ops=[Make.Eq()], comparators=[Make.Name('taskIndex')])
+				, Make.Compare(Make.Mod.join([Make.Name('leafConnectee'), Make.Name('taskDivisions')]), ops=[Make.Eq()], comparators=[Make.Name('task次')])
 			]), body=list(countGapsCodeBlock[0:-1]))
 
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
@@ -169,7 +169,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', Make.Store()))]
 					, body=[Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Name('state', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
-								, Make.Assign([Make.Attribute(Make.Name('state'), 'taskIndex', context=Make.Store())], value=Make.Name('indexSherpa'))
+								, Make.Assign([Make.Attribute(Make.Name('state'), 'task次', context=Make.Store())], value=Make.Name('indexSherpa'))
 								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
 						, Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))

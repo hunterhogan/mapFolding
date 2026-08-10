@@ -12,7 +12,7 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 
 	pathFilenameSource: Path = pathDataRaw / "p2d7s0_1_3_2.csv"
 	if pathFilenameSource.exists():
-		setLeavesAllowedAfterTwo: set[int] = set(getLeavesCreasePost(state, 2))
+		boxOfLeavesAllowedAfterTwo: set[int] = set(getLeavesCreasePost(state, 2))
 
 		dictionaryAppendStreams: dict[int, TextIO] = {}
 		try:
@@ -34,7 +34,7 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 					if not boxOfPrefixParts[4].isdigit():
 						continue
 					leafFifth: int = int(boxOfPrefixParts[4])
-					if leafFifth not in setLeavesAllowedAfterTwo:
+					if leafFifth not in boxOfLeavesAllowedAfterTwo:
 						continue
 
 					appendStream: TextIO | None = dictionaryAppendStreams.get(leafFifth)
@@ -58,9 +58,9 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 	pathSorted.mkdir(exist_ok=True)
 
 	lineHeader: str | None = None
-	tupleHeaderExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
+	boxOfHeaderExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
 
-	setSequences: set[tuple[int, ...]] = set()
+	boxOfSequences: set[tuple[int, ...]] = set()
 	boxOfSequencesUnique: list[tuple[int, ...]] = []
 
 	duplicatesDetected: bool = False
@@ -69,16 +69,16 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 	sequencePrior: tuple[int, ...] | None = None
 
 	with pathFilenameTarget.open('r', encoding="utf-8", newline='') as readStream:
-		for indexLine, lineRaw in enumerate(readStream):
+		for 次Line, lineRaw in enumerate(readStream):
 			line: str = lineRaw.rstrip('\n').rstrip('\r')
-			if indexLine == 0 and line.startswith("0,1,2,"):
+			if 次Line == 0 and line.startswith("0,1,2,"):
 				boxOfHeaderParts: list[str] = line.split(',')
 				if len(boxOfHeaderParts) == state.leavesTotal:
 					try:
-						tupleHeaderFound: tuple[int, ...] = tuple(int(part) for part in boxOfHeaderParts)
+						boxOfHeaderFound: tuple[int, ...] = tuple(int(part) for part in boxOfHeaderParts)
 					except ValueError:
-						tupleHeaderFound = ()
-					if tupleHeaderFound == tupleHeaderExpected:
+						boxOfHeaderFound = ()
+					if boxOfHeaderFound == boxOfHeaderExpected:
 						lineHeader = line
 						continue
 
@@ -91,23 +91,23 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 				invalidLinesDetected = True
 				continue
 			try:
-				tupleSequence: tuple[int, ...] = tuple(int(part) for part in line.split(','))
+				boxOfSequence: tuple[int, ...] = tuple(int(part) for part in line.split(','))
 			except ValueError:
 				invalidLinesDetected = True
 				continue
-			if len(tupleSequence) != state.leavesTotal:
+			if len(boxOfSequence) != state.leavesTotal:
 				invalidLinesDetected = True
 				continue
 
-			if sequencePrior is not None and tupleSequence < sequencePrior:
+			if sequencePrior is not None and boxOfSequence < sequencePrior:
 				sortedAlready = False
-			sequencePrior = tupleSequence
+			sequencePrior = boxOfSequence
 
-			if tupleSequence in setSequences:
+			if boxOfSequence in boxOfSequences:
 				duplicatesDetected = True
 				continue
-			setSequences.add(tupleSequence)
-			boxOfSequencesUnique.append(tupleSequence)
+			boxOfSequences.add(boxOfSequence)
+			boxOfSequencesUnique.append(boxOfSequence)
 
 	if not (duplicatesDetected or invalidLinesDetected or not sortedAlready):
 		return
@@ -119,18 +119,18 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 		if lineHeader is not None:
 			writeStream.write(lineHeader)
 			writeStream.write('\n')
-		for tupleSequence in boxOfSequencesSorted:
-			writeStream.write(','.join(str(value) for value in tupleSequence))
+		for boxOfSequence in boxOfSequencesSorted:
+			writeStream.write(','.join(str(value) for value in boxOfSequence))
 			writeStream.write('\n')
 
 def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> None:
 	pathSorted: Path = pathDataRaw / "sorted"
 	pathSorted.mkdir(exist_ok=True)
 
-	setLeavesAllowedAfterOne: set[int] = set(getLeavesCreasePost(state, 1))
+	boxOfLeavesAllowedAfterOne: set[int] = set(getLeavesCreasePost(state, 1))
 	dictionaryAllowedAfterThird: dict[int, set[int]] = {
 		leafThird: set(getLeavesCreasePost(state, leafThird))
-		for leafThird in setLeavesAllowedAfterOne
+		for leafThird in boxOfLeavesAllowedAfterOne
 	}
 
 	dictionaryAppendStreams: dict[tuple[int, int], TextIO] = {}
@@ -155,7 +155,7 @@ def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> Non
 						continue
 					leafThird: int = int(boxOfPrefixParts[2])
 					leafFourth: int = int(boxOfPrefixParts[3])
-					if leafThird not in setLeavesAllowedAfterOne:
+					if leafThird not in boxOfLeavesAllowedAfterOne:
 						continue
 					if leafFourth not in dictionaryAllowedAfterThird[leafThird]:
 						continue

@@ -63,9 +63,9 @@ def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
 	assertEqualTo(len(dictionaryLeafOptionsActual), state.leavesTotal, 'getDictionaryLeafOptions', mapShape)
 
 	for pile in range(state.leavesTotal):
-		tupleLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(dictionaryLeafOptionsActual[pile]))
-		tupleLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
-		assertEqualTo(tupleLeavesPileActual, tupleLeavesPileAuthoritativeData, 'getDictionaryLeafOptions', pile, mapShape)
+		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(dictionaryLeafOptionsActual[pile]))
+		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
+		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getDictionaryLeafOptions', pile, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
 def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
@@ -115,10 +115,10 @@ def test_getLeafOptions(mapShape: tuple[int, ...]) -> None:
 	dictionaryLeafOptionsAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryLeafOptionsKnown[mapShape]
 
 	for pile in range(state.leavesTotal):
-		tupleLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))
-		tupleLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
+		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))
+		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
 
-		assertEqualTo(tupleLeavesPileActual, tupleLeavesPileAuthoritativeData, 'getLeafOptions', pile, mapShape)
+		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getLeafOptions', pile, mapShape)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
 @pytest.mark.parametrize("creaseKind,creaseFunction,dictionaryExpectedByMapShape", [("increase", getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown), ("decrease", getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown)], ids=["increase", "decrease"])

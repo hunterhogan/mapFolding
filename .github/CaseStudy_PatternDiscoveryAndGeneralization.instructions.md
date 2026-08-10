@@ -111,13 +111,13 @@ With the series structure understood and the magical sequence identified, formul
 
 ```python
 pileStepAbsolute = 4
-for indexUniversal in range(state.dimensionsTotal - 2):
-    leafPredecessorTheFirst = Z0Z_invert(state, magicalSequence[state.dimensionsTotal - 2 - indexUniversal])
+for 次Universal in range(state.dimensionsTotal - 2):
+    leafPredecessorTheFirst = Z0Z_invert(state, magicalSequence[state.dimensionsTotal - 2 - 次Universal])
     leafPredecessorsInThisSeries = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
     for addend in range(leafPredecessorsInThisSeries):
         leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
         leafPredecessor首零 = leafPredecessor + 首零(state.dimensionsTotal)
-        pileFirst = magicalSequence[indexUniversal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
+        pileFirst = magicalSequence[次Universal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
         for pile in boxOfPiles[boxOfPiles.index(pileFirst): None]:
             dictionary首零Plus零[pile].append(leafPredecessor)
             dictionary首零Plus零[pile].append(leafPredecessor首零)
@@ -280,7 +280,7 @@ When asked to find patterns in static data:
 | ---------------------------------- | ------------------------------------------------------------------ |
 | 60+ explicit tuples                | Single nested loop                                                 |
 | Valid only for 6D                  | Valid for any `dimensionsTotal >= 4`                               |
-| Hardcoded `pileFirst` values       | `magicalSequence[indexUniversal] + 6 - (pileStepAbsolute * (...))` |
+| Hardcoded `pileFirst` values       | `magicalSequence[次Universal] + 6 - (pileStepAbsolute * (...))` |
 | Hardcoded `leafPredecessor` values | `Z0Z_invert(state, magicalSequence[...])` and arithmetic           |
 | No visible structure               | Clear series structure via loop bounds                             |
 

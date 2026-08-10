@@ -127,7 +127,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
-	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+	boxOfUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 
@@ -152,7 +152,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 			positionsOfEarlier: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsSubset[:, leafEarlier]
 
 			isEarlierAlwaysPresentAndPrecedes: bool = bool(numpy.all((positionsOfEarlier >= 0) & (positionsOfEarlier < columnEarliestIndex)))
-			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in setUnconditional:
+			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in boxOfUnconditional:
 				boxOfConditionalRelationships.append({
 					'Earlier': leafEarlier,
 					'Later': leafLater,
@@ -209,7 +209,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
-	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+	boxOfUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 
@@ -234,7 +234,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 			positionsOfEarlier: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsSubset[:, leafEarlier]
 
 			isEarlierAlwaysPresentAndPrecedes: bool = bool(numpy.all((positionsOfEarlier >= 0) & (positionsOfEarlier < pileLastOfLeafIndex)))
-			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in setUnconditional:
+			if isEarlierAlwaysPresentAndPrecedes and (leafEarlier, leafLater) not in boxOfUnconditional:
 				boxOfConditionalRelationships.append({
 					'Earlier': leafEarlier,
 					'Later': leafLater,
@@ -266,7 +266,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
-	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+	boxOfUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 
@@ -290,7 +290,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 
 			positionsOfLater: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsSubset[:, leafLater]
 			isLaterAlwaysPresentAndFollows: bool = bool(numpy.all((positionsOfLater >= 0) & (pileLastOfLeafIndex < positionsOfLater)))
-			if isLaterAlwaysPresentAndFollows and (leafEarlier, leafLater) not in setUnconditional:
+			if isLaterAlwaysPresentAndFollows and (leafEarlier, leafLater) not in boxOfUnconditional:
 				boxOfConditionalRelationships.append({
 					'Earlier': leafEarlier,
 					'Later': leafLater,
@@ -321,7 +321,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 	columnOffset: int = 2 if columnsToExclude is not None and 0 in columnsToExclude and 1 in columnsToExclude else 0
 
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
-	setUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
+	boxOfUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
 	leafDomain: range = getLeafDomain(state, leafLater)
 
@@ -347,7 +347,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 
 		for leafEarlierCandidate in indicesEarlier.tolist():
 			leafEarlier: Leaf = int(leafEarlierCandidate)
-			if (leafEarlier, leafLater) in setUnconditional:
+			if (leafEarlier, leafLater) in boxOfUnconditional:
 				continue
 			boxOfConditionalRelationships.append({
 				'Earlier': leafEarlier,

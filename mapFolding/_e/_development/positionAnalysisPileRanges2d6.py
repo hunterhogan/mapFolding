@@ -99,12 +99,12 @@ p37 = [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 
 bbb = [4, 7, 8, 11, 13, 14, 16, 19, 21, 22, 25, 26, 28, 31, 35, 37, 38, 41, 42, 44, 47, 49, 50, 52, 55, 56, 59, 61, 62]
 
 ww: list[int] = []
-for index, nn in enumerate(p21):
+for 次, nn in enumerate(p21):
 	if nn < 2**4 - 1:
-		print(nn, p21[-(index + 2)], nn ^ 0b111111 == p21[-(index + 2)], sep='\t')
+		print(nn, p21[-(次 + 2)], nn ^ 0b111111 == p21[-(次 + 2)], sep='\t')
 		ww.extend([nn, nn ^ 0b111111])
 	elif nn < 2**5 - 1:
-		print(nn, p21[-(index + 3)], nn ^ 0b111111, nn ^ 0b111111 == p21[-(index + 3)], sep='\t')
+		print(nn, p21[-(次 + 3)], nn ^ 0b111111, nn ^ 0b111111 == p21[-(次 + 3)], sep='\t')
 		ww.extend([nn, nn ^ 0b111111])
 
 print(set(p21).difference(ww))  # {47, 62, 31}. # 47^0b111111 = 16

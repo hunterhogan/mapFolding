@@ -39,15 +39,15 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	implementations I tried.
 	"""
 	indicesAnalyzed: int = 2
-	indexArcCode, indexCrossings = range(indicesAnalyzed)
-	slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=indexArcCode)
-	slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=indexCrossings)
+	次ArcCode, 次Crossings = range(indicesAnalyzed)
+	slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., indices=次ArcCode)
+	slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., indices=次Crossings)
 
 	indicesWorkbench: int = 3
-	indexPrepArea, indexAlfa, indexZulu = range(indicesWorkbench)
-	slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., indices=indexPrepArea)
-	slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., indices=indexAlfa)
-	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=indexZulu)
+	次PrepArea, 次Alfa, 次Zulu = range(indicesWorkbench)
+	slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., indices=次PrepArea)
+	slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., indices=次Alfa)
+	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=次Zulu)
 
 	shape = ShapeArray(length=len(state.dictionaryMeanders), indices=indicesAnalyzed)
 	arrayMeanders: memmap[tuple[Any, ...], dtype[dtypeArcCode]] = numpy.memmap('arrayMeanders.mM', dtypeArcCode, 'write', shape=shape)
@@ -71,13 +71,13 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			selectorAnalysis: ndarray[tuple[int], dtype[numpy.intp]] = numpy.flatnonzero(arcCode)
 
-			indexStop: int = state.indexTarget + len(selectorAnalysis)
-			sliceAnalysis: slice = slice(state.indexTarget, indexStop)
-			state.indexTarget = indexStop
-			del indexStop
+			次Stop: int = state.次Target + len(selectorAnalysis)
+			sliceAnalysis: slice = slice(state.次Target, 次Stop)
+			state.次Target = 次Stop
+			del 次Stop
 
-			slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, indices=indexArcCode)
-			slicerCrossingsAnalysis = ShapeSlicer(length=sliceAnalysis, indices=indexCrossings)
+			slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, indices=次ArcCode)
+			slicerCrossingsAnalysis = ShapeSlicer(length=sliceAnalysis, indices=次Crossings)
 			del sliceAnalysis
 
 			arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
@@ -131,7 +131,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_and(bitsZulu, state.bitsLocator, out=bitsZulu)
 		arrayWorkbench.flush()
 
-		state.indexTarget = 0
+		state.次Target = 0
 
 		state.boundary -= 1
 		boundaryProgressBar.set_postfix(boundary=state.boundary)  # pyright: ignore[reportUnknownMemberType]
@@ -275,7 +275,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		if 45 <= state.n:  # Data collection for 'reference' directory.
 			# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-			print(state.kind, state.n, state.boundary + 1, state.indexTarget, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
+			print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
 		boundaryProgressBar.update()
 
 	boundaryProgressBar.close()
