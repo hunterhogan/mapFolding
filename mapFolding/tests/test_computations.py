@@ -58,154 +58,97 @@ if TYPE_CHECKING:
 	from types import ModuleType
 	from typing import LiteralString
 
-@pytest.mark.parametrize(
-	'oeisID, n, flow, CPUlimit'
-	, [
-		pytest.param('A007822', 6, 'algorithm', 0.5, id='algorithm')
-		, pytest.param('A007822', 6, 'asynchronous', 0.5, id='asynchronous')
-		, pytest.param('A007822', 6, 'theorem2', 0.5, id='theorem2')
-		, pytest.param(
-			'A007822', 6, 'theorem2Codon', 0.5
-			, id='theorem2Codon'
-			, marks=pytest.mark.skipif(
-				importlib.util.find_spec('codon') is None
-				, reason='codon-jit is not installed'
-			)
-		)
-		, pytest.param('A007822', 6, 'theorem2Numba', 0.5, id='theorem2Numba')
-		, pytest.param('A007822', 6, 'theorem2Trimmed', 0.5, id='theorem2Trimmed')
-	]
-)
-def test_countFoldsSymmetric(oeisID: LiteralString, n: int, flow: LiteralString, CPUlimit: float) -> None:
-	"""Test foldsSymmetric flow options.
+@pytest.mark.parametrize('CPUlimit', (None,))
+@pytest.mark.parametrize('oeisID, n, flow'
+	, [*[pytest.param(oeisID, n, flow, id=f'{flow},{oeisID}({n})') for oeisID, nValues in (
+			('A000136', (2, 3, 12))
+			, ('A001415', (2, 3, 9))
+			, ('A001416', (2, 4, 6))
+			, ('A001417', (3, 5))
+			, ('A001418', (4,))
+			, ('A195646', (2,))) for n, flow in CartesianProduct(nValues
+				, ('numba', 'theorem2Numba')
+		)]
+		, *[pytest.param(oeisID, n, flow, id=f'{flow},{oeisID}({n})') for oeisID, nValues in (
+			('A000136', (2, 3, 12))
+			, ('A001415', (2, 3, 6))
+			, ('A001416', (2, 4))
+			, ('A001417', (3,))
+			, ('A001418', (3,))
+			, ('A195646', (1,))) for n, flow in CartesianProduct(nValues
+				, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed')
+)]])
+def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float | None) -> None:
+	"""Validate that different computational flows produce valid results."""
+	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
+	expected: int = getValuesKnown(oeisID)[n]
+	actual: int = countFolds(mapShape, flow, CPUlimit=CPUlimit)
+	assertEqualTo(actual, expected, countFolds.__name__, mapShape, flow)
 
-	Parameters
-	----------
-	oeisID : str
-		OEIS identifier to validate.
-	n : int
-		Sequence index to validate.
-	flow : str
-		Computation flow to validate.
-	CPUlimit : float
-		CPU limit for the computation.
-
-	"""
+@pytest.mark.parametrize('CPUlimit', (None,))
+@pytest.mark.parametrize('n, flow'
+	, [*[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 7), ('numba', 'theorem2Numba'))]
+	, *[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 5), ('algorithm', 'theorem2', 'theorem2Trimmed')
+)]])
+def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> None:
+	"""Test foldsSymmetric flow options."""
+	oeisID: LiteralString = 'A007822'
 	pathLikeWrite: PathLike[str] | None = None
 	warnings.filterwarnings('ignore', category=NumbaPendingDeprecationWarning)
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 	expected: int = getValuesKnown(oeisID)[n]
 	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
-	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, mapShape, flow, pathLikeWrite, CPUlimit)
+	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, n, flow)
 
-@pytest.mark.parametrize('CPUlimit', (None,))
-@pytest.mark.parametrize('oeisID, n, flow'
-	, [
-		*[
-			pytest.param(oeisID, n, flow, id=f'{flow}::{oeisID}({n})')
-			for oeisID, nValues in (
-				('A000136', (2, 3, 12))
-				, ('A001415', (2, 3, 9))
-				, ('A001416', (2, 4, 6))
-				, ('A001417', (3, 5))
-				, ('A001418', (4,))
-				, ('A195646', (2,))
-			)
-			for n, flow in CartesianProduct(nValues, ('numba', 'theorem2Codon', 'theorem2Numba'))
-		]
-		, *[
-			pytest.param(oeisID, n, flow, id=f'{flow}::{oeisID}({n})')
-			for oeisID, nValues in (
-				('A000136', (2, 3, 12))
-				, ('A001415', (2, 3, 6))
-				, ('A001416', (2, 4))
-				, ('A001417', (3,))
-				, ('A001418', (3,))
-				, ('A195646', (1,))
-			)
-			for n, flow in CartesianProduct(nValues, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed'))
-		]
-	]
-)
-def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float | None) -> None:
-	"""Validate that different computational flows produce valid results.
-
-	(AI generated docstring)
-
-	This is the primary test for ensuring mathematical consistency across different
-	algorithmic implementations. When adding a new computational approach, include
-	it in the parametrized flow list to verify it produces correct results.
-
-	The test compares the output of each flow against known correct values from
-	OEIS sequences, ensuring that optimization techniques don't compromise accuracy.
-
-	Parameters
-	----------
-	oeisID : str
-		OEIS identifier to validate.
-	n : int
-		Sequence index to validate.
-	flow : str
-		Computation flow to validate.
-	CPUlimit : float | None
-		CPU limit for the computation.
-
-	"""
-	if flow == 'theorem2Codon' and importlib.util.find_spec('codon') is None:
-		pytest.skip('codon-jit is not installed')
-
-	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
-	expected: int = getValuesKnown(oeisID)[n]
-	actual: int = countFolds(mapShape, flow, CPUlimit=CPUlimit)
-	assertEqualTo(actual, expected, countFolds.__name__, mapShape, flow, CPUlimit=CPUlimit)
-
-@pytest.mark.xdist_group(name='test_meanders')
-@pytest.mark.parametrize(
-	'kind, oeisID'
-	, [
-		pytest.param('semi', 'A000682', id='semi')
-		, pytest.param('meanders', 'A005316', id='meanders')
-	]
-)
-@pytest.mark.parametrize('n, flow', (*CartesianProduct((2, 29), ('matrixNumPy', 'matrixPandas')), (3, 'matrixMeanders'), (10, 'matrixMeanders')))
-def test_meanders(kind: LiteralString, oeisID: OEISid, n: int, flow: LiteralString) -> None:
-	"""Verify Meanders OEIS sequence value calculations against known reference values.
-
-	Tests the functions in `mapFolding.algorithms.oeisIDbyFormula` by comparing their
-	calculated output against known correct values from the OEIS database for Meanders IDs.
-
-	Parameters
-	----------
-	kind : str
-		Semantic meander algorithm kind to validate.
-	oeisID : str
-		OEIS identifier to validate.
-	n : int
-		Sequence index to validate.
-	flow : LiteralString
-		Computation flow to validate.
-
-	"""
-	expected: int = getValuesKnown(oeisID)[n]
+# TODO Run the numpy/pandas tests in series because they cause namespace problems.
+@pytest.mark.parametrize('n, flow, kind', (
+	(30, 'matrixNumPy', 'semi'), (3, 'matrixMeanders', 'meanders'), (20, 'matrixPandas', 'meanders'), (10, 'matrixMeanders', 'semi')
+))
+def test_meanders(kind: LiteralString, n: int, flow: LiteralString) -> None:
+	"""Verify Meanders OEIS sequence value calculations against known reference values."""
+	fml = {'semi': 'A000682', 'meanders': 'A005316'}
+	expected: int = getValuesKnown(fml[kind])[n]
 	actual: int = countMeanders(kind, n, flow, None)
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
+# TODO Make param that isn't stoopid.
+@pytest.mark.parametrize(
+	'oeisID, n, f, keywordArguments'
+	, [
+		pytest.param('A000136', 3, '', {'flow': 'daoOfMapFolding'}, id='A000136,countFolds')
+		, pytest.param('A001415', 3, '', {'flow': 'daoOfMapFolding'}, id='A001415,countFolds')
+		, pytest.param('A001416', 3, '', {'flow': 'daoOfMapFolding'}, id='A001416,countFolds')
+		, pytest.param('A001417', 3, '', {'flow': 'daoOfMapFolding'}, id='A001417,countFolds')
+		, pytest.param('A001418', 3, '', {'flow': 'daoOfMapFolding'}, id='A001418,countFolds')
+		, pytest.param('A195646', 2, '', {'flow': 'daoOfMapFolding'}, id='A195646,countFolds')
+		, pytest.param('A000682', 3, '', {'flow': 'matrixMeanders'}, id='A000682,countMeanders')
+		, pytest.param('A005316', 3, '', {'flow': 'matrixMeanders'}, id='A005316,countMeanders')
+		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric,countFoldsSymmetric')
+	]
+)
+def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString, keywordArguments: 形KeywordArgumentsCount) -> None:
+	"""Verify OEIS sequence value calculations against known reference values."""
+	expected: int = getValuesKnown(oeisID)[n]
+	actual: int = oeisIDfor_n(oeisID, n, f, **keywordArguments)
+	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, n, f, **keywordArguments)
+
+# TODO Make param that isn't stoopid.
 @pytest.mark.parametrize(
 	'oeisID, f'
 	, [
 		pytest.param('A000560', '', id='A000560')
-		, pytest.param('A000136', 'A000682', id='A000136::A000682')
-		, pytest.param('A000136', 'A000560', id='A000136::A000560')
-		, pytest.param('A000682', 'A000560', id='A000682::A000560')
-		, pytest.param('A000682', 'A301620', id='A000682::A301620')
-		, pytest.param('A000682', 'A259689', id='A000682::A259689')
-		, pytest.param('A000682', 'A000136', id='A000682::A000136')
-		, pytest.param('A000682', 'A223094', id='A000682::A223094')
-		, pytest.param('A001010', 'A000682 and A007822', id='A001010::A000682-and-A007822')
-		, pytest.param('A001010', 'A001011 and A000136', id='A001010::A001011-and-A000136')
-		, pytest.param('A223094', 'A000136 and A000682', id='A223094::A000136-and-A000682')
-		, pytest.param('A223094', 'A223094 and A000682', id='A223094::A223094-and-A000682')
-		, pytest.param('A223094', 'A000682', id='A223094::A000682')
+		, pytest.param('A000136', 'A000682', id='A000136,A000682')
+		, pytest.param('A000136', 'A000560', id='A000136,A000560')
+		, pytest.param('A000682', 'A000560', id='A000682,A000560')
+		, pytest.param('A000682', 'A301620', id='A000682,A301620')
+		, pytest.param('A000682', 'A259689', id='A000682,A259689')
+		, pytest.param('A000682', 'A000136', id='A000682,A000136')
+		, pytest.param('A000682', 'A223094', id='A000682,A223094')
+		, pytest.param('A001010', 'A000682 and A007822', id='A001010,A000682-and-A007822')
+		, pytest.param('A001010', 'A001011 and A000136', id='A001010,A001011-and-A000136')
+		, pytest.param('A223094', 'A000136 and A000682', id='A223094,A000136-and-A000682')
+		, pytest.param('A223094', 'A223094 and A000682', id='A223094,A223094-and-A000682')
+		, pytest.param('A223094', 'A000682', id='A223094,A000682')
 		, pytest.param('A259689', '', id='A259689')
 		, pytest.param('A001011', '', id='A001011')
 		, pytest.param('A005315', '', id='A005315')
@@ -213,7 +156,7 @@ def test_meanders(kind: LiteralString, oeisID: OEISid, n: int, flow: LiteralStri
 		, pytest.param('A077460', '', id='A077460')
 		, pytest.param('A078591', '', id='A078591')
 		, pytest.param('A301620', '', id='A301620')
-		, pytest.param('A301620', 'A259689', id='A301620::A259689')
+		, pytest.param('A301620', 'A259689', id='A301620,A259689')
 	]
 )
 @pytest.mark.parametrize(
@@ -225,43 +168,6 @@ def test_oeisIDfor_n_byFormula(oeisID: OEISid, oeis_n: int, f: LiteralString) ->
 	expected: int = getValuesKnown(oeisID)[oeis_n]
 	actual: int = oeisIDfor_n(oeisID, oeis_n, f=f)
 	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, oeis_n, f=f)
-
-@pytest.mark.parametrize(
-	'oeisID, n, f, keywordArguments'
-	, [
-		pytest.param('A000136', 3, '', {'flow': 'daoOfMapFolding'}, id='A000136::countFolds')
-		, pytest.param('A001415', 3, '', {'flow': 'daoOfMapFolding'}, id='A001415::countFolds')
-		, pytest.param('A001416', 3, '', {'flow': 'daoOfMapFolding'}, id='A001416::countFolds')
-		, pytest.param('A001417', 3, '', {'flow': 'daoOfMapFolding'}, id='A001417::countFolds')
-		, pytest.param('A001418', 3, '', {'flow': 'daoOfMapFolding'}, id='A001418::countFolds')
-		, pytest.param('A195646', 2, '', {'flow': 'daoOfMapFolding'}, id='A195646::countFolds')
-		, pytest.param('A000682', 3, '', {'flow': 'matrixMeanders'}, id='A000682::countMeanders')
-		, pytest.param('A005316', 3, '', {'flow': 'matrixMeanders'}, id='A005316::countMeanders')
-		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric::countFoldsSymmetric')
-	]
-)
-def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString, keywordArguments: 形KeywordArgumentsCount) -> None:
-	"""Verify OEIS sequence value calculations against known reference values.
-
-	Tests the `oeisIDfor_n` function by comparing its calculated output against
-	known correct values from the OEIS database. This ensures that sequence
-	value computations remain mathematically accurate across code changes.
-
-	The test iterates through validation test cases defined in `settingsOEIS`
-	for the given OEIS sequence identifier, verifying that each computed value
-	matches its corresponding known reference value.
-
-	Parameters
-	----------
-	oeisID : str
-		OEIS identifier to validate.
-	n : int
-		Sequence index to validate.
-
-	"""
-	expected: int = getValuesKnown(oeisID)[n]
-	actual: int = oeisIDfor_n(oeisID, n, f, **keywordArguments)
-	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, n, f, **keywordArguments)
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.

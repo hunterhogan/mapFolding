@@ -66,7 +66,7 @@ if TYPE_CHECKING:
 	from typing import Literal, LiteralString
 
 def countFolds(mapShape: Sequence[int]
-				, flow: Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
+				, flow: Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 				, pathLikeWrite: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
@@ -108,7 +108,7 @@ def countFolds(mapShape: Sequence[int]
 		- `int <= -1`: The number of available processors to *not* use.
 		- If the value of `CPUlimit` is a `float` greater than 1 or less than -1, `countFolds`
 		truncates the value to an `int` with the same sign as the `float`.
-	flow : Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
+	flow : Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 		My stupid way of selecting the version of the algorithm to use in the computation. There are
 		certainly better ways to do this, but I have not yet solved this issue.
 
@@ -179,8 +179,6 @@ def countFolds(mapShape: Sequence[int]
 			match flow:
 				case 'theorem2':
 					from mapFolding.syntheticModules.theorem2 import doTheNeedful
-				case 'theorem2Codon':
-					from mapFolding.syntheticModules.codon.theorem2 import doTheNeedful
 				case 'theorem2Numba':
 					from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
 				case 'theorem2Trimmed':
@@ -205,7 +203,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return foldsTotal
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -218,7 +216,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	----------
 	mapShape : tuple[int, ...]
 		The strip dimensions, expressed as `(1, 2 * n)` for sequence index `n`.
-	flow : str | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Codon', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
+	flow : str | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
 		The counting method. `'algorithm'` or `''` selects the standard method. The other supported values select
 		alternative methods with the same result.
 	pathLikeWrite : PathLike[str] | None = None
@@ -259,8 +257,6 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 		match flow:
 			case 'theorem2':
 				from mapFolding.syntheticModules.foldsSymmetric.theorem2 import doTheNeedful
-			case 'theorem2Codon':
-				from mapFolding.syntheticModules.foldsSymmetric.codon.theorem2 import doTheNeedful
 			case 'theorem2Numba':
 				from mapFolding.syntheticModules.foldsSymmetric.theorem2Numba import doTheNeedful
 			case 'theorem2Trimmed':

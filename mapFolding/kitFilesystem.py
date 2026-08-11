@@ -50,13 +50,13 @@ import sys
 import urllib3
 
 if TYPE_CHECKING:
-	from pandas import DataFrame
 	from _csv import Writer
 	from collections.abc import Iterable, Iterator
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import EliminationState
 	from mapFolding._e.theTypes import Folding
 	from os import PathLike
+	from pandas import DataFrame
 	from urllib3.response import BaseHTTPResponse
 
 #================== Create appropriate paths and filenames =========================================
@@ -352,8 +352,8 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 #================== Read ==========================================================================
 
 # TODO generalize `getDataFrameFoldings`.
-def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:
-	import pandas
+def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:  # ruff: ignore[undocumented-public-function]
+	import pandas  # ruff: ignore[import-outside-top-level]
 	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
 	dataframeFoldings: pandas.DataFrame | None = None
 	if pathFilename.exists():

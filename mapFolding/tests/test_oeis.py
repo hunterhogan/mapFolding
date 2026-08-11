@@ -134,7 +134,7 @@ def testHelpText() -> None:
 
 	# Verify the example works
 	# TODO Why is a str not a str?
-	expectedValue = oeisIDfor_n(oeisID, n)
+	expectedValue = oeisIDfor_n(oeisID, n)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 
 	# Test CLI execution of the example
 	with unittest.mock.patch('sys.argv', ['OEIS_for_n', oeisID, str(n)]):
