@@ -78,6 +78,7 @@ ignore = [
   "type-name-incorrect-variance",
   "typed-argument-default-in-stub",
   "unused-import",
+  "unused-variable",
   "useless-else-on-loop",
   "useless-import-alias",
   "yoda-conditions",

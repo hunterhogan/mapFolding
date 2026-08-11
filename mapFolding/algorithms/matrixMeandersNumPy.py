@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import suppress
 from gc import collect as goByeBye
-from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1AsUfunc, getBucketsTotal, integersWide吗
 from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
@@ -59,7 +59,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	state.dictionaryMeanders = {}
 
 	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
-	while 0 < state.boundary and not areIntegersWide(state, arrayMeanders=arrayMeanders):
+	while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
 		def recordAnalysis(arrayAnalyzed: memmap[tuple[Any, ...], dtype[形ArcCode]], state: MatrixMeandersState, arcCode: ndarray[tuple[int], dtype[形ArcCode]], arrayMeanders: memmap[tuple[Any, ...], dtype[形ArcCode]]) -> MatrixMeandersState:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
 
@@ -306,7 +306,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 		The computed value of `crossings`.
 	"""
 	while 0 < state.boundary:
-		if areIntegersWide(state):
+		if integersWide吗(state):
 			state = countBigInt(state)
 		else:
 			state = count(state)

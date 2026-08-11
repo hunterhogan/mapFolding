@@ -169,7 +169,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		Modified `IngredientsFunction` with Numba decorator applied and imports updated.
 
 	"""
-	def Z0Z_UnhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
+	def unhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		"""Remove existing decorators from function definition to prevent conflicts with Numba.
 
 		(AI generated docstring)
@@ -264,7 +264,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	elif boxOf_arg4signature_or_function:
 		boxOf_argsDecorator = [Make.Tuple(boxOf_arg4signature_or_function)]
 
-	ingredientsFunction.astFunctionDef = Z0Z_UnhandledDecorators(ingredientsFunction.astFunctionDef)
+	ingredientsFunction.astFunctionDef = unhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 

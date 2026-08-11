@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, walkDyckPath
+from mapFolding.algorithms.matrixMeandersShare import integersWide吗, walkDyckPath
 from mapFolding.dataBaskets import MatrixMeandersState
 
 def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
@@ -32,7 +32,7 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 
     [2] `walkDyckPath`
     """
-    while 0 < state.boundary and areIntegersWide(state):
+    while 0 < state.boundary and integersWide吗(state):
         state.reduceBoundary()
         dictionaryArcCodeToCrossings: dict[int, int] = state.dictionaryMeanders.copy()
         state.dictionaryMeanders = {}

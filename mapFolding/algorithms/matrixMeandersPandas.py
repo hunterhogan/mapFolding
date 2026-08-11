@@ -15,7 +15,7 @@ https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044
 from __future__ import annotations
 
 from gc import collect as goByeBye
-from mapFolding.algorithms.matrixMeandersShare import areIntegersWide, flipTheExtra_0b1AsUfunc, getBucketsTotal
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1AsUfunc, getBucketsTotal, integersWide吗
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Crossings
 from typing import TYPE_CHECKING
@@ -45,7 +45,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	)
 	state.dictionaryMeanders.clear()
 
-	while 0 < state.boundary and not areIntegersWide(state, dataframe=dataframeAnalyzed):
+	while 0 < state.boundary and not integersWide吗(state, dataframe=dataframeAnalyzed):
 
 		def aggregateArcCodes()  -> None:
 			nonlocal dataframeAnalyzed
@@ -338,7 +338,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 		The computed value of `crossings`.
 	"""
 	while 0 < state.boundary:
-		if areIntegersWide(state):
+		if integersWide吗(state):
 			state = countBigInt(state)
 		else:
 			state = count(state)

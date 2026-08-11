@@ -51,7 +51,7 @@ References
 """
 from __future__ import annotations
 
-from mapFolding.algorithms.matrixMeandersShare import initializeDictionaryMeanders
+from mapFolding.algorithms.matrixMeandersShare import makeDictionaryMeanders
 from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import MapFoldingState, MatrixMeandersState, ParallelMapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
@@ -332,7 +332,7 @@ def countMeanders(
 				from mapFolding.algorithms.matrixMeanders import doTheNeedful
 
 		boundary: int = n - 1
-		dictionaryMeanders: dict[int, int] = initializeDictionaryMeanders(kind, n, boundary)
+		dictionaryMeanders: dict[int, int] = makeDictionaryMeanders(kind, n, boundary)
 		state: MatrixMeandersState = MatrixMeandersState(n, kind, boundary, dictionaryMeanders)
 		countTotal: int = doTheNeedful(state)
 

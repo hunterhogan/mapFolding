@@ -1,7 +1,7 @@
 from __future__ import annotations
-from humpy_cytoolz import get_in
 
 from functools import cache
+from humpy_cytoolz import get_in
 from hunterMakesPy import raiseIfNone
 from typing import TYPE_CHECKING
 import numpy
@@ -23,115 +23,6 @@ if TYPE_CHECKING:
 - Standardize code as much as possible to create duplicate code.
 - Convert duplicate code to procedures.
 """
-
-def areIntegersWide(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
-	"""Check if the largest values are wider than the maximum limits.
-
-	Parameters
-	----------
-	state : MatrixMeandersState
-		The current state of the computation, including `dictionaryMeanders`.
-	dataframe : pandas.DataFrame | None = None
-		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of
-		`state.dictionaryMeanders`.
-	fixedSizeMAXIMUMarcCode : bool = False
-		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as
-		`dtypeArcCode`.
-
-	Returns
-	-------
-	wider : bool
-		True if at least one integer is wider than the fixed-size integers.
-
-	Notes
-	-----
-	Casting `state.MAXIMUMarcCode` to a fixed-size 64-bit unsigned integer might cause the flow to be
-	a little more complicated because `MAXIMUMarcCode` is usually 1-bit larger than the `max(arcCode)`
-	value.
-
-	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,*
-	semi), then the flow will go to a function that does not use fixed size integers. When the
-	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
-	with fixed size integers. In that case, casting `MAXIMUMarcCode` to a fixed size merely delays the
-	transition from one function to the other by one iteration.
-
-	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the
-	function with fixed size integers and usually stays there until `crossings` is huge, which is near
-	the end of the computation. If you cast `MAXIMUMarcCode` into a 64-bit unsigned integer, however,
-	then around `state.boundary == 28`, the bit width of `MAXIMUMarcCode` might exceed the limit. That
-	will cause the flow to go to the function that does not have fixed size integers for a few
-	iterations before returning to the function with fixed size integers.
-	"""
-	if dataframe is not None:
-		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
-		crossingsWidest = int(dataframe['crossings'].max()).bit_length()
-	elif arrayMeanders is not None:
-		arcCodeWidest = int(arrayMeanders.max()).bit_length()
-		crossingsWidest = int(arrayMeanders.max()).bit_length()
-	else:
-		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
-		crossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
-
-	MAXIMUMarcCode: int = 0
-	if fixedSizeMAXIMUMarcCode:
-		MAXIMUMarcCode = state.MAXIMUMarcCode
-
-	return (raiseIfNone(state.bitWidthLimitArcCode) < arcCodeWidest
-		or raiseIfNone(state.bitWidthLimitCrossings) < crossingsWidest
-		or raiseIfNone(state.bitWidthLimitArcCode) < MAXIMUMarcCode
-		)
-
-@cache
-def walkDyckPath(intWithExtra_0b1: int) -> int:
-	"""Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
-
-	You can use `walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
-	the meander transfer matrix closes a mismatched pair [1]. The `intWithExtra_0b1` value stores one
-	side of the packed boundary state with parity bits at even positions.
-
-	Parameters
-	----------
-	intWithExtra_0b1 : int
-		Packed bit pattern for one half of the current meander boundary state.
-
-	Returns
-	-------
-	flipExtra_0b1_Here : int
-		Bit mask `2^(2k)` at the first even-bit position where the prefix balance becomes negative.
-
-	Bit Search
-	----------
-	The scan advances by shifting `flipExtra_0b1_Here` left by `2` each step. The scan adds `1` when
-	the bit is `0` and subtracts `1` when the bit is `1`. The function returns immediately at the
-	first index where the running balance is negative in the Dyck-prefix sense [2].
-
-	Mathematics
-	-----------
-	first negative prefix : equation
-		```text
-		Let  x ≜ `intWithExtra_0b1`,  bᵢ ≜ bit(x, 2i),  sₖ ≜ ∑ᵢ₌₀ᵏ (1 if bᵢ = 0 else −1)
-
-		k* ≜ min { k ∈ ℕ : sₖ < 0 }
-		`flipExtra_0b1_Here` = 2^(2k*)
-		```
-
-	References
-	----------
-	[1] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
-		Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
-		https://dx.doi.org/10.1088/0305-4470/33/34/301
-	[2] Dyck language and balanced-parenthesis paths.
-		https://en.wikipedia.org/wiki/Dyck_language
-	"""
-	findTheExtra_0b1: int = 0
-	flipExtra_0b1_Here: int = 1
-	while 0 <= findTheExtra_0b1:
-		flipExtra_0b1_Here <<= 2
-		if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
-			findTheExtra_0b1 += 1
-		else:
-			findTheExtra_0b1 -= 1
-	return flipExtra_0b1_Here
 
 @cache
 def _flipTheExtra_0b1[形: numpy.integer](intWithExtra_0b1: 形) -> 形:
@@ -188,6 +79,153 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 		bucketsTotal = int(3.55 * 665523011)
 
 	return bucketsTotal
+
+def integersWide吗(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+	"""Check if the largest values are wider than the maximum limits.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The current state of the computation, including `dictionaryMeanders`.
+	dataframe : pandas.DataFrame | None = None
+		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of
+		`state.dictionaryMeanders`.
+	fixedSizeMAXIMUMarcCode : bool = False
+		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as
+		`dtypeArcCode`.
+
+	Returns
+	-------
+	wider : bool
+		True if at least one integer is wider than the fixed-size integers.
+
+	Notes
+	-----
+	Casting `state.MAXIMUMarcCode` to a fixed-size 64-bit unsigned integer might cause the flow to be
+	a little more complicated because `MAXIMUMarcCode` is usually 1-bit larger than the `max(arcCode)`
+	value.
+
+	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,*
+	semi), then the flow will go to a function that does not use fixed size integers. When the
+	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
+	with fixed size integers. In that case, casting `MAXIMUMarcCode` to a fixed size merely delays the
+	transition from one function to the other by one iteration.
+
+	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the
+	function with fixed size integers and usually stays there until `crossings` is huge, which is near
+	the end of the computation. If you cast `MAXIMUMarcCode` into a 64-bit unsigned integer, however,
+	then around `state.boundary == 28`, the bit width of `MAXIMUMarcCode` might exceed the limit. That
+	will cause the flow to go to the function that does not have fixed size integers for a few
+	iterations before returning to the function with fixed size integers.
+	"""
+	if dataframe is not None:
+		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
+		crossingsWidest = int(dataframe['crossings'].max()).bit_length()
+	elif arrayMeanders is not None:
+		arcCodeWidest = int(arrayMeanders.max()).bit_length()
+		crossingsWidest = int(arrayMeanders.max()).bit_length()
+	else:
+		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
+		crossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
+
+	MAXIMUMarcCode: int = 0
+	if fixedSizeMAXIMUMarcCode:
+		MAXIMUMarcCode = state.MAXIMUMarcCode
+
+	return (raiseIfNone(state.bitWidthLimitArcCode) < arcCodeWidest
+		or raiseIfNone(state.bitWidthLimitCrossings) < crossingsWidest
+		or raiseIfNone(state.bitWidthLimitArcCode) < MAXIMUMarcCode
+		)
+
+def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
+	# TODO Consider: If semi is essentially A000136 * leavesTotal, then my graphs of A000136 are
+	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
+	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
+	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows
+	# predictably. Cutting the count in half... In `doTheNeedful`, I used `while state.boundary > 0:`
+	# and the ratio trick to find the midpoint: it didn't work.
+	if kind == 'semi':
+		if n == 1:
+			#=Sin= early return.
+			return {0b1: 1}
+		elif n & 0b1:
+			arcCode: int = 0b101
+		else:
+			arcCode = 0b1
+		boxOfArcCodes: list[int] = [(arcCode << 1) | arcCode]
+#										   0b1010 | 0b0101 is 0b1111, or 0xf
+#											 0b10 |   0b01 is   0b11, or 0x3
+
+		MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
+		while boxOfArcCodes[-1] < MAXIMUMarcCode:
+			arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
+			boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+			# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
+			# See "mapFolding/reference/A000682facts.py"
+		dictionaryMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
+
+	elif kind == 'meanders':
+		if n & 0b1:
+			dictionaryMeanders = {0b1111: 1}  # 0xf
+		else:
+			dictionaryMeanders = {0b10110: 1}
+	else:
+		message: str = f"I received `{kind = }` for meander computation, but I only support 'semi' and 'meanders'."
+		raise ValueError(message)
+
+	return dictionaryMeanders
+
+@cache
+def walkDyckPath(intWithExtra_0b1: int) -> int:
+	"""Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
+
+	You can use `walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
+	the meander transfer matrix closes a mismatched pair [1]. The `intWithExtra_0b1` value stores one
+	side of the packed boundary state with parity bits at even positions.
+
+	Parameters
+	----------
+	intWithExtra_0b1 : int
+		Packed bit pattern for one half of the current meander boundary state.
+
+	Returns
+	-------
+	flipExtra_0b1_Here : int
+		Bit mask `2^(2k)` at the first even-bit position where the prefix balance becomes negative.
+
+	Bit Search
+	----------
+	The scan advances by shifting `flipExtra_0b1_Here` left by `2` each step. The scan adds `1` when
+	the bit is `0` and subtracts `1` when the bit is `1`. The function returns immediately at the
+	first index where the running balance is negative in the Dyck-prefix sense [2].
+
+	Mathematics
+	-----------
+	first negative prefix : equation
+		```text
+		Let  x ≜ `intWithExtra_0b1`,  bᵢ ≜ bit(x, 2i),  sₖ ≜ ∑ᵢ₌₀ᵏ (1 if bᵢ = 0 else −1)
+
+		k* ≜ min { k ∈ ℕ : sₖ < 0 }
+		`flipExtra_0b1_Here` = 2^(2k*)
+		```
+
+	References
+	----------
+	[1] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
+		Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
+		https://dx.doi.org/10.1088/0305-4470/33/34/301
+	[2] Dyck language and balanced-parenthesis paths.
+		https://en.wikipedia.org/wiki/Dyck_language
+	"""
+	findTheExtra_0b1: int = 0
+	flipExtra_0b1_Here: int = 1
+	while 0 <= findTheExtra_0b1:
+		flipExtra_0b1_Here <<= 2
+		if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
+			findTheExtra_0b1 += 1
+		else:
+			findTheExtra_0b1 -= 1
+	return flipExtra_0b1_Here
 
 n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 	2: {1: 1},
@@ -2114,41 +2152,3 @@ n_boundary_bucketsMeanders: dict[int, dict[int, int]] = {
 		21: 614965718,
 	},
 }
-
-def initializeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
-	# TODO Consider: If semi is essentially A000136 * leavesTotal, then my graphs of A000136 are
-	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
-	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
-	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows
-	# predictably. Cutting the count in half... In `doTheNeedful`, I used `while state.boundary > 0:`
-	# and the ratio trick to find the midpoint: it didn't work.
-	if kind == 'semi':
-		if n == 1:
-			#=Sin= early return.
-			return {0b1: 1}
-		elif n & 0b1:
-			arcCode: int = 0b101
-		else:
-			arcCode = 0b1
-		boxOfArcCodes: list[int] = [(arcCode << 1) | arcCode]
-#										   0b1010 | 0b0101 is 0b1111, or 0xf
-#											 0b10 |   0b01 is   0b11, or 0x3
-
-		MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
-		while boxOfArcCodes[-1] < MAXIMUMarcCode:
-			arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
-			boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
-			# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
-			# See "mapFolding/reference/A000682facts.py"
-		dictionaryMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
-
-	elif kind == 'meanders':
-		if n & 0b1:
-			dictionaryMeanders = {0b1111: 1}  # 0xf
-		else:
-			dictionaryMeanders = {0b10110: 1}
-	else:
-		message: str = f"I received `{kind = }` for meander computation, but I only support 'semi' and 'meanders'."
-		raise ValueError(message)
-
-	return dictionaryMeanders

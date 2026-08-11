@@ -28,19 +28,19 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 	# Remove `doTheNeedful`
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(sourceCallableDispatcher)), Then.removeIt).visit(astModule)
 
-	# while (0 < state.boundary and areIntegersWide(state)):
-	Call_areIntegersWide: ast.Call = Make.Call(Make.Name('areIntegersWide'), listParameters=[Make.Name('state')])
+	# while (0 < state.boundary and integersWide吗(state)):
+	Call_integersWide吗: ast.Call = Make.Call(Make.Name('integersWide吗'), listParameters=[Make.Name('state')])
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
 		findThis=IfThis.is0LessThanAttributeNamespaceIdentifier(identifierDataclassInstance, 'boundary')
 		, doThat=Then.extractIt
 	).captureLastMatch(astModule))
-	newTest: ast.expr = Make.And.join([astCompare, Call_areIntegersWide])
+	newTest: ast.expr = Make.And.join([astCompare, Call_integersWide吗])
 
 	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(identifierDataclassInstance, 'boundary')
 			, Grab.testAttribute(Then.replaceWith(newTest))
 	).visit(astModule)
 
-	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersShare', list_alias=[Make.alias('areIntegersWide')]))
+	astModule.body.insert(0, Make.ImportFrom('mapFolding.algorithms.matrixMeandersShare', list_alias=[Make.alias('integersWide吗')]))
 
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=identifierModule)
 
