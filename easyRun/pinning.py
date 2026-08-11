@@ -27,7 +27,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 		return prod(map(lengthChoicesLeaf, boxOfChoicesLeaf))
 
 	permutationsPermutationSpaceTotal: Callable[[Iterable[Any]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('extractUndeterminedPiles'))))
-	print(len(str(mm := fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
+	print(len(str(mm := fac(state.totalLeaves))), mm, "Maximum permutations of leaves")
 	print(len(str(rr := prod(toolz_map(lengthChoicesLeaf, filter(None, DOTvalues(getDictionaryChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 

@@ -42,7 +42,7 @@ def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Q
 	tuple(map(queueStates.put, map(partial(reducePermutationSpace, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
 def theorem2b(state: EliminationState) -> EliminationState:
-	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):
+	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.totalLeaves):
 		state.Theorem2Multiplier = 2
 		dimension: int = state.mapShape.index(max(state.mapShape))
 		leaf_k: int = state.mapShapeProducts[dimension]
@@ -60,12 +60,12 @@ def theorem4(state: EliminationState) -> EliminationState:
 	return state
 
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
-	if state.leavesTotal == 0:
+	if state.totalLeaves == 0:
 		state.groupsOfFolds = 1
 		return state
 
 	if not state.boxOfPermutationSpace:
-		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
+		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getDictionaryChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 

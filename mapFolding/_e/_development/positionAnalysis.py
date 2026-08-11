@@ -8,8 +8,7 @@ from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import getDomainLeaf, pileOrigin
-from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeafSuccessors, howManyDimensionsHaveOddParity, 零)
+from mapFolding._e._2上nDimensional import getLeafPredecessors, getLeafSuccessors, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd, 零
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from pprint import pprint
@@ -130,8 +129,8 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 
-	for leafLater in range(state.leavesTotal):
-		columnEarliestOriginal: int = leafLater.bit_count() + (2 ** (dimensionNearestTail(leafLater) + 1) - 2)
+	for leafLater in range(state.totalLeaves):
+		columnEarliestOriginal: int = leafLater.bit_count() + (2 ** (工dimensionTail(leafLater) + 1) - 2)
 		columnEarliestIndex: int = columnEarliestOriginal - columnOffset
 
 		if columnEarliestIndex < 0:
@@ -144,7 +143,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 		positionsSubset: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[maskRowsAtEarliestColumn]
 
-		for leafEarlier in range(state.leavesTotal):
+		for leafEarlier in range(state.totalLeaves):
 			if leafEarlier == leafLater:
 				continue
 
@@ -173,7 +172,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 	already captured by the unconditional precedence analysis.
 
 	The formula for the last pile *in* the domain of a leaf is.
-		pileLastOfLeaf = int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 1
+		pileLastOfLeaf = int(bit_mask(totalDimensions) ^ bit_mask(totalDimensions - 工dimension首零(leaf))) - 工totalDimensionsOdd(leaf) + 1
 
 	Parameters
 	----------
@@ -212,8 +211,8 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 
-	for leafLater in range(state.leavesTotal):
-		pileLastOfLeafOriginal: int = int(bit_mask(state.dimensionsTotal) ^ bit_mask(state.dimensionsTotal - dimensionNearest首(leafLater))) - howManyDimensionsHaveOddParity(leafLater) + 1
+	for leafLater in range(state.totalLeaves):
+		pileLastOfLeafOriginal: int = int(bit_mask(state.totalDimensions) ^ bit_mask(state.totalDimensions - 工dimension首零(leafLater))) - 工totalDimensionsOdd(leafLater) + 1
 		pileLastOfLeafIndex: int = pileLastOfLeafOriginal - columnOffset
 
 		if pileLastOfLeafIndex < 0:
@@ -226,7 +225,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 
 		positionsSubset: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[maskRowsAtLastPileOfLeaf]
 
-		for leafEarlier in range(state.leavesTotal):
+		for leafEarlier in range(state.totalLeaves):
 			if leafEarlier == leafLater:
 				continue
 
@@ -269,8 +268,8 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 
-	for leafEarlier in range(state.leavesTotal):
-		pileLastOfLeafOriginal: int = int(bit_mask(state.dimensionsTotal) ^ bit_mask(state.dimensionsTotal - dimensionNearest首(leafEarlier))) - howManyDimensionsHaveOddParity(leafEarlier) + 1
+	for leafEarlier in range(state.totalLeaves):
+		pileLastOfLeafOriginal: int = int(bit_mask(state.totalDimensions) ^ bit_mask(state.totalDimensions - 工dimension首零(leafEarlier))) - 工totalDimensionsOdd(leafEarlier) + 1
 		pileLastOfLeafIndex: int = pileLastOfLeafOriginal - columnOffset
 
 		if pileLastOfLeafIndex < 0:
@@ -283,7 +282,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 
 		positionsSubset: numpy.ndarray[Any, numpy.dtype[numpy.int16]] = positionsMatrix[maskRowsAtLastPileOfLeaf]
 
-		for leafLater in range(state.leavesTotal):
+		for leafLater in range(state.totalLeaves):
 			if leafLater == leafEarlier:
 				continue
 
@@ -384,8 +383,8 @@ def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: Elim
 
 def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, boxOfLeavesAnalyzed: list[Leaf] | None = None) -> dict[Leaf, list[Pile]]:
 	if boxOfLeavesAnalyzed is None:
-		leavesExcluded: set[Leaf] = {pileOrigin, 零, state.leavesTotal - 零}
-		boxOfLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
+		leavesExcluded: set[Leaf] = {pileOrigin, 零, state.totalLeaves - 零}
+		boxOfLeavesAnalyzed = [leaf for leaf in range(state.totalLeaves) if leaf not in leavesExcluded]
 
 	dictionaryPilesAtDomainEnds: dict[Leaf, list[Pile]] = {}
 	for leaf in boxOfLeavesAnalyzed:

@@ -4,8 +4,8 @@ from __future__ import annotations
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import inclusive, raiseIfNone
 from mapFolding._e._2上nDimensional import (
-	dimensionIndex, dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane, ptount, 一, 三, 二, 五,
-	四, 零, 首一, 首零, 首零一)
+	dimensionIndex, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane, ptount, 一, 三, 二, 五, 四, 工dimensionTail, 工dimension首零, 零, 首一,
+	首零, 首零一)
 from operator import add, neg, sub
 from typing import TYPE_CHECKING
 from Z0Z_tools import exclude
@@ -32,8 +32,8 @@ def pinPile一ByCrease(state: EliminationState) -> Iterator[Leaf]:
 
 	leafAt一Ante首: Leaf | None = state.permutationSpace.getLeaf(neg(一) + state.首)
 
-	if leafAt一Ante首 and (0 < dimensionNearestTail(leafAt一Ante首)):
-		boxOfCreaseIndicesExcluded.extend([*range(dimensionNearestTail(leafAt一Ante首) - 零, state.dimensionsTotal - 一)])
+	if leafAt一Ante首 and (0 < 工dimensionTail(leafAt一Ante首)):
+		boxOfCreaseIndicesExcluded.extend([*range(工dimensionTail(leafAt一Ante首) - 零, state.totalDimensions - 一)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
@@ -45,8 +45,8 @@ def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 
 	leafAt一: Leaf | None = state.permutationSpace.getLeaf(一)
 
-	if leafAt一 and (leafAt一.bit_length() < state.dimensionsTotal):
-		boxOfCreaseIndicesExcluded.extend([*range(零, dimensionNearest首(leafAt一) + inclusive)])
+	if leafAt一 and (leafAt一.bit_length() < state.totalDimensions):
+		boxOfCreaseIndicesExcluded.extend([*range(零, 工dimension首零(leafAt一) + inclusive)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 #-------- Depth 3 ------------------------------------
@@ -62,8 +62,8 @@ def pinPile一零ByCrease(state: EliminationState) -> Iterator[Leaf]:
 
 	if 1 < len(tupleLeavesCrease):
 		boxOfCreaseIndicesExcluded.append(0)
-	if isEven吗(leafAt一Ante首) and (leafAt一 == (零) + 首零(state.dimensionsTotal)):
-		boxOfCreaseIndicesExcluded.extend([*range(dimensionNearestTail(leafAt一Ante首) + 零, state.dimensionsTotal)])
+	if isEven吗(leafAt一Ante首) and (leafAt一 == (零) + 首零(state.totalDimensions)):
+		boxOfCreaseIndicesExcluded.extend([*range(工dimensionTail(leafAt一Ante首) + 零, state.totalDimensions)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
@@ -76,10 +76,10 @@ def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	leafAt一: 		Leaf = raiseIfNone(state.permutationSpace.getLeaf(一))
 	leafAt一Ante首: Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(一) + state.首))
 
-	if leafAt一Ante首 < 首零一(state.dimensionsTotal):
+	if leafAt一Ante首 < 首零一(state.totalDimensions):
 		boxOfCreaseIndicesExcluded.append(-1)
-	if (leafAt一Ante首 == (零) + 首零(state.dimensionsTotal)) and (leafAt一 != 一 + 零):
-		boxOfCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一) - 零)])
+	if (leafAt一Ante首 == (零) + 首零(state.totalDimensions)) and (leafAt一 != 一 + 零):
+		boxOfCreaseIndicesExcluded.extend([*range(工dimension首零(leafAt一) - 零)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 #-------- Depth 4 ------------------------------------
@@ -96,18 +96,18 @@ def pinPile二ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	leafAt零一Ante首: Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(零 + 一) + state.首))
 
 	if isOdd吗(leafAt一零):
-		boxOfCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt一零)])
+		boxOfCreaseIndicesExcluded.extend([*range(工dimension首零(leafAt一零), 5), ptount(leafAt一零)])
 		boxOfCreaseIndicesExcluded.append((dimensionIndex(leafInSubHyperplane(leafAt一Ante首)) + 4) % 5)
 	if isEven吗(leafAt一零):
-		boxOfCreaseIndicesExcluded.extend([*range(state.dimensionsTotal - 3)][(state.dimensionsTotal - 3) - ((state.dimensionsTotal - 2) - leafInSubHyperplane(leafAt零一Ante首 - (leafAt零一Ante首.bit_count() - isEven吗(leafAt零一Ante首))).bit_count()) % (state.dimensionsTotal - 2) - isEven吗(leafAt零一Ante首): None])
+		boxOfCreaseIndicesExcluded.extend([*range(state.totalDimensions - 3)][(state.totalDimensions - 3) - ((state.totalDimensions - 2) - leafInSubHyperplane(leafAt零一Ante首 - (leafAt零一Ante首.bit_count() - isEven吗(leafAt零一Ante首))).bit_count()) % (state.totalDimensions - 2) - isEven吗(leafAt零一Ante首): None])
 		if isEven吗(leafAt一Ante首):
-			boxOfCreaseIndicesExcluded.extend([*range(dimensionNearestTail(leafInSubHyperplane(leafAt一Ante首)) - 一, (state.dimensionsTotal - 3))])
-	if leafAt一 == (零) + 首零(state.dimensionsTotal):
-		boxOfCreaseIndicesExcluded.extend([(dimensionIndex(leafInSubHyperplane(leafAt一Ante首)) + 4) % 5, dimensionNearestTail(leafAt零一Ante首) - 1])
-		if (零) + 首零(state.dimensionsTotal) < leafAt零一Ante首:
-			boxOfCreaseIndicesExcluded.extend([*range(int(leafAt零一Ante首 - int(bit_flip(0, dimensionNearest首(leafAt零一Ante首)))).bit_length() - 1, state.dimensionsTotal - 2)])
-		if ((0 < leafAt一零 - leafAt一 <= bit_flip(0, state.dimensionsTotal - 4)) and (0 < (leafAt一Ante首 - leafAt一零) <= bit_flip(0, state.dimensionsTotal - 3))):
-			boxOfCreaseIndicesExcluded.extend([ptount(leafAt一零), state.dimensionsTotal - 3, state.dimensionsTotal - 4])
+			boxOfCreaseIndicesExcluded.extend([*range(工dimensionTail(leafInSubHyperplane(leafAt一Ante首)) - 一, (state.totalDimensions - 3))])
+	if leafAt一 == (零) + 首零(state.totalDimensions):
+		boxOfCreaseIndicesExcluded.extend([(dimensionIndex(leafInSubHyperplane(leafAt一Ante首)) + 4) % 5, 工dimensionTail(leafAt零一Ante首) - 1])
+		if (零) + 首零(state.totalDimensions) < leafAt零一Ante首:
+			boxOfCreaseIndicesExcluded.extend([*range(int(leafAt零一Ante首 - int(bit_flip(0, 工dimension首零(leafAt零一Ante首)))).bit_length() - 1, state.totalDimensions - 2)])
+		if ((0 < leafAt一零 - leafAt一 <= bit_flip(0, state.totalDimensions - 4)) and (0 < (leafAt一Ante首 - leafAt一零) <= bit_flip(0, state.totalDimensions - 3))):
+			boxOfCreaseIndicesExcluded.extend([ptount(leafAt一零), state.totalDimensions - 3, state.totalDimensions - 4])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
@@ -134,7 +134,7 @@ def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 		or (addendDimension一 in {二, 三})
 		or ((addendDimension一 == 一) and not (addendDimension零 == addendDimension首零 and addendDimension一零 < 0))
 	):
-		if leafAt零一Ante首 == 首一(state.dimensionsTotal):
+		if leafAt零一Ante首 == 首一(state.totalDimensions):
 			if addendDimension零 == 三:
 				boxOfCreaseIndicesExcluded.append(dimensionIndex(二))
 			if addendDimension零 == 五:
@@ -145,7 +145,7 @@ def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 			if addendDimension一零 == 三:
 				boxOfCreaseIndicesExcluded.append(dimensionIndex(二))
 
-		if 0 < (dimensionTail := dimensionNearestTail(leafAt零一Ante首)) < 5:
+		if 0 < (dimensionTail := 工dimensionTail(leafAt零一Ante首)) < 5:
 			boxOfCreaseIndicesExcluded.extend(list(range(dimensionTail % 4)) or [dimensionIndex(一)])
 
 		if addendDimension首零 == neg(五):

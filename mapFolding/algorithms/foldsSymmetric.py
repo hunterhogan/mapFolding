@@ -20,9 +20,9 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 	state.leafComparison[0] = 1
 	state.leafConnectee = 1
 
-	while state.leafConnectee < state.leavesTotal + 1:
+	while state.leafConnectee < state.totalLeaves + 1:
 		state.次MiniGap = state.leafBelow[state.次Leaf]
-		state.leafComparison[state.leafConnectee] = (state.leavesTotal + state.次MiniGap - state.次Leaf) % state.leavesTotal
+		state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
 		state.次Leaf = state.次MiniGap
 
 		state.leafConnectee += 1

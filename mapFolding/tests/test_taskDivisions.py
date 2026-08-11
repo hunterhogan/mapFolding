@@ -28,7 +28,7 @@ from __future__ import annotations
 from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions
-from mapFolding.oeis import getFoldsTotalKnown, makeMapShape
+from mapFolding.oeis import getTotalFoldsKnown, makeMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import pytest
@@ -45,7 +45,7 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A001417', 5), id='A001417::n5')])
 @pytest.mark.parametrize('flow', ('',))
 def test_countFolds_computationDivisionsMaximum(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: Limitation, computationDivisions: int | str | None) -> None:
-	expected: int = getFoldsTotalKnown(mapShape) or 0
+	expected: int = getTotalFoldsKnown(mapShape) or 0
 	actual: int = countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 	assertEqualTo(actual, expected, countFolds.__name__, mapShape, computationDivisions=computationDivisions, flow=flow)
 
@@ -83,13 +83,13 @@ def test_defineProcessorLimitError(expected: type[TypeError], parameter: list[in
 		defineProcessorLimit(parameter)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 		assertEqualTo(type(exceptionInfo.value), expected, defineProcessorLimit.__name__, parameter)
 
-@pytest.mark.parametrize('computationDivisions, concurrencyLimit, leavesTotal, expected', [(None, 4, 99, 0), ('maximum', 4, 77, 77), ('cpu', 4, 21, 4)])
-def test_getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int, expected: int) -> None:
-	actual: int = getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
-	assertEqualTo(actual, expected, getTaskDivisions.__name__, computationDivisions, concurrencyLimit, leavesTotal)
+@pytest.mark.parametrize('computationDivisions, concurrencyLimit, totalLeaves, expected', [(None, 4, 99, 0), ('maximum', 4, 77, 77), ('cpu', 4, 21, 4)])
+def test_getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, totalLeaves: int, expected: int) -> None:
+	actual: int = getTaskDivisions(computationDivisions, concurrencyLimit, totalLeaves)
+	assertEqualTo(actual, expected, getTaskDivisions.__name__, computationDivisions, concurrencyLimit, totalLeaves)
 
-@pytest.mark.parametrize('computationDivisions, concurrencyLimit, leavesTotal, expected', [(['invalid'], 4, 437, ValueError), (20, 4, 15, ValueError)])
-def test_getTaskDivisionsError(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int, expected: type[ValueError]) -> None:
+@pytest.mark.parametrize('computationDivisions, concurrencyLimit, totalLeaves, expected', [(['invalid'], 4, 437, ValueError), (20, 4, 15, ValueError)])
+def test_getTaskDivisionsError(computationDivisions: int | str | None, concurrencyLimit: int, totalLeaves: int, expected: type[ValueError]) -> None:
 	with pytest.raises(expected) as exceptionInfo:
-		getTaskDivisions(computationDivisions, concurrencyLimit, leavesTotal)
-		assertEqualTo(type(exceptionInfo.value), expected, getTaskDivisions.__name__, computationDivisions, concurrencyLimit, leavesTotal)
+		getTaskDivisions(computationDivisions, concurrencyLimit, totalLeaves)
+		assertEqualTo(type(exceptionInfo.value), expected, getTaskDivisions.__name__, computationDivisions, concurrencyLimit, totalLeaves)

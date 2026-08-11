@@ -86,75 +86,75 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 		raise ArithmeticError(message)
 
 	if n == metadata['offset']:
-		foldsTotal: int = metadata['valuesKnown'][n]
+		totalFolds: int = metadata['valuesKnown'][n]
 	elif not f and oeisID in oeisIDsMapFoldingImplemented:
-		foldsTotal = countFolds(mapShape=makeMapShape(oeisID, n), **keywordArguments)
+		totalFolds = countFolds(mapShape=makeMapShape(oeisID, n), **keywordArguments)
 	else:
 		match oeisID:
 			case 'A000682' if not f:
-				foldsTotal = countMeanders('semi', n, **keywordArguments)
+				totalFolds = countMeanders('semi', n, **keywordArguments)
 			case 'A005316' if not f:
-				foldsTotal = countMeanders('meanders', n, **keywordArguments)
+				totalFolds = countMeanders('meanders', n, **keywordArguments)
 			case 'A007822' if not f:
-				foldsTotal = countFoldsSymmetric(makeMapShape(oeisID, n), **keywordArguments)
+				totalFolds = countFoldsSymmetric(makeMapShape(oeisID, n), **keywordArguments)
 			case 'A007822':
-				foldsTotal = byFormula.A007822(n, f)
+				totalFolds = byFormula.A007822(n, f)
 			case 'A000136':
-				foldsTotal = byFormula.A000136(n, f)
+				totalFolds = byFormula.A000136(n, f)
 			case 'A000560':
-				foldsTotal = byFormula.A000560(n, f)
+				totalFolds = byFormula.A000560(n, f)
 			case 'A000682':
-				foldsTotal = byFormula.A000682(n, f)
+				totalFolds = byFormula.A000682(n, f)
 			case 'A001010':
-				foldsTotal = byFormula.A001010(n, f)
+				totalFolds = byFormula.A001010(n, f)
 			case 'A001011':
-				foldsTotal = byFormula.A001011(n, f)
+				totalFolds = byFormula.A001011(n, f)
 			case 'A005315':
-				foldsTotal = byFormula.A005315(n, f)
+				totalFolds = byFormula.A005315(n, f)
 			case 'A005316':
-				foldsTotal = byFormula.A005316(n, f)
+				totalFolds = byFormula.A005316(n, f)
 			case 'A060206':
-				foldsTotal = byFormula.A060206(n, f)
+				totalFolds = byFormula.A060206(n, f)
 			case 'A077014':
-				foldsTotal = byFormula.A077014(n, f)
+				totalFolds = byFormula.A077014(n, f)
 			case 'A077054':
-				foldsTotal = byFormula.A077054(n, f)
+				totalFolds = byFormula.A077054(n, f)
 			case 'A077460':
-				foldsTotal = byFormula.A077460(n, f)
+				totalFolds = byFormula.A077460(n, f)
 			case 'A078591':
-				foldsTotal = byFormula.A078591(n, f)
+				totalFolds = byFormula.A078591(n, f)
 			case 'A078592':
-				foldsTotal = byFormula.A078592(n, f)
+				totalFolds = byFormula.A078592(n, f)
 			case 'A085973':
-				foldsTotal = byFormula.A085973(n, f)
+				totalFolds = byFormula.A085973(n, f)
 			case 'A208357':
-				foldsTotal = byFormula.A208357(n, f)
+				totalFolds = byFormula.A208357(n, f)
 			case 'A217310':
-				foldsTotal = byFormula.A217310(n, f)
+				totalFolds = byFormula.A217310(n, f)
 			case 'A217318':
-				foldsTotal = byFormula.A217318(n, f)
+				totalFolds = byFormula.A217318(n, f)
 			case 'A223093':
-				foldsTotal = byFormula.A223093(n, f)
+				totalFolds = byFormula.A223093(n, f)
 			case 'A223094':
-				foldsTotal = byFormula.A223094(n, f)
+				totalFolds = byFormula.A223094(n, f)
 			case 'A223095':
-				foldsTotal = byFormula.A223095(n, f)
+				totalFolds = byFormula.A223095(n, f)
 			case 'A227167':
-				foldsTotal = byFormula.A227167(n, f)
+				totalFolds = byFormula.A227167(n, f)
 			case 'A259689':
-				foldsTotal = byFormula.A259689(n, f)
+				totalFolds = byFormula.A259689(n, f)
 			case 'A259702':
-				foldsTotal = byFormula.A259702(n, f)
+				totalFolds = byFormula.A259702(n, f)
 			case 'A301620':
-				foldsTotal = byFormula.A301620(n, f)
+				totalFolds = byFormula.A301620(n, f)
 			case 'A333971':
-				foldsTotal = byFormula.A333971(n, f)
+				totalFolds = byFormula.A333971(n, f)
 			case 'A334615':
-				foldsTotal = byFormula.A334615(n, f)
+				totalFolds = byFormula.A334615(n, f)
 			case 'A337581':
-				foldsTotal = byFormula.A337581(n, f)
+				totalFolds = byFormula.A337581(n, f)
 			case _:
 				message = f"I received `{oeisID = }`, but I couldn't find a formula for it."
 				raise ValueError(message)
 
-	return foldsTotal
+	return totalFolds

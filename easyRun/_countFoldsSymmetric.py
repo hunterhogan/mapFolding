@@ -29,6 +29,6 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 
 		timeStart: float = time.perf_counter()
-		foldsTotal: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
+		totalFolds: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
 
-		printEasyRunBenchmark(oeisID, n, foldsTotal, timeStart, ratio=False)
+		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=False)

@@ -81,12 +81,12 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
 		sys.stdout.write(ansiColorReset)
 
-		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/_development/excel/p2d{state.dimensionsTotal}SurplusDictionaries.csv")
+		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/_development/excel/p2d{state.totalDimensions}SurplusDictionaries.csv")
 
 		if boxOfDictionaryPinned:
 			with pathFilename.open('w', encoding='utf-8', newline='') as writeStream:
 				writerCSV = csv.writer(writeStream)
-				boxOfPiles: list[int] = list(range(state.leavesTotal))
+				boxOfPiles: list[int] = list(range(state.totalLeaves))
 				writerCSV.writerow(boxOfPiles)
 				for permutationSpace in boxOfDictionaryPinned:
 					writerCSV.writerow([permutationSpace.get(pile, '') for pile in boxOfPiles])

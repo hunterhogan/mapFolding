@@ -28,7 +28,7 @@ from __future__ import annotations
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from itertools import permutations
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, validateMapShape
+from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves, validateMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import multiprocessing
@@ -41,16 +41,16 @@ if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
 	from typing import Any
 
-# TODO `getLeavesTotal` comprehensive tests.
-def test_getLeavesTotal_edge_cases() -> None:
-	"""Test edge cases for getLeavesTotal."""
+# TODO `getTotalLeaves` comprehensive tests.
+def test_getTotalLeaves_edge_cases() -> None:
+	"""Test edge cases for getTotalLeaves."""
 	# Order independence
 	ImaTuple: tuple[int, ...] = (2, 3, 4)
-	baseline: int = getLeavesTotal(ImaTuple)
+	baseline: int = getTotalLeaves(ImaTuple)
 
 	for mapShape in permutations(ImaTuple):
-		actual: int = getLeavesTotal(mapShape)
-		assertEqualTo(actual, baseline, getLeavesTotal.__name__, mapShape)
+		actual: int = getTotalLeaves(mapShape)
+		assertEqualTo(actual, baseline, getTotalLeaves.__name__, mapShape)
 
 @pytest.mark.parametrize(
 	'mapShape,expected'

@@ -31,7 +31,7 @@ def _CLIHelpText() -> str:
 		f"\tOEIS_for_n {exampleOEISid} {exampleN}\n"
 		"  Python:\n"
 		"\tfrom mapFolding.oeis import oeisIDfor_n\n"
-		f"\tfoldsTotal = oeisIDfor_n('{exampleOEISid}', {exampleN})"
+		f"\ttotalFolds = oeisIDfor_n('{exampleOEISid}', {exampleN})"
 	)
 
 def _getOEISDescriptions() -> str:

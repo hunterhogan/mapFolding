@@ -9,7 +9,7 @@ from hunterMakesPy import decreasing, inclusive, zeroIndexed
 from itertools import chain
 from mapFolding._e import leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import creaseViolation吗
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal
+from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves
 from mapFolding.kitFilesystem import makePathFilenameFolds, streamAlbum, writeAlbum
 from mapFolding.oeis import getValuesKnown, makeMapShape
 from mapFolding.theSSOT import settingsPackage
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 # mapShape: tuple[int, ...] = getMapNext(n)
-# leavesTotal: int = getLeavesTotal(mapShape)
+# totalLeaves: int = getTotalLeaves(mapShape)
 
 # def makeAlbums(getMapNext: Callable[[int], tuple[int, ...]], n: int, nFinal: int, pathAlbum: Path):
 def makeAlbums1xn(n: int, nFinal: int, workersMaximum: int) -> Path:
@@ -58,12 +58,12 @@ def makeAlbums1xn(n: int, nFinal: int, workersMaximum: int) -> Path:
 
 def _makeDescendants(folding: Folding) -> tuple[Folding, ...]:
 	# DEVELOPMENT With a 1Xn map, an increase in map size only adds one leaf. There are only old-n-ways to insert 1 leaf.
-	# bb = len(old folding) == old leavesTotal
+	# bb = len(old folding) == old totalLeaves
 	# cc = len(new folding) - bb
 	# If I put a Leaf in every new Pile:
 	# pile permutations = P(bb, cc) = bb! / (bb - cc)!
 	# If I put a ChoicesLeaf in every new Pile:
-	# each new ChoicesLeaf = makeChoicesLeaf(new leavesTotal, range(bb, bb + cc))
+	# each new ChoicesLeaf = makeChoicesLeaf(new totalLeaves, range(bb, bb + cc))
 	# pile combinations = bb Choose cc = bb! / (cc! * (bb - cc)!)
 	# If I use ChoicesLeaf, I _think_ it will be easier for me to use the functions from the
 	# `elimination` algorithms. I can start with ChoicesLeaf, which means PermutationSpace, run
@@ -74,7 +74,7 @@ def _makeDescendants(folding: Folding) -> tuple[Folding, ...]:
 
 	# OR, make a new crossed creases based on the limited `_foldingValid吗` function.
 
-	# Any mapShape can start with the 1xn Album with the same leavesTotal. But it will need to use the
+	# Any mapShape can start with the 1xn Album with the same totalLeaves. But it will need to use the
 	# full foldingValid check. Nevertheless, that is a MUCH smaller search space.
 	inserting: Iterable[Folding] = map(partial(_insertLeafAtPile, folding, len(folding)), range(len(folding), pileOrigin, decreasing))
 	return tuple(filter(_foldingValid吗, inserting))
@@ -122,7 +122,7 @@ if __name__ == '__main__':
 # Be conscious of how this is applied and watch out for traps and assumptions.
 
 # From constraint propagation, select the length of the last dimension:
-#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
+#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [totalFolds] is divisible by 2 * [totalLeaves]." ============================
 # if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 # 	state.Theorem2Multiplier = 2
 # 	leafOrigin下aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.mapShapeProducts))
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
 # `elimination` selects the longest dimension:
 # def theorem2b(state: EliminationState) -> EliminationState:
-# 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):
+# 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.totalLeaves):
 # 		state.Theorem2Multiplier = 2
 # 		dimension: int = state.mapShape.index(max(state.mapShape))
 # 		leaf_k: int = state.mapShapeProducts[dimension]
@@ -145,7 +145,7 @@ if __name__ == '__main__':
 # constraintPropagation and `elimination` would assign leaf_k = 1 because mapShapeProducts for
 # mapShape (1, n) is [1, n]. (Or does my code make it [1, 1, n]?) Compare to mapShape (2, n), which is
 # [1, 2, 2n]. In any event, it seems that selecting k, r, where k ∈ mapShapeProducts and r = 2 * k
-# < leavesTotal is valid for any k in mapShapeProducts. With (1, n) maps, we have the good fortune
+# < totalLeaves is valid for any k in mapShapeProducts. With (1, n) maps, we have the good fortune
 # of k and r staying the same for all n.
 
 # If I were to select k using either of the above methods for other map types, then k and r would
@@ -170,7 +170,7 @@ if __name__ == '__main__':
 #   no algorithm is _this_ efficient. "Lazy" construction allows many steps of each algorithm to be
 #   efficient, but I never tried to achieve this level of efficiency.
 
-# `leavesTotal` -> a function for incrementing the map size.
+# `totalLeaves` -> a function for incrementing the map size.
 # 	E.g., getMapNext: Callable[[int], tuple[int, ...]] = partial(makeMapShape, 'A001417')
 
 # TODO to make the files smaller, use a truncated notation. The graph notation I created is very

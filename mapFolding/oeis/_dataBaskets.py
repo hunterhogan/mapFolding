@@ -10,6 +10,6 @@ class MetadataOEISid(TypedDict):
 	offset: int
 	"""The starting index, 'n', of the sequence, typically 0 or 1."""
 	valuesKnown: dict[int, int]
-	"""Dictionary of sequence indices, 'n', to their known values, `foldsTotal`."""
+	"""Dictionary of sequence indices, 'n', to their known values, `totalFolds`."""
 	valueUnknown: int
-	"""The smallest value of 'n' for for which `foldsTotal` is unknown."""
+	"""The smallest value of 'n' for for which `totalFolds` is unknown."""

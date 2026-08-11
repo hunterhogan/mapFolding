@@ -37,7 +37,7 @@ from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import getFoldsTotalKnown, getValuesKnown, makeMapShape, oeisIDfor_n
+from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDfor_n
 from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -203,11 +203,11 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 
 	pathFilenameModule: Path = pathFilename_tmpTesting.absolute()
-	pathFilenameFoldsTotal: Path = pathFilenameModule.with_suffix('.foldsTotalTesting')
-	registrarRecordsTemporaryFilesystemObject(pathFilenameFoldsTotal)
+	pathFilenameTotalFolds: Path = pathFilenameModule.with_suffix('.totalFoldsTesting')
+	registrarRecordsTemporaryFilesystemObject(pathFilenameTotalFolds)
 
 	jobTest = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem
-		, pathFilenameFoldsTotal=PurePosixPath(pathFilenameFoldsTotal), foldsTotalMultiplier=state.leavesTotal)
+		, pathFilenameTotalFolds=PurePosixPath(pathFilenameTotalFolds), totalFoldsMultiplier=state.totalLeaves)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(jobTest, spices)
 
@@ -219,6 +219,6 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 	assert loader is not None, messageTestFailure(loader, 'a module loader', 'importlib.util.spec_from_file_location', '__main__', pathFilenameModule)
 	loader.exec_module(module)
 
-	expected: str = str(getFoldsTotalKnown(oneTestCuzTestsOverwritingTests) or 0)
-	actual: str = pathFilenameFoldsTotal.read_text(encoding='utf-8').strip()
-	assertEqualTo(actual, expected, 'Path.read_text', pathFilenameFoldsTotal, encoding='utf-8')
+	expected: str = str(getTotalFoldsKnown(oneTestCuzTestsOverwritingTests) or 0)
+	actual: str = pathFilenameTotalFolds.read_text(encoding='utf-8').strip()
+	assertEqualTo(actual, expected, 'Path.read_text', pathFilenameTotalFolds, encoding='utf-8')

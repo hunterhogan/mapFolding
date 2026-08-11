@@ -20,10 +20,10 @@ def eliminateFolds(
 	, *
 	, CPUlimit: Limitation = None
 	, flow: str | None = None
-	, suffix: str = '.foldsTotal'
+	, suffix: str = '.totalFolds'
 ) -> int:
 	"""
-	Compute foldsTotal by elimination.
+	Compute totalFolds by elimination.
 
 	Parameters
 	----------
@@ -34,7 +34,7 @@ def eliminateFolds(
 		syntax of the programming language.
 	pathLikeWrite : PathLike[str] | None = None
 		A filename, a path of only directories, or a path with directories and a filename to which `countFolds` will write the
-		value of `foldsTotal`. If `pathLikeWrite` is a path of only directories, `countFolds` creates a filename based
+		value of `totalFolds`. If `pathLikeWrite` is a path of only directories, `countFolds` creates a filename based
 		on the map dimensions.
 	CPUlimit : bool | float | int | None = None
 		If relevant, whether and how to limit the number of processors `countFolds` will use.
@@ -49,12 +49,12 @@ def eliminateFolds(
 		with the same sign as the `float`.
 	flow : str | None = None
 		My stupid way of selecting the version of the algorithm to use in the computation.
-	suffix : str = ".foldsTotal"
+	suffix : str = ".totalFolds"
 		The filename suffix for the saved count.
 
 	Returns
 	-------
-	foldsTotal : int
+	totalFolds : int
 		Number of distinct ways to fold a map of the given dimensions.
 
 	Raises
@@ -78,15 +78,15 @@ def eliminateFolds(
 	#-------- Memorialization instructions ---------------------------------------------
 
 	if pathLikeWrite is None:
-		pathFilenameFoldsTotal: Path | None = None
+		pathFilenameTotalFolds: Path | None = None
 	else:
-		pathFilenameFoldsTotal = makePathFilenameFolds(state.mapShape, pathLikeWrite, suffix=suffix)
-		saveTotalFAILearly(pathFilenameFoldsTotal)
+		pathFilenameTotalFolds = makePathFilenameFolds(state.mapShape, pathLikeWrite, suffix=suffix)
+		saveTotalFAILearly(pathFilenameTotalFolds)
 
 	#-------- Algorithm version -----------------------------------------------------
 
 	if 0 in state.mapShape:
-		foldsTotal: int = 1
+		totalFolds: int = 1
 	else:
 		match flow:
 			case 'constraintPropagation':
@@ -100,11 +100,11 @@ def eliminateFolds(
 			case 'elimination' | _:
 				from mapFolding._e.algorithms.elimination import doTheNeedful
 
-		foldsTotal = doTheNeedful(state, concurrencyLimit).foldsTotal
+		totalFolds = doTheNeedful(state, concurrencyLimit).totalFolds
 
 	#-------- Follow memorialization instructions ---------------------------------------------
 
-	if pathFilenameFoldsTotal is not None:
-		saveTotal(pathFilenameFoldsTotal, foldsTotal)
+	if pathFilenameTotalFolds is not None:
+		saveTotal(pathFilenameTotalFolds, totalFolds)
 
-	return foldsTotal
+	return totalFolds

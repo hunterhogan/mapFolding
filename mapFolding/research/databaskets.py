@@ -5,8 +5,8 @@ from __future__ import annotations
 from mapFolding._e import leafOrigin
 from mapFolding.beDRY import makeDataContainer
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import getFoldsTotalKnown
-from mapFolding.theTypes import 形Array1DLeavesTotal
+from mapFolding.oeis import getTotalFoldsKnown
+from mapFolding.theTypes import 形Array1DTotalLeaves
 import dataclasses
 
 @dataclasses.dataclass(slots=True)
@@ -26,11 +26,11 @@ class LeafSequenceState(MapFoldingState):
 
 	Attributes
 	----------
-	leafSequence : 形Array1DLeavesTotal = None
+	leafSequence : 形Array1DTotalLeaves = None
 		Array storing the sequence of leaf connections discovered.
 	"""
 
-	leafSequence: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	leafSequence: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""
 	Array storing the sequence of leaf connections discovered during computation.
 
@@ -56,10 +56,10 @@ class LeafSequenceState(MapFoldingState):
 		"""
 		super().__post_init__()
 		if self.leafSequence is None:
-			foldsTotalKnown: int | None = getFoldsTotalKnown(self.mapShape)
-			if foldsTotalKnown is not None:
-				groupsOfFoldsKnown: int = foldsTotalKnown // self.leavesTotal
+			totalFoldsKnown: int | None = getTotalFoldsKnown(self.mapShape)
+			if totalFoldsKnown is not None:
+				groupsOfFoldsKnown: int = totalFoldsKnown // self.totalLeaves
 				self.leafSequence = makeDataContainer(groupsOfFoldsKnown, self.__dataclass_fields__['leafSequence'].metadata['dtype'])
-				# I previously collected a lot of data using `Leaf` numbers from 1 to `leavesTotal`,
+				# I previously collected a lot of data using `Leaf` numbers from 1 to `totalLeaves`,
 				# so I initialized the array with `self.leaf1ndex` instead of `leafOrigin`.
 				self.leafSequence[self.groupsOfFolds] = leafOrigin

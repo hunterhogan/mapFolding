@@ -10,7 +10,7 @@ nodes required by the module generators.
 Contents
 --------
 Variables
-    adjustFoldsTotal
+    adjustTotalFolds
         Halve the generated symmetric-fold total with upward rounding.
     ExprCallFilterAsymmetricFolds_leafBelow
         Call the symmetry filter with the generated `leafBelow` name.
@@ -49,7 +49,7 @@ foldsSymmetricIncrementCount: ast.stmt = ast.parse(ImaString).body[0]
 del ImaString
 
 ImaString = f'{defaultFoldsSymmetric['variable']['stateInstance']}.{defaultFoldsSymmetric['variable']['counting']} = ({defaultFoldsSymmetric['variable']['stateInstance']}.{defaultFoldsSymmetric['variable']['counting']} + 1) // 2'
-adjustFoldsTotal: ast.stmt = ast.parse(ImaString).body[0]
+adjustTotalFolds: ast.stmt = ast.parse(ImaString).body[0]
 """Halve the generated symmetric-fold total with upward rounding."""
 del ImaString
 

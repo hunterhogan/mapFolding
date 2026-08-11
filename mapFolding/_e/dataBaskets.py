@@ -16,7 +16,7 @@ from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddL
 from mapFolding._e.filters import choicesLeaf吗, leafInChoicesLeaf吗, leaf吗, 是valid
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile
-from mapFolding.beDRY import getLeavesTotal, validateMapShape
+from mapFolding.beDRY import getTotalLeaves, validateMapShape
 from math import prod
 from operator import attrgetter, methodcaller
 from typing import cast, overload, TYPE_CHECKING
@@ -553,7 +553,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 @dataclasses.dataclass(slots=True)
 class EliminationState:
-	"""Computational state for algorithms that compute `foldsTotal` by elimination.
+	"""Computational state for algorithms that compute `totalFolds` by elimination.
 
 	This data basket stores both mutable workbench fields (which change during the search) and
 	precomputed constants derived from `mapShape` (which do not change after `__post_init__`).
@@ -578,13 +578,13 @@ class EliminationState:
 		Multiplier applied by Theorem 3 optimizations.
 	Theorem4Multiplier : int = 1
 		Multiplier applied by Theorem 4 optimizations.
-	dimensionsTotal : int
+	totalDimensions : int
 		Unchanging total number of axes in `mapShape`.
 	foldingCheckSum : int
 		Unchanging triangular-number check-sum for a valid `Folding`.
 	leafLast : `Leaf`
 		Unchanging 0-indexed largest `leaf` value.
-	leavesTotal : int
+	totalLeaves : int
 		Unchanging total number of leaves in the map.
 	pileLast : `Pile`
 		Unchanging 0-indexed largest `pile` value.
@@ -602,7 +602,7 @@ class EliminationState:
 
 	Notes
 	-----
-	The computed `foldsTotal` is `groupsOfFolds * leavesTotal * Theorem2Multiplier *
+	The computed `totalFolds` is `groupsOfFolds * totalLeaves * Theorem2Multiplier *
 	Theorem3Multiplier * Theorem4Multiplier`.
 
 	"""
@@ -619,7 +619,7 @@ class EliminationState:
 	boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
 
 	groupsOfFolds: int = 0
-	"""`foldsTotal` is divisible by `leavesTotal`; the algorithm counts each `Folding` that represents a group of `leavesTotal`-many foldings."""
+	"""`totalFolds` is divisible by `totalLeaves`; the algorithm counts each `Folding` that represents a group of `totalLeaves`-many foldings."""
 
 	boxOfFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
 	"""A list of `Folding` patterns found."""
@@ -631,20 +631,20 @@ class EliminationState:
 	Theorem3Multiplier: int = 1
 	Theorem4Multiplier: int = 1
 
-	dimensionsTotal: int = dataclasses.field(init=False)
+	totalDimensions: int = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
 	foldingCheckSum: int = dataclasses.field(init=False)
 	"""Unchanging triangular number check-sum for a valid `Folding`, https://en.wikipedia.org/wiki/Triangular_number."""
 	leafLast: Leaf = dataclasses.field(init=False)
 	"""Unchanging 0-indexed largest `leaf` in a `Folding`."""
-	leavesTotal: int = dataclasses.field(init=False)
+	totalLeaves: int = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 	pileLast: Pile = dataclasses.field(init=False)
 	"""Unchanging 0-indexed final `pile` in a `Folding`."""
 	pilesTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of piles in the map."""
 	mapShapeProducts: tuple[int, ...] = dataclasses.field(init=False)
-	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal + inclusive]`."""
+	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[totalDimensions + inclusive]`."""
 	mapShapeProductsSums: tuple[int, ...] = dataclasses.field(init=False)
 	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[len(mapShapeProducts) + inclusive]`."""
 	mapShape首ProductsSums: tuple[int, ...] = dataclasses.field(init=False)
@@ -653,7 +653,7 @@ class EliminationState:
 	"""Unchanging single-base positional-numeral value of the Cartesian coordinates that are the first to be _out-of-bounds_ for the `mapShape`."""
 
 	@property
-	def foldsTotal(self) -> int:
+	def totalFolds(self) -> int:
 		"""The computed number of distinct `Folding` patterns for this `mapShape`."""
 		return prod(
 			(self.groupsOfFolds, self.Theorem2aMultiplier, self.Theorem2Multiplier, self.Theorem3Multiplier, self.Theorem4Multiplier)
@@ -661,7 +661,7 @@ class EliminationState:
 
 	def moveToBoxOfFolding(self) -> Self:
 		foldingGroup吗: dict[bool, list[PermutationSpace]] = toolz_groupby(
-			compose(self.leavesTotal.__eq__, attrgetter('leafCount')), self.boxOfPermutationSpace
+			compose(self.totalLeaves.__eq__, attrgetter('leafCount')), self.boxOfPermutationSpace
 		)
 		self.boxOfPermutationSpace = list(foldingGroup吗.get(False, ()))
 		self.boxOfFolding.extend(map(methodcaller('makeFolding'), foldingGroup吗.get(True, ())))
@@ -721,7 +721,7 @@ class EliminationState:
 		"""
 		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.pinnedLeaves())}
 
-		for dimension in range(self.dimensionsTotal):
+		for dimension in range(self.totalDimensions):
 			boxOfPileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 			for pile, leaf in permutationSpace.pinnedLeaves().items():
 				crease: int | None = getCreasePost(self.mapShape, leaf, dimension)
@@ -808,17 +808,17 @@ class EliminationState:
 	def __post_init__(self) -> None:
 		"""One-time computation of unchanging values."""
 		self.mapShape = validateMapShape(self.mapShape)
-		self.dimensionsTotal = len(self.mapShape)
-		self.leavesTotal = getLeavesTotal(self.mapShape)
-		if 0 < self.leavesTotal:
-			self.Theorem2aMultiplier = self.leavesTotal
-		self.leafLast = self.leavesTotal - 1
-		self.foldingCheckSum = self.leafLast * self.leavesTotal // 2
-		self.pilesTotal = self.leavesTotal
+		self.totalDimensions = len(self.mapShape)
+		self.totalLeaves = getTotalLeaves(self.mapShape)
+		if 0 < self.totalLeaves:
+			self.Theorem2aMultiplier = self.totalLeaves
+		self.leafLast = self.totalLeaves - 1
+		self.foldingCheckSum = self.leafLast * self.totalLeaves // 2
+		self.pilesTotal = self.totalLeaves
 		self.pileLast = self.pilesTotal - 1
-		self.首 = self.leavesTotal
+		self.首 = self.totalLeaves
 		self.mapShapeProducts = _e.getMapShapeProducts(self.mapShape)
 		self.mapShapeProductsSums = _e.getMapShapeProductsSums(self.mapShape)
 		self.mapShape首ProductsSums = _e.getMapShape首ProductsSums(
-			self.mapShapeProducts, self.dimensionsTotal, self.dimensionsTotal
+			self.mapShapeProducts, self.totalDimensions, self.totalDimensions
 		)

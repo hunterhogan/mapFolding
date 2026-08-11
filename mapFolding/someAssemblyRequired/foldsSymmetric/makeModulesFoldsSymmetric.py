@@ -8,7 +8,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfThis
 from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import (
-	adjustFoldsTotal, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
+	adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
@@ -36,7 +36,7 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 		).captureLastMatch(astModule))
 	FunctionDef_count.name = identifierCallable or defaultFoldsSymmetric['function']['counting']
 
-	NodeChanger(Be.Return, Then.insertThisAbove([adjustFoldsTotal])).visit(FunctionDef_count)
+	NodeChanger(Be.Return, Then.insertThisAbove([adjustTotalFolds])).visit(FunctionDef_count)
 
 	NodeChanger(
 		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(default['variable']['stateInstance'], default['variable']['counting']))

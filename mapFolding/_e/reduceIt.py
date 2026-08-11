@@ -127,7 +127,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		for dimension in range(state.dimensionsTotal):
+		for dimension in range(state.totalDimensions):
 			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.pinnedLeaves()))
 
 			for upDown, leftRight in ((False, True), (True, False)):
@@ -147,7 +147,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 						pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
 
 					if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-						antiChoicesLeaf: ChoicesLeaf = _e.makeAntiChoicesLeaf(state.leavesTotal, (leaf_rCrease,))
+						antiChoicesLeaf: ChoicesLeaf = _e.makeAntiChoicesLeaf(state.totalLeaves, (leaf_rCrease,))
 
 						if pileOf_k < pileOf_r < pileOf_kCrease:
 							pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
@@ -159,7 +159,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 							pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
 					elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-						antiChoicesLeaf = _e.makeAntiChoicesLeaf(state.leavesTotal, (leaf_kCrease,))
+						antiChoicesLeaf = _e.makeAntiChoicesLeaf(state.totalLeaves, (leaf_kCrease,))
 
 						if pileOf_rCrease < pileOf_k < pileOf_r:
 							pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
@@ -219,7 +219,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
-		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), _e.makeAntiChoicesLeaf(state.leavesTotal, DOTvalues(leavesPinned)))
+		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), _e.makeAntiChoicesLeaf(state.totalLeaves, DOTvalues(leavesPinned)))
 		if len(leavesPinned) < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
@@ -274,7 +274,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 			if _e.lengthChoicesLeaf(choicesLeaf) == len(boxOfPiles):
 
 				permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles))
-					, _e.makeAntiChoicesLeaf(state.leavesTotal, _e.getIteratorOfLeaves(choicesLeaf))
+					, _e.makeAntiChoicesLeaf(state.totalLeaves, _e.getIteratorOfLeaves(choicesLeaf))
 				)
 
 		if permutationSpace.leafCount < leafCount:
@@ -305,10 +305,10 @@ def reducePermutationSpace_leafDomainOf0or1(state: EliminationState, permutation
 
 		countDomainSizes: Counter[Leaf] = Counter(chain(chain.from_iterable(map(_e.getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 
-		if set(range(state.leavesTotal)).difference(countDomainSizes.keys()):
+		if set(range(state.totalLeaves)).difference(countDomainSizes.keys()):
 			permutationSpace.valid = False
 		else:
-			leaf: Leaf | None = first(set(filterValue((1).__eq__, countDomainSizes, factory=dict[Leaf, int])).difference(leavesPinned.values()).difference([state.leavesTotal]), None)
+			leaf: Leaf | None = first(set(filterValue((1).__eq__, countDomainSizes, factory=dict[Leaf, int])).difference(leavesPinned.values()).difference([state.totalLeaves]), None)
 			if leaf is not None:
 				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInChoicesLeaf吗, leaf), pilesUndetermined, factory=dict[Leaf, ChoicesLeaf])), leaf))
 				permutationSpaceHasNewLeaf = True

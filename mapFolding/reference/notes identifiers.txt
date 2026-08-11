@@ -1,0 +1,26 @@
+get: expression, an existing value, don't mutate it.
+make: expression, a new value from existing values.
+工: expression. Use only on functions and similar.
+totalDimensionsOdd: int = 工totalDimensionsOdd(15)
+
+identifierDataclass
+名 ming
+pathFilenameWrite
+道 dao
+道名
+
+lookup
+
+次: index
+
+boxOf: plural prefix, especially list, set, tuple
+"boxOf" feels weird, but it reduces ambiguity, example:
+real identifier in `kitNumba`: `shapeAsListSlices`
+
+Does "List" mean
+- `numba.List`
+- builtins.list that must be a list for some reason
+- `ast.List`
+- boxOf
+
+Better identifier: `shapeAsBoxOfSlice`

@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from copy import deepcopy
 from mapFolding.dataBaskets import SymmetricFoldsState
-from mapFolding.theTypes import 形FoldsTotal
+from mapFolding.theTypes import 形TotalFolds
 from queue import Queue
 from threading import Lock, Thread
 
 boxOfThreads: list[Thread] = []
 queueFutures: Queue[SymmetricFoldsState] = Queue()
-symmetricFoldsTotal: int = 0
-LOCKsymmetricFoldsTotal = Lock()
+symmetricTotalFolds: int = 0
+LOCKsymmetricTotalFolds = Lock()
 STOPsignal = object()
 
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None:
-    global boxOfThreads, symmetricFoldsTotal, queueFutures
+    global boxOfThreads, symmetricTotalFolds, queueFutures
     boxOfThreads = []
     queueFutures = Queue()
-    symmetricFoldsTotal = symmetricFolds
+    symmetricTotalFolds = symmetricFolds
     indexThread = 0
     while indexThread < maxWorkers:
         thread = Thread(target=_threadDoesSomething, name=f'thread{indexThread}', daemon=True)
@@ -25,32 +25,32 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
         indexThread += 1
 
 def _threadDoesSomething() -> None:
-    global symmetricFoldsTotal
+    global symmetricTotalFolds
     while True:
         state: SymmetricFoldsState = queueFutures.get()
         if state is STOPsignal:
             break
         state = _filterAsymmetricFolds(state)
-        with LOCKsymmetricFoldsTotal:
-            symmetricFoldsTotal += state.symmetricFolds
+        with LOCKsymmetricTotalFolds:
+            symmetricTotalFolds += state.symmetricFolds
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
     queueFutures.put_nowait(deepcopy(state))
 
-def getSymmetricFoldsTotal() -> 形FoldsTotal:
+def getSymmetricTotalFolds() -> 形TotalFolds:
     for _thread in boxOfThreads:
         queueFutures.put(STOPsignal)
     for thread in boxOfThreads:
         thread.join()
-    return symmetricFoldsTotal
+    return symmetricTotalFolds
 
 def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.次Leaf = 1
     state.leafComparison[0] = 1
     state.leafConnectee = 1
-    while state.leafConnectee < state.leavesTotal + 1:
+    while state.leafConnectee < state.totalLeaves + 1:
         state.次MiniGap = state.leafBelow[state.次Leaf]
-        state.leafComparison[state.leafConnectee] = (state.leavesTotal + state.次MiniGap - state.次Leaf) % state.leavesTotal
+        state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
         state.次Leaf = state.次MiniGap
         state.leafConnectee += 1
     for boxOfTuples in state.indices:
@@ -65,8 +65,8 @@ def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:
     return state.leaf1ndex > 0
 
-def activeLeafGreaterThanLeavesTotal(state: SymmetricFoldsState) -> bool:
-    return state.leaf1ndex > state.leavesTotal
+def activeLeafGreaterThanTotalLeaves(state: SymmetricFoldsState) -> bool:
+    return state.leaf1ndex > state.totalLeaves
 
 def activeLeafIsTheFirstLeaf(state: SymmetricFoldsState) -> bool:
     return state.leaf1ndex <= 1
@@ -105,7 +105,7 @@ def initializeIndexMiniGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
     return state
 
 def initializeVariablesToFindGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.dimensionsUnconstrained = state.dimensionsTotal
+    state.dimensionsUnconstrained = state.totalDimensions
     state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
     state.次Dimension = 0
     return state
@@ -149,7 +149,7 @@ def loopingLeavesConnectedToActiveLeaf(state: SymmetricFoldsState) -> bool:
     return state.leafConnectee != state.leaf1ndex
 
 def loopingThroughTheDimensions(state: SymmetricFoldsState) -> bool:
-    return state.次Dimension < state.dimensionsTotal
+    return state.次Dimension < state.totalDimensions
 
 def loopingToActiveGapCeiling(state: SymmetricFoldsState) -> bool:
     return state.次MiniGap < state.gap1ndexCeiling
@@ -174,7 +174,7 @@ def undoLastLeafPlacement(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while activeLeafGreaterThan0(state):
         if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
-            if activeLeafGreaterThanLeavesTotal(state):
+            if activeLeafGreaterThanTotalLeaves(state):
                 filterAsymmetricFolds(state)
             else:
                 state = initializeVariablesToFindGaps(state)
@@ -198,7 +198,7 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
         if gapAvailable(state):
             state = insertActiveLeafAtGap(state)
     else:
-        state.symmetricFolds = getSymmetricFoldsTotal()
+        state.symmetricFolds = getSymmetricTotalFolds()
     state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 

@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 	from typing import Literal, LiteralString
 
 @cache
-def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int | None:
+def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
 
 	(AI generated docstring)
@@ -57,8 +57,8 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int | None:
 
 	Examples
 	--------
-	>>> from mapFolding.oeis import librarianLookupsFoldsTotalKnown
-	>>> librarianLookupsFoldsTotalKnown((2, 3))
+	>>> from mapFolding.oeis import getTotalFoldsKnown
+	>>> getTotalFoldsKnown((2, 3))
 	10
 
 	Implementation Details
@@ -69,7 +69,7 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int | None:
 
 	See Also
 	--------
-	mapFolding.oeis.librarianConstructsDictionaryFoldsTotalKnown
+	mapFolding.oeis.makeLookupTotalFoldsKnown
 		Construct the underlying lookup dictionary.
 
 	References
@@ -77,10 +77,10 @@ def getFoldsTotalKnown(mapShape: tuple[int, ...]) -> int | None:
 	[1] functools.cache - Python standard library
 		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
-	lookupFoldsTotal: dict[tuple[int, ...], int] = makeDictionaryFoldsTotalKnown()
-	return lookupFoldsTotal.get(tuple(mapShape))
+	lookupTotalFolds: dict[tuple[int, ...], int] = makeLookupTotalFoldsKnown()
+	return lookupTotalFolds.get(tuple(mapShape))
 
-def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
+def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 	"""You can create a dictionary mapping map shapes to known folding totals from all OEIS sequences.
 
 	(AI generated docstring)
@@ -92,7 +92,7 @@ def makeDictionaryFoldsTotalKnown() -> dict[tuple[int, ...], int]:
 
 	Returns
 	-------
-	dictionaryFoldsTotalKnown : dict[tuple[int, ...], int]
+	dictionaryTotalFoldsKnown : dict[tuple[int, ...], int]
 		A dictionary where keys are tuple `mapShape` and values are the total number of distinct
 		folding patterns for `mapShape`.
 

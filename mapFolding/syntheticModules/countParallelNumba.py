@@ -3,7 +3,7 @@ from __future__ import annotations
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding.dataBaskets import (
-	ParallelMapFoldingState, 形Array1DElephino, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形Elephino, 形FoldsTotal, 形LeavesTotal)
+	ParallelMapFoldingState, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形TotalFolds, 形TotalLeaves)
 from multiprocessing import set_start_method as multiprocessing_set_start_method
 from numba import jit
 
@@ -11,16 +11,16 @@ if __name__ == '__main__':
     multiprocessing_set_start_method('spawn')
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
-def count(groupsOfFolds: 形FoldsTotal, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形LeavesTotal, 次Leaf: 形LeavesTotal, 次MiniGap: 形Elephino, leaf1ndex: 形LeavesTotal, leafConnectee: 形LeavesTotal, dimensionsUnconstrained: 形LeavesTotal, countDimensionsGapped: 形Array1DLeavesTotal, gapRangeStart: 形Array1DElephino, gapsWhere: 形Array1DLeavesTotal, leafAbove: 形Array1DLeavesTotal, leafBelow: 形Array1DLeavesTotal, connectionGraph: 形Array3DLeavesTotal, dimensionsTotal: 形LeavesTotal, leavesTotal: 形LeavesTotal, taskDivisions: 形LeavesTotal, task次: 形LeavesTotal) -> tuple[形FoldsTotal, 形Elephino, 形Elephino, 形LeavesTotal, 形LeavesTotal, 形Elephino, 形LeavesTotal, 形LeavesTotal, 形LeavesTotal, 形Array1DLeavesTotal, 形Array1DElephino, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形LeavesTotal, 形LeavesTotal, 形LeavesTotal, 形LeavesTotal]:
+def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形TotalLeaves, 次Leaf: 形TotalLeaves, 次MiniGap: 形Elephino, leaf1ndex: 形TotalLeaves, leafConnectee: 形TotalLeaves, dimensionsUnconstrained: 形TotalLeaves, countDimensionsGapped: 形Array1DTotalLeaves, gapRangeStart: 形Array1DElephino, gapsWhere: 形Array1DTotalLeaves, leafAbove: 形Array1DTotalLeaves, leafBelow: 形Array1DTotalLeaves, connectionGraph: 形Array3DTotalLeaves, totalDimensions: 形TotalLeaves, totalLeaves: 形TotalLeaves, taskDivisions: 形TotalLeaves, task次: 形TotalLeaves) -> tuple[形TotalFolds, 形Elephino, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形Array1DTotalLeaves, 形Array1DElephino, 形Array1DTotalLeaves, 形Array1DTotalLeaves, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves]:
     while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:
-            if leaf1ndex > leavesTotal:
+            if leaf1ndex > totalLeaves:
                 groupsOfFolds += 1
             else:
-                dimensionsUnconstrained = dimensionsTotal
+                dimensionsUnconstrained = totalDimensions
                 gap1ndexCeiling = gapRangeStart[leaf1ndex - 1]
                 次Dimension = 0
-                while 次Dimension < dimensionsTotal:
+                while 次Dimension < totalDimensions:
                     leafConnectee = connectionGraph[次Dimension, leaf1ndex, leaf1ndex]
                     if leafConnectee == leaf1ndex:
                         dimensionsUnconstrained -= 1
@@ -58,37 +58,37 @@ def count(groupsOfFolds: 形FoldsTotal, gap1ndex: 形Elephino, gap1ndexCeiling: 
             leafAbove[leafBelow[leaf1ndex]] = leaf1ndex
             gapRangeStart[leaf1ndex] = gap1ndex
             leaf1ndex += 1
-    return (groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal, taskDivisions, task次)
+    return (groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次)
 
 def unRepackParallelMapFoldingState(state: ParallelMapFoldingState) -> ParallelMapFoldingState:
-    mapShape: tuple[形LeavesTotal, ...] = state.mapShape
-    groupsOfFolds: 形FoldsTotal = state.groupsOfFolds
+    mapShape: tuple[形TotalLeaves, ...] = state.mapShape
+    groupsOfFolds: 形TotalFolds = state.groupsOfFolds
     gap1ndex: 形Elephino = state.gap1ndex
     gap1ndexCeiling: 形Elephino = state.gap1ndexCeiling
-    次Dimension: 形LeavesTotal = state.次Dimension
-    次Leaf: 形LeavesTotal = state.次Leaf
+    次Dimension: 形TotalLeaves = state.次Dimension
+    次Leaf: 形TotalLeaves = state.次Leaf
     次MiniGap: 形Elephino = state.次MiniGap
-    leaf1ndex: 形LeavesTotal = state.leaf1ndex
-    leafConnectee: 形LeavesTotal = state.leafConnectee
-    dimensionsUnconstrained: 形LeavesTotal = state.dimensionsUnconstrained
-    countDimensionsGapped: 形Array1DLeavesTotal = state.countDimensionsGapped
+    leaf1ndex: 形TotalLeaves = state.leaf1ndex
+    leafConnectee: 形TotalLeaves = state.leafConnectee
+    dimensionsUnconstrained: 形TotalLeaves = state.dimensionsUnconstrained
+    countDimensionsGapped: 形Array1DTotalLeaves = state.countDimensionsGapped
     gapRangeStart: 形Array1DElephino = state.gapRangeStart
-    gapsWhere: 形Array1DLeavesTotal = state.gapsWhere
-    leafAbove: 形Array1DLeavesTotal = state.leafAbove
-    leafBelow: 形Array1DLeavesTotal = state.leafBelow
-    connectionGraph: 形Array3DLeavesTotal = state.connectionGraph
-    dimensionsTotal: 形LeavesTotal = state.dimensionsTotal
-    leavesTotal: 形LeavesTotal = state.leavesTotal
-    taskDivisions: 形LeavesTotal = state.taskDivisions
-    task次: 形LeavesTotal = state.task次
-    groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal, taskDivisions, task次 = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, dimensionsTotal, leavesTotal, taskDivisions, task次)
+    gapsWhere: 形Array1DTotalLeaves = state.gapsWhere
+    leafAbove: 形Array1DTotalLeaves = state.leafAbove
+    leafBelow: 形Array1DTotalLeaves = state.leafBelow
+    connectionGraph: 形Array3DTotalLeaves = state.connectionGraph
+    totalDimensions: 形TotalLeaves = state.totalDimensions
+    totalLeaves: 形TotalLeaves = state.totalLeaves
+    taskDivisions: 形TotalLeaves = state.taskDivisions
+    task次: 形TotalLeaves = state.task次
+    groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次 = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次)
     state = ParallelMapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, 次Dimension=次Dimension, 次Leaf=次Leaf, 次MiniGap=次MiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, taskDivisions=taskDivisions, task次=task次)
     return state
 
 def doTheNeedful(state: ParallelMapFoldingState, concurrencyLimit: int) -> tuple[int, list[ParallelMapFoldingState]]:
     stateParallel = deepcopy(state)
     boxOfStatesParallel: list[ParallelMapFoldingState] = [stateParallel] * stateParallel.taskDivisions
-    groupsOfFoldsTotal: int = 0
+    groupsOfTotalFolds: int = 0
     dictionaryConcurrency: dict[int, ConcurrentFuture[ParallelMapFoldingState]] = {}
     with ProcessPoolExecutor(concurrencyLimit) as concurrencyManager:
         for indexSherpa in range(stateParallel.taskDivisions):
@@ -97,6 +97,6 @@ def doTheNeedful(state: ParallelMapFoldingState, concurrencyLimit: int) -> tuple
             dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(unRepackParallelMapFoldingState, state)
         for indexSherpa in range(stateParallel.taskDivisions):
             boxOfStatesParallel[indexSherpa] = dictionaryConcurrency[indexSherpa].result()
-            groupsOfFoldsTotal += boxOfStatesParallel[indexSherpa].groupsOfFolds
-    foldsTotal: int = groupsOfFoldsTotal * stateParallel.leavesTotal
-    return (foldsTotal, boxOfStatesParallel)
+            groupsOfTotalFolds += boxOfStatesParallel[indexSherpa].groupsOfFolds
+    totalFolds: int = groupsOfTotalFolds * stateParallel.totalLeaves
+    return (totalFolds, boxOfStatesParallel)

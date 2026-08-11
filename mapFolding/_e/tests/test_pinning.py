@@ -19,17 +19,17 @@ if TYPE_CHECKING:
 	from numpy.typing import NDArray
 
 def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
-	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal))))
+	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.totalDimensions), 首零一(state.totalDimensions))))
 
 @pytest.mark.parametrize("pinningFunction", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))
-@pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
+@pytest.mark.parametrize("totalDimensions", [5, 6], ids=lambda totalDimensions: f"2^{totalDimensions}-dimensional")
 def test_pinningFunctions(
 	pinningFunction: CallableFunction[..., EliminationState],
-	dimensionsTotal: int,
+	totalDimensions: int,
 	CPUlimit: Limitation,
 	arrayAlbum2上nDimensional: NDArray[numpy.uint8],
 ) -> None:
-	state: EliminationState = EliminationState((2,) * dimensionsTotal)
+	state: EliminationState = EliminationState((2,) * totalDimensions)
 
 	state = pinningFunction(state, CPUlimit=CPUlimit)
 

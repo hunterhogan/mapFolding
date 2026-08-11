@@ -3,8 +3,8 @@
 This module contains empirically extracted combined domain data for leaves
 ['首零一二', '首一二'] across multiple mapShape configurations.
 
-Each list is named `boxOfDomain2D{dimensionsTotal}` where `dimensionsTotal`
-is the exponent in the 2^dimensionsTotal mapShape, and it contains tuples representing
+Each list is named `boxOfDomain2D{totalDimensions}` where `totalDimensions`
+is the exponent in the 2^totalDimensions mapShape, and it contains tuples representing
 valid pile positions for the specified leaves. The tuple order follows the original
 leaf argument order.
 """

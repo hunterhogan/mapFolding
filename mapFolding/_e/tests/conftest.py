@@ -47,8 +47,8 @@ def rtol(request: FixtureRequest) -> float:
 #================== Fixtures ======================================================
 
 @pytest.fixture()
-def arrayAlbum2上nDimensional(dimensionsTotal: int) -> NDArray[numpy.uint8]:
-	return pickle.loads((pathDataSamples / f'arrayFoldings2上{dimensionsTotal}Dimensional.pkl').read_bytes())
+def arrayAlbum2上nDimensional(totalDimensions: int) -> NDArray[numpy.uint8]:
+	return pickle.loads((pathDataSamples / f'arrayFoldings2上{totalDimensions}Dimensional.pkl').read_bytes())
 
 @pytest.fixture(params=(None,))
 def CPUlimit(request: pytest.FixtureRequest) -> Limitation:

@@ -5,7 +5,7 @@
 	- [Data structures for better performance](#data-structures-for-better-performance)
 	- [2^n-dimensional maps](#2n-dimensional-maps)
 		- [Given a `Folding` with `leaf` adjacent to `leaf_r`, the difference of `leaf` and `leaf_r` is a power of 2, with many restrictions](#given-a-folding-with-leaf-adjacent-to-leaf_r-the-difference-of-leaf-and-leaf_r-is-a-power-of-2-with-many-restrictions)
-		- [Given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`](#given-leaves-k-and-r-if-dimensionnearest首k--dimensionnearesttailr-then-pileof_k--pileof_r)
+		- [Given leaves `k` and `r`, if `工dimension首零(k) <= 工dimensionTail(r)`, then `pileOf_k < pileOf_r`](#given-leaves-k-and-r-if-工dimension首零k--工dimensionTailr-then-pileof_k--pileof_r)
 		- [Pairs of leaves with low entropy](#pairs-of-leaves-with-low-entropy)
 		- [Crease neighbors are `bit_flip` neighbors](#crease-neighbors-are-bit_flip-neighbors)
 		- [Addends for "next" and "prior" leaves match crease neighbors](#addends-for-next-and-prior-leaves-match-crease-neighbors)
@@ -65,38 +65,38 @@ Truth:
 Reminders and general observations:
 
 - [something, something] absolute value [yada yada] in `state.mapShapeProducts[0:-1]`
-- The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.leavesTotal // 2)`, `neg(state.leavesTotal // 2)`.
-- The total number of differences is `state.leavesTotal - 1`, which is an odd number. (_Cf._ fencepost problem.)
-- `state.mapShapeProducts[-1] == state.leavesTotal`, and `state.mapShapeProducts[-2] == state.leavesTotal // 2`.
+- The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.totalLeaves // 2)`, `neg(state.totalLeaves // 2)`.
+- The total number of differences is `state.totalLeaves - 1`, which is an odd number. (_Cf._ fencepost problem.)
+- `state.mapShapeProducts[-1] == state.totalLeaves`, and `state.mapShapeProducts[-2] == state.totalLeaves // 2`.
 
 Differences:
 
 1. The signs of the magnitudes alternate: if the difference between two leaves is +2, for example, then before there can be another difference of +2, there must be a difference of -2.
-2. The total number of differences equal to `pos(state.leavesTotal // 2)` is always exactly one more than the total number of differences equal to `neg(state.leavesTotal // 2)`.
-   1. Therefore, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
+2. The total number of differences equal to `pos(state.totalLeaves // 2)` is always exactly one more than the total number of differences equal to `neg(state.totalLeaves // 2)`.
+   1. Therefore, the first and last differences with magnitude `state.totalLeaves // 2` are positive.
 3. For all other magnitudes in `state.mapShapeProducts[0:-2]`, the total number of positive and negative differences is always equal.
    1. Therefore, the first and last differences with those magnitudes must have opposite signs.
    2. Given Truth 1 and Truth 2,
       1. the first difference in every `Folding` is +1,
       2. the last difference of magnitude 1 is -1.
 4. In two consecutive piles, the absolute value of the differences cannot be the same. Given the difference at `pile_k` is -4, for example, then at `pile_k + 1`, the difference cannot be -4 or +4.
-5. The sum of all differences is `state.leavesTotal // 2`.
-6. Starting from `pileOrigin` in a `Folding`, the running total of differences is a distinct integer in the range `[0, state.leavesTotal)` and does not repeat.
+5. The sum of all differences is `state.totalLeaves // 2`.
+6. Starting from `pileOrigin` in a `Folding`, the running total of differences is a distinct integer in the range `[0, state.totalLeaves)` and does not repeat.
 
-### Given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`
+### Given leaves `k` and `r`, if `工dimension首零(k) <= 工dimensionTail(r)`, then `pileOf_k < pileOf_r`
 
 Physically, `pileOf_r` can exist before `pileOf_k`, so the limitation is due to leveraged enumeration.
 
-`dimensionNearest首(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
+`工dimension首零(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
 
 ```python
 k: int # Is a leaf
-index = dimensionNearest首(k)
+index = 工dimension首零(k)
 
 rTheFirst = state.mapShapeProducts[index]
 step = rTheFirst
 
-leavesThatCannotPrecede_k = range(rTheFirst, state.leavesTotal, step)
+leavesThatCannotPrecede_k = range(rTheFirst, state.totalLeaves, step)
 ```
 
 ### Pairs of leaves with low entropy
@@ -128,7 +128,7 @@ Furthermore, it is easy to predict the pairs of pairs-of-leaves with low entropy
 
 For $2^n$-dimensional maps, the crease neighbors of a `leaf` are obtained by flipping individual bits of the `leaf`'s binary representation. That is, the "next" and "prior" crease neighbors of `leaf` along `dimension` are `bit_flip(leaf, dimension)`. But not all bit-flips are valid creases: the crease list is a strict subset of the full list of bit-flips, and which bit-flips survive depends on the leaf's parity structure.
 
-Specifically, `getLeavesCreasePost(state, leaf)` and `getLeavesCreaseAnte(state, leaf)` each return a subset of `[bit_flip(leaf, d) for d in range(dimensionsTotal)]`. The subsets are selected by slicing indices determined by `howManyDimensionsHaveOddParity(leaf)`, `dimensionNearestTail(leaf)`, and `dimensionNearest首(leaf)`.
+Specifically, `getLeavesCreasePost(state, leaf)` and `getLeavesCreaseAnte(state, leaf)` each return a subset of `[bit_flip(leaf, d) for d in range(totalDimensions)]`. The subsets are selected by slicing indices determined by `工totalDimensionsOdd(leaf)`, `工dimensionTail(leaf)`, and `工dimension首零(leaf)`.
 
 - If the parity of `leaf` is even, then all crease-post neighbors are greater than `leaf`, and all crease-ante neighbors are less than `leaf`.
 - If the parity of `leaf` is odd, then all crease-post neighbors are less than `leaf`, and all crease-ante neighbors are greater than `leaf`.
@@ -148,7 +148,7 @@ boxOfAddendLeaves == boxOfLeavesNext        # True for all leaves
 boxOfAddendPriorLeaves == boxOfLeavesPrior  # True for all leaves
 ```
 
-where `boxOfLeavesNext` and `boxOfLeavesPrior` are slices of `[bit_flip(leaf, dimension) for dimension in range(dimensionsTotal)]` selected by the same slicing logic as `getLeavesCreasePost` and `getLeavesCreaseAnte`.
+where `boxOfLeavesNext` and `boxOfLeavesPrior` are slices of `[bit_flip(leaf, dimension) for dimension in range(totalDimensions)]` selected by the same slicing logic as `getLeavesCreasePost` and `getLeavesCreaseAnte`.
 
 ### Progressions within a dimension
 
@@ -162,14 +162,14 @@ cf: 18, 19, 21, 25, ...
 cf: 20, 21, 23, 27, ...
 ```
 
-Counting from the end (applying `bit_mask(dimensionsTotal) ^ leaf`) yields the even leaves. This "counting from the end" is a permutation expressible by bit manipulation: for each leaf $l$ in the first half, $l \oplus \text{bit\_mask}(n)$ gives the corresponding leaf in the second half.
+Counting from the end (applying `bit_mask(totalDimensions) ^ leaf`) yields the even leaves. This "counting from the end" is a permutation expressible by bit manipulation: for each leaf $l$ in the first half, $l \oplus \text{bit\_mask}(n)$ gives the corresponding leaf in the second half.
 
 ### Bit inversion symmetry
 
-For a $2^n$-dimensional map with $\text{leavesTotal} = 2^n$ leaves, the pile-range of `pile = leavesTotal // 2 - 1` has a two-part structure:
+For a $2^n$-dimensional map with $\text{totalLeaves} = 2^n$ leaves, the pile-range of `pile = totalLeaves // 2 - 1` has a two-part structure:
 
-1. Leaves in $[0, \text{leavesTotal}//2)$.
-2. Their bit-inversions in $[\text{leavesTotal}//2, \text{leavesTotal})$.
+1. Leaves in $[0, \text{totalLeaves}//2)$.
+2. Their bit-inversions in $[\text{totalLeaves}//2, \text{totalLeaves})$.
 
 The bit inversion is $\text{leaf} \oplus \text{bit\_mask}(n)$:
 
@@ -179,7 +179,7 @@ for leaf in [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31]:
 # 31 -> 32, 26 -> 37, 25 -> 38, 22 -> 41, 21 -> 42, ...
 ```
 
-This extends: `leafInSubHyperplane` can be used for the "start over" equivalences at $\text{leavesTotal}/4$, $\text{leavesTotal}/2$, and $3\cdot\text{leavesTotal}/4$.
+This extends: `leafInSubHyperplane` can be used for the "start over" equivalences at $\text{totalLeaves}/4$, $\text{totalLeaves}/2$, and $3\cdot\text{totalLeaves}/4$.
 
 ### Leaf domains are directly tied to `mapShapeProductsSums` and `mapShape首ProductsSums`
 
@@ -203,11 +203,11 @@ The full formula for `getDomainLeaf`:
 
 ```python
 range(
-    mapShapeProductsSums[dimensionNearestTail(leaf) + inclusive]
-        + howManyDimensionsHaveOddParity(leaf) - originPinned
-    , mapShape首ProductsSums[dimensionNearest首(leaf)]
-        + 2 - howManyDimensionsHaveOddParity(leaf) - originPinned
-    , 2 + (2 * (leaf == 首零(dimensionsTotal) + 零))
+    mapShapeProductsSums[工dimensionTail(leaf) + inclusive]
+        + 工totalDimensionsOdd(leaf) - originPinned
+    , mapShape首ProductsSums[工dimension首零(leaf)]
+        + 2 - 工totalDimensionsOdd(leaf) - originPinned
+    , 2 + (2 * (leaf == 首零(totalDimensions) + 零))
 )
 ```
 
@@ -227,8 +227,8 @@ The leaves in the pile-range of a pile can be computed from leaf domains (which 
 
 The pile-range construction involves three groups:
 
-1. **Odd leaves below $\text{leavesTotal}/2$** and some even leaves, via `mapShapeProductsSums` addends scaled by `mapShapeProducts`.
-2. **Even leaves above $\text{leavesTotal}/2$**, via bit-inversion (`invertLeafIn2上nDimensions`) of the first group's formula.
+1. **Odd leaves below $\text{totalLeaves}/2$** and some even leaves, via `mapShapeProductsSums` addends scaled by `mapShapeProducts`.
+2. **Even leaves above $\text{totalLeaves}/2$**, via bit-inversion (`invertLeafIn2上nDimensions`) of the first group's formula.
 3. **Dimension origins** and their inverses, added separately.
 
 ### Constraint propagation system
@@ -260,9 +260,9 @@ Key observations:
 
 For $2^n$-dimensional maps:
 
-- `foldsTotal` is divisible by $\text{leavesTotal} \times 2^{\text{dimensionsTotal}} \times \text{dimensionsTotal}!$
-- This includes: `Theorem2aMultiplier = leavesTotal` (pin `leafOrigin` at `pileOrigin`), and `Theorem4Multiplier = dimensionsTotal!` (factorial symmetry from permuting dimensions of equal length).
-- For general maps with unequal dimension lengths, `Theorem2Multiplier = 2` when the longest dimension has length $> 2$ and $\text{leavesTotal} > 4$, and `Theorem4Multiplier` is the product of factorials of groups of equal-length dimensions.
+- `totalFolds` is divisible by $\text{totalLeaves} \times 2^{\text{totalDimensions}} \times \text{totalDimensions}!$
+- This includes: `Theorem2aMultiplier = totalLeaves` (pin `leafOrigin` at `pileOrigin`), and `Theorem4Multiplier = totalDimensions!` (factorial symmetry from permuting dimensions of equal length).
+- For general maps with unequal dimension lengths, `Theorem2Multiplier = 2` when the longest dimension has length $> 2$ and $\text{totalLeaves} > 4$, and `Theorem4Multiplier` is the product of factorials of groups of equal-length dimensions.
 
 ### Low-entropy leaf pairs: structure of "beans and cornbread"
 
@@ -302,7 +302,7 @@ For a $2^6$-dimensional map with 7840 enumerated sequences:
 - The permutations of piles $\{2, 16, 32, 48, 62\}$ produce 5730 of 7840 sequences.
 - The number of distinct leaf possibilities at these piles: 5, 29, 30, 29, 5.
 
-Maps of shape $(3, 3, \ldots, 3)$ have `foldsTotal` divisible by $\text{leavesTotal} \times 2^{\text{dimensionsTotal}} \times \text{dimensionsTotal}!$
+Maps of shape $(3, 3, \ldots, 3)$ have `totalFolds` divisible by $\text{totalLeaves} \times 2^{\text{totalDimensions}} \times \text{totalDimensions}!$
 
 ### Leaf metadata per dimension
 
@@ -325,13 +325,13 @@ Lunnon's theorem: a pile ordering is a valid folding if and only if all its one-
 
 ## Semiotics, notation, and givens
 
-- Each `Leaf` is a distinct integer in the range `[0, state.leavesTotal)`.
+- Each `Leaf` is a distinct integer in the range `[0, state.totalLeaves)`.
 - `leaf` is the archetypal variable name for a `Leaf`.
 - Each `Pile` is a distinct integer in the range `[0, state.pilesTotal)`.
 - `pile` is the archetypal variable name for a `Pile`.
 - A `Folding` is a one-to-one correspondence between the set of `Pile` and the set of `Leaf`.
 - `folding` is the archetypal variable name for a `Folding`.
-- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.
+- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.totalLeaves`.
 - The positional-numeral ideographs (零, 一, 二, 三, etc.) represent `mapShapeProducts[dimensionIndex]`, i.e., powers of 2 in $2^n$-dimensional maps: 零 $= 2^0 = 1$, 一 $= 2^1 = 2$, 二 $= 2^2 = 4$, etc.
 - 首 (shǒu, "head") denotes the most-significant-dimension end of a coordinate. For example, `首零(n)` $= 2^{n-1}$, `首一(n)` $= 2^{n-2}$, `首零一(n)` $= 2^{n-1} + 2^{n-2}$.
 - `ChoicesLeaf` is a `gmpy2.mpz` bitset where bit $i$ is set iff leaf $i$ is a candidate at that pile.

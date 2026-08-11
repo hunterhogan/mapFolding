@@ -34,7 +34,7 @@ if __name__ == "__main__":
 	# state = pinLeavesDimension二(state)
 	state = pinLeavesDimensions0零一(state)
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
-	print(doTheNeedful(state, workersMaximum).foldsTotal)
+	print(doTheNeedful(state, workersMaximum).totalFolds)
 
 """
 
@@ -62,7 +62,7 @@ def assimilateEliminationCrease(identifierModuleBorg: str) -> Path:
 
 		return moduleDissect
 
-	boxOfFunctionsHARDCODED: list[tuple[identifierDotAttribute, str]] = [('mapFolding.beDRY', 'getLeavesTotal'), ('mapFolding.beDRY', 'defineProcessorLimit')]
+	boxOfFunctionsHARDCODED: list[tuple[identifierDotAttribute, str]] = [('mapFolding.beDRY', 'getTotalLeaves'), ('mapFolding.beDRY', 'defineProcessorLimit')]
 	boxOfModulesHARDCODED: list[identifierDotAttribute] = [
 		*tuple(map("{0}._e.{1}".format, repeat(settingsPackage.identifierPackage), (
 			'theTypes', 'semiotics', 'leafDomains', 'pileOptions', '_disaggregation', '_beDRY', 'dataBaskets', 'filters', 'pinIt'

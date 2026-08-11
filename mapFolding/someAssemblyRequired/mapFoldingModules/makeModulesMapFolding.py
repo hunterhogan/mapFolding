@@ -163,7 +163,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 			, body=[Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('state')]))
 				, Make.AnnAssign(Make.Name('boxOfStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))
 					, value=Make.Mult.join([Make.List([Make.Name('stateParallel')]), Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')]))
-				, Make.AnnAssign(Make.Name('groupsOfFoldsTotal', Make.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
+				, Make.AnnAssign(Make.Name('groupsOfTotalFolds', Make.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
 
 				, Make.AnnAssign(Make.Name('dictionaryConcurrency', Make.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(dataclassIdentifierParallel))])), value=Make.Dict())
 				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', Make.Store()))]
@@ -173,10 +173,10 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
 						, Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
-								, Make.AugAssign(Make.Name('groupsOfFoldsTotal', Make.Store()), op=Make.Add(), value=Make.Attribute(Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
+								, Make.AugAssign(Make.Name('groupsOfTotalFolds', Make.Store()), op=Make.Add(), value=Make.Attribute(Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
 
-				, Make.AnnAssign(Make.Name('foldsTotal', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfFoldsTotal'), Make.Attribute(Make.Name('stateParallel'), 'leavesTotal')]))
-				, Make.Return(Make.Tuple([Make.Name('foldsTotal'), Make.Name('boxOfStatesParallel')]))]
+				, Make.AnnAssign(Make.Name('totalFolds', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfTotalFolds'), Make.Attribute(Make.Name('stateParallel'), 'totalLeaves')]))
+				, Make.Return(Make.Tuple([Make.Name('totalFolds'), Make.Name('boxOfStatesParallel')]))]
 			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))])))
 		, imports=LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
 			Make.ImportFrom('copy', list_alias=[Make.alias('deepcopy')]),

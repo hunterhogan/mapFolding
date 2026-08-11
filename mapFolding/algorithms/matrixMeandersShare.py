@@ -138,7 +138,7 @@ def integersWide吗(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[
 		)
 
 def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
-	# TODO Consider: If semi is essentially A000136 * leavesTotal, then my graphs of A000136 are
+	# TODO Consider: If semi is essentially A000136 * totalLeaves, then my graphs of A000136 are
 	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
 	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
 	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows

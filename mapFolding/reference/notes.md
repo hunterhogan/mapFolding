@@ -36,24 +36,24 @@ Assume `boxOfDimensions`:
 | 2D array | max(p)      | coordinateSystem        |               | C      | c      |
 | 1D array | n           | cumulativeProduct       |               | P      | bigP   |
 | 1D array | d           | countDimensionsGapped   |               | count  | count  |
-| integer  | d           | 次Dimension          |               | i      | i      |
+| integer  | d           | 次Dimension             |               | i      | i      |
 | integer  | d           | dimensionsUnconstrained |               | dd     | dd     |
-| integer  | 8*          | dimensionsTotal         |               | d      | dim    |
+| integer  | 8*          | totalDimensions         |               | d      | dim    |
 | integer  |             | distance                |               | delta  | delta  |
 | integer  | ~10^17      | foldingsTotal           | f             | G      | mCount |
 | integer  |             | gap1ndex                |               | g      | g      |
 | integer  |             | gap1ndexCeiling         |               | gg     | gg     |
 | 1D array |             | gapRangeStart           |               | gapter | gapter |
 | 1D array | n-1         | gapsWhere               |               | gap    | gap    |
-| integer  | gg-1        | 次MiniGap            |               | j      | j      |
-| integer  | n           | 次Leaf               |               | m      | m      |
+| integer  | gg-1        | 次MiniGap               |               | j      | j      |
+| integer  | n           | 次Leaf                  |               | m      | m      |
 | integer  | n+1         | leaf1ndex               |               | l      | l      |
 | 1D array | n+1         | leafAbove               |               | A      | a      |
 | 1D array | n+1         | leafBelow               |               | B      | b      |
 | integer  | n           | leafConnectee           |               | m      | m      |
 | integer  | n           | leafIndex               |               | m      | m      |
-| integer  | 256*        | leavesTotal             |               | n      |        |
-| 1D array | 19 (2x19)   | boxOfDimensions          | mapShape      | p      | p      |
+| integer  | 256*        | totalLeaves             |               | n      |        |
+| 1D array | 19 (2x19)   | boxOfDimensions         | mapShape      | p      | p      |
 | 1D array | (container) | my                      |               |        |        |
 | 1D array | (container) | the                     | static        |        |        |
 | 2D array | (container) | track                   | s             |        |        |
@@ -117,4 +117,4 @@ Assume `boxOfDimensions`:
 
 - All taskIndices can start from the states:
   - `gap1ndex > 0`
-  - `not leaf1ndex != leavesTotal and leafConnectee % leavesTotal == leavesTotal - 1`
+  - `not leaf1ndex != totalLeaves and leafConnectee % totalLeaves == totalLeaves - 1`

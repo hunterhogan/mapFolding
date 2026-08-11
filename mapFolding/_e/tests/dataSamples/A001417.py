@@ -1,4 +1,4 @@
-"""Test data for elimination algorithm functions, indexed by n-cube dimension (2^n leavesTotal).
+"""Test data for elimination algorithm functions, indexed by n-cube dimension (2^n totalLeaves).
 
 The OEIS sequence A001417 counts the number of ways to fold a 2^n map (n-dimensional hypercube with
 side length 2 in each dimension). This module provides known test data for functions that compute
@@ -8,14 +8,14 @@ Data Structure
 --------------
 Each dictionary is keyed by `mapShape` (a tuple defining the n-dimensional hypercube). The naming
 convention `2^n-dimensional` refers to a shape of `(2,) * n`, which yields `2^n` leaves. For example:
-- `2^4-dimensional` means `(2, 2, 2, 2)` → 16 leavesTotal
-- `2^5-dimensional` means `(2, 2, 2, 2, 2)` → 32 leavesTotal
-- `2^6-dimensional` means `(2, 2, 2, 2, 2, 2)` → 64 leavesTotal
+- `2^4-dimensional` means `(2, 2, 2, 2)` → 16 totalLeaves
+- `2^5-dimensional` means `(2, 2, 2, 2, 2)` → 32 totalLeaves
+- `2^6-dimensional` means `(2, 2, 2, 2, 2, 2)` → 64 totalLeaves
 
 Synonyms:
-- n=4: (2,)*4, 2^4-dimensional, 16 leavesTotal, A001417(4)
-- n=5: (2,)*5, 2^5-dimensional, 32 leavesTotal, A001417(5)
-- n=6: (2,)*6, 2^6-dimensional, 64 leavesTotal, A001417(6)
+- n=4: (2,)*4, 2^4-dimensional, 16 totalLeaves, A001417(4)
+- n=5: (2,)*5, 2^5-dimensional, 32 totalLeaves, A001417(5)
+- n=6: (2,)*6, 2^6-dimensional, 64 totalLeaves, A001417(6)
 
 Future Extensions
 -----------------

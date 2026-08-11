@@ -7,7 +7,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import IfThis, Settings形
 from mapFolding.someAssemblyRequired.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
-from mapFolding.theTypes import 形LeavesTotal  # ruff: ignore[typing-only-first-party-import]
+from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
 from pathlib import Path
 from typing import cast, TYPE_CHECKING
 import python_minifier
@@ -18,12 +18,12 @@ if TYPE_CHECKING:
 	import ast
 
 boxOfSettings形: list[Settings形] = [
-	Settings形(datatypeIdentifier='形LeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形LeavesTotal'),
+	Settings形(datatypeIdentifier='形TotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形TotalLeaves'),
 	Settings形(datatypeIdentifier='形Elephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Elephino'),
-	Settings形(datatypeIdentifier='形FoldsTotal', typeModule='numpy', typeIdentifier='int64', type_asname='形FoldsTotal'),
-	Settings形(datatypeIdentifier='形Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DLeavesTotal'),
+	Settings形(datatypeIdentifier='形TotalFolds', typeModule='numpy', typeIdentifier='int64', type_asname='形TotalFolds'),
+	Settings形(datatypeIdentifier='形Array1DTotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DTotalLeaves'),
 	Settings形(datatypeIdentifier='形Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DElephino'),
-	Settings形(datatypeIdentifier='形Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DLeavesTotal'),
+	Settings形(datatypeIdentifier='形Array3DTotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DTotalLeaves'),
 ]
 
 def makeJob(job: RecipeJobTheorem2) -> None:
@@ -139,5 +139,5 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 	return ingredientsFunction
 
 if __name__ == '__main__':
-	mapShape: tuple[形LeavesTotal, ...] = (2, 14)
+	mapShape: tuple[形TotalLeaves, ...] = (2, 14)
 	makeJob(fromMapShape(mapShape))

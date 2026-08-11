@@ -29,22 +29,22 @@ def test_dimensionIndexConstantsMatchExpected(actualValue: int, expectedValue: i
 def test_dimensionIndexReturnsExpectedIndex(dimensionAsNonnegativeInteger: int, expectedDimensionIndexValue: int) -> None:
 	assertEqualTo(dimensionIndex(dimensionAsNonnegativeInteger), expectedDimensionIndexValue, 'dimensionIndex', dimensionAsNonnegativeInteger)
 
-@pytest.mark.parametrize('functionTarget, dimensionsTotal, expectedValue', [
-	*tuple((首零, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零)
-	, *tuple((首零一, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零一)
-	, *tuple((首零一二, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零一二)
-	, *tuple((首零二, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零二)
-	, *tuple((首一, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首一)
-	, *tuple((首一二, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首一二)
-	, *tuple((首二, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首二)
-	, *tuple((首三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首三)
-	, *tuple((首零一二三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零一二三)
-	, *tuple((首零一三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零一三)
-	, *tuple((首零二三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零二三)
-	, *tuple((首零三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首零三)
-	, *tuple((首一二三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首一二三)
-	, *tuple((首一三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首一三)
-	, *tuple((首二三, dimensionsTotal, expectedValue) for dimensionsTotal, expectedValue in expected首二三),
+@pytest.mark.parametrize('functionTarget, totalDimensions, expectedValue', [
+	*tuple((首零, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零)
+	, *tuple((首零一, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一)
+	, *tuple((首零一二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一二)
+	, *tuple((首零二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零二)
+	, *tuple((首一, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一)
+	, *tuple((首一二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一二)
+	, *tuple((首二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首二)
+	, *tuple((首三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首三)
+	, *tuple((首零一二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一二三)
+	, *tuple((首零一三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一三)
+	, *tuple((首零二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零二三)
+	, *tuple((首零三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零三)
+	, *tuple((首一二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一二三)
+	, *tuple((首一三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一三)
+	, *tuple((首二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首二三),
 ])
-def test_dimensionCoordinateFunctionsReturnExpected(functionTarget: CallableFunction[[int], int], dimensionsTotal: int, expectedValue: int) -> None:
-	assertEqualTo(functionTarget(dimensionsTotal), expectedValue, functionTarget.__name__, dimensionsTotal)
+def test_dimensionCoordinateFunctionsReturnExpected(functionTarget: CallableFunction[[int], int], totalDimensions: int, expectedValue: int) -> None:
+	assertEqualTo(functionTarget(totalDimensions), expectedValue, functionTarget.__name__, totalDimensions)

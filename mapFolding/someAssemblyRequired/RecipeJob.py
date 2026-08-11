@@ -8,7 +8,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitFilesystem import makePathFilenameFolds
-from mapFolding.oeis import getFoldsTotalKnown
+from mapFolding.oeis import getTotalFoldsKnown
 from mapFolding.someAssemblyRequired import default, dictionaryEstimatesMapFolding, IfThis, Settings形
 from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
@@ -21,10 +21,10 @@ import dataclasses
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
-	from mapFolding.theTypes import 形LeavesTotal
 	from mapFolding.dataBaskets import SymmetricFoldsState
 	from mapFolding.someAssemblyRequired import ShatteredDataclass
 	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
+	from mapFolding.theTypes import 形TotalLeaves
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:
@@ -38,7 +38,7 @@ class RecipeJobTheorem2:
 	----------
 	state : MapFoldingState
 		The map folding computation state containing dimensions and initial values.
-	foldsTotalEstimated : int = 0
+	totalFoldsEstimated : int = 0
 		Estimated total number of folds for progress tracking.
 	shatteredDataclass : ShatteredDataclass = None
 		Deconstructed dataclass metadata for code transformation.
@@ -62,7 +62,7 @@ class RecipeJobTheorem2:
 		Override path for the target module directory.
 	fileExtension : str
 		File extension for generated modules.
-	pathFilenameFoldsTotal : PurePosixPath = None
+	pathFilenameTotalFolds : PurePosixPath = None
 		Path for writing fold count results.
 	packageIdentifier : str | None = None
 		Target package identifier.
@@ -78,17 +78,17 @@ class RecipeJobTheorem2:
 		Target dataclass instance identifier.
 	logicalPathModuleDataclass : identifierDotAttribute | None
 		Logical path to target dataclass module.
-	形FoldsTotal : TypeAlias
+	形TotalFolds : TypeAlias
 		Type alias for fold count datatype.
 	形Elephino : TypeAlias
 		Type alias for intermediate computation datatype.
-	形LeavesTotal : TypeAlias
+	形TotalLeaves : TypeAlias
 		Type alias for leaf count datatype.
 	"""
 
 	state: MapFoldingState | SymmetricFoldsState
 	"""The map folding computation state containing dimensions and initial values."""
-	foldsTotalEstimated: int = 0
+	totalFoldsEstimated: int = 0
 	"""Estimated total number of folds for progress tracking."""
 	shatteredDataclass: ShatteredDataclass | None = None
 	"""Deconstructed dataclass metadata for code transformation."""
@@ -118,7 +118,7 @@ class RecipeJobTheorem2:
 	"""Override path for the target module directory."""
 	fileExtension: str = settingsPackage.fileExtension
 	"""File extension for generated modules."""
-	pathFilenameFoldsTotal: PurePosixPath | None = None
+	pathFilenameTotalFolds: PurePosixPath | None = None
 	"""Path for writing fold count results."""
 
 #-------- Logical identifiers, as opposed to physical identifiers ------------------------
@@ -136,7 +136,7 @@ class RecipeJobTheorem2:
 	"""Target dataclass instance identifier."""
 	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
 	"""Logical path to target dataclass module."""
-	foldsTotalMultiplier: int = 1
+	totalFoldsMultiplier: int = 1
 
 #-------- Datatypes ------------------------------------------
 
@@ -203,13 +203,13 @@ class RecipeJobTheorem2:
 		the provided configuration and sensible defaults.
 
 		"""
-		pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFolds(self.state.mapShape))
+		pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(self.state.mapShape))
 
-		if self.pathFilenameFoldsTotal is None:
-			self.pathFilenameFoldsTotal = pathFilenameFoldsTotal
+		if self.pathFilenameTotalFolds is None:
+			self.pathFilenameTotalFolds = pathFilenameTotalFolds
 
 		if self.moduleIdentifier is None:
-			self.moduleIdentifier = self.pathFilenameFoldsTotal.stem
+			self.moduleIdentifier = self.pathFilenameTotalFolds.stem
 
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance:
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
@@ -217,14 +217,14 @@ class RecipeJobTheorem2:
 		if self.source_astModule is None:
 			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
 
-def fromMapShape(mapShape: tuple[形LeavesTotal, ...]) -> RecipeJobTheorem2:
+def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
 	"""Create a binary executable for `mapShape`."""
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
-	foldsTotalEstimated: int = getFoldsTotalKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
+	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
-	pathFilenameFoldsTotal = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
-	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameFoldsTotal=pathFilenameFoldsTotal
-		, foldsTotalEstimated=foldsTotalEstimated, foldsTotalMultiplier=state.leavesTotal)
+	pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
+	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameTotalFolds=pathFilenameTotalFolds
+		, totalFoldsEstimated=totalFoldsEstimated, totalFoldsMultiplier=state.totalLeaves)
 
 #================== Bulk changes ======================================================================
 
@@ -368,28 +368,28 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
 		boxOfLauncherBody.extend([
 			Make.With([Make.withitem(Make.Call(Make.Name('ProgressBar'), list_keyword=[
-				Make.keyword('total', Make.Constant(job.foldsTotalEstimated // job.foldsTotalMultiplier))
+				Make.keyword('total', Make.Constant(job.totalFoldsEstimated // job.totalFoldsMultiplier))
 				, Make.keyword('update_interval', Make.Constant(2))])
 				, Make.Name(identifierStatusUpdate, Make.Store()))]
 				, [Make.Expr(Make.Call(Make.Name(job.identifierCallable), [Make.Name(identifierStatusUpdate)]))])
-			, Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Mult().join([
-				Make.Attribute(Make.Name(identifierStatusUpdate), 'n'), Make.Constant(job.foldsTotalMultiplier)]))])
+			, Make.Assign([Make.Name('totalFolds', Make.Store())], Make.Mult().join([
+				Make.Attribute(Make.Name(identifierStatusUpdate), 'n'), Make.Constant(job.totalFoldsMultiplier)]))])
 	else:
 		NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Name(
 			raiseIfNone(job.shatteredDataclass).countingVariableName.id)))).visit(ingredientsFunction.astFunctionDef)
 		ingredientsFunction.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
-		boxOfLauncherBody.append(Make.Assign([Make.Name('foldsTotal', Make.Store())], Make.Call(
+		boxOfLauncherBody.append(Make.Assign([Make.Name('totalFolds', Make.Store())], Make.Call(
 			deepcopy(raiseIfNone(job.shatteredDataclass).countingVariableAnnotation), [
-			Make.Mult().join([Make.Call(Make.Name(job.identifierCallable)), Make.Constant(job.foldsTotalMultiplier)])])))
+			Make.Mult().join([Make.Call(Make.Name(job.identifierCallable)), Make.Constant(job.totalFoldsMultiplier)])])))
 
 	boxOfLauncherBody.extend([
 		Make.Expr(Make.Call(Make.Name('print'), [Make.Sub().join([
 			Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')), Make.Name('timeStart')])]))
-		, Make.Expr(Make.Call(Make.Name('print'), [Make.Constant(f'\nmap {job.state.mapShape} ='), Make.Name('foldsTotal')]))
+		, Make.Expr(Make.Call(Make.Name('print'), [Make.Constant(f'\nmap {job.state.mapShape} ='), Make.Name('totalFolds')]))
 		, Make.Assign([Make.Name('writeStream', Make.Store())], Make.Call(Make.Name('open'), [
-			Make.Constant(raiseIfNone(job.pathFilenameFoldsTotal).as_posix()), Make.Constant('w')]))
+			Make.Constant(raiseIfNone(job.pathFilenameTotalFolds).as_posix()), Make.Constant('w')]))
 		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'write'), [
-			Make.Call(Make.Name('str'), [Make.Name('foldsTotal')])]))
+			Make.Call(Make.Name('str'), [Make.Name('totalFolds')])]))
 		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'close')))])
 	ingredientsModule.appendLauncher(statement=Make.If(
 		Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')]), boxOfLauncherBody))
@@ -401,7 +401,7 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	"""Customize data types in the given ingredients by adjusting imports.
 
 	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
-	preserving _abstract_ names for datatypes, such as `形Array1DLeavesTotal` and `形FoldsTotal`. This function well
+	preserving _abstract_ names for datatypes, such as `形Array1DTotalLeaves` and `形TotalFolds`. This function well
 	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
 	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
 	for example, `mapFolding.syntheticModules.foldsSymmetric.asynchronousNumba` or its equivalent), ought to still have the abstract

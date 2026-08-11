@@ -43,38 +43,38 @@ Truth:
 Reminders and general observations:
 
 - [something, something] absolute value [yada yada] in `state.mapShapeProducts[0:-1]`
-- The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.leavesTotal // 2)`, `neg(state.leavesTotal // 2)`.
-- The total number of differences is `state.leavesTotal - 1`, which is an odd number. (_Cf._ fencepost problem.)
-- `state.mapShapeProducts[-1] == state.leavesTotal`, and `state.mapShapeProducts[-2] == state.leavesTotal // 2`.
+- The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.totalLeaves // 2)`, `neg(state.totalLeaves // 2)`.
+- The total number of differences is `state.totalLeaves - 1`, which is an odd number. (_Cf._ fencepost problem.)
+- `state.mapShapeProducts[-1] == state.totalLeaves`, and `state.mapShapeProducts[-2] == state.totalLeaves // 2`.
 
 Differences:
 
 1. The signs of the magnitudes alternate: if the difference between two leaves is +2, for example, then before there can be another difference of +2, there must be a difference of -2.
-2. The total number of differences equal to `pos(state.leavesTotal // 2)` is always exactly one more than the total number of differences equal to `neg(state.leavesTotal // 2)`.
-   1. Therefore, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
+2. The total number of differences equal to `pos(state.totalLeaves // 2)` is always exactly one more than the total number of differences equal to `neg(state.totalLeaves // 2)`.
+   1. Therefore, the first and last differences with magnitude `state.totalLeaves // 2` are positive.
 3. For all other magnitudes in `state.mapShapeProducts[0:-2]`, the total number of positive and negative differences is always equal.
    1. Therefore, the first and last differences with those magnitudes must have opposite signs.
    2. Given Truth 1 and Truth 2,
       1. the first difference in every `Folding` is +1,
       2. the last difference of magnitude 1 is -1.
 4. In two consecutive piles, the absolute value of the differences cannot be the same. Given the difference at `pile_k` is -4, for example, then at `pile_k + 1`, the difference cannot be -4 or +4.
-5. The sum of all differences is `state.leavesTotal // 2`.
-6. Starting from `pileOrigin` in a `Folding`, the running total of differences is a distinct integer in the range `[0, state.leavesTotal)` and does not repeat.
+5. The sum of all differences is `state.totalLeaves // 2`.
+6. Starting from `pileOrigin` in a `Folding`, the running total of differences is a distinct integer in the range `[0, state.totalLeaves)` and does not repeat.
 
-### Given leaves `k` and `r`, if `dimensionNearest首(k) <= dimensionNearestTail(r)`, then `pileOf_k < pileOf_r`
+### Given leaves `k` and `r`, if `工dimension首零(k) <= 工dimensionTail(r)`, then `pileOf_k < pileOf_r`
 
 Physically, `pileOf_r` can exist before `pileOf_k`, so the limitation is due to leveraged enumeration.
 
-`dimensionNearest首(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
+`工dimension首零(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
 
 ```python
 k: int # Is a leaf
-index = dimensionNearest首(k)
+index = 工dimension首零(k)
 
 rTheFirst = state.mapShapeProducts[index]
 step = rTheFirst
 
-leavesThatCannotPrecede_k = range(rTheFirst, state.leavesTotal, step)
+leavesThatCannotPrecede_k = range(rTheFirst, state.totalLeaves, step)
 ```
 
 ### Pairs of leaves with low entropy
@@ -104,10 +104,10 @@ Furthermore, it is easy to predict the pairs of pairs-of-leaves with low entropy
 
 ## Semiotics, notation, and givens
 
-- Each `Leaf` is a distinct integer in the range `[0, state.leavesTotal)`.
+- Each `Leaf` is a distinct integer in the range `[0, state.totalLeaves)`.
 - `leaf` is the archetypal variable name for a `Leaf`.
 - Each `Pile` is a distinct integer in the range `[0, state.pilesTotal)`.
 - `pile` is the archetypal variable name for a `Pile`.
 - A `Folding` is a one-to-one correspondence between the set of `Pile` and the set of `Leaf`.
 - `folding` is the archetypal variable name for a `Folding`.
-- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.
+- A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.totalLeaves`.

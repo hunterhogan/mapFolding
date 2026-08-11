@@ -7,19 +7,19 @@ live in `mapFolding._e._2上nDimensionalSemiotics` [2].
 
 Contents
 --------
-dimensionFourthNearest首
+工dimension首三
 	Locate the fourth most-significant non-zero digit index.
-dimensionNearestTail
+工dimensionTail
 	Locate the least-significant non-zero digit index.
-dimensionNearest首
+工dimension首零
 	Locate the most-significant non-zero digit index.
-dimensionSecondNearest首
+工dimension首一
 	Locate the second most-significant non-zero digit index.
-dimensionThirdNearest首
+工dimension首二
 	Locate the third most-significant non-zero digit index.
-dimensionsConsecutiveAtTail
+工totalDimensionsTail
 	Count consecutive tail digits with value `1` in a masked width.
-howManyDimensionsHaveOddParity
+工totalDimensionsOdd
 	Count non-head digits with value `1`.
 invertLeafIn2上nDimensions
 	Invert base-2 digits within a fixed dimension count.
@@ -45,13 +45,13 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import EliminationState
 
-def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int) -> int:
+def 工totalDimensionsTail(state: EliminationState, integerNonnegative: int) -> int:
 	"""Count consecutive tail radix-2 digits with value `1` in `integerNonnegative`.
 
 	Parameters
 	----------
 	state : EliminationState
-		State container that provides `state.dimensionsTotal`.
+		State container that provides `state.totalDimensions`.
 	integerNonnegative : int
 		Input value interpreted as a base-2 positional coordinate encoding.
 
@@ -59,20 +59,20 @@ def dimensionsConsecutiveAtTail(state: EliminationState, integerNonnegative: int
 	-------
 	digitsTrailingOnes : int
 		The count of consecutive least-significant base-2 digits equal to `1`, bounded by
-		`state.dimensionsTotal`.
+		`state.totalDimensions`.
 
 	Examples
 	--------
 	```python
 		if ((isEven吗(leafAt二Ante首) or (isOdd吗(leafAt二Ante首) and (dimensionIndex(dimension) <
-		dimensionsConsecutiveAtTail(state, leafAt二Ante首))))):
+		工totalDimensionsTail(state, leafAt二Ante首))))):
 			boxOfRemoveLeaves.extend([dimension])
 	```
 	"""
-	return bit_scan1(invertLeafIn2上nDimensions(state.dimensionsTotal, integerNonnegative)) or 0
+	return bit_scan1(invertLeafIn2上nDimensions(state.totalDimensions, integerNonnegative)) or 0
 
 @cache
-def dimensionNearest首(integerNonnegative: int, /) -> int:
+def 工dimension首零(integerNonnegative: int, /) -> int:
 	"""Locate the most-significant non-zero radix-2 digit index in `integerNonnegative`.
 
 	Parameters
@@ -88,13 +88,13 @@ def dimensionNearest首(integerNonnegative: int, /) -> int:
 	Examples
 	--------
 	```python
-		dimensionHead: int = dimensionNearest首(leafAt二)
+		dimensionHead: int = 工dimension首零(leafAt二)
 	```
 	"""
 	return max(0, integerNonnegative.bit_length() - 1)
 
 @cache
-def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
+def 工dimension首一(integerNonnegative: int, /) -> int | None:
 	"""Locate the second most-significant non-zero radix-2 digit index in `integerNonnegative`.
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy
@@ -115,11 +115,11 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 	Examples
 	--------
 	```python
-		if (howManyDimensionsHaveOddParity(pileOfLeaf二一) == 1
-			and (dimensionNearest首(pileOfLeaf二一)
-				- raiseIfNone(dimensionSecondNearest首(pileOfLeaf 二一)) < 2)
+		if (工totalDimensionsOdd(pileOfLeaf二一) == 1
+			and (工dimension首零(pileOfLeaf二一)
+				- raiseIfNone(工dimension首一(pileOfLeaf 二一)) < 2)
 		):
-			addend: int = mapShapeProducts[dimensionsTotal-2] + 4
+			addend: int = mapShapeProducts[totalDimensions-2] + 4
 	```
 
 	References
@@ -128,15 +128,15 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 		https://en.wikipedia.org/wiki/Positional_notation
 	[2] mapFolding._e._2上nDimensionalSemiotics
 	"""
-	anotherInteger: int = int(bit_flip(integerNonnegative, dimensionNearest首(integerNonnegative)))
+	anotherInteger: int = int(bit_flip(integerNonnegative, 工dimension首零(integerNonnegative)))
 	if anotherInteger == 0:
 		dimensionSecondNearest: int | None = None
 	else:
-		dimensionSecondNearest = dimensionNearest首(anotherInteger)
+		dimensionSecondNearest = 工dimension首零(anotherInteger)
 	return dimensionSecondNearest
 
 @cache
-def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
+def 工dimension首二(integerNonnegative: int, /) -> int | None:
 	"""Locate the third most-significant non-zero radix-2 digit index in `integerNonnegative`.
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy
@@ -157,8 +157,8 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 	Examples
 	--------
 	```python
-		if (dimensionThirdNearest首(pileOfLeaf零) == 一)
-		and (二+零 <= dimensionNearest首(pileOfLeaf 零)):
+		if (工dimension首二(pileOfLeaf零) == 一)
+		and (二+零 <= 工dimension首零(pileOfLeaf 零)):
 			次Domain0: int = (pilesTotal // 2) + 1
 			boxOfIndicesPilesExcluded.extend([次Domain0])
 	```
@@ -169,8 +169,8 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 		https://en.wikipedia.org/wiki/Positional_notation
 	[2] mapFolding._e._2上nDimensionalSemiotics
 	"""
-	dimensionNearest: int = dimensionNearest首(integerNonnegative)
-	dimensionSecondNearest: int | None = dimensionSecondNearest首(integerNonnegative)
+	dimensionNearest: int = 工dimension首零(integerNonnegative)
+	dimensionSecondNearest: int | None = 工dimension首一(integerNonnegative)
 
 	if dimensionSecondNearest in {0, None}:
 		dimensionThirdNearest: int | None = None
@@ -179,11 +179,11 @@ def dimensionThirdNearest首(integerNonnegative: int, /) -> int | None:
 		if anotherInteger == 0:
 			dimensionThirdNearest = None
 		else:
-			dimensionThirdNearest = dimensionNearest首(anotherInteger)
+			dimensionThirdNearest = 工dimension首零(anotherInteger)
 	return dimensionThirdNearest
 
 @cache
-def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
+def 工dimension首三(integerNonnegative: int, /) -> int | None:
 	"""Locate the fourth most-significant non-zero radix-2 digit index in `integerNonnegative`.
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy
@@ -204,8 +204,8 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 	Examples
 	--------
 	```python
-		if dimensionThirdNearest首(pileOfLeaf零) == 一+零:
-			次Domain0 = pilesTotal // 4 if dimensionFourthNearest首(pileOfLeaf零) == 一:
+		if 工dimension首二(pileOfLeaf零) == 一+零:
+			次Domain0 = pilesTotal // 4 if 工dimension首三(pileOfLeaf零) == 一:
 				indicesDomain0ToExclude.extend([次Domain0])
 	```
 
@@ -215,9 +215,9 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 		https://en.wikipedia.org/wiki/Positional_notation
 	[2] mapFolding._e._2上nDimensionalSemiotics
 	"""
-	dimensionNearest: int = dimensionNearest首(integerNonnegative)
-	dimensionSecondNearest: int | None = dimensionSecondNearest首(integerNonnegative)
-	dimensionThirdNearest: int | None = dimensionThirdNearest首(integerNonnegative)
+	dimensionNearest: int = 工dimension首零(integerNonnegative)
+	dimensionSecondNearest: int | None = 工dimension首一(integerNonnegative)
+	dimensionThirdNearest: int | None = 工dimension首二(integerNonnegative)
 
 	if dimensionThirdNearest in {0, None}:
 		dimensionFourthNearest: int | None = None
@@ -226,7 +226,7 @@ def dimensionFourthNearest首(integerNonnegative: int, /) -> int | None:
 		if anotherInteger == 0:
 			dimensionFourthNearest = None
 		else:
-			dimensionFourthNearest = dimensionNearest首(anotherInteger)
+			dimensionFourthNearest = 工dimension首零(anotherInteger)
 	return dimensionFourthNearest
 
 @cache
@@ -259,7 +259,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	Examples
 	--------
 	```python
-		if howManyDimensionsHaveOddParity(leafAt二Ante首) == 1:
+		if 工totalDimensionsOdd(leafAt二Ante首) == 1:
 			boxOfRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
 	```
 
@@ -269,10 +269,10 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 		https://en.wikipedia.org/wiki/Positional_notation
 	[2] mapFolding._e._2上nDimensionalSemiotics
 	"""
-	return int(f_mod_2exp(notLeafOrigin, dimensionNearest首(notLeafOrigin)))
+	return int(f_mod_2exp(notLeafOrigin, 工dimension首零(notLeafOrigin)))
 
 @cache
-def dimensionNearestTail(integerNonnegative: int, /) -> int:
+def 工dimensionTail(integerNonnegative: int, /) -> int:
 	"""Locate the least-significant non-zero radix-2 digit index in `integerNonnegative`.
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy
@@ -293,7 +293,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	Examples
 	--------
 	```python
-		dimensionTail: int = dimensionNearestTail(pileOfLeaf二一)
+		dimensionTail: int = 工dimensionTail(pileOfLeaf二一)
 	```
 
 	References
@@ -305,7 +305,7 @@ def dimensionNearestTail(integerNonnegative: int, /) -> int:
 	return bit_scan1(integerNonnegative) or 0
 
 @cache
-def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
+def 工totalDimensionsOdd(integerNonnegative: int, /) -> int:
 	"""Count non-head radix-2 digits with value `1` in `integerNonnegative`.
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy
@@ -326,7 +326,7 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	Examples
 	--------
 	```python
-		slicingIndices: int = isOdd吗(howManyDimensionsHaveOddParity(leaf))
+		slicingIndices: int = isOdd吗(工totalDimensionsOdd(leaf))
 	```
 
 	References
@@ -338,17 +338,17 @@ def howManyDimensionsHaveOddParity(integerNonnegative: int, /) -> int:
 	return max(0, integerNonnegative.bit_count() - 1)
 
 @cache
-def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -> int:
-	"""Invert base-2 digits in `integerNonnegative` within a dimension count `dimensionsTotal`.
+def invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int) -> int:
+	"""Invert base-2 digits in `integerNonnegative` within a dimension count `totalDimensions`.
 
 	This function treats `integerNonnegative` as a single-base positional-numeral system as a proxy
-	for Cartesian coordinates [1]. The fixed-width inversion uses `dimensionsTotal` as the digit
+	for Cartesian coordinates [1]. The fixed-width inversion uses `totalDimensions` as the digit
 	width, which aligns with the dimension indexing conventions in `mapFolding._e._2上
 	nDimensionalSemiotics` [2].
 
 	Parameters
 	----------
-	dimensionsTotal : int
+	totalDimensions : int
 		The number of base-2 digit positions that define the inversion mask.
 	integerNonnegative : int
 		Input value interpreted as a base-2 positional coordinate encoding.
@@ -356,12 +356,12 @@ def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -
 	Returns
 	-------
 	integerInverted : int
-		The value produced by XOR with `bit_mask(dimensionsTotal)`.
+		The value produced by XOR with `bit_mask(totalDimensions)`.
 
 	Examples
 	--------
 	```python
-		anInteger: int = invertLeafIn2上nDimensions(state.dimensionsTotal, integerNonnegative) return
+		anInteger: int = invertLeafIn2上nDimensions(state.totalDimensions, integerNonnegative) return
 		bit_scan1(anInteger) or 0
 	```
 
@@ -371,7 +371,7 @@ def invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int) -
 		https://en.wikipedia.org/wiki/Positional_notation
 	[2] mapFolding._e._2上nDimensionalSemiotics
 	"""
-	return int(integerNonnegative ^ bit_mask(dimensionsTotal))
+	return int(integerNonnegative ^ bit_mask(totalDimensions))
 
 @cache
 def ptount(integerAbove3: int, /) -> int:
@@ -396,7 +396,7 @@ def ptount(integerAbove3: int, /) -> int:
 	--------
 	```python
 		if isOdd吗(leafAt一零):
-			boxOfCreaseIndicesExcluded.extend([*range(dimensionNearest首(leafAt一零), 5), ptount(leafAt 一零)])
+			boxOfCreaseIndicesExcluded.extend([*range(工dimension首零(leafAt一零), 5), ptount(leafAt 一零)])
 	```
 
 	References

@@ -30,48 +30,48 @@ import io
 import pytest
 import unittest.mock
 
-@pytest.mark.parametrize('foldsTotal', [pytest.param(123, id='foldsTotal-123')])
-def test_saveFoldsTotal_fallback(path_tmpTesting: Path, foldsTotal: int) -> None:
+@pytest.mark.parametrize('totalFolds', [pytest.param(123, id='totalFolds-123')])
+def test_saveTotalFolds_fallback(path_tmpTesting: Path, totalFolds: int) -> None:
 	pathFilename: Path = path_tmpTesting / 'countTotal.txt'
 	with unittest.mock.patch('pathlib.Path.write_text', side_effect=OSError('Simulated write failure')), unittest.mock.patch('os.getcwd', return_value=str(path_tmpTesting)):
 		capturedOutput: io.StringIO = io.StringIO()
 		with redirect_stdout(capturedOutput):
-			saveTotal(pathFilename, foldsTotal)
+			saveTotal(pathFilename, totalFolds)
 	fallbackFiles: list[Path] = list(path_tmpTesting.glob('countTotalYO_*.txt'))
-	assertEqualTo(len(fallbackFiles), 1, saveTotal.__name__, pathFilename, foldsTotal)
+	assertEqualTo(len(fallbackFiles), 1, saveTotal.__name__, pathFilename, totalFolds)
 
-@pytest.mark.parametrize('mapShape, expectedFilename', [((11, 13), 'p11x13.foldsTotal'), ((317, 313, 311), 'p317x313x311.foldsTotal')])
-def test_getFilenameFoldsTotal(mapShape: tuple[int, ...], expectedFilename: str) -> None:
-	"""Test that getFilenameFoldsTotal generates correct filenames with dimensions sorted."""
+@pytest.mark.parametrize('mapShape, expectedFilename', [((11, 13), 'p11x13.totalFolds'), ((317, 313, 311), 'p317x313x311.totalFolds')])
+def test_getFilenameTotalFolds(mapShape: tuple[int, ...], expectedFilename: str) -> None:
+	"""Test that getFilenameTotalFolds generates correct filenames with dimensions sorted."""
 	filenameActual: str = makeFilenameFolds(mapShape)
 	assertEqualTo(filenameActual, expectedFilename, makeFilenameFolds.__name__, mapShape)
 
 @pytest.mark.parametrize(
 	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
-def test_getPathFilenameFoldsTotal_defaultPath(mapShape: tuple[int, ...]) -> None:
-	"""Test getPathFilenameFoldsTotal with default path."""
-	pathFilenameFoldsTotal: Path = makePathFilenameFolds(mapShape)
-	assertEqualTo(pathFilenameFoldsTotal.is_absolute(), True, makePathFilenameFolds.__name__, mapShape)
-	assertEqualTo(pathFilenameFoldsTotal.name, makeFilenameFolds(mapShape), makePathFilenameFolds.__name__, mapShape)
-	assertEqualTo(pathFilenameFoldsTotal.parent, getPathRootJobDEFAULT(), makePathFilenameFolds.__name__, mapShape)
+def test_getPathFilenameTotalFolds_defaultPath(mapShape: tuple[int, ...]) -> None:
+	"""Test getPathFilenameTotalFolds with default path."""
+	pathFilenameTotalFolds: Path = makePathFilenameFolds(mapShape)
+	assertEqualTo(pathFilenameTotalFolds.is_absolute(), True, makePathFilenameFolds.__name__, mapShape)
+	assertEqualTo(pathFilenameTotalFolds.name, makeFilenameFolds(mapShape), makePathFilenameFolds.__name__, mapShape)
+	assertEqualTo(pathFilenameTotalFolds.parent, getPathRootJobDEFAULT(), makePathFilenameFolds.__name__, mapShape)
 
 @pytest.mark.parametrize(
 	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
-def test_getPathFilenameFoldsTotal_relativeFilename(mapShape: tuple[int, ...]) -> None:
-	"""Test getPathFilenameFoldsTotal with relative filename."""
-	relativeFilename: Path = Path('custom/path/test.foldsTotal')
-	pathFilenameFoldsTotal: Path = makePathFilenameFolds(mapShape, pathLikeWrite=relativeFilename)
-	assertEqualTo(pathFilenameFoldsTotal.is_absolute(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=relativeFilename)
-	assertEqualTo(pathFilenameFoldsTotal, getPathRootJobDEFAULT() / relativeFilename, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=relativeFilename)
+def test_getPathFilenameTotalFolds_relativeFilename(mapShape: tuple[int, ...]) -> None:
+	"""Test getPathFilenameTotalFolds with relative filename."""
+	relativeFilename: Path = Path('custom/path/test.totalFolds')
+	pathFilenameTotalFolds: Path = makePathFilenameFolds(mapShape, pathLikeWrite=relativeFilename)
+	assertEqualTo(pathFilenameTotalFolds.is_absolute(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=relativeFilename)
+	assertEqualTo(pathFilenameTotalFolds, getPathRootJobDEFAULT() / relativeFilename, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=relativeFilename)
 
 @pytest.mark.parametrize(
 	'mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')]
 )
-def test_getPathFilenameFoldsTotal_createsDirs(path_tmpTesting: Path, mapShape: tuple[int, ...]) -> None:
-	"""Test that getPathFilenameFoldsTotal creates necessary directories."""
+def test_getPathFilenameTotalFolds_createsDirs(path_tmpTesting: Path, mapShape: tuple[int, ...]) -> None:
+	"""Test that getPathFilenameTotalFolds creates necessary directories."""
 	nestedPath: Path = path_tmpTesting / 'deep/nested/structure'
-	pathFilenameFoldsTotal: Path = makePathFilenameFolds(mapShape, pathLikeWrite=nestedPath)
-	assertEqualTo(pathFilenameFoldsTotal.parent.exists(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=nestedPath)
-	assertEqualTo(pathFilenameFoldsTotal.parent.is_dir(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=nestedPath)
+	pathFilenameTotalFolds: Path = makePathFilenameFolds(mapShape, pathLikeWrite=nestedPath)
+	assertEqualTo(pathFilenameTotalFolds.parent.exists(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=nestedPath)
+	assertEqualTo(pathFilenameTotalFolds.parent.is_dir(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=nestedPath)

@@ -11,10 +11,9 @@ from mapFolding._e._2上nDimensional.filters import moreThanLeaf零吗 as moreTh
 
 # isort: split
 from mapFolding._e._2上nDimensional.measure import (
-	dimensionFourthNearest首 as dimensionFourthNearest首, dimensionNearestTail as dimensionNearestTail, dimensionNearest首 as dimensionNearest首,
-	dimensionsConsecutiveAtTail as dimensionsConsecutiveAtTail, dimensionSecondNearest首 as dimensionSecondNearest首,
-	dimensionThirdNearest首 as dimensionThirdNearest首, howManyDimensionsHaveOddParity as howManyDimensionsHaveOddParity,
-	invertLeafIn2上nDimensions as invertLeafIn2上nDimensions, leafInSubHyperplane as leafInSubHyperplane, ptount as ptount)
+	invertLeafIn2上nDimensions as invertLeafIn2上nDimensions, leafInSubHyperplane as leafInSubHyperplane, ptount as ptount,
+	工dimensionTail as 工dimensionTail, 工dimension首一 as 工dimension首一, 工dimension首三 as 工dimension首三, 工dimension首二 as 工dimension首二,
+	工dimension首零 as 工dimension首零, 工totalDimensionsOdd as 工totalDimensionsOdd, 工totalDimensionsTail as 工totalDimensionsTail)
 
 # isort: split
 from mapFolding._e._2上nDimensional.creases import getLeavesCreaseAnte as getLeavesCreaseAnte, getLeavesCreasePost as getLeavesCreasePost

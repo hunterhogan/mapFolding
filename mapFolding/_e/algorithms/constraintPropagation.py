@@ -4,7 +4,7 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
-from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost
+from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, 工dimensionTail, 工dimension首零
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
@@ -26,8 +26,8 @@ if TYPE_CHECKING:
 def count(state: EliminationState) -> EliminationState:
 	model = cp_model.CpModel()
 
-	boxOfLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.pileLast, f"leafInPile[{pile}]") for pile in range(state.leavesTotal)]
-	boxOfPilingsInLeafOrder: list[cp_model.IntVar] = [model.new_int_var(leafOrigin, state.leafLast, f"pileOfLeaf[{leaf}]") for leaf in range(state.leavesTotal)]
+	boxOfLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.pileLast, f"leafInPile[{pile}]") for pile in range(state.totalLeaves)]
+	boxOfPilingsInLeafOrder: list[cp_model.IntVar] = [model.new_int_var(leafOrigin, state.leafLast, f"pileOfLeaf[{leaf}]") for leaf in range(state.totalLeaves)]
 	model.add_inverse(boxOfLeavesInPileOrder, boxOfPilingsInLeafOrder)
 
 #======== Manual concurrency and targeted constraints ============================
@@ -38,7 +38,7 @@ def count(state: EliminationState) -> EliminationState:
 	for aPile, choicesLeaf in pilesUndetermined.items():
 		model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(choicesLeaf))))
 
-#======== Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal` ============================
+#======== Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves` ============================
 	model.add(boxOfLeavesInPileOrder[pileOrigin] == leafOrigin)
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
@@ -52,13 +52,13 @@ def count(state: EliminationState) -> EliminationState:
 
 	if mapShapeIs2上nDimensions(state.mapShape):
 		#=SIN= `for` loops: CP-SAT requires one ordering constraint for each constrained leaf pair.
-		for leaf in range(state.mapShapeProducts[1], state.leavesTotal):
-			dimensionHead: int = dimensionNearest首(leaf)
+		for leaf in range(state.mapShapeProducts[1], state.totalLeaves):
+			dimensionHead: int = 工dimension首零(leaf)
 			leafStep: int = state.mapShapeProducts[dimensionHead]
-			for leafTail in filter(leaf.__ne__, range(leafStep, state.leavesTotal, leafStep)):
+			for leafTail in filter(leaf.__ne__, range(leafStep, state.totalLeaves, leafStep)):
 				model.add(boxOfPilingsInLeafOrder[leaf] < boxOfPilingsInLeafOrder[leafTail])
 
-			dimensionTail: int = dimensionNearestTail(leaf)
+			dimensionTail: int = 工dimensionTail(leaf)
 			if 0 < dimensionTail:
 				for leafHead in range(leafOrigin, state.mapShapeProductsSums[dimensionTail]):
 					model.add(boxOfPilingsInLeafOrder[leafHead] < boxOfPilingsInLeafOrder[leaf])
@@ -83,10 +83,10 @@ def count(state: EliminationState) -> EliminationState:
 			model.add_allowed_assignments([boxOfLeavesInPileOrder[pile], boxOfLeavesInPileOrder[pile + 1]], assignmentsCreasePost)
 			model.add_allowed_assignments([boxOfLeavesInPileOrder[pile - 1], boxOfLeavesInPileOrder[pile]], assignmentsCreaseAnte)
 
-		for aLeaf in frozenset(range(state.leavesTotal)).difference(DOTvalues(leavesPinned)):
+		for aLeaf in frozenset(range(state.totalLeaves)).difference(DOTvalues(leavesPinned)):
 			model.add_allowed_assignments([boxOfPilingsInLeafOrder[aLeaf]], zip(getDomainLeaf(state, aLeaf)))
 
-#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
+#======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [totalFolds] is divisible by 2 * [totalLeaves]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 		state.Theorem2Multiplier = 2
 		leafOrigin下aDimension: int = last(filter((state.leafLast // 2).__ge__, state.mapShapeProducts))
@@ -117,7 +117,7 @@ def count(state: EliminationState) -> EliminationState:
 		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于__r.Not()])  # [k < r+1 < k+1 < r]
 
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:
-		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.dimensionsTotal))
+		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.totalDimensions))
 
 	def leafCreasePost(leaf: Leaf, dimension: int) -> Leaf | None:
 		leafCrease: Leaf | None = None
@@ -133,7 +133,7 @@ def count(state: EliminationState) -> EliminationState:
 		k下indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_k)
 		r下indicesCartesian: tuple[int, ...] = leaf2IndicesCartesian(leaf_r)
 
-		for aDimension in range(state.dimensionsTotal):
+		for aDimension in range(state.totalDimensions):
 			k1下aDimension: Leaf | None = leafCreasePost(leaf_k, aDimension)
 			r1下aDimension: Leaf | None = leafCreasePost(leaf_r, aDimension)
 
@@ -166,7 +166,7 @@ def count(state: EliminationState) -> EliminationState:
 def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Do the things necessary so that `count` operates efficiently."""
 	if not state.boxOfPermutationSpace:
-		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
+		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getDictionaryChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 
@@ -184,7 +184,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 			sherpa: EliminationState = claimTicket.result()
 
 			# TODO temporary data collection for p2d7
-			if (sherpa.dimensionsTotal == 7) and (sherpa.boxOfFolding):
+			if (sherpa.totalDimensions == 7) and (sherpa.boxOfFolding):
 				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 				# ruff: ignore[import-outside-top-level]
 				from mapFolding.kitFilesystem import writeAlbum

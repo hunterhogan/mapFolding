@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getDomainLeaf, pileOrigin
-from mapFolding._e._2上nDimensional import dimensionNearestTail, 零
+from mapFolding._e._2上nDimensional import 工dimensionTail, 零
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from typing import Any, TYPE_CHECKING
@@ -28,7 +28,7 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 		The elimination state containing the map shape and dimension information.
 	boxOfLeavesAnalyzed : list[int] | None = None
 		Specific leaves to analyze. If None, analyzes all leaves except the trivial ones
-		(0, 1, and leavesTotal-1) which always occupy the same pile.
+		(0, 1, and totalLeaves-1) which always occupy the same pile.
 
 	Returns
 	-------
@@ -58,8 +58,8 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
 	if boxOfLeavesAnalyzed is None:
-		leavesExcluded: set[int] = {pileOrigin, 零, state.leavesTotal - 零}
-		boxOfLeavesAnalyzed = [leaf for leaf in range(state.leavesTotal) if leaf not in leavesExcluded]
+		leavesExcluded: set[int] = {pileOrigin, 零, state.totalLeaves - 零}
+		boxOfLeavesAnalyzed = [leaf for leaf in range(state.totalLeaves) if leaf not in leavesExcluded]
 
 	boxOfEntropyRecords: list[dict[str, Any]] = []
 
@@ -75,7 +75,7 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 		if dataframeMelted.empty:
 			continue
 
-		arrayPileCounts: numpy.ndarray = numpy.bincount(dataframeMelted['variable'].astype(int), minlength=state.leavesTotal)
+		arrayPileCounts: numpy.ndarray = numpy.bincount(dataframeMelted['variable'].astype(int), minlength=state.totalLeaves)
 		arrayPileCountsInDomain: numpy.ndarray = arrayPileCounts[list(domainLeaf)]
 		arrayFrequencies: numpy.ndarray[tuple[Any, ...], numpy.dtype[numpy.int_]] = arrayPileCountsInDomain / arrayPileCountsInDomain.sum()
 
@@ -97,18 +97,18 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 			'concentrationMaximum': concentrationMaximum,
 			'bitPattern': f"{leaf:06b}",
 			'bitCount': leaf.bit_count(),
-			'trailingZeros': dimensionNearestTail(leaf),
+			'trailingZeros': 工dimensionTail(leaf),
 		})
 
 	return pandas.DataFrame(boxOfEntropyRecords).sort_values('entropyRelative', ascending=False).reset_index(drop=True)
 
-def analyzeEntropyForDimension(dimensionsTotal: int = 6) -> None:
+def analyzeEntropyForDimension(totalDimensions: int = 6) -> None:
 	"""Analyze entropy for all non-trivial leaves in a given dimension configuration."""
-	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
+	mapShape: tuple[int, ...] = (2,) * totalDimensions
 	state: EliminationState = EliminationState(mapShape)
 
 	print(f"\n{'=' * 80}")
-	print(f"Entropy Analysis for 2^{dimensionsTotal} (mapShape={mapShape})")
+	print(f"Entropy Analysis for 2^{totalDimensions} (mapShape={mapShape})")
 	print(f"{'=' * 80}\n")
 
 	dataframeEntropy = measureEntropy(state)

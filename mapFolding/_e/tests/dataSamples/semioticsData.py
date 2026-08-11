@@ -40,8 +40,8 @@ expectedDimensionIndex: Final[tuple[tuple[int, int], ...]] = (
 expectedLeafOrigin: Final[int] = 0
 expectedPileOrigin: Final[int] = 0
 
-# Function expected outputs for dimensionsTotal in range(5, 9)
-# Each tuple is (dimensionsTotal, expectedResult)
+# Function expected outputs for totalDimensions in range(5, 9)
+# Each tuple is (totalDimensions, expectedResult)
 
 expected首零: tuple[tuple[int, int], ...] = (
 	(5, 16),

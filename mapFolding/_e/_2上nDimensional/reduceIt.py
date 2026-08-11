@@ -75,7 +75,7 @@ from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations
 from mapFolding._e import leafOrigin, makeAntiChoicesLeaf
 from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, moreThanLeaf零吗)
+	getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, moreThanLeaf零吗, 工dimensionTail, 工dimension首零)
 from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.filters import choicesLeaf吗, leafPinned吗, leaf吗, notPileLast, pileChoicesLeaf吗
@@ -133,7 +133,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 				continue
 
 			permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate
-					, makeAntiChoicesLeaf(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
+					, makeAntiChoicesLeaf(state.totalLeaves, set(range(state.totalLeaves)).difference(leavesCrease))
 			)
 			if not permutationSpace.valid:
 				#=SIN= Early return.
@@ -185,7 +185,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 			if pile in leafAtPilePredecessors[leaf]:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
-					, makeAntiChoicesLeaf(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
+					, makeAntiChoicesLeaf(state.totalLeaves, leafAtPilePredecessors[leaf][pile])
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
@@ -231,7 +231,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		for dimension in range(state.dimensionsTotal):
+		for dimension in range(state.totalDimensions):
 			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.pinnedLeaves()))
 
 			for upDown, leftRight in ((False, True), (True, False)):
@@ -247,7 +247,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 						pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
 
 					if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-						antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, (leaf_rCrease,))
+						antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, (leaf_rCrease,))
 
 						if pileOf_k < pileOf_r < pileOf_kCrease:
 							pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
@@ -259,7 +259,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 							pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
 					elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-						antiChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, (leaf_kCrease,))
+						antiChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, (leaf_kCrease,))
 
 						if pileOf_rCrease < pileOf_k < pileOf_r:
 							pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
@@ -307,11 +307,11 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 	-----------------
 	For each pinned leaf:
 
-	1. Compute `dimensionNearest首(leaf)` [1] to identify the dimension with the smallest coordinate
+	1. Compute `工dimension首零(leaf)` [1] to identify the dimension with the smallest coordinate
 		magnitude from the head.
 	2. If nonzero, remove all leaves with larger coordinates in that dimension from piles before
 		`pile`.
-	3. Compute `dimensionNearestTail(leaf)` [2] to identify the dimension with the smallest coordinate
+	3. Compute `工dimensionTail(leaf)` [2] to identify the dimension with the smallest coordinate
 		magnitude from the tail.
 	4. If nonzero, remove all leaves with smaller coordinates in that dimension from piles after
 		`pile`.
@@ -330,9 +330,9 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 	References
 	----------
-	[1] mapFolding._e.dimensionNearest首
+	[1] mapFolding._e.工dimension首零
 
-	[2] mapFolding._e.dimensionNearestTail
+	[2] mapFolding._e.工dimensionTail
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 
@@ -343,21 +343,21 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		pile1stOpen: int = 2
 		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.pinnedLeaves(), factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
-			dimensionHead: int = dimensionNearest首(leaf)
+			dimensionHead: int = 工dimension首零(leaf)
 			if 0 < dimensionHead:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterLeaf(choicesLeaf吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
-					, makeAntiChoicesLeaf(state.leavesTotal, range(state.mapShapeProducts[dimensionHead], state.leavesTotal, state.mapShapeProducts[dimensionHead]))
+					, makeAntiChoicesLeaf(state.totalLeaves, range(state.mapShapeProducts[dimensionHead], state.totalLeaves, state.mapShapeProducts[dimensionHead]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
 					return permutationSpace
 
-			dimensionTail: int = dimensionNearestTail(leaf)
+			dimensionTail: int = 工dimensionTail(leaf)
 			if 0 < dimensionTail:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
-					, makeAntiChoicesLeaf(state.leavesTotal, range(leafOrigin, state.mapShapeProductsSums[dimensionTail]))
+					, makeAntiChoicesLeaf(state.totalLeaves, range(leafOrigin, state.mapShapeProductsSums[dimensionTail]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
@@ -416,8 +416,8 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 			else:
 				continue
 
-			if 0 <= leafForbidden < state.leavesTotal:
-				permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate, makeAntiChoicesLeaf(state.leavesTotal, [leafForbidden]))
+			if 0 <= leafForbidden < state.totalLeaves:
+				permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate, makeAntiChoicesLeaf(state.totalLeaves, [leafForbidden]))
 				if not permutationSpace.valid:
 					#=SIN= Early return.
 					return permutationSpace

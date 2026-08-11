@@ -5,14 +5,14 @@ from collections.abc import Sequence
 from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
-from mapFolding.theTypes import 形NumPyLeavesTotal
+from mapFolding.theTypes import 形NumPyTotalLeaves
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding.theTypes import 形Array1DLeavesTotal, 形Array2DLeavesTotal, 形Array3DLeavesTotal, 形NumPyIntegerType
+	from mapFolding.theTypes import 形Array1DTotalLeaves, 形Array2DTotalLeaves, 形Array3DTotalLeaves, 形NumPyIntegerType
 	from numpy import dtype as numpy_dtype, ndarray
 	from typing import Any
 
@@ -54,7 +54,7 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit
 
-def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, leavesTotal: int) -> int:
+def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, totalLeaves: int) -> int:
 	"""Determine whether to divide the computation into tasks and how many divisions.
 
 	Parameters
@@ -64,7 +64,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 		details. I know it is annoying, but I want to be sure you have the most accurate information.
 	concurrencyLimit : int
 		Maximum number of concurrent tasks allowed.
-	leavesTotal : int
+	totalLeaves : int
 		Total number of leaves in the map.
 
 	Returns
@@ -93,9 +93,9 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 			strComputationDivisions = strComputationDivisions.lower()
 			match strComputationDivisions:
 				case 'maximum':
-					taskDivisions: int = leavesTotal
+					taskDivisions: int = totalLeaves
 				case 'cpu':
-					taskDivisions = min(concurrencyLimit, leavesTotal)
+					taskDivisions = min(concurrencyLimit, totalLeaves)
 				case _:
 					message: str = f"I received '{strComputationDivisions}' for the parameter, `computationDivisions`, but the string value is not supported."
 					raise ValueError(message)
@@ -103,9 +103,9 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 			message = f"I received {computationDivisions} for the parameter, `computationDivisions`, but the type {type(computationDivisions).__name__} is not supported."
 			raise ValueError(message)
 
-	if taskDivisions > leavesTotal:
+	if taskDivisions > totalLeaves:
 		message = (
-			f"I derived `{taskDivisions = }`, which is greater than `{leavesTotal = }`, but task divisions cannot exceed the map's "
+			f"I derived `{taskDivisions = }`, which is greater than `{totalLeaves = }`, but task divisions cannot exceed the map's "
 			"total leaves because that would count folds more than once."
 		)
 		raise ValueError(message)
@@ -146,14 +146,14 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 
 #======== map folding ===================================
 
-def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: type[形NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]:
+def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: type[形NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
 		A tuple of integers representing the dimensions of the map.
-	leavesTotal : int
+	totalLeaves : int
 		The total number of leaves in the map.
 	datatype : type[形NumPyIntegerType]
 		The NumPy integer type to use for the array elements, ensuring proper memory usage and
@@ -162,14 +162,14 @@ def getConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int, datatype: ty
 	Returns
 	-------
 	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]
-		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) with the
+		A 3D NumPy array with shape (`totalDimensions`, `totalLeaves`+1, `totalLeaves`+1) with the
 		specified `datatype`, representing all possible connections between leaves.
 	"""
-	connectionGraph: 形Array3DLeavesTotal = _makeConnectionGraph(mapShape, leavesTotal)
+	connectionGraph: 形Array3DTotalLeaves = _makeConnectionGraph(mapShape, totalLeaves)
 	return connectionGraph.astype(datatype)
 
 @cache
-def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
+def getTotalLeaves(mapShape: tuple[int, ...]) -> int:
 	"""The definitive calculation of the total number of leaves in a map with the given dimensions.
 
 	Parameters
@@ -179,7 +179,7 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 
 	Returns
 	-------
-	leavesTotal : int
+	totalLeaves : int
 		The definitive total number of leaves in the map.
 
 	Raises
@@ -190,9 +190,9 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 
 	Notes
 	-----
-	It is impossible to overstate the importance of `leavesTotal` in every algorithm for counting
+	It is impossible to overstate the importance of `totalLeaves` in every algorithm for counting
 	folds. Therefore, in this package, this function is the ***only*** permissible way to compute
-	`leavesTotal`.
+	`totalLeaves`.
 
 	The total number of leaves is the product of all dimensions in `mapShape`.
 	"""
@@ -205,20 +205,20 @@ def getLeavesTotal(mapShape: tuple[int, ...]) -> int:
 		productDimensions *= dimension
 	return productDimensions
 
-def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> 形Array3DLeavesTotal:
+def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Array3DTotalLeaves:
 	"""Implement connection graph generation for map folding.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
 		A tuple of integers representing the dimensions of the map.
-	leavesTotal : int
+	totalLeaves : int
 		The total number of leaves in the map.
 
 	Returns
 	-------
-	connectionGraph : 形Array3DLeavesTotal
-		A 3D NumPy array with shape (`dimensionsTotal`, `leavesTotal`+1, `leavesTotal`+1) where each
+	connectionGraph : 形Array3DTotalLeaves
+		A 3D NumPy array with shape (`totalDimensions`, `totalLeaves`+1, `totalLeaves`+1) where each
 		entry [d,i,j] represents the leaf that would be connected to leaf j when inserting leaf i in
 		dimension d.
 
@@ -230,17 +230,17 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], leavesTotal: int) -> 形Arra
 	The algorithm calculates a coordinate system first, then determines connections based on parity
 	rules, boundary conditions, and dimensional constraints.
 	"""
-	dimensionsTotal: int = len(mapShape)
-	cumulativeProduct: 形Array1DLeavesTotal = numpy.multiply.accumulate([1, *list(mapShape)], dtype=形NumPyLeavesTotal)
-	arrayDimensions: 形Array1DLeavesTotal = numpy.array(mapShape, dtype=形NumPyLeavesTotal)
-	coordinateSystem: 形Array2DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1), dtype=形NumPyLeavesTotal)
-	for 次Dimension in range(dimensionsTotal):
-		for leaf1ndex in range(1, leavesTotal + inclusive):
+	totalDimensions: int = len(mapShape)
+	cumulativeProduct: 形Array1DTotalLeaves = numpy.multiply.accumulate([1, *list(mapShape)], dtype=形NumPyTotalLeaves)
+	arrayDimensions: 形Array1DTotalLeaves = numpy.array(mapShape, dtype=形NumPyTotalLeaves)
+	coordinateSystem: 形Array2DTotalLeaves = numpy.zeros((totalDimensions, totalLeaves + 1), dtype=形NumPyTotalLeaves)
+	for 次Dimension in range(totalDimensions):
+		for leaf1ndex in range(1, totalLeaves + inclusive):
 			coordinateSystem[次Dimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[次Dimension]) % arrayDimensions[次Dimension] + 1)
 
-	connectionGraph: 形Array3DLeavesTotal = numpy.zeros((dimensionsTotal, leavesTotal + 1, leavesTotal + 1), dtype=形NumPyLeavesTotal)
-	for 次Dimension in range(dimensionsTotal):
-		for activeLeaf1ndex in range(1, leavesTotal + inclusive):
+	connectionGraph: 形Array3DTotalLeaves = numpy.zeros((totalDimensions, totalLeaves + 1, totalLeaves + 1), dtype=形NumPyTotalLeaves)
+	for 次Dimension in range(totalDimensions):
+		for activeLeaf1ndex in range(1, totalLeaves + inclusive):
 			for connectee1ndex in range(1, activeLeaf1ndex + inclusive):
 				isFirstCoord: bool = coordinateSystem[次Dimension, connectee1ndex] == 1
 				isLastCoord: bool = coordinateSystem[次Dimension, connectee1ndex] == arrayDimensions[次Dimension]

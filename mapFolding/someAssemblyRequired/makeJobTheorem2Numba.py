@@ -27,19 +27,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding.theTypes import 形LeavesTotal
+	from mapFolding.theTypes import 形TotalLeaves
 	import ast
 
 # TODO Dynamically calculate the bitwidth of each datatype.
 # DEVELOPMENT I delayed dynamic calculation because I didn't know how to calculate what 'elephino'
 # needs. I now have a safe upper bound for that. Somewhere.
 boxOfSettings形: list[Settings形] = [
-	Settings形(datatypeIdentifier='形LeavesTotal', typeModule='numba', typeIdentifier='uint8', type_asname='形LeavesTotal'),
+	Settings形(datatypeIdentifier='形TotalLeaves', typeModule='numba', typeIdentifier='uint8', type_asname='形TotalLeaves'),
 	Settings形(datatypeIdentifier='形Elephino', typeModule='numba', typeIdentifier='uint8', type_asname='形Elephino'),
-	Settings形(datatypeIdentifier='形FoldsTotal', typeModule='numba', typeIdentifier='uint64', type_asname='形FoldsTotal'),
-	Settings形(datatypeIdentifier='形Array1DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DLeavesTotal'),
+	Settings形(datatypeIdentifier='形TotalFolds', typeModule='numba', typeIdentifier='uint64', type_asname='形TotalFolds'),
+	Settings形(datatypeIdentifier='形Array1DTotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DTotalLeaves'),
 	Settings形(datatypeIdentifier='形Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DElephino'),
-	Settings形(datatypeIdentifier='形Array3DLeavesTotal', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DLeavesTotal'),
+	Settings形(datatypeIdentifier='形Array3DTotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DTotalLeaves'),
 ]
 
 def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
@@ -95,7 +95,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
-	foldsTotalEstimated: int = getValuesKnown('A007822').get(n, 0)
+	totalFoldsEstimated: int = getValuesKnown('A007822').get(n, 0)
 	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
 		, defaultFoldsSymmetric['variable']['stateDataclass'], defaultFoldsSymmetric['variable']['stateInstance'])
 	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['logicalPath']['synthetic']}.theorem2Numba')
@@ -108,22 +108,22 @@ def makeFoldsSymmetric(n: int) -> None:
 	pathPackage: PurePosixPath | None = None
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
 	fileExtension: str = settingsPackage.fileExtension
-	pathFilenameFoldsTotal = pathModule / ('foldsSymmetric_' + str(n))
+	pathFilenameTotalFolds = pathModule / ('foldsSymmetric_' + str(n))
 	packageIdentifier: str = ''
 	logicalPathRoot: identifierDotAttribute | None = None
-	moduleIdentifier: str = pathFilenameFoldsTotal.stem
+	moduleIdentifier: str = pathFilenameTotalFolds.stem
 	identifierCallable: str = identifierCallableSource
 	identifierDataclass: str | None = sourceDataclassIdentifier
 	identifierDataclassInstance: str | None = sourceDataclassInstance
 	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
-	aJob = RecipeJobTheorem2(state, foldsTotalEstimated, shatteredDataclass, source_astModule, identifierCallableSource, sourceLogicalPathModuleDataclass
+	aJob = RecipeJobTheorem2(state, totalFoldsEstimated, shatteredDataclass, source_astModule, identifierCallableSource, sourceLogicalPathModuleDataclass
 		, sourceDataclassIdentifier, sourceDataclassInstance, sourcePathPackage, sourcePackageIdentifier, pathPackage, pathModule, fileExtension
-		, pathFilenameFoldsTotal, packageIdentifier, logicalPathRoot, moduleIdentifier, identifierCallable, identifierDataclass, identifierDataclassInstance
+		, pathFilenameTotalFolds, packageIdentifier, logicalPathRoot, moduleIdentifier, identifierCallable, identifierDataclass, identifierDataclassInstance
 		, logicalPathModuleDataclass)
 	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(aJob, spices)
 
 if __name__ == '__main__':
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
-	mapShape: tuple[形LeavesTotal, ...] = (6, 6)
+	mapShape: tuple[形TotalLeaves, ...] = (6, 6)
 	makeJobNumba(fromMapShape(mapShape), spices)

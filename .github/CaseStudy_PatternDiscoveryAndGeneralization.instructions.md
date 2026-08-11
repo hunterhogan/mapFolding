@@ -9,13 +9,13 @@ This document is for AI assistants (including future versions of myself) working
 
 ## The Problem Domain
 
-The mapFolding project deals with multidimensional map folding algorithms. Maps are hyperplanes with `dimensionsTotal` dimensions, each with length 2, giving `2^dimensionsTotal` total "leaves" (positions). The challenge is discovering which leaves must precede others at specific "piles" (positions in a folding sequence).
+The mapFolding project deals with multidimensional map folding algorithms. Maps are hyperplanes with `totalDimensions` dimensions, each with length 2, giving `2^totalDimensions` total "leaves" (positions). The challenge is discovering which leaves must precede others at specific "piles" (positions in a folding sequence).
 
 ## Concrete Example: `dictionary首零Plus零` in `_dataDynamic.py`
 
 ### The Starting Point: Static Data
 
-The process began with tuples extracted from empirical analysis of a 6-dimensional map (`dimensionsTotal = 6`, `leavesTotal = 64`). Each tuple `(leafPredecessor, pileFirst)` means: "at piles starting from `pileFirst`, the leaf `leafPredecessor` must come before `leaf首零Plus零`."
+The process began with tuples extracted from empirical analysis of a 6-dimensional map (`totalDimensions = 6`, `totalLeaves = 64`). Each tuple `(leafPredecessor, pileFirst)` means: "at piles starting from `pileFirst`, the leaf `leafPredecessor` must come before `leaf首零Plus零`."
 
 ```python
 leafPredecessorPileFirst = [
@@ -69,7 +69,7 @@ After multiple reorganizations, a "series" structure emerged. The key insight ca
 
 1. Data naturally grouped into "series"
 2. Each series had a relationship to powers of 2
-3. Within a series, `pileFirst` increased when `howManyDimensionsHaveOddParity` decreased
+3. Within a series, `pileFirst` increased when `工totalDimensionsOdd` decreased
 
 ### Step 3: Iterative Comment Annotation
 
@@ -86,7 +86,7 @@ The progression from arithmetic relationships (`8 + 32 = 40`) to structural rela
 The comment `8 + 32 = 40 + 16 = 56 + 8 = 64` triggered recognition of `Z0Z_mapShape首ProductsSums`:
 
 ```python
-magicalSequence = Z0Z_mapShape首ProductsSums(state, state.dimensionsTotal)
+magicalSequence = Z0Z_mapShape首ProductsSums(state, state.totalDimensions)
 # Returns: (0, 32, 48, 56, 60, 62, 63)
 ```
 
@@ -102,8 +102,8 @@ With the series structure understood and the magical sequence identified, formul
 # From comments that captured the discovered rules:
 # pileFirst the LAST = magicalSequence + 6
 # pileFirst the LAST ascending as leafPredecessor ascends
-# Note: howManyDimensionsHaveOddParity(leafPredecessor the LAST) = 1
-# pileFirst the others = pileFirst the LAST - 4 * (howManyDimensionsHaveOddParity(...) - 1)
+# Note: 工totalDimensionsOdd(leafPredecessor the LAST) = 1
+# pileFirst the others = pileFirst the LAST - 4 * (工totalDimensionsOdd(...) - 1)
 # leafPredecessor the first = Z0Z_invert(state, magicalSequence)
 ```
 
@@ -111,13 +111,13 @@ With the series structure understood and the magical sequence identified, formul
 
 ```python
 pileStepAbsolute = 4
-for 次Universal in range(state.dimensionsTotal - 2):
-    leafPredecessorTheFirst = Z0Z_invert(state, magicalSequence[state.dimensionsTotal - 2 - 次Universal])
-    leafPredecessorsInThisSeries = state.mapShapeProducts[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
+for 次Universal in range(state.totalDimensions - 2):
+    leafPredecessorTheFirst = Z0Z_invert(state, magicalSequence[state.totalDimensions - 2 - 次Universal])
+    leafPredecessorsInThisSeries = state.mapShapeProducts[工totalDimensionsOdd(leafPredecessorTheFirst)]
     for addend in range(leafPredecessorsInThisSeries):
         leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
-        leafPredecessor首零 = leafPredecessor + 首零(state.dimensionsTotal)
-        pileFirst = magicalSequence[次Universal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + is_even(leafPredecessor)))
+        leafPredecessor首零 = leafPredecessor + 首零(state.totalDimensions)
+        pileFirst = magicalSequence[次Universal] + 6 - (pileStepAbsolute * (工totalDimensionsOdd(leafPredecessor) - 1 + is_even(leafPredecessor)))
         for pile in boxOfPiles[boxOfPiles.index(pileFirst): None]:
             dictionary首零Plus零[pile].append(leafPredecessor)
             dictionary首零Plus零[pile].append(leafPredecessor首零)
@@ -131,12 +131,12 @@ The `mapFolding/_e/` directory contains measurement and semantic functions essen
 
 | Function                                              | Purpose                                                                |
 | ----------------------------------------------------- | ---------------------------------------------------------------------- |
-| `dimensionNearest首(n)`                               | Position of most significant set bit (0-indexed)                       |
-| `dimensionSecondNearest首(n)`                         | Position of second most significant set bit                            |
+| `工dimension首零(n)`                               | Position of most significant set bit (0-indexed)                       |
+| `工dimension首一(n)`                         | Position of second most significant set bit                            |
 | `howMany0coordinatesAtTail(n)`                        | Count trailing zeros (CTZ) — how many times n is divisible by 2        |
-| `howManyDimensionsHaveOddParity(n)`                   | `bit_count() - 1` — number of set bits excluding the MSB               |
+| `工totalDimensionsOdd(n)`                   | `bit_count() - 1` — number of set bits excluding the MSB               |
 | `leafInSubHyperplane(n)`                              | Project leaf onto sub-hyperplane (bits below MSB)                      |
-| `Z0Z_invert(state, n)`                                | XOR with `bit_mask(dimensionsTotal)` — "mirror" within dimension space |
+| `Z0Z_invert(state, n)`                                | XOR with `bit_mask(totalDimensions)` — "mirror" within dimension space |
 | `Z0Z_mapShape首ProductsSums(state, dim)` | Cumulative sums of products of dimensions in reverse                   |
 
 ### From `_semiotics.py` (via `_e/__init__.py`)
@@ -196,7 +196,7 @@ The `mapFolding/_e/` directory contains measurement and semantic functions essen
 
 1. Test on a DIFFERENT dimension count (e.g., 5D or 7D if you have the data)
 2. Check edge cases: minimum and maximum leaf values
-3. Confirm loop bounds scale with `dimensionsTotal`
+3. Confirm loop bounds scale with `totalDimensions`
 
 ## Common Patterns in This Codebase
 
@@ -205,11 +205,11 @@ The `mapFolding/_e/` directory contains measurement and semantic functions essen
 Data often organizes into series indexed by dimension, where:
 
 - Series boundaries relate to `mapShapeProducts` or cumulative sums
-- Values within a series relate by `首零(dimensionsTotal)` offsets (adds 2^(d-1))
+- Values within a series relate by `首零(totalDimensions)` offsets (adds 2^(d-1))
 
 ### The Parity Pattern
 
-`howManyDimensionsHaveOddParity` frequently determines:
+`工totalDimensionsOdd` frequently determines:
 
 - Step sizes within ranges
 - Offsets from base values
@@ -217,7 +217,7 @@ Data often organizes into series indexed by dimension, where:
 
 ### The Inversion Pattern
 
-`Z0Z_invert(state, x)` = `x ^ bit_mask(dimensionsTotal)` creates symmetric leaf pairs:
+`Z0Z_invert(state, x)` = `x ^ bit_mask(totalDimensions)` creates symmetric leaf pairs:
 
 - Leaf `x` and leaf `invert(x)` often have related rules
 - Rules for `leaf < 首零` often mirror rules for `leaf >= 首零`
@@ -272,14 +272,14 @@ When asked to find patterns in static data:
 - `mapFolding/_e/_semiotics.py` — Semantic constants and dimension-indexed functions
 - `mapFolding/_e/_dataDynamic.py` — Domain and range functions (examples of generalized patterns)
 - `mapFolding/_e/__init__.py` — Re-exports (the public API for these tools)
-- `mapFolding/dataBaskets.py` — State classes with `mapShapeProducts`, `leavesTotal`, etc.
+- `mapFolding/dataBaskets.py` — State classes with `mapShapeProducts`, `totalLeaves`, etc.
 
 ## Appendix: The Transformation Summary
 
 | Before (Static)                    | After (Dynamic)                                                    |
 | ---------------------------------- | ------------------------------------------------------------------ |
 | 60+ explicit tuples                | Single nested loop                                                 |
-| Valid only for 6D                  | Valid for any `dimensionsTotal >= 4`                               |
+| Valid only for 6D                  | Valid for any `totalDimensions >= 4`                               |
 | Hardcoded `pileFirst` values       | `magicalSequence[次Universal] + 6 - (pileStepAbsolute * (...))` |
 | Hardcoded `leafPredecessor` values | `Z0Z_invert(state, magicalSequence[...])` and arithmetic           |
 | No visible structure               | Clear series structure via loop bounds                             |

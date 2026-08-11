@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 astExprCall_initializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultFoldsSymmetric['function']['initializeConcurrencyManager']), listParameters=[Make.Name('maxWorkers')]))
 AssignTotal2CountingIdentifier: ast.Assign = Make.Assign(
 	[Make.Attribute(Make.Name(defaultFoldsSymmetric['variable']['stateInstance']), defaultFoldsSymmetric['variable']['counting'], context=Make.Store())]
-	, value=Make.Call(Make.Name(defaultFoldsSymmetric['function']['getSymmetricFoldsTotal']))
+	, value=Make.Call(Make.Name(defaultFoldsSymmetric['function']['getSymmetricTotalFolds']))
 )
 
 def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
@@ -31,7 +31,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 	1. When the algorithm finds a `groupOfFolds`, the call to `filterAsymmetricFolds` must be non-blocking.
 	2. Filtering the `groupOfFolds` into symmetric folds must start immediately, and run concurrently.
 	3. When filtering, the module must immediately discard `leafBelow` and sum the filtered folds into a global total.
-	4. Of course, the filtering must be complete before `getAsymmetricFoldsTotal` fulfills the request for the total.
+	4. Of course, the filtering must be complete before `getAsymmetricTotalFolds` fulfills the request for the total.
 
 	Why _must_ those things happen?
 	1. Filtering takes as long as finding the `groupOfFolds`, so we can't block.

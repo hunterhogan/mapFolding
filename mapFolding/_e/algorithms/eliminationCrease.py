@@ -72,6 +72,6 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	queueStates.close()
 	queueStates.join_thread()
 
-	state.Theorem4Multiplier = factorial(state.dimensionsTotal)
+	state.Theorem4Multiplier = factorial(state.totalDimensions)
 
 	return state

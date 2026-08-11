@@ -8,7 +8,7 @@ from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown
 
 # isort: split
 from mapFolding.oeis.__main__ import (
-	getFoldsTotalKnown as getFoldsTotalKnown, makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark,
+	getTotalFoldsKnown as getTotalFoldsKnown, makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark,
 	printEasyRunHeader as printEasyRunHeader)
 
 # isort: split

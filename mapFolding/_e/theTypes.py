@@ -37,7 +37,7 @@ Mathematical Basis
 ------------------
 
 A `ChoicesLeaf` value is a bitset where bit position `i` (zero-indexed) is set when `Leaf` `i` is in
-the domain. Bit position `leavesTotal` (one past the highest `Leaf` index) is the sentinel bit that
+the domain. Bit position `totalLeaves` (one past the highest `Leaf` index) is the sentinel bit that
 distinguishes `ChoicesLeaf` from `Leaf`. When the sentinel bit is set, the value is a `ChoicesLeaf`.
 When the sentinel bit is clear, the value is a `Leaf`.
 
@@ -51,11 +51,11 @@ Examples
 
 Build a `ChoicesLeaf` bitset from an iterable of `Leaf` indices.
 
-	choicesLeaf = makeChoicesLeaf(state.leavesTotal, range(0, state.leavesTotal, 2))
+	choicesLeaf = makeChoicesLeaf(state.totalLeaves, range(0, state.totalLeaves, 2))
 
 Build a complement `ChoicesLeaf` by excluding leaves.
 
-	antiChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, DOTvalues(leavesPinned))
+	antiChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, DOTvalues(leavesPinned))
 
 Count the number of leaves in a domain.
 
@@ -98,10 +98,10 @@ type Pile = int
 #======== Containers ============================
 
 type Folding = tuple[Leaf, ...]
-"""`leaf` indexed to `pile`; length must be `leavesTotal`."""
+"""`leaf` indexed to `pile`; length must be `totalLeaves`."""
 
 type PinnedLeaves = dict[Pile, Leaf]
-"""`pile: leaf`; length ought to be less than `leavesTotal`: when length equals `leavesTotal`, ought to convert to `Folding`."""
+"""`pile: leaf`; length ought to be less than `totalLeaves`: when length equals `totalLeaves`, ought to convert to `Folding`."""
 
 type UndeterminedPiles = dict[Pile, ChoicesLeaf]
-"""`pile: choicesLeaf`; length less than or equal to `leavesTotal`."""
+"""`pile: choicesLeaf`; length less than or equal to `totalLeaves`."""

@@ -58,7 +58,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 	pathSorted.mkdir(exist_ok=True)
 
 	lineHeader: str | None = None
-	boxOfHeaderExpected: tuple[int, ...] = tuple(range(state.leavesTotal))
+	boxOfHeaderExpected: tuple[int, ...] = tuple(range(state.totalLeaves))
 
 	boxOfSequences: set[tuple[int, ...]] = set()
 	boxOfSequencesUnique: list[tuple[int, ...]] = []
@@ -73,7 +73,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 			line: str = lineRaw.rstrip('\n').rstrip('\r')
 			if 次Line == 0 and line.startswith("0,1,2,"):
 				boxOfHeaderParts: list[str] = line.split(',')
-				if len(boxOfHeaderParts) == state.leavesTotal:
+				if len(boxOfHeaderParts) == state.totalLeaves:
 					try:
 						boxOfHeaderFound: tuple[int, ...] = tuple(int(part) for part in boxOfHeaderParts)
 					except ValueError:
@@ -87,7 +87,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 			if line[0] == ',' or line[-1] == ',' or ',,' in line:
 				invalidLinesDetected = True
 				continue
-			if line.count(',') != state.leavesTotal - 1:
+			if line.count(',') != state.totalLeaves - 1:
 				invalidLinesDetected = True
 				continue
 			try:
@@ -95,7 +95,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 			except ValueError:
 				invalidLinesDetected = True
 				continue
-			if len(boxOfSequence) != state.leavesTotal:
+			if len(boxOfSequence) != state.totalLeaves:
 				invalidLinesDetected = True
 				continue
 

@@ -28,12 +28,12 @@ type OEISid = LiteralString
 
 #================== Flexible `TypeAlias` for granular control over fixed-width integers =======
 
-形LeavesTotal: TypeAlias = int
-"""Use on unsigned integers that will never exceed the magnitude of `leavesTotal`."""
+形TotalLeaves: TypeAlias = int
+"""Use on unsigned integers that will never exceed the magnitude of `totalLeaves`."""
 
 # TODO use lessons from mapFolding\reference\multiDimensionalMapFolding\elephinoIntegerWidthAnalysis.ipynb.
 形Elephino: TypeAlias = int
-"""Use on unsigned integers that will exceed the magnitude of `leavesTotal` but that are not "colossal."
+"""Use on unsigned integers that will exceed the magnitude of `totalLeaves` but that are not "colossal."
 
 Note well
 ---------
@@ -45,19 +45,19 @@ Colossal values are found with the cross humpy inequality:
 
 """
 
-形FoldsTotal: TypeAlias = int
-"""Use on unsigned integers that might have colossal magnitudes similar to `foldsTotal`."""
+形TotalFolds: TypeAlias = int
+"""Use on unsigned integers that might have colossal magnitudes similar to `totalFolds`."""
 
 #-------- Additional `TypeAlias` with NumPy types as their default ----------
 
-形NumPyLeavesTotal: TypeAlias = numpy_uint8
-"""Use in NumPy data structures whose elements are unsigned integers that will never exceed the magnitude of `leavesTotal`."""
+形NumPyTotalLeaves: TypeAlias = numpy_uint8
+"""Use in NumPy data structures whose elements are unsigned integers that will never exceed the magnitude of `totalLeaves`."""
 
 形NumPyElephino: TypeAlias = numpy_uint16
-"""Use in NumPy data structures whose elements are unsigned integers that might exceed the magnitude of `leavesTotal` but that are not 'colossal.'"""
+"""Use in NumPy data structures whose elements are unsigned integers that might exceed the magnitude of `totalLeaves` but that are not 'colossal.'"""
 
-形NumPyFoldsTotal: TypeAlias = numpy_uint64
-"""Use in NumPy data structures whose elements are unsigned integers that might have colossal magnitudes similar to `foldsTotal`.
+形NumPyTotalFolds: TypeAlias = numpy_uint64
+"""Use in NumPy data structures whose elements are unsigned integers that might have colossal magnitudes similar to `totalFolds`.
 
 Note well
 ---------
@@ -67,20 +67,20 @@ different data structure."""
 #-------- Yet more `TypeAlias` with NumPy `ndarray` types ----------
 # Reminder: you can override the types with anything you want, not just `ndarray`. See, e.g., `makeJobTheorem2Numba`.
 
-形Array3DLeavesTotal: TypeAlias = ndarray[tuple[int, int, int], dtype[形NumPyLeavesTotal]]
-"""A `numpy.ndarray` with three axes and elements of type `形NumPyLeavesTotal`."""
+形Array3DTotalLeaves: TypeAlias = ndarray[tuple[int, int, int], dtype[形NumPyTotalLeaves]]
+"""A `numpy.ndarray` with three axes and elements of type `形NumPyTotalLeaves`."""
 
-形Array2DLeavesTotal: TypeAlias = ndarray[tuple[int, int], dtype[形NumPyLeavesTotal]]
-"""A `numpy.ndarray` with two axes and elements of type `形NumPyLeavesTotal`."""
+形Array2DTotalLeaves: TypeAlias = ndarray[tuple[int, int], dtype[形NumPyTotalLeaves]]
+"""A `numpy.ndarray` with two axes and elements of type `形NumPyTotalLeaves`."""
 
-形Array1DLeavesTotal: TypeAlias = ndarray[tuple[int], dtype[形NumPyLeavesTotal]]
-"""A `numpy.ndarray` with one axis and elements of type `形NumPyLeavesTotal`."""
+形Array1DTotalLeaves: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalLeaves]]
+"""A `numpy.ndarray` with one axis and elements of type `形NumPyTotalLeaves`."""
 
 形Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[形NumPyElephino]]
 """A `numpy.ndarray` with one axis and elements of type `形NumPyElephino`."""
 
-形Array1DFoldsTotal: TypeAlias = ndarray[tuple[int], dtype[形NumPyFoldsTotal]]
-"""A `numpy.ndarray` with one axis and elements of type `形NumPyFoldsTotal`."""
+形Array1DTotalFolds: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalFolds]]
+"""A `numpy.ndarray` with one axis and elements of type `形NumPyTotalFolds`."""
 
 #================== Function signatures ===========================================================
 

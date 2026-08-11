@@ -2,7 +2,7 @@
 
 ## absurd
 
-`getLeavesTotal`: this check is one-degree short of absurd, but three lines of early absurdity is better than invalid output later. I'd add more checks if I could think of more. Fail early.
+`getTotalLeaves`: this check is one-degree short of absurd, but three lines of early absurdity is better than invalid output later. I'd add more checks if I could think of more. Fail early.
 
 ## analyzeArcCodesAligned
 

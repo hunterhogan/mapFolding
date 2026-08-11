@@ -222,9 +222,9 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
-				shapeAsListSlices: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
-				shapeAsListSlices[-1] = Make.Slice(step=Make.Constant(1))
-				shapeAST: ast.Slice | ast.Tuple = Make.Tuple(list(shapeAsListSlices))
+				shapeAsBoxOf_astSlice: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
+				shapeAsBoxOf_astSlice[-1] = Make.Slice(step=Make.Constant(1))
+				shapeAST: ast.Slice | ast.Tuple = Make.Tuple(list(shapeAsBoxOf_astSlice))
 			else:
 				shapeAST = Make.Slice(step=Make.Constant(1))
 

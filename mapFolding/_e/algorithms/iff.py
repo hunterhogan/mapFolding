@@ -64,7 +64,7 @@ from __future__ import annotations
 
 from functools import cache
 from itertools import combinations
-from mapFolding.beDRY import getLeavesTotal
+from mapFolding.beDRY import getTotalLeaves
 from math import prod
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems
@@ -74,7 +74,7 @@ if TYPE_CHECKING:
 
 # DEVELOPMENT This module must be efficient. Imagine computing mapShape(3, 14), for example, which we
 # know has 98,420,246,759,688 valid foldings. With mathamagic, we only have to find one-half of them,
-# and for each group of leavesTotal (which is 42, because 3 × 14), we only have to find one from the
+# and for each group of totalLeaves (which is 42, because 3 × 14), we only have to find one from the
 # group. Therefore, the module must validate 98420246759688 ÷ 42 ÷ 2 = 1,171,669,604,282 foldings.
 
 # To validate one folding, in each of the 2 dimensions, we must prove there are no crease violations.
@@ -176,7 +176,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	inequalities encoded by `creaseViolationComplicated吗` [3].
 
 	The leaf-boundary filter in `foldingValid吗` uses a cached leaf count derived from
-	`mapFolding.getLeavesTotal` [2].
+	`mapFolding.getTotalLeaves` [2].
 
 	`foldingValid吗` enumerates each pair of `(pile, leaf)` positions from `folding`
 	and combines each pair with each `dimension` index. The parity filter from
@@ -205,7 +205,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	----------
 	[1] mapFolding._e.algorithms.eliminationCrease
 
-	[2] mapFolding.getLeavesTotal
+	[2] mapFolding.getTotalLeaves
 
 	[3] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
 	"""
@@ -213,7 +213,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
 
-	for dimension in range(_dimensionsTotal(mapShape)):
+	for dimension in range(_totalDimensions(mapShape)):
 		boxOfPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
@@ -249,7 +249,7 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 	inequalities encoded by `creaseViolationComplicated吗` [3].
 
 	The leaf-boundary filter in `foldingValid吗` uses a cached leaf count derived from
-	`mapFolding.getLeavesTotal` [2].
+	`mapFolding.getTotalLeaves` [2].
 
 	`foldingValid吗` enumerates each pair of `(pile, leaf)` positions from `folding`
 	and combines each pair with each `dimension` index. The parity filter from
@@ -278,13 +278,13 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 	----------
 	[1] mapFolding._e.algorithms.eliminationCrease
 
-	[2] mapFolding.getLeavesTotal
+	[2] mapFolding.getTotalLeaves
 
 	[3] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
 	"""
 	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
 
-	for dimension in range(_dimensionsTotal(mapShape)):
+	for dimension in range(_totalDimensions(mapShape)):
 		boxOfPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
@@ -298,12 +298,12 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 	return True
 
 @cache
-def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
+def _totalDimensions(mapShape: tuple[int, ...]) -> int:
 	"""You can compute the number of dimensions encoded by `mapShape`.
 
 	(AI generated docstring)
 
-	`_dimensionsTotal` exists as a small, named adapter for code that iterates over each
+	`_totalDimensions` exists as a small, named adapter for code that iterates over each
 	dimension of `mapShape` [1].
 
 	Parameters
@@ -313,7 +313,7 @@ def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 
 	Returns
 	-------
-	dimensionsTotal : int
+	totalDimensions : int
 		The number of dimensions in `mapShape`.
 
 	References
@@ -323,14 +323,14 @@ def _dimensionsTotal(mapShape: tuple[int, ...]) -> int:
 	return len(mapShape)
 
 @cache
-def _leavesTotal(mapShape: tuple[int, ...]) -> int:
+def _totalLeaves(mapShape: tuple[int, ...]) -> int:
 	"""You can compute and memoize the total number of leaves for `mapShape`.
 
 	(AI generated docstring)
 
-	`_leavesTotal` exists to centralize leaf-count computation for hot validation paths such as
+	`_totalLeaves` exists to centralize leaf-count computation for hot validation paths such as
 	`foldingValid吗`. The `functools.cache` decorator memoizes the result per
-	`mapShape` value [1]. The leaf-count computation uses `mapFolding.getLeavesTotal` [2].
+	`mapShape` value [1]. The leaf-count computation uses `mapFolding.getTotalLeaves` [2].
 
 	Parameters
 	----------
@@ -339,16 +339,16 @@ def _leavesTotal(mapShape: tuple[int, ...]) -> int:
 
 	Returns
 	-------
-	leavesTotal : int
+	totalLeaves : int
 		The total number of leaves for `mapShape`.
 
 	References
 	----------
 	[1] functools.cache
 		https://docs.python.org/3/library/functools.html#functools.cache
-	[2] mapFolding.getLeavesTotal
+	[2] mapFolding.getTotalLeaves
 	"""
-	return getLeavesTotal(mapShape)
+	return getTotalLeaves(mapShape)
 
 @cache
 def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:

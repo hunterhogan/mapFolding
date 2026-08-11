@@ -5,13 +5,13 @@ from mapFolding.dataBaskets import SymmetricFoldsState
 def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while state.symmetricFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
-            if state.leaf1ndex > state.leavesTotal:
+            if state.leaf1ndex > state.totalLeaves:
                 state.次Leaf = 1
                 state.leafComparison[0] = 1
                 state.leafConnectee = 1
-                while state.leafConnectee < state.leavesTotal + 1:
+                while state.leafConnectee < state.totalLeaves + 1:
                     state.次MiniGap = state.leafBelow[state.次Leaf]
-                    state.leafComparison[state.leafConnectee] = (state.leavesTotal + state.次MiniGap - state.次Leaf) % state.leavesTotal
+                    state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
                     state.次Leaf = state.次MiniGap
                     state.leafConnectee += 1
                 for boxOfTuples in state.indices:
@@ -22,10 +22,10 @@ def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState
                             break
                     state.symmetricFolds += state.leafConnectee
             else:
-                state.dimensionsUnconstrained = state.dimensionsTotal
+                state.dimensionsUnconstrained = state.totalDimensions
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
                 state.次Dimension = 0
-                while state.次Dimension < state.dimensionsTotal:
+                while state.次Dimension < state.totalDimensions:
                     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
                     if state.leafConnectee == state.leaf1ndex:
                         state.dimensionsUnconstrained -= 1

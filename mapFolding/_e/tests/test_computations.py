@@ -8,7 +8,7 @@ from mapFolding._e._2上nDimensional.pinIt import (
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
-from mapFolding.oeis import getFoldsTotalKnown, getMetadata, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
+from mapFolding.oeis import getMetadata, getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
 from typing import TYPE_CHECKING
 import pytest
 
@@ -26,7 +26,7 @@ def pinningFunctionEliminateFolds2上nDimensional(request: pytest.FixtureRequest
 
 @pytest.fixture
 def expectedFromMapShape(mapShape: tuple[int, ...]) -> int:
-	return raiseIfNone(getFoldsTotalKnown(mapShape))
+	return raiseIfNone(getTotalFoldsKnown(mapShape))
 
 # ruff: ignore[commented-out-code]
 # @pytest.mark.parametrize("flow", ["elimination"])
@@ -89,12 +89,12 @@ def test_eliminateFoldsPinnedState(pinningFunctionEliminateFolds2上nDimensional
 	"""
 	oeisID: OEISid = "A001417"
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
-	expectedFoldsTotal: int = getValuesKnown(oeisID)[n]
+	expectedTotalFolds: int = getValuesKnown(oeisID)[n]
 	statePinned: EliminationState = pinningFunctionEliminateFolds2上nDimensional(EliminationState(mapShape), CPUlimit=CPUlimit)
-	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWrite=None, CPUlimit=CPUlimit, flow=flow)
+	actualTotalFolds: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWrite=None, CPUlimit=CPUlimit, flow=flow)
 	functionName: str = getattr(pinningFunctionEliminateFolds2上nDimensional, "__name__", pinningFunctionEliminateFolds2上nDimensional.__class__.__name__)
 
-	assertEqualTo(actualFoldsTotal, expectedFoldsTotal, 'eliminateFolds', functionName, oeisID, n, flow)
+	assertEqualTo(actualTotalFolds, expectedTotalFolds, 'eliminateFolds', functionName, oeisID, n, flow)
 
 # @pytest.mark.parametrize("n", [4, 5], ids=lambda n: f"2^{n}-dimensional")
 @pytest.mark.parametrize("n", [4], ids=lambda n: f"2^{n}-dimensional")
@@ -108,8 +108,8 @@ def test_eliminateFoldsPinPilesAtEnds(pileDepthPinningTests: int, CPUlimit: floa
 	"""
 	oeisID: OEISid = "A001417"
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
-	expectedFoldsTotal: int = getValuesKnown(oeisID)[n]
+	expectedTotalFolds: int = getValuesKnown(oeisID)[n]
 	statePinned: EliminationState = pinPilesAtEnds(EliminationState(mapShape), pileDepthPinningTests, CPUlimit=CPUlimit)
-	actualFoldsTotal: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWrite=None, CPUlimit=CPUlimit, flow=flow)
+	actualTotalFolds: int = eliminateFolds(mapShape=mapShape, state=statePinned, pathLikeWrite=None, CPUlimit=CPUlimit, flow=flow)
 
-	assertEqualTo(actualFoldsTotal, expectedFoldsTotal, 'eliminateFolds', oeisID, n, flow, pileDepthPinningTests=pileDepthPinningTests)
+	assertEqualTo(actualTotalFolds, expectedTotalFolds, 'eliminateFolds', oeisID, n, flow, pileDepthPinningTests=pileDepthPinningTests)

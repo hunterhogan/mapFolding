@@ -5,8 +5,8 @@ from mapFolding.dataBaskets import MapFoldingState
 def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
 	return state.leaf1ndex > 0
 
-def activeLeafGreaterThanLeavesTotal(state: MapFoldingState) -> bool:
-	return state.leaf1ndex > state.leavesTotal
+def activeLeafGreaterThanTotalLeaves(state: MapFoldingState) -> bool:
+	return state.leaf1ndex > state.totalLeaves
 
 def activeLeafIsTheFirstLeaf(state: MapFoldingState) -> bool:
 	return state.leaf1ndex <= 1
@@ -45,7 +45,7 @@ def initializeIndexMiniGap(state: MapFoldingState) -> MapFoldingState:
 	return state
 
 def initializeVariablesToFindGaps(state: MapFoldingState) -> MapFoldingState:
-	state.dimensionsUnconstrained = state.dimensionsTotal
+	state.dimensionsUnconstrained = state.totalDimensions
 	state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
 	state.次Dimension = 0
 	return state
@@ -89,7 +89,7 @@ def loopingLeavesConnectedToActiveLeaf(state: MapFoldingState) -> bool:
 	return state.leafConnectee != state.leaf1ndex
 
 def loopingThroughTheDimensions(state: MapFoldingState) -> bool:
-	return state.次Dimension < state.dimensionsTotal
+	return state.次Dimension < state.totalDimensions
 
 def loopingToActiveGapCeiling(state: MapFoldingState) -> bool:
 	return state.次MiniGap < state.gap1ndexCeiling
@@ -114,7 +114,7 @@ def undoLastLeafPlacement(state: MapFoldingState) -> MapFoldingState:
 def count(state: MapFoldingState) -> MapFoldingState:
 	while activeLeafGreaterThan0(state):
 		if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
-			if activeLeafGreaterThanLeavesTotal(state):
+			if activeLeafGreaterThanTotalLeaves(state):
 				state.groupsOfFolds += 1
 			else:
 				state = initializeVariablesToFindGaps(state)

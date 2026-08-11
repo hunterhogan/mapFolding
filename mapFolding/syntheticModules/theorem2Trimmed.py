@@ -6,13 +6,13 @@ from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFold
 def count(state: MapFoldingState) -> MapFoldingState:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
-            if state.leaf1ndex > state.leavesTotal:
+            if state.leaf1ndex > state.totalLeaves:
                 state.groupsOfFolds += 1
             else:
-                state.dimensionsUnconstrained = state.dimensionsTotal
+                state.dimensionsUnconstrained = state.totalDimensions
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
                 state.次Dimension = 0
-                while state.次Dimension < state.dimensionsTotal:
+                while state.次Dimension < state.totalDimensions:
                     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
                     if state.leafConnectee == state.leaf1ndex:
                         state.dimensionsUnconstrained -= 1

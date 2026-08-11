@@ -5,23 +5,23 @@ from __future__ import annotations
 
 from copy import deepcopy
 from mapFolding.dataBaskets import SymmetricFoldsState
-from mapFolding.theTypes import 形FoldsTotal
+from mapFolding.theTypes import 形TotalFolds
 from queue import Queue
 from threading import Lock, Thread
 
 boxOfThreads: list[Thread] = []
 queueFutures: Queue[SymmetricFoldsState] = Queue()
-symmetricFoldsTotal: int = 0
-LOCKsymmetricFoldsTotal = Lock()
+symmetricTotalFolds: int = 0
+LOCKsymmetricTotalFolds = Lock()
 # TODO There isn't a better way to do this?
 STOPsignal = object()
 # pyright: reportArgumentType=false
 
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> None:
-	global boxOfThreads, symmetricFoldsTotal, queueFutures
+	global boxOfThreads, symmetricTotalFolds, queueFutures
 	boxOfThreads = []
 	queueFutures = Queue()
-	symmetricFoldsTotal = symmetricFolds
+	symmetricTotalFolds = symmetricFolds
 
 	indexThread = 0
 	while indexThread < maxWorkers:
@@ -31,14 +31,14 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> No
 		indexThread += 1
 
 def _threadDoesSomething() -> None:
-	global symmetricFoldsTotal
+	global symmetricTotalFolds
 	while True:
 		state: SymmetricFoldsState = queueFutures.get()
 		if state is STOPsignal:
 			break
 		state = _filterAsymmetricFolds(state)
-		with LOCKsymmetricFoldsTotal:
-			symmetricFoldsTotal += state.symmetricFolds
+		with LOCKsymmetricTotalFolds:
+			symmetricTotalFolds += state.symmetricFolds
 
 def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 	"""Add real function during generation; the signature is here to preview its interactions with the module."""
@@ -47,9 +47,9 @@ def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
 	queueFutures.put_nowait(deepcopy(state))
 
-def getSymmetricFoldsTotal() -> 形FoldsTotal:
+def getSymmetricTotalFolds() -> 形TotalFolds:
 	for _thread in boxOfThreads:
 		queueFutures.put(STOPsignal)
 	for thread in boxOfThreads:
 		thread.join()
-	return symmetricFoldsTotal
+	return symmetricTotalFolds

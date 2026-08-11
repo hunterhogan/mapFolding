@@ -26,9 +26,9 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from __future__ import annotations
 
-from mapFolding.beDRY import getConnectionGraph, getLeavesTotal, makeDataContainer
+from mapFolding.beDRY import getConnectionGraph, getTotalLeaves, makeDataContainer
 from mapFolding.theTypes import (
-	形ArcCode, 形Array1DElephino, 形Array1DLeavesTotal, 形Array3DLeavesTotal, 形Crossings, 形Elephino, 形FoldsTotal, 形LeavesTotal)
+	形ArcCode, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Crossings, 形Elephino, 形TotalFolds, 形TotalLeaves)
 from typing import NamedTuple, TYPE_CHECKING
 import dataclasses
 import numpy
@@ -46,99 +46,99 @@ class MapFoldingState:
 
 	Attributes
 	----------
-	mapShape : tuple[形LeavesTotal, ...]
+	mapShape : tuple[形TotalLeaves, ...]
 		Dimensions of the map being analyzed for folding patterns.
-	groupsOfFolds : 形FoldsTotal = 形FoldsTotal(0)
-		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
+	groupsOfFolds : 形TotalFolds = 形TotalFolds(0)
+		Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings.
 	gap1ndex : 形Elephino = 形Elephino(0)
 		The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed.
 	gap1ndexCeiling : 形Elephino = 形Elephino(0)
 		The upper bound of `gap1ndex`.
-	次Dimension : 形LeavesTotal = 形LeavesTotal(0)
+	次Dimension : 形TotalLeaves = 形TotalLeaves(0)
 		The current 0-indexed position of the dimension during computation.
-	次Leaf : 形LeavesTotal = 形LeavesTotal(0)
+	次Leaf : 形TotalLeaves = 形TotalLeaves(0)
 		The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`.
 	次MiniGap : 形Elephino = 形Elephino(0)
 		The current 0-indexed position of a 'gap' in a loop during computation.
-	leaf1ndex : 形LeavesTotal = 形LeavesTotal(1)
+	leaf1ndex : 形TotalLeaves = 形TotalLeaves(1)
 		The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed.
-	leafConnectee : 形LeavesTotal = 形LeavesTotal(0)
+	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
 		Target leaf for connection operations.
-	dimensionsUnconstrained : 形LeavesTotal = None
+	dimensionsUnconstrained : 形TotalLeaves = None
 		Count of dimensions not subject to folding constraints.
-	countDimensionsGapped : 形Array1DLeavesTotal = None
+	countDimensionsGapped : 形Array1DTotalLeaves = None
 		Array tracking computed number of dimensions with gaps.
 	gapRangeStart : 形Array1DElephino = None
 		Array tracking computed starting positions of gap ranges.
-	gapsWhere : 形Array1DLeavesTotal = None
+	gapsWhere : 形Array1DTotalLeaves = None
 		Array indicating locations of gaps in the folding pattern.
-	leafAbove : 形Array1DLeavesTotal = None
+	leafAbove : 形Array1DTotalLeaves = None
 		Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation.
-	leafBelow : 形Array1DLeavesTotal = None
+	leafBelow : 形Array1DTotalLeaves = None
 		Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation.
-	leafComparison : 形Array1DLeavesTotal = None
+	leafComparison : 形Array1DTotalLeaves = None
 		Array for finding symmetric folds.
-	connectionGraph : 形Array3DLeavesTotal
+	connectionGraph : 形Array3DTotalLeaves
 		Unchanging array representing connections between all leaves.
-	dimensionsTotal : 形LeavesTotal
+	totalDimensions : 形TotalLeaves
 		Unchanging total number of dimensions in the map.
-	leavesTotal : 形LeavesTotal
+	totalLeaves : 形TotalLeaves
 		Unchanging total number of leaves in the map.
 
 	"""
 
-	mapShape: tuple[形LeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': '形LeavesTotal'})
+	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True, metadata={'elementConstructor': '形TotalLeaves'})
 	"""Dimensions of the map being analyzed for folding patterns."""
 
-	groupsOfFolds: 形FoldsTotal = dataclasses.field(default=形FoldsTotal(0), metadata={'theCountingIdentifier': True})
-	"""Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings."""
+	groupsOfFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
+	"""Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings."""
 
 	gap1ndex: 形Elephino = 形Elephino(0)
 	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: 形Elephino = 形Elephino(0)
 	"""The upper bound of `gap1ndex`."""
-	次Dimension: 形LeavesTotal = 形LeavesTotal(0)
+	次Dimension: 形TotalLeaves = 形TotalLeaves(0)
 	"""The current 0-indexed position of the dimension during computation."""
-	次Leaf: 形LeavesTotal = 形LeavesTotal(0)
+	次Leaf: 形TotalLeaves = 形TotalLeaves(0)
 	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
 	次MiniGap: 形Elephino = 形Elephino(0)
 	"""The current 0-indexed position of a 'gap' in a loop during computation."""
-	leaf1ndex: 形LeavesTotal = 形LeavesTotal(1)
+	leaf1ndex: 形TotalLeaves = 形TotalLeaves(1)
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
-	leafConnectee: 形LeavesTotal = 形LeavesTotal(0)
+	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
 	"""Target leaf for connection operations."""
 
-	dimensionsUnconstrained: 形LeavesTotal = dataclasses.field(default=None, init=True)
+	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
 	"""Count of dimensions not subject to folding constraints."""
 
-	countDimensionsGapped: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	countDimensionsGapped: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking computed number of dimensions with gaps."""
 	gapRangeStart: 形Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DElephino.__args__[1].__args__[0]})
 	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	gapsWhere: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	leafAbove: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	leafBelow: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
 
-	connectionGraph: 形Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': 形Array3DLeavesTotal.__args__[1].__args__[0]})
+	connectionGraph: 形Array3DTotalLeaves = dataclasses.field(init=False, metadata={'dtype': 形Array3DTotalLeaves.__args__[1].__args__[0]})
 	"""Unchanging array representing connections between all leaves."""
-	dimensionsTotal: 形LeavesTotal = dataclasses.field(init=False)
+	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	leavesTotal: 形LeavesTotal = dataclasses.field(init=False)
+	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 	@property
-	def foldsTotal(self) -> 形FoldsTotal:
+	def totalFolds(self) -> 形TotalFolds:
 		"""The total number of possible folding patterns for this map.
 
 		Returns
 		-------
-		foldsTotal : 形FoldsTotal
+		totalFolds : 形TotalFolds
 			The complete count of distinct folding patterns achievable with the current map configuration.
 
 		"""
-		return 形FoldsTotal(self.leavesTotal) * self.groupsOfFolds
+		return 形TotalFolds(self.totalLeaves) * self.groupsOfFolds
 
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value.
@@ -146,28 +146,28 @@ class MapFoldingState:
 		Notes
 		-----
 		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
-		dimensions. `dimensionsTotal`, `leavesTotal`, and `connectionGraph` cannot be set: they are calculated.
+		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
 
 		"""
-		self.dimensionsTotal = 形LeavesTotal(len(self.mapShape))
-		self.leavesTotal = 形LeavesTotal(getLeavesTotal(self.mapShape))
+		self.totalDimensions = 形TotalLeaves(len(self.mapShape))
+		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
 
-		leavesTotalAsInt = int(self.leavesTotal)
+		totalLeavesAsInt = int(self.totalLeaves)
 
-		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
 		if self.dimensionsUnconstrained is None:
-			self.dimensionsUnconstrained = 形LeavesTotal(int(self.dimensionsTotal))
+			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
 		if self.gapsWhere is None:
-			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
 		if self.countDimensionsGapped is None:
-			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
+			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
 		if self.gapRangeStart is None:
-			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
+			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
 		if self.leafAbove is None:
-			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
+			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
 		if self.leafBelow is None:
-			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 
 @dataclasses.dataclass(slots=True)
 class SymmetricFoldsState:
@@ -175,91 +175,91 @@ class SymmetricFoldsState:
 
 	Attributes
 	----------
-	mapShape : tuple[形LeavesTotal, ...]
+	mapShape : tuple[形TotalLeaves, ...]
 		Dimensions of the map being analyzed for folding patterns.
-	groupsOfFolds : 形FoldsTotal = 形FoldsTotal(0)
-		Current count of distinct folding pattern groups: each group has `leavesTotal`-many foldings.
+	groupsOfFolds : 形TotalFolds = 形TotalFolds(0)
+		Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings.
 	gap1ndex : 形Elephino = 形Elephino(0)
 		The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed.
 	gap1ndexCeiling : 形Elephino = 形Elephino(0)
 		The upper bound of `gap1ndex`.
-	次Dimension : 形LeavesTotal = 形LeavesTotal(0)
+	次Dimension : 形TotalLeaves = 形TotalLeaves(0)
 		The current 0-indexed position of the dimension during computation.
-	次Leaf : 形LeavesTotal = 形LeavesTotal(0)
+	次Leaf : 形TotalLeaves = 形TotalLeaves(0)
 		The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`.
 	次MiniGap : 形Elephino = 形Elephino(0)
 		The current 0-indexed position of a 'gap' in a loop during computation.
-	leaf1ndex : 形LeavesTotal = 形LeavesTotal(1)
+	leaf1ndex : 形TotalLeaves = 形TotalLeaves(1)
 		The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed.
-	leafConnectee : 形LeavesTotal = 形LeavesTotal(0)
+	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
 		Target leaf for connection operations.
-	dimensionsUnconstrained : 形LeavesTotal = None
+	dimensionsUnconstrained : 形TotalLeaves = None
 		Count of dimensions not subject to folding constraints.
-	countDimensionsGapped : 形Array1DLeavesTotal = None
+	countDimensionsGapped : 形Array1DTotalLeaves = None
 		Array tracking computed number of dimensions with gaps.
 	gapRangeStart : 形Array1DElephino = None
 		Array tracking computed starting positions of gap ranges.
-	gapsWhere : 形Array1DLeavesTotal = None
+	gapsWhere : 形Array1DTotalLeaves = None
 		Array indicating locations of gaps in the folding pattern.
-	leafAbove : 形Array1DLeavesTotal = None
+	leafAbove : 形Array1DTotalLeaves = None
 		Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation.
-	leafBelow : 形Array1DLeavesTotal = None
+	leafBelow : 形Array1DTotalLeaves = None
 		Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation.
-	leafComparison : 形Array1DLeavesTotal = None
+	leafComparison : 形Array1DTotalLeaves = None
 		Array for finding symmetric folds.
-	connectionGraph : 形Array3DLeavesTotal
+	connectionGraph : 形Array3DTotalLeaves
 		Unchanging array representing connections between all leaves.
-	dimensionsTotal : 形LeavesTotal
+	totalDimensions : 形TotalLeaves
 		Unchanging total number of dimensions in the map.
-	leavesTotal : 形LeavesTotal
+	totalLeaves : 形TotalLeaves
 		Unchanging total number of leaves in the map.
 
 	"""
 
-	mapShape: tuple[形LeavesTotal, ...] = dataclasses.field(init=True, metadata={'elementConstructor': '形LeavesTotal'})
+	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True, metadata={'elementConstructor': '形TotalLeaves'})
 	"""Dimensions of the map being analyzed for folding patterns."""
 
-	symmetricFolds: 形FoldsTotal = dataclasses.field(default=形FoldsTotal(0), metadata={'theCountingIdentifier': True})
+	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
 	"""Current count of symmetric folds."""
 
 	gap1ndex: 形Elephino = 形Elephino(0)
 	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: 形Elephino = 形Elephino(0)
 	"""The upper bound of `gap1ndex`."""
-	次Dimension: 形LeavesTotal = 形LeavesTotal(0)
+	次Dimension: 形TotalLeaves = 形TotalLeaves(0)
 	"""The current 0-indexed position of the dimension during computation."""
-	次Leaf: 形LeavesTotal = 形LeavesTotal(0)
+	次Leaf: 形TotalLeaves = 形TotalLeaves(0)
 	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
 	次MiniGap: 形Elephino = 形Elephino(0)
 	"""The current 0-indexed position of a 'gap' in a loop during computation."""
-	leaf1ndex: 形LeavesTotal = 形LeavesTotal(1)
+	leaf1ndex: 形TotalLeaves = 形TotalLeaves(1)
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
-	leafConnectee: 形LeavesTotal = 形LeavesTotal(0)
+	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
 	"""Target leaf for connection operations."""
 
-	dimensionsUnconstrained: 形LeavesTotal = dataclasses.field(default=None, init=True)
+	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
 	"""Count of dimensions not subject to folding constraints."""
 
-	countDimensionsGapped: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	countDimensionsGapped: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking computed number of dimensions with gaps."""
 	gapRangeStart: 形Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DElephino.__args__[1].__args__[0]})
 	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	gapsWhere: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	leafAbove: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	leafBelow: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
-	leafComparison: 形Array1DLeavesTotal = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DLeavesTotal.__args__[1].__args__[0]})
+	leafComparison: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array for finding symmetric folds."""
 
-	connectionGraph: 形Array3DLeavesTotal = dataclasses.field(init=False, metadata={'dtype': 形Array3DLeavesTotal.__args__[1].__args__[0]})
+	connectionGraph: 形Array3DTotalLeaves = dataclasses.field(init=False, metadata={'dtype': 形Array3DTotalLeaves.__args__[1].__args__[0]})
 	"""Unchanging array representing connections between all leaves."""
-	dimensionsTotal: 形LeavesTotal = dataclasses.field(init=False)
+	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
 	indices: list[list[tuple[int, int]]] = dataclasses.field(init=False)
 	"""Precomputed index pairs for symmetric fold checking."""
-	leavesTotal: 形LeavesTotal = dataclasses.field(init=False)
+	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
 
 	def __post_init__(self) -> None:
@@ -268,31 +268,31 @@ class SymmetricFoldsState:
 		Notes
 		-----
 		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
-		dimensions. `dimensionsTotal`, `leavesTotal`, and `connectionGraph` cannot be set: they are calculated.
+		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
 
 		"""
-		self.dimensionsTotal = 形LeavesTotal(len(self.mapShape))
-		self.leavesTotal = 形LeavesTotal(getLeavesTotal(self.mapShape))
+		self.totalDimensions = 形TotalLeaves(len(self.mapShape))
+		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
 
-		leavesTotalAsInt = int(self.leavesTotal)
-		self.connectionGraph = getConnectionGraph(self.mapShape, leavesTotalAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+		totalLeavesAsInt = int(self.totalLeaves)
+		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		self.indices = [[((次 + folding) % (self.leavesTotal + 1), (-2 - 次 + folding) % (self.leavesTotal + 1)) for 次 in range(self.leavesTotal // 2)] for folding in range(self.leavesTotal + 1)]
+		self.indices = [[((次 + folding) % (self.totalLeaves + 1), (-2 - 次 + folding) % (self.totalLeaves + 1)) for 次 in range(self.totalLeaves // 2)] for folding in range(self.totalLeaves + 1)]
 
 		if self.dimensionsUnconstrained is None:
-			self.dimensionsUnconstrained = 形LeavesTotal(int(self.dimensionsTotal))
+			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
 		if self.gapsWhere is None:
-			self.gapsWhere = makeDataContainer(leavesTotalAsInt * leavesTotalAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
 		if self.countDimensionsGapped is None:
-			self.countDimensionsGapped = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
+			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
 		if self.gapRangeStart is None:
-			self.gapRangeStart = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
+			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
 		if self.leafAbove is None:
-			self.leafAbove = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
+			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
 		if self.leafBelow is None:
-			self.leafBelow = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 		if self.leafComparison is None:
-			self.leafComparison = makeDataContainer(leavesTotalAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
+			self.leafComparison = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
 
 @dataclasses.dataclass
 class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + dataclassIdentifier`.
@@ -313,23 +313,23 @@ class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `d
 
 	Attributes
 	----------
-	taskDivisions : 形LeavesTotal = 形LeavesTotal(0)
+	taskDivisions : 形TotalLeaves = 形TotalLeaves(0)
 		Number of tasks into which the computation is divided.
-	taskIndex : 形LeavesTotal = 形LeavesTotal(0)
+	taskIndex : 形TotalLeaves = 形TotalLeaves(0)
 		Current task identifier when processing in task division mode.
 
 	"""
 
-	taskDivisions: 形LeavesTotal = 形LeavesTotal(0)
+	taskDivisions: 形TotalLeaves = 形TotalLeaves(0)
 	"""
 	Number of tasks into which to divide the computation.
 
-	If this value exceeds `leavesTotal`, the computation will produce incorrect
+	If this value exceeds `totalLeaves`, the computation will produce incorrect
 	results. When set to 0 (default), the value is automatically set to
-	`leavesTotal` during initialization, providing optimal task granularity.
+	`totalLeaves` during initialization, providing optimal task granularity.
 	"""
 
-	task次: 形LeavesTotal = 形LeavesTotal(0)
+	task次: 形TotalLeaves = 形TotalLeaves(0)
 	"""
 	Index of the current task when using task divisions.
 
@@ -347,12 +347,12 @@ class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `d
 		This method calls the parent initialization to set up all base
 		computational arrays, then configures the task division
 		parameters. If `taskDivisions` is 0, it automatically sets the
-		value to `leavesTotal` for optimal parallelization.
+		value to `totalLeaves` for optimal parallelization.
 
 		"""
 		super().__post_init__()
 		if self.taskDivisions == 0:
-			self.taskDivisions = 形LeavesTotal(int(self.leavesTotal))
+			self.taskDivisions = 形TotalLeaves(int(self.totalLeaves))
 
 @dataclasses.dataclass(slots=True)
 class MatrixMeandersState:

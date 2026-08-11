@@ -9,7 +9,7 @@ from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getChoicesLeaf, getIteratorOfLeaves, getLookupDomainsLeaves
 from mapFolding._e._2上nDimensional import (
-	dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
+	getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 工dimension首零, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding.kitFilesystem import getDataFrameFoldings
@@ -113,39 +113,39 @@ pp3  = (3, 5, 9, 17, 33)
 
 		ss = state.mapShapeProductsSums[dd]
 		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.mapShapeProductsSums[1:dd]))
-		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.mapShapeProductsSums[dd + 1: state.dimensionsTotal]))
+		# pileRange.extend(map(partial(iadd, leafMinimum - ss), state.mapShapeProductsSums[dd + 1: state.totalDimensions]))
 
-		if dd < dimensionNearest首(pile):
+		if dd < 工dimension首零(pile):
 			dd += 1
 
 			ss = state.mapShapeProducts[dd]
 			pileRange.extend(map(partial(isub, leafMinimum + ss), state.mapShapeProductsSums[1:dd]))
-			pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProductsSums[dd + 1: state.dimensionsTotal]))
+			pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProductsSums[dd + 1: state.totalDimensions]))
 
 	if isOdd吗(pile):
 		dd = pileDimension
 
 		ss = state.mapShapeProductsSums[dd]
 		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.totalDimensions]))
 
 		dd += 1
 
 		ss = state.mapShapeProductsSums[dd]
 		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.totalDimensions]))
 
 		dd += 1
 
 		ss = state.mapShapeProductsSums[dd]
 		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.totalDimensions]))
 
 		dd += 1
 
 		ss = state.mapShapeProductsSums[dd]
 		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[1:dd]))
-		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
+		pileRange.extend(map(partial(iadd, leafMinimum + ss), state.mapShapeProducts[dd + 1: state.totalDimensions]))
 
 	print(pile, pileDimension)
 	print(sorted(set(pileRange)))
@@ -167,10 +167,10 @@ pp3  = (3, 5, 9, 17, 33)
 		# Yes, sort of. `Z0Z_alfaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
-			return list(map(partial(add, dimensionOrigin + 2), state.mapShapeProductsSums[1: dimensionNearest首(dimensionOrigin)]))
+			return list(map(partial(add, dimensionOrigin + 2), state.mapShapeProductsSums[1: 工dimension首零(dimensionOrigin)]))
 
 		def Z0Z_alfaBeta(state: EliminationState, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
-			return list(flatten(map(partial(intraDimensionalLeaves, state), state.mapShapeProducts[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+			return list(flatten(map(partial(intraDimensionalLeaves, state), state.mapShapeProducts[2 + alfaStart: (state.totalDimensions - 1) + betaStop: charlieStep])))
 
 		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
@@ -184,22 +184,22 @@ pp3  = (3, 5, 9, 17, 33)
 
 			# 32 < even leaves
 			for yy in range(1):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.mapShapeProducts[yy])
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.totalDimensions), map(partial(mul, state.mapShapeProducts[yy])
 					, Z0Z_alfaBeta(state
-						, alfaStart=yy + (state.dimensionsTotal - 2 - dimensionNearest首(pile))
+						, alfaStart=yy + (state.totalDimensions - 2 - 工dimension首零(pile))
 						, betaStop=-(yy)
 					))))
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
 			for yy in range(1, 3):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(mul, state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.totalDimensions), map(partial(mul, state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
-			pileRange.extend(state.mapShapeProducts[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)])
+			pileRange.extend(state.mapShapeProducts[1 + ((零) + 首零(state.totalDimensions) < pile):工dimension首零(pile + 1)])
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			# pile5 needs a higher start.
-			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), state.mapShapeProducts[0:state.dimensionsTotal]))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.totalDimensions), state.mapShapeProducts[0:state.totalDimensions]))
 
 			return tuple(sorted(pileRange))
 
@@ -218,27 +218,27 @@ pp3  = (3, 5, 9, 17, 33)
 	)
 
 			# for yy in range(1):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.mapShapeProducts[yy])
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.totalDimensions), map(partial(mul, state.mapShapeProducts[yy])
 			# 		, Z0Z_alfaBeta(state
-			# 			, alfaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
+			# 			, alfaStart=yy+(state.totalDimensions - 2 - 工dimension首零(pile))
 			# 			, betaStop=-(yy)
 			# 		))))
 			# for yy in range(1,3):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(partial(mul, state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.totalDimensions), map(partial(mul, state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
-			pileRange.extend(map(partial(add, 1), state.mapShapeProducts[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))
+			pileRange.extend(map(partial(add, 1), state.mapShapeProducts[1 + ((零) + 首零(state.totalDimensions) < pile):工dimension首零(pile + 1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
-			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(partial(add, 1), state.mapShapeProducts[1:state.dimensionsTotal])))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.totalDimensions), map(partial(add, 1), state.mapShapeProducts[1:state.totalDimensions])))
 
 			return tuple(sorted(pileRange))
 
-		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
+		for pile in range(首一(state.totalDimensions), 首零一(state.totalDimensions), 2):
 			print(pile, (real := tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))) == (computed := Z0Z_getPileRangeEven(state, pile)), end=': ')
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
-		for pile in range((零) + 首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
+		for pile in range((零) + 首二(state.totalDimensions), 首零一(state.totalDimensions), 2):
 			print(pile, (real := tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))) == (computed := Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)
@@ -261,7 +261,7 @@ pp3  = (3, 5, 9, 17, 33)
 		domains = getLookupDomainsLeaves(state)
 		pileRange31 = frozenset(getIteratorOfLeaves(getChoicesLeaf(state, 31)))
 
-		for pile in range(state.leavesTotal):
+		for pile in range(state.totalLeaves):
 			continue
 			print(pile, set(getIteratorOfLeaves(getChoicesLeaf(state, pile))).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
 

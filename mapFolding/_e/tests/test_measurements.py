@@ -12,38 +12,38 @@ Multi-argument functions use curated static cases plus invalid-input coverage.
 from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import (
-	dimensionFourthNearest首, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首,
-	dimensionThirdNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, leafInSubHyperplane, ptount)
+	invertLeafIn2上nDimensions, leafInSubHyperplane, ptount, 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零,
+	工totalDimensionsOdd, 工totalDimensionsTail)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples.measurementData import (
-	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionsConsecutiveAtTail, dataDimensionSecondNearest, dataDimensionThirdNearest,
-	dataHowMany0coordinatesAtTail, dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount)
+	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionSecondNearest, dataDimensionThirdNearest, dataHowMany0coordinatesAtTail,
+	dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount, dataTotalDimensionsTail)
 from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import CallableFunction
 
-@pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', dataDimensionsConsecutiveAtTail)
-def test_dimensionsConsecutiveAtTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int) -> None:
+@pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', dataTotalDimensionsTail)
+def test_工totalDimensionsTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int) -> None:
 	state: EliminationState = EliminationState(mapShape)
-	assertEqualTo(dimensionsConsecutiveAtTail(state, integerNonnegative), expectedResult, 'dimensionsConsecutiveAtTail', state, integerNonnegative)
+	assertEqualTo(工totalDimensionsTail(state, integerNonnegative), expectedResult, '工totalDimensionsTail', state, integerNonnegative)
 
 @pytest.mark.parametrize('functionTarget, inputValue, expectedResult', [
-	*[(dimensionNearest首, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionNearest.items()]
-	, *[(dimensionSecondNearest首, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionSecondNearest.items()]
-	, *[(dimensionThirdNearest首, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionThirdNearest.items()]
-	, *[(dimensionFourthNearest首, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionFourthNearest.items()]
-	, *[(dimensionNearestTail, inputValue, expectedResult) for inputValue, expectedResult in dataHowMany0coordinatesAtTail.items()]
-	, (howManyDimensionsHaveOddParity, 45, 3)
+	*[(工dimension首零, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionNearest.items()]
+	, *[(工dimension首一, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionSecondNearest.items()]
+	, *[(工dimension首二, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionThirdNearest.items()]
+	, *[(工dimension首三, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionFourthNearest.items()]
+	, *[(工dimensionTail, inputValue, expectedResult) for inputValue, expectedResult in dataHowMany0coordinatesAtTail.items()]
+	, (工totalDimensionsOdd, 45, 3)
 ])
 def test_integerNonnegativeFunctions(functionTarget: CallableFunction[[int], int | None], inputValue: int, expectedResult: int | None) -> None:
 	assertEqualTo(functionTarget(inputValue), expectedResult, functionTarget.__name__, inputValue)
 
-@pytest.mark.parametrize('dimensionsTotal, integerNonnegative, expectedResult', dataInvertLeafIn2上nDimensions)
-def test_invertLeafIn2上nDimensions(dimensionsTotal: int, integerNonnegative: int, expectedResult: int) -> None:
-	assertEqualTo(invertLeafIn2上nDimensions(dimensionsTotal, integerNonnegative), expectedResult, 'invertLeafIn2上nDimensions', dimensionsTotal, integerNonnegative)
+@pytest.mark.parametrize('totalDimensions, integerNonnegative, expectedResult', dataInvertLeafIn2上nDimensions)
+def test_invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int, expectedResult: int) -> None:
+	assertEqualTo(invertLeafIn2上nDimensions(totalDimensions, integerNonnegative), expectedResult, 'invertLeafIn2上nDimensions', totalDimensions, integerNonnegative)
 
 @pytest.mark.parametrize('notLeafOrigin, expectedResult', dataLeafInSubHyperplane.items())
 def test_leafInSubHyperplane(notLeafOrigin: int, expectedResult: int) -> None:

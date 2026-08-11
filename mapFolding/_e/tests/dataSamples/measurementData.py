@@ -792,7 +792,7 @@ dataDimensionFourthNearest: dict[int, int | None] = {
     86: 1,
 }
 
-dataDimensionsConsecutiveAtTail: tuple[tuple[tuple[int, ...], int, int], ...] = (
+dataTotalDimensionsTail: tuple[tuple[tuple[int, ...], int, int], ...] = (
     ((2, 2, 2), 0, 0),
     ((2, 2, 2), 1, 1),
     ((2, 2, 2), 3, 2),
@@ -1329,7 +1329,7 @@ dataHowMany0coordinatesAtTail: dict[int, int] = {
     256: 8,
 }
 
-dataHowManyDimensionsHaveOddParity: dict[int, int] = {
+data工totalDimensionsOdd: dict[int, int] = {
     0: 0,
     1: 0,
     2: 0,

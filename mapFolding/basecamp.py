@@ -52,7 +52,7 @@ References
 from __future__ import annotations
 
 from mapFolding.algorithms.matrixMeandersShare import makeDictionaryMeanders
-from mapFolding.beDRY import defineProcessorLimit, getLeavesTotal, getTaskDivisions, mapShapeIs2上nDimensions, validateMapShape
+from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import MapFoldingState, MatrixMeandersState, ParallelMapFoldingState, SymmetricFoldsState
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
@@ -71,7 +71,7 @@ def countFolds(mapShape: Sequence[int]
 				, *
 				, CPUlimit: Limitation = None
 				, computationDivisions: int | str | None = None
-				, suffix: str = ".foldsTotal"
+				, suffix: str = ".totalFolds"
 				) -> int:
 	"""
 	Count the number of distinct ways to fold a map.
@@ -93,7 +93,7 @@ def countFolds(mapShape: Sequence[int]
 		- `int`: into how many tasks `countFolds` will divide the computation. The values 0 or 1 are
 		identical to `None`. It is mathematically impossible to divide the computation into more tasks
 		than the map's total leaves.
-		- 'maximum': divides the computation into `leavesTotal`-many tasks.
+		- 'maximum': divides the computation into `totalLeaves`-many tasks.
 		- 'cpu': divides the computation into the number of available CPUs.
 	CPUlimit : bool | float | int | None = None
 		If relevant, whether and how to limit the number of processors `countFolds` will use.
@@ -114,7 +114,7 @@ def countFolds(mapShape: Sequence[int]
 
 	Returns
 	-------
-	foldsTotal : int
+	totalFolds : int
 		Number of distinct ways to fold a map of the given dimensions.
 
 	Using `computationDivisions`
@@ -125,12 +125,12 @@ def countFolds(mapShape: Sequence[int]
 	by every task must be done by each task. In some cases, you will increase the total computation
 	time, but if you improve the computation time, it will only change by -10 to -50% depending on (at
 	the very least) the ratio of the map dimensions, the number of leaves, and the ratio of
-	`leavesTotal` to logicalCores.
+	`totalLeaves` to logicalCores.
 
 	If an undivided computation would take 10 hours on your computer, for example, the computation
 	will take at least 5 hours, you might reduce the time to 9 hours, but most of the time, you will
-	increase the computation time. If logicalCores >= `leavesTotal`, the computation will probably be
-	faster. If logicalCores <= 2 * `leavesTotal`, it will almost certainly be slower.
+	increase the computation time. If logicalCores >= `totalLeaves`, the computation will probably be
+	faster. If logicalCores <= 2 * `totalLeaves`, it will almost certainly be slower.
 	"""
 	mapShape = validateMapShape(mapShape)
 
@@ -138,7 +138,7 @@ def countFolds(mapShape: Sequence[int]
 
 	if computationDivisions:
 		concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
-		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, getLeavesTotal(mapShape))
+		taskDivisions: int = getTaskDivisions(computationDivisions, concurrencyLimit, getTotalLeaves(mapShape))
 	else:
 		concurrencyLimit = 1
 		taskDivisions = 0
@@ -146,9 +146,9 @@ def countFolds(mapShape: Sequence[int]
 #-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWrite is None:
-		pathFilenameFoldsTotal: Path | None = None
+		pathFilenameTotalFolds: Path | None = None
 	else:
-		pathFilenameFoldsTotal = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
+		pathFilenameTotalFolds = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
 
 #-------- Algorithm version -----------------------------------------------------
 
@@ -163,14 +163,14 @@ def countFolds(mapShape: Sequence[int]
 		| A001418 | 1      | (1, 1)                        |                                      |
 		| A195646 | 0      | Let p ∈ {3}. ∴ (p,) * 0 or () | a(1) = A000136(3), a(2) = A001418(3) |
 		"""
-		foldsTotal = 1
+		totalFolds = 1
 	elif 1 < taskDivisions:
 		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful
 
 		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
-		# `boxOfStatesParallel` exists so you can research the parallel computation.
-		foldsTotal, _listStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
+		# TODO Figure out a better place to document this. `boxOfStatesParallel` exists so you can research the parallel computation.
+		totalFolds, _boxOfStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
 	else:
 		if flow == 'daoOfMapFolding':
@@ -194,16 +194,16 @@ def countFolds(mapShape: Sequence[int]
 
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 		mapFoldingState = doTheNeedful(mapFoldingState)
-		foldsTotal = mapFoldingState.foldsTotal
+		totalFolds = mapFoldingState.totalFolds
 
 #-------- Follow memorialization instructions ---------------------------------------------
 
-	if pathFilenameFoldsTotal is not None:
-		saveTotal(pathFilenameFoldsTotal, foldsTotal)
+	if pathFilenameTotalFolds is not None:
+		saveTotal(pathFilenameTotalFolds, totalFolds)
 
-	return foldsTotal
+	return totalFolds
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".foldsTotal") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".totalFolds") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -226,7 +226,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 		The processor limit for the `'asynchronous'` method. `None`, `False`, and `0` allow all
 		available processors; `True` limits the calculation to one processor. An `int` sets or reserves
 		a number of processors, and a `float` sets or reserves a fraction of available processors.
-	suffix : str = ".foldsTotal"
+	suffix : str = ".totalFolds"
 		The filename suffix for the saved count.
 
 	Returns
@@ -244,15 +244,15 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 #-------- memorialization instructions ---------------------------------------------
 
 	if pathLikeWrite is None:
-		pathFilenameFoldsTotal: Path | None = None
+		pathFilenameTotalFolds: Path | None = None
 	else:
-		pathFilenameFoldsTotal = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
+		pathFilenameTotalFolds = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
 
 #-------- Algorithm version -----------------------------------------------------
 
 	if flow == 'asynchronous':
 		from mapFolding.syntheticModules.foldsSymmetric.asynchronous import doTheNeedful
-		foldsTotal = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
+		totalFolds = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
 	else:
 		match flow:
 			case 'theorem2':
@@ -267,14 +267,14 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
 
 		symmetricState = doTheNeedful(symmetricState)
-		foldsTotal = symmetricState.symmetricFolds
+		totalFolds = symmetricState.symmetricFolds
 
 #-------- Follow memorialization instructions ---------------------------------------------
 
-	if pathFilenameFoldsTotal is not None:
-		saveTotal(pathFilenameFoldsTotal, foldsTotal)
+	if pathFilenameTotalFolds is not None:
+		saveTotal(pathFilenameTotalFolds, totalFolds)
 
-	return foldsTotal
+	return totalFolds
 
 #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 # ruff: ignore[unused-function-argument]

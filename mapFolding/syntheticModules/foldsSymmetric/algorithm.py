@@ -6,9 +6,9 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.次Leaf = 1
     state.leafComparison[0] = 1
     state.leafConnectee = 1
-    while state.leafConnectee < state.leavesTotal + 1:
+    while state.leafConnectee < state.totalLeaves + 1:
         state.次MiniGap = state.leafBelow[state.次Leaf]
-        state.leafComparison[state.leafConnectee] = (state.leavesTotal + state.次MiniGap - state.次Leaf) % state.leavesTotal
+        state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
         state.次Leaf = state.次MiniGap
         state.leafConnectee += 1
     for boxOfTuples in state.indices:
@@ -23,8 +23,8 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:
     return state.leaf1ndex > 0
 
-def activeLeafGreaterThanLeavesTotal(state: SymmetricFoldsState) -> bool:
-    return state.leaf1ndex > state.leavesTotal
+def activeLeafGreaterThanTotalLeaves(state: SymmetricFoldsState) -> bool:
+    return state.leaf1ndex > state.totalLeaves
 
 def activeLeafIsTheFirstLeaf(state: SymmetricFoldsState) -> bool:
     return state.leaf1ndex <= 1
@@ -63,7 +63,7 @@ def initializeIndexMiniGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
     return state
 
 def initializeVariablesToFindGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
-    state.dimensionsUnconstrained = state.dimensionsTotal
+    state.dimensionsUnconstrained = state.totalDimensions
     state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
     state.次Dimension = 0
     return state
@@ -107,7 +107,7 @@ def loopingLeavesConnectedToActiveLeaf(state: SymmetricFoldsState) -> bool:
     return state.leafConnectee != state.leaf1ndex
 
 def loopingThroughTheDimensions(state: SymmetricFoldsState) -> bool:
-    return state.次Dimension < state.dimensionsTotal
+    return state.次Dimension < state.totalDimensions
 
 def loopingToActiveGapCeiling(state: SymmetricFoldsState) -> bool:
     return state.次MiniGap < state.gap1ndexCeiling
@@ -132,7 +132,7 @@ def undoLastLeafPlacement(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while activeLeafGreaterThan0(state):
         if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
-            if activeLeafGreaterThanLeavesTotal(state):
+            if activeLeafGreaterThanTotalLeaves(state):
                 state = filterAsymmetricFolds(state)
             else:
                 state = initializeVariablesToFindGaps(state)

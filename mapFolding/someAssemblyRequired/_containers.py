@@ -239,9 +239,9 @@ class DeReConstructField2ast:
 			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
 			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
 			dtype_asnameName: ast.Name = self.astAnnotation
-			if dtype_asnameName.id == '形Array3DLeavesTotal':
+			if dtype_asnameName.id == '形Array3DTotalLeaves':
 				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
-			if dtype_asnameName.id == '形Array2DLeavesTotal':
+			if dtype_asnameName.id == '形Array2DTotalLeaves':
 				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8')]))
 			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
 			constructor = 'array'

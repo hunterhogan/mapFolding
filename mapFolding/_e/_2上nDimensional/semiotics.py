@@ -73,151 +73,151 @@ def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: in
 #-------- Access the dimension coordinates encoded in a number relative to the number's most significant digit -------
 
 @cache
-def 首零(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` (`dimensionIndex = 0`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` (`dimensionIndex = 0`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, index zero
 	- shǒu líng
 	"""
-	return int('1' + '0' * (dimensionsTotal - 1), _dimensionLength)
+	return int('1' + '0' * (totalDimensions - 1), _dimensionLength)
 
 @cache
-def 首零一(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` and `一` (`dimensionIndex = 0` and `dimensionIndex = 1`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零一(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` and `一` (`dimensionIndex = 0` and `dimensionIndex = 1`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-one
 	- shǒu líng yī
 	"""
-	return int('11' + '0' * (dimensionsTotal - 2), _dimensionLength)
+	return int('11' + '0' * (totalDimensions - 2), _dimensionLength)
 
 @cache
-def 首零一二(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, and `二` (`dimensionIndex = 0`, `dimensionIndex = 1`, and `dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零一二(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, and `二` (`dimensionIndex = 0`, `dimensionIndex = 1`, and `dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-one-two
 	- shǒu líng yī èr
 	"""
-	return int('111' + '0' * (dimensionsTotal - 3), _dimensionLength)
+	return int('111' + '0' * (totalDimensions - 3), _dimensionLength)
 
 @cache
-def 首零二(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` and `二` (`dimensionIndex = 0` and `dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零二(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` and `二` (`dimensionIndex = 0` and `dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-two
 	- shǒu líng èr
 	"""
-	return int('101' + '0' * (dimensionsTotal - 3), _dimensionLength)
+	return int('101' + '0' * (totalDimensions - 3), _dimensionLength)
 
 @cache
-def 首一(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一` (`dimensionIndex = 1`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首一(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一` (`dimensionIndex = 1`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, index one
 	- shǒu yī
 	"""
-	return int('01' + '0' * (dimensionsTotal - 2), _dimensionLength)
+	return int('01' + '0' * (totalDimensions - 2), _dimensionLength)
 
 @cache
-def 首一二(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一` and `二` (`dimensionIndex = 1` and `dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首一二(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一` and `二` (`dimensionIndex = 1` and `dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices one-two
 	- shǒu yī èr
 	"""
-	return int('011' + '0' * (dimensionsTotal - 3), _dimensionLength)
+	return int('011' + '0' * (totalDimensions - 3), _dimensionLength)
 
 @cache
-def 首二(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `二` (`dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首二(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `二` (`dimensionIndex = 2`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, index two
 	- shǒu èr
 	"""
-	return int('001' + '0' * (dimensionsTotal - 3), _dimensionLength)
+	return int('001' + '0' * (totalDimensions - 3), _dimensionLength)
 
 @cache
-def 首三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `三` (`dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `三` (`dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, index three
 	- shǒu sān
 	"""
-	return int('0001' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('0001' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首零一二三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, `二`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 1`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零一二三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, `二`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 1`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-one-two-three
 	- shǒu líng yī èr sān
 	"""
-	return int('1111' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('1111' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首零一三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 1`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零一三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `一`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 1`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-one-three
 	- shǒu líng yī sān
 	"""
-	return int('1101' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('1101' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首零二三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `二`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零二三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零`, `二`, and `三` (`dimensionIndex = 0`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-two-three
 	- shǒu líng èr sān
 	"""
-	return int('1011' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('1011' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首零三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` and `三` (`dimensionIndex = 0` and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首零三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `零` and `三` (`dimensionIndex = 0` and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices zero-three
 	- shǒu líng sān
 	"""
-	return int('1001' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('1001' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首一二三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一`, `二`, and `三` (`dimensionIndex = 1`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首一二三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一`, `二`, and `三` (`dimensionIndex = 1`, `dimensionIndex = 2`, and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices one-two-three
 	- shǒu yī èr sān
 	"""
-	return int('0111' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('0111' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首一三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一` and `三` (`dimensionIndex = 1` and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首一三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `一` and `三` (`dimensionIndex = 1` and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices one-three
 	- shǒu yī sān
 	"""
-	return int('0101' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('0101' + '0' * (totalDimensions - 4), _dimensionLength)
 
 @cache
-def 首二三(dimensionsTotal: int, /) -> int:
-	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `二` and `三` (`dimensionIndex = 2` and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `dimensionsTotal`.
+def 首二三(totalDimensions: int, /) -> int:
+	"""Enumerate each `DimensionIndex` starting from the head `首`, assign `1` to `二` and `三` (`dimensionIndex = 2` and `dimensionIndex = 3`), and assign `0` to each other `DimensionIndex` in `totalDimensions`.
 
 	Read as (any of):
 	- from the head, indices two-three
 	- shǒu èr sān
 	"""
-	return int('0011' + '0' * (dimensionsTotal - 4), _dimensionLength)
+	return int('0011' + '0' * (totalDimensions - 4), _dimensionLength)

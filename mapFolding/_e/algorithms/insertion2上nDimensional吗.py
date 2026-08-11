@@ -34,7 +34,7 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 	leaf一: Leaf = folding[-1]
 	domain一: Iterable[Pile] = getDomainLeaf(state, leaf一)
 	leaves: tuple[Leaf, ...] = tuple(reversed(folding[2:-1]))
-	antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, leaves)
+	antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, leaves)
 	boxOfPermutationSpace: list[PermutationSpace] = []
 	for pile in tqdm(domain一, total=len(domain一), disable=False, position=position, leave=False, desc=f"for pile in domain一 of folding {folding[2:6]}"):
 		boxOfPermutationSpace.extend(state.boxOfPermutationSpace)
@@ -74,7 +74,7 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 
 def makeAlbum2上nDimensional吗(state: EliminationState, workersMaximum: int) -> EliminationState:
 	"""Construct album `n`."""
-	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.dimensionsTotal - 1), pathAlbum, suffix='.album'))
+	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.totalDimensions - 1), pathAlbum, suffix='.album'))
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 		boxOfClaimTickets: list[Future[EliminationState]] = []

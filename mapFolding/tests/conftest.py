@@ -124,7 +124,7 @@ def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any]:
 	_theSSOT.pathCache = pathCacheOriginal
 
 @pytest.fixture
-def pathFilenameFoldsTotalTesting(path_tmpTesting: Path) -> Path:
+def pathFilenameTotalFoldsTesting(path_tmpTesting: Path) -> Path:
 	"""Creates a temporary file path for folds total testing.
 
 	Parameters
@@ -134,11 +134,11 @@ def pathFilenameFoldsTotalTesting(path_tmpTesting: Path) -> Path:
 
 	Returns
 	-------
-	foldsTotalFilePath : Path
+	totalFoldsFilePath : Path
 		Path to a temporary file for testing folds total functionality.
 
 	"""
-	return path_tmpTesting.joinpath("foldsTotalTest.txt")
+	return path_tmpTesting.joinpath("totalFoldsTest.txt")
 
 @pytest.fixture
 def pathFilename_tmpTesting(request: pytest.FixtureRequest) -> Path:
@@ -244,10 +244,10 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 	Returns
 	-------
 	loaderFunction : Callable[[int], NDArray[numpy.uint8]]
-		Function that loads arrayFoldings for a given dimensionsTotal.
+		Function that loads arrayFoldings for a given totalDimensions.
 	"""
-	def loader(dimensionsTotal: int) -> NDArray[numpy.uint8]:
-		pathFilename = pathDataSamples / f"arrayFoldingsP2d{dimensionsTotal}.pkl"
+	def loader(totalDimensions: int) -> NDArray[numpy.uint8]:
+		pathFilename = pathDataSamples / f"arrayFoldingsP2d{totalDimensions}.pkl"
 		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # ruff: ignore[suspicious-pickle-usage]
 		return arrayFoldings
 

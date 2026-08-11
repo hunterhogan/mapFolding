@@ -31,7 +31,7 @@ def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
 	--------
 	The function is used to enumerate leaves when building anti-options.
 
-		antiChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, getIteratorOfLeaves(choicesLeaf))
+		antiChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, getIteratorOfLeaves(choicesLeaf))
 
 	The function is used to enumerate candidate leaves for constraint propagation.
 

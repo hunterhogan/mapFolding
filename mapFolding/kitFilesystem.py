@@ -13,9 +13,9 @@ makeFilenameCountTotal
 	Build a filesystem-safe filename for countTotal-style outputs.
 makePathFilenameCountTotal
 	Resolve or create a Path for a given filename or directory and ensure parent directories exist.
-makeFilenameFoldsTotal, makePathFilenameFoldsTotal
-	Variants tuned for foldsTotal outputs.
-saveFoldsTotal, saveFoldsTotalFAILearly
+makeFilenameTotalFolds, makePathFilenameTotalFolds
+	Variants tuned for totalFolds outputs.
+saveTotalFolds, saveTotalFoldsFAILearly
 	Functions that write computed results to disk with fallback and validation.
 
 See Also
@@ -149,8 +149,8 @@ def makeFilenameCount(*underscore: str, suffix: str = '.countTotal', **dash: str
 	stem: str = '_'.join([*underscore, *map('-'.join, dash.items())])
 	return stem + suffix
 
-def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.foldsTotal') -> Path:
-	"""Get a standardized filename and create a configurable path to store the computed `foldsTotal` value.
+def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds') -> Path:
+	"""Get a standardized filename and create a configurable path to store the computed `totalFolds` value.
 
 	To help reduce duplicate code and to increase predictability, this function creates a standardized
 	filename, has a default but configurable path, and creates the path.
@@ -162,13 +162,13 @@ def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLik
 	pathLikeWrite : PathLike[str] | None = getPathRootJobDEFAULT()
 		Path, filename, or relative path and filename. If None, uses default path. If a directory,
 		appends standardized filename.
-	suffix : str = '.foldsTotal'
+	suffix : str = '.totalFolds'
 		Filename suffix/extension to use.
 
 	Returns
 	-------
-	pathFilenameFoldsTotal : Path
-		Absolute path and filename for storing the `foldsTotal` value.
+	pathFilenameTotalFolds : Path
+		Absolute path and filename for storing the `totalFolds` value.
 
 	Notes
 	-----
@@ -177,8 +177,8 @@ def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLik
 	filename: str = makeFilenameFolds(mapShape, suffix)
 	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
 
-def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') -> str:
-	"""Create a standardized filename for a computed `foldsTotal` value.
+def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') -> str:
+	"""Create a standardized filename for a computed `totalFolds` value.
 
 	(AI generated docstring)
 
@@ -190,18 +190,18 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.foldsTotal') ->
 	----------
 	mapShape : tuple[int, ...]
 		A sequence of integers representing the dimensions of the map.
-	suffix : str = '.foldsTotal'
+	suffix : str = '.totalFolds'
 		Filename suffix/extension to use.
 
 	Returns
 	-------
-	filenameFoldsTotal : str
-		A filename string in format 'pMxN.foldsTotal' where M,N are sorted dimensions.
+	filenameTotalFolds : str
+		A filename string in format 'pMxN.totalFolds' where M,N are sorted dimensions.
 
 	Notes
 	-----
 	The filename format ensures no spaces in the filename, safe filesystem characters, unique
-	extension (.foldsTotal), Python-safe strings (no starting with numbers, no reserved words), and
+	extension (.totalFolds), Python-safe strings (no starting with numbers, no reserved words), and
 	the 'p' prefix comes from Lunnon's original code.
 
 	"""
@@ -354,12 +354,12 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 # TODO generalize `getDataFrameFoldings`.
 def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:  # ruff: ignore[undocumented-public-function]
 	import pandas  # ruff: ignore[import-outside-top-level]
-	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.dimensionsTotal}.pkl')
+	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.totalDimensions}.pkl')
 	dataframeFoldings: pandas.DataFrame | None = None
 	if pathFilename.exists():
 		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))
 	else:
-		message: str = f"{ansiColors.YellowOnBlack}I received {state.dimensionsTotal = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
+		message: str = f"{ansiColors.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
 		sys.stderr.write(message + '\n')
 	return dataframeFoldings
 

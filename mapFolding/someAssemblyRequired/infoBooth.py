@@ -30,7 +30,7 @@ dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
 	(3, 3, 3, 3): 85109616000000000000000000000000,
 	(8, 8): 791274195985524900,  # Two tests, months apart, estimated 300,000 hours to compute.
 }
-"""Estimates of multidimensional map folding `foldsTotal`."""
+"""Estimates of multidimensional map folding `totalFolds`."""
 
 class Default(TypedDict):
 	"""Default values."""
@@ -72,7 +72,7 @@ default = Default(
 defaultFoldsSymmetric: Default = deepcopy(default)
 defaultFoldsSymmetric['function']['_processCompletedFutures'] = '_processCompletedFutures'
 defaultFoldsSymmetric['function']['filterAsymmetricFolds'] = 'filterAsymmetricFolds'
-defaultFoldsSymmetric['function']['getSymmetricFoldsTotal'] = 'getSymmetricFoldsTotal'
+defaultFoldsSymmetric['function']['getSymmetricTotalFolds'] = 'getSymmetricTotalFolds'
 defaultFoldsSymmetric['function']['initializeConcurrencyManager'] = 'initializeConcurrencyManager'
 defaultFoldsSymmetric['logicalPath']['assembly'] = 'someAssemblyRequired.foldsSymmetric'
 defaultFoldsSymmetric['logicalPath']['synthetic'] += '.foldsSymmetric'

@@ -100,15 +100,15 @@ def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
 	"""
 	return choicesLeaf.bit_count() - 1
 
-def makeAntiChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
+def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	"""You can build a complement `ChoicesLeaf` by clearing each `Leaf` bit in `leaves`.
 
-	The returned `ChoicesLeaf` contains a bit for every `Leaf` in `range(leavesTotal)` except each `Leaf` in `leaves`.
+	The returned `ChoicesLeaf` contains a bit for every `Leaf` in `range(totalLeaves)` except each `Leaf` in `leaves`.
 	The returned `ChoicesLeaf` also preserves the sentinel bit that indicates the value is a `ChoicesLeaf`.
 
 	Parameters
 	----------
-	leavesTotal : int
+	totalLeaves : int
 		Total number of leaves in the map.
 	leaves : Iterable[Leaf]
 		Iterable of `Leaf` indices to exclude from the returned `ChoicesLeaf`.
@@ -122,11 +122,11 @@ def makeAntiChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf
 	--------
 	The function is used to start from the full domain.
 
-		antiChoicesLeaf: ChoicesLeaf = getAntiChoicesLeaf(state.leavesTotal, frozenset())
+		antiChoicesLeaf: ChoicesLeaf = getAntiChoicesLeaf(state.totalLeaves, frozenset())
 
 	The function is used to exclude every `Leaf` not in a crease relation.
 
-		antiChoicesLeaf = getAntiChoicesLeaf(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
+		antiChoicesLeaf = getAntiChoicesLeaf(state.totalLeaves, set(range(state.totalLeaves)).difference(leavesCrease))
 
 	References
 	----------
@@ -134,9 +134,9 @@ def makeAntiChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf
 		https://gmpy2.readthedocs.io/en/latest/
 	[2] mapFolding.inclusive
 	"""
-	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
+	return reduce(bit_clear, leaves, bit_mask(totalLeaves + inclusive))
 
-def makeChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
+def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	"""You can build a `ChoicesLeaf` by setting each `Leaf` bit in `leaves`.
 
 	The returned `ChoicesLeaf` contains the sentinel bit that indicates the value is a `ChoicesLeaf`. The returned
@@ -144,7 +144,7 @@ def makeChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 
 	Parameters
 	----------
-	leavesTotal : int
+	totalLeaves : int
 		Total number of leaves in the map.
 	leaves : Iterable[Leaf]
 		Iterable of `Leaf` indices to include in the returned `ChoicesLeaf`.
@@ -158,7 +158,7 @@ def makeChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	--------
 	The function is used to create a domain bitset before normalizing with `choicesLeafLeafNone`.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.leavesTotal, choicesLeaf)))
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.totalLeaves, choicesLeaf)))
 											for pile, choicesLeaf in getDictionaryChoicesLeaf(state).items()}
 
 	References
@@ -167,7 +167,7 @@ def makeChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 		https://gmpy2.readthedocs.io/en/latest/
 	[2] mapFolding._e._beDRY.choicesLeafLeafNone
 	"""
-	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
+	return reduce(bit_set, leaves, bit_set(0, totalLeaves))
 
 # SEMIOTICS
 def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
@@ -200,7 +200,7 @@ def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | Non
 
 	The function is used to normalize per-pile domains into pinned leaves when possible.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.leavesTotal, choicesLeaf)))
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.totalLeaves, choicesLeaf)))
 											for pile, choicesLeaf in getDictionaryChoicesLeaf(state).items()}
 
 	References
@@ -309,7 +309,7 @@ def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	"""
 	return tuple(accumulate(getMapShapeProducts(mapShape), add, initial=0))
 
-def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], dimensionsTotal: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
+def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], totalDimensions: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
 	"""Compute prefix sums of reversed dimension products for head-first coordinate arithmetic.
 
 	You can use this function to obtain a tuple of cumulative sums computed from reversed
@@ -326,12 +326,12 @@ def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], dimensionsTota
 	----------
 	mapShapeProducts : tuple[int, ...]
 		Prefix products of dimension lengths, typically from `getMapShapeProducts` [4].
-	dimensionsTotal : int | None = None
+	totalDimensions : int | None = None
 		Total number of dimensions in the map. When `None`, inferred as
 		`len(mapShapeProducts) - 1`.
 	dimensionFrom首 : int | None = None
 		Dimension index defining which products to include in the sum computation. When `None`,
-		defaults to `dimensionsTotal`. This parameter controls how many dimension products are
+		defaults to `totalDimensions`. This parameter controls how many dimension products are
 		reversed and summed.
 
 	Returns
@@ -344,11 +344,11 @@ def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], dimensionsTota
 	--------
 	The function is used during state initialization to compute head-first sums.
 
-		self.mapShape首ProductsSums = getMapShape首ProductsSums(self.mapShapeProducts, self.dimensionsTotal, self.dimensionsTotal)
+		self.mapShape首ProductsSums = getMapShape首ProductsSums(self.mapShapeProducts, self.totalDimensions, self.totalDimensions)
 
 	The function is used to compute offset bounds in sub-hyperplane computations.
 
-		mapShape首ProductsSumsInSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, state.dimensionsTotal, state.dimensionsTotal - 1)
+		mapShape首ProductsSumsInSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, state.totalDimensions, state.totalDimensions - 1)
 
 	References
 	----------
@@ -361,12 +361,12 @@ def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], dimensionsTota
 	[4] mapFolding._e._beDRY.getMapShapeProducts
 
 	"""
-	dimensionsTotal = dimensionsTotal or len(mapShapeProducts) - 1
+	totalDimensions = totalDimensions or len(mapShapeProducts) - 1
 
 	if dimensionFrom首 is None:
-		dimensionFrom首 = dimensionsTotal
+		dimensionFrom首 = totalDimensions
 
-	mapShapeProductsTruncator: int = dimensionFrom首 - (dimensionsTotal + zeroIndexed)
+	mapShapeProductsTruncator: int = dimensionFrom首 - (totalDimensions + zeroIndexed)
 
 	mapShapeProductsFrom首: tuple[int, ...] = mapShapeProducts[0:mapShapeProductsTruncator][::-1]
 
