@@ -41,7 +41,7 @@
 | iterator    | Fixed    | Yes     | Lazy processing   | Memory-efficient; single-use only.                      |
 | range       | Fixed    | Yes     | Integer sequences | $O(1)$ memory; $O(1)$ membership check.                 |
 | frozenset   | Fixed    | No      | Membership keys   | Hashable; used as keys for other sets/dicts.            |
-| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than boxOfs; faster iteration.     |
+| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than boxOfs; faster iteration.    |
 | NamedTuple  | Fixed    | Yes     | Named records     | Tuple performance with object-like access.              |
 | set         | Changing | No      | Uniqueness        | $O(1)$ lookup; high memory overhead (\~32 bytes/item).  |
 | Counter     | Changing | Yes     | Tallying          | Specialized for frequencies; supports multiset math.    |
@@ -241,7 +241,7 @@ The `pin2上nDimensionalAnnex` module implements a constraint-satisfaction syste
 4. **Conditional predecessors**: enforce pile-dependent predecessor constraints.
 5. **Crossed crease detection**: eliminate permutation spaces where two creases cross (Koehler 1968 / Legendre 2014 forbidden inequalities).
 6. **Non-consecutive dimensions**: in two consecutive piles, the absolute value of the difference cannot repeat.
-7. **Domain size one**: when a pile's `LeafOptions` reduces to a single leaf, pin it.
+7. **Domain size one**: when a pile's `ChoicesLeaf` reduces to a single leaf, pin it.
 8. **Naked subset elimination**: when $k$ piles share the same $k$ candidate leaves, eliminate those leaves from all other piles.
 
 These functions are interdependent components, not independent algorithms. Each assumes the others will run afterward to propagate consequences.
@@ -334,6 +334,6 @@ Lunnon's theorem: a pile ordering is a valid folding if and only if all its one-
 - A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.
 - The positional-numeral ideographs (零, 一, 二, 三, etc.) represent `productsOfDimensions[dimensionIndex]`, i.e., powers of 2 in $2^n$-dimensional maps: 零 $= 2^0 = 1$, 一 $= 2^1 = 2$, 二 $= 2^2 = 4$, etc.
 - 首 (shǒu, "head") denotes the most-significant-dimension end of a coordinate. For example, `首零(n)` $= 2^{n-1}$, `首一(n)` $= 2^{n-2}$, `首零一(n)` $= 2^{n-1} + 2^{n-2}$.
-- `LeafOptions` is a `gmpy2.mpz` bitset where bit $i$ is set iff leaf $i$ is a candidate at that pile.
+- `ChoicesLeaf` is a `gmpy2.mpz` bitset where bit $i$ is set iff leaf $i$ is a candidate at that pile.
 - `PinnedLeaves` is a `dict[Pile, Leaf]` of pile-to-leaf assignments that are determined.
-- `UndeterminedPiles` is a `dict[Pile, LeafOptions]` of pile-to-candidate-set mappings still to be resolved.
+- `UndeterminedPiles` is a `dict[Pile, ChoicesLeaf]` of pile-to-candidate-set mappings still to be resolved.

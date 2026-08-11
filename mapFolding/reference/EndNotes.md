@@ -27,7 +27,7 @@ The ONLY valid way to pin a `Leaf` in a `PermutationSpace` or `Folding` is to ca
 
 ## sorted
 
-`PermutationSpace.addMissingLeafOptions()`: `sorted` overrides the insertion order and sorts based on `Pile` index. This is partially "defensive" in the sense that it is a consistent, logical, expected order, and may prevent odd results if another subroutine didn't guarantee the order when it ought to have. I'm hoping it improves efficiency, too.
+`PermutationSpace.addMissingChoicesLeaf()`: `sorted` overrides the insertion order and sorts based on `Pile` index. This is partially "defensive" in the sense that it is a consistent, logical, expected order, and may prevent odd results if another subroutine didn't guarantee the order when it ought to have. I'm hoping it improves efficiency, too.
 
 ## sortingDimensions
 
@@ -46,4 +46,4 @@ Furthermore, now that the package includes OEIS A000136, 1 x N stamps/maps, sort
 
 ## TypeAlias
 
-Use `type` by default. Switch to `TypeAlias` whenever it promotes self-documenting code, especially through semiotics. Examples, I prefer `isinstance(x, LeafOptions)` to `isinstance(x, mpz)`; `dimension = DimensionIndex(2)` is more self-documenting than `dimension = int(2)`.
+Use `type` by default. Switch to `TypeAlias` whenever it promotes self-documenting code, especially through semiotics. Examples, I prefer `isinstance(x, ChoicesLeaf)` to `isinstance(x, mpz)`; `dimension = DimensionIndex(2)` is more self-documenting than `dimension = int(2)`.

@@ -16,17 +16,17 @@ Disaggregation and deconstruction functions
 	DOTvalues
 		You can iterate over values in a `Mapping`.
 	getIteratorOfLeaves
-		You can iterate over each `Leaf` bit that is set in a `LeafOptions`.
+		You can iterate over each `Leaf` bit that is set in a `ChoicesLeaf`.
 
-`LeafOptions` functions
-	getAntiLeafOptions
-		You can build a complement `LeafOptions` by clearing each `leaf` bit.
-	makeLeafOptions
-		You can build a `LeafOptions` by setting each `leaf` bit.
-	leafOptionsLeafNone
-		You can normalize a `LeafOptions` into a `Leaf` or `None` when the range is degenerate.
-	leafOptionsAND
-		You can AND a `LeafOptions` with a disposable mask.
+`ChoicesLeaf` functions
+	getAntiChoicesLeaf
+		You can build a complement `ChoicesLeaf` by clearing each `leaf` bit.
+	makeChoicesLeaf
+		You can build a `ChoicesLeaf` by setting each `leaf` bit.
+	choicesLeafLeafNone
+		You can normalize a `ChoicesLeaf` into a `Leaf` or `None` when the range is degenerate.
+	choicesLeafAND
+		You can AND a `ChoicesLeaf` with a disposable mask.
 
 Be DRY functions
 	getProductsOfDimensions
@@ -57,44 +57,44 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e.filters import leafOptions吗
+from mapFolding._e.filters import choicesLeaf吗
 from more_itertools import iter_index
 from operator import add, mul
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding._e.theTypes import Leaf, LeafOptions
+	from mapFolding._e.theTypes import ChoicesLeaf, Leaf
 
-#======== `LeafOptions` functions ================================================
+#======== `ChoicesLeaf` functions ================================================
 
-def makeLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
-	"""You can build a complement `LeafOptions` by clearing each `Leaf` bit in `leaves`.
+def makeAntiChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
+	"""You can build a complement `ChoicesLeaf` by clearing each `Leaf` bit in `leaves`.
 
-	The returned `LeafOptions` contains a bit for every `Leaf` in `range(leavesTotal)` except each `Leaf` in `leaves`.
-	The returned `LeafOptions` also preserves the sentinel bit that indicates the value is a `LeafOptions`.
+	The returned `ChoicesLeaf` contains a bit for every `Leaf` in `range(leavesTotal)` except each `Leaf` in `leaves`.
+	The returned `ChoicesLeaf` also preserves the sentinel bit that indicates the value is a `ChoicesLeaf`.
 
 	Parameters
 	----------
 	leavesTotal : int
 		Total number of leaves in the map.
 	leaves : Iterable[Leaf]
-		Iterable of `Leaf` indices to exclude from the returned `LeafOptions`.
+		Iterable of `Leaf` indices to exclude from the returned `ChoicesLeaf`.
 
 	Returns
 	-------
-	antiLeafOptions : LeafOptions
-		`LeafOptions` bitset containing each allowed `Leaf` plus the `LeafOptions` sentinel bit.
+	antiChoicesLeaf : ChoicesLeaf
+		`ChoicesLeaf` bitset containing each allowed `Leaf` plus the `ChoicesLeaf` sentinel bit.
 
 	Examples
 	--------
 	The function is used to start from the full domain.
 
-		antiLeafOptions: LeafOptions = getAntiLeafOptions(state.leavesTotal, frozenset())
+		antiChoicesLeaf: ChoicesLeaf = getAntiChoicesLeaf(state.leavesTotal, frozenset())
 
 	The function is used to exclude every `Leaf` not in a crease relation.
 
-		antiLeafOptions = getAntiLeafOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
+		antiChoicesLeaf = getAntiChoicesLeaf(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
 
 	References
 	----------
@@ -104,62 +104,62 @@ def makeLeafAntiOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions
 	"""
 	return reduce(bit_clear, leaves, bit_mask(leavesTotal + inclusive))
 
-def makeLeafOptions(leavesTotal: int, leaves: Iterable[Leaf]) -> LeafOptions:
-	"""You can build a `LeafOptions` by setting each `Leaf` bit in `leaves`.
+def makeChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
+	"""You can build a `ChoicesLeaf` by setting each `Leaf` bit in `leaves`.
 
-	The returned `LeafOptions` contains the sentinel bit that indicates the value is a `LeafOptions`. The returned
-	`LeafOptions` also contains a bit for each `Leaf` in `leaves`.
+	The returned `ChoicesLeaf` contains the sentinel bit that indicates the value is a `ChoicesLeaf`. The returned
+	`ChoicesLeaf` also contains a bit for each `Leaf` in `leaves`.
 
 	Parameters
 	----------
 	leavesTotal : int
 		Total number of leaves in the map.
 	leaves : Iterable[Leaf]
-		Iterable of `Leaf` indices to include in the returned `LeafOptions`.
+		Iterable of `Leaf` indices to include in the returned `ChoicesLeaf`.
 
 	Returns
 	-------
-	leafOptions : LeafOptions
-		`LeafOptions` bitset containing each `Leaf` in `leaves` plus the `LeafOptions` sentinel bit.
+	choicesLeaf : ChoicesLeaf
+		`ChoicesLeaf` bitset containing each `Leaf` in `leaves` plus the `ChoicesLeaf` sentinel bit.
 
 	Examples
 	--------
-	The function is used to create a domain bitset before normalizing with `leafOptionsLeafNone`.
+	The function is used to create a domain bitset before normalizing with `choicesLeafLeafNone`.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(leafOptionsLeafNone(makeLeafOptions(state.leavesTotal, leafOptions)))
-											for pile, leafOptions in getDictionaryLeafOptions(state).items()}
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.leavesTotal, choicesLeaf)))
+											for pile, choicesLeaf in getDictionaryChoicesLeaf(state).items()}
 
 	References
 	----------
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding._e._beDRY.leafOptionsLeafNone
+	[2] mapFolding._e._beDRY.choicesLeafLeafNone
 	"""
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
 
-def howManyLeavesInLeafOptions(leafOptions: LeafOptions) -> int:
-	"""Count the number of `Leaf` indices encoded in a `LeafOptions` bitset.
+def howManyLeavesInChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
+	"""Count the number of `Leaf` indices encoded in a `ChoicesLeaf` bitset.
 
 	You can use this function to determine the cardinality of the domain represented by
-	`leafOptions`. The function counts the number of set bits in `leafOptions` minus one
+	`choicesLeaf`. The function counts the number of set bits in `choicesLeaf` minus one
 	(the sentinel bit) [1]. The result represents how many distinct `Leaf` indices are
-	present in `leafOptions`.
+	present in `choicesLeaf`.
 
 	Parameters
 	----------
-	leafOptions : LeafOptions
+	choicesLeaf : ChoicesLeaf
 		Bitset encoding a set of `Leaf` indices.
 
 	Returns
 	-------
 	leavesCount : int
-		The number of `Leaf` indices with set bits in `leafOptions`, excluding the sentinel bit.
+		The number of `Leaf` indices with set bits in `choicesLeaf`, excluding the sentinel bit.
 
 	Examples
 	--------
 	The function is used to identify groups of piles sharing the same domain cardinality.
 
-		itemfilter(lambda groupBy: (howManyLeavesInLeafOptions(groupBy[leafOptionsKey])) == len(groupBy[piles]), groupByLeafOptions)
+		itemfilter(lambda groupBy: (howManyLeavesInChoicesLeaf(groupBy[choicesLeafKey])) == len(groupBy[piles]), groupByChoicesLeaf)
 
 	References
 	----------
@@ -167,79 +167,79 @@ def howManyLeavesInLeafOptions(leafOptions: LeafOptions) -> int:
 		https://gmpy2.readthedocs.io/en/latest/mpz.html#gmpy2.mpz.bit_count
 
 	"""
-	return leafOptions.bit_count() - 1
+	return choicesLeaf.bit_count() - 1
 
 # SEMIOTICS
-def leafOptionsLeafNone(leafOptions: LeafOptions, /) -> LeafOptions | Leaf | None:
-	"""You can normalize a `LeafOptions` into a `Leaf`, `LeafOptions`, or `None` when the range is degenerate.
+def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
+	"""You can normalize a `ChoicesLeaf` into a `Leaf`, `ChoicesLeaf`, or `None` when the range is degenerate.
 
-	When `leafOptions` is a `LeafOptions`, `leafOptions` contains one sentinel bit that indicates the value is a `LeafOptions`.
+	When `choicesLeaf` is a `ChoicesLeaf`, `choicesLeaf` contains one sentinel bit that indicates the value is a `ChoicesLeaf`.
 	This function interprets the total set-bit count as a compact encoding of domain cardinality.
 
-	- When `leafOptions.bit_count() == 1`, `leafOptions` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
-	- When `leafOptions.bit_count() == 2`, `leafOptions` contains exactly one `Leaf` plus the sentinel bit. The function converts the range to a
-		`Leaf` by returning `raiseIfNone(leafOptions.bit_scan1())`.
-	- Otherwise, the function returns `leafOptions` unchanged.
+	- When `choicesLeaf.bit_count() == 1`, `choicesLeaf` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
+	- When `choicesLeaf.bit_count() == 2`, `choicesLeaf` contains exactly one `Leaf` plus the sentinel bit. The function converts the range to a
+		`Leaf` by returning `raiseIfNone(choicesLeaf.bit_scan1())`.
+	- Otherwise, the function returns `choicesLeaf` unchanged.
 
 	Parameters
 	----------
-	leafOptions : LeafOptions
-		`LeafOptions` to inspect.
+	choicesLeaf : ChoicesLeaf
+		`ChoicesLeaf` to inspect.
 
 	Returns
 	-------
-	leafSpaceOrNone : Leaf | LeafOptions | None
-		A `Leaf` when `leafOptions` encodes exactly one leaf, `None` when `leafOptions` encodes an empty domain, or `leafOptions` otherwise.
+	leafSpaceOrNone : Leaf | ChoicesLeaf | None
+		A `Leaf` when `choicesLeaf` encodes exactly one leaf, `None` when `choicesLeaf` encodes an empty domain, or `choicesLeaf` otherwise.
 
 	Examples
 	--------
 	The function is used to normalize a masked domain.
 
-		if (ImaLeafSpaceNotAWalrusSubscript := leafOptionsLeafNone(leafOptionsAND(antiLeafOptions, leafOptions))) is None:
+		if (ImaLeafSpaceNotAWalrusSubscript := choicesLeafLeafNone(choicesLeafAND(antiChoicesLeaf, choicesLeaf))) is None:
 			return {}
 
 	The function is used to normalize per-pile domains into pinned leaves when possible.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(leafOptionsLeafNone(makeLeafOptions(state.leavesTotal, leafOptions)))
-											for pile, leafOptions in getDictionaryLeafOptions(state).items()}
+		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.leavesTotal, choicesLeaf)))
+											for pile, choicesLeaf in getDictionaryChoicesLeaf(state).items()}
 
 	References
 	----------
 	[1] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding._e.filters.thisIsALeafOptions
+	[2] mapFolding._e.filters.thisIsAChoicesLeaf
 
 	[3] hunterMakesPy - Context7
 		https://context7.com/hunterhogan/huntermakespy
 
 	"""
-	whoAmI: LeafOptions | Leaf | None = leafOptions
-	if leafOptions吗(leafOptions):
-		if leafOptions.bit_count() == 2:
-			whoAmI = raiseIfNone(leafOptions.bit_scan1())
-		elif leafOptions.bit_count() == 1:
+	whoAmI: ChoicesLeaf | Leaf | None = choicesLeaf
+	if choicesLeaf吗(choicesLeaf):
+		if choicesLeaf.bit_count() == 2:
+			whoAmI = raiseIfNone(choicesLeaf.bit_scan1())
+		elif choicesLeaf.bit_count() == 1:
 			whoAmI = None
 	return whoAmI
 
-def leafOptionsAND(leafOptionsDISPOSABLE: LeafOptions, leafOptions: LeafOptions) -> LeafOptions:
-	"""Compute the bitwise AND of two `LeafOptions`.
+def choicesLeafAND(choicesLeafDISPOSABLE: ChoicesLeaf, choicesLeaf: ChoicesLeaf) -> ChoicesLeaf:
+	"""Compute the bitwise AND of two `ChoicesLeaf`.
 
-	You can use this function to mask `leafOptions` with `leafOptionsDISPOSABLE` [1]. The
+	You can use this function to mask `choicesLeaf` with `choicesLeafDISPOSABLE` [1]. The
 	function performs bitwise AND and returns the intersection of the two leaf sets.
 
 	Parameters
 	----------
-	leafOptionsDISPOSABLE : LeafOptions
-		Bitset mask applied to `leafOptions`.
-	leafOptions : LeafOptions
-		Bitset to be masked by `leafOptionsDISPOSABLE`.
+	choicesLeafDISPOSABLE : ChoicesLeaf
+		Bitset mask applied to `choicesLeaf`.
+	choicesLeaf : ChoicesLeaf
+		Bitset to be masked by `choicesLeafDISPOSABLE`.
 
 	Returns
 	-------
-	maskedLeafOptions : LeafOptions
-		Bitwise AND of `leafOptions` and `leafOptionsDISPOSABLE`.
+	maskedChoicesLeaf : ChoicesLeaf
+		Bitwise AND of `choicesLeaf` and `choicesLeafDISPOSABLE`.
 	"""
-	return leafOptions & leafOptionsDISPOSABLE
+	return choicesLeaf & choicesLeafDISPOSABLE
 
 #======== Be DRY functions ================================================
 

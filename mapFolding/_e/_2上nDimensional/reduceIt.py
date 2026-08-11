@@ -21,7 +21,7 @@ readability and maintainability:
 	then `permutationSpace`, enabling use with `filter_map` [1].
 
 3. `_reduceLeafSpace` is the shared subroutine that handles the mechanical work of updating
-	`LeafOptions` at specified piles and propagating newly pinned leaves. All constraint
+	`ChoicesLeaf` at specified piles and propagating newly pinned leaves. All constraint
 	encoders call `_reduceLeafSpace` to perform the actual updates.
 
 The functions are not independent algorithms; the functions are interdependent components of
@@ -73,12 +73,12 @@ from gmpy2 import bit_flip
 from humpy_cytoolz import get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations
-from mapFolding._e import leafOrigin, makeLeafAntiOptions
+from mapFolding._e import leafOrigin, makeAntiChoicesLeaf
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, moreThanLeaf零吗)
 from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
-from mapFolding._e.filters import leafOptions吗, leafPinned吗, leaf吗, notPileLast, pileLeafOptions吗
+from mapFolding._e.filters import choicesLeaf吗, leafPinned吗, leaf吗, notPileLast, pileChoicesLeaf吗
 from mapFolding._e.reduceIt import (
 	reduceLeafSpace, reducePermutationSpace_leafDomainOf0or1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
 from mapFolding._e.theTypes import Leaf, Pile
@@ -90,15 +90,15 @@ from Z0Z_tools import DOTitems, reverseLookup
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
 	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-	from mapFolding._e.theTypes import LeafOptions, PinnedLeaves
+	from mapFolding._e.theTypes import ChoicesLeaf, PinnedLeaves
 
-#======== Reducing `LeafOptions` ===============================
+#======== Reducing `ChoicesLeaf` ===============================
 
 def _byCrease2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce crease adjacency constraints.
 
 	I use this constraint encoder to enforce that when a leaf is pinned at a pile and the
-	adjacent pile has undetermined `LeafOptions`, the adjacent pile can only contain leaves
+	adjacent pile has undetermined `ChoicesLeaf`, the adjacent pile can only contain leaves
 	that are crease neighbors of the pinned leaf. I identify pinned-leaf-adjacent-to-undetermined
 	configurations and restrict the undetermined pile to crease neighbors using `_reduceLeafSpace`.
 
@@ -107,7 +107,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -123,17 +123,17 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 		leafCount: int = permutationSpace.leafCount
 
 		for (pile_k, leafSpace_k), (pile_r, leafSpace_r) in pairwise(permutationSpace.items()):
-			if leaf吗(leafSpace_k) and leafOptions吗(leafSpace_r):
-				pilesToUpdate: tuple[tuple[Pile, LeafOptions]] = ((pile_r, leafSpace_r),)
+			if leaf吗(leafSpace_k) and choicesLeaf吗(leafSpace_r):
+				pilesToUpdate: tuple[tuple[Pile, ChoicesLeaf]] = ((pile_r, leafSpace_r),)
 				leavesCrease: Iterator[Leaf] = getLeavesCreasePost(state, leafSpace_k)  # DEVELOPMENT 2上nDimensional
-			elif leafOptions吗(leafSpace_k) and leaf吗(leafSpace_r):
+			elif choicesLeaf吗(leafSpace_k) and leaf吗(leafSpace_r):
 				pilesToUpdate = ((pile_k, leafSpace_k),)
 				leavesCrease = getLeavesCreaseAnte(state, leafSpace_r)  # DEVELOPMENT 2上nDimensional
 			else:
 				continue
 
 			permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate
-					, makeLeafAntiOptions(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
+					, makeAntiChoicesLeaf(state.leavesTotal, set(range(state.leavesTotal)).difference(leavesCrease))
 			)
 			if not permutationSpace.valid:
 				#=SIN= Early return.
@@ -159,7 +159,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -185,7 +185,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 			if pile in leafAtPilePredecessors[leaf]:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
-					, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
+					, makeAntiChoicesLeaf(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
@@ -215,7 +215,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -247,7 +247,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 						pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
 
 					if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-						leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
+						antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, (leaf_rCrease,))
 
 						if pileOf_k < pileOf_r < pileOf_kCrease:
 							pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
@@ -259,7 +259,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 							pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
 					elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-						leafAntiOptions = makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
+						antiChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, (leaf_kCrease,))
 
 						if pileOf_rCrease < pileOf_k < pileOf_r:
 							pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
@@ -281,8 +281,8 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 						continue
 
 					permutationSpace = reduceLeafSpace(permutationSpace
-							, filter(pileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
-							, leafAntiOptions
+							, filter(pileChoicesLeaf吗, extract(permutationSpace.items(), pilesForbidden))
+							, antiChoicesLeaf
 					)
 					if not permutationSpace.valid:
 						#=SIN= Early return.
@@ -321,7 +321,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -346,8 +346,8 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead:
 				permutationSpace = reduceLeafSpace(permutationSpace
-					, DOTitems(filterLeaf(leafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
-					, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
+					, DOTitems(filterLeaf(choicesLeaf吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
+					, makeAntiChoicesLeaf(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
@@ -357,7 +357,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 			if 0 < dimensionTail:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
-					, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
+					, makeAntiChoicesLeaf(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
@@ -378,8 +378,8 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 	next pile because map foldings cannot have four consecutive leaves in arithmetic progression.
 
 	The function examines all triples of consecutive piles and identifies configurations where:
-	1. Two adjacent piles have pinned leaves and the third has `LeafOptions`, or
-	2. The middle pile has `LeafOptions` and the outer two have pinned leaves.
+	1. Two adjacent piles have pinned leaves and the third has `ChoicesLeaf`, or
+	2. The middle pile has `ChoicesLeaf` and the outer two have pinned leaves.
 
 	For each pattern, I compute the forbidden leaf (the next term in the arithmetic progression)
 	and remove that leaf from the undetermined pile using `_reduceLeafSpace`.
@@ -389,7 +389,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -404,20 +404,20 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 		leafCount: int = permutationSpace.leafCount
 
 		for (pile_k, leafSpace_k), (pile, leafSpace), (pile_r, leafSpace_r) in triplewise(sorted(DOTitems(permutationSpace))):
-			if leaf吗(leafSpace_k) and leaf吗(leafSpace) and leafOptions吗(leafSpace_r):
-				pilesToUpdate: tuple[tuple[Pile, LeafOptions]] = ((pile_r, leafSpace_r),)
+			if leaf吗(leafSpace_k) and leaf吗(leafSpace) and choicesLeaf吗(leafSpace_r):
+				pilesToUpdate: tuple[tuple[Pile, ChoicesLeaf]] = ((pile_r, leafSpace_r),)
 				leafForbidden: Leaf = leafSpace + (leafSpace - leafSpace_k)
-			elif leaf吗(leafSpace_k) and leafOptions吗(leafSpace) and leaf吗(leafSpace_r):
+			elif leaf吗(leafSpace_k) and choicesLeaf吗(leafSpace) and leaf吗(leafSpace_r):
 				pilesToUpdate = ((pile, leafSpace),)
 				leafForbidden = (leafSpace_k + leafSpace_r) // 2
-			elif leafOptions吗(leafSpace_k) and leaf吗(leafSpace) and leaf吗(leafSpace_r):
+			elif choicesLeaf吗(leafSpace_k) and leaf吗(leafSpace) and leaf吗(leafSpace_r):
 				pilesToUpdate = ((pile_k, leafSpace_k),)
 				leafForbidden = leafSpace - (leafSpace_r - leafSpace)
 			else:
 				continue
 
 			if 0 <= leafForbidden < state.leavesTotal:
-				permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate, makeLeafAntiOptions(state.leavesTotal, [leafForbidden]))
+				permutationSpace = reduceLeafSpace(permutationSpace, pilesToUpdate, makeAntiChoicesLeaf(state.leavesTotal, [leafForbidden]))
 				if not permutationSpace.valid:
 					#=SIN= Early return.
 					return permutationSpace

@@ -3,10 +3,10 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding._e import getIteratorOfLeaves, getDomainLeaf, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.theSSOT import settingsPackage
@@ -15,7 +15,7 @@ from more_itertools import triplewise
 from ortools.sat.python import cp_model
 from tqdm import tqdm
 from typing import TYPE_CHECKING
-from Z0Z_tools import between吗, DOTvalues
+from Z0Z_tools import DOTvalues
 import uuid
 
 if TYPE_CHECKING:
@@ -35,8 +35,8 @@ def count(state: EliminationState) -> EliminationState:
 	for aPile, aLeaf in leavesPinned.items():
 		model.add(boxOfLeavesInPileOrder[aPile] == aLeaf)
 
-	for aPile, leafOptions in pilesUndetermined.items():
-		model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(leafOptions))))
+	for aPile, choicesLeaf in pilesUndetermined.items():
+		model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(choicesLeaf))))
 
 #======== Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal` ============================
 	model.add(boxOfLeavesInPileOrder[pileOrigin] == leafOrigin)
@@ -74,10 +74,10 @@ def count(state: EliminationState) -> EliminationState:
 				model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile], boxOfLeavesInPileOrder[aPile + 1]], zip(repeat(leaf), getLeavesCreasePost(state, leaf), strict=False))
 			model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile - 1], boxOfLeavesInPileOrder[aPile]], zip(getLeavesCreaseAnte(state, leaf), repeat(leaf), strict=False))
 
-		for pile, leafOptions in pilesUndetermined.items():
+		for pile, choicesLeaf in pilesUndetermined.items():
 			assignmentsCreasePost: list[tuple[Leaf, Leaf]] = []
 			assignmentsCreaseAnte: list[tuple[Leaf, Leaf]] = []
-			for leaf in getIteratorOfLeaves(leafOptions):
+			for leaf in getIteratorOfLeaves(choicesLeaf):
 				assignmentsCreasePost.extend((leaf, leafCreasePost) for leafCreasePost in getLeavesCreasePost(state, leaf))
 				assignmentsCreaseAnte.extend((leafCreaseAnte, leaf) for leafCreaseAnte in getLeavesCreaseAnte(state, leaf))
 			model.add_allowed_assignments([boxOfLeavesInPileOrder[pile], boxOfLeavesInPileOrder[pile + 1]], assignmentsCreasePost)
@@ -89,7 +89,7 @@ def count(state: EliminationState) -> EliminationState:
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 		state.Theorem2Multiplier = 2
-		leafOrigin下aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.productsOfDimensions))
+		leafOrigin下aDimension: int = last(filter((state.leafLast // 2).__ge__, state.productsOfDimensions))
 		model.add(boxOfPilingsInLeafOrder[leafOrigin下aDimension] < boxOfPilingsInLeafOrder[2 * leafOrigin下aDimension])
 
 #======== Forbidden inequalities ============================
@@ -167,7 +167,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	"""Do the things necessary so that `count` operates efficiently."""
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 
 	state.permutationSpace = PermutationSpace()

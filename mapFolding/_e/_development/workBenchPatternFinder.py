@@ -6,13 +6,12 @@ from __future__ import annotations
 from bisect import bisect_left
 from functools import partial
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
-from humpy_cytoolz import curry as syntacticCurry
 from hunterMakesPy import raiseIfNone
-from mapFolding._e import getIteratorOfLeaves, getLeafOptions, getLookupDomainsLeaves
+from mapFolding._e import getChoicesLeaf, getIteratorOfLeaves, getLookupDomainsLeaves
 from mapFolding._e._2上nDimensional import (
 	dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
@@ -30,7 +29,7 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryLeafOptions(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryChoicesLeaf(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
 
@@ -150,9 +149,9 @@ pp3  = (3, 5, 9, 17, 33)
 
 	print(pile, pileDimension)
 	print(sorted(set(pileRange)))
-	rr = tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))
+	rr = tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))
 	print(rr)
-	rrLess1 = tuple(getIteratorOfLeaves(getLeafOptions(state, pile - 1)))
+	rrLess1 = tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile - 1)))
 	print(rrLess1)
 
 	"""Notes
@@ -167,13 +166,11 @@ pp3  = (3, 5, 9, 17, 33)
 		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
 		# Yes, sort of. `Z0Z_alfaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
-		@syntacticCurry
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
 			return list(map(partial(add, dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
 
-		@syntacticCurry
 		def Z0Z_alfaBeta(state: EliminationState, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
-			return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+			return list(flatten(map(partial(intraDimensionalLeaves, state), state.productsOfDimensions[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
 
 		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
@@ -237,12 +234,12 @@ pp3  = (3, 5, 9, 17, 33)
 			return tuple(sorted(pileRange))
 
 		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real := tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed := Z0Z_getPileRangeEven(state, pile)), end=': ')
+			print(pile, (real := tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))) == (computed := Z0Z_getPileRangeEven(state, pile)), end=': ')
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
 		for pile in range((零) + 首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real := tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed := Z0Z_getPileRange(state, pile)), end=': ')
+			print(pile, (real := tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))) == (computed := Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
@@ -252,7 +249,7 @@ pp3  = (3, 5, 9, 17, 33)
 			# else:
 			# 	pile+=1
 			# zz = tuple(map(partial(xor, 1), zz))
-			# print(pile, (ll:=getLeafOptions(state, pile)) == (zz), end=': ')
+			# print(pile, (ll:=getChoicesLeaf(state, pile)) == (zz), end=': ')
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)
 
@@ -262,11 +259,11 @@ pp3  = (3, 5, 9, 17, 33)
 		pileTarget = 31
 		dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
 		domains = getLookupDomainsLeaves(state)
-		pileRange31 = frozenset(getIteratorOfLeaves(getLeafOptions(state, 31)))
+		pileRange31 = frozenset(getIteratorOfLeaves(getChoicesLeaf(state, 31)))
 
 		for pile in range(state.leavesTotal):
 			continue
-			print(pile, set(getIteratorOfLeaves(getLeafOptions(state, pile))).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
+			print(pile, set(getIteratorOfLeaves(getChoicesLeaf(state, pile))).difference(getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pile,)).keys()))
 
 		for excluder, boxOfExcluded in dictionaryExcluded.items():
 			continue

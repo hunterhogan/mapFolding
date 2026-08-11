@@ -13,7 +13,7 @@ from hunterMakesPy import raiseIfNone
 from itertools import combinations, filterfalse
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding._e.filters import leafInLeafOptions吗, leafOptions吗, leaf吗, 是valid
+from mapFolding._e.filters import choicesLeaf吗, leafInChoicesLeaf吗, leaf吗, 是valid
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
@@ -26,7 +26,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, LeafOptions, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, PinnedLeaves, UndeterminedPiles
 	from typing import Self
 
 #=EndNotes##pinning=
@@ -152,7 +152,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		leavesPinned : PinnedLeaves
 			Dictionary of `Pile` to pinned `Leaf` mappings.
 		pilesUndetermined : UndeterminedPiles
-			Dictionary of `Pile` to `LeafOptions` domain mappings.
+			Dictionary of `Pile` to `ChoicesLeaf` domain mappings.
 		"""
 		leavesPinned: PinnedLeaves = self.pinnedLeaves()
 		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
@@ -165,26 +165,26 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		You can use this method to replace one `PermutationSpace` with alternatives that pin one
 		candidate `Leaf` at `pile`. When `pile` is `None`, this method selects the first pile whose
-		value is a `LeafOptions`. When `leavesToPin` is false-valued, this method uses every `Leaf`
-		represented by the selected `LeafOptions`. Candidates already pinned in `self` are omitted.
+		value is a `ChoicesLeaf`. When `leavesToPin` is false-valued, this method uses every `Leaf`
+		represented by the selected `ChoicesLeaf`. Candidates already pinned in `self` are omitted.
 
-		If `pile` does not contain a `LeafOptions`, this method returns an iterable containing `self`
+		If `pile` does not contain a `ChoicesLeaf`, this method returns an iterable containing `self`
 		without copying `self`.
 
 		Parameters
 		----------
 		pile : Pile | None = None
 			`Pile` at which to pin each candidate `Leaf`. A value of `None` selects the first pile
-			whose value is a `LeafOptions`.
+			whose value is a `ChoicesLeaf`.
 		leavesToPin : Iterable[Leaf] = ()
 			Candidate `Leaf` values. A false-valued `leavesToPin` selects every `Leaf` represented by
-			the selected `LeafOptions`.
+			the selected `ChoicesLeaf`.
 
 		Returns
 		-------
 		deconstructed : Iterable[PermutationSpace]
 			Iterable that yields one new `PermutationSpace` for each candidate `Leaf` that is not
-			already pinned, or yields `self` once when `pile` does not contain a `LeafOptions`.
+			already pinned, or yields `self` once when `pile` does not contain a `ChoicesLeaf`.
 
 		Collection Integrity
 		--------------------
@@ -193,11 +193,11 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		`self` object rather than a copy.
 		"""
 		if pile is None:
-			pile = first(filterLeaf(leafOptions吗, self))
-		if (leafOptions := self.getLeafOptions(pile)) is None:
+			pile = first(filterLeaf(choicesLeaf吗, self))
+		if (choicesLeaf := self.getChoicesLeaf(pile)) is None:
 			deconstructed: Iterable[PermutationSpace] = [self]
 		else:
-			leavesToPin = leavesToPin or _e.getIteratorOfLeaves(leafOptions)
+			leavesToPin = leavesToPin or _e.getIteratorOfLeaves(choicesLeaf)
 			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
 		return deconstructed
 
@@ -223,7 +223,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		deconstructedPermutationSpace: list[PermutationSpace] = []
 		if self.leafNotPinned吗(leaf):
 			leafInPileRange: Callable[[int], bool] = compose(
-				partial(leafInLeafOptions吗, leaf), partial(self.getLeafOptions, default=bit_mask(len(self)))
+				partial(leafInChoicesLeaf吗, leaf), partial(self.getChoicesLeaf, default=bit_mask(len(self)))
 			)
 			pinLeafAt: Callable[[int], PermutationSpace] = partial(self.atPilePinLeaf, leaf=leaf)
 			deconstructedPermutationSpace.extend(map(pinLeafAt, filter(leafInPileRange, filter(self.pileUndetermined吗, leafDomain))))
@@ -257,8 +257,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		def leafInPileRangeByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
-				leafOptions: LeafOptions = raiseIfNone(self.getLeafOptions(domain[次], default=bit_mask(len(self))))
-				return leafInLeafOptions吗(leaves[次], leafOptions)
+				choicesLeaf: ChoicesLeaf = raiseIfNone(self.getChoicesLeaf(domain[次], default=bit_mask(len(self))))
+				return leafInChoicesLeaf吗(leaves[次], choicesLeaf)
 
 			return workhorse
 
@@ -301,7 +301,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return deconstructedPermutationSpace
 
 	def pinnedLeaves(self) -> PinnedLeaves:
-		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
+		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: choicesLeaf`.
 
 		Returns
 		-------
@@ -311,14 +311,14 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return filterLeaf(leaf吗, self)
 
 	def undeterminedPiles(self) -> UndeterminedPiles:
-		"""Return a dictionary *unsorted* by `pile` of all `pile: leafOptions` in `PermutationSpace`.
+		"""Return a dictionary *unsorted* by `pile` of all `pile: choicesLeaf` in `PermutationSpace`.
 
 		Returns
 		-------
-		pilesUndetermined : dict[int, LeafOptions]
-			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
+		pilesUndetermined : dict[int, ChoicesLeaf]
+			Dictionary of `pile: choicesLeaf`, if a `choicesLeaf` is defined at `pile`.
 		"""
-		return filterLeaf(leafOptions吗, self)
+		return filterLeaf(choicesLeaf吗, self)
 
 	@overload
 	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...
@@ -349,30 +349,30 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return default
 
 	@overload
-	def getLeafOptions(self, pile: Pile, default: None = None) -> LeafOptions | None: ...
+	def getChoicesLeaf(self, pile: Pile, default: None = None) -> ChoicesLeaf | None: ...
 	@overload
-	def getLeafOptions(self, pile: Pile, default: LeafOptions) -> LeafOptions: ...
+	def getChoicesLeaf(self, pile: Pile, default: ChoicesLeaf) -> ChoicesLeaf: ...
 	@overload
-	def getLeafOptions[个](self, pile: Pile, default: 个) -> LeafOptions | 个: ...
-	def getLeafOptions[个](self, pile: Pile, default: LeafOptions | 个 | None = None) -> LeafOptions | 个 | None:
-		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `LeafOptions`.
+	def getChoicesLeaf[个](self, pile: Pile, default: 个) -> ChoicesLeaf | 个: ...
+	def getChoicesLeaf[个](self, pile: Pile, default: ChoicesLeaf | 个 | None = None) -> ChoicesLeaf | 个 | None:
+		"""Read `permutationSpace[pile]` only when `permutationSpace[pile]` is a `ChoicesLeaf`.
 
 		Parameters
 		----------
 		pile : Pile
 			`Pile` index to look up in `permutationSpace`.
-		default : LeafOptions | None = None
-			Value to return when `permutationSpace[pile]` is not a `LeafOptions`.
+		default : ChoicesLeaf | None = None
+			Value to return when `permutationSpace[pile]` is not a `ChoicesLeaf`.
 
 		Returns
 		-------
-		leafOptionsOrNone : LeafOptions | None
-			`LeafOptions` value from `permutationSpace[pile]`, or `default`.
+		choicesLeafOrNone : ChoicesLeaf | None
+			`ChoicesLeaf` value from `permutationSpace[pile]`, or `default`.
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
-		ImaLeafOptions: LeafSpace = self[pile]
-		if leafOptions吗(ImaLeafOptions):
-			return ImaLeafOptions
+		ImaChoicesLeaf: LeafSpace = self[pile]
+		if choicesLeaf吗(ImaChoicesLeaf):
+			return ImaChoicesLeaf
 		return default
 
 	def leafNotPinned吗(self, leaf: Leaf) -> bool:
@@ -491,8 +491,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			Determine whether a `Pile` still requires a `Leaf` assignment.
 		`mapFolding._e.filters.isLeaf吗`
 			Narrow an existing `LeafSpace` value to `Leaf`.
-		`mapFolding._e.filters.isLeafOptions吗`
-			Narrow an existing `LeafSpace` value to `LeafOptions`.
+		`mapFolding._e.filters.isChoicesLeaf吗`
+			Narrow an existing `LeafSpace` value to `ChoicesLeaf`.
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
 		return leaf吗(self[pile])
@@ -501,7 +501,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""Determine whether `pile` still requires a `Leaf` assignment.
 
 		Use this method when control flow concerns whether a `Pile` still requires a `Leaf`
-		assignment. Use `isLeafOptions吗` when the logic already has a `LeafSpace` value and needs
+		assignment. Use `isChoicesLeaf吗` when the logic already has a `LeafSpace` value and needs
 		Python type narrowing.
 
 		Parameters
@@ -512,38 +512,38 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		pileIsUndetermined : bool
-			`True` if this `PermutationSpace` contains `LeafOptions` at `pile`.
+			`True` if this `PermutationSpace` contains `ChoicesLeaf` at `pile`.
 
 		See Also
 		--------
 		`pilePinned吗`
 			Determine whether a `Pile` already has a pinned `Leaf`.
-		`mapFolding._e.filters.isLeafOptions吗`
-			Narrow an existing `LeafSpace` value to `LeafOptions`.
+		`mapFolding._e.filters.isChoicesLeaf吗`
+			Narrow an existing `LeafSpace` value to `ChoicesLeaf`.
 		`mapFolding._e.filters.isLeaf吗`
 			Narrow an existing `LeafSpace` value to `Leaf`.
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
-		return leafOptions吗(self[pile])
+		return choicesLeaf吗(self[pile])
 
 	def _solidifyLeafSpace(self) -> None:
 		count: int = self.leafCount
 		if count < len(self):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
 			leavesPinned: PinnedLeaves = self.pinnedLeaves()
-			leafAntiOptions: LeafOptions = _e.makeLeafAntiOptions(len(self), leavesPinned.values())
+			antiChoicesLeaf: ChoicesLeaf = _e.makeAntiChoicesLeaf(len(self), leavesPinned.values())
 			for pile in filterfalse[Pile](leavesPinned.__contains__, self):
-				self[pile] &= leafAntiOptions
+				self[pile] &= antiChoicesLeaf
 			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
 			if count < self.leafCount:
 				self._solidifyLeafSpace()
 
 	def _solidifyLeafSpaceAtPile(self, pile: Pile) -> None:
 		rangeOfPile: LeafSpace | None = self[pile]
-		if leafOptions吗(rangeOfPile):
+		if choicesLeaf吗(rangeOfPile):
 			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
-			rangeOfPile = _e.leafOptionsLeafNone(rangeOfPile)
-			if leafOptions吗(rangeOfPile):
+			rangeOfPile = _e.choicesLeafLeafNone(rangeOfPile)
+			if choicesLeaf吗(rangeOfPile):
 				self[pile] = rangeOfPile
 			elif rangeOfPile is None:
 				self.valid = False
@@ -750,7 +750,7 @@ class EliminationState:
 		functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = list(boxOfFunctionsReduction)
 		for permutationSpace in boxOfPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
-			sumPermutationSpace: Leaf | LeafOptions = sum(permutationSpace.values())
+			sumPermutationSpace: Leaf | ChoicesLeaf = sum(permutationSpace.values())
 			次: int = len(functionsReduction)
 
 			while 次:

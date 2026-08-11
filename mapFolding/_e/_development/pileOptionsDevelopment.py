@@ -7,15 +7,14 @@ from __future__ import annotations
 from bisect import bisect_left
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
-from humpy_cytoolz import curry as syntacticCurry
 from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
-from mapFolding._e import getIteratorOfLeaves, leafOrigin, makeLeafOptions
+from mapFolding._e import getIteratorOfLeaves, leafOrigin, makeChoicesLeaf
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pileOptions import getLeafOptions
+from mapFolding._e.pileOptions import getChoicesLeaf
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import flatten
 from pprint import pprint
@@ -24,48 +23,42 @@ from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
 	import pandas
-
-# TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
 
 #======== Boolean filters ======================================
 
-@syntacticCurry
 def filterCeiling(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 	return pile < int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf))) - howManyDimensionsHaveOddParity(leaf) + 2 - (leaf == leafOrigin)
 
-@syntacticCurry
 def filterFloor(pile: Pile, leaf: Leaf) -> bool:
 	return int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin) <= pile
 
-@syntacticCurry
 def filterParity(pile: Pile, leaf: Leaf) -> bool:
 	return (pile & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) & 1)
 
-@syntacticCurry
 def filterDoubleParity(pile: Pile, dimensionsTotal: int, leaf: Leaf) -> bool:
 	if leaf != 首零(dimensionsTotal) + 零:
 		return True
 	return (pile >> 1 & 1) == ((int(bit_flip(0, dimensionNearestTail(leaf) + 1)) + howManyDimensionsHaveOddParity(leaf) - 1 - (leaf == leafOrigin)) >> 1 & 1)
 
-#======== getLeafOptions ======================================
+#======== getChoicesLeaf ======================================
 
 @cache
-def _getLeafOptions(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> LeafOptions:
-	leafOptions: Iterable[Leaf] = range(leavesTotal)
+def _getChoicesLeaf(pile: Pile, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> ChoicesLeaf:
+	choicesLeaf: Iterable[Leaf] = range(leavesTotal)
 	if mapShapeIs2上nDimensions(mapShape):
-		parityMatch: Callable[[Leaf], bool] = filterParity(pile)
-		pileAboveFloor: Callable[[Leaf], bool] = filterFloor(pile)
-		pileBelowCeiling: Callable[[Leaf], bool] = filterCeiling(pile, dimensionsTotal)
-		matchLargerStep: Callable[[Leaf], bool] = filterDoubleParity(pile, dimensionsTotal)
+		parityMatch: Callable[[Leaf], bool] = partial(filterParity, pile)
+		pileAboveFloor: Callable[[Leaf], bool] = partial(filterFloor, pile)
+		pileBelowCeiling: Callable[[Leaf], bool] = partial(filterCeiling, pile, dimensionsTotal)
+		matchLargerStep: Callable[[Leaf], bool] = partial(filterDoubleParity, pile, dimensionsTotal)
 
-		leafOptions = filter(parityMatch, leafOptions)
-		leafOptions = filter(pileAboveFloor, leafOptions)
-		leafOptions = filter(pileBelowCeiling, leafOptions)
-		leafOptions = filter(matchLargerStep, leafOptions)
+		choicesLeaf = filter(parityMatch, choicesLeaf)
+		choicesLeaf = filter(pileAboveFloor, choicesLeaf)
+		choicesLeaf = filter(pileBelowCeiling, choicesLeaf)
+		choicesLeaf = filter(matchLargerStep, choicesLeaf)
 
-	return makeLeafOptions(leavesTotal, leafOptions)
+	return makeChoicesLeaf(leavesTotal, choicesLeaf)
 
 #======== Functions to help find a formula ======================================
 
@@ -77,8 +70,8 @@ def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPile
 	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: EliminationState, pile: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	from mapFolding._e.pileOptions import getDictionaryLeafOptions
-	return {leaves: sorted(filterfalse(boxOfLeaves.__contains__, (getIteratorOfLeaves(getDictionaryLeafOptions(state)[pile]))))
+	from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+	return {leaves: sorted(filterfalse(boxOfLeaves.__contains__, (getIteratorOfLeaves(getDictionaryChoicesLeaf(state)[pile]))))
 		for leaves, boxOfLeaves in DOTitems(_getGroupedBy(state, pile, groupByLeavesAtPiles))}
 
 if __name__ == '__main__':
@@ -203,9 +196,9 @@ pp3  = (3, 5, 9, 17, 33)
 
 	print(f"{pile=}\t{pileDimension=}")
 	print("computed=", sorted(set(pileRange)))
-	realRange = tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))
+	realRange = tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))
 	print(f"{realRange=}")
-	pileAnte = tuple(getIteratorOfLeaves(getLeafOptions(state, pile - 1)))
+	pileAnte = tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile - 1)))
 	print(f"{pileAnte=}")
 
 	pileRangeByFormula: bool = False
@@ -216,13 +209,11 @@ pp3  = (3, 5, 9, 17, 33)
 		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
 		# Yes, sort of. `Z0Z_alfaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
-		@syntacticCurry
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
 			return list(map(add(dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
 
-		@syntacticCurry
 		def Z0Z_alfaBeta(state: EliminationState, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
-			return list(flatten(map(intraDimensionalLeaves(state), state.productsOfDimensions[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+			return list(flatten(map(partial(intraDimensionalLeaves, state), state.productsOfDimensions[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
 
 		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
@@ -286,12 +277,12 @@ pp3  = (3, 5, 9, 17, 33)
 			return tuple(sorted(pileRange))
 
 		for pile in range(首一(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real := tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed := Z0Z_getPileRangeEven(state, pile)), end=': ')
+			print(pile, (real := tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))) == (computed := Z0Z_getPileRangeEven(state, pile)), end=': ')
 			# print(f"{ansiColors.Green}surplus: {set(computed).difference(real)}", f"{ansiColors.Magenta}missing: {set(real).difference(computed)}{ansiColorReset}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
 		for pile in range((零) + 首二(state.dimensionsTotal), 首零一(state.dimensionsTotal), 2):
-			print(pile, (real := tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))) == (computed := Z0Z_getPileRange(state, pile)), end=': ')
+			print(pile, (real := tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))) == (computed := Z0Z_getPileRange(state, pile)), end=': ')
 			# print(f"surplus: {set(computed).difference(real)}", f"missing: {set(real).difference(computed)}", sep='\n')
 			pprint(f"{computed=}", width=180)
 
@@ -301,6 +292,6 @@ pp3  = (3, 5, 9, 17, 33)
 			# else:
 			# 	pile+=1
 			# zz = tuple(map(partial(xor, 1), zz))
-			# print(pile, (ll:=getLeafOptions(state, pile)) == (zz), end=': ')
+			# print(pile, (ll:=getChoicesLeaf(state, pile)) == (zz), end=': ')
 			# # print(set(zz).difference(ll), set(ll).difference(zz), sep='\t')
 			# pprint(zz, width=180)

@@ -10,14 +10,15 @@ from mapFolding._e.semiotics import leafOrigin as leafOrigin, pileOrigin as pile
 
 # isort: split
 from mapFolding._e.leafDomains import getDomainLeaf as getDomainLeaf, getLookupDomainsLeaves as getLookupDomainsLeaves
-from mapFolding._e.pileOptions import getLeafOptions as getLeafOptions
+from mapFolding._e.pileOptions import getChoicesLeaf as getChoicesLeaf
 
 # isort: split
 from mapFolding._e._disaggregation import getIteratorOfLeaves as getIteratorOfLeaves
 
 # isort: split
 from mapFolding._e._beDRY import (
-	getProductsOfDimensions as getProductsOfDimensions, getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
-	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, howManyLeavesInLeafOptions as howManyLeavesInLeafOptions,
-	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, leafOptionsAND as leafOptionsAND,
-	leafOptionsLeafNone as leafOptionsLeafNone, makeLeafAntiOptions as makeLeafAntiOptions, makeLeafOptions as makeLeafOptions)
+	choicesLeafAND as choicesLeafAND, choicesLeafLeafNone as choicesLeafLeafNone, getProductsOfDimensions as getProductsOfDimensions,
+	getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
+	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, howManyLeavesInChoicesLeaf as howManyLeavesInChoicesLeaf,
+	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, makeAntiChoicesLeaf as makeAntiChoicesLeaf,
+	makeChoicesLeaf as makeChoicesLeaf)

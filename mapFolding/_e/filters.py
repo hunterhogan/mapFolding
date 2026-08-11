@@ -14,7 +14,7 @@ Contents
 --------
 Boolean antecedents
 	leafIsInPileRange
-		You can test whether a `leaf` is present in `leafOptions`.
+		You can test whether a `leaf` is present in `choicesLeaf`.
 	leafIsNotPinned
 		You can test whether a `leaf` is absent from `permutationSpace.values()`.
 	leafPinned吗
@@ -27,8 +27,8 @@ Boolean antecedents
 		You can test whether `permutationSpace[pile]` is not a `Leaf`.
 	thisIsALeaf
 		You can narrow `leafSpace` to a `Leaf`.
-	thisIsALeafOptions
-		You can narrow `leafSpace` to a `LeafOptions`.
+	thisIsAChoicesLeaf
+		You can narrow `leafSpace` to a `ChoicesLeaf`.
 
 References
 ----------
@@ -42,7 +42,7 @@ References
 """
 from __future__ import annotations
 
-from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
 from operator import attrgetter
 from typing import TYPE_CHECKING, TypeIs
 
@@ -52,23 +52,23 @@ if TYPE_CHECKING:
 
 #======== Boolean antecedents ================================================
 
-def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
-	"""Test whether `leaf` is present in `leafOptions`.
+def leafInChoicesLeaf吗(leaf: Leaf, choicesLeaf: ChoicesLeaf) -> bool:
+	"""Test whether `leaf` is present in `choicesLeaf`.
 
-	You can use `leafInLeafOptions吗` in an `if` statement, or you can pass `leafInLeafOptions吗`
+	You can use `leafInChoicesLeaf吗` in an `if` statement, or you can pass `leafInChoicesLeaf吗`
 	as a predicate to a filtering utility described in the module docstring.
 
 	Parameters
 	----------
 	leaf : Leaf
 		`leaf` index.
-	leafOptions : LeafOptions
+	choicesLeaf : ChoicesLeaf
 		Bitset of `leaf` membership for a pile.
 
 	Returns
 	-------
 	leafIsPresent : bool
-		`True` if `leafOptions` contains `leaf`.
+		`True` if `choicesLeaf` contains `leaf`.
 
 	References
 	----------
@@ -76,7 +76,7 @@ def leafInLeafOptions吗(leaf: Leaf, leafOptions: LeafOptions) -> bool:
 		https://gmpy2.readthedocs.io/en/latest/mpz.html
 
 	"""
-	return leafOptions.bit_test(leaf)
+	return choicesLeaf.bit_test(leaf)
 
 def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 	"""Return `True` if `leaf` is pinned in `leavesPinned`.
@@ -123,7 +123,7 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	Parameters
 	----------
 	leafSpace : LeafSpace | None
-		`Leaf`, `LeafOptions`, or `None` to inspect.
+		`Leaf`, `ChoicesLeaf`, or `None` to inspect.
 
 	Returns
 	-------
@@ -133,8 +133,8 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 
 	See Also
 	--------
-	`isLeafOptions吗`
-		Narrow a `LeafSpace` value to `LeafOptions`.
+	`isChoicesLeaf吗`
+		Narrow a `LeafSpace` value to `ChoicesLeaf`.
 	`mapFolding._e.dataBaskets.PermutationSpace.pilePinned吗`
 		Determine whether a `Pile` already has a pinned `Leaf`.
 	`mapFolding._e.dataBaskets.PermutationSpace.pileUndetermined吗`
@@ -142,24 +142,24 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""
 	return isinstance(leafSpace, Leaf)
 
-def leafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
-	"""Identify and narrow a `LeafSpace` value to `LeafOptions`.
+def choicesLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[ChoicesLeaf]:
+	"""Identify and narrow a `LeafSpace` value to `ChoicesLeaf`.
 
 	Use this function when control flow already has a `LeafSpace` value and needs to distinguish
 	the Python types in `LeafSpace`. A `True` result narrows `leafSpace` to the bitset type
-	`LeafOptions`. Use `PermutationSpace.pileUndetermined吗` when the logic instead asks whether
+	`ChoicesLeaf`. Use `PermutationSpace.pileUndetermined吗` when the logic instead asks whether
 	a `Pile` still requires a `Leaf` assignment.
 
 	Parameters
 	----------
 	leafSpace : LeafSpace | None
-		`Leaf`, `LeafOptions`, or `None` to inspect.
+		`Leaf`, `ChoicesLeaf`, or `None` to inspect.
 
 	Returns
 	-------
-	leafSpaceIsLeafOptions : TypeIs[LeafOptions]
-		`True` if `leafSpace` is an instance of `LeafOptions` and the positive branch can treat
-		`leafSpace` as `LeafOptions`.
+	leafSpaceIsChoicesLeaf : TypeIs[ChoicesLeaf]
+		`True` if `leafSpace` is an instance of `ChoicesLeaf` and the positive branch can treat
+		`leafSpace` as `ChoicesLeaf`.
 
 	See Also
 	--------
@@ -170,10 +170,10 @@ def leafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	`mapFolding._e.dataBaskets.PermutationSpace.pilePinned吗`
 		Determine whether a `Pile` already has a pinned `Leaf`.
 	"""
-	return isinstance(leafSpace, LeafOptions)
+	return isinstance(leafSpace, ChoicesLeaf)
 
-def pileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
-	return isinstance(pileLeafSpace[0], int) and leafOptions吗(pileLeafSpace[1])
+def pileChoicesLeaf吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, ChoicesLeaf]]:
+	return isinstance(pileLeafSpace[0], int) and choicesLeaf吗(pileLeafSpace[1])
 
 #======== Filtering functions ================================================
 

@@ -20,7 +20,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Callable, Collection, Iterable, Sequence
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding._e.theTypes import Folding, Leaf, LeafOptions, LeafSpace, Pile, PinnedLeaves
+	from mapFolding._e.theTypes import ChoicesLeaf, Folding, Leaf, LeafSpace, Pile, PinnedLeaves
 	from pathlib import Path
 
 # mapShape: tuple[int, ...] = getMapNext(n)
@@ -62,11 +62,11 @@ def _makeDescendants(folding: Folding) -> tuple[Folding, ...]:
 	# cc = len(new folding) - bb
 	# If I put a Leaf in every new Pile:
 	# pile permutations = P(bb, cc) = bb! / (bb - cc)!
-	# If I put a LeafOptions in every new Pile:
-	# each new LeafOptions = makeLeafOptions(new leavesTotal, range(bb, bb + cc))
+	# If I put a ChoicesLeaf in every new Pile:
+	# each new ChoicesLeaf = makeChoicesLeaf(new leavesTotal, range(bb, bb + cc))
 	# pile combinations = bb Choose cc = bb! / (cc! * (bb - cc)!)
-	# If I use LeafOptions, I _think_ it will be easier for me to use the functions from the
-	# `elimination` algorithms. I can start with LeafOptions, which means PermutationSpace, run
+	# If I use ChoicesLeaf, I _think_ it will be easier for me to use the functions from the
+	# `elimination` algorithms. I can start with ChoicesLeaf, which means PermutationSpace, run
 	# `reduceLeafSpace` (without crossed creases, which takes most of the time), `moveToBoxOfFolding`,
 	# `deconstructAtPile` on max(Pile), repeat starting at `reduceLeafSpace` until
 	# boxOfPermutationSpace is empty. Then send boxOfFolding to the custom `_foldingValid吗`, which will

@@ -65,7 +65,7 @@ from mapFolding._e._2上nDimensional.pinByCrease import (
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
 from more_itertools import partition
 from operator import getitem, neg
@@ -238,7 +238,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
 	fails [1].
 
-	This function seeds `state.boxOfPermutationSpace` using `addLeafOptions` [2]
+	This function seeds `state.boxOfPermutationSpace` using `addChoicesLeaf` [2]
 	when `state.boxOfPermutationSpace` is empty. This function validates `pileDepth`
 	using `intInnit` from `hunterMakesPy` [3] and `operator.getitem` [4]. This
 	function then chooses a symmetric sequence of `pile` values near both ends of the
@@ -281,7 +281,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 	----------
 	[1] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
 
-	[2] mapFolding._e._beDRY.addLeafOptions.
+	[2] mapFolding._e._beDRY.addChoicesLeaf.
 
 	[3] hunterMakesPy - Context7.
 		https://context7.com/hunterhogan/huntermakespy
@@ -295,7 +295,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 		return state
 
 	if not state.boxOfPermutationSpace:
-		state.boxOfPermutationSpace.append(PermutationSpace().addMissingPileLeafSpace(getDictionaryLeafOptions(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace().addMissingPileLeafSpace(getDictionaryChoicesLeaf(state)))
 
 	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
 	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,

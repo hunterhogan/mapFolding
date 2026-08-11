@@ -9,8 +9,8 @@ from gmpy2 import bit_clear
 from humpy_cytoolz import groupby as toolz_groupby
 from mapFolding import _e
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
-from mapFolding._e.filters import leafInLeafOptions吗, 是valid
-from mapFolding._e.theTypes import LeafOptions
+from mapFolding._e.filters import leafInChoicesLeaf吗, 是valid
+from mapFolding._e.theTypes import ChoicesLeaf
 from operator import methodcaller
 from typing import TYPE_CHECKING
 
@@ -92,7 +92,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):
 			boxOfExcludeLeaf_r.append(permutationSpace)
 
-		elif leafInLeafOptions吗(leaf_k, permutationSpace.getLeafOptions(pile_k, LeafOptions(0))):
+		elif leafInChoicesLeaf吗(leaf_k, permutationSpace.getChoicesLeaf(pile_k, ChoicesLeaf(0))):
 			permutationSpaceCopy: PermutationSpace = permutationSpace.copy()
 			permutationSpaceCopy[pile_k] = bit_clear(permutationSpaceCopy[pile_k], leaf_k)
 			state.boxOfPermutationSpace.append(permutationSpaceCopy)

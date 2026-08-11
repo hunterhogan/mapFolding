@@ -7,7 +7,7 @@ from mapFolding._e._2上nDimensional import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, getLeavesCreaseAnte,
 	getLeavesCreasePost, howManyDimensionsHaveOddParity, leafInSubHyperplane, moreThanLeaf零吗, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一,
 	首零一二)
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from more_itertools import last
 from operator import getitem, neg
 from typing import TYPE_CHECKING
@@ -15,7 +15,7 @@ from Z0Z_tools import exclude
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import EliminationState
-	from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
 
 #======== Domain-based subroutines for analyzing a specific `pile`. =======
 
@@ -63,13 +63,13 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	leafAt二:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(二))
 	leafAt二Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(二) + state.首))
 
-	dictionaryLeafOptions: dict[Pile, LeafOptions] = getDictionaryLeafOptions(state)
+	dictionaryChoicesLeaf: dict[Pile, ChoicesLeaf] = getDictionaryChoicesLeaf(state)
 	boxOfRemoveLeaves: list[int] = []
 
 #========= use `leafAt一` to exclude a `leaf` from `pile` ===================
 
 	pileExcluder: Pile = 一
-	for dimension, leaf in enumerate(getIteratorOfLeaves(dictionaryLeafOptions[pileExcluder])):
+	for dimension, leaf in enumerate(getIteratorOfLeaves(dictionaryChoicesLeaf[pileExcluder])):
 		if leaf == leafAt一:
 			if dimension < state.dimensionsTotal - 2:
 				boxOfRemoveLeaves.extend([一, 首零(state.dimensionsTotal) + leafAt一])
@@ -90,7 +90,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 #========= use `leafAt一Ante首` to exclude a `leaf` from `pile` ===================
 
 	pileExcluder = neg(一) + state.首
-	for dimension, leaf in enumerate(getIteratorOfLeaves(dictionaryLeafOptions[pileExcluder])):
+	for dimension, leaf in enumerate(getIteratorOfLeaves(dictionaryChoicesLeaf[pileExcluder])):
 		if leaf == leafAt一Ante首:
 			if dimension == 0:
 				boxOfRemoveLeaves.extend([一])
@@ -345,7 +345,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	dimensionTail: int = dimensionNearestTail(leafAt二Ante首)
 
 	#-------- I DON'T KNOW AND I DON'T CARE WHY THIS WORKS AS LONG AS IT WORKS -------
-	if isBit1吗(getitem(dictionaryLeafOptions, (neg(二) + state.首)), leafAt二Ante首 - 1):
+	if isBit1吗(getitem(dictionaryChoicesLeaf, (neg(二) + state.首)), leafAt二Ante首 - 1):
 		dimension = 三
 		if not isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
 
@@ -466,4 +466,4 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 	del dimensionHead, dimensionTail
 
-	return sorted(set(getIteratorOfLeaves(dictionaryLeafOptions[state.pile])).difference(set(boxOfRemoveLeaves)))
+	return sorted(set(getIteratorOfLeaves(dictionaryChoicesLeaf[state.pile])).difference(set(boxOfRemoveLeaves)))

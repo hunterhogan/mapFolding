@@ -6,7 +6,7 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import keyfilter as filterPile
 from itertools import pairwise
-from mapFolding._e import getDomainLeaf, makeLeafAntiOptions
+from mapFolding._e import getDomainLeaf, makeAntiChoicesLeaf
 from mapFolding._e._2上nDimensional import 一, 二, 零
 from mapFolding._e._2上nDimensional.pinIt import pin3beans2, pinLeavesDimension二, pinPilesAtEnds
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
@@ -24,7 +24,7 @@ from Z0Z_tools import DOTitems
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import Folding, Leaf, LeafOptions, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf, Folding, Leaf, Pile
 	from pathlib import Path
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_development' / 'albums'
@@ -34,7 +34,7 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 	leaf一: Leaf = folding[-1]
 	domain一: Iterable[Pile] = getDomainLeaf(state, leaf一)
 	leaves: tuple[Leaf, ...] = tuple(reversed(folding[2:-1]))
-	leafAntiOptions: LeafOptions = makeLeafAntiOptions(state.leavesTotal, leaves)
+	antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.leavesTotal, leaves)
 	boxOfPermutationSpace: list[PermutationSpace] = []
 	for pile in tqdm(domain一, total=len(domain一), disable=False, position=position, leave=False, desc=f"for pile in domain一 of folding {folding[2:6]}"):
 		boxOfPermutationSpace.extend(state.boxOfPermutationSpace)
@@ -45,7 +45,7 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 
 		permutationSpace: PermutationSpace = state.boxOfPermutationSpace.pop()
 		permutationSpace = permutationSpace.atPilePinLeaf(state.pile, leaf一)
-		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(filterPile(state.pile.__lt__, permutationSpace.undeterminedPiles())), leafAntiOptions)
+		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(filterPile(state.pile.__lt__, permutationSpace.undeterminedPiles())), antiChoicesLeaf)
 		state.boxOfPermutationSpace.append(permutationSpace)
 		state.removeCreaseViolations().reduceAllPermutationSpace()
 

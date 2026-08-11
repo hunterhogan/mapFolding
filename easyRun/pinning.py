@@ -4,13 +4,13 @@ from __future__ import annotations
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
-from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, getLeafOptions, getLookupDomainsLeaves, howManyLeavesInLeafOptions
+from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves, howManyLeavesInChoicesLeaf
 from mapFolding._e._2上nDimensional import getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from math import prod
 from operator import methodcaller
 from pprint import pprint
@@ -20,15 +20,15 @@ import time
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding._e.theTypes import LeafOptions
+	from mapFolding._e.theTypes import ChoicesLeaf
 
 def printStatisticsPermutations(state: EliminationState) -> None:
-	def prodOfDOTvalues(boxOfLeafOptions: Iterable[LeafOptions]) -> int:
-		return prod(map(howManyLeavesInLeafOptions, boxOfLeafOptions))
+	def prodOfDOTvalues(boxOfChoicesLeaf: Iterable[ChoicesLeaf]) -> int:
+		return prod(map(howManyLeavesInChoicesLeaf, boxOfChoicesLeaf))
 
 	permutationsPermutationSpaceTotal: Callable[[Iterable[Any]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('extractUndeterminedPiles'))))
 	print(len(str(mm := fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
-	print(len(str(rr := prod(toolz_map(howManyLeavesInLeafOptions, filter(None, DOTvalues(getDictionaryLeafOptions(state))))))), rr, "dictionaryLeafOptions")
+	print(len(str(rr := prod(toolz_map(howManyLeavesInChoicesLeaf, filter(None, DOTvalues(getDictionaryChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
@@ -59,11 +59,11 @@ if __name__ == '__main__':
 		state = pinIt.pinLeavesDimension一(state)
 		state = pinIt.pinLeavesDimension二(state)
 		pprint(dictionaryLeafDomains := getLookupDomainsLeaves(state))
-		pprint(dictionaryLeafOptions := getDictionaryLeafOptions(state), width=200)
+		pprint(dictionaryChoicesLeaf := getDictionaryChoicesLeaf(state), width=200)
 		pprint(getLeafPredecessors(state), width=260)
 		pprint(state.boxOfFolding)
 		pprint(state.boxOfPermutationSpace)
-		print(*(format(x, '06b') for x in getIteratorOfLeaves(getLeafOptions(state, 28))))
+		print(*(format(x, '06b') for x in getIteratorOfLeaves(getChoicesLeaf(state, 28))))
 		print(*getLeavesCreaseAnte(state, 53))
 		print(*getLeavesCreasePost(state, 22))
 		print(list(getDomainLeaf(state, 首一(5) + 4)))

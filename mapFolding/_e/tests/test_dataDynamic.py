@@ -15,12 +15,12 @@ and the tests will automatically pick them up via parametrization.
 
 from __future__ import annotations
 
-from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, getLeafOptions, getLookupDomainsLeaves
+from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves
 from mapFolding._e._2上nDimensional import (
 	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二,
 	getLeavesCreaseAnte, getLeavesCreasePost)
 from mapFolding._e.dataBaskets import EliminationState
-from mapFolding._e.pileOptions import getDictionaryLeafOptions
+from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
 	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_7_5_4, p2上nDimensionalDomain7_6,
@@ -32,7 +32,7 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import LeafOptions, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf, Pile
 	from types import ModuleType
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
@@ -52,20 +52,20 @@ def test_getLookupDomainsLeaves(mapShape: tuple[int, ...]) -> None:
 		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getLookupDomainsLeaves.range.stop', leaf, mapShape)
 		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getLookupDomainsLeaves.range.step', leaf, mapShape)
 
-@pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafOptionsKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafOptionsKnown])
-def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
-	"""Verify getDictionaryLeafOptions against authoritative pile range data for all piles."""
+@pytest.mark.parametrize("mapShape", list(A001417.dictionaryChoicesLeafKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryChoicesLeafKnown])
+def test_getDictionaryChoicesLeaf(mapShape: tuple[int, ...]) -> None:
+	"""Verify getDictionaryChoicesLeaf against authoritative pile range data for all piles."""
 	state: EliminationState = EliminationState(mapShape=mapShape)
-	dictionaryLeafOptionsAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryLeafOptionsKnown[mapShape]
+	dictionaryChoicesLeafAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryChoicesLeafKnown[mapShape]
 
-	dictionaryLeafOptionsActual: dict[Pile, LeafOptions] = getDictionaryLeafOptions(state)
+	dictionaryChoicesLeafActual: dict[Pile, ChoicesLeaf] = getDictionaryChoicesLeaf(state)
 
-	assertEqualTo(len(dictionaryLeafOptionsActual), state.leavesTotal, 'getDictionaryLeafOptions', mapShape)
+	assertEqualTo(len(dictionaryChoicesLeafActual), state.leavesTotal, 'getDictionaryChoicesLeaf', mapShape)
 
 	for pile in range(state.leavesTotal):
-		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(dictionaryLeafOptionsActual[pile]))
-		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
-		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getDictionaryLeafOptions', pile, mapShape)
+		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(dictionaryChoicesLeafActual[pile]))
+		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryChoicesLeafAuthoritativeData[pile]
+		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getDictionaryChoicesLeaf', pile, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
 def test_getDomainLeaf(mapShape: tuple[int, ...]) -> None:
@@ -108,17 +108,17 @@ def test_getDomainLeafsCombined(domainFunction: CallableFunction[[EliminationSta
 	assertEqualTo(len(tuplesMissingFromActual), 0, domainFunction.__name__, mapShape)
 	assertEqualTo(len(tuplesExtraInActual), 0, domainFunction.__name__, mapShape)
 
-@pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafOptionsKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafOptionsKnown])
-def test_getLeafOptions(mapShape: tuple[int, ...]) -> None:
-	"""Verify getLeafOptions against authoritative pile range data for all piles."""
+@pytest.mark.parametrize("mapShape", list(A001417.dictionaryChoicesLeafKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryChoicesLeafKnown])
+def test_getChoicesLeaf(mapShape: tuple[int, ...]) -> None:
+	"""Verify getChoicesLeaf against authoritative pile range data for all piles."""
 	state: EliminationState = EliminationState(mapShape=mapShape)
-	dictionaryLeafOptionsAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryLeafOptionsKnown[mapShape]
+	dictionaryChoicesLeafAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryChoicesLeafKnown[mapShape]
 
 	for pile in range(state.leavesTotal):
-		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(getLeafOptions(state, pile)))
-		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryLeafOptionsAuthoritativeData[pile]
+		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))
+		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryChoicesLeafAuthoritativeData[pile]
 
-		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getLeafOptions', pile, mapShape)
+		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getChoicesLeaf', pile, mapShape)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
 @pytest.mark.parametrize("creaseKind,creaseFunction,dictionaryExpectedByMapShape", [("increase", getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown), ("decrease", getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown)], ids=["increase", "decrease"])

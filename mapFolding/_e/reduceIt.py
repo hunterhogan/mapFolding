@@ -7,8 +7,8 @@ from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗, pileLeafOptions吗
-from mapFolding._e.theTypes import Leaf, LeafOptions
+from mapFolding._e.filters import leafInChoicesLeaf吗, leafPinned吗, pileChoicesLeaf吗
+from mapFolding._e.theTypes import ChoicesLeaf, Leaf
 from more_itertools import extract, first, one
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTvalues, reverseLookup
@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
-def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, LeafOptions]], leafAntiOptions: LeafOptions) -> PermutationSpace:
+def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, ChoicesLeaf]], antiChoicesLeaf: ChoicesLeaf) -> PermutationSpace:
 	"""Update permutation space by removing forbidden leaves from specified piles.
 
 	(AI generated docstring)
@@ -31,24 +31,24 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 	This function implements the mechanical update logic used by all constraint-propagation
 	functions in the reduction system. Constraint encoders should call this function rather than
 	modifying `permutationSpace` directly to ensure consistent domain updates, proper normalization
-	via `leafOptionsLeafNone` [1], and early detection of unsatisfiable constraints.
+	via `choicesLeafLeafNone` [1], and early detection of unsatisfiable constraints.
 
-	The `pilesToUpdate` parameter contains explicit `(pile, leafOptions)` tuples because constraint
+	The `pilesToUpdate` parameter contains explicit `(pile, choicesLeaf)` tuples because constraint
 	encoders may need to restrict a different domain than the current `permutationSpace[pile]` value.
 	For example, when enforcing crease adjacency, the encoder provides the specific crease-neighbor
-	options to intersect with `leafAntiOptions`, not the broader current domain at that pile.
+	options to intersect with `antiChoicesLeaf`, not the broader current domain at that pile.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-		Dictionary mapping pile indices to leaf indices or `LeafOptions`. The function
+		Dictionary mapping pile indices to leaf indices or `ChoicesLeaf`. The function
 		mutates this dictionary in place.
-	pilesToUpdate : Iterable[tuple[Pile, LeafOptions]]
+	pilesToUpdate : Iterable[tuple[Pile, ChoicesLeaf]]
 		Pile indices to update and their corresponding leaf domains to restrict. Each tuple contains
-		a pile index and the `LeafOptions` bitset representing the domain to intersect with
-		`leafAntiOptions`. The provided `LeafOptions` may differ from `permutationSpace[pile]` when
+		a pile index and the `ChoicesLeaf` bitset representing the domain to intersect with
+		`antiChoicesLeaf`. The provided `ChoicesLeaf` may differ from `permutationSpace[pile]` when
 		the constraint encoder needs to restrict against a computed subset.
-	leafAntiOptions : LeafOptions
+	antiChoicesLeaf : ChoicesLeaf
 		Bitset representing forbidden leaves to exclude from all updated piles. The function computes
 		the intersection of each pile's domain with the complement of this bitset.
 
@@ -63,7 +63,7 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 	This function is the shared update subroutine for the constraint-propagation system orchestrated
 	by `reduceAllPermutationSpace` [2]. All constraint encoders (`reducePermutationSpace_*` functions)
 	call this function to perform domain updates. Constraint encoders should not modify
-	`permutationSpace` directly; they should identify forbidden leaves, construct `leafAntiOptions`,
+	`permutationSpace` directly; they should identify forbidden leaves, construct `antiChoicesLeaf`,
 	and delegate the actual update to this function.
 
 	The function enforces two critical invariants:
@@ -73,17 +73,17 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 
 	References
 	----------
-	[1] mapFolding._e.leafOptionsLeafNone
+	[1] mapFolding._e.choicesLeafLeafNone
 
 	[2] mapFolding._e.pinIt.reduceAllPermutationSpace
 
-	[3] mapFolding._e.leafOptionsAND
+	[3] mapFolding._e.choicesLeafAND
 
 	[4] gmpy2 - Integer arithmetic
 		https://gmpy2.readthedocs.io/en/latest/
 	"""
-	for pile, leafOptions in pilesToUpdate:
-		leafSpace: LeafSpace | None = _e.leafOptionsLeafNone(_e.leafOptionsAND(leafAntiOptions, leafOptions))
+	for pile, choicesLeaf in pilesToUpdate:
+		leafSpace: LeafSpace | None = _e.choicesLeafLeafNone(_e.choicesLeafAND(antiChoicesLeaf, choicesLeaf))
 		if leafSpace is None:
 			#=SIN= Early return.
 			permutationSpace.valid = False
@@ -111,7 +111,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -147,7 +147,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 						pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
 
 					if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-						leafAntiOptions: LeafOptions = _e.makeLeafAntiOptions(state.leavesTotal, (leaf_rCrease,))
+						antiChoicesLeaf: ChoicesLeaf = _e.makeAntiChoicesLeaf(state.leavesTotal, (leaf_rCrease,))
 
 						if pileOf_k < pileOf_r < pileOf_kCrease:
 							pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
@@ -159,7 +159,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 							pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
 					elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-						leafAntiOptions = _e.makeLeafAntiOptions(state.leavesTotal, (leaf_kCrease,))
+						antiChoicesLeaf = _e.makeAntiChoicesLeaf(state.leavesTotal, (leaf_kCrease,))
 
 						if pileOf_rCrease < pileOf_k < pileOf_r:
 							pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
@@ -181,8 +181,8 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 						continue
 
 					permutationSpace = reduceLeafSpace(permutationSpace
-							, filter(pileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
-							, leafAntiOptions
+							, filter(pileChoicesLeaf吗, extract(permutationSpace.items(), pilesForbidden))
+							, antiChoicesLeaf
 					)
 					if not permutationSpace.valid:
 						#=SIN= Early return.
@@ -197,8 +197,8 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 	"""I use this to propagate leaf pinning constraints.
 
 	I use this constraint encoder to enforce that every pinned leaf can appear at only one pile. For
-	every leaf pinned at a pile, I remove that leaf from `LeafOptions` at all other piles. When
-	`LeafOptions` at a pile reduces to a single leaf, I convert `pile: leafOptions` to `pile: leaf`
+	every leaf pinned at a pile, I remove that leaf from `ChoicesLeaf` at all other piles. When
+	`ChoicesLeaf` at a pile reduces to a single leaf, I convert `pile: choicesLeaf` to `pile: leaf`
 	(pinning the leaf).
 
 	Parameters
@@ -206,7 +206,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leafOptions`.
+		A dictionary of `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -219,7 +219,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
-		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), _e.makeLeafAntiOptions(state.leavesTotal, DOTvalues(leavesPinned)))
+		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), _e.makeAntiChoicesLeaf(state.leavesTotal, DOTvalues(leavesPinned)))
 		if len(leavesPinned) < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
@@ -230,16 +230,16 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 	I use this constraint encoder to detect naked subsets in the permutation space and remove
 	subset leaves from all other piles. A naked subset occurs when `n` piles share the same
-	`LeafOptions` containing exactly `n` leaves. Those `n` leaves can only appear in those `n`
-	piles, so I remove those leaves from `LeafOptions` at all other piles using `_reduceLeafSpace`.
+	`ChoicesLeaf` containing exactly `n` leaves. Those `n` leaves can only appear in those `n`
+	piles, so I remove those leaves from `ChoicesLeaf` at all other piles using `_reduceLeafSpace`.
 
 	Algorithm Details
 	-----------------
 	The function implements a specialized naked subset detector optimized for high throughput:
 
-	1. Extract `UndeterminedPiles` (piles with `LeafOptions`).
-	2. Group piles by their `LeafOptions` values.
-	3. Filter groups where the number of leaves in `LeafOptions` equals the number of piles sharing that `LeafOptions` (the naked subset criterion).
+	1. Extract `UndeterminedPiles` (piles with `ChoicesLeaf`).
+	2. Group piles by their `ChoicesLeaf` values.
+	3. Filter groups where the number of leaves in `ChoicesLeaf` equals the number of piles sharing that `ChoicesLeaf` (the naked subset criterion).
 	4. For each naked subset, remove subset leaves from all other piles.
 
 	The function iterates until no new leaves are pinned. The function is not a comprehensive
@@ -251,7 +251,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -265,16 +265,16 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 		leafCount: int = permutationSpace.leafCount
 
 		pilesUndetermined: UndeterminedPiles = permutationSpace.undeterminedPiles()
-		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
-		for pile, leafOptions in pilesUndetermined.items():
-			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)
+		groupByChoicesLeaf: dict[ChoicesLeaf, set[Pile]] = {}
+		for pile, choicesLeaf in pilesUndetermined.items():
+			groupByChoicesLeaf.setdefault(choicesLeaf, set()).add(pile)
 
-		groupByLeafOptions = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByLeafOptions)
-		for leafOptions, boxOfPiles in groupByLeafOptions.items():
-			if _e.howManyLeavesInLeafOptions(leafOptions) == len(boxOfPiles):
+		groupByChoicesLeaf = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByChoicesLeaf)
+		for choicesLeaf, boxOfPiles in groupByChoicesLeaf.items():
+			if _e.howManyLeavesInChoicesLeaf(choicesLeaf) == len(boxOfPiles):
 
 				permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles))
-					, _e.makeLeafAntiOptions(state.leavesTotal, _e.getIteratorOfLeaves(leafOptions))
+					, _e.makeAntiChoicesLeaf(state.leavesTotal, _e.getIteratorOfLeaves(choicesLeaf))
 				)
 
 		if permutationSpace.leafCount < leafCount:
@@ -290,7 +290,7 @@ def reducePermutationSpace_leafDomainOf0or1(state: EliminationState, permutation
 	state : EliminationState
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: leafOptions`.
+		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
 
 	Returns
 	-------
@@ -310,7 +310,7 @@ def reducePermutationSpace_leafDomainOf0or1(state: EliminationState, permutation
 		else:
 			leaf: Leaf | None = first(set(filterValue((1).__eq__, countDomainSizes, factory=dict[Leaf, int])).difference(leavesPinned.values()).difference([state.leavesTotal]), None)
 			if leaf is not None:
-				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInLeafOptions吗, leaf), pilesUndetermined, factory=dict[Leaf, LeafOptions])), leaf))
+				permutationSpace = reducePermutationSpace_LeafIsPinned(state, permutationSpace.atPilePinLeaf(one(filterLeaf(partial(leafInChoicesLeaf吗, leaf), pilesUndetermined, factory=dict[Leaf, ChoicesLeaf])), leaf))
 				permutationSpaceHasNewLeaf = True
 	return permutationSpace
 

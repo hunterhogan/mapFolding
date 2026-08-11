@@ -1,25 +1,25 @@
 # Ideas to improve the algorithms
 
-## Bifurcate `PermutationSpace` if a `LeafOptions` has exactly two leaves
+## Bifurcate `PermutationSpace` if a `ChoicesLeaf` has exactly two leaves
 
-This is a very blunt attack, but it might be useful. After `updateboxOfPermutationSpacePileRangesOfLeaves`, something like
-`(any(valfilter(bit_count == 3)), extractUndeterminedPiles, state.boxOfPermutationSpace)` to find all `LeafOptions` with
+This is a very blunt attack, but it might be useful. After `updateBoxOfPermutationSpacePileRangesOfLeaves`, something like
+`(any(valfilter(bit_count == 3)), extractUndeterminedPiles, state.boxOfPermutationSpace)` to find all `ChoicesLeaf` with
 exactly two leaves, then split the corresponding `PermutationSpace` into two `PermutationSpace` objects, replacing
-`LeafOptions` with `int`. Should I then run the new `PermutationSpace` back through
-`updateboxOfPermutationSpacePileRangesOfLeaves`? I _feel_ like `notEnoughOpenPiles`, for example, will eliminate some of the new
+`ChoicesLeaf` with `int`. Should I then run the new `PermutationSpace` back through
+`updateBoxOfPermutationSpacePileRangesOfLeaves`? I _feel_ like `notEnoughOpenPiles`, for example, will eliminate some of the new
 `PermutationSpace` objects, which is the point.
 
 ## Sophisticated bifurcation/separation of `PermutationSpace`
 
-Many relationships cannot be expressed with `LeafOptions`. In a 2^6 map, most of the time, leaf9 and leaf13 can be in any
+Many relationships cannot be expressed with `ChoicesLeaf`. In a 2^6 map, most of the time, leaf9 and leaf13 can be in any
 order, but if leaf13 is in pile3, pile5, or pile7, then leaf9 must precede leaf13. If leaf13 is pinned, `_conditionalPredecessors`
-will change the `LeafOptions` and `notEnoughOpenPiles` might disqualify the `PermutationSpace`. Nevertheless, it _might_ be
+will change the `ChoicesLeaf` and `notEnoughOpenPiles` might disqualify the `PermutationSpace`. Nevertheless, it _might_ be
 advantageous to divide the `PermutationSpace` into four dictionaries:
 
 1. pile3: leaf13
 2. pile5: leaf13
 3. pile7: leaf13
-4. At pile3, pile5, or pile7, remove leaf13 from `LeafOptions`.
+4. At pile3, pile5, or pile7, remove leaf13 from `ChoicesLeaf`.
 
 Then other effects would cascade through the four dictionaries due to other functions.
 
