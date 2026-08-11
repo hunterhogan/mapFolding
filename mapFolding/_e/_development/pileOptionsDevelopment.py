@@ -145,8 +145,8 @@ pp3  = (3, 5, 9, 17, 33)
 	"""
 
 	pile: Pile = 4
-	pileDimension = bisect_left(state.sumsOfProductsOfDimensionsNearest首, pile >> 1 << 1)
-	leafMinimum = isEven吗(pile) + state.productsOfDimensions[pileDimension]
+	pileDimension = bisect_left(state.mapShape首ProductsSums, pile >> 1 << 1)
+	leafMinimum = isEven吗(pile) + state.mapShapeProducts[pileDimension]
 	pileRange: list[Leaf] = []
 
 	pileRange.append(leafMinimum)
@@ -154,16 +154,16 @@ pp3  = (3, 5, 9, 17, 33)
 	if isEven吗(pile):
 		dd = pileDimension
 
-		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(iadd(leafMinimum - ss), state.sumsOfProductsOfDimensions[1:dd]))
-		pileRange.extend(map(iadd(leafMinimum - ss), state.sumsOfProductsOfDimensions[dd + 1: state.dimensionsTotal]))
+		ss = state.mapShapeProductsSums[dd]
+		pileRange.extend(map(iadd(leafMinimum - ss), state.mapShapeProductsSums[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum - ss), state.mapShapeProductsSums[dd + 1: state.dimensionsTotal]))
 
 		if dd < dimensionNearest首(pile):
 			dd += 1
 
-			ss = state.productsOfDimensions[dd]
-			# pileRange.extend(map(partial(isub, leafMinimum + ss), state.sumsOfProductsOfDimensions[1:dd]))
-			# pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+			ss = state.mapShapeProducts[dd]
+			# pileRange.extend(map(partial(isub, leafMinimum + ss), state.mapShapeProductsSums[1:dd]))
+			# pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
 
 		if (pile % 4 == 0) and ((零) + 首零(state.dimensionsTotal) in pileRange):
 			pileRange.remove((零) + 首零(state.dimensionsTotal))
@@ -172,27 +172,27 @@ pp3  = (3, 5, 9, 17, 33)
 	if isOdd吗(pile):
 		dd = pileDimension
 
-		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		ss = state.mapShapeProductsSums[dd]
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
 
 		dd += 1
 
-		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		ss = state.mapShapeProductsSums[dd]
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
 
 		dd += 1
 
-		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		ss = state.mapShapeProductsSums[dd]
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
 
 		dd += 1
 
-		ss = state.sumsOfProductsOfDimensions[dd]
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[1:dd]))
-		pileRange.extend(map(iadd(leafMinimum + ss), state.productsOfDimensions[dd + 1: state.dimensionsTotal]))
+		ss = state.mapShapeProductsSums[dd]
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[1:dd]))
+		pileRange.extend(map(iadd(leafMinimum + ss), state.mapShapeProducts[dd + 1: state.dimensionsTotal]))
 
 	print(f"{pile=}\t{pileDimension=}")
 	print("computed=", sorted(set(pileRange)))
@@ -210,10 +210,10 @@ pp3  = (3, 5, 9, 17, 33)
 		# Yes, sort of. `Z0Z_alfaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
 		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
-			return list(map(add(dimensionOrigin + 2), state.sumsOfProductsOfDimensions[1: dimensionNearest首(dimensionOrigin)]))
+			return list(map(add(dimensionOrigin + 2), state.mapShapeProductsSums[1: dimensionNearest首(dimensionOrigin)]))
 
 		def Z0Z_alfaBeta(state: EliminationState, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
-			return list(flatten(map(partial(intraDimensionalLeaves, state), state.productsOfDimensions[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
+			return list(flatten(map(partial(intraDimensionalLeaves, state), state.mapShapeProducts[2 + alfaStart: (state.dimensionsTotal - 1) + betaStop: charlieStep])))
 
 		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
@@ -223,11 +223,11 @@ pp3  = (3, 5, 9, 17, 33)
 			# ? 24 < even leaves < 32.
 			# piles 49, 51, 53, 55 need a higher start on yy=0.
 			for yy in range(3):
-				pileRange.extend(map(mul(state.productsOfDimensions[yy]), Z0Z_alfaBeta(state, betaStop=-(yy))))
+				pileRange.extend(map(mul(state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy))))
 
 			# 32 < even leaves
 			for yy in range(1):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy])
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(mul(state.mapShapeProducts[yy])
 					, Z0Z_alfaBeta(state
 						, alfaStart=yy + (state.dimensionsTotal - 2 - dimensionNearest首(pile))
 						, betaStop=-(yy)
@@ -235,14 +235,14 @@ pp3  = (3, 5, 9, 17, 33)
 			# ? 32 < odd leaves < 52
 			# ? 32 < odd leaves < 36
 			for yy in range(1, 3):
-				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
+				pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(mul(state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
 			# piles 51, 53, 55 need a higher start.
-			pileRange.extend(state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)])
+			pileRange.extend(state.mapShapeProducts[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)])
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
 			# pile5 needs a higher start.
-			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), state.productsOfDimensions[0:state.dimensionsTotal]))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), state.mapShapeProducts[0:state.dimensionsTotal]))
 
 			return tuple(sorted(pileRange))
 
@@ -253,7 +253,7 @@ pp3  = (3, 5, 9, 17, 33)
 				pileRange.extend(map(
 					add(1)
 					, (map(
-						mul(state.productsOfDimensions[yy])
+						mul(state.mapShapeProducts[yy])
 						, Z0Z_alfaBeta(state, alfaStart=0, betaStop=-(yy))
 				)
 			)
@@ -261,18 +261,18 @@ pp3  = (3, 5, 9, 17, 33)
 	)
 
 			# for yy in range(1):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy])
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(mul(state.mapShapeProducts[yy])
 			# 		, Z0Z_alfaBeta(state
 			# 			, alfaStart=yy+(state.dimensionsTotal - 2 - dimensionNearest首(pile))
 			# 			, betaStop=-(yy)
 			# 		))))
 			# for yy in range(1,3):
-			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(mul(state.productsOfDimensions[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
+			# 	pileRange.extend(map(partial(Z0Z_invert, state.dimensionsTotal), map(mul(state.mapShapeProducts[yy]), Z0Z_alfaBeta(state, betaStop=-(yy)))))
 
 			# dimension origins
-			pileRange.extend(map(add(1), state.productsOfDimensions[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))
+			pileRange.extend(map(add(1), state.mapShapeProducts[1 + ((零) + 首零(state.dimensionsTotal) < pile):dimensionNearest首(pile + 1)]))
 			# inverse dimension origins: 62, 61, 59, 55, 47, 31
-			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(add(1), state.productsOfDimensions[1:state.dimensionsTotal])))
+			pileRange.extend(map(partial(invertLeafIn2上nDimensions, state.dimensionsTotal), map(add(1), state.mapShapeProducts[1:state.dimensionsTotal])))
 
 			return tuple(sorted(pileRange))
 

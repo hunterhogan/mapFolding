@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain, pairwise, product as CartesianProduct, repeat, starmap
-from mapFolding._e import getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from mapFolding._e import getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
@@ -36,7 +36,7 @@ def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: Permutat
 		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT).moveToBoxOfFolding()
 
 def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
-	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, boxOfPermutationSpace))
+	return chain.from_iterable(map(PermutationSpace.deconstructPile, boxOfPermutationSpace))
 
 def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
 	tuple(map(queueStates.put, map(partial(reducePermutationSpace, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
@@ -45,17 +45,17 @@ def theorem2b(state: EliminationState) -> EliminationState:
 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):
 		state.Theorem2Multiplier = 2
 		dimension: int = state.mapShape.index(max(state.mapShape))
-		leaf_k: int = state.productsOfDimensions[dimension]
+		leaf_k: int = state.mapShapeProducts[dimension]
 		leaf_r: int = 2 * leaf_k
 		state = excludeLeaf_rBeforeLeaf_k(state, leaf_k, leaf_r)
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 	return state
 
 def theorem4(state: EliminationState) -> EliminationState:
-	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
+	for indicesSameDimensionLength in mapShapeLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 		for 次k, 次r in pairwise(indicesSameDimensionLength):
-			state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[次k], state.productsOfDimensions[次r])
+			state = excludeLeaf_rBeforeLeaf_k(state, state.mapShapeProducts[次k], state.mapShapeProducts[次r])
 			state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 	return state
 
@@ -66,7 +66,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryChoicesLeaf(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getDictionaryChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 
 		state = theorem4(state)

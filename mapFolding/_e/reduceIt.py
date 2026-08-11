@@ -271,7 +271,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 		groupByChoicesLeaf = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByChoicesLeaf)
 		for choicesLeaf, boxOfPiles in groupByChoicesLeaf.items():
-			if _e.howManyLeavesInChoicesLeaf(choicesLeaf) == len(boxOfPiles):
+			if _e.lengthChoicesLeaf(choicesLeaf) == len(boxOfPiles):
 
 				permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles))
 					, _e.makeAntiChoicesLeaf(state.leavesTotal, _e.getIteratorOfLeaves(choicesLeaf))

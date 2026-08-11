@@ -18,6 +18,105 @@ if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import Leaf, Pile
 
+"""# DEVELOPMENT leaf domains are directly tied to mapShapeProductsSums and mapShape首ProductsSums
+
+2d6
+(0, 32, 48, 56, 60, 62, 63) = mapShape首ProductsSums
+(0, 1, 3, 7, 15, 31, 63, 127) = mapShapeProductsSums
+
+leaf descends from 63 in mapShape首ProductsSums
+first pile is dimensionsTotal and ascends by addends in mapShapeProductsSums
+
+leaf63 starts at pile6 = 6+0
+leaf62 starts at pile7 = 6+1
+leaf60 starts at pile10 = 7+3
+leaf56 starts at pile17 = 10+7
+leaf48 starts at pile32 = 17+15
+leaf32 starts at pile63 = 32+31
+
+2d5
+mapShape首ProductsSums
+(0, 16, 24, 28, 30, 31)
+
+31, 5+0
+30, 5+1
+28, 6+3
+24, 9+7
+16, 16+15
+
+mapShapeProductsSums
+(0, 1, 3, 7, 15, 31, 63)
+
+{
+	0: [0],
+	1: [1],
+	2: [3, 5, 9, 17],
+	3: [2, 7, 11, 13, 19, 21, 25],
+	4: [3, 5, 6, 9, 10, 15, 18, 23, 27, 29],
+	5: [2, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31],
+	6: [3, 5, 6, 9, 10, 15, 17, 18, 23, 27, 29, 30],
+	7: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31],
+	8: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 27, 29, 30],
+	9: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	10: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30],
+	11: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	12: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 27, 29, 30],
+	13: [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	14: [3, 5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 27, 29, 30],
+	15: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	16: [3, 5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+	17: [2, 4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	18: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+	19: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	20: [5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+	21: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	22: [5, 6, 9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+	23: [4, 7, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	24: [5, 6, 9, 10, 12, 15, 18, 20, 23, 24, 27, 29, 30],
+	25: [4, 8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	26: [9, 10, 12, 15, 17, 18, 20, 23, 24, 27, 29, 30],
+	27: [8, 11, 13, 14, 19, 21, 22, 25, 26, 28, 31],
+	28: [9, 10, 12, 18, 20, 23, 24, 27, 29, 30],
+	29: [8, 19, 21, 22, 25, 26, 28],
+	30: [17, 18, 20, 24],
+	31: [16]
+}
+"""
+
+"""products of dimensions and sums of products emerge from the formulas in `getDomainLeaf`.
+state = EliminationState((2,) * 6)
+domainsOfDimensionOrigins = tuple(getDomainLeaf(state, leaf) for leaf in state.mapShapeProducts)[0:-1]
+sumsOfDimensionOrigins = tuple(accumulate(state.mapShapeProducts))[0:-1]
+sumsOfDimensionOriginsReversed = tuple(accumulate(state.mapShapeProducts[::-1], initial=-state.leavesTotal))[1:None]
+for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.mapShapeProducts, domainsOfDimensionOrigins, sumsOfDimensionOrigins, sumsOfDimensionOriginsReversed, strict=False):
+	print(f"{dimensionOrigin:<2}\t{domain.start == sumOrigins = }\t{sumOrigins}\t{sumReversed+2}\t{domain.stop == sumReversed+2 = }")
+1       domain.start == sumOrigins = True       1       2       domain.stop == sumReversed+2 = True
+2       domain.start == sumOrigins = True       3       34      domain.stop == sumReversed+2 = True
+4       domain.start == sumOrigins = True       7      50      domain.stop == sumReversed+2 = True
+8       domain.start == sumOrigins = True       15      58      domain.stop == sumReversed+2 = True
+16      domain.start == sumOrigins = True       31     62	      domain.stop == sumReversed+2 = True
+32      domain.start == sumOrigins = True       63      64      domain.stop == sumReversed+2 = True
+
+(Note to self: in `sumReversed+2`, consider if this is better explained by `sumReversed - descending + inclusive` or something similar.)
+
+The piles of dimension origins (sums of products of dimensions) emerge from the following formulas!
+
+(Note: the function below is included to capture the function as it existed at this point in development. I hope the package has improved/evolved by the time you read this.)
+def getDomainLeaf(state: EliminationState, leaf: int) -> range:
+	def workhorse(leaf: int, dimensionsTotal: int, mapShape: tuple[int, ...], leavesTotal: int) -> range:
+		originPinned =  leaf == leafOrigin
+		return range(
+					int(bit_flip(0, howMany0coordinatesAtTail(leaf) + 1))									# `start`, first value included in the `range`.
+						+ howManyDimensionsHaveOddParity(leaf)
+						- 1 - originPinned
+					, int(bit_mask(dimensionsTotal) ^ bit_mask(dimensionsTotal - dimensionNearest首(leaf)))	# `stop`, first value excluded from the `range`.
+						- howManyDimensionsHaveOddParity(leaf)
+						+ 2 - originPinned
+					, 2 + (2 * (leaf == 首零(dimensionsTotal)+零))											# `step`
+				)
+	return workhorse(leaf, state.dimensionsTotal, state.mapShape, state.leavesTotal)
+"""
+
 def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
 	"""The beans and cornbread and beans and cornbread dimension.
 
@@ -74,7 +173,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 
 	domainCombined: list[tuple[int, int, int, int]] = []
 
-	productsOfDimensions: tuple[int, ...] = tuple(int(bit_flip(0, dimension)) for dimension in range(dimensionsTotal + 1))
+	mapShapeProducts: tuple[int, ...] = tuple(int(bit_flip(0, dimension)) for dimension in range(dimensionsTotal + 1))
 
 #======== By exclusion of the indices, add pairs of corners (160 tuples) ====================
 	for 次, (pileOfLeaf二一零, pileOfLeaf二一) in enumerate(domain一corners):
@@ -100,7 +199,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 				if (howManyDimensionsHaveOddParity(pileOfLeaf二一) == 1
 					and (dimensionNearest首(pileOfLeaf二一) - raiseIfNone(dimensionSecondNearest首(pileOfLeaf二一)) < 2)
 				):
-					addend: int = productsOfDimensions[dimensionsTotal - 2] + 4
+					addend: int = mapShapeProducts[dimensionsTotal - 2] + 4
 					excludeAbove = domain0corners.index((pileOfLeaf二一 + addend, pileOfLeaf二一零 + addend))
 
 			else:
@@ -108,7 +207,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 				if 次 == 0:
 					excludeAbove = 1
 				elif 次 <= 2:
-					addend = 三 + sum(productsOfDimensions[1:dimensionsTotal - 2])
+					addend = 三 + sum(mapShapeProducts[1:dimensionsTotal - 2])
 					excludeAbove = domain0corners.index((pileOfLeaf二一 + addend, pileOfLeaf二一零 + addend))
 		boxOfIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
 
@@ -255,17 +354,17 @@ def getDomain二零and二(state: EliminationState) -> tuple[tuple[int, int], ...
 	domain二零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 零))
 	domain二: tuple[int, ...] = tuple(getDomainLeaf(state, 二))
 	direction: CallableFunction[[int, int], int] = add
-	return _getDomains二Or二一(domain二零, domain二, direction, state.dimensionsTotal, state.sumsOfProductsOfDimensions)
+	return _getDomains二Or二一(domain二零, domain二, direction, state.dimensionsTotal, state.mapShapeProductsSums)
 
 def getDomain二一零and二一(state: EliminationState) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf二一零 and leaf二一."""
 	domain二一零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一 + 零))
 	domain二一: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一))
 	direction: CallableFunction[[int, int], int] = sub
-	return _getDomains二Or二一(domain二一零, domain二一, direction, state.dimensionsTotal, state.sumsOfProductsOfDimensions)
+	return _getDomains二Or二一(domain二一零, domain二一, direction, state.dimensionsTotal, state.mapShapeProductsSums)
 
 @cache
-def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: CallableFunction[[int, int], int], dimensionsTotal: int, sumsOfProductsOfDimensions: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
+def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...], direction: CallableFunction[[int, int], int], dimensionsTotal: int, mapShapeProductsSums: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
 	if direction(0, 6009) == 6009:
 		ImaDomain二零and二: bool = True
 		ImaDomain二一零and二一: bool = False
@@ -353,15 +452,16 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 				次Domain0 = 3 * pilesTotal // 4
 				次Domain0 -= pilesFewerDomain0
+				# DEVELOPMENT b/c 首一二(dimensionsTotal)
 				if pileOfLeaf零 < 首一二(dimensionsTotal):
 					dimensionIndexPart首: int = dimensionsTotal
 					dimensionIndexPart一: int = dimensionIndex(一)
 					dimensionIndexPart二: int = dimensionIndex(二)
 
 					# Compute the 次 from the head `首`
-					次SumsOfProductsOfDimensions: int = dimensionIndexPart首 - (dimensionIndexPart一 + dimensionIndexPart二)
+					次MapShapeProductsSums: int = dimensionIndexPart首 - (dimensionIndexPart一 + dimensionIndexPart二)
 
-					addend: int = sumsOfProductsOfDimensions[次SumsOfProductsOfDimensions]
+					addend: int = mapShapeProductsSums[次MapShapeProductsSums]
 					if ImaDomain二一零and二一:
 						addend -= 1  # decreasing?
 					pileOfLeaf0: int = addend + 首零(dimensionsTotal)
@@ -557,11 +657,11 @@ def _getDomainLeaf(leaf: Leaf, dimensionsTotal: int, mapShape: tuple[int, ...], 
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
 		return range(
-					state.sumsOfProductsOfDimensions[dimensionNearestTail(leaf) + inclusive]  		# `start`, first value included in the `range`.
+					state.mapShapeProductsSums[dimensionNearestTail(leaf) + inclusive]  		# `start`, first value included in the `range`.
 						+ howManyDimensionsHaveOddParity(leaf)
 						- originPinned
 
-					, state.sumsOfProductsOfDimensionsNearest首[dimensionNearest首(leaf)]  			# `stop`, first value excluded from the `range`.
+					, state.mapShape首ProductsSums[dimensionNearest首(leaf)]  			# `stop`, first value excluded from the `range`.
 						+ 2
 						- howManyDimensionsHaveOddParity(leaf)
 						- originPinned

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from gmpy2 import bit_flip, bit_mask, bit_test as isBit1吗, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
-from mapFolding._e import getIteratorOfLeaves, getSumsOfProductsOfDimensionsNearest首
+from mapFolding._e import getIteratorOfLeaves, getMapShape首ProductsSums
 from mapFolding._e._2上nDimensional import (
 	dimensionIndex, dimensionNearestTail, dimensionNearest首, dimensionsConsecutiveAtTail, dimensionSecondNearest首, getLeavesCreaseAnte,
 	getLeavesCreasePost, howManyDimensionsHaveOddParity, leafInSubHyperplane, moreThanLeaf零吗, ptount, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一,
@@ -97,7 +97,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			if dimension < state.dimensionsTotal - 2:
 				boxOfRemoveLeaves.extend([首一(state.dimensionsTotal) + leafAt一Ante首])
 			if 0 < dimension < state.dimensionsTotal - 2:
-				boxOfRemoveLeaves.extend([getitem(state.productsOfDimensions, dimension), 首一(state.dimensionsTotal) + leafAt一Ante首 - getitem(state.sumsOfProductsOfDimensions, dimension)])
+				boxOfRemoveLeaves.extend([getitem(state.mapShapeProducts, dimension), 首一(state.dimensionsTotal) + leafAt一Ante首 - getitem(state.mapShapeProductsSums, dimension)])
 			if 0 < dimension < state.dimensionsTotal - 3:
 				boxOfRemoveLeaves.extend([零 + leafAt一Ante首])
 			if 0 < dimension < state.dimensionsTotal - 1:
@@ -119,7 +119,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if leafAt一零 == 三 + 二 + 零:
 		boxOfRemoveLeaves.extend([二 + 一 + 零, (零 + 二) + 首零(state.dimensionsTotal)])
 	if leafAt一零 == (零 + 二) + 首一(state.dimensionsTotal):
-		boxOfRemoveLeaves.extend([首二(state.dimensionsTotal), leafAt一零 + getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt一零))), leafAt一零 + getitem(state.sumsOfProductsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt一零)) + 1), 首零一二(state.dimensionsTotal)])
+		boxOfRemoveLeaves.extend([首二(state.dimensionsTotal), leafAt一零 + getitem(state.mapShapeProducts, raiseIfNone(dimensionSecondNearest首(leafAt一零))), leafAt一零 + getitem(state.mapShapeProductsSums, raiseIfNone(dimensionSecondNearest首(leafAt一零)) + 1), 首零一二(state.dimensionsTotal)])
 	if leafAt一零 == (零) + 首一二(state.dimensionsTotal):
 		boxOfRemoveLeaves.extend([首一(state.dimensionsTotal) + (一 + 零), last(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt一零)))])
 	if leafAt一零 == (零) + 首零一(state.dimensionsTotal):
@@ -127,16 +127,16 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if isOdd吗(leafAt一零):
 		dimensionHeadSecond: int = raiseIfNone(dimensionSecondNearest首(leafAt一零))
 		次By首Second: int = dimensionHeadSecond * decreasing + decreasing  # Are you confused and/or annoyed by this? Blame Python. (Or figure out a better formula.)
-		boxOfRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionHeadSecond)])
+		boxOfRemoveLeaves.extend([getitem(state.mapShapeProducts, dimensionHeadSecond)])
 		if leafAt一零 < 首零(state.dimensionsTotal):
-			sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - 1)
-			boxOfRemoveLeaves.extend([一, leafAt一零 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), leafAt一零 + getitem(sumsOfProductsOfDimensionsNearest首InSubHyperplane, 次By首Second)])
+			mapShape首ProductsSumsInSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, state.dimensionsTotal, state.dimensionsTotal - 1)
+			boxOfRemoveLeaves.extend([一, leafAt一零 + getitem(state.mapShapeProductsSums, (state.dimensionsTotal - 1)), leafAt一零 + getitem(mapShape首ProductsSumsInSubHyperplane, 次By首Second)])
 			if dimensionHeadSecond == 2:
-				boxOfRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + getitem(state.productsOfDimensions, dimensionNearest首(leafAt一零)), getitem(state.sumsOfProductsOfDimensions, dimensionHeadSecond) + 首零(state.dimensionsTotal)])
+				boxOfRemoveLeaves.extend([getitem(state.mapShapeProductsSums, dimensionHeadSecond) + getitem(state.mapShapeProducts, dimensionNearest首(leafAt一零)), getitem(state.mapShapeProductsSums, dimensionHeadSecond) + 首零(state.dimensionsTotal)])
 			if dimensionHeadSecond == 3:
-				boxOfRemoveLeaves.extend([一 + leafAt一零 + getitem(state.productsOfDimensions, (state.dimensionsTotal - 1))])
+				boxOfRemoveLeaves.extend([一 + leafAt一零 + getitem(state.mapShapeProducts, (state.dimensionsTotal - 1))])
 		if 首零(state.dimensionsTotal) < leafAt一零:
-			boxOfRemoveLeaves.extend([(零) + 首零一(state.dimensionsTotal), getitem(state.productsOfDimensions, (dimensionNearest首(leafAt一零) - 1))])
+			boxOfRemoveLeaves.extend([(零) + 首零一(state.dimensionsTotal), getitem(state.mapShapeProducts, (dimensionNearest首(leafAt一零) - 1))])
 
 #========= use `leafAt零一Ante首` to exclude a `leaf` from `pile` ===================
 # DEVELOPMENT a leaf in pile首Less一零 does not have leafCrease in the pile-range of pile零Ante首零, but `leafInSubHyperplane(leafAt首
@@ -153,19 +153,19 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 			boxOfRemoveLeaves.extend([首一(state.dimensionsTotal)])
 			dimension: int = 一
 			if isBit1吗(leafAt零一Ante首, dimensionIndex(dimension)):
-				boxOfRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零, state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2]), leafAt零一Ante首 - dimension - getitem(state.sumsOfProductsOfDimensions, (dimensionIndex(dimension) + 1))])
+				boxOfRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零, state.首 - sum(state.mapShapeProducts[dimensionIndex(dimension): state.dimensionsTotal - 2]), leafAt零一Ante首 - dimension - getitem(state.mapShapeProductsSums, (dimensionIndex(dimension) + 1))])
 			dimension = 二
 			if isBit1吗(leafAt零一Ante首, dimensionIndex(dimension)):
 				boxOfRemoveLeaves.extend([dimension, 首零(state.dimensionsTotal) + dimension + 零])
 				if 1 < dimensionNearestTail(leafAt零一Ante首):
-					boxOfRemoveLeaves.extend([state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2])])
+					boxOfRemoveLeaves.extend([state.首 - sum(state.mapShapeProducts[dimensionIndex(dimension): state.dimensionsTotal - 2])])
 				else:  # DEVELOPMENT IDK and IDC why this works, but it does.
 					boxOfRemoveLeaves.extend([getitem(tuple(getLeavesCreaseAnte(state, leafInSubHyperplane(leafAt零一Ante首))), dimensionIndex(dimension)) - 零])
 			dimension = 三
 			if isBit1吗(leafAt零一Ante首, dimensionIndex(dimension)):
 				if 1 < dimensionNearestTail(leafAt零一Ante首):
 					boxOfRemoveLeaves.extend([dimension])
-					boxOfRemoveLeaves.extend([state.首 - sum(state.productsOfDimensions[dimensionIndex(dimension): state.dimensionsTotal - 2])])
+					boxOfRemoveLeaves.extend([state.首 - sum(state.mapShapeProducts[dimensionIndex(dimension): state.dimensionsTotal - 2])])
 				if dimensionNearestTail(leafAt零一Ante首) < dimensionIndex(dimension):
 					boxOfRemoveLeaves.extend([首零(state.dimensionsTotal) + dimension + 零])
 			sheepOrGoat = 0
@@ -174,10 +174,10 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 				boxOfRemoveLeaves.extend([二])
 				sheepOrGoat: int = ptount(leafAt零一Ante首 // shepherdOfDimensions)
 				if 0 < sheepOrGoat < state.dimensionsTotal - 3:
-					comebackOffset: int = state.productsOfDimensions[dimensionNearest首(leafAt零一Ante首)] - 二
+					comebackOffset: int = state.mapShapeProducts[dimensionNearest首(leafAt零一Ante首)] - 二
 					boxOfRemoveLeaves.extend([leafAt零一Ante首 - comebackOffset])
 				if 0 < sheepOrGoat < state.dimensionsTotal - 4:
-					comebackOffset = state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAt零一Ante首))] - 二
+					comebackOffset = state.mapShapeProducts[raiseIfNone(dimensionSecondNearest首(leafAt零一Ante首))] - 二
 					boxOfRemoveLeaves.extend([leafAt零一Ante首 - comebackOffset])
 		if isOdd吗(leafAt零一Ante首):
 			boxOfRemoveLeaves.extend([一])
@@ -185,10 +185,10 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 				boxOfRemoveLeaves.extend([0b001011])
 			sheepOrGoat = ptount(leafAt零一Ante首)
 			if 0 < sheepOrGoat < state.dimensionsTotal - 3:
-				comebackOffset = state.productsOfDimensions[dimensionNearest首(leafAt零一Ante首)] - 一
+				comebackOffset = state.mapShapeProducts[dimensionNearest首(leafAt零一Ante首)] - 一
 				boxOfRemoveLeaves.extend([leafAt零一Ante首 - comebackOffset])
 			if 0 < sheepOrGoat < state.dimensionsTotal - 4:
-				comebackOffset = state.productsOfDimensions[raiseIfNone(dimensionSecondNearest首(leafAt零一Ante首))] - 一
+				comebackOffset = state.mapShapeProducts[raiseIfNone(dimensionSecondNearest首(leafAt零一Ante首))] - 一
 				boxOfRemoveLeaves.extend([leafAt零一Ante首 - comebackOffset])
 
 #-------- Use information from other piles to decide whether to exclude some leaves. -------
@@ -228,11 +228,11 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if isOdd吗(leafAt二):
 			dimension = 二
 			if not isBit1吗(leafAt二, dimensionIndex(dimension)):
-				boxOfRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+				boxOfRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - getitem(state.mapShapeProductsSums, dimensionIndex(dimension))])
 
 			dimension = 三
 			if not isBit1吗(leafAt二, dimensionIndex(dimension)):
-				boxOfRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - dimension, leafAt二 + 首零(state.dimensionsTotal) + getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+				boxOfRemoveLeaves.extend([leafAt二 + 首零(state.dimensionsTotal) - dimension, leafAt二 + 首零(state.dimensionsTotal) + getitem(state.mapShapeProductsSums, dimensionIndex(dimension))])
 
 			dimension = 四
 			if isBit1吗(leafAt二, dimensionIndex(dimension)):
@@ -242,7 +242,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		boxOfIndicesCreasePostToKeep.extend(range(state.dimensionsTotal - dimensionHead + 1, (state.dimensionsTotal - zeroIndexed)))
 
 		boxOfRemoveLeaves.extend([
-				leafAt二 + 零, leafAt二 + 首零(state.dimensionsTotal), leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 1)), getitem(state.productsOfDimensions, dimensionHead) + (一 + 零)])
+				leafAt二 + 零, leafAt二 + 首零(state.dimensionsTotal), leafAt二 + getitem(state.mapShapeProductsSums, (state.dimensionsTotal - 1)), getitem(state.mapShapeProducts, dimensionHead) + (一 + 零)])
 
 		dimension = 一
 		if isBit1吗(leafAt二, dimensionIndex(dimension)):
@@ -250,21 +250,21 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 		dimension = 二
 		if not isBit1吗(leafAt二, dimensionIndex(dimension)):
-			boxOfIndicesCreasePostToKeep.append(creasePostAt二.index(state.productsOfDimensions[dimensionHead]))
+			boxOfIndicesCreasePostToKeep.append(creasePostAt二.index(state.mapShapeProducts[dimensionHead]))
 
 		if leafAt二 < 首零(state.dimensionsTotal):
-			boxOfRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(二)), getitem(state.sumsOfProductsOfDimensions, (dimensionIndex(二) + 1))])
+			boxOfRemoveLeaves.extend([getitem(state.mapShapeProducts, dimensionIndex(二)), getitem(state.mapShapeProductsSums, (dimensionIndex(二) + 1))])
 
 		dimension = 四
 		if (not isBit1吗(leafAt二, dimensionIndex(dimension))) and (首零(state.dimensionsTotal) < leafAt二):
-			boxOfRemoveLeaves.extend([getitem(state.productsOfDimensions, dimensionIndex(dimension))])
+			boxOfRemoveLeaves.extend([getitem(state.mapShapeProducts, dimensionIndex(dimension))])
 
 		# DEVELOPMENT 1) I am sure this concept has validity. 2) I am sure there is a more accurate computation for it.
 		zerosAtThe首 = 2
 		if state.dimensionsTotal - zeroIndexed - dimensionHead == zerosAtThe首:
-			sumsOfProductsOfDimensionsNearest首InSubSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - zerosAtThe首)
+			mapShape首ProductsSumsInSubSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, state.dimensionsTotal, state.dimensionsTotal - zerosAtThe首)
 			addendForUnknownReasons: int = -1
-			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(moreThanLeaf零吗, sumsOfProductsOfDimensionsNearest首InSubSubHyperplane)]
+			leavesWeDontWant: list[int] = [aLeaf + addendForUnknownReasons for aLeaf in filter(moreThanLeaf零吗, mapShape首ProductsSumsInSubSubHyperplane)]
 			boxOfRemoveLeaves.extend(leavesWeDontWant)
 
 	if isOdd吗(leafAt二):
@@ -272,7 +272,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 		if dimensionNearestTail(leafAt二 - 1) == 1:
 			boxOfRemoveLeaves.extend([一])
 
-		if leafInSubHyperplane(leafAt二) == state.sumsOfProductsOfDimensions[3]:
+		if leafInSubHyperplane(leafAt二) == state.mapShapeProductsSums[3]:
 			boxOfRemoveLeaves.extend([二])
 
 		dimension = 零
@@ -322,7 +322,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 		#--- medium ---
 		if 首一(state.dimensionsTotal) < leafAt二 < 首零(state.dimensionsTotal):
-			boxOfRemoveLeaves.extend([leafAt二 + getitem(state.sumsOfProductsOfDimensions, (state.dimensionsTotal - 2)), 首一(state.dimensionsTotal) + (一 + 零)])
+			boxOfRemoveLeaves.extend([leafAt二 + getitem(state.mapShapeProductsSums, (state.dimensionsTotal - 2)), 首一(state.dimensionsTotal) + (一 + 零)])
 
 		#--- large ---
 		if 首零(state.dimensionsTotal) < leafAt二:
@@ -395,10 +395,10 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 		dimension = 四
 		if isEven吗(leafAt二Ante首) and (not isBit1吗(leafAt二Ante首, dimensionIndex(dimension))):
-			boxOfRemoveLeaves.extend([leafAt二Ante首 - getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+			boxOfRemoveLeaves.extend([leafAt二Ante首 - getitem(state.mapShapeProductsSums, dimensionIndex(dimension))])
 
 	if dimensionTail == 3:
-		boxOfRemoveLeaves.extend([getitem(state.sumsOfProductsOfDimensionsNearest首, dimensionTail)])
+		boxOfRemoveLeaves.extend([getitem(state.mapShape首ProductsSums, dimensionTail)])
 
 	#--- large ---
 
@@ -413,7 +413,7 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 
 			dimension = 二
 			if isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
-				boxOfRemoveLeaves.extend([首零(state.dimensionsTotal) + getitem(state.sumsOfProductsOfDimensions, dimensionIndex(dimension))])
+				boxOfRemoveLeaves.extend([首零(state.dimensionsTotal) + getitem(state.mapShapeProductsSums, dimensionIndex(dimension))])
 
 		dimension = 二
 		if isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
@@ -433,12 +433,12 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 	if isOdd吗(leafAt二Ante首):
 		dimension = 零  # This is redundant but it might help expose patterns.
 		if isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
-			boxOfRemoveLeaves.extend([一, leafAt二Ante首 - dimension, leafAt二Ante首 - getitem(state.productsOfDimensions, raiseIfNone(dimensionSecondNearest首(leafAt二Ante首)))])
+			boxOfRemoveLeaves.extend([一, leafAt二Ante首 - dimension, leafAt二Ante首 - getitem(state.mapShapeProducts, raiseIfNone(dimensionSecondNearest首(leafAt二Ante首)))])
 
 	if isEven吗(leafAt二Ante首):
 		dimension = 零  # This is redundant but it might help expose patterns.
 		if not isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
-			boxOfRemoveLeaves.extend([leafAt二Ante首 + dimension, state.productsOfDimensions[dimensionTail], leafAt二Ante首 - state.productsOfDimensions[dimensionTail]])
+			boxOfRemoveLeaves.extend([leafAt二Ante首 + dimension, state.mapShapeProducts[dimensionTail], leafAt二Ante首 - state.mapShapeProducts[dimensionTail]])
 
 		dimension = 二
 		if isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
@@ -452,14 +452,14 @@ def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
 					boxOfRemoveLeaves.extend([addendIDC + leafAt二Ante首])
 
 			if leafAt二Ante首 < 首零(state.dimensionsTotal):
-				boxOfRemoveLeaves.extend([leafAt二Ante首 + state.sumsOfProductsOfDimensions[dimensionTail], state.首 - leafAt二Ante首])
+				boxOfRemoveLeaves.extend([leafAt二Ante首 + state.mapShapeProductsSums[dimensionTail], state.首 - leafAt二Ante首])
 
 		if leafAt二Ante首 < 首零(state.dimensionsTotal):
-			boxOfRemoveLeaves.extend([首一(state.dimensionsTotal), leafAt二Ante首 + state.productsOfDimensions[dimensionNearest首(leafAt二Ante首) + 1]])
+			boxOfRemoveLeaves.extend([首一(state.dimensionsTotal), leafAt二Ante首 + state.mapShapeProducts[dimensionNearest首(leafAt二Ante首) + 1]])
 
 			dimension = 三
 			if not isBit1吗(leafAt二Ante首, dimensionIndex(dimension)):
-				boxOfRemoveLeaves.extend([dimension, leafAt二Ante首 + dimension, state.sumsOfProductsOfDimensionsNearest首[dimensionIndex(dimension)]])
+				boxOfRemoveLeaves.extend([dimension, leafAt二Ante首 + dimension, state.mapShape首ProductsSums[dimensionIndex(dimension)]])
 
 		if leafAt二Ante首 != (一) + 首零(state.dimensionsTotal):
 			boxOfRemoveLeaves.extend([首一(state.dimensionsTotal)])

@@ -29,11 +29,11 @@ Disaggregation and deconstruction functions
 		You can AND a `ChoicesLeaf` with a disposable mask.
 
 Be DRY functions
-	getProductsOfDimensions
+	getMapShapeProducts
 		You can compute prefix products of `mapShape` dimension lengths.
-	getSumsOfProductsOfDimensions
-		You can compute prefix sums of `getProductsOfDimensions(mapShape)`.
-	getSumsOfProductsOfDimensionsNearest首
+	getMapShapeProductsSums
+		You can compute prefix sums of `getMapShapeProducts(mapShape)`.
+	getMapShape首ProductsSums
 		You can compute prefix sums of reversed dimension products for head-first coordinate arithmetic.
 	reverseLookup
 		You can find a key in a `dict` by matching a value.
@@ -67,6 +67,38 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import ChoicesLeaf, Leaf
 
 #======== `ChoicesLeaf` functions ================================================
+
+def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
+	"""Count the number of `Leaf` indices encoded in a `ChoicesLeaf` bitset.
+
+	You can use this function to determine the cardinality of the domain represented by
+	`choicesLeaf`. The function counts the number of set bits in `choicesLeaf` minus one
+	(the sentinel bit) [1]. The result represents how many distinct `Leaf` indices are
+	present in `choicesLeaf`.
+
+	Parameters
+	----------
+	choicesLeaf : ChoicesLeaf
+		Bitset encoding a set of `Leaf` indices.
+
+	Returns
+	-------
+	leavesCount : int
+		The number of `Leaf` indices with set bits in `choicesLeaf`, excluding the sentinel bit.
+
+	Examples
+	--------
+	The function is used to identify groups of piles sharing the same domain cardinality.
+
+		itemfilter(lambda groupBy: (lengthChoicesLeaf(groupBy[choicesLeafKey])) == len(groupBy[piles]), groupByChoicesLeaf)
+
+	References
+	----------
+	[1] gmpy2.mpz.bit_count - gmpy2 documentation
+		https://gmpy2.readthedocs.io/en/latest/mpz.html#gmpy2.mpz.bit_count
+
+	"""
+	return choicesLeaf.bit_count() - 1
 
 def makeAntiChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	"""You can build a complement `ChoicesLeaf` by clearing each `Leaf` bit in `leaves`.
@@ -136,38 +168,6 @@ def makeChoicesLeaf(leavesTotal: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	[2] mapFolding._e._beDRY.choicesLeafLeafNone
 	"""
 	return reduce(bit_set, leaves, bit_set(0, leavesTotal))
-
-def howManyLeavesInChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
-	"""Count the number of `Leaf` indices encoded in a `ChoicesLeaf` bitset.
-
-	You can use this function to determine the cardinality of the domain represented by
-	`choicesLeaf`. The function counts the number of set bits in `choicesLeaf` minus one
-	(the sentinel bit) [1]. The result represents how many distinct `Leaf` indices are
-	present in `choicesLeaf`.
-
-	Parameters
-	----------
-	choicesLeaf : ChoicesLeaf
-		Bitset encoding a set of `Leaf` indices.
-
-	Returns
-	-------
-	leavesCount : int
-		The number of `Leaf` indices with set bits in `choicesLeaf`, excluding the sentinel bit.
-
-	Examples
-	--------
-	The function is used to identify groups of piles sharing the same domain cardinality.
-
-		itemfilter(lambda groupBy: (howManyLeavesInChoicesLeaf(groupBy[choicesLeafKey])) == len(groupBy[piles]), groupByChoicesLeaf)
-
-	References
-	----------
-	[1] gmpy2.mpz.bit_count - gmpy2 documentation
-		https://gmpy2.readthedocs.io/en/latest/mpz.html#gmpy2.mpz.bit_count
-
-	"""
-	return choicesLeaf.bit_count() - 1
 
 # SEMIOTICS
 def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
@@ -243,7 +243,7 @@ def choicesLeafAND(choicesLeafDISPOSABLE: ChoicesLeaf, choicesLeaf: ChoicesLeaf)
 
 #======== Be DRY functions ================================================
 
-def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
+def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	"""You can compute prefix products of each dimension length in `mapShape`.
 
 	The returned tuple starts with the product of zero dimensions, which is `1`. Each subsequent element multiplies the next
@@ -256,14 +256,14 @@ def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 
 	Returns
 	-------
-	productsOfDimensions : tuple[int, ...]
-		Tuple of prefix products with `productsOfDimensions[0] == 1`.
+	mapShapeProducts : tuple[int, ...]
+		Tuple of prefix products with `mapShapeProducts[0] == 1`.
 
 	Examples
 	--------
 	The function is used during `EliminationState` initialization.
 
-		self.productsOfDimensions = getProductsOfDimensions(self.mapShape)
+		self.mapShapeProducts = getMapShapeProducts(self.mapShape)
 
 	References
 	----------
@@ -275,11 +275,11 @@ def getProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	"""
 	return tuple(accumulate(mapShape, mul, initial=1))
 
-def getSumsOfProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
-	"""You can compute prefix sums of `getProductsOfDimensions(mapShape)`.
+def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
+	"""You can compute prefix sums of `getMapShapeProducts(mapShape)`.
 
 	The returned tuple starts with the sum of zero products, which is `0`. Each subsequent element adds the next product from
-	`getProductsOfDimensions(mapShape)`.
+	`getMapShapeProducts(mapShape)`.
 
 	Parameters
 	----------
@@ -288,14 +288,14 @@ def getSumsOfProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 
 	Returns
 	-------
-	sumsOfProductsOfDimensions : tuple[int, ...]
-		Tuple of prefix sums with `sumsOfProductsOfDimensions[0] == 0`.
+	mapShapeProductsSums : tuple[int, ...]
+		Tuple of prefix sums with `mapShapeProductsSums[0] == 0`.
 
 	Examples
 	--------
 	The function is used during `EliminationState` initialization.
 
-		self.sumsOfProductsOfDimensions = getSumsOfProductsOfDimensions(self.mapShape)
+		self.mapShapeProductsSums = getMapShapeProductsSums(self.mapShape)
 
 	References
 	----------
@@ -303,13 +303,13 @@ def getSumsOfProductsOfDimensions(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 		https://docs.python.org/3/library/itertools.html#itertools.accumulate
 	[2] operator.add
 		https://docs.python.org/3/library/operator.html#operator.add
-	[3] mapFolding._e._beDRY.getProductsOfDimensions
+	[3] mapFolding._e._beDRY.getMapShapeProducts
 
 	[4] mapFolding._e.dataBaskets.EliminationState
 	"""
-	return tuple(accumulate(getProductsOfDimensions(mapShape), add, initial=0))
+	return tuple(accumulate(getMapShapeProducts(mapShape), add, initial=0))
 
-def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...], dimensionsTotal: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
+def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], dimensionsTotal: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
 	"""Compute prefix sums of reversed dimension products for head-first coordinate arithmetic.
 
 	You can use this function to obtain a tuple of cumulative sums computed from reversed
@@ -317,18 +317,18 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 	Cartesian coordinates in multidimensional space [1] and you need to compute offsets
 	from the "anti-origin" (the maximum coordinate) rather than from the origin.
 
-	The function reverses the first `dimensionFrom首` dimension products from `productsOfDimensions`,
+	The function reverses the first `dimensionFrom首` dimension products from `mapShapeProducts`,
 	then computes prefix sums [2] of the reversed products. This provides a complementary
-	perspective to `getSumsOfProductsOfDimensions` [3] by ordering dimension products in
+	perspective to `getMapShapeProductsSums` [3] by ordering dimension products in
 	descending order before summation.
 
 	Parameters
 	----------
-	productsOfDimensions : tuple[int, ...]
-		Prefix products of dimension lengths, typically from `getProductsOfDimensions` [4].
+	mapShapeProducts : tuple[int, ...]
+		Prefix products of dimension lengths, typically from `getMapShapeProducts` [4].
 	dimensionsTotal : int | None = None
 		Total number of dimensions in the map. When `None`, inferred as
-		`len(productsOfDimensions) - 1`.
+		`len(mapShapeProducts) - 1`.
 	dimensionFrom首 : int | None = None
 		Dimension index defining which products to include in the sum computation. When `None`,
 		defaults to `dimensionsTotal`. This parameter controls how many dimension products are
@@ -336,7 +336,7 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 
 	Returns
 	-------
-	sumsOfProductsOfDimensionsNearest首 : tuple[int, ...]
+	mapShape首ProductsSums : tuple[int, ...]
 		Tuple of prefix sums computed from reversed dimension products. Element `[i]` contains
 		the sum of the first `i` elements of the reversed product sequence.
 
@@ -344,11 +344,11 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 	--------
 	The function is used during state initialization to compute head-first sums.
 
-		self.sumsOfProductsOfDimensionsNearest首 = getSumsOfProductsOfDimensionsNearest首(self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal)
+		self.mapShape首ProductsSums = getMapShape首ProductsSums(self.mapShapeProducts, self.dimensionsTotal, self.dimensionsTotal)
 
 	The function is used to compute offset bounds in sub-hyperplane computations.
 
-		sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, state.dimensionsTotal, state.dimensionsTotal - 1)
+		mapShape首ProductsSumsInSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, state.dimensionsTotal, state.dimensionsTotal - 1)
 
 	References
 	----------
@@ -356,27 +356,27 @@ def getSumsOfProductsOfDimensionsNearest首(productsOfDimensions: tuple[int, ...
 		Internal implementation detail
 	[2] itertools.accumulate
 		https://docs.python.org/3/library/itertools.html#itertools.accumulate
-	[3] mapFolding._e._beDRY.getSumsOfProductsOfDimensions
+	[3] mapFolding._e._beDRY.getMapShapeProductsSums
 
-	[4] mapFolding._e._beDRY.getProductsOfDimensions
+	[4] mapFolding._e._beDRY.getMapShapeProducts
 
 	"""
-	dimensionsTotal = dimensionsTotal or len(productsOfDimensions) - 1
+	dimensionsTotal = dimensionsTotal or len(mapShapeProducts) - 1
 
 	if dimensionFrom首 is None:
 		dimensionFrom首 = dimensionsTotal
 
-	productsOfDimensionsTruncator: int = dimensionFrom首 - (dimensionsTotal + zeroIndexed)
+	mapShapeProductsTruncator: int = dimensionFrom首 - (dimensionsTotal + zeroIndexed)
 
-	productsOfDimensionsFrom首: tuple[int, ...] = productsOfDimensions[0:productsOfDimensionsTruncator][::-1]
+	mapShapeProductsFrom首: tuple[int, ...] = mapShapeProducts[0:mapShapeProductsTruncator][::-1]
 
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = tuple(accumulate(productsOfDimensionsFrom首, add, initial=0))
+	mapShape首ProductsSums: tuple[int, ...] = tuple(accumulate(mapShapeProductsFrom首, add, initial=0))
 
-	return sumsOfProductsOfDimensionsNearest首
+	return mapShape首ProductsSums
 
 #======== Flow control ================================================
 
-def indicesMapShapeDimensionLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
+def mapShapeLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
 	"""You can group dimension indices in `mapShape` by repeated dimension lengths.
 
 	The returned `Iterator` yields one `tuple` per distinct dimension length in `mapShape` where the dimension length occurs more
@@ -396,10 +396,10 @@ def indicesMapShapeDimensionLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterat
 	--------
 	The function is used to iterate repeated dimension magnitudes during elimination.
 
-		for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
+		for indicesSameDimensionLength in mapShapeLengthsAreEqual(state.mapShape):
 			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 			for 次k, 次r in pairwise(indicesSameDimensionLength):
-				state = excludeLeaf_rBeforeLeaf_k(state, state.productsOfDimensions[次k], state.productsOfDimensions[次r])
+				state = excludeLeaf_rBeforeLeaf_k(state, state.mapShapeProducts[次k], state.mapShapeProducts[次r])
 
 	References
 	----------

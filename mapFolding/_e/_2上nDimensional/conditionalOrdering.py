@@ -5,7 +5,7 @@ from collections import defaultdict
 from functools import cache
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
-from mapFolding._e import getLookupDomainsLeaves, getSumsOfProductsOfDimensionsNearest首
+from mapFolding._e import getLookupDomainsLeaves, getMapShape首ProductsSums
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, 一, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
@@ -38,14 +38,14 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 #======== piles at the beginning of the leaf's domain ================
 	for dimension in range(3, state.dimensionsTotal + inclusive):
 		for countDown in range(dimension - 2 + decreasing, decreasing, decreasing):
-			for leaf in range(state.productsOfDimensions[dimension] - sum(state.productsOfDimensions[countDown:dimension - 2]), state.leavesTotal, state.productsOfDimensions[dimension - 1]):
-				dictionaryPrecedence[leaf] = {aPile: [state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
-							for aPile in list(dictionaryDomains[leaf])[0: getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, dimensionFrom首=dimension - 1)[dimension - 2 - countDown] // 2]}
+			for leaf in range(state.mapShapeProducts[dimension] - sum(state.mapShapeProducts[countDown:dimension - 2]), state.leavesTotal, state.mapShapeProducts[dimension - 1]):
+				dictionaryPrecedence[leaf] = {aPile: [state.mapShapeProducts[dimensionNearest首(leaf)] + state.mapShapeProducts[dimensionNearestTail(leaf)]]
+							for aPile in list(dictionaryDomains[leaf])[0: getMapShape首ProductsSums(state.mapShapeProducts, dimensionFrom首=dimension - 1)[dimension - 2 - countDown] // 2]}
 
 #-------- The beginning of domain首一Plus零 --------------------------------
 	leaf = (零) + 首一(state.dimensionsTotal)
-	dictionaryPrecedence[leaf] = {aPile: [2 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]
-										, 3 * state.productsOfDimensions[dimensionNearest首(leaf)] + state.productsOfDimensions[dimensionNearestTail(leaf)]]
+	dictionaryPrecedence[leaf] = {aPile: [2 * state.mapShapeProducts[dimensionNearest首(leaf)] + state.mapShapeProducts[dimensionNearestTail(leaf)]
+										, 3 * state.mapShapeProducts[dimensionNearest首(leaf)] + state.mapShapeProducts[dimensionNearestTail(leaf)]]
 							for aPile in list(dictionaryDomains[leaf])[1:2]}
 	del leaf
 
@@ -53,22 +53,22 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	leaf: Leaf = (零) + 首零一(state.dimensionsTotal)
 	boxOfPiles = list(dictionaryDomains[leaf])
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in list(dictionaryDomains[leaf])}
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)
-	sumsOfProductsOfDimensionsNearest首InSubHyperplane: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions, dimensionFrom首=state.dimensionsTotal - 1)
+	mapShape首ProductsSums: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts)
+	mapShape首ProductsSumsInSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, dimensionFrom首=state.dimensionsTotal - 1)
 	pileStepAbsolute = 2
 
 	for aPile in boxOfPiles[boxOfPiles.index(一 + 零): boxOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) + inclusive]:
 		dictionaryPrecedence[leaf][aPile].append((零) + 首零(state.dimensionsTotal))
 
 	for 次Universal in range(state.dimensionsTotal - 2):
-		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[次Universal + 2]
-		leavesPredecessorInThisSeries: int = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
+		leafPredecessorTheFirst: int = state.mapShapeProductsSums[次Universal + 2]
+		leavesPredecessorInThisSeries: int = state.mapShapeProducts[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
 		for addend in range(leavesPredecessorInThisSeries):
 			leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
 			pileFirst: int = (
-				sumsOfProductsOfDimensionsNearest首[次Universal]
-				+ state.sumsOfProductsOfDimensions[2]
-				+ state.productsOfDimensions[state.dimensionsTotal - (次Universal + 2)]
+				mapShape首ProductsSums[次Universal]
+				+ state.mapShapeProductsSums[2]
+				+ state.mapShapeProducts[state.dimensionsTotal - (次Universal + 2)]
 				- ((pileStepAbsolute * 2 * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
 					* (1 + (2 == (howManyDimensionsHaveOddParity(leafPredecessor) + isEven吗(leafPredecessor)) == dimensionNearest首(leafPredecessor)))
 				)
@@ -95,8 +95,8 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 
 			if (次Universal < state.dimensionsTotal - 4) and isOdd吗(dimensionNearestTail(leafPredecessor - isOdd吗(leafPredecessor))):
 				pileFirst = (
-					sumsOfProductsOfDimensionsNearest首InSubHyperplane[次Universal]
-					+ state.sumsOfProductsOfDimensions[2 + 1 + 次Universal]
+					mapShape首ProductsSumsInSubHyperplane[次Universal]
+					+ state.mapShapeProductsSums[2 + 1 + 次Universal]
 					- (pileStepAbsolute
 						* 2
 						* (howManyDimensionsHaveOddParity(leafPredecessor首零) - 1
@@ -104,14 +104,14 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 							- isEven吗(leafPredecessor首零) * (int(not (bool(次Universal))))
 						)
 					)
-					+ state.productsOfDimensions[state.dimensionsTotal - 1
+					+ state.mapShapeProducts[state.dimensionsTotal - 1
 												+ addend * (int(not (bool(次Universal))))
 												- (次Universal + 2)]
 				)
 				for aPile in boxOfPiles[boxOfPiles.index(pileFirst) + 次Universal: boxOfPiles.index(neg(零) + 首零(state.dimensionsTotal)) - 次Universal + inclusive]:
 					dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-	del leaf, boxOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute, sumsOfProductsOfDimensionsNearest首InSubHyperplane
+	del leaf, boxOfPiles, mapShape首ProductsSums, pileStepAbsolute, mapShape首ProductsSumsInSubHyperplane
 
 #======== leaf首零Plus零: Separate logic because the distance between absolute piles is 4, not 2 ==============
 # leaf has conditional `leafPredecessor` in all but the first pile of its domain
@@ -119,20 +119,20 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	leaf: Leaf = (零) + 首零(state.dimensionsTotal)
 	boxOfPiles: list[Pile] = list(dictionaryDomains[leaf])[1: None]
 	dictionaryPrecedence[leaf] = {aPile: [] for aPile in boxOfPiles}
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = getSumsOfProductsOfDimensionsNearest首(state.productsOfDimensions)
+	mapShape首ProductsSums: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts)
 	pileStepAbsolute = 4
 	for 次Universal in range(state.dimensionsTotal - 2):
-		leafPredecessorTheFirst: int = state.sumsOfProductsOfDimensions[次Universal + 2]
-		leavesPredecessorInThisSeries = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
+		leafPredecessorTheFirst: int = state.mapShapeProductsSums[次Universal + 2]
+		leavesPredecessorInThisSeries = state.mapShapeProducts[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
 		for addend in range(leavesPredecessorInThisSeries):
 			leafPredecessor: int = leafPredecessorTheFirst + (addend * decreasing)
 			leafPredecessor首零: int = leafPredecessor + 首零(state.dimensionsTotal)
-			pileFirst = sumsOfProductsOfDimensionsNearest首[次Universal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
+			pileFirst = mapShape首ProductsSums[次Universal] + 6 - (pileStepAbsolute * (howManyDimensionsHaveOddParity(leafPredecessor) - 1 + isEven吗(leafPredecessor)))
 			for aPile in boxOfPiles[boxOfPiles.index(pileFirst): None]:
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor)
 				dictionaryPrecedence[leaf][aPile].append(leafPredecessor首零)
 
-	del leaf, boxOfPiles, sumsOfProductsOfDimensionsNearest首, pileStepAbsolute
+	del leaf, boxOfPiles, mapShape首ProductsSums, pileStepAbsolute
 
 #======== piles at the end of the leaf's domain ================
 #-------- Example of special case: has conditional `leafPredecessor` two steps before the end of the domain --------------------------

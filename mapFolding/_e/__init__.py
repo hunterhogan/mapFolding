@@ -17,8 +17,7 @@ from mapFolding._e._disaggregation import getIteratorOfLeaves as getIteratorOfLe
 
 # isort: split
 from mapFolding._e._beDRY import (
-	choicesLeafAND as choicesLeafAND, choicesLeafLeafNone as choicesLeafLeafNone, getProductsOfDimensions as getProductsOfDimensions,
-	getSumsOfProductsOfDimensions as getSumsOfProductsOfDimensions,
-	getSumsOfProductsOfDimensionsNearest首 as getSumsOfProductsOfDimensionsNearest首, howManyLeavesInChoicesLeaf as howManyLeavesInChoicesLeaf,
-	indicesMapShapeDimensionLengthsAreEqual as indicesMapShapeDimensionLengthsAreEqual, makeAntiChoicesLeaf as makeAntiChoicesLeaf,
-	makeChoicesLeaf as makeChoicesLeaf)
+	choicesLeafAND as choicesLeafAND, choicesLeafLeafNone as choicesLeafLeafNone, getMapShapeProducts as getMapShapeProducts,
+	getMapShapeProductsSums as getMapShapeProductsSums, getMapShape首ProductsSums as getMapShape首ProductsSums,
+	lengthChoicesLeaf as lengthChoicesLeaf, makeAntiChoicesLeaf as makeAntiChoicesLeaf, makeChoicesLeaf as makeChoicesLeaf,
+	mapShapeLengthsAreEqual as mapShapeLengthsAreEqual)

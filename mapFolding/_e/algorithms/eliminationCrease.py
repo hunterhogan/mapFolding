@@ -22,7 +22,7 @@ def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -
 		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
 
 def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
-	return chain.from_iterable(map(PermutationSpace.deconstructAtPile, boxOfPermutationSpace))
+	return chain.from_iterable(map(PermutationSpace.deconstructPile, boxOfPermutationSpace))
 
 def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
 	tuple(map(queueStates.put, map(partial(pinByCrease, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))

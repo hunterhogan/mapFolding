@@ -19,115 +19,45 @@ if TYPE_CHECKING:
 """NOTE Do you hate my system of ideographs for powers of 2?
 
 With relatively little effort you could use `astToolkit` (pip install astToolkit) to replace all of the ideographs with
-`state.productsOfDimensions[dimensionIndex]`. With `astToolkit`, you create a transformation that you can apply after any update.
+`state.mapShapeProducts[dimensionIndex]`. With `astToolkit`, you create a transformation that you can apply after any update.
 """
 
 _dimensionLength: int = 2  # Hypothetically, change to 3 for 3ⁿ-dimensional maps.
 
-_dimensionIndex: DimensionIndex = 0						# == 0
+_dimensionIndex: DimensionIndex = 0				# == 0
 
 零: int = _dimensionLength ** _dimensionIndex
-"""dimensionIndex = 0: assign `1` to `dimensionIndex = 0`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index zero
-- líng
-- ling4
-- rei
-- yeong
-- linh
-"""
+"""dimensionIndex = 0. Assign `1` to `dimensionIndex = 0` and `0` to each other `DimensionIndex`. Read as index zero/líng."""
 
 # 一
 _base: int = _dimensionLength
-_dimensionIndex += 1					# == 1
+_dimensionIndex += 1							# == 1
 _power: int = _dimensionIndex
 一: int = _base ** _power						# == _dimensionLength ** _dimensionIndex
-"""dimensionIndex = 1: assign `1` to `dimensionIndex = 1`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index one
-- yī
-- jat1
-- ichi
-- il
-- nhất
-"""
+"""dimensionIndex = 1. Assign `1` to `dimensionIndex = 1` and `0` to each other `DimensionIndex`. Read as index one/yī."""
 
 # 二
 _radix: int = _dimensionLength
-_dimensionIndex += 1					# == 2
+_dimensionIndex += 1							# == 2
 _place_ValueIndex: int = _dimensionIndex
 二: int = _radix ** _place_ValueIndex			# == _dimensionLength ** _dimensionIndex
-"""dimensionIndex = 2: assign `1` to `dimensionIndex = 2`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index two
-- èr
-- ji6
-- ni
-- i
-- nhị
-"""
+"""dimensionIndex = 2. Assign `1` to `dimensionIndex = 2` and `0` to each other `DimensionIndex`. Read as index two/èr."""
 
 # etc.
 三: int = _dimensionLength ** 3
-"""dimensionIndex = 3: assign `1` to `dimensionIndex = 3`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index three
-- sān
-- saam1
-- san
-- sam
-- tam
-"""
+"""dimensionIndex = 3. Assign `1` to `dimensionIndex = 3` and `0` to each other `DimensionIndex`. Read as index three/sān."""
 四: int = _dimensionLength ** 4
-"""dimensionIndex = 4: assign `1` to `dimensionIndex = 4`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index four
-- sì
-- sei3
-- shi
-- sa
-- tứ
-"""
+"""dimensionIndex = 4. Assign `1` to `dimensionIndex = 4` and `0` to each other `DimensionIndex`. Read as index four/sì."""
 五: int = _dimensionLength ** 5
-"""dimensionIndex = 5: assign `1` to `dimensionIndex = 5`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index five
-- wǔ
-- ng5
-- go
-- o
-- ngũ
-"""
+"""dimensionIndex = 5. Assign `1` to `dimensionIndex = 5` and `0` to each other `DimensionIndex`. Read as index five/wǔ."""
 六: int = _dimensionLength ** 6
-"""dimensionIndex = 6: assign `1` to `dimensionIndex = 6`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index six
-- liù
-- luk6
-- roku
-- yuk
-- lục
-"""
+"""dimensionIndex = 6. Assign `1` to `dimensionIndex = 6` and `0` to each other `DimensionIndex`. Read as index six/liù."""
 七: int = _dimensionLength ** 7
-"""dimensionIndex = 7: assign `1` to `dimensionIndex = 7`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index seven
-- qī
-- cat1
-- shichi
-- chil
-- thất
-"""
+"""dimensionIndex = 7. Assign `1` to `dimensionIndex = 7` and `0` to each other `DimensionIndex`. Read as index seven/qī."""
 八: int = _dimensionLength ** 8
-"""dimensionIndex = 8: assign `1` to `dimensionIndex = 8`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index eight
-- bā
-- baat3
-- hachi
-- pal
-- bát
-"""
+"""dimensionIndex = 8. Assign `1` to `dimensionIndex = 8` and `0` to each other `DimensionIndex`. Read as index eight/bā."""
 九: int = _dimensionLength ** 9
-"""dimensionIndex = 9: assign `1` to `dimensionIndex = 9`, and assign `0` to each other `DimensionIndex`. Read as (any of):
-- index nine
-- jiǔ
-- gau2
-- kyū
-- gu
-- cửu
-"""
+"""dimensionIndex = 9. Assign `1` to `dimensionIndex = 9` and `0` to each other `DimensionIndex`. Read as index nine/jiǔ."""
 
 @cache
 def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: int = _dimensionLength) -> DimensionIndex:
@@ -149,10 +79,6 @@ def 首零(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, index zero
 	- shǒu líng
-	- sau2 ling4
-	- shu rei
-	- su yeong
-	- thủ linh
 	"""
 	return int('1' + '0' * (dimensionsTotal - 1), _dimensionLength)
 
@@ -163,10 +89,6 @@ def 首零一(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-one
 	- shǒu líng yī
-	- sau2 ling4 jat1
-	- shu rei ichi
-	- su yeong il
-	- thủ linh nhất
 	"""
 	return int('11' + '0' * (dimensionsTotal - 2), _dimensionLength)
 
@@ -177,10 +99,6 @@ def 首零一二(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-one-two
 	- shǒu líng yī èr
-	- sau2 ling4 jat1 ji6
-	- shu rei ichi ni
-	- su yeong il i
-	- thủ linh nhất nhị
 	"""
 	return int('111' + '0' * (dimensionsTotal - 3), _dimensionLength)
 
@@ -191,10 +109,6 @@ def 首零二(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-two
 	- shǒu líng èr
-	- sau2 ling4 ji6
-	- shu rei ni
-	- su yeong i
-	- thủ linh nhị
 	"""
 	return int('101' + '0' * (dimensionsTotal - 3), _dimensionLength)
 
@@ -205,10 +119,6 @@ def 首一(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, index one
 	- shǒu yī
-	- sau2 jat1
-	- shu ichi
-	- su il
-	- thủ nhất
 	"""
 	return int('01' + '0' * (dimensionsTotal - 2), _dimensionLength)
 
@@ -219,10 +129,6 @@ def 首一二(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices one-two
 	- shǒu yī èr
-	- sau2 jat1 ji6
-	- shu ichi ni
-	- su il i
-	- thủ nhất nhị
 	"""
 	return int('011' + '0' * (dimensionsTotal - 3), _dimensionLength)
 
@@ -233,10 +139,6 @@ def 首二(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, index two
 	- shǒu èr
-	- sau2 ji6
-	- shu ni
-	- su i
-	- thủ nhị
 	"""
 	return int('001' + '0' * (dimensionsTotal - 3), _dimensionLength)
 
@@ -247,10 +149,6 @@ def 首三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, index three
 	- shǒu sān
-	- sau2 saam1
-	- shu san
-	- su sam
-	- thủ tam
 	"""
 	return int('0001' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -261,10 +159,6 @@ def 首零一二三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-one-two-three
 	- shǒu líng yī èr sān
-	- sau2 ling4 jat1 ji6 saam1
-	- shu rei ichi ni san
-	- su yeong il i sam
-	- thủ linh nhất nhị tam
 	"""
 	return int('1111' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -275,10 +169,6 @@ def 首零一三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-one-three
 	- shǒu líng yī sān
-	- sau2 ling4 jat1 saam1
-	- shu rei ichi san
-	- su yeong il sam
-	- thủ linh nhất tam
 	"""
 	return int('1101' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -289,10 +179,6 @@ def 首零二三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-two-three
 	- shǒu líng èr sān
-	- sau2 ling4 ji6 saam1
-	- shu rei ni san
-	- su yeong i sam
-	- thủ linh nhị tam
 	"""
 	return int('1011' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -303,10 +189,6 @@ def 首零三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices zero-three
 	- shǒu líng sān
-	- sau2 ling4 saam1
-	- shu rei san
-	- su yeong sam
-	- thủ linh tam
 	"""
 	return int('1001' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -317,10 +199,6 @@ def 首一二三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices one-two-three
 	- shǒu yī èr sān
-	- sau2 jat1 ji6 saam1
-	- shu ichi ni san
-	- su il i sam
-	- thủ nhất nhị tam
 	"""
 	return int('0111' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -331,10 +209,6 @@ def 首一三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices one-three
 	- shǒu yī sān
-	- sau2 jat1 saam1
-	- shu ichi san
-	- su il sam
-	- thủ nhất tam
 	"""
 	return int('0101' + '0' * (dimensionsTotal - 4), _dimensionLength)
 
@@ -345,9 +219,5 @@ def 首二三(dimensionsTotal: int, /) -> int:
 	Read as (any of):
 	- from the head, indices two-three
 	- shǒu èr sān
-	- sau2 ji6 saam1
-	- shu ni san
-	- su i sam
-	- thủ nhị tam
 	"""
 	return int('0011' + '0' * (dimensionsTotal - 4), _dimensionLength)

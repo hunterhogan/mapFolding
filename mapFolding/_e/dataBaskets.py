@@ -51,27 +51,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 	#============== New methods and attributes ====================================================
 
-	def addMissingPileLeafSpace(self, missing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
-		"""Update missing `Pile: LeafSpace` items with the items from `missing`.
-
-		This will not overwrite any existing `Pile: LeafSpace` items in `permutationSpace` because
-		that would corrupt the `PermutationSpace`.
-
-		Parameters
-		----------
-		missing : PermutationSpace | UndeterminedPiles | PinnedLeaves
-			`Pile: LeafSpace` in `missing`.
-
-		Returns
-		-------
-		permutationSpace : PermutationSpace
-			New `PermutationSpace` and modifies `PermutationSpace` in place.
-		"""
-		#=EndNotes##sorted=
-		self = PermutationSpace(sorted(DOTitems(merge(missing, self, factory=PermutationSpace))))
-		#=Wrong= It is necessary to assign to self before returning.
-		return self  # ruff: ignore[unnecessary-assign]
-
 	def atPileExcludeLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
 		if self.pileUndetermined吗(pile):
 			# TODO `self.pileUndetermined吗` calls a TypeIs for `self[pile]`, so the code only has a
@@ -158,50 +137,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
 		return (leavesPinned, cast('UndeterminedPiles', dissociatePile(self, *DOTkeys(leavesPinned))))
 
-	def deconstructAtPile(self, pile: Pile | None = None, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
-		"""Create alternative `PermutationSpace` branches from `leavesToPin` candidates at `pile`.
-
-		(AI generated docstring)
-
-		You can use this method to replace one `PermutationSpace` with alternatives that pin one
-		candidate `Leaf` at `pile`. When `pile` is `None`, this method selects the first pile whose
-		value is a `ChoicesLeaf`. When `leavesToPin` is false-valued, this method uses every `Leaf`
-		represented by the selected `ChoicesLeaf`. Candidates already pinned in `self` are omitted.
-
-		If `pile` does not contain a `ChoicesLeaf`, this method returns an iterable containing `self`
-		without copying `self`.
-
-		Parameters
-		----------
-		pile : Pile | None = None
-			`Pile` at which to pin each candidate `Leaf`. A value of `None` selects the first pile
-			whose value is a `ChoicesLeaf`.
-		leavesToPin : Iterable[Leaf] = ()
-			Candidate `Leaf` values. A false-valued `leavesToPin` selects every `Leaf` represented by
-			the selected `ChoicesLeaf`.
-
-		Returns
-		-------
-		deconstructed : Iterable[PermutationSpace]
-			Iterable that yields one new `PermutationSpace` for each candidate `Leaf` that is not
-			already pinned, or yields `self` once when `pile` does not contain a `ChoicesLeaf`.
-
-		Collection Integrity
-		--------------------
-		Do not retain `self` in the same collection as any returned `PermutationSpace` that you
-		consume. Each new branch overlaps with `self`, and the fallback result contains the exact
-		`self` object rather than a copy.
-		"""
-		if pile is None:
-			pile = first(filterLeaf(choicesLeaf吗, self))
-		if (choicesLeaf := self.getChoicesLeaf(pile)) is None:
-			deconstructed: Iterable[PermutationSpace] = [self]
-		else:
-			leavesToPin = leavesToPin or _e.getIteratorOfLeaves(choicesLeaf)
-			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
-		return deconstructed
-
-	def deconstructByDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> list[PermutationSpace]:
+	def deconstructDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> list[PermutationSpace]:
 		"""Pin `leaf` at each open `pile` in the domain of `leaf`.
 
 		Return a `list` containing this `PermutationSpace` if `leaf` is already pinned, or one
@@ -231,7 +167,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			deconstructedPermutationSpace.append(self)
 		return deconstructedPermutationSpace
 
-	def deconstructByDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> list[PermutationSpace]:
+	def deconstructDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> list[PermutationSpace]:
 		"""Pin several leaves across matching pile-domain tuples.
 
 		Parameters
@@ -291,34 +227,57 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 				For each leaf in leaves, I filter out occupied piles, so I will not overwrite any pinned leaves--that would invalidate the permutation space.
 				I apply filters that prevent pinning the same leaf twice.
 				Therefore, for each domain in `leavesDomain`, I can safely pin `leaves[次]` at `boxOfPiles[次]` without corrupting the permutation space."""
-				permutationSpaceForListOfPiles: PermutationSpace = self.copy()
+				permutationSpace: PermutationSpace = self.copy()
 				for 次 in range(len(leaves)):
-					permutationSpaceForListOfPiles = permutationSpaceForListOfPiles.atPilePinLeaf(boxOfPiles[次], leaves[次])
-				deconstructedPermutationSpace.append(permutationSpaceForListOfPiles)
+					permutationSpace = permutationSpace.atPilePinLeaf(boxOfPiles[次], leaves[次])
+				deconstructedPermutationSpace.append(permutationSpace)
 		else:
 			deconstructedPermutationSpace.append(self)
 
 		return deconstructedPermutationSpace
 
-	def pinnedLeaves(self) -> PinnedLeaves:
-		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: choicesLeaf`.
+	def deconstructPile(self, pile: Pile | None = None, leavesToPin: Iterable[Leaf] = ()) -> Iterable[PermutationSpace]:
+		"""Create alternative `PermutationSpace` branches from `leavesToPin` candidates at `pile`.
+
+		(AI generated docstring)
+
+		You can use this method to replace one `PermutationSpace` with alternatives that pin one
+		candidate `Leaf` at `pile`. When `pile` is `None`, this method selects the first pile whose
+		value is a `ChoicesLeaf`. When `leavesToPin` is false-valued, this method uses every `Leaf`
+		represented by the selected `ChoicesLeaf`. Candidates already pinned in `self` are omitted.
+
+		If `pile` does not contain a `ChoicesLeaf`, this method returns an iterable containing `self`
+		without copying `self`.
+
+		Parameters
+		----------
+		pile : Pile | None = None
+			`Pile` at which to pin each candidate `Leaf`. A value of `None` selects the first pile
+			whose value is a `ChoicesLeaf`.
+		leavesToPin : Iterable[Leaf] = ()
+			Candidate `Leaf` values. A false-valued `leavesToPin` selects every `Leaf` represented by
+			the selected `ChoicesLeaf`.
 
 		Returns
 		-------
-		dictionaryOfPileLeaf : dict[int, int]
-			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
-		"""
-		return filterLeaf(leaf吗, self)
+		deconstructed : Iterable[PermutationSpace]
+			Iterable that yields one new `PermutationSpace` for each candidate `Leaf` that is not
+			already pinned, or yields `self` once when `pile` does not contain a `ChoicesLeaf`.
 
-	def undeterminedPiles(self) -> UndeterminedPiles:
-		"""Return a dictionary *unsorted* by `pile` of all `pile: choicesLeaf` in `PermutationSpace`.
-
-		Returns
-		-------
-		pilesUndetermined : dict[int, ChoicesLeaf]
-			Dictionary of `pile: choicesLeaf`, if a `choicesLeaf` is defined at `pile`.
+		Collection Integrity
+		--------------------
+		Do not retain `self` in the same collection as any returned `PermutationSpace` that you
+		consume. Each new branch overlaps with `self`, and the fallback result contains the exact
+		`self` object rather than a copy.
 		"""
-		return filterLeaf(choicesLeaf吗, self)
+		if pile is None:
+			pile = first(filterLeaf(choicesLeaf吗, self))
+		if (choicesLeaf := self.getChoicesLeaf(pile)) is None:
+			deconstructed: Iterable[PermutationSpace] = [self]
+		else:
+			leavesToPin = leavesToPin or _e.getIteratorOfLeaves(choicesLeaf)
+			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
+		return deconstructed
 
 	@overload
 	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...
@@ -375,6 +334,17 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			return ImaChoicesLeaf
 		return default
 
+	@property
+	def leafCount(self) -> int:
+		"""Count of `Leaf` indices that are pinned in this `PermutationSpace`.
+
+		Returns
+		-------
+		leafCount : int
+			Count of `Leaf` indices that are pinned in this `PermutationSpace`.
+		"""
+		return sum(map(leaf吗, self.values()))
+
 	def leafNotPinned吗(self, leaf: Leaf) -> bool:
 		"""Return `True` if `leaf` is not presently pinned in this `PermutationSpace`.
 
@@ -389,17 +359,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			`True` if this `PermutationSpace` does not include `leaf`.
 		"""
 		return leaf not in self.values()
-
-	@property
-	def leafCount(self) -> int:
-		"""Count of `Leaf` indices that are pinned in this `PermutationSpace`.
-
-		Returns
-		-------
-		leafCount : int
-			Count of `Leaf` indices that are pinned in this `PermutationSpace`.
-		"""
-		return sum(map(leaf吗, self.values()))
 
 	def leafPinned吗(self, leaf: Leaf) -> bool:
 		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
@@ -548,6 +507,48 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			elif rangeOfPile is None:
 				self.valid = False
 
+	# TODO Does it matter whether this is a property or a method?
+	def pinnedLeaves(self) -> PinnedLeaves:
+		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: choicesLeaf`.
+
+		Returns
+		-------
+		dictionaryOfPileLeaf : dict[int, int]
+			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
+		"""
+		return filterLeaf(leaf吗, self)
+
+	def undeterminedPiles(self) -> UndeterminedPiles:
+		"""Create a dictionary *unsorted* by `pile` of all `pile: choicesLeaf` in `PermutationSpace`.
+
+		Returns
+		-------
+		pilesUndetermined : dict[int, ChoicesLeaf]
+			Dictionary of `pile: choicesLeaf`, if a `choicesLeaf` is defined at `pile`.
+		"""
+		return filterLeaf(choicesLeaf吗, self)
+
+	def updatePilesMissing(self, missing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
+		"""Update missing `Pile: LeafSpace` items with the items from `missing`.
+
+		This will not overwrite any existing `Pile: LeafSpace` items in `permutationSpace` because
+		that would corrupt the `PermutationSpace`.
+
+		Parameters
+		----------
+		missing : PermutationSpace | UndeterminedPiles | PinnedLeaves
+			`Pile: LeafSpace` in `missing`.
+
+		Returns
+		-------
+		permutationSpace : PermutationSpace
+			New `PermutationSpace` and modifies `PermutationSpace` in place.
+		"""
+		#=EndNotes##sorted=
+		self = PermutationSpace(sorted(DOTitems(merge(missing, self))))
+		#=Wrong= It is necessary to assign to self before returning.
+		return self  # ruff: ignore[unnecessary-assign]
+
 	valid: bool = True
 
 @dataclasses.dataclass(slots=True)
@@ -589,12 +590,12 @@ class EliminationState:
 		Unchanging 0-indexed largest `pile` value.
 	pilesTotal : int
 		Unchanging total number of piles in the map.
-	productsOfDimensions : tuple[int, ...]
+	mapShapeProducts : tuple[int, ...]
 		Unchanging products of dimension lengths, from the empty product through all dimensions.
-	sumsOfProductsOfDimensions : tuple[int, ...]
-		Unchanging sums of `productsOfDimensions` from the head.
-	sumsOfProductsOfDimensionsNearest首 : tuple[int, ...]
-		Unchanging sums of `productsOfDimensions` from the head `首`.
+	mapShapeProductsSums : tuple[int, ...]
+		Unchanging sums of `mapShapeProducts` from the head.
+	mapShape首ProductsSums : tuple[int, ...]
+		Unchanging sums of `mapShapeProducts` from the head `首`.
 	首 : int
 		Unchanging single-base positional-numeral value of the first out-of-bounds Cartesian
 		coordinate.
@@ -642,12 +643,12 @@ class EliminationState:
 	"""Unchanging 0-indexed final `pile` in a `Folding`."""
 	pilesTotal: int = dataclasses.field(init=False)
 	"""Unchanging total number of piles in the map."""
-	productsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
+	mapShapeProducts: tuple[int, ...] = dataclasses.field(init=False)
 	"""Unchanging list of products of map dimensions from the product of no dimensions, `[0]`, to the product of all dimensions, `[dimensionsTotal + inclusive]`."""
-	sumsOfProductsOfDimensions: tuple[int, ...] = dataclasses.field(init=False)
-	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[len(productsOfDimensions) + inclusive]`."""
-	sumsOfProductsOfDimensionsNearest首: tuple[int, ...] = dataclasses.field(init=False)
-	"""Unchanging list of sums of products of map dimensions starting from the head `首`, from the sum of no products, `[0]`, to the sum of all products, `[len(productsOfDimensions) + inclusive]`."""
+	mapShapeProductsSums: tuple[int, ...] = dataclasses.field(init=False)
+	"""Unchanging list of sums of products of map dimensions from the sum of no products, `[0]`, to the sum of all products, `[len(mapShapeProducts) + inclusive]`."""
+	mapShape首ProductsSums: tuple[int, ...] = dataclasses.field(init=False)
+	"""Unchanging list of sums of products of map dimensions starting from the head `首`, from the sum of no products, `[0]`, to the sum of all products, `[len(mapShapeProducts) + inclusive]`."""
 	首: int = dataclasses.field(init=False)
 	"""Unchanging single-base positional-numeral value of the Cartesian coordinates that are the first to be _out-of-bounds_ for the `mapShape`."""
 
@@ -816,8 +817,8 @@ class EliminationState:
 		self.pilesTotal = self.leavesTotal
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.leavesTotal
-		self.productsOfDimensions = _e.getProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensions = _e.getSumsOfProductsOfDimensions(self.mapShape)
-		self.sumsOfProductsOfDimensionsNearest首 = _e.getSumsOfProductsOfDimensionsNearest首(
-			self.productsOfDimensions, self.dimensionsTotal, self.dimensionsTotal
+		self.mapShapeProducts = _e.getMapShapeProducts(self.mapShape)
+		self.mapShapeProductsSums = _e.getMapShapeProductsSums(self.mapShape)
+		self.mapShape首ProductsSums = _e.getMapShape首ProductsSums(
+			self.mapShapeProducts, self.dimensionsTotal, self.dimensionsTotal
 		)

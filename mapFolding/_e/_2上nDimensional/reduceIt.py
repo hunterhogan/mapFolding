@@ -347,7 +347,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 			if 0 < dimensionHead:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterLeaf(choicesLeaf吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
-					, makeAntiChoicesLeaf(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
+					, makeAntiChoicesLeaf(state.leavesTotal, range(state.mapShapeProducts[dimensionHead], state.leavesTotal, state.mapShapeProducts[dimensionHead]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.
@@ -357,7 +357,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 			if 0 < dimensionTail:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
-					, makeAntiChoicesLeaf(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
+					, makeAntiChoicesLeaf(state.leavesTotal, range(leafOrigin, state.mapShapeProductsSums[dimensionTail]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.

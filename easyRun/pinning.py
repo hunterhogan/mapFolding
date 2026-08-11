@@ -4,7 +4,7 @@ from __future__ import annotations
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
-from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves, howManyLeavesInChoicesLeaf
+from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves, lengthChoicesLeaf
 from mapFolding._e._2上nDimensional import getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
@@ -24,15 +24,15 @@ if TYPE_CHECKING:
 
 def printStatisticsPermutations(state: EliminationState) -> None:
 	def prodOfDOTvalues(boxOfChoicesLeaf: Iterable[ChoicesLeaf]) -> int:
-		return prod(map(howManyLeavesInChoicesLeaf, boxOfChoicesLeaf))
+		return prod(map(lengthChoicesLeaf, boxOfChoicesLeaf))
 
 	permutationsPermutationSpaceTotal: Callable[[Iterable[Any]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('extractUndeterminedPiles'))))
 	print(len(str(mm := fac(state.leavesTotal))), mm, "Maximum permutations of leaves")
-	print(len(str(rr := prod(toolz_map(howManyLeavesInChoicesLeaf, filter(None, DOTvalues(getDictionaryChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
+	print(len(str(rr := prod(toolz_map(lengthChoicesLeaf, filter(None, DOTvalues(getDictionaryChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state: EliminationState = EliminationState((2,) * 6, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional)
+	state: EliminationState = EliminationState((2,) * 5, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional)
 
 	printThis = True
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 		print(*getLeavesCreaseAnte(state, 53))
 		print(*getLeavesCreasePost(state, 22))
 		print(list(getDomainLeaf(state, 首一(5) + 4)))
-		print(state.sumsOfProductsOfDimensionsNearest首)
+		print(state.mapShape首ProductsSums)
 		state = pinIt.pin3beans2(state)
 		state = pinIt.pinLeavesDimensions0零一(state)
 		state = pinIt.pinLeavesDimension首二(state)

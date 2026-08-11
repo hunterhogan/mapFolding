@@ -83,10 +83,10 @@ The progression from arithmetic relationships (`8 + 32 = 40`) to structural rela
 
 ### Step 4: Connecting to Existing Functions
 
-The comment `8 + 32 = 40 + 16 = 56 + 8 = 64` triggered recognition of `Z0Z_sumsOfProductsOfDimensionsNearest首`:
+The comment `8 + 32 = 40 + 16 = 56 + 8 = 64` triggered recognition of `Z0Z_mapShape首ProductsSums`:
 
 ```python
-magicalSequence = Z0Z_sumsOfProductsOfDimensionsNearest首(state, state.dimensionsTotal)
+magicalSequence = Z0Z_mapShape首ProductsSums(state, state.dimensionsTotal)
 # Returns: (0, 32, 48, 56, 60, 62, 63)
 ```
 
@@ -113,7 +113,7 @@ With the series structure understood and the magical sequence identified, formul
 pileStepAbsolute = 4
 for 次Universal in range(state.dimensionsTotal - 2):
     leafPredecessorTheFirst = Z0Z_invert(state, magicalSequence[state.dimensionsTotal - 2 - 次Universal])
-    leafPredecessorsInThisSeries = state.productsOfDimensions[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
+    leafPredecessorsInThisSeries = state.mapShapeProducts[howManyDimensionsHaveOddParity(leafPredecessorTheFirst)]
     for addend in range(leafPredecessorsInThisSeries):
         leafPredecessor = leafPredecessorTheFirst + (addend * decreasing)
         leafPredecessor首零 = leafPredecessor + 首零(state.dimensionsTotal)
@@ -137,7 +137,7 @@ The `mapFolding/_e/` directory contains measurement and semantic functions essen
 | `howManyDimensionsHaveOddParity(n)`                   | `bit_count() - 1` — number of set bits excluding the MSB               |
 | `leafInSubHyperplane(n)`                              | Project leaf onto sub-hyperplane (bits below MSB)                      |
 | `Z0Z_invert(state, n)`                                | XOR with `bit_mask(dimensionsTotal)` — "mirror" within dimension space |
-| `Z0Z_sumsOfProductsOfDimensionsNearest首(state, dim)` | Cumulative sums of products of dimensions in reverse                   |
+| `Z0Z_mapShape首ProductsSums(state, dim)` | Cumulative sums of products of dimensions in reverse                   |
 
 ### From `_semiotics.py` (via `_e/__init__.py`)
 
@@ -182,7 +182,7 @@ The `mapFolding/_e/` directory contains measurement and semantic functions essen
 ### Phase 5: Sequence Recognition
 
 1. Look for known sequences: powers of 2, cumulative sums, products
-2. Test against `productsOfDimensions`, `sumsOfProductsOfDimensions`
+2. Test against `mapShapeProducts`, `mapShapeProductsSums`
 3. Check if relationships involve dimension-specific offsets
 
 ### Phase 6: Formula Construction
@@ -204,7 +204,7 @@ The `mapFolding/_e/` directory contains measurement and semantic functions essen
 
 Data often organizes into series indexed by dimension, where:
 
-- Series boundaries relate to `productsOfDimensions` or cumulative sums
+- Series boundaries relate to `mapShapeProducts` or cumulative sums
 - Values within a series relate by `首零(dimensionsTotal)` offsets (adds 2^(d-1))
 
 ### The Parity Pattern
@@ -272,7 +272,7 @@ When asked to find patterns in static data:
 - `mapFolding/_e/_semiotics.py` — Semantic constants and dimension-indexed functions
 - `mapFolding/_e/_dataDynamic.py` — Domain and range functions (examples of generalized patterns)
 - `mapFolding/_e/__init__.py` — Re-exports (the public API for these tools)
-- `mapFolding/dataBaskets.py` — State classes with `productsOfDimensions`, `leavesTotal`, etc.
+- `mapFolding/dataBaskets.py` — State classes with `mapShapeProducts`, `leavesTotal`, etc.
 
 ## Appendix: The Transformation Summary
 

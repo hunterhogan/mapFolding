@@ -42,17 +42,17 @@ Truth:
 
 Reminders and general observations:
 
-- [something, something] absolute value [yada yada] in `state.productsOfDimensions[0:-1]`
+- [something, something] absolute value [yada yada] in `state.mapShapeProducts[0:-1]`
 - The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.leavesTotal // 2)`, `neg(state.leavesTotal // 2)`.
 - The total number of differences is `state.leavesTotal - 1`, which is an odd number. (_Cf._ fencepost problem.)
-- `state.productsOfDimensions[-1] == state.leavesTotal`, and `state.productsOfDimensions[-2] == state.leavesTotal // 2`.
+- `state.mapShapeProducts[-1] == state.leavesTotal`, and `state.mapShapeProducts[-2] == state.leavesTotal // 2`.
 
 Differences:
 
 1. The signs of the magnitudes alternate: if the difference between two leaves is +2, for example, then before there can be another difference of +2, there must be a difference of -2.
 2. The total number of differences equal to `pos(state.leavesTotal // 2)` is always exactly one more than the total number of differences equal to `neg(state.leavesTotal // 2)`.
    1. Therefore, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
-3. For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of positive and negative differences is always equal.
+3. For all other magnitudes in `state.mapShapeProducts[0:-2]`, the total number of positive and negative differences is always equal.
    1. Therefore, the first and last differences with those magnitudes must have opposite signs.
    2. Given Truth 1 and Truth 2,
       1. the first difference in every `Folding` is +1,
@@ -65,13 +65,13 @@ Differences:
 
 Physically, `pileOf_r` can exist before `pileOf_k`, so the limitation is due to leveraged enumeration.
 
-`dimensionNearest首(k)` is a 0-based index. Use the index on `state.productsOfDimensions`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
+`dimensionNearest首(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
 
 ```python
 k: int # Is a leaf
 index = dimensionNearest首(k)
 
-rTheFirst = state.productsOfDimensions[index]
+rTheFirst = state.mapShapeProducts[index]
 step = rTheFirst
 
 leavesThatCannotPrecede_k = range(rTheFirst, state.leavesTotal, step)

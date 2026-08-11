@@ -119,7 +119,7 @@ def dimensionSecondNearest首(integerNonnegative: int, /) -> int | None:
 			and (dimensionNearest首(pileOfLeaf二一)
 				- raiseIfNone(dimensionSecondNearest首(pileOfLeaf 二一)) < 2)
 		):
-			addend: int = productsOfDimensions[dimensionsTotal-2] + 4
+			addend: int = mapShapeProducts[dimensionsTotal-2] + 4
 	```
 
 	References

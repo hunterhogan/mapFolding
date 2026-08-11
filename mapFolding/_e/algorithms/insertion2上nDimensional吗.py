@@ -8,11 +8,11 @@ from humpy_cytoolz import keyfilter as filterPile
 from itertools import pairwise
 from mapFolding._e import getDomainLeaf, makeAntiChoicesLeaf
 from mapFolding._e._2上nDimensional import 一, 二, 零
-from mapFolding._e._2上nDimensional.pinIt import pin3beans2, pinLeavesDimension二, pinPilesAtEnds
+from mapFolding._e._2上nDimensional.pinIt import pinLeavesDimension二, pinPilesAtEnds
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import 是valid
-from mapFolding._e.pinIt import atPileExcludeLeaf_inBulk, excludeLeaf_rBeforeLeaf_k
+from mapFolding._e.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from mapFolding._e.reduceIt import reduceLeafSpace
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from mapFolding.oeis import makeMapShape
@@ -53,8 +53,6 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 		for 次, (r, k) in enumerate(pairwise(leaves), start=1):
 			if r == 2:
 				continue
-			if r == 3:
-				state = pin3beans2(state, CPUlimit=True)
 			if r in leaves二:
 				leaves二.remove(r)
 				if not leaves二:
@@ -63,7 +61,7 @@ def makeDescendants(folding: Folding, state: EliminationState, position: int) ->
 			domain_r: Iterable[Pile] = tuple(filter(state.pile.__gt__, getDomainLeaf(state, r)))
 			pilesForOthers: set[Pile] = set(range(len(folding) - state.pile - 次)).intersection(domain_r)
 			for pileSacrifice in pilesForOthers:
-				state.boxOfPermutationSpace = 是valid(atPileExcludeLeaf_inBulk(state.boxOfPermutationSpace, pileSacrifice, r))
+				state.boxOfPermutationSpace = 是valid(atPileExcludeLeaf(state.boxOfPermutationSpace, pileSacrifice, r))
 
 			domain_k: Iterable[Pile] = tuple(filter(state.pile.__gt__, getDomainLeaf(state, k)))
 

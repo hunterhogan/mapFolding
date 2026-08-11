@@ -125,7 +125,7 @@ if __name__ == '__main__':
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 # if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 # 	state.Theorem2Multiplier = 2
-# 	leafOrigin下aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.productsOfDimensions))
+# 	leafOrigin下aDimension: int = last(filter(between吗(0, state.leafLast // 2), state.mapShapeProducts))
 # 	model.add(boxOfPilingsInLeafOrder[leafOrigin下aDimension] < boxOfPilingsInLeafOrder[2 * leafOrigin下aDimension])
 
 # `leafOrigin下aDimension: int = last...` chooses the largest per-dimension leafOrigin, and I'm
@@ -136,16 +136,16 @@ if __name__ == '__main__':
 # 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.leavesTotal):
 # 		state.Theorem2Multiplier = 2
 # 		dimension: int = state.mapShape.index(max(state.mapShape))
-# 		leaf_k: int = state.productsOfDimensions[dimension]
+# 		leaf_k: int = state.mapShapeProducts[dimension]
 # 		leaf_r: int = 2 * leaf_k
 # 		state = excludeLeaf_rBeforeLeaf_k(state, leaf_k, leaf_r)
 # 		state = state.reduceAllPermutationSpace(boxOfFunctionsReduction).removeCreaseViolations()
 # 	return state
 
-# constraintPropagation and `elimination` would assign leaf_k = 1 because productsOfDimensions for
+# constraintPropagation and `elimination` would assign leaf_k = 1 because mapShapeProducts for
 # mapShape (1, n) is [1, n]. (Or does my code make it [1, 1, n]?) Compare to mapShape (2, n), which is
-# [1, 2, 2n]. In any event, it seems that selecting k, r, where k ∈ productsOfDimensions and r = 2 * k
-# < leavesTotal is valid for any k in productsOfDimensions. With (1, n) maps, we have the good fortune
+# [1, 2, 2n]. In any event, it seems that selecting k, r, where k ∈ mapShapeProducts and r = 2 * k
+# < leavesTotal is valid for any k in mapShapeProducts. With (1, n) maps, we have the good fortune
 # of k and r staying the same for all n.
 
 # If I were to select k using either of the above methods for other map types, then k and r would

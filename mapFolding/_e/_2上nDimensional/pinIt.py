@@ -174,7 +174,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
-	state.boxOfPermutationSpace.extend(state.permutationSpace.deconstructAtPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
+	state.boxOfPermutationSpace.extend(state.permutationSpace.deconstructPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
@@ -295,7 +295,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 		return state
 
 	if not state.boxOfPermutationSpace:
-		state.boxOfPermutationSpace.append(PermutationSpace().addMissingPileLeafSpace(getDictionaryChoicesLeaf(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace().updatePilesMissing(getDictionaryChoicesLeaf(state)))
 
 	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
 	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,
@@ -500,7 +500,7 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
-	state.boxOfPermutationSpace = state.permutationSpace.deconstructByDomainsCombined(leaves, leavesDomain)
+	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
 #--- Logic that wants to join the shared logic ---
@@ -610,7 +610,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
-	state.boxOfPermutationSpace = state.permutationSpace.deconstructByDomainOfLeaf(leaves, leavesDomain)
+	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainOfLeaf(leaves, leavesDomain)
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
 #-------- Plebian functions -----------------------------------------

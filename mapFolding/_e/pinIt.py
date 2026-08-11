@@ -4,45 +4,15 @@ Functions for 2^n-dimensional maps must go in other modules.
 """
 from __future__ import annotations
 
-from functools import partial
-from gmpy2 import bit_clear
-from humpy_cytoolz import groupby as toolz_groupby
 from mapFolding import _e
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import leafInChoicesLeaf吗, 是valid
 from mapFolding._e.theTypes import ChoicesLeaf
-from operator import methodcaller
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable
+	from collections.abc import Iterable
+	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 	from mapFolding._e.theTypes import Leaf, Pile
-
-#======== Group by =======================
-
-def segregateLeafPinnedAtPile(boxOfPermutationSpace: Iterable[PermutationSpace], leaf: Leaf, pile: Pile) -> tuple[list[PermutationSpace], list[PermutationSpace]]:
-	"""Partition `boxOfPermutationSpace` into (notPinned, isPinned) groups for `leaf` pinned at `pile`.
-
-	Parameters
-	----------
-	boxOfPermutationSpace : Iterable[PermutationSpace]
-		Collection of partial folding dictionaries.
-	leaf : int
-		`leaf` to test.
-	pile : int
-		`pile` index.
-
-	Returns
-	-------
-	segregatedLists : tuple[list[PermutationSpace], list[PermutationSpace]]
-		First element: dictionaries where `leaf` is NOT pinned at `pile`.
-		Second element: dictionaries where `leaf` IS pinned at `pile`.
-	"""
-	isPinned: Callable[[PermutationSpace], bool] = partial(PermutationSpace.leafPinnedAtPile吗, leaf=leaf, pile=pile)
-	grouped: dict[bool, list[PermutationSpace]] = toolz_groupby(isPinned, boxOfPermutationSpace)
-	return (grouped.get(False, []), grouped.get(True, []))
-
-#======== Bulk modifications =======================
 
 def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> EliminationState:
 	"""Exclude `leaf_r` from appearing before `leaf_k` in every `pile` in the domain of `leaf_k`.
@@ -82,7 +52,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	, pile_k: Pile
 	, domainOf_leaf_r: Iterable[Pile] | None = None
 ) -> EliminationState:
-	boxOfPermutationSpace: Iterable[PermutationSpace] = state.boxOfPermutationSpace
+	boxOfPermutationSpace: list[PermutationSpace] = state.boxOfPermutationSpace
 	state.boxOfPermutationSpace = []
 
 	boxOfPermutationSpaceUnchanged: list[PermutationSpace] = []
@@ -93,11 +63,8 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 			boxOfExcludeLeaf_r.append(permutationSpace)
 
 		elif leafInChoicesLeaf吗(leaf_k, permutationSpace.getChoicesLeaf(pile_k, ChoicesLeaf(0))):
-			permutationSpaceCopy: PermutationSpace = permutationSpace.copy()
-			permutationSpaceCopy[pile_k] = bit_clear(permutationSpaceCopy[pile_k], leaf_k)
-			state.boxOfPermutationSpace.append(permutationSpaceCopy)
-
 			boxOfExcludeLeaf_r.append(permutationSpace.atPilePinLeaf(pile_k, leaf_k))
+			state.boxOfPermutationSpace.append(permutationSpace.atPileExcludeLeaf(pile_k, leaf_k))
 
 		else:
 			boxOfPermutationSpaceUnchanged.append(permutationSpace)
@@ -115,7 +82,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 		domainOf_leaf_r = _e.getDomainLeaf(state, leaf_r)
 
 	for pile_r in filter(pile_k.__gt__, sorted(domainOf_leaf_r, reverse=True)):
-		boxOfPermutationSpace = 是valid(atPileExcludeLeaf_inBulk(boxOfPermutationSpace, pile_r, leaf_r))
+		boxOfPermutationSpace = 是valid(atPileExcludeLeaf(boxOfPermutationSpace, pile_r, leaf_r))
 
 	state.boxOfPermutationSpace.extend(boxOfPermutationSpace)
 
@@ -125,7 +92,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 
 	return state
 
-def atPileExcludeLeaf_inBulk(boxOfPermutationSpace: Iterable[PermutationSpace], pile: Pile, leaf: Leaf) -> list[PermutationSpace]:
+def atPileExcludeLeaf(boxOfPermutationSpace: list[PermutationSpace], pile: Pile, leaf: Leaf) -> list[PermutationSpace]:
 	"""Return a new list of `PermutationSpace` without `leaf` at `pile`.
 
 	Parameters
@@ -147,11 +114,6 @@ def atPileExcludeLeaf_inBulk(boxOfPermutationSpace: Iterable[PermutationSpace], 
 	requireLeafPinnedAtPile
 		Complementary operation that forces a `leaf` at a `pile`.
 	"""
-	boxOfPermutationSpace, _pinnedAtPile = segregateLeafPinnedAtPile(boxOfPermutationSpace, leaf, pile)
-	groupByPilePinned: dict[bool, list[PermutationSpace]] = toolz_groupby(methodcaller('pilePinned吗', pile), boxOfPermutationSpace)
-
-	boxOfPermutationSpace = groupByPilePinned.get(True, [])
-
-	for permutationSpace in groupByPilePinned.get(False, []):
-		boxOfPermutationSpace.append(permutationSpace.atPileExcludeLeaf(pile, leaf))
+	for permutationSpace in boxOfPermutationSpace:
+		permutationSpace.atPileExcludeLeaf(pile, leaf)
 	return boxOfPermutationSpace

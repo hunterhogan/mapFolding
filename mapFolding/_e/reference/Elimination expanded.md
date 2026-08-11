@@ -11,7 +11,7 @@
 		- [Addends for "next" and "prior" leaves match crease neighbors](#addends-for-next-and-prior-leaves-match-crease-neighbors)
 		- [Progressions within a dimension](#progressions-within-a-dimension)
 		- [Bit inversion symmetry](#bit-inversion-symmetry)
-		- [Leaf domains are directly tied to `sumsOfProductsOfDimensions` and `sumsOfProductsOfDimensionsNearest首`](#leaf-domains-are-directly-tied-to-sumsofproductsofdimensions-and-sumsofproductsofdimensionsnearest首)
+		- [Leaf domains are directly tied to `mapShapeProductsSums` and `mapShape首ProductsSums`](#leaf-domains-are-directly-tied-to-sumsofproductsofdimensions-and-sumsofproductsofdimensionsnearest首)
 		- [Leaf precedence hierarchy](#leaf-precedence-hierarchy)
 		- [Pile-range formulas: relationship between pile ranges and leaf domains](#pile-range-formulas-relationship-between-pile-ranges-and-leaf-domains)
 		- [Constraint propagation system](#constraint-propagation-system)
@@ -64,17 +64,17 @@ Truth:
 
 Reminders and general observations:
 
-- [something, something] absolute value [yada yada] in `state.productsOfDimensions[0:-1]`
+- [something, something] absolute value [yada yada] in `state.mapShapeProducts[0:-1]`
 - The difference between two adjacent leaves may be 1, -1, 2, -2, 4, -4, ..., `pos(state.leavesTotal // 2)`, `neg(state.leavesTotal // 2)`.
 - The total number of differences is `state.leavesTotal - 1`, which is an odd number. (_Cf._ fencepost problem.)
-- `state.productsOfDimensions[-1] == state.leavesTotal`, and `state.productsOfDimensions[-2] == state.leavesTotal // 2`.
+- `state.mapShapeProducts[-1] == state.leavesTotal`, and `state.mapShapeProducts[-2] == state.leavesTotal // 2`.
 
 Differences:
 
 1. The signs of the magnitudes alternate: if the difference between two leaves is +2, for example, then before there can be another difference of +2, there must be a difference of -2.
 2. The total number of differences equal to `pos(state.leavesTotal // 2)` is always exactly one more than the total number of differences equal to `neg(state.leavesTotal // 2)`.
    1. Therefore, the first and last differences with magnitude `state.leavesTotal // 2` are positive.
-3. For all other magnitudes in `state.productsOfDimensions[0:-2]`, the total number of positive and negative differences is always equal.
+3. For all other magnitudes in `state.mapShapeProducts[0:-2]`, the total number of positive and negative differences is always equal.
    1. Therefore, the first and last differences with those magnitudes must have opposite signs.
    2. Given Truth 1 and Truth 2,
       1. the first difference in every `Folding` is +1,
@@ -87,13 +87,13 @@ Differences:
 
 Physically, `pileOf_r` can exist before `pileOf_k`, so the limitation is due to leveraged enumeration.
 
-`dimensionNearest首(k)` is a 0-based index. Use the index on `state.productsOfDimensions`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
+`dimensionNearest首(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
 
 ```python
 k: int # Is a leaf
 index = dimensionNearest首(k)
 
-rTheFirst = state.productsOfDimensions[index]
+rTheFirst = state.mapShapeProducts[index]
 step = rTheFirst
 
 leavesThatCannotPrecede_k = range(rTheFirst, state.leavesTotal, step)
@@ -181,12 +181,12 @@ for leaf in [2, 4, 7, 11, 13, 14, 19, 21, 22, 25, 26, 31]:
 
 This extends: `leafInSubHyperplane` can be used for the "start over" equivalences at $\text{leavesTotal}/4$, $\text{leavesTotal}/2$, and $3\cdot\text{leavesTotal}/4$.
 
-### Leaf domains are directly tied to `sumsOfProductsOfDimensions` and `sumsOfProductsOfDimensionsNearest首`
+### Leaf domains are directly tied to `mapShapeProductsSums` and `mapShape首ProductsSums`
 
 For dimension origins (powers of 2), leaf domains follow a pattern:
 
-- The `start` of a dimension origin's domain equals `sumsOfProductsOfDimensions` up to that dimension.
-- The `stop` equals `sumsOfProductsOfDimensionsNearest首` from the head minus an offset of 2.
+- The `start` of a dimension origin's domain equals `mapShapeProductsSums` up to that dimension.
+- The `stop` equals `mapShape首ProductsSums` from the head minus an offset of 2.
 
 For a $2^6$-dimensional map:
 
@@ -203,9 +203,9 @@ The full formula for `getDomainLeaf`:
 
 ```python
 range(
-    sumsOfProductsOfDimensions[dimensionNearestTail(leaf) + inclusive]
+    mapShapeProductsSums[dimensionNearestTail(leaf) + inclusive]
         + howManyDimensionsHaveOddParity(leaf) - originPinned
-    , sumsOfProductsOfDimensionsNearest首[dimensionNearest首(leaf)]
+    , mapShape首ProductsSums[dimensionNearest首(leaf)]
         + 2 - howManyDimensionsHaveOddParity(leaf) - originPinned
     , 2 + (2 * (leaf == 首零(dimensionsTotal) + 零))
 )
@@ -223,11 +223,11 @@ Some leaves are always preceded by one or more leaves. Most leaves, however, are
 
 ### Pile-range formulas: relationship between pile ranges and leaf domains
 
-The leaves in the pile-range of a pile can be computed from leaf domains (which leaf can appear at which pile). For odd piles in a specific range (e.g., $9 \le \text{odd piles} \le 47$ for a $2^6$-dimensional map), the pile-range follows a pattern involving `intraDimensionalLeaves` and `productsOfDimensions`, though a full closed-form formula remains under development.
+The leaves in the pile-range of a pile can be computed from leaf domains (which leaf can appear at which pile). For odd piles in a specific range (e.g., $9 \le \text{odd piles} \le 47$ for a $2^6$-dimensional map), the pile-range follows a pattern involving `intraDimensionalLeaves` and `mapShapeProducts`, though a full closed-form formula remains under development.
 
 The pile-range construction involves three groups:
 
-1. **Odd leaves below $\text{leavesTotal}/2$** and some even leaves, via `sumsOfProductsOfDimensions` addends scaled by `productsOfDimensions`.
+1. **Odd leaves below $\text{leavesTotal}/2$** and some even leaves, via `mapShapeProductsSums` addends scaled by `mapShapeProducts`.
 2. **Even leaves above $\text{leavesTotal}/2$**, via bit-inversion (`invertLeafIn2上nDimensions`) of the first group's formula.
 3. **Dimension origins** and their inverses, added separately.
 
@@ -332,7 +332,7 @@ Lunnon's theorem: a pile ordering is a valid folding if and only if all its one-
 - A `Folding` is a one-to-one correspondence between the set of `Pile` and the set of `Leaf`.
 - `folding` is the archetypal variable name for a `Folding`.
 - A `PermutationSpace` is an exclusive subset of the undifferentiated permutation space of the factorial of `state.leavesTotal`.
-- The positional-numeral ideographs (零, 一, 二, 三, etc.) represent `productsOfDimensions[dimensionIndex]`, i.e., powers of 2 in $2^n$-dimensional maps: 零 $= 2^0 = 1$, 一 $= 2^1 = 2$, 二 $= 2^2 = 4$, etc.
+- The positional-numeral ideographs (零, 一, 二, 三, etc.) represent `mapShapeProducts[dimensionIndex]`, i.e., powers of 2 in $2^n$-dimensional maps: 零 $= 2^0 = 1$, 一 $= 2^1 = 2$, 二 $= 2^2 = 4$, etc.
 - 首 (shǒu, "head") denotes the most-significant-dimension end of a coordinate. For example, `首零(n)` $= 2^{n-1}$, `首一(n)` $= 2^{n-2}$, `首零一(n)` $= 2^{n-1} + 2^{n-2}$.
 - `ChoicesLeaf` is a `gmpy2.mpz` bitset where bit $i$ is set iff leaf $i$ is a candidate at that pile.
 - `PinnedLeaves` is a `dict[Pile, Leaf]` of pile-to-leaf assignments that are determined.

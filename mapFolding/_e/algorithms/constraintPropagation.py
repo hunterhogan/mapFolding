@@ -3,7 +3,7 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
 from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
@@ -43,24 +43,24 @@ def count(state: EliminationState) -> EliminationState:
 
 #======== Lunnon Theorem 4: "G(p^d) is divisible by d!p^d." ============================
 
-	for indicesSameDimensionLength in indicesMapShapeDimensionLengthsAreEqual(state.mapShape):
+	for indicesSameDimensionLength in mapShapeLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 		for 次k, 次r in pairwise(indicesSameDimensionLength):
-			model.add(boxOfPilingsInLeafOrder[state.productsOfDimensions[次k]] < boxOfPilingsInLeafOrder[state.productsOfDimensions[次r]])
+			model.add(boxOfPilingsInLeafOrder[state.mapShapeProducts[次k]] < boxOfPilingsInLeafOrder[state.mapShapeProducts[次r]])
 
 #======== Rules for 2^n-dimensional maps ============================
 
 	if mapShapeIs2上nDimensions(state.mapShape):
 		#=SIN= `for` loops: CP-SAT requires one ordering constraint for each constrained leaf pair.
-		for leaf in range(state.productsOfDimensions[1], state.leavesTotal):
+		for leaf in range(state.mapShapeProducts[1], state.leavesTotal):
 			dimensionHead: int = dimensionNearest首(leaf)
-			leafStep: int = state.productsOfDimensions[dimensionHead]
+			leafStep: int = state.mapShapeProducts[dimensionHead]
 			for leafTail in filter(leaf.__ne__, range(leafStep, state.leavesTotal, leafStep)):
 				model.add(boxOfPilingsInLeafOrder[leaf] < boxOfPilingsInLeafOrder[leafTail])
 
 			dimensionTail: int = dimensionNearestTail(leaf)
 			if 0 < dimensionTail:
-				for leafHead in range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]):
+				for leafHead in range(leafOrigin, state.mapShapeProductsSums[dimensionTail]):
 					model.add(boxOfPilingsInLeafOrder[leafHead] < boxOfPilingsInLeafOrder[leaf])
 
 		#=SIN= `for` loop: CP-SAT requires one non-consecutive-dimension constraint for each adjacent pile triple.
@@ -89,7 +89,7 @@ def count(state: EliminationState) -> EliminationState:
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):
 		state.Theorem2Multiplier = 2
-		leafOrigin下aDimension: int = last(filter((state.leafLast // 2).__ge__, state.productsOfDimensions))
+		leafOrigin下aDimension: int = last(filter((state.leafLast // 2).__ge__, state.mapShapeProducts))
 		model.add(boxOfPilingsInLeafOrder[leafOrigin下aDimension] < boxOfPilingsInLeafOrder[2 * leafOrigin下aDimension])
 
 #======== Forbidden inequalities ============================
@@ -167,7 +167,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	"""Do the things necessary so that `count` operates efficiently."""
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `foldsTotal` is divisible by `leavesTotal`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).addMissingPileLeafSpace(getDictionaryChoicesLeaf(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getDictionaryChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 
 	state.permutationSpace = PermutationSpace()
