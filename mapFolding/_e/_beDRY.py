@@ -57,7 +57,7 @@ from gmpy2 import bit_clear, bit_mask, bit_set
 from humpy_cytoolz import unique
 from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
 from itertools import accumulate
-from mapFolding._e.filters import isLeafOptions吗
+from mapFolding._e.filters import leafOptions吗
 from more_itertools import iter_index
 from operator import add, mul
 from typing import TYPE_CHECKING
@@ -214,7 +214,7 @@ def leafOptionsLeafNone(leafOptions: LeafOptions, /) -> LeafOptions | Leaf | Non
 
 	"""
 	whoAmI: LeafOptions | Leaf | None = leafOptions
-	if isLeafOptions吗(leafOptions):
+	if leafOptions吗(leafOptions):
 		if leafOptions.bit_count() == 2:
 			whoAmI = raiseIfNone(leafOptions.bit_scan1())
 		elif leafOptions.bit_count() == 1:

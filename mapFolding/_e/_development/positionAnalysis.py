@@ -7,7 +7,7 @@ from __future__ import annotations
 from gmpy2 import bit_mask
 from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding._e import getLeafDomain, pileOrigin
+from mapFolding._e import getDomainLeaf, pileOrigin
 from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeafSuccessors, howManyDimensionsHaveOddParity, 零)
 from mapFolding._e.dataBaskets import EliminationState
@@ -322,7 +322,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 	dataframeUnconditional: pandas.DataFrame = getLeafUnconditionalPrecedence(state)
 	boxOfUnconditional: set[tuple[Any, Any]] = set(zip(dataframeUnconditional['Earlier'], dataframeUnconditional['Later'], strict=True))
 
-	leafDomain: range = getLeafDomain(state, leafLater)
+	leafDomain: range = getDomainLeaf(state, leafLater)
 
 	boxOfConditionalRelationships: list[dict[str, int]] = []
 	for pileOfLeafOriginal in leafDomain:

@@ -78,7 +78,7 @@ from mapFolding._e._2上nDimensional import (
 	dimensionNearestTail, dimensionNearest首, getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, moreThanLeaf零吗)
 from mapFolding._e._2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.algorithms.iff import creaseViolation吗
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, isPileLeafOptions吗, leafPinned吗, notPileLast
+from mapFolding._e.filters import leafOptions吗, leafPinned吗, leaf吗, notPileLast, pileLeafOptions吗
 from mapFolding._e.reduceIt import (
 	reduceLeafSpace, reducePermutationSpace_leafDomainOf0or1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
 from mapFolding._e.theTypes import Leaf, Pile
@@ -123,10 +123,10 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 		leafCount: int = permutationSpace.leafCount
 
 		for (pile_k, leafSpace_k), (pile_r, leafSpace_r) in pairwise(permutationSpace.items()):
-			if isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace_r):
+			if leaf吗(leafSpace_k) and leafOptions吗(leafSpace_r):
 				pilesToUpdate: tuple[tuple[Pile, LeafOptions]] = ((pile_r, leafSpace_r),)
 				leavesCrease: Iterator[Leaf] = getLeavesCreasePost(state, leafSpace_k)  # DEVELOPMENT 2上nDimensional
-			elif isLeafOptions吗(leafSpace_k) and isLeaf吗(leafSpace_r):
+			elif leafOptions吗(leafSpace_k) and leaf吗(leafSpace_r):
 				pilesToUpdate = ((pile_k, leafSpace_k),)
 				leavesCrease = getLeavesCreaseAnte(state, leafSpace_r)  # DEVELOPMENT 2上nDimensional
 			else:
@@ -179,12 +179,12 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		leavesPinned: PinnedLeaves = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
+		leavesPinned: PinnedLeaves = filterLeaf(leafAtPilePredecessors.__contains__, permutationSpace.pinnedLeaves(), factory=dict[Pile, Leaf])
 		leavesPinned = filterLeaf(moreThanLeaf零吗, leavesPinned, factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			if pile in leafAtPilePredecessors[leaf]:
 				permutationSpace = reduceLeafSpace(permutationSpace
-					, DOTitems(filterPile(pile.__lt__, permutationSpace.extractUndeterminedPiles()))
+					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
 					, makeLeafAntiOptions(state.leavesTotal, leafAtPilePredecessors[leaf][pile])
 				)
 				if not permutationSpace.valid:
@@ -232,7 +232,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 		leafCount: int = permutationSpace.leafCount
 
 		for dimension in range(state.dimensionsTotal):
-			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
+			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.pinnedLeaves()))
 
 			for upDown, leftRight in ((False, True), (True, False)):
 				leavesPinnedParityOpposite: PinnedLeaves = dict(get(upDown, groupedByParity, ()))
@@ -281,7 +281,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 						continue
 
 					permutationSpace = reduceLeafSpace(permutationSpace
-							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
+							, filter(pileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 							, leafAntiOptions
 					)
 					if not permutationSpace.valid:
@@ -341,12 +341,12 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 		leafCount: int = permutationSpace.leafCount
 
 		pile1stOpen: int = 2
-		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.extractPinnedLeaves(), factory=dict[Pile, Leaf])
+		leavesPinned: PinnedLeaves = filterLeaf(moreThanLeaf零吗, permutationSpace.pinnedLeaves(), factory=dict[Pile, Leaf])
 		for pile, leaf in DOTitems(filterPile(partial(notPileLast, state.pileLast), leavesPinned)):
 			dimensionHead: int = dimensionNearest首(leaf)
 			if 0 < dimensionHead:
 				permutationSpace = reduceLeafSpace(permutationSpace
-					, DOTitems(filterLeaf(isLeafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
+					, DOTitems(filterLeaf(leafOptions吗, filterPile(pile1stOpen.__le__, filterPile(pile.__gt__, permutationSpace))))
 					, makeLeafAntiOptions(state.leavesTotal, range(state.productsOfDimensions[dimensionHead], state.leavesTotal, state.productsOfDimensions[dimensionHead]))
 				)
 				if not permutationSpace.valid:
@@ -356,7 +356,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 			dimensionTail: int = dimensionNearestTail(leaf)
 			if 0 < dimensionTail:
 				permutationSpace = reduceLeafSpace(permutationSpace
-					, DOTitems(filterPile(pile.__lt__, permutationSpace.extractUndeterminedPiles()))
+					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
 					, makeLeafAntiOptions(state.leavesTotal, range(leafOrigin, state.sumsOfProductsOfDimensions[dimensionTail]))
 				)
 				if not permutationSpace.valid:
@@ -404,13 +404,13 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 		leafCount: int = permutationSpace.leafCount
 
 		for (pile_k, leafSpace_k), (pile, leafSpace), (pile_r, leafSpace_r) in triplewise(sorted(DOTitems(permutationSpace))):
-			if isLeaf吗(leafSpace_k) and isLeaf吗(leafSpace) and isLeafOptions吗(leafSpace_r):
+			if leaf吗(leafSpace_k) and leaf吗(leafSpace) and leafOptions吗(leafSpace_r):
 				pilesToUpdate: tuple[tuple[Pile, LeafOptions]] = ((pile_r, leafSpace_r),)
 				leafForbidden: Leaf = leafSpace + (leafSpace - leafSpace_k)
-			elif isLeaf吗(leafSpace_k) and isLeafOptions吗(leafSpace) and isLeaf吗(leafSpace_r):
+			elif leaf吗(leafSpace_k) and leafOptions吗(leafSpace) and leaf吗(leafSpace_r):
 				pilesToUpdate = ((pile, leafSpace),)
 				leafForbidden = (leafSpace_k + leafSpace_r) // 2
-			elif isLeafOptions吗(leafSpace_k) and isLeaf吗(leafSpace) and isLeaf吗(leafSpace_r):
+			elif leafOptions吗(leafSpace_k) and leaf吗(leafSpace) and leaf吗(leafSpace_r):
 				pilesToUpdate = ((pile_k, leafSpace_k),)
 				leafForbidden = leafSpace - (leafSpace_r - leafSpace)
 			else:

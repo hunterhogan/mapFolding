@@ -7,7 +7,7 @@ from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding._e.filters import isPileLeafOptions吗, leafInLeafOptions吗, leafPinned吗
+from mapFolding._e.filters import leafInLeafOptions吗, leafPinned吗, pileLeafOptions吗
 from mapFolding._e.theTypes import Leaf, LeafOptions
 from more_itertools import extract, first, one
 from typing import TYPE_CHECKING
@@ -128,7 +128,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 		leafCount: int = permutationSpace.leafCount
 
 		for dimension in range(state.dimensionsTotal):
-			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.extractPinnedLeaves()))
+			groupedByParity: dict[bool, list[tuple[Pile, Leaf]]] = toolz_groupby(_odd吗(state.mapShape, dimension), DOTitems(permutationSpace.pinnedLeaves()))
 
 			for upDown, leftRight in ((False, True), (True, False)):
 				leavesPinnedParityOpposite: PinnedLeaves = dict(get(upDown, groupedByParity, ()))
@@ -181,7 +181,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 						continue
 
 					permutationSpace = reduceLeafSpace(permutationSpace
-							, filter(isPileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
+							, filter(pileLeafOptions吗, extract(permutationSpace.items(), pilesForbidden))
 							, leafAntiOptions
 					)
 					if not permutationSpace.valid:
@@ -264,7 +264,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 		permutationSpaceHasNewLeaf = False
 		leafCount: int = permutationSpace.leafCount
 
-		pilesUndetermined: UndeterminedPiles = permutationSpace.extractUndeterminedPiles()
+		pilesUndetermined: UndeterminedPiles = permutationSpace.undeterminedPiles()
 		groupByLeafOptions: dict[LeafOptions, set[Pile]] = {}
 		for pile, leafOptions in pilesUndetermined.items():
 			groupByLeafOptions.setdefault(leafOptions, set()).add(pile)

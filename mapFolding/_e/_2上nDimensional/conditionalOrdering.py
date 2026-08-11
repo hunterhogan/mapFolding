@@ -5,9 +5,9 @@ from collections import defaultdict
 from functools import cache
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
-from mapFolding._e import getSumsOfProductsOfDimensionsNearest首
+from mapFolding._e import getLookupDomainsLeaves, getSumsOfProductsOfDimensionsNearest首
 from mapFolding._e._2上nDimensional import (
-	dimensionNearestTail, dimensionNearest首, getDictionaryLeafDomains, howManyDimensionsHaveOddParity, leafInSubHyperplane, 一, 零, 首一, 首零, 首零一)
+	dimensionNearestTail, dimensionNearest首, howManyDimensionsHaveOddParity, leafInSubHyperplane, 一, 零, 首一, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from operator import neg
@@ -31,7 +31,7 @@ def getLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[L
 def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""Prototype."""
 	state = EliminationState(mapShape)
-	dictionaryDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
+	dictionaryDomains: dict[Leaf, range] = getLookupDomainsLeaves(state)
 
 	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 
@@ -158,7 +158,7 @@ def getLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Lea
 @cache
 def _getDictionaryConditionalLeafSuccessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	state = EliminationState(mapShape)
-	dictionaryDomains: dict[Leaf, range] = getDictionaryLeafDomains(state)
+	dictionaryDomains: dict[Leaf, range] = getLookupDomainsLeaves(state)
 
 	dictionarySuccessor: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 

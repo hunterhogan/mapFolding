@@ -14,7 +14,7 @@ This module refines `EliminationState.boxOfPermutationSpace` [6] by pinning spec
 Contents
 --------
 pinLeaf首零Plus零
-	Pin `leaf` `首零(state.dimensionsTotal) + 零` using `getLeaf首零Plus零Domain`.
+	Pin `leaf` `首零(state.dimensionsTotal) + 零` using `getDomainLeaf首零Plus零`.
 pinLeavesDimension0
 	Pin `leafOrigin` and `首零(state.dimensionsTotal)` using `_pinLeavesByDomain`.
 pinLeavesDimension一
@@ -57,9 +57,9 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import getLeafDomain, leafOrigin, pileOrigin
+from mapFolding._e import getDomainLeaf, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import (
-	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getLeaf首零Plus零Domain, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
+	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomainLeaf首零Plus零, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
 from mapFolding._e._2上nDimensional.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
@@ -75,7 +75,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from concurrent.futures import Future
-	from hunterMakesPy import CallableFunction
 	from hunterMakesPy.theTypes import Limitation
 	from mapFolding._e.theTypes import Leaf, Pile
 
@@ -146,9 +145,8 @@ def _pinPiles(state: EliminationState, maximumSizeBoxOfPermutationSpace: int, pi
 				for permutationSpace in thesePilesAreOpen[True]
 			]
 
-			for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets), desc=f"Pinning pile {pile:3d} of {state.pileLast:3d}", disable=False):
+			for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets), desc=f"Pinning pile {pile:3d} of {state.pileLast:3d}", disable=True):
 				state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
-				state.boxOfFolding.extend(claimTicket.result().boxOfFolding)
 
 	return state
 
@@ -177,7 +175,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 	[2] mapFolding._e.pin2上nDimensions._getLeavesAtPile.
 	"""
 	state.boxOfPermutationSpace.extend(state.permutationSpace.deconstructAtPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
-	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
+	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
 def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 	"""You can select an `Iterable` of `Leaf` values to pin at `state.pile`.
@@ -467,9 +465,8 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 		]
 
 		for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets)
-				, desc=f"Pinning leaves {", ".join(map(f"{{:{len(str(state.leafLast))}d}}".format, leaves))} of {state.leafLast}", disable=False):
+				, desc=f"Pinning leaves {", ".join(map(f"{{:{len(str(state.leafLast))}d}}".format, leaves))} of {state.leafLast}", disable=True):
 			state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
-			state.boxOfFolding.extend(claimTicket.result().boxOfFolding)
 
 	return state
 
@@ -504,17 +501,17 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructByDomainsCombined(leaves, leavesDomain)
-	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
+	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
 #--- Logic that wants to join the shared logic ---
 
-def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: CallableFunction[[EliminationState, Leaf], tuple[Pile, ...]], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> EliminationState:
+def _pinLeafByDomain(state: EliminationState, leaf: Leaf, leafDomain: Sequence[Pile], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> EliminationState:
 	"""You can pin one `leaf` value by deconstructing each `PermutationSpace` using a computed leaf domain.
 
 	(AI generated docstring)
 
 	This function computes `leavesDomain` for each input `PermutationSpace` dictionary by calling
-	`getLeafDomain(EliminationState(...), leaf)`. This function then concurrently deconstructs each `PermutationSpace` dictionary
+	`getDomainLeaf(EliminationState(...), leaf)`. This function then concurrently deconstructs each `PermutationSpace` dictionary
 	using `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1] inside a `ProcessPoolExecutor` [2] and aggregates results with
 	`as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
@@ -530,8 +527,8 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	leaf : Leaf
 		Leaf to pin.
-	getLeafDomain : Callable[[EliminationState, Leaf], tuple[Pile, ...]]
-		Callable that computes the domain for `leaf`.
+	leafDomain : Sequence[Pile]
+		Domain associated with `leaf`.
 	youMustBeDimensionsTallToRideThis : int = 3
 		Minimum `state.dimensionsTotal` required by `mapShapeIs2上nDimensions`.
 	CPUlimit : bool | float | int | None = None
@@ -573,17 +570,16 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, getLeafDomain: Callabl
 			concurrencyManager.submit(_pinLeafByDomainConcurrentTask
 							, state=EliminationState(mapShape=state.mapShape, permutationSpace=permutationSpace)
 							, leaves=leaf
-							, leavesDomain=getLeafDomain(EliminationState(mapShape=state.mapShape, permutationSpace=permutationSpace), leaf))
+							, leavesDomain=leafDomain)
 			for permutationSpace in boxOfPermutationSpace
 		]
 
 		for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets), desc=f"Pinning leaf {leaf:16d} of {state.leafLast:3d}", disable=False):
 			state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
-			state.boxOfFolding.extend(claimTicket.result().boxOfFolding)
 
 	return state
 
-def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leavesDomain: tuple[Pile, ...]) -> EliminationState:
+def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leavesDomain: Sequence[Pile]) -> EliminationState:
 	"""You can deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	(AI generated docstring)
@@ -598,7 +594,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 		State that owns `state.permutationSpace`.
 	leaves : Leaf
 		Leaf to pin.
-	leavesDomain : tuple[Pile, ...]
+	leavesDomain : Sequence[Pile]
 		Domain associated with `leaves`.
 
 	Returns
@@ -615,7 +611,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructByDomainOfLeaf(leaves, leavesDomain)
-	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
+	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
 #-------- Plebian functions -----------------------------------------
 
@@ -646,12 +642,12 @@ def pinLeavesDimension0(state: EliminationState, *, CPUlimit: Limitation = None)
 	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
 
 def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
-	"""You can pin `leaf` `首零(state.dimensionsTotal) + 零` using `getLeaf首零Plus零Domain`.
+	"""You can pin `leaf` `首零(state.dimensionsTotal) + 零` using `getDomainLeaf首零Plus零`.
 
 	(AI generated docstring)
 
 	This function delegates to `_pinLeafByDomain` [1] by passing
-	`leaf = 零 + 首零(state.dimensionsTotal)` and `getLeafDomain = getLeaf首零Plus零Domain` [2].
+	`leaf = 零 + 首零(state.dimensionsTotal)` and `getDomainLeaf = getDomainLeaf首零Plus零` [2].
 
 	Parameters
 	----------
@@ -669,10 +665,10 @@ def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None
 	----------
 	[1] mapFolding._e.pin2上nDimensions._pinLeafByDomain.
 
-	[2] mapFolding._e._dataDynamic.getLeaf首零Plus零Domain.
+	[2] mapFolding._e._dataDynamic.getDomainLeaf首零Plus零.
 	"""
 	leaf: Leaf = (零) + 首零(state.dimensionsTotal)
-	return _pinLeafByDomain(state, leaf, getLeaf首零Plus零Domain, CPUlimit=CPUlimit)
+	return _pinLeafByDomain(state, leaf, getDomainLeaf首零Plus零(state, leaf), CPUlimit=CPUlimit)
 
 def pinLeavesDimension零(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
 	"""You can pin the dimension-零 leaves by pinning `leaf` `首零(state.dimensionsTotal) + 零`.
@@ -838,7 +834,7 @@ def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = 
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
 
 def pin3beans2(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
-	return _pinLeavesByDomain(state, (一 + 零, 一), tuple((pile, pile + 1) for pile in getLeafDomain(state, 一 + 零)), CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, (一 + 零, 一), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 一 + 零)), CPUlimit=CPUlimit)
 
 def pin首beans(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
-	return _pinLeavesByDomain(state, (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)), tuple((pile, pile + 1) for pile in getLeafDomain(state, 首一(state.dimensionsTotal))), CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, (首一(state.dimensionsTotal), 首零一(state.dimensionsTotal)), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 首一(state.dimensionsTotal))), CPUlimit=CPUlimit)

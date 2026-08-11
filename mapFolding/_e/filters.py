@@ -43,9 +43,11 @@ References
 from __future__ import annotations
 
 from mapFolding._e.theTypes import Leaf, LeafOptions, Pile
+from operator import attrgetter
 from typing import TYPE_CHECKING, TypeIs
 
 if TYPE_CHECKING:
+	from mapFolding._e.dataBaskets import PermutationSpace
 	from mapFolding._e.theTypes import LeafSpace, PinnedLeaves
 
 #======== Boolean antecedents ================================================
@@ -110,7 +112,7 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	"""
 	return pileLast != pile
 
-def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
+def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Identify and narrow a `LeafSpace` value to `Leaf`.
 
 	Use this function when control flow already has a `LeafSpace` value and needs to distinguish
@@ -140,7 +142,7 @@ def isLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""
 	return isinstance(leafSpace, Leaf)
 
-def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
+def leafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	"""Identify and narrow a `LeafSpace` value to `LeafOptions`.
 
 	Use this function when control flow already has a `LeafSpace` value and needs to distinguish
@@ -170,5 +172,10 @@ def isLeafOptions吗(leafSpace: LeafSpace | None) -> TypeIs[LeafOptions]:
 	"""
 	return isinstance(leafSpace, LeafOptions)
 
-def isPileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
-	return isLeafOptions吗(pileLeafSpace[1])
+def pileLeafOptions吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, LeafOptions]]:
+	return isinstance(pileLeafSpace[0], int) and leafOptions吗(pileLeafSpace[1])
+
+#======== Filtering functions ================================================
+
+def 是valid(boxOfPermutationSpace: list[PermutationSpace]) -> list[PermutationSpace]:
+	return list(filter(attrgetter('valid'), boxOfPermutationSpace))

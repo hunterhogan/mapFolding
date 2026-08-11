@@ -3,7 +3,7 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding._e import getIteratorOfLeaves, getLeafDomain, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
+from mapFolding._e import getIteratorOfLeaves, getDomainLeaf, indicesMapShapeDimensionLengthsAreEqual, leafOrigin, pileOrigin
 from mapFolding._e._2上nDimensional import dimensionNearestTail, dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
@@ -84,7 +84,7 @@ def count(state: EliminationState) -> EliminationState:
 			model.add_allowed_assignments([boxOfLeavesInPileOrder[pile - 1], boxOfLeavesInPileOrder[pile]], assignmentsCreaseAnte)
 
 		for aLeaf in frozenset(range(state.leavesTotal)).difference(DOTvalues(leavesPinned)):
-			model.add_allowed_assignments([boxOfPilingsInLeafOrder[aLeaf]], zip(getLeafDomain(state, aLeaf)))
+			model.add_allowed_assignments([boxOfPilingsInLeafOrder[aLeaf]], zip(getDomainLeaf(state, aLeaf)))
 
 #======== Lunnon Theorem 2(b): "If some [dimensionLength in state.mapShape] > 2, [foldsTotal] is divisible by 2 * [leavesTotal]." ============================
 	if (state.Theorem4Multiplier == 1) and (2 < max(state.mapShape)):

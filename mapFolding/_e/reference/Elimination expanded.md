@@ -199,7 +199,7 @@ For a $2^6$-dimensional map:
 | 16               | 31           | 62          |
 | 32               | 63           | 64          |
 
-The full formula for `getLeafDomain`:
+The full formula for `getDomainLeaf`:
 
 ```python
 range(

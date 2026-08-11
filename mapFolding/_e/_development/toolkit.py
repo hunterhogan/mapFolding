@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import partial
 from humpy_cytoolz import valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding._e.filters import isLeaf吗
+from mapFolding._e.filters import leaf吗
 from mapFolding._e.tests.test_pinning import beansWithoutCornbread
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from mapFolding.theSSOT import settingsPackage
@@ -35,7 +35,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, boxOfPermutationS
 	boxOfSurplusDictionaries: list[PermutationSpace] = []
 	for permutationSpace in boxOfPermutationSpace:
 		maskMatches: numpy.ndarray = numpy.ones(rowsTotal, dtype=bool)
-		for pile, leaf in filterLeaf(isLeaf吗, permutationSpace).items():
+		for pile, leaf in filterLeaf(leaf吗, permutationSpace).items():
 			maskMatches &= (arrayFoldings[:, pile] == leaf)
 		if not bool(maskMatches.any()):
 			boxOfSurplusDictionaries.append(permutationSpace)
@@ -62,7 +62,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, boxOfPermutationS
 
 def verifyPinning2Dn(state: EliminationState) -> None:
 	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:
-		return permutationSpace.extractPinnedLeaves()
+		return permutationSpace.pinnedLeaves()
 	arrayFoldings = getDataFrameFoldings(state)
 	if arrayFoldings is not None:
 		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
@@ -94,7 +94,7 @@ def verifyPinning2Dn(state: EliminationState) -> None:
 		if pinningCoverage.indicesOverlappingPermutationSpace:
 			sys.stdout.write(f"{ansiColors.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
 			for 次Dictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
-				sys.stdout.write(pformat(filterLeaf(isLeaf吗, state.boxOfPermutationSpace[次Dictionary]), width=140) + '\n')
+				sys.stdout.write(pformat(filterLeaf(leaf吗, state.boxOfPermutationSpace[次Dictionary]), width=140) + '\n')
 
 		beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
 		boxOfBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.boxOfPermutationSpace))

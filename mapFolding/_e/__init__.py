@@ -9,7 +9,7 @@ from mapFolding._e import theTypes as theTypes
 from mapFolding._e.semiotics import leafOrigin as leafOrigin, pileOrigin as pileOrigin
 
 # isort: split
-from mapFolding._e.leafDomains import getLeafDomain as getLeafDomain
+from mapFolding._e.leafDomains import getDomainLeaf as getDomainLeaf, getLookupDomainsLeaves as getLookupDomainsLeaves
 from mapFolding._e.pileOptions import getLeafOptions as getLeafOptions
 
 # isort: split

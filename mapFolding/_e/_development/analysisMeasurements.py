@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from mapFolding._e import getLeafDomain, pileOrigin
+from mapFolding._e import getDomainLeaf, pileOrigin
 from mapFolding._e._2上nDimensional import dimensionNearestTail, 零
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding.kitFilesystem import getDataFrameFoldings
@@ -64,7 +64,7 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 	boxOfEntropyRecords: list[dict[str, Any]] = []
 
 	for leaf in boxOfLeavesAnalyzed:
-		domainLeaf: range = getLeafDomain(state, leaf)
+		domainLeaf: range = getDomainLeaf(state, leaf)
 		domainSize: int = len(domainLeaf)
 
 		if domainSize == 0:

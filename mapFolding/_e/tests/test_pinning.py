@@ -41,7 +41,7 @@ def test_pinningFunctions(
 
 	for permutationSpace in state.boxOfPermutationSpace:
 		selectorFoldingsMatchingPermutationSpace: numpy.ndarray = numpy.ones(foldingsTotalExpected, dtype=bool)
-		for pile, leafSpace in permutationSpace.extractPinnedLeaves().items():
+		for pile, leafSpace in permutationSpace.pinnedLeaves().items():
 			selectorFoldingsMatchingPermutationSpace &= (arrayAlbum2上nDimensional[:, pile] == leafSpace)
 		boxOfSelectorsFoldingsByPermutationSpace.append(selectorFoldingsMatchingPermutationSpace)
 

@@ -13,7 +13,7 @@ from hunterMakesPy import raiseIfNone
 from itertools import combinations, filterfalse
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding._e.filters import isLeafOptions吗, isLeaf吗, leafInLeafOptions吗
+from mapFolding._e.filters import leafInLeafOptions吗, leafOptions吗, leaf吗, 是valid
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding._e.theTypes import Folding, LeafSpace, Pile
 from mapFolding.beDRY import getLeavesTotal, validateMapShape
@@ -69,7 +69,19 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		#=EndNotes##sorted=
 		self = PermutationSpace(sorted(DOTitems(merge(missing, self, factory=PermutationSpace))))
-		return self.copy()
+		#=Wrong= It is necessary to assign to self before returning.
+		return self  # ruff: ignore[unnecessary-assign]
+
+	def atPileExcludeLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
+		if self.pileUndetermined吗(pile):
+			# TODO `self.pileUndetermined吗` calls a TypeIs for `self[pile]`, so the code only has a
+			# 1-step gap between TypeIs[mpz] not `int` and calling `bit_clear`. Is there a way to
+			# bridge the gap?
+			self[pile] = self[pile].bit_clear(leaf)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] # ty: ignore[unresolved-attribute]
+			self._solidifyLeafSpaceAtPile(pile)
+		elif self[pile] == leaf:
+			self.valid = False
+		return self
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
 		"""DANGEROUSLY create a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
@@ -142,7 +154,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		pilesUndetermined : UndeterminedPiles
 			Dictionary of `Pile` to `LeafOptions` domain mappings.
 		"""
-		leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
+		leavesPinned: PinnedLeaves = self.pinnedLeaves()
 		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
 		return (leavesPinned, cast('UndeterminedPiles', dissociatePile(self, *DOTkeys(leavesPinned))))
 
@@ -181,7 +193,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		`self` object rather than a copy.
 		"""
 		if pile is None:
-			pile = first(filterLeaf(isLeafOptions吗, self))
+			pile = first(filterLeaf(leafOptions吗, self))
 		if (leafOptions := self.getLeafOptions(pile)) is None:
 			deconstructed: Iterable[PermutationSpace] = [self]
 		else:
@@ -288,7 +300,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 		return deconstructedPermutationSpace
 
-	def extractPinnedLeaves(self) -> PinnedLeaves:
+	def pinnedLeaves(self) -> PinnedLeaves:
 		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: leafOptions`.
 
 		Returns
@@ -296,9 +308,9 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		dictionaryOfPileLeaf : dict[int, int]
 			Dictionary of `pile` with pinned `leaf`, if a `leaf` is pinned at `pile`.
 		"""
-		return filterLeaf(isLeaf吗, self)
+		return filterLeaf(leaf吗, self)
 
-	def extractUndeterminedPiles(self) -> UndeterminedPiles:
+	def undeterminedPiles(self) -> UndeterminedPiles:
 		"""Return a dictionary *unsorted* by `pile` of all `pile: leafOptions` in `PermutationSpace`.
 
 		Returns
@@ -306,7 +318,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		pilesUndetermined : dict[int, LeafOptions]
 			Dictionary of `pile: leafOptions`, if a `leafOptions` is defined at `pile`.
 		"""
-		return filterLeaf(isLeafOptions吗, self)
+		return filterLeaf(leafOptions吗, self)
 
 	@overload
 	def getLeaf(self, pile: Pile, default: None = None) -> Leaf | None: ...
@@ -332,7 +344,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
 		ImaLeaf: LeafSpace = self[pile]
-		if isLeaf吗(ImaLeaf):
+		if leaf吗(ImaLeaf):
 			return ImaLeaf
 		return default
 
@@ -359,7 +371,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
 		ImaLeafOptions: LeafSpace = self[pile]
-		if isLeafOptions吗(ImaLeafOptions):
+		if leafOptions吗(ImaLeafOptions):
 			return ImaLeafOptions
 		return default
 
@@ -387,7 +399,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		leafCount : int
 			Count of `Leaf` indices that are pinned in this `PermutationSpace`.
 		"""
-		return sum(map(isLeaf吗, self.values()))
+		return sum(map(leaf吗, self.values()))
 
 	def leafPinned吗(self, leaf: Leaf) -> bool:
 		"""Return `True` if `leaf` is pinned in this `PermutationSpace`.
@@ -447,7 +459,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		folding : Folding
 			Every pinned or inserted `Leaf`, ordered by ascending `Pile`.
 		"""
-		pilesToInsert: Iterator[Pile] = DOTkeys(self.extractUndeterminedPiles())
+		pilesToInsert: Iterator[Pile] = DOTkeys(self.undeterminedPiles())
 		#=SIN= `cast` because the type checkers cannot possible know that the prior logic leads to all int.
 		# TODO Think about: I _feel_ like this logic could be more efficient. This
 		# `tuple(DOTvalues(dict(sorted(DOTitems` has THREE constructors (`sorted` is a stealth `list`
@@ -483,7 +495,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			Narrow an existing `LeafSpace` value to `LeafOptions`.
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
-		return isLeaf吗(self[pile])
+		return leaf吗(self[pile])
 
 	def pileUndetermined吗(self, pile: Pile) -> bool:
 		"""Determine whether `pile` still requires a `Leaf` assignment.
@@ -512,13 +524,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			Narrow an existing `LeafSpace` value to `Leaf`.
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
-		return not isLeaf吗(self[pile])
+		return leafOptions吗(self[pile])
 
 	def _solidifyLeafSpace(self) -> None:
 		count: int = self.leafCount
 		if count < len(self):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
-			leavesPinned: PinnedLeaves = self.extractPinnedLeaves()
+			leavesPinned: PinnedLeaves = self.pinnedLeaves()
 			leafAntiOptions: LeafOptions = _e.makeLeafAntiOptions(len(self), leavesPinned.values())
 			for pile in filterfalse[Pile](leavesPinned.__contains__, self):
 				self[pile] &= leafAntiOptions
@@ -528,10 +540,10 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 	def _solidifyLeafSpaceAtPile(self, pile: Pile) -> None:
 		rangeOfPile: LeafSpace | None = self[pile]
-		if isLeafOptions吗(rangeOfPile):
+		if leafOptions吗(rangeOfPile):
 			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
 			rangeOfPile = _e.leafOptionsLeafNone(rangeOfPile)
-			if isLeafOptions吗(rangeOfPile):
+			if leafOptions吗(rangeOfPile):
 				self[pile] = rangeOfPile
 			elif rangeOfPile is None:
 				self.valid = False
@@ -706,11 +718,11 @@ class EliminationState:
 
 		[6] mapFolding._e.pin2上nDimensions
 		"""
-		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.extractPinnedLeaves())}
+		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.pinnedLeaves())}
 
 		for dimension in range(self.dimensionsTotal):
 			boxOfPileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
-			for pile, leaf in permutationSpace.extractPinnedLeaves().items():
+			for pile, leaf in permutationSpace.pinnedLeaves().items():
 				crease: int | None = getCreasePost(self.mapShape, leaf, dimension)
 				if crease:
 					pileCrease: int | None = leafToPile.get(crease)
@@ -726,12 +738,12 @@ class EliminationState:
 		return all((
 			self.permutationSpace.leafNotPinned吗(leaf)
 			, self.permutationSpace.pileUndetermined吗(self.pile)
-			, self.pile in _e.getLeafDomain(self, leaf)
+			, self.pile in _e.getDomainLeaf(self, leaf)
 		))
 
 	def reduceAllPermutationSpace(self, boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None) -> Self:
 		boxOfFunctionsReduction = boxOfFunctionsReduction or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
-		boxOfPermutationSpace: list[PermutationSpace] = list(filter(attrgetter('valid'), self.boxOfPermutationSpace))
+		boxOfPermutationSpace: list[PermutationSpace] = 是valid(self.boxOfPermutationSpace)
 		self.boxOfPermutationSpace = []
 		boxOfPermutationSpaceIrreducible: list[PermutationSpace] = []
 

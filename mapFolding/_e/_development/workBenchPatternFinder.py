@@ -8,9 +8,9 @@ from functools import partial
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from humpy_cytoolz import curry as syntacticCurry
 from hunterMakesPy import raiseIfNone
-from mapFolding._e import getIteratorOfLeaves, getLeafOptions
+from mapFolding._e import getIteratorOfLeaves, getLeafOptions, getLookupDomainsLeaves
 from mapFolding._e._2上nDimensional import (
-	dimensionNearest首, getDictionaryLeafDomains, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
+	dimensionNearest首, getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding.kitFilesystem import getDataFrameFoldings
@@ -261,7 +261,7 @@ pp3  = (3, 5, 9, 17, 33)
 		pileExcluder = 60
 		pileTarget = 31
 		dictionaryExcluded = getExcludedLeaves(state, pileTarget, groupByLeavesAtPiles=(pileExcluder,))
-		domains = getDictionaryLeafDomains(state)
+		domains = getLookupDomainsLeaves(state)
 		pileRange31 = frozenset(getIteratorOfLeaves(getLeafOptions(state, 31)))
 
 		for pile in range(state.leavesTotal):

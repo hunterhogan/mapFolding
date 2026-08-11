@@ -15,10 +15,10 @@ and the tests will automatically pick them up via parametrization.
 
 from __future__ import annotations
 
-from mapFolding._e import getIteratorOfLeaves, getLeafDomain, getLeafOptions
+from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, getLeafOptions, getLookupDomainsLeaves
 from mapFolding._e._2上nDimensional import (
-	getDictionaryLeafDomains, getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二,
-	getDomain首零一二and首一二, getDomain首零二and首二, getLeavesCreaseAnte, getLeavesCreasePost)
+	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二,
+	getLeavesCreaseAnte, getLeavesCreasePost)
 from mapFolding._e.dataBaskets import EliminationState
 from mapFolding._e.pileOptions import getDictionaryLeafOptions
 from mapFolding._e.tests import assertEqualTo
@@ -36,21 +36,21 @@ if TYPE_CHECKING:
 	from types import ModuleType
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
-def test_getDictionaryLeafDomains(mapShape: tuple[int, ...]) -> None:
-	"""Verify getDictionaryLeafDomains against authoritative leaf domain data for all leaves."""
+def test_getLookupDomainsLeaves(mapShape: tuple[int, ...]) -> None:
+	"""Verify getLookupDomainsLeaves against authoritative leaf domain data for all leaves."""
 	state: EliminationState = EliminationState(mapShape=mapShape)
 	dictionaryLeafDomainsAuthoritativeData: dict[int, tuple[int, int, int]] = A001417.dictionaryLeafDomainKnown[mapShape]
 
-	dictionaryLeafDomainsActual: dict[int, range] = getDictionaryLeafDomains(state)
+	dictionaryLeafDomainsActual: dict[int, range] = getLookupDomainsLeaves(state)
 
-	assertEqualTo(len(dictionaryLeafDomainsActual), state.leavesTotal, 'getDictionaryLeafDomains', mapShape)
+	assertEqualTo(len(dictionaryLeafDomainsActual), state.leavesTotal, 'getLookupDomainsLeaves', mapShape)
 
 	for leaf in range(state.leavesTotal):
 		rangeActual: range = dictionaryLeafDomainsActual[leaf]
 		startAuthoritativeData, stopAuthoritativeData, stepAuthoritativeData = dictionaryLeafDomainsAuthoritativeData[leaf]
-		assertEqualTo(rangeActual.start, startAuthoritativeData, 'getDictionaryLeafDomains.range.start', leaf, mapShape)
-		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getDictionaryLeafDomains.range.stop', leaf, mapShape)
-		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getDictionaryLeafDomains.range.step', leaf, mapShape)
+		assertEqualTo(rangeActual.start, startAuthoritativeData, 'getLookupDomainsLeaves.range.start', leaf, mapShape)
+		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getLookupDomainsLeaves.range.stop', leaf, mapShape)
+		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getLookupDomainsLeaves.range.step', leaf, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafOptionsKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafOptionsKnown])
 def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
@@ -68,17 +68,17 @@ def test_getDictionaryLeafOptions(mapShape: tuple[int, ...]) -> None:
 		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getDictionaryLeafOptions', pile, mapShape)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
-def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
-	"""Verify getLeafDomain against authoritative leaf domain data for all leaves."""
+def test_getDomainLeaf(mapShape: tuple[int, ...]) -> None:
+	"""Verify getDomainLeaf against authoritative leaf domain data for all leaves."""
 	state: EliminationState = EliminationState(mapShape=mapShape)
 	dictionaryLeafDomainsAuthoritativeData: dict[int, tuple[int, int, int]] = A001417.dictionaryLeafDomainKnown[mapShape]
 
 	for leaf in range(state.leavesTotal):
-		rangeActual: range = getLeafDomain(state, leaf)
+		rangeActual: range = getDomainLeaf(state, leaf)
 		startAuthoritativeData, stopAuthoritativeData, stepAuthoritativeData = dictionaryLeafDomainsAuthoritativeData[leaf]
-		assertEqualTo(rangeActual.start, startAuthoritativeData, 'getLeafDomain.range.start', leaf, mapShape)
-		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getLeafDomain.range.stop', leaf, mapShape)
-		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getLeafDomain.range.step', leaf, mapShape)
+		assertEqualTo(rangeActual.start, startAuthoritativeData, 'getDomainLeaf.range.start', leaf, mapShape)
+		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getDomainLeaf.range.stop', leaf, mapShape)
+		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getDomainLeaf.range.step', leaf, mapShape)
 
 @pytest.mark.parametrize("dimensionsTotal", [5, 6], ids=lambda dimensionsTotal: f"2^{dimensionsTotal}-dimensional")
 @pytest.mark.parametrize("domainFunction,moduleAuthoritativeData", [
@@ -90,7 +90,7 @@ def test_getLeafDomain(mapShape: tuple[int, ...]) -> None:
 	, (getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二)
 	, (getDomain首零二and首二, p2上nDimensionalDomain首零二_首二)
 ], ids=lambda domainFunction: domainFunction.__name__)
-def test_getLeafDomainsCombined(domainFunction: CallableFunction[[EliminationState], Sequence[tuple[int, ...]]], moduleAuthoritativeData: ModuleType, dimensionsTotal: int) -> None:
+def test_getDomainLeafsCombined(domainFunction: CallableFunction[[EliminationState], Sequence[tuple[int, ...]]], moduleAuthoritativeData: ModuleType, dimensionsTotal: int) -> None:
 	"""Verify combined domain function against authoritative dataset: completeness, uniqueness, correctness."""
 	mapShape: tuple[int, ...] = (2,) * dimensionsTotal
 	state: EliminationState = EliminationState(mapShape=mapShape)

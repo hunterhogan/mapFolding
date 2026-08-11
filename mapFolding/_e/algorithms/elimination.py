@@ -28,7 +28,7 @@ def count(state: EliminationState) -> EliminationState:
 def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[int, ...]) -> int:
 	return sum(map(foldingValid吗, map(permutationSpace.makeFolding, filter(allUnique吗
 			, CartesianProduct(*(tuple(getIteratorOfLeaves(leafOptions))
-					for _pile, leafOptions in sorted(DOTitems(permutationSpace.extractUndeterminedPiles()))))))
+					for _pile, leafOptions in sorted(DOTitems(permutationSpace.undeterminedPiles()))))))
 					, repeat(mapShape)))
 
 def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
