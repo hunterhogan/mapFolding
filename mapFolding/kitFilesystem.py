@@ -1,4 +1,4 @@
-# ruff: file-ignore[suspicious-pickle-usage]
+#ruff: file-ignore[suspicious-pickle-usage] #=Sin= Centralize all pickle usage here.
 """Persistent storage utilities for map folding computation results.
 
 (AI generated docstring)
@@ -308,17 +308,22 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	"""
 	try:
 		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
-	except Exception as ERRORmessage:  # ruff: ignore[blind-except]
-		try:  # ruff: ignore[too-many-statements-in-try-clause]
+	#ruff: ignore[blind-except] #=Sin= The total must print.
+	except BaseException as ERRORmessage:
+		#ruff: ignore[too-many-statements-in-try-clause] #=Sin= Is it a sin to ignore a pretentious rule?
+		try:
 			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(banner + f"\n{countTotal = }\n" + banner)
-			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff: ignore[os-getcwd, os-path-join]
-			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff: ignore[builtin-open, open-file-with-context-handler]
+			#ruff: ignore[os-getcwd, os-path-join] #=Sin= `try` used pathlib, so I'm using builtin here.
+			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')
+			#ruff: ignore[builtin-open, open-file-with-context-handler] #=Sin= `try` used pathlib and context handler.
+			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')
 			streamWriteFallback.write(str(countTotal))
 			streamWriteFallback.close()
 			stdout.write(pathFilenameWritten)
-		except Exception:  # ruff: ignore[blind-except]
+		#ruff: ignore[bare-except] #=Sin= The total must print.
+		except:
 			stdout.write(str(countTotal))
 			pathFilenameWritten = ''
 	return PurePosixPath(pathFilenameWritten)

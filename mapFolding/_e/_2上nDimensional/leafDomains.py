@@ -522,7 +522,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 		excludeBelow -= pilesFewerDomain0
 		boxOfIndicesPilesExcluded.extend(range(excludeBelow))
 
-#-------- `excludeAbove` `次`------------------------------
+#-------- `excludeAbove` `次` ------------------------------
 		excludeAbove: int = 次 + 2 - int(bit_mask(dimensionTail))
 		excludeAbove -= pilesFewerDomain0
 		boxOfIndicesPilesExcluded.extend(range(excludeAbove, pilesTotal))
@@ -657,7 +657,7 @@ def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], 
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
 		return range(
-					state.mapShapeProductsSums[工dimensionTail(leaf) + inclusive]  		# `start`, first value included in the `range`.
+					state.mapShapeProductsSums[工dimensionTail(leaf) + inclusive]  	# `start`, first value included in the `range`.
 						+ 工totalDimensionsOdd(leaf)
 						- originPinned
 
@@ -666,7 +666,7 @@ def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], 
 						- 工totalDimensionsOdd(leaf)
 						- originPinned
 
-					, 2 + (2 * (leaf == 首零(totalDimensions) + 零))								# `step`
+					, 2 + (2 * (leaf == 首零(totalDimensions) + 零))				# `step`
 				)
 	return range(totalLeaves)
 
