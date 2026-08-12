@@ -1,4 +1,4 @@
-# TODO Modernize kitNumba.
+# FIXME Modernize kitNumba.
 """
 Map folding AST transformation system: Numba integration and just-in-time compilation optimization.
 
@@ -268,15 +268,16 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
-	# TODO This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
+	# FIXME This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
 	boxOfDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
-	# Leave this line in so that global edits will change it.
+	#=Sin= Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator, boxOfDecoratorKeywords)
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=boxOfDecoratorKeywords)  # ruff: ignore[redefined-while-unused]
+	# ruff: ignore[redefined-while-unused]
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=boxOfDecoratorKeywords)
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction
@@ -312,6 +313,5 @@ class SpicesJobNumba:
 	numbaProgressBarIdentifier: str = 'ProgressBarGroupsOfFolds'
 	"""Identifier for the progress bar implementation used in Numba-compiled code."""
 
-	# TODO `dataclasses.field(default_factory=ParametersNumba)`
-	parametersNumba: ParametersNumba = dataclasses.field(default_factory=ParametersNumba)  # pyright: ignore[reportArgumentType, reportCallIssue, reportUnknownVariableType]  # ty: ignore[no-matching-overload]
+	parametersNumba: ParametersNumba = dataclasses.field(default_factory=parametersNumbaDefault.copy)
 	"""Numba compilation parameters; defaults to empty dict allowing decorator defaults."""

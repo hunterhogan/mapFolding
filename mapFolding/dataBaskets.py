@@ -1,4 +1,4 @@
-# TODO `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
+# FIXME `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
 # pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
 # ruff: file-ignore[function-call-in-dataclass-default-argument]
 # ty: ignore[invalid-assignment, unresolved-attribute]

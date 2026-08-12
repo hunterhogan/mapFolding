@@ -58,7 +58,7 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 
 	Notes
 	-----
-	TODO remake this function from scratch.
+	FIXME remake this function from scratch.
 
 	Factors:
 		- The starting quantity of `arcCode`.

@@ -40,13 +40,14 @@ from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.theSSOT import pathDataSamples, settingsPackage
-from os import getcwd, path
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
-from sys import modules as sysModules, stderr, stdout
+from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
 from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
+import os
+import sys
 
 if TYPE_CHECKING:
 	from _csv import Writer
@@ -312,7 +313,7 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(banner + f"\n{countTotal = }\n" + banner)
-			pathFilenameWritten = path.join(getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff: ignore[os-getcwd, os-path-join]
+			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff: ignore[os-getcwd, os-path-join]
 			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff: ignore[builtin-open, open-file-with-context-handler]
 			streamWriteFallback.write(str(countTotal))
 			streamWriteFallback.close()
@@ -424,7 +425,7 @@ def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:
 		dataframeFoldings = readDataFrame(pathFilename)
 	else:
 		message: str = f"{ansiColors.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
-		stderr.write(message + '\n')
+		sys.stderr.write(message + '\n')
 	return dataframeFoldings
 
 def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:

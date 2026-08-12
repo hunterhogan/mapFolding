@@ -427,7 +427,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 
 	return permutationSpace
 
-# TODO The order of the functions can cause tests to fail. I don't think that ought to happen.
+# FIXME The order of the functions can cause tests to fail. I don't think that ought to happen.
 boxOfFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
 	_noConsecutiveDimensions2上nDimensional,
 	_crossedCreases2上nDimensional,
