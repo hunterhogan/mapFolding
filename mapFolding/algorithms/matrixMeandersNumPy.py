@@ -2,10 +2,11 @@ from __future__ import annotations
 
 from contextlib import suppress
 from gc import collect as goByeBye
+from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1AsUfunc, getBucketsTotal, integersWide吗
 from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
-from mapFolding.theTypes import 形ArcCode
+from mapFolding.theTypes import 形ArcCode, 形NumPyIntegerType
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
@@ -13,9 +14,12 @@ import numpy
 import pathlib
 
 if TYPE_CHECKING:
-	from numpy import dtype, memmap, ndarray
+	from numpy import dtype, ndarray
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
 	from typing import Any
+
+def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyIntegerType], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyIntegerType]]:
+	return numpy.memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
 
 def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	"""Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
@@ -50,7 +54,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=次Zulu)
 
 	shape = ShapeArray(length=len(state.dictionaryMeanders), indices=indicesAnalyzed)
-	arrayMeanders: memmap[tuple[Any, ...], dtype[形ArcCode]] = numpy.memmap('arrayMeanders.mM', 形ArcCode, 'write', shape=shape)
+	arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayMeanders')
 	del shape
 
 	arrayMeanders[slicerArcCode] = numpy.array(list(state.dictionaryMeanders.keys()), dtype=形ArcCode)
@@ -60,7 +64,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
 	while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
-		def recordAnalysis(arrayAnalyzed: memmap[tuple[Any, ...], dtype[形ArcCode]], state: MatrixMeandersState, arcCode: ndarray[tuple[int], dtype[形ArcCode]], arrayMeanders: memmap[tuple[Any, ...], dtype[形ArcCode]]) -> MatrixMeandersState:
+		def recordAnalysis(arrayAnalyzed: ndarray[tuple[Any, ...], dtype[形ArcCode]], state: MatrixMeandersState, arcCode: ndarray[tuple[int], dtype[形ArcCode]], arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]]) -> MatrixMeandersState:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
 
 			This abstraction makes it easier to implement `numpy.memmap` or other options.
@@ -93,7 +97,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		lengthArrayAnalyzed: int = getBucketsTotal(state, 1.2)
 		shape = ShapeArray(length=lengthArrayAnalyzed, indices=indicesAnalyzed)
-		arrayAnalyzed: memmap[tuple[Any, ...], dtype[形ArcCode]] = numpy.memmap('arrayAnalyzed.mM', 形ArcCode, 'write', shape=shape)
+		arrayAnalyzed: ndarray[tuple[Any, ...], dtype[形ArcCode]] = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayAnalyzed')
 		del lengthArrayAnalyzed, shape
 
 		# 2026 July 26. I don't remember exactly when I created the `ShapeArray` system, but I'm
@@ -118,7 +122,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		# tried not to think about it. Remembering all of that is so depressing, I'm going to take a
 		# break now.)
 		shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indices=indicesWorkbench)
-		arrayWorkbench: memmap[tuple[Any, ...], dtype[形ArcCode]] = numpy.memmap('arrayPrepArea.mM', 形ArcCode, 'write', shape=shape)
+		arrayWorkbench: ndarray[tuple[Any, ...], dtype[形ArcCode]] = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayPrepArea')
 		del shape
 
 		#=EndNotes##arrayWorkbench=
@@ -129,7 +133,8 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_and(arrayMeanders[slicerArcCode], state.bitsLocator, out=bitsAlfa)
 		bitwise_right_shift(arrayMeanders[slicerArcCode], 1, out=bitsZulu)
 		bitwise_and(bitsZulu, state.bitsLocator, out=bitsZulu)
-		arrayWorkbench.flush()
+		# TODO Make this command safe for non-memmap containers.
+		arrayWorkbench.flush()  # pyright: ignore[reportUnknownMemberType, reportAttributeAccessIssue] # ty: ignore[unresolved-attribute]
 
 		state.次Target = 0
 
@@ -263,7 +268,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		unique: UniqueInverseResult[形ArcCode] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
 
 		shape = ShapeArray(length=len(unique.values), indices=indicesAnalyzed)
-		arrayMeanders = numpy.memmap('arrayMeanders.mM', 形ArcCode, 'write', shape=shape)
+		arrayMeanders = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayMeanders')
 		del shape
 
 		arrayMeanders[slicerArcCode] = unique.values

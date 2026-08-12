@@ -1,5 +1,3 @@
-#=Sin= no typechecking block to avoid ast transformation problems.
-# ruff: file-ignore[typing-only-first-party-import]
 """Count the number of symmetric folds in the group of folds defined by `leafBelow`.
 
 Notes

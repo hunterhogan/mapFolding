@@ -20,8 +20,8 @@ if __name__ == '__main__':
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
 	flow = 'matrixMeanders'
-	flow = 'matrixNumPy'
 	flow = 'matrixPandas'
+	flow = 'matrixNumPy'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			('A005316', 'meanders'),

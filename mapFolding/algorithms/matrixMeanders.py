@@ -1,4 +1,3 @@
-# ruff: file-ignore[typing-only-first-party-import]
 from __future__ import annotations
 
 from mapFolding.algorithms.matrixMeandersShare import walkDyckPath
