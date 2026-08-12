@@ -117,7 +117,10 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	theCountingIdentifier: str = dictionaryIdentifiers['variable']['counting']
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
 
+	findThisWhile0 = IfThis.isWhile0LessThanAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThisIf0 = IfThis.isIf0LessThanAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex')
 	findThisWhile0 = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThisIf0 = IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
 
 	findThis = Be.While.orelseIs(lambda ImaList: ImaList)
 	doThat = Grab.orelseAttribute(Grab.index(0, Then.insertThisBelow([doubleTheCount])))
@@ -133,48 +136,32 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	doThat = changer
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
-	"""
-	findThisWhile = Be.While.testIs
-	doThat4 = Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
-	findThis = findThisWhile(findThisDOTleaf1ndex)
-	doThat = doThat4
-	changer = NodeChanger(findThis, doThat).visit
-
-	findThis = findThis0
-	doThat = removeIt
-	changer = NodeChanger(findThis, doThat).visit
-
-	findThis = findThisGt
-	doThat = changer
-	changer = NodeChanger(findThis, doThat).visit
-
-	findThis = findThisDOTleaf1ndex
-	doThat = changer
-	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)"""
 	NodeChanger(
-		findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		findThis=findThisWhile0
 		, doThat=Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
 	).visit(ingredientsFunction.astFunctionDef)
 
 	insertLeaf = NodeTourist(
-		findThis=IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		findThis=findThisIf0
 		, doThat=Then.extractIt(DOT.body)
 	).captureLastMatch(ingredientsFunction.astFunctionDef)
 	NodeChanger(
-		findThis=IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+		findThis=findThisIf0
 		, doThat=Then.replaceWith(insertLeaf)
 	).visit(ingredientsFunction.astFunctionDef)
 
-	findThisDOTleaf1ndex = Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex'))
-	findThis0 = Be.Compare.comparatorsIs(Be.at(0, IfThis.isConstant_value(0)))
+	findThis_leftIsDOTleaf1ndex = Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex'))
+	findThis_comparatorsIs0 = Be.Compare.comparatorsIs(Be.at(0, IfThis.isConstant_value(0)))
+	findThisDOTleaf1ndex = Be.Compare.comparatorsIs(Be.at(0, IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex')))
+	findThis0 = Be.Compare.leftIs(IfThis.isConstant_value(0))
 
 #========== isAttributeNamespaceIdentifierGreaterThan0 ======
-	findThis = findThisDOTleaf1ndex
-	doThat = NodeChanger(Be.Compare.opsIs(Be.at(0, Be.Gt)), NodeChanger(findThis0, Then.removeIt).visit).visit
+	findThis = findThis_leftIsDOTleaf1ndex
+	doThat = NodeChanger(Be.Compare.opsIs(Be.at(0, Be.Gt)), NodeChanger(findThis_comparatorsIs0, Then.removeIt).visit).visit
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
 #========== isAttributeNamespaceIdentifierLessThanOrEqual0 ======
-	findThis = findThisDOTleaf1ndex
+	findThis = findThis_leftIsDOTleaf1ndex
 	doThat = NodeChanger(Be.Compare.opsIs(Be.at(0, Be.LtE)), Then.removeIt).visit
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 

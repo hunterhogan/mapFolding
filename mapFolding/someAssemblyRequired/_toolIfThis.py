@@ -71,7 +71,7 @@ class IfThis(astToolkit_IfThis):
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isConstant_value(0))
 					, Be.Compare.opsIs(Be.at(0, Be.Lt))
 					, Be.Compare.comparatorsIs(Be.at(0, IfThis.isAttributeNamespaceIdentifier(namespace, identifier)))
-				)
+				)  # pyright: ignore[reportReturnType] # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isAttributeNamespaceIdentifierLessThanOrEqual0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare]]:
@@ -97,7 +97,7 @@ class IfThis(astToolkit_IfThis):
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))
 					, Be.Compare.opsIs(Be.at(0, Be.LtE))
-				)
+				)  # pyright: ignore[reportReturnType] # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare]]:
@@ -124,7 +124,7 @@ class IfThis(astToolkit_IfThis):
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))
 					, Be.Compare.opsIs(Be.at(0, Be.Gt))
 					, Be.Compare.comparatorsIs(Be.at(0, IfThis.isConstant_value(0)))
-				)
+				)  # pyright: ignore[reportReturnType] # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isIf0LessThanAttributeNamespaceIdentifier(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.If]]:

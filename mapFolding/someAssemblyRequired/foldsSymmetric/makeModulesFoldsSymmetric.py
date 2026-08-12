@@ -6,7 +6,6 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfThis
-from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import (
 	adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
@@ -86,8 +85,6 @@ def makeFoldsSymmetricModules() -> None:
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', defaultFoldsSymmetric['function']['counting']
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
-
-	makeTheorem2Codon(defaultFoldsSymmetric)
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = _numbaOnTheorem2(astModule, 'theorem2Numba', defaultFoldsSymmetric['function']['counting']
