@@ -22,10 +22,10 @@ configure and validate parallel processing setups. The concurrency limit tests
 show how to balance performance with system resource constraints.
 
 """
-
 from __future__ import annotations
 
-from hunterMakesPy.tests.test_parseParameters import PytestFor_defineConcurrencyLimit
+from hunterMakesPy.parseParameters import defineConcurrencyLimit
+from mapFolding import _optionalNumba, beDRY
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions
 from mapFolding.oeis import getTotalFoldsKnown, makeMapShape
@@ -34,7 +34,6 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-	from collections.abc import Callable
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
 	from typing import LiteralString
@@ -71,17 +70,41 @@ def test_countFolds_CPUlimitError(mapShape: tuple[int, ...], flow: LiteralString
 		countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
 
-@pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_defineConcurrencyLimit())
-def test_defineProcessorLimit(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
-	callablePytest()
+@pytest.mark.parametrize('concurrencyPackage', (None, 'multiprocessing', 'numba', 'unknown-package'))
+@pytest.mark.parametrize('CPUlimit,expected', [(None, 8), (False, 8), (True, 1), (4, 4), (0.5, 4), (-0.5, 4), (-2, 6), (0, 8), (1, 1)])
+def test_defineProcessorLimit(CPUlimit: Limitation, expected: int, concurrencyPackage: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
+	cpuTotalStatic: int = 8
 
-@pytest.mark.parametrize('expected,parameter', [(TypeError, [4]), (TypeError, (2,)), (TypeError, {2}), (TypeError, {'cores': 2})])
-def test_defineProcessorLimitError(expected: type[TypeError], parameter: list[int] | tuple[int, ...] | set[int] | dict[str, int]) -> None:
-	"""Test that invalid CPUlimit types are properly handled."""
+	def deterministicConcurrency(*, limit: Limitation) -> int:
+		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic)
+
+	def deterministicNumba(CPUlimit: Limitation) -> int:
+		return defineConcurrencyLimit(limit=CPUlimit, cpuTotal=cpuTotalStatic)
+
+	monkeypatch.setattr(beDRY, 'defineConcurrencyLimit', deterministicConcurrency)
+	monkeypatch.setattr(_optionalNumba, 'defineProcessorLimitNumba', deterministicNumba)
+
+	actual: int = defineProcessorLimit(CPUlimit, concurrencyPackage)
+	assertEqualTo(actual, expected, defineProcessorLimit.__name__, CPUlimit, concurrencyPackage)
+
+@pytest.mark.parametrize('concurrencyPackage', (None, 'multiprocessing', 'numba', 'unknown-package'))
+@pytest.mark.parametrize('CPUlimit,expected', [([4], TypeError), ((2,), TypeError), ({2}, TypeError), ({'cores': 2}, TypeError)])
+def test_defineProcessorLimitError(CPUlimit: list[int] | tuple[int, ...] | set[int] | dict[str, int], expected: type[TypeError], concurrencyPackage: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
+	cpuTotalStatic: int = 8
+
+	def deterministicConcurrency(*, limit: Limitation) -> int:
+		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic)
+
+	def deterministicNumba(CPUlimit: Limitation) -> int:
+		return defineConcurrencyLimit(limit=CPUlimit, cpuTotal=cpuTotalStatic)
+
+	monkeypatch.setattr(beDRY, 'defineConcurrencyLimit', deterministicConcurrency)
+	monkeypatch.setattr(_optionalNumba, 'defineProcessorLimitNumba', deterministicNumba)
+
 	with pytest.raises(expected) as exceptionInfo:
 		#=SIN= Invalid argument type: the test verifies rejection of values outside `Limitation`.
-		defineProcessorLimit(parameter)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
-		assertEqualTo(type(exceptionInfo.value), expected, defineProcessorLimit.__name__, parameter)
+		defineProcessorLimit(CPUlimit, concurrencyPackage)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+	assertEqualTo(type(exceptionInfo.value), expected, defineProcessorLimit.__name__, CPUlimit, concurrencyPackage)
 
 @pytest.mark.parametrize('computationDivisions, concurrencyLimit, totalLeaves, expected', [(None, 4, 99, 0), ('maximum', 4, 77, 77), ('cpu', 4, 21, 4)])
 def test_getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, totalLeaves: int, expected: int) -> None:

@@ -183,7 +183,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 		for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets), disable=False, desc=f"PermutationSpace {len(boxOfClaimTickets)}"):
 			sherpa: EliminationState = claimTicket.result()
 
-			# TODO temporary data collection for p2d7
+			# DEVELOPMENT temporary data collection for p2d7
 			if (sherpa.totalDimensions == 7) and (sherpa.boxOfFolding):
 				pathFilename: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw" / f"p2d7_{uuid.uuid4()}.csv"
 				# ruff: ignore[import-outside-top-level]

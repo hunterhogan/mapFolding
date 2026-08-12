@@ -66,7 +66,7 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 	"""
 	oeisID = formatOEISid(oeisID)
 
-	# TODO =EndNotes= unambiguous but technically malformed user input: Be nice. Try to deal with
+	# DOCUMENT =EndNotes= unambiguous but technically malformed user input: Be nice. Try to deal with
 	# _unambiguous_ input that is malformed, such as an integer value passed as a `str` or `float`
 	# type, instead of halting execution. `hunterMakesPy.parseParameters` and `datastructures` have
 	# easy-to-implement, robust functions to do the hard work.

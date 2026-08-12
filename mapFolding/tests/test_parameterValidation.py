@@ -22,26 +22,22 @@ testing that you can adapt for your own functions.
 The integration with external utility modules (hunterMakesPy) shows how to test dependencies while
 maintaining clear separation of concerns.
 """
-
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from itertools import permutations
-from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves, validateMapShape
+from mapFolding.beDRY import getTotalLeaves, validateMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
-import multiprocessing
-import numba
 import pytest
 import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Sequence
-	from hunterMakesPy.theTypes import Limitation
 	from typing import Any
 
-# TODO `getTotalLeaves` comprehensive tests.
+# FIXME `getTotalLeaves` comprehensive tests.
 def test_getTotalLeaves_edge_cases() -> None:
 	"""Test edge cases for getTotalLeaves."""
 	# Order independence
@@ -102,27 +98,6 @@ def test_intInnitError(mapShape: Iterable[Any], expected: type[Exception]) -> No
 @pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_oopsieKwargsie())
 def test_OopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
 	callablePytest()
-
-# TODO put all tests of `defineProcessorLimit` in one module: test_taskDivisions.py has more tests.
-# Ensure the tests are thorough.
-@pytest.mark.parametrize(
-	'CPUlimit, expectedLimit'
-	, [
-		(None, numba.get_num_threads())
-		, (False, numba.get_num_threads())
-		, (True, 1)
-		, (4, 4)
-		, (0.5, max(1, numba.get_num_threads() // 2))
-		, (-0.5, max(1, numba.get_num_threads() // 2))
-		, (-2, max(1, numba.get_num_threads() - 2))
-		, (0, numba.get_num_threads())
-		, (1, 1)
-	]
-)
-def test_setCPUlimitNumba(CPUlimit: Limitation, expectedLimit: Any | int) -> None:
-	numba.set_num_threads(multiprocessing.cpu_count())
-	actual: int = defineProcessorLimit(CPUlimit, 'numba')
-	assertEqualTo(actual, expectedLimit, defineProcessorLimit.__name__, CPUlimit, 'numba')
 
 @pytest.mark.parametrize(
 	'mapShape,expected'
