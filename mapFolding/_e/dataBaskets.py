@@ -52,7 +52,32 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	#============== New methods and attributes ====================================================
 
 	def atPileExcludeLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
-		# DOCUMENT
+		"""Exclude `leaf` from `pile` in this `PermutationSpace`.
+
+		(AI generated docstring)
+
+		Remove `leaf` from `ChoicesLeaf` at `pile` when `pile` contains a `ChoicesLeaf`, or if `leaf`
+		is already pinned at `pile`, mark this `PermutationSpace` as invalid.
+
+		Parameters
+		----------
+		pile : Pile
+			Index of the pile whose candidate set will be modified. The method ensures a `LeafSpace`
+			exists for this pile before attempting the exclusion.
+		leaf : Leaf
+			Leaf index to exclude from the pile's candidate set.
+
+		Returns
+		-------
+		permutationSpace : PermutationSpace
+			The same `PermutationSpace` instance (self), mutated in-place.
+
+		Side effects
+		------------
+		- Mutates self by updating self[pile].
+		- Calls self._solidifyLeafSpaceAtPile(pile) to normalize internal state after mutation.
+		- Sets self.valid = False if attempting to exclude a leaf that is already pinned at pile.
+		"""
 		self._solidifyLeafSpaceAtPile(pile)
 		leafSpaceAtPile: LeafSpace = self[pile]
 		if choicesLeaf吗(leafSpaceAtPile):
@@ -732,7 +757,7 @@ class EliminationState:
 			for groupedParity in boxOfPileCreaseByParity:
 				if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
 					for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
-						return True
+					return True
 		return False
 
 	def pinAt_pile吗(self, leaf: Leaf) -> bool:
