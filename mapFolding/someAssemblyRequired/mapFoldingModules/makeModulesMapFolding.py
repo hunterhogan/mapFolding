@@ -9,7 +9,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
-from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
 from mapFolding.someAssemblyRequired.makeModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2

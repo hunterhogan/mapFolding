@@ -38,7 +38,7 @@ from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDfor_n
-from mapFolding.someAssemblyRequired.kitNumba import parametersNumbaLight
+from mapFolding.someAssemblyRequired.numba.kitNumba import parametersNumbaLight
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests import assertEqualTo, messageTestFailure
@@ -196,8 +196,8 @@ def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFil
 		The temporary file path for generated module testing.
 
 	"""
-	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
-	from mapFolding.someAssemblyRequired.makeJobTheorem2Numba import makeJobNumba
+	from mapFolding.someAssemblyRequired.numba.kitNumba import SpicesJobNumba
+	from mapFolding.someAssemblyRequired.numba.makeJobTheorem2Numba import makeJobNumba
 
 	mapShape: tuple[int, ...] = oneTestCuzTestsOverwritingTests
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))

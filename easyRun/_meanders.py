@@ -40,10 +40,10 @@ if __name__ == '__main__':
 		"""
 
 		nList: list[int] = []
-		nList.extend(range(2, 10))
-		nList.extend(range(10, 28))
+		# nList.extend(range(2, 10))
+		# nList.extend(range(10, 28))
 		# nList.extend(range(28, 33))
-		# nList.extend(range(33, 38))
+		nList.extend(range(33, 38))
 		# nList.extend(range(38, 43))
 		# nList.extend(range(43, 45))
 		# nList.extend(range(45, 50))

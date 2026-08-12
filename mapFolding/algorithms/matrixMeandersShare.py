@@ -4,6 +4,7 @@ from functools import cache
 from humpy_cytoolz import get_in
 from hunterMakesPy import raiseIfNone
 from typing import TYPE_CHECKING
+import numba
 import numpy
 
 if TYPE_CHECKING:
@@ -23,62 +24,6 @@ if TYPE_CHECKING:
 - Standardize code as much as possible to create duplicate code.
 - Convert duplicate code to procedures.
 """
-
-@cache
-def _flipTheExtra_0b1[形: numpy.integer](intWithExtra_0b1: 形) -> 形:
-	resize = type(intWithExtra_0b1)
-	return resize(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
-
-flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
-"""Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion) for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
-
-Warning
--------
-The function will loop infinitely if *any* element does not have a bit that needs flipping.
-
-Parameters
-----------
-arrayTarget : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
-	An array with one axis of unsigned integers and unbalanced closures.
-
-Returns
--------
-arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
-	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
-"""
-
-def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:  # ruff: ignore[unused-function-argument]
-	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
-
-	Warning
-	-------
-	Because `countPandas` does not store anything in `state.arrayArcCodes`, if `countPandas` requests
-	bucketsTotal for a value not in the dictionary, the returned value will be 0. But `countPandas`
-	should have a safety check that will allocate more space.
-
-	Notes
-	-----
-	FIXME remake this function from scratch.
-
-	Factors:
-		- The starting quantity of `arcCode`.
-		- The value(s) of the starting `arcCode`.
-		- n
-		- boundary
-		- Whether this bucketsTotal is increasing, as compared to all of the prior bucketsTotal.
-		- If increasing, is it exponential or logarithmic?
-		- The maximum value.
-		- If decreasing, I don't really know the factors.
-		- If I know the actual value or if I must estimate it.
-
-	Figure out an intelligent flow for so many factors.
-	"""
-	theDictionary: dict[str, dict[int, dict[int, int]]] = {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
-	bucketsTotal: int = get_in([state.kind, state.n, state.boundary], theDictionary, default=0)
-	if bucketsTotal <= 0:
-		bucketsTotal = int(3.55 * 665523011)
-
-	return bucketsTotal
 
 def integersWide吗(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
@@ -138,6 +83,7 @@ def integersWide吗(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[
 		)
 
 def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
+	# DOCUMENT
 	# TODO Consider: If semi is essentially A000136 * totalLeaves, then my graphs of A000136 are
 	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
 	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
@@ -174,6 +120,70 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 		raise ValueError(message)
 
 	return dictionaryMeanders
+
+#================== Dyck Path =====================================================================
+
+@numba.njit(cache=True)
+def walkDyckPathNumba(intWithExtra_0b1: int) -> int:
+	"""Numba-compiled duplicate of `walkDyckPath`'s bit-search loop.
+
+	`@cache`-wrapped `walkDyckPath` cannot be called from `nopython` mode, so this repeats the loop
+	body verbatim. See `walkDyckPath` for the math. Keep the two in sync by hand.
+	"""
+	findTheExtra_0b1 = 0
+	flipExtra_0b1_Here = 1
+	while 0 <= findTheExtra_0b1:
+		flipExtra_0b1_Here <<= 2
+		if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
+			findTheExtra_0b1 += 1
+		else:
+			findTheExtra_0b1 -= 1
+	return flipExtra_0b1_Here
+
+@numba.vectorize(['uint64(uint64)'], nopython=True, cache=True)
+def flipTheExtra_0b1AsUfunc(intWithExtra_0b1):
+	"""Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion), Numba-compiled, for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
+
+	Warning
+	-------
+	The function will loop infinitely if *any* element does not have a bit that needs flipping. Unlike
+	`walkDyckPath`, this kernel uses fixed-width integers instead of Python's arbitrary-precision `int`:
+	a search that would need to look past the input's bit width wraps silently instead of hanging.
+
+	Parameters
+	----------
+	arrayTarget : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
+		An array with one axis of unsigned integers and unbalanced closures.
+
+	Returns
+	-------
+	arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
+		An array with the same shape and dtype as `arrayTarget` but with one bit flipped in each element.
+	"""
+	return intWithExtra_0b1 ^ walkDyckPathNumba(intWithExtra_0b1)
+
+@cache
+def _flipTheExtra_0b1[形: numpy.integer](intWithExtra_0b1: 形) -> 形:
+	resize = type(intWithExtra_0b1)
+	return resize(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
+
+Z0Z_flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
+"""Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion) for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
+
+Warning
+-------
+The function will loop infinitely if *any* element does not have a bit that needs flipping.
+
+Parameters
+----------
+arrayTarget : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
+	An array with one axis of unsigned integers and unbalanced closures.
+
+Returns
+-------
+arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
+	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
+"""
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -226,6 +236,41 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 		else:
 			findTheExtra_0b1 -= 1
 	return flipExtra_0b1_Here
+
+#================== Buckets =======================================================================
+
+def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:  # ruff: ignore[unused-function-argument]
+	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
+
+	Warning
+	-------
+	Because `countPandas` does not store anything in `state.arrayArcCodes`, if `countPandas` requests
+	bucketsTotal for a value not in the dictionary, the returned value will be 0. But `countPandas`
+	should have a safety check that will allocate more space.
+
+	Notes
+	-----
+	FIXME remake this function from scratch.
+
+	Factors:
+		- The starting quantity of `arcCode`.
+		- The value(s) of the starting `arcCode`.
+		- n
+		- boundary
+		- Whether this bucketsTotal is increasing, as compared to all of the prior bucketsTotal.
+		- If increasing, is it exponential or logarithmic?
+		- The maximum value.
+		- If decreasing, I don't really know the factors.
+		- If I know the actual value or if I must estimate it.
+
+	Figure out an intelligent flow for so many factors.
+	"""
+	theDictionary: dict[str, dict[int, dict[int, int]]] = {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
+	bucketsTotal: int = get_in([state.kind, state.n, state.boundary], theDictionary, default=0)
+	if bucketsTotal <= 0:
+		bucketsTotal = int(3.55 * 665523011)
+
+	return bucketsTotal
 
 n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 	2: {1: 1},

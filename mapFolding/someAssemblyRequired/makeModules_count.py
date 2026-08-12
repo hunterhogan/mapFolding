@@ -11,9 +11,9 @@ from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, Default, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
-from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.theSSOT import settingsPackage
 from typing import cast, TYPE_CHECKING
 import operator

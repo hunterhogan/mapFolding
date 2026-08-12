@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from mapFolding.dataBaskets import SymmetricFoldsState
 	from mapFolding.someAssemblyRequired import ShatteredDataclass
-	from mapFolding.someAssemblyRequired.kitNumba import SpicesJobNumba
+	from mapFolding.someAssemblyRequired.numba.kitNumba import SpicesJobNumba
 	from mapFolding.theTypes import 形TotalLeaves
 
 @dataclasses.dataclass(slots=True)
