@@ -8,7 +8,6 @@ from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
-from mapFolding.someAssemblyRequired.codon.makeModulesCodon import makeTheorem2Codon
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.someAssemblyRequired.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.kitTransformations import (
@@ -147,7 +146,7 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	# TODO Remember why I can't get the TypeChecker to see ast.Tuple, and document it.
+	# FIXME Remember why I can't get the TypeChecker to see ast.Tuple, and document it.
 	# ty: ignore[invalid-assignment]
 	astTuple: ast.Tuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportAssignmentType, reportArgumentType]  #
 	astTuple.ctx = Make.Store()
@@ -211,8 +210,6 @@ def makeMapFoldingModules() -> None:
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
-
-	makeTheorem2Codon()
 
 	astModule = parsePathFilename2astModule(pathFilename)
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
