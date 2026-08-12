@@ -9,7 +9,6 @@ if TYPE_CHECKING:
 
 def getDomainLeaf(state: EliminationState, leaf: Leaf) -> range:
 	# DOCUMENT
-	# TODO Is this the "right" way to do this given that I want to segregate `_2上nDimensional`?
 	from mapFolding._e._2上nDimensional.leafDomains import _getDomainLeaf  # ruff: ignore[import-outside-top-level]
 	return _getDomainLeaf(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 

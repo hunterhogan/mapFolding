@@ -52,13 +52,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	#============== New methods and attributes ====================================================
 
 	def atPileExcludeLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
-		if self.pileUndetermined吗(pile):
-			# TODO `self.pileUndetermined吗` calls a TypeIs for `self[pile]`, so the code only has a
-			# 1-step gap between TypeIs[mpz] not `int` and calling `bit_clear`. Is there a way to
-			# bridge the gap?
-			self[pile] = self[pile].bit_clear(leaf)  # pyright: ignore[reportAttributeAccessIssue, reportUnknownMemberType] # ty: ignore[unresolved-attribute]
+		# DOCUMENT
+		self._solidifyLeafSpaceAtPile(pile)
+		leafSpaceAtPile: LeafSpace = self[pile]
+		if choicesLeaf吗(leafSpaceAtPile):
+			self[pile] = leafSpaceAtPile.bit_clear(leaf)
 			self._solidifyLeafSpaceAtPile(pile)
-		elif self[pile] == leaf:
+		elif leafSpaceAtPile == leaf:
 			self.valid = False
 		return self
 
