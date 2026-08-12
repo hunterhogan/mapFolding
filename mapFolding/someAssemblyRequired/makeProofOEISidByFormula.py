@@ -18,8 +18,7 @@ from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, pa
 from astToolkit.containers import IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import makeDictionaryFunctionDef, pythonCode2ast_expr, write_astModule
 from humpy_cytoolz import valmap
-from mapFolding.tests.conftest import pathDataSamples
-from mapFolding.theSSOT import settingsPackage
+from mapFolding.theSSOT import pathDataSamples, settingsPackage
 from typing import TYPE_CHECKING
 import ast
 

@@ -22,13 +22,105 @@ stores computational results or adding new file formats.
 from __future__ import annotations
 
 from contextlib import redirect_stdout
-from mapFolding.kitFilesystem import getPathRootJobDEFAULT, makeFilenameFolds, makePathFilenameFolds, saveTotal
+from hunterMakesPy import raiseIfNone
+from mapFolding._e.dataBaskets import EliminationState
+from mapFolding.kitFilesystem import (
+	getDataFrameFoldings, getPathRootJobDEFAULT, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings,
+	makePathFilenameFolds, readDataFrame, saveTotal)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
+from mapFolding.theSSOT import pathDataSamples
 from pathlib import Path
 import io
+import numpy
+import pandas
 import pytest
 import unittest.mock
+
+@pytest.mark.parametrize(
+	'totalDimensions, suffix, expected',
+	[
+		pytest.param(4, '.pkl', 'arrayFoldings2上4Dimensional.pkl', id='dimensions4-pickle'),
+		pytest.param(6, '.pkl.gz', 'arrayFoldings2上6Dimensional.pkl.gz', id='dimensions6-compressedPickle'),
+	],
+)
+def test_makeFilenameArrayFoldings(totalDimensions: int, suffix: str, expected: str) -> None:
+	assertEqualTo(makeFilenameArrayFoldings(totalDimensions, suffix), expected, makeFilenameArrayFoldings.__name__, totalDimensions, suffix)
+
+@pytest.mark.parametrize(
+	'totalDimensions, pathRoot, suffix, expected',
+	[
+		pytest.param(
+			5,
+			Path('foldingSamples'),
+			'.pkl',
+			Path('foldingSamples/arrayFoldings2上5Dimensional.pkl'),
+			id='dimensions5-relativeRoot',
+		),
+	],
+)
+def test_makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: Path, suffix: str, expected: Path) -> None:
+	assertEqualTo(
+		makePathFilenameArrayFoldings(totalDimensions, pathRoot, suffix=suffix),
+		expected,
+		makePathFilenameArrayFoldings.__name__,
+		totalDimensions,
+		pathRoot,
+		suffix=suffix,
+	)
+
+@pytest.mark.parametrize(
+	'pathFilename, expected',
+	[
+		pytest.param(
+			pathDataSamples / 'arrayFoldings2上4Dimensional.pkl',
+			((12, 16), 'uint8', (5, 15)),
+			id='arrayFoldings2上4Dimensional',
+		),
+	],
+)
+def test_readDataFrame(pathFilename: Path, expected: tuple[tuple[int, int], str, tuple[int, int]]) -> None:
+	dataframeActual: pandas.DataFrame = readDataFrame(pathFilename)
+	arrayActual: numpy.ndarray = dataframeActual.to_numpy(dtype=numpy.uint8, copy=False)
+	assertEqualTo(dataframeActual.shape, expected[0], readDataFrame.__name__, pathFilename)
+	assertEqualTo(dataframeActual.dtypes.astype(str).unique().tolist(), [expected[1]], readDataFrame.__name__, pathFilename)
+	assertEqualTo((int(arrayActual[0, 2]), int(arrayActual[-1, 4])), expected[2], readDataFrame.__name__, pathFilename)
+	assertEqualTo(type(dataframeActual.index), pandas.RangeIndex, readDataFrame.__name__, pathFilename)
+	assertEqualTo(type(dataframeActual.columns), pandas.RangeIndex, readDataFrame.__name__, pathFilename)
+
+@pytest.mark.parametrize(
+	'pathFilename, expected',
+	[
+		pytest.param(pathDataSamples / 'arrayFoldings2上3Dimensional.pkl', FileNotFoundError, id='missingPickle'),
+	],
+)
+def test_readDataFrameError(pathFilename: Path, expected: type[Exception]) -> None:
+	with pytest.raises(expected):
+		readDataFrame(pathFilename)
+
+@pytest.mark.parametrize(
+	'state, expected',
+	[
+		pytest.param(EliminationState((2,) * 4), (12, 16), id='dimensions4'),
+		pytest.param(EliminationState((2,) * 6), (7840, 64), id='dimensions6'),
+	],
+)
+def test_getDataFrameFoldings(state: EliminationState, expected: tuple[int, int]) -> None:
+	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
+	assertEqualTo(dataframeFoldings.shape, expected, getDataFrameFoldings.__name__, state)
+
+@pytest.mark.parametrize(
+	'state, expected',
+	[
+		pytest.param(EliminationState((2,) * 3), None, id='dimensions3-missing'),
+	],
+)
+def test_getDataFrameFoldingsError(state: EliminationState, expected: None, capsys: pytest.CaptureFixture[str]) -> None:
+	dataframeFoldings: pandas.DataFrame | None = getDataFrameFoldings(state)
+	standardError: str = capsys.readouterr().err
+	assertEqualTo(dataframeFoldings, expected, getDataFrameFoldings.__name__, state)
+	assert f'{state.totalDimensions = }' in standardError
+	assert makeFilenameArrayFoldings(state.totalDimensions) in standardError
 
 @pytest.mark.parametrize('totalFolds', [pytest.param(123, id='totalFolds-123')])
 def test_saveTotalFolds_fallback(path_tmpTesting: Path, totalFolds: int) -> None:

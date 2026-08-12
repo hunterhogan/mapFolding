@@ -32,22 +32,21 @@ astToolkit
 """
 from __future__ import annotations
 
+from contextlib import suppress
+from csv import reader as csv_reader, writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.theSSOT import settingsPackage
+from mapFolding.theSSOT import pathDataSamples, settingsPackage
+from os import getcwd, path
 from pathlib import Path, PurePosixPath
-from sys import modules as sysModules, stdout
+from platformdirs import user_data_dir
+from sys import modules as sysModules, stderr, stdout
 from typing import TYPE_CHECKING
+from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
-import contextlib
-import csv
-import os
-import platformdirs
-import sys
-import urllib3
 
 if TYPE_CHECKING:
 	from _csv import Writer
@@ -84,47 +83,13 @@ def getPathRootJobDEFAULT() -> Path:
 	if 'google.colab' in sysModules:
 		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / settingsPackage.identifierPackage
 	else:
-		pathJobDEFAULT = Path(platformdirs.user_data_dir(appname=settingsPackage.identifierPackage, appauthor=False, ensure_exists=True))
+		pathJobDEFAULT = Path(user_data_dir(appname=settingsPackage.identifierPackage, appauthor=False, ensure_exists=True))
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 
-def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
-	"""Create an absolute `pathlib.Path` for a 'countTotal' filename.
-
-	(AI generated docstring)
-
-	Parameters
-	----------
-	pathLikeWrite : os.PathLike | None = None
-		Directory, filename, or relative path to use. If ``None``, the default job directory returned
-		by `getPathRootJobDEFAULT` is used. If a directory is provided, the standardized
-		filename is appended. If an absolute file path is provided, it is returned as-is.
-	*underscore : str
-		Positional segments used to build the filename stem; segments are joined with underscores.
-	suffix : str = ".countTotal"
-		Filename suffix/extension to use.
-	**dash : str
-		Keyword segments included via ``dash.items()``; each (key, value) pair is joined with ``'-'``
-		and included in the stem; all parts are joined by ``'_'``.
-
-	Returns
-	-------
-	pathFilename : pathlib.Path
-		Absolute path to the filename. Parent directories are created if necessary.
-	"""
-	filename: str = makeFilenameCount(*underscore, suffix=suffix, **dash)
-	if pathLikeWrite is None:
-		pathFilename: Path = getPathRootJobDEFAULT() / filename
-	else:
-		pathLikeWrite = Path(pathLikeWrite)
-		if pathLikeWrite.is_dir():
-			pathFilename = pathLikeWrite / filename
-		elif pathLikeWrite.is_file() and pathLikeWrite.is_absolute():
-			pathFilename = pathLikeWrite
-		else:
-			pathFilename = getPathRootJobDEFAULT() / pathLikeWrite
-		pathFilename.parent.mkdir(parents=True, exist_ok=True)
-	return pathFilename
+def makeFilenameArrayFoldings(totalDimensions: int, suffix: str = '.pkl') -> str:
+	# DOCUMENT
+	return makeFilenameCount(f'arrayFoldings2上{totalDimensions}Dimensional', suffix=suffix)
 
 def makeFilenameCount(*underscore: str, suffix: str = '.countTotal', **dash: str) -> str:
 	"""Build a standardized filename for countTotal-like outputs.
@@ -148,34 +113,6 @@ def makeFilenameCount(*underscore: str, suffix: str = '.countTotal', **dash: str
 	"""
 	stem: str = '_'.join([*underscore, *map('-'.join, dash.items())])
 	return stem + suffix
-
-def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds') -> Path:
-	"""Get a standardized filename and create a configurable path to store the computed `totalFolds` value.
-
-	To help reduce duplicate code and to increase predictability, this function creates a standardized
-	filename, has a default but configurable path, and creates the path.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		A sequence of integers representing the map dimensions.
-	pathLikeWrite : PathLike[str] | None = getPathRootJobDEFAULT()
-		Path, filename, or relative path and filename. If None, uses default path. If a directory,
-		appends standardized filename.
-	suffix : str = '.totalFolds'
-		Filename suffix/extension to use.
-
-	Returns
-	-------
-	pathFilenameTotalFolds : Path
-		Absolute path and filename for storing the `totalFolds` value.
-
-	Notes
-	-----
-	The function creates any necessary directories in the path if they don't exist.
-	"""
-	filename: str = makeFilenameFolds(mapShape, suffix)
-	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
 
 def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') -> str:
 	"""Create a standardized filename for a computed `totalFolds` value.
@@ -206,6 +143,76 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') ->
 
 	"""
 	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
+
+def makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: PathLike[str] = pathDataSamples, *, suffix: str = '.pkl') -> Path:
+	# DOCUMENT
+	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
+
+def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
+	"""Create an absolute `pathlib.Path` for a 'countTotal' filename.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	pathLikeWrite : PathLike[str] | None = None
+		Directory, filename, or relative path to use. If ``None``, the default job directory returned
+		by `getPathRootJobDEFAULT` is used. If a directory is provided, the standardized
+		filename is appended. If an absolute file path is provided, it is returned as-is.
+	*underscore : str
+		Positional segments used to build the filename stem; segments are joined with underscores.
+	suffix : str = ".countTotal"
+		Filename suffix/extension to use.
+	**dash : str
+		Keyword segments included via ``dash.items()``; each (key, value) pair is joined with ``'-'``
+		and included in the stem; all parts are joined by ``'_'``.
+
+	Returns
+	-------
+	pathFilename : pathlib.Path
+		Absolute path to the filename. Parent directories are created if necessary.
+	"""
+	filename: str = makeFilenameCount(*underscore, suffix=suffix, **dash)
+	if pathLikeWrite is None:
+		pathFilename: Path = getPathRootJobDEFAULT() / filename
+	else:
+		pathLikeWrite = Path(pathLikeWrite)
+		if pathLikeWrite.is_dir():
+			pathFilename = pathLikeWrite / filename
+		elif pathLikeWrite.is_file() and pathLikeWrite.is_absolute():
+			pathFilename = pathLikeWrite
+		else:
+			pathFilename = getPathRootJobDEFAULT() / pathLikeWrite
+		pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	return pathFilename
+
+def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds') -> Path:
+	"""Get a standardized filename and create a configurable path to store the computed `totalFolds` value.
+
+	To help reduce duplicate code and to increase predictability, this function creates a standardized
+	filename, has a default but configurable path, and creates the path.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		A sequence of integers representing the map dimensions.
+	pathLikeWrite : PathLike[str] | None = getPathRootJobDEFAULT()
+		Path, filename, or relative path and filename. If None, uses default path. If a directory,
+		appends standardized filename.
+	suffix : str = '.totalFolds'
+		Filename suffix/extension to use.
+
+	Returns
+	-------
+	pathFilenameTotalFolds : Path
+		Absolute path and filename for storing the `totalFolds` value.
+
+	Notes
+	-----
+	The function creates any necessary directories in the path if they don't exist.
+	"""
+	filename: str = makeFilenameFolds(mapShape, suffix)
+	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
 
 #================== Confirm the ability to read or write ===========================================
 
@@ -305,7 +312,7 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(banner + f"\n{countTotal = }\n" + banner)
-			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff: ignore[os-getcwd, os-path-join]
+			pathFilenameWritten = path.join(getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')  # ruff: ignore[os-getcwd, os-path-join]
 			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')  # ruff: ignore[builtin-open, open-file-with-context-handler]
 			streamWriteFallback.write(str(countTotal))
 			streamWriteFallback.close()
@@ -345,88 +352,11 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	(`2**16` bytes) reduces the number of system calls when writing many rows.
 	"""
 	with pathFilename.open(encoding="utf-8", mode="w", newline="", buffering=2**16) as streamWrite:
-		csvWriter: Writer = csv.writer(streamWrite)
+		csvWriter: Writer = csv_writer(streamWrite)
 		csvWriter.writerows(album)
 	return pathFilename
 
 #================== Read ==========================================================================
-
-# TODO generalize `getDataFrameFoldings`.
-def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:  # ruff: ignore[undocumented-public-function]
-	import pandas  # ruff: ignore[import-outside-top-level]
-	pathFilename: Path = Path(f'{settingsPackage.pathPackage}/tests/dataSamples/arrayFoldingsP2d{state.totalDimensions}.pkl')
-	dataframeFoldings: pandas.DataFrame | None = None
-	if pathFilename.exists():
-		dataframeFoldings = pandas.DataFrame(pandas.read_pickle(pathFilename))
-	else:
-		message: str = f"{ansiColors.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
-		sys.stderr.write(message + '\n')
-	return dataframeFoldings
-
-def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
-	"""Read an entire album of foldings from a CSV file into memory.
-
-	(AI generated docstring)
-
-	Each row in the CSV file is parsed into a `Folding` (a tuple of integers).
-	All rows are materialized into a tuple before returning, so the entire file
-	is loaded into memory.
-
-	Parameters
-	----------
-	pathFilename : pathlib.Path
-		Path to a CSV file previously written by `writeAlbum`.
-
-	Returns
-	-------
-	album : tuple[Folding, ...]
-		A tuple of `Folding` objects, one per row in the CSV file. Each
-		`Folding` is a tuple of integers (leaf indices).
-
-	See Also
-	--------
-	streamAlbum : Lazily iterate over foldings without loading the entire file.
-	writeAlbum : Write an album of foldings to a CSV file.
-	"""
-	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
-		return tuple(tuple(map(int, row)) for row in csv.reader(streamRead))
-
-def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
-	"""Lazily iterate over foldings in a CSV file, yielding one at a time.
-
-	(AI generated docstring)
-
-	Unlike `readAlbum`, this function does not load the entire file into memory.
-	Instead, it opens the file and yields each row as a `Folding` (a tuple of
-	integers) as it is read. This is useful for processing large albums without
-	consuming excessive memory.
-
-	Parameters
-	----------
-	pathFilename : pathlib.Path
-		Path to a CSV file previously written by `writeAlbum`.
-
-	Yields
-	------
-	folding : Folding
-		Each row from the CSV file, converted to a tuple of integers (leaf
-		indices).
-
-	Notes
-	-----
-	The file remains open for the lifetime of the iterator. If the iterator is
-	not fully consumed, the file handle is closed when the generator is
-	garbage-collected or explicitly closed.
-
-	See Also
-	--------
-	readAlbum : Read an entire album into memory at once.
-	writeAlbum : Write an album of foldings to a CSV file.
-	"""
-	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
-		csvReader: Iterator[list[str]] = csv.reader(streamRead)
-		for row in csvReader:
-			yield tuple(map(int, row))
 
 def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	"""I use this to manage cached data retrieval with HTTP conditional requests.
@@ -475,8 +405,8 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 		if cacheDatetime is not None:
 			headers = {"If-Modified-Since": format_datetime(cacheDatetime, usegmt=True)}
 
-		httpPoolManager: urllib3.PoolManager = urllib3.PoolManager(retries=False)
-		with contextlib.suppress(HTTPError, AttributeError):
+		httpPoolManager = PoolManager(retries=False)
+		with suppress(HTTPError, AttributeError):
 			response: BaseHTTPResponse = httpPoolManager.request("GET", url, headers=headers, preload_content=True, decode_content=True)
 			if response.status == 304:
 				pathFilenameCache.touch()  # Update cache file's modification time to server time.
@@ -485,6 +415,88 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 		httpPoolManager.clear()
 
 	return data
+
+def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:
+	# DOCUMENT
+	pathFilename: Path = makePathFilenameArrayFoldings(state.totalDimensions)
+	dataframeFoldings: DataFrame | None = None
+	if pathFilename.exists():
+		dataframeFoldings = readDataFrame(pathFilename)
+	else:
+		message: str = f"{ansiColors.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
+		stderr.write(message + '\n')
+	return dataframeFoldings
+
+def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
+	"""Read an entire album of foldings from a CSV file into memory.
+
+	(AI generated docstring)
+
+	Each row in the CSV file is parsed into a `Folding` (a tuple of integers).
+	All rows are materialized into a tuple before returning, so the entire file
+	is loaded into memory.
+
+	Parameters
+	----------
+	pathFilename : pathlib.Path
+		Path to a CSV file previously written by `writeAlbum`.
+
+	Returns
+	-------
+	album : tuple[Folding, ...]
+		A tuple of `Folding` objects, one per row in the CSV file. Each
+		`Folding` is a tuple of integers (leaf indices).
+
+	See Also
+	--------
+	streamAlbum : Lazily iterate over foldings without loading the entire file.
+	writeAlbum : Write an album of foldings to a CSV file.
+	"""
+	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
+		return tuple(tuple(map(int, row)) for row in csv_reader(streamRead))
+
+def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
+	# DOCUMENT
+	#=Sin= `pandas` is optional.
+	import pandas  # ruff: ignore[import-outside-top-level]
+	return pandas.DataFrame(pandas.read_pickle(pathFilename))
+
+def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
+	"""Lazily iterate over foldings in a CSV file, yielding one at a time.
+
+	(AI generated docstring)
+
+	Unlike `readAlbum`, this function does not load the entire file into memory.
+	Instead, it opens the file and yields each row as a `Folding` (a tuple of
+	integers) as it is read. This is useful for processing large albums without
+	consuming excessive memory.
+
+	Parameters
+	----------
+	pathFilename : pathlib.Path
+		Path to a CSV file previously written by `writeAlbum`.
+
+	Yields
+	------
+	folding : Folding
+		Each row from the CSV file, converted to a tuple of integers (leaf
+		indices).
+
+	Notes
+	-----
+	The file remains open for the lifetime of the iterator. If the iterator is
+	not fully consumed, the file handle is closed when the generator is
+	garbage-collected or explicitly closed.
+
+	See Also
+	--------
+	readAlbum : Read an entire album into memory at once.
+	writeAlbum : Write an album of foldings to a CSV file.
+	"""
+	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
+		csvReader: Iterator[list[str]] = csv_reader(streamRead)
+		for row in csvReader:
+			yield tuple(map(int, row))
 
 # Perhaps:
 #================== Find or enumerate files based on their purpose, not filename or path ==========

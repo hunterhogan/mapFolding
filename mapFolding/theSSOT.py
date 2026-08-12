@@ -3,7 +3,11 @@
 from __future__ import annotations
 
 from hunterMakesPy import PackageSettings
+from typing import TYPE_CHECKING
 import dataclasses
+
+if TYPE_CHECKING:
+	from pathlib import Path
 
 @dataclasses.dataclass
 class mapFoldingPackageSettings(PackageSettings):
@@ -34,3 +38,5 @@ settingsPackage = mapFoldingPackageSettings(
 	identifierPackageFALLBACK=identifierPackageFALLBACK,
 )
 """Global package settings."""
+
+pathDataSamples: Path = settingsPackage.pathPackage / 'tests' / 'dataSamples'

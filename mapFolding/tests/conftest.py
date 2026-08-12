@@ -25,11 +25,12 @@ research domain.
 
 from __future__ import annotations
 
+from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
 from mapFolding.oeis import _theSSOT, getMetadata, oeisIDsImplemented
-from mapFolding.theSSOT import settingsPackage
+from mapFolding.theSSOT import pathDataSamples
 from pathlib import Path
 from typing import TYPE_CHECKING
-import pickle
+import numpy
 import pytest
 import random
 import shutil
@@ -42,7 +43,6 @@ if TYPE_CHECKING:
 	from numpy.typing import NDArray
 	from pytest import FixtureRequest
 	from typing import Any
-	import numpy
 
 # ================== Test-function parameters ======================================================
 
@@ -76,7 +76,6 @@ def setupWarningsAsErrors() -> Generator[None, Any]:
 #======== SSOT for test data paths and filenames ==============
 # TODO I might still need something like this to test the creation of a job. But I don't need to use
 # this for every tmp dir or file, and it doesn't need to be this complicated.
-pathDataSamples: Path = Path(settingsPackage.pathPackage, "tests/dataSamples").absolute()
 path_tmpRoot: Path = pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)
 
@@ -247,8 +246,6 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 		Function that loads arrayFoldings for a given totalDimensions.
 	"""
 	def loader(totalDimensions: int) -> NDArray[numpy.uint8]:
-		pathFilename = pathDataSamples / f"arrayFoldingsP2d{totalDimensions}.pkl"
-		arrayFoldings: NDArray[numpy.uint8] = pickle.loads(pathFilename.read_bytes())  # ruff: ignore[suspicious-pickle-usage]
-		return arrayFoldings
+		return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
 
 	return loader

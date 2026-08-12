@@ -1,22 +1,16 @@
-# ruff: file-ignore[suspicious-pickle-usage]
 from __future__ import annotations
 
-from mapFolding.theSSOT import settingsPackage
-from pathlib import Path
+from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
 from typing import TYPE_CHECKING
-import pickle
+import numpy
 import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy.theTypes import Limitation
 	from numpy.typing import NDArray
+	from pathlib import Path
 	from pytest import FixtureRequest
-	import numpy
-
-#================== Filesystem ======================================================
-
-pathDataSamples: Path = Path(settingsPackage.pathPackage, "_e/tests/dataSamples").absolute()
 
 @pytest.fixture
 def path_tmpTesting(tmp_path: Path) -> Path:
@@ -48,7 +42,7 @@ def rtol(request: FixtureRequest) -> float:
 
 @pytest.fixture()
 def arrayAlbum2上nDimensional(totalDimensions: int) -> NDArray[numpy.uint8]:
-	return pickle.loads((pathDataSamples / f'arrayFoldings2上{totalDimensions}Dimensional.pkl').read_bytes())
+	return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
 
 @pytest.fixture(params=(None,))
 def CPUlimit(request: pytest.FixtureRequest) -> Limitation:
