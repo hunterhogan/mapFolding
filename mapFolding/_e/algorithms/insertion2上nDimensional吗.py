@@ -10,13 +10,13 @@ from mapFolding._e import getDomainLeaf, makeAntiChoicesLeaf
 from mapFolding._e._2上nDimensional import 一, 二, 零
 from mapFolding._e._2上nDimensional.pinIt import pinLeavesDimension二, pinPilesAtEnds
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
+from mapFolding._e.algorithms.insertion import pathAlbum
 from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
 from mapFolding._e.filters import 是valid
 from mapFolding._e.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from mapFolding._e.reduceIt import reduceLeafSpace
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from mapFolding.oeis import makeMapShape
-from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems
@@ -26,8 +26,6 @@ if TYPE_CHECKING:
 	from concurrent.futures import Future
 	from mapFolding._e.theTypes import ChoicesLeaf, Folding, Leaf, Pile
 	from pathlib import Path
-
-pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_development' / 'albums'
 
 def makeDescendants(folding: Folding, state: EliminationState, position: int) -> EliminationState:
 	"""Process a single folding and return resulting state."""
