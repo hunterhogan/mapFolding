@@ -12,7 +12,7 @@ import numpy
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding.theTypes import 形Array1DTotalLeaves, 形Array2DTotalLeaves, 形Array3DTotalLeaves, 形NumPyIntegerType
+	from mapFolding.theTypes import 形Array1DTotalLeaves, 形Array2DTotalLeaves, 形Array3DTotalLeaves, 形NumPyInteger
 	from numpy import dtype as numpy_dtype, ndarray
 	from typing import Any
 
@@ -146,7 +146,7 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 
 #======== map folding ===================================
 
-def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: type[形NumPyIntegerType]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]:
+def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: type[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
 
 	Parameters
@@ -155,13 +155,13 @@ def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: ty
 		A tuple of integers representing the dimensions of the map.
 	totalLeaves : int
 		The total number of leaves in the map.
-	datatype : type[形NumPyIntegerType]
+	datatype : type[形NumPyInteger]
 		The NumPy integer type to use for the array elements, ensuring proper memory usage and
 		compatibility with the computation state.
 
 	Returns
 	-------
-	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[形NumPyIntegerType]]
+	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]
 		A 3D NumPy array with shape (`totalDimensions`, `totalLeaves`+1, `totalLeaves`+1) with the
 		specified `datatype`, representing all possible connections between leaves.
 	"""
@@ -255,7 +255,7 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Arra
 					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[次Dimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[形NumPyIntegerType]) -> ndarray[Any, numpy_dtype[形NumPyIntegerType]]:
+def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[形NumPyInteger]) -> ndarray[Any, numpy_dtype[形NumPyInteger]]:
 	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
 	By centralizing data container creation, you can more easily make global changes.
@@ -264,12 +264,12 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[形NumPyInteg
 	----------
 	shape : int | tuple[Any, ...]
 		The array shape, either as a single axis length or a tuple of axes lengths.
-	datatype : type[形NumPyIntegerType]
+	datatype : type[形NumPyInteger]
 		The `numpy.integer` type for the array elements.
 
 	Returns
 	-------
-	container : ndarray[Any, numpy_dtype[形NumPyIntegerType]]
+	container : ndarray[Any, numpy_dtype[形NumPyInteger]]
 		A zero-filled `ndarray` with the specified `shape` and `datatype`.
 
 	"""

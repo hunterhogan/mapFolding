@@ -3,10 +3,10 @@ from __future__ import annotations
 from contextlib import suppress
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
-from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1AsUfunc, getBucketsTotal, integersWide吗
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getBucketsTotal, integersWide吗
 from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
-from mapFolding.theTypes import 形ArcCode, 形NumPyIntegerType
+from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
@@ -18,7 +18,13 @@ if TYPE_CHECKING:
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
 	from typing import Any
 
-def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyIntegerType], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyIntegerType]]:
+type Array1D = ndarray[tuple[int], dtype[形ArcCode]]
+type ArrayBoolean = ndarray[tuple[int], dtype[numpy.bool]]
+type ArrayGeneral = ndarray[tuple[Any, ...], dtype[形ArcCode]]
+type ArraySelector = ndarray[tuple[int], dtype[numpy.intp]]
+
+def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
+	# Change from memmap to in memory ndarray, merely by changing this function.
 	return numpy.memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
 
 def count(state: MatrixMeandersState) -> MatrixMeandersState:
@@ -54,7 +60,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., indices=次Zulu)
 
 	shape = ShapeArray(length=len(state.dictionaryMeanders), indices=indicesAnalyzed)
-	arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayMeanders')
+	arrayMeanders: ArrayGeneral = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayMeanders')
 	del shape
 
 	arrayMeanders[slicerArcCode] = numpy.array(list(state.dictionaryMeanders.keys()), dtype=形ArcCode)
@@ -64,16 +70,16 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
 	while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
-		def recordAnalysis(arrayAnalyzed: ndarray[tuple[Any, ...], dtype[形ArcCode]], state: MatrixMeandersState, arcCode: ndarray[tuple[int], dtype[形ArcCode]], arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]]) -> MatrixMeandersState:
+		def recordAnalysis(arrayAnalyzed: ArrayGeneral, state: MatrixMeandersState, arcCode: Array1D, arrayMeanders: ArrayGeneral) -> MatrixMeandersState:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
 
 			This abstraction makes it easier to implement `numpy.memmap` or other options.
 			"""
-			selectorOverLimit: ndarray[tuple[int], dtype[numpy.bool_]] = state.MAXIMUMarcCode < arcCode
+			selectorOverLimit: ArrayBoolean = state.MAXIMUMarcCode < arcCode
 			arcCode[selectorOverLimit] = 0
 			del selectorOverLimit
 
-			selectorAnalysis: ndarray[tuple[int], dtype[numpy.intp]] = numpy.flatnonzero(arcCode)
+			selectorAnalysis: ArraySelector = numpy.flatnonzero(arcCode)
 
 			次Stop: int = state.次Target + len(selectorAnalysis)
 			sliceAnalysis: slice = slice(state.次Target, 次Stop)
@@ -97,7 +103,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		lengthArrayAnalyzed: int = getBucketsTotal(state, 1.2)
 		shape = ShapeArray(length=lengthArrayAnalyzed, indices=indicesAnalyzed)
-		arrayAnalyzed: ndarray[tuple[Any, ...], dtype[形ArcCode]] = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayAnalyzed')
+		arrayAnalyzed: ArrayGeneral = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayAnalyzed')
 		del lengthArrayAnalyzed, shape
 
 		# 2026 July 26. I don't remember exactly when I created the `ShapeArray` system, but I'm
@@ -122,13 +128,13 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		# tried not to think about it. Remembering all of that is so depressing, I'm going to take a
 		# break now.)
 		shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indices=indicesWorkbench)
-		arrayWorkbench: ndarray[tuple[Any, ...], dtype[形ArcCode]] = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayPrepArea')
+		arrayWorkbench: ArrayGeneral = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayPrepArea')
 		del shape
 
 		#=EndNotes##arrayWorkbench=
-		toPrepArea: ndarray[tuple[int], dtype[形ArcCode]] = arrayWorkbench[slicerPrepArea].view()
-		bitsAlfa: ndarray[tuple[int], dtype[形ArcCode]] = arrayWorkbench[slicerAlfa].view()
-		bitsZulu: ndarray[tuple[int], dtype[形ArcCode]] = arrayWorkbench[slicerZulu].view()
+		toPrepArea: Array1D = arrayWorkbench[slicerPrepArea].view()
+		bitsAlfa: Array1D = arrayWorkbench[slicerAlfa].view()
+		bitsZulu: Array1D = arrayWorkbench[slicerZulu].view()
 
 		bitwise_and(arrayMeanders[slicerArcCode], state.bitsLocator, out=bitsAlfa)
 		bitwise_right_shift(arrayMeanders[slicerArcCode], 1, out=bitsZulu)
@@ -148,7 +154,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		greater(bitsAlfa, 1, out=toPrepArea)
 
 		multiply(bitsZulu, toPrepArea, out=toPrepArea)
-		selectorGreaterThan1: ndarray[tuple[int], dtype[numpy.bool]] = numpy.empty_like(toPrepArea, dtype=numpy.bool)
+		selectorGreaterThan1: ArrayBoolean = numpy.empty_like(toPrepArea, dtype=numpy.bool)
 		greater(toPrepArea, 1, out=selectorGreaterThan1)
 
 #-------- if bitsAlfaAtEven and not bitsZuluAtEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
@@ -160,10 +166,10 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)
+		arraySelectors: ArraySelector = numpy.flatnonzero(toPrepArea)
 
-		bitsAlfaStack: ndarray[tuple[int], dtype[形ArcCode]] = bitsAlfa.copy()
-		bitsAlfaStack[arraySelectors] = flipTheExtra_0b1AsUfunc(bitsAlfaStack[arraySelectors])
+		bitsAlfaStack: Array1D = bitsAlfa.copy()
+		bitsAlfaStack[arraySelectors] = flipTheExtra_0b1(bitsAlfaStack[arraySelectors])
 		del arraySelectors
 
 #-------- if bitsZuluAtEven and not bitsAlfaAtEven ------ #-------- ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ------------
@@ -173,7 +179,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_and(toPrepArea, 1, out=toPrepArea)
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)
+		arraySelectors: ArraySelector = numpy.flatnonzero(toPrepArea)
 
 #-------- bitsAlfaAtEven or bitsZuluAtEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
 		bitwise_and(bitsZulu, bitsAlfa, out=toPrepArea)
@@ -182,10 +188,10 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
 		del selectorGreaterThan1
 		bitwise_xor(toPrepArea, 1, out=toPrepArea)
-		selectorDisqualified: ndarray[tuple[int], dtype[numpy.intp]] = numpy.flatnonzero(toPrepArea)
+		selectorDisqualified: ArraySelector = numpy.flatnonzero(toPrepArea)
 
 		toPrepArea[:] = bitsZulu.copy()
-		toPrepArea[arraySelectors] = flipTheExtra_0b1AsUfunc(toPrepArea[arraySelectors])
+		toPrepArea[arraySelectors] = flipTheExtra_0b1(toPrepArea[arraySelectors])
 		del arraySelectors
 		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
 
@@ -202,7 +208,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
 #================== analyze bitsAlfa ====== (1 - (bitsAlfa & 1)) << 1 | bitsAlfa >> 2 | bitsZulu << 3 ========
-		bitsAlfaStack: ndarray[tuple[int], dtype[形ArcCode]] = numpy.empty_like(arrayMeanders[slicerArcCode])
+		bitsAlfaStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
 #-------- >> | << | (<< - 1 & bitsAlfa 1 1) << bitsZulu 3 2 bitsAlfa 2 ----------
 		bitwise_and(bitsAlfa, 1, out=bitsAlfaStack)
 		subtract(1, bitsAlfaStack, out=bitsAlfaStack)
@@ -217,9 +223,9 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
 
 #-------- if 1 < bitsAlfa ------------ < 1 bitsAlfa -----
-		bitsAlfaStack: ndarray[tuple[int], dtype[形ArcCode]] = numpy.empty_like(arrayMeanders[slicerArcCode])
+		bitsAlfaStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
 		less_equal(bitsAlfa, 1, out=bitsAlfaStack)
-		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.flatnonzero(bitsAlfaStack)
+		arraySelectors: ArraySelector = numpy.flatnonzero(bitsAlfaStack)
 		del bitsAlfaStack
 		toPrepArea[arraySelectors] = 0
 		del arraySelectors
@@ -227,7 +233,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
 #================== analyze bitsZulu ========== (1 - (bitsZulu & 1)) | bitsAlfa << 2 | bitsZulu >> 1 ============
-		bitsZuluStack: ndarray[tuple[int], dtype[形ArcCode]] = numpy.empty_like(arrayMeanders[slicerArcCode])
+		bitsZuluStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
 #-------- >> | << | (- 1 & bitsZulu 1) << bitsAlfa 2 1 bitsZulu 1 ----------
 		bitwise_and(bitsZulu, 1, out=bitsZuluStack)
 		subtract(1, bitsZuluStack, out=bitsZuluStack)
@@ -242,9 +248,9 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		bitwise_right_shift(toPrepArea, 1, out=toPrepArea)
 
 #-------- if 1 < bitsZulu ------------- < 1 bitsZulu ------
-		bitsZuluStack: ndarray[tuple[int], dtype[形ArcCode]] = numpy.empty_like(arrayMeanders[slicerArcCode])
+		bitsZuluStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
 		less_equal(bitsZulu, 1, out=bitsZuluStack)
-		arraySelectors: ndarray[tuple[Any, ...], dtype[numpy.intp]] = numpy.flatnonzero(bitsZuluStack)
+		arraySelectors: ArraySelector = numpy.flatnonzero(bitsZuluStack)
 		del bitsZuluStack
 		toPrepArea[arraySelectors] = 0
 		del arraySelectors

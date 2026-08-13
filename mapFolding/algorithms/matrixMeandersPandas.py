@@ -15,7 +15,7 @@ https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044
 from __future__ import annotations
 
 from gc import collect as goByeBye
-from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1AsUfunc, getBucketsTotal, integersWide吗
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getBucketsTotal, integersWide吗
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Crossings
 from typing import TYPE_CHECKING
@@ -106,16 +106,15 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 			bitsTarget &= state.bitsLocator            								# `bitsAlfa`
 
 			# `if bitsAlfaAtEven and not bitsZuluAtEven`, modify `bitsAlfaPairedToOdd`
-			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = 形ArcCode(
-				flipTheExtra_0b1AsUfunc(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]))  # ty: ignore[invalid-assignment]
+			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = flipTheExtra_0b1(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])])
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator     			# `bitsZulu`
 
 			# `if bitsZuluAtEven and not bitsAlfaAtEven`, modify `bitsZuluPairedToOdd`
-			dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = 形ArcCode(
-				flipTheExtra_0b1AsUfunc(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']))
+			dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = (
+				flipTheExtra_0b1(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']))
 
 			#--------- Step 3 compute `arcCode` -------------------------------
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# (bitsZulu >> 2)

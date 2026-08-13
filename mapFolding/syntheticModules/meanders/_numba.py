@@ -1,23 +1,10 @@
 from __future__ import annotations
 
 from mapFolding.theTypes import 形ArcCode
-from typing import cast, TYPE_CHECKING
 import numba
 
-if TYPE_CHECKING:
-	from collections.abc import Callable
-	from typing import Protocol
-
-	class _unaryUfunc(Protocol):
-		def __call__[个](self, intWithExtra_0b1: 个, /) -> 个: ...
-
-	type _jitUfuncArcCode = Callable[[Callable[[形ArcCode], 形ArcCode]], _unaryUfunc]
-
-#=SIN= Cast: Numba's typed package leaves the `vectorize` decorator factory partially unknown.
-#=SIN= Pyright suppression: Numba leaves `vectorize` partially unknown despite declaring `py.typed`.
-_jitUfunc = cast('_jitUfuncArcCode', numba.vectorize((f"{形ArcCode.__name__}({形ArcCode.__name__})",), cache=True, nopython=True))  # pyright: ignore[reportUnknownMemberType]
-
-@_jitUfunc
+#=SIN= Pyright suppression: `numba.vectorize` is partially unknown.
+@numba.vectorize((f"{形ArcCode.__name__}({形ArcCode.__name__})",), cache=True, nopython=True)  # pyright: ignore[reportUntypedFunctionDecorator, reportUnknownMemberType]
 def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
 	"""Flip a bit based on Dyck path with a Numba-generated universal function [1].
 

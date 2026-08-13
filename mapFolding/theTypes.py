@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from numpy import dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
-from typing import Any, TYPE_CHECKING, TypedDict, TypeVar
+from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
@@ -14,7 +14,7 @@ type OEISid = LiteralString
 
 #================== `TypeVar` when a NumPy integer type is mandatory =======
 
-形NumPyIntegerType = TypeVar('形NumPyIntegerType', bound=integer[Any], covariant=True)
+形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 
 #================== Matrix meanders ===========================================================

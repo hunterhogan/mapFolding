@@ -2,19 +2,18 @@ from __future__ import annotations
 
 from functools import cache
 from humpy_cytoolz import get_in
-from hunterMakesPy import raiseIfNone
+from hunterMakesPy import errorL33T, raiseIfNone
+from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
 from typing import TYPE_CHECKING
-import numba
 import numpy
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import MatrixMeandersState
-	from mapFolding.theTypes import 形ArcCode
 	from numpy import dtype, ndarray
 	from typing import Any, Literal, LiteralString
 	import pandas
 
-"""Goals:
+"""Matrix Meanders Goals:
 - Extreme abstraction.
 - Find operations with latent intermediate arrays and make the intermediate array explicit.
 - Reduce or eliminate intermediate arrays and selector arrays.
@@ -123,56 +122,16 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 
 #================== Dyck Path =====================================================================
 
-@numba.njit(cache=True)
-def walkDyckPathNumba(intWithExtra_0b1: int) -> int:
-	"""Numba-compiled duplicate of `walkDyckPath`'s bit-search loop.
-
-	`@cache`-wrapped `walkDyckPath` cannot be called from `nopython` mode, so this repeats the loop
-	body verbatim. See `walkDyckPath` for the math. Keep the two in sync by hand.
-	"""
-	findTheExtra_0b1 = 0
-	flipExtra_0b1_Here = 1
-	while 0 <= findTheExtra_0b1:
-		flipExtra_0b1_Here <<= 2
-		if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
-			findTheExtra_0b1 += 1
-		else:
-			findTheExtra_0b1 -= 1
-	return flipExtra_0b1_Here
-
-@numba.vectorize(['uint64(uint64)'], nopython=True, cache=True)
-def flipTheExtra_0b1AsUfunc(intWithExtra_0b1):
-	"""Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion), Numba-compiled, for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
-
-	Warning
-	-------
-	The function will loop infinitely if *any* element does not have a bit that needs flipping. Unlike
-	`walkDyckPath`, this kernel uses fixed-width integers instead of Python's arbitrary-precision `int`:
-	a search that would need to look past the input's bit width wraps silently instead of hanging.
-
-	Parameters
-	----------
-	arrayTarget : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
-		An array with one axis of unsigned integers and unbalanced closures.
-
-	Returns
-	-------
-	arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
-		An array with the same shape and dtype as `arrayTarget` but with one bit flipped in each element.
-	"""
-	return intWithExtra_0b1 ^ walkDyckPathNumba(intWithExtra_0b1)
-
-@cache
-def _flipTheExtra_0b1[形: numpy.integer](intWithExtra_0b1: 形) -> 形:
+def _flipTheExtra_0b1(intWithExtra_0b1: 形NumPyInteger) -> 形NumPyInteger:
 	resize = type(intWithExtra_0b1)
 	return resize(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
 
-Z0Z_flipTheExtra_0b1AsUfunc = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
+flipTheExtra_0b1 = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
 """Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion) for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
 
 Warning
 -------
-The function will loop infinitely if *any* element does not have a bit that needs flipping.
+The function will loop infinitely if _any_ element does not have a bit that needs flipping.
 
 Parameters
 ----------
@@ -266,7 +225,7 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 	Figure out an intelligent flow for so many factors.
 	"""
 	theDictionary: dict[str, dict[int, dict[int, int]]] = {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
-	bucketsTotal: int = get_in([state.kind, state.n, state.boundary], theDictionary, default=0)
+	bucketsTotal: int = get_in([state.kind, state.n, state.boundary], theDictionary, default=-errorL33T)
 	if bucketsTotal <= 0:
 		bucketsTotal = int(3.55 * 665523011)
 
