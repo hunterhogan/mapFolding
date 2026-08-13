@@ -3,7 +3,7 @@ from __future__ import annotations
 from contextlib import suppress
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
-from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getBucketsTotal, integersWide吗
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
@@ -101,7 +101,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		state.setBitWidthNumPy(arrayMeanders)
 		state.setBitsLocator()
 
-		lengthArrayAnalyzed: int = getBucketsTotal(state, 1.2)
+		lengthArrayAnalyzed: int = getTotalBuckets(state, len(arrayMeanders[slicerArcCode]))
 		shape = ShapeArray(length=lengthArrayAnalyzed, indices=indicesAnalyzed)
 		arrayAnalyzed: ArrayGeneral = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayAnalyzed')
 		del lengthArrayAnalyzed, shape

@@ -198,14 +198,24 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
 
 #================== Buckets =======================================================================
 
-def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2) -> int:  # ruff: ignore[unused-function-argument]
-	"""Under renovation: Estimate the total number of non-unique arcCode that will be computed from the existing arcCode.
+def getTotalBuckets(state: MatrixMeandersState, totalArcCodes: int = 0) -> int:
+	"""Return the allocation length for one transfer-matrix step.
 
-	Warning
+	The function returns an exact recorded `totalBuckets` when the current `kind`, `n`, and
+	`boundary` identify one. For an unrecorded step, the function estimates `totalBuckets` from the
+	current number of unique `arcCode` carried by `state`.
+
+	Parameters
+	----------
+	state : MatrixMeandersState
+		The current transfer-matrix state.
+	totalArcCodes : int
+		Number of unique input `arcCode` at the current boundary.
+
+	Returns
 	-------
-	Because `countPandas` does not store anything in `state.arrayArcCodes`, if `countPandas` requests
-	bucketsTotal for a value not in the dictionary, the returned value will be 0. But `countPandas`
-	should have a safety check that will allocate more space.
+	totalBuckets : int
+		The exact or estimated number of non-unique `arcCode` rows to allocate.
 
 	Notes
 	-----
@@ -215,8 +225,10 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 		- The starting quantity of `arcCode`.
 		- The value(s) of the starting `arcCode`.
 		- n
+		- parity of n
 		- boundary
-		- Whether this bucketsTotal is increasing, as compared to all of the prior bucketsTotal.
+		- parity of boundary
+		- Whether this totalBuckets is increasing, as compared to all of the prior totalBuckets.
 		- If increasing, is it exponential or logarithmic?
 		- The maximum value.
 		- If decreasing, I don't really know the factors.
@@ -224,12 +236,14 @@ def getBucketsTotal(state: MatrixMeandersState, safetyMultiplicand: float = 1.2)
 
 	Figure out an intelligent flow for so many factors.
 	"""
-	theDictionary: dict[str, dict[int, dict[int, int]]] = {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
-	bucketsTotal: int = get_in([state.kind, state.n, state.boundary], theDictionary, default=-errorL33T)
-	if bucketsTotal <= 0:
-		bucketsTotal = int(3.55 * 665523011)
+	totalBuckets: int = get_in([state.kind, state.n, state.boundary]
+		, {'meanders': n_boundary_bucketsMeanders, 'semi': n_boundary_bucketsSemi}
+		, default=-errorL33T)
 
-	return bucketsTotal
+	if totalBuckets <= 0:
+		totalBuckets = (355 * totalArcCodes + 99) // 100
+
+	return totalBuckets
 
 n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 	2: {1: 1},

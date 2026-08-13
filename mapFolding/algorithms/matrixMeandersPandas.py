@@ -15,7 +15,7 @@ https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044
 from __future__ import annotations
 
 from gc import collect as goByeBye
-from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getBucketsTotal, integersWide吗
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.syntheticModules.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Crossings
 from typing import TYPE_CHECKING
@@ -105,8 +105,11 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 			bitsTarget = dataframeMeanders['arcCode'].copy()
 			bitsTarget &= state.bitsLocator            								# `bitsAlfa`
 
+			# TODO What changed so that I have to now use `.astype()`?
 			# `if bitsAlfaAtEven and not bitsZuluAtEven`, modify `bitsAlfaPairedToOdd`
-			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = flipTheExtra_0b1(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])])
+			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = (
+				flipTheExtra_0b1(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]).astype(形ArcCode)
+			)
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**1
@@ -114,7 +117,8 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 			# `if bitsZuluAtEven and not bitsAlfaAtEven`, modify `bitsZuluPairedToOdd`
 			dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = (
-				flipTheExtra_0b1(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']))
+				flipTheExtra_0b1(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']).astype(形ArcCode)
+			)
 
 			#--------- Step 3 compute `arcCode` -------------------------------
 			dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# (bitsZulu >> 2)
@@ -291,7 +295,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 		state.bitWidth = int(dataframeMeanders['arcCode'].max()).bit_length()
 		state.setBitsLocator()
-		length: int = getBucketsTotal(state)
+		length: int = getTotalBuckets(state, len(dataframeMeanders.index))
 		dataframeAnalyzed = pandas.DataFrame({
 			'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=形ArcCode)
 			, 'crossings': pandas.Series(name='crossings', data=0, index=pandas.RangeIndex(length), dtype=形Crossings)
