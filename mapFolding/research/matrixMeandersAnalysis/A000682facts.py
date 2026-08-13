@@ -1,7 +1,9 @@
 """A000682 facts."""
 
+from __future__ import annotations
+
 nToBitWidthCrossingsTotal: dict[int, int] = {
-				1: 1,  2: 1,   3: 2,   4: 3,   5: 4,   6: 5,   7: 7,   8: 8,   9: 9
+				1: 1, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 7, 8: 8, 9: 9
 	, 10: 11, 11: 13, 12: 14, 13: 16, 14: 17, 15: 19, 16: 21, 17: 22, 18: 24, 19: 25
 	, 20: 27, 21: 29, 22: 30, 23: 32, 24: 34, 25: 36, 26: 37, 27: 39, 28: 41, 29: 42
 	, 30: 44, 31: 46, 32: 47, 33: 49, 34: 51, 35: 53, 36: 54, 37: 56, 38: 58, 39: 60
@@ -13,7 +15,7 @@ bitWidthCrossingsTotalIncreaseMaximum = 2
 bitWidthCrossingsTotalIncreaseMean = 1.57
 bitWidthCrossingsTotalIncreaseMedian = 2
 
-nToNumberOfInitialArcCodes: dict[int, int] = { # numberOfInitialArcCodes = (n // 2) + 2
+nToNumberOfInitialArcCodes: dict[int, int] = {  # numberOfInitialArcCodes = (n // 2) + 2
 	2:		3,
 	3:		3,
 	4:		4,
@@ -65,7 +67,7 @@ nToNumberOfInitialArcCodes: dict[int, int] = { # numberOfInitialArcCodes = (n //
 }
 
 nToInitialArcCodes: dict[int, dict[int, int]] = {
-	2:  {0x3: 1, 0x3f: 1, 0x3ff: 1}, # {0b 11: 1, 0b 11 1111: 1, 0b 11 1111 1111: 1}
+	2:  {0x3: 1, 0x3f: 1, 0x3ff: 1},  # {0b 11: 1, 0b 11 1111: 1, 0b 11 1111 1111: 1}
 	4:  {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1},
 	6:  {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1},
 	8:  {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1},
@@ -122,7 +124,7 @@ nToInitialArcCodes: dict[int, dict[int, int]] = {
 		, 0x3fffffffffffffffffffff: 1, 0x3ffffffffffffffffffffff: 1, 0x3fffffffffffffffffffffff: 1, 0x3ffffffffffffffffffffffff: 1
         , 0x3fffffffffffffffffffffffff: 1},
 	1:  {0xf: 1, 0xff: 1},
-	3:  {0xf: 1, 0xff: 1, 0xfff: 1}, # {0b 1111: 1, 0b 1111 1111: 1, 0b 1111 1111 1111: 1}
+	3:  {0xf: 1, 0xff: 1, 0xfff: 1},  # {0b 1111: 1, 0b 1111 1111: 1, 0b 1111 1111 1111: 1}
 	5:  {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1},
 	7:  {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1},
 	9:  {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1},
