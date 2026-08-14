@@ -16,16 +16,16 @@ authors:
   family-names: Hogan
   email: HunterHogan@pm.me
 cff-version: 1.2.0
-commit: 7196ccf29e8e313cf88d374db7356dc6e992d616
+commit: da27b44b3d847ece1ae33118fe47f56a1bb24c79
 contact:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
-date-released: '2026-08-10'
+date-released: '2026-08-14'
 identifiers:
 - type: url
-  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.30.0
-  description: The URL for mapFolding 0.30.0.
+  value: https://github.com/hunterhogan/mapFolding/releases/tag/0.31.0
+  description: The URL for mapFolding 0.31.0.
 keywords:
 - A001415
 - A001417
@@ -40,9 +40,9 @@ keywords:
 license: CC-BY-NC-4.0
 message: Cite this software with the metadata in this file.
 repository: https://github.com/hunterhogan/mapFolding.git
-repository-artifact: https://pypi.org/project/mapfolding/0.30.0/
-repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.30.0
+repository-artifact: https://pypi.org/project/mapfolding/0.31.0/
+repository-code: https://github.com/hunterhogan/mapFolding/releases/tag/0.31.0
 title: mapFolding
 type: software
 url: https://github.com/hunterhogan/mapFolding
-version: 0.30.0
+version: 0.31.0
