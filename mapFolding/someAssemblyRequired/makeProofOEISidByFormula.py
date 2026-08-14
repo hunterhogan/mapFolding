@@ -15,7 +15,7 @@ Functions
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
-from astToolkit.containers import IngredientsModule, LedgerOfImports
+from astToolkit.containers import IngredientsModule
 from astToolkit.transformationTools import makeDictionaryFunctionDef, pythonCode2ast_expr, write_astModule
 from humpy_cytoolz import valmap
 from mapFolding.theSSOT import pathDataSamples, settingsPackage
@@ -88,24 +88,6 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	))
 
 	moduleDataSamples.write_astModule(pathFilenameDataSamples)
-
-	return pathFilename
-
-# TODO sympy equation solver.
-def makeSympy(pathFilenameSource: Path) -> Path:
-	"""Omg."""
-	pathFilenameWrite: Path = pathFilenameSource.with_stem('Z0Z_sympy')
-	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)
-
-	ingredients = IngredientsModule(imports=LedgerOfImports(astModule))
-	ingredients.imports.addImport_asStr('sympy')
-
-	ingredients.appendPrologue(statement=Make.Assign([Make.Name('n', Make.Store())], value=Make.Call(Make.Attribute(Make.Name('sympy'), 'symbols')
-		, listParameters=[Make.Constant('n')], list_keyword=[Make.keyword('integer', value=Make.Constant(value=True))])))
-
-	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis', list_alias=[Make.alias('getValuesKnown')]))
-
-	pathFilename: Path = write_astModule(astModule, pathFilenameWrite, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
 

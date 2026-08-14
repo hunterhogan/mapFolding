@@ -257,13 +257,12 @@ OEIS limits my proposed changes to a sequence to three sequences at a time. I ha
 - A085973
 - A208357
 - A217310
-- A217318
+- A217318, submitted.
 - A223093
 - A223094
-- A223095
-- A333971
-- A334615
-- A337581, submitted.
+- A223095, values.
+- A333971, values.
+- A334615, values.
 
 ## My recovery
 
