@@ -47,7 +47,7 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 	match concurrencyPackage:
 		case 'numba':
 			#=Sin= `numba` is optional.
-			# ruff: ignore[import-outside-top-level]
+			#ruff: ignore[import-outside-top-level]
 			from mapFolding._optionalNumba import defineProcessorLimitNumba
 			concurrencyLimit: int = defineProcessorLimitNumba(CPUlimit)
 		case 'multiprocessing' | _:
@@ -141,12 +141,12 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 		raise ValueError(message)
 
 	#=EndNotes##sortingDimensions=
-	# Do NOT sort the dimensions.
+	#Do NOT sort the dimensions.
 	return tuple(mapShapeAsList)
 
 #======== map folding ===================================
 
-def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: type[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
+def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
 
 	Parameters
@@ -255,7 +255,7 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Arra
 					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[次Dimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[Any, ...], datatype: type[形NumPyInteger]) -> ndarray[Any, numpy_dtype[形NumPyInteger]]:
+def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[Any, numpy_dtype[形NumPyInteger]]:
 	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
 	By centralizing data container creation, you can more easily make global changes.

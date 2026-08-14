@@ -24,6 +24,7 @@ type ArrayGeneral = ndarray[tuple[Any, ...], dtype[形ArcCode]]
 type ArraySelector = ndarray[tuple[int], dtype[numpy.intp]]
 
 def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
+	# DOCUMENT
 	# Change from memmap to in memory ndarray, merely by changing this function.
 	return numpy.memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
 
@@ -43,10 +44,9 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 	Notes
 	-----
 	This version is *relatively* slow for small values of `n` (*e.g.*, 3 seconds vs. 3 milliseconds)
-	because of my aggressive use of garbage collection because I don't really know how to manage
-	memory. On the other hand, it uses less memory for extreme values of `n`, which makes it faster
-	due to less disk swapping--as compared to the pandas implementation and other NumPy
-	implementations I tried.
+	due to garbage collection. On the other hand, it uses less memory for extreme values of `n`, which
+	makes it faster due to less disk swapping--as compared to the pandas implementation and other
+	NumPy implementations I tried.
 	"""
 	indicesAnalyzed: int = 2
 	次ArcCode, 次Crossings = range(indicesAnalyzed)
@@ -106,27 +106,6 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 		arrayAnalyzed: ArrayGeneral = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayAnalyzed')
 		del lengthArrayAnalyzed, shape
 
-		# 2026 July 26. I don't remember exactly when I created the `ShapeArray` system, but I'm
-		# not sure it is working the way I intended.
-		# OR, it is so sophisticated that I can't remember enough of the details. I mean, I use a lot
-		# of techniques in this module that I have never used again, such as the tricks with
-		# `.view()`.
-		# Actually, yes, I think my understanding WAS more sophisticated at the time I created this. I
-		# think I knew the shape would always be tuple[int, int] and that it was possible an axis
-		# could have a length of 1. While that is unusual, I don't believe it is a problem. And the
-		# entire system allowed me to abstract the numbers out of the array access and substitute
-		# semantic names for axes and even ranges within axes. AND, as I wrote int he docstring, I can
-		# rearrange the physical ordering of the axes (to optimize access) and the shape of the array
-		# by ONLY changing the `ShapeArray` and `ShapeSlicer` objects. The code that uses the arrays
-		# does not need to change. That is a very powerful abstraction. Did I ACTUALLY accomplish
-		# that?! How did I think of that?! Why have I forgotten that I thought of this?! (Well, this
-		# algorithm broke my heart because I was -this close- to computing a new number, but I didn't
-		# have enough memory. And, I am sure I have made some valuable insights into the problem, but
-		# I don't know how to communicate in math-speak. It's _another_ situation in which I don't
-		# know how to maximize the potential of the insight and my math-speak ignorance isolates me.
-		# And it's amplified by my ignorance of programming-speak. I mothballed the algorithm and
-		# tried not to think about it. Remembering all of that is so depressing, I'm going to take a
-		# break now.)
 		shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indices=indicesWorkbench)
 		arrayWorkbench: ArrayGeneral = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayPrepArea')
 		del shape

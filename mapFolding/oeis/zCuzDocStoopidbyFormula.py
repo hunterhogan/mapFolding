@@ -13,9 +13,12 @@ from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
 
-# TODO Think of a non-arbitrary way to determine which `f` ought to be the default.
+# TODO Think of a non-arbitrary way to determine which `f` ought to be the default. 1. Prefer formulas
+# with terms that are "not formulas".
 
 # TODO Figure out how to make the docstrings accessible from `oeisIDfor_n`.
+
+# TODO Standardize the formatting of the formulas.
 
 @cache
 def A000136(n: int, f: LiteralString | None = None) -> int:
@@ -426,7 +429,7 @@ def A337581(n: int, f: LiteralString | None = None) -> int:
 				countTotal = 4 * _A000682(n - 2)
 	return countTotal
 
-# ================== Not formulas ==========================
+#================== Not formulas ==========================
 
 @cache
 def _A000682(n: int) -> int:
