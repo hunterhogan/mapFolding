@@ -1,6 +1,9 @@
 # FIXME `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
 # pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
-# ruff: file-ignore[function-call-in-dataclass-default-argument]
+#=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
+# pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false
+#=SIN= Ruff suppression: Numba StructRef integration requires its private payload utilities and native value accessor.
+# ruff: file-ignore[function-call-in-dataclass-default-argument, private-member-access]
 # ty: ignore[invalid-assignment, unresolved-attribute]
 """
 Computational state orchestration for map folding analysis.
@@ -26,10 +29,11 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from __future__ import annotations
 
+from importlib.util import find_spec
 from mapFolding.beDRY import getConnectionGraph, getTotalLeaves, makeDataContainer
 from mapFolding.theTypes import (
 	形ArcCode, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Crossings, 形Elephino, 形TotalFolds, 形TotalLeaves)
-from typing import NamedTuple, TYPE_CHECKING
+from typing import NamedTuple, override, TYPE_CHECKING
 import dataclasses
 import numpy
 
@@ -168,6 +172,116 @@ class MapFoldingState:
 			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
 		if self.leafBelow is None:
 			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+
+if find_spec('numba') is not None:
+	from contextlib import ExitStack
+	from numba import typeof
+	from numba.core import cgutils, types
+	from numba.experimental import structref
+	from numba.experimental.jitclass.base import imp_dtor
+	from numba.extending import box, NativeValue, reflect, typeof_impl, unbox
+
+	_numbaParentField: str = 'numbaParent'
+
+	@structref.register
+	class _形NumbaMapFoldingState(types.StructRef):
+		@override
+		def preprocess_fields(self, fields: tuple[tuple[str, types.Type], ...]) -> tuple[tuple[str, types.Type], ...]:
+			def _unliteralField(field: tuple[str, types.Type]) -> tuple[str, types.Type]:
+				return field[0], types.unliteral(field[1])
+
+			return tuple(map(_unliteralField, fields))
+
+	形NumbaMapFoldingState = _形NumbaMapFoldingState
+
+	@typeof_impl.register(MapFoldingState)
+	def _typeofMapFoldingState(value: MapFoldingState, _context: Any) -> _形NumbaMapFoldingState:
+		def _typeofField(field: dataclasses.Field[Any]) -> tuple[str, types.Type]:
+			return field.name, typeof(getattr(value, field.name))
+
+		return _形NumbaMapFoldingState(((_numbaParentField, types.voidptr), *tuple(map(_typeofField, dataclasses.fields(value)))))
+
+	@unbox(_形NumbaMapFoldingState)
+	def _unboxMapFoldingState(numbaType: _形NumbaMapFoldingState, value: Any, context: Any) -> NativeValue:
+		numbaContext = context.context
+		payloadModel = numbaContext.data_model_manager[numbaType.get_data_type()]
+		payloadLLVMtype = payloadModel.get_value_type()
+		stateSlot = cgutils.alloca_once_value(context.builder, cgutils.get_null_value(numbaContext.get_value_type(numbaType)))
+		memoryInformationSlot = cgutils.alloca_once_value(context.builder, cgutils.get_null_value(cgutils.voidptr_t))
+		isErrorSlot = cgutils.alloca_once_value(context.builder, cgutils.false_bit)
+
+		context.pyapi.incref(value)
+		memoryInformation = numbaContext.nrt.meminfo_alloc_dtor_unchecked(
+			context.builder
+			, numbaContext.get_constant(types.uintp, numbaContext.get_abi_sizeof(payloadLLVMtype))
+			, imp_dtor(numbaContext, context.builder.module, numbaType)
+		)
+		context.builder.store(memoryInformation, memoryInformationSlot)
+
+		with context.builder.if_else(cgutils.is_null(context.builder, memoryInformation), likely=False) as (allocationFailed, allocationSucceeded):
+			with allocationFailed:
+				context.pyapi.err_set_none('PyExc_MemoryError')
+				context.builder.store(cgutils.true_bit, isErrorSlot)
+			with allocationSucceeded:
+				payloadPointer = numbaContext.nrt.meminfo_data(context.builder, memoryInformation)
+				payloadPointer = context.builder.bitcast(payloadPointer, payloadLLVMtype.as_pointer())
+				context.builder.store(cgutils.get_null_value(payloadLLVMtype), payloadPointer)
+
+				structReferenceUtilities = structref._Utils(numbaContext, context.builder, numbaType)
+				state = structReferenceUtilities.new_struct_ref(memoryInformation)
+				stateValue = state._getvalue()
+				context.builder.store(stateValue, stateSlot)
+				payload = structReferenceUtilities.get_data_struct(stateValue)
+				setattr(payload, _numbaParentField, context.builder.bitcast(value, cgutils.voidptr_t))
+
+				with ExitStack() as stack:
+					def unboxField(field: dataclasses.Field[Any]) -> None:
+						fieldType = numbaType.field_dict[field.name]
+						fieldObject = context.pyapi.object_getattr_string(value, field.name)
+						with cgutils.early_exit_if_null(context.builder, stack, fieldObject):
+							context.builder.store(cgutils.true_bit, isErrorSlot)
+						fieldNative = context.unbox(fieldType, fieldObject)
+						context.pyapi.decref(fieldObject)
+						with cgutils.early_exit_if(context.builder, stack, fieldNative.is_error):
+							context.builder.store(cgutils.true_bit, isErrorSlot)
+						setattr(payload, field.name, fieldNative.value)
+
+					tuple(map(unboxField, dataclasses.fields(MapFoldingState)))
+
+		stateValue = context.builder.load(stateSlot)
+		isError = context.builder.load(isErrorSlot)
+		with context.builder.if_then(isError, likely=False):
+			context.pyapi.decref(value)
+			with context.builder.if_then(cgutils.is_not_null(context.builder, context.builder.load(memoryInformationSlot))):
+				numbaContext.nrt.decref(context.builder, numbaType, stateValue)
+
+		def cleanUp() -> None:
+			context.pyapi.decref(value)
+
+		return NativeValue(stateValue, is_error=isError, cleanup=cleanUp)
+
+	@reflect(_形NumbaMapFoldingState)
+	def _reflectMapFoldingState(numbaType: _形NumbaMapFoldingState, value: Any, context: Any) -> None:
+		payload = structref._Utils(context.context, context.builder, numbaType).get_data_struct(value)
+		parent = context.builder.bitcast(getattr(payload, _numbaParentField), context.pyapi.pyobj)
+
+		def reflectField(field: dataclasses.Field[Any]) -> None:
+			fieldType = numbaType.field_dict[field.name]
+			fieldValue = getattr(payload, field.name)
+			context.context.nrt.incref(context.builder, fieldType, fieldValue)
+			fieldObject = context.box(fieldType, fieldValue)
+			context.pyapi.object_setattr_string(parent, field.name, fieldObject)
+			context.pyapi.decref(fieldObject)
+
+		tuple(map(reflectField, dataclasses.fields(MapFoldingState)))
+
+	@box(_形NumbaMapFoldingState)
+	def _boxMapFoldingState(numbaType: _形NumbaMapFoldingState, value: Any, context: Any) -> Any:
+		payload = structref._Utils(context.context, context.builder, numbaType).get_data_struct(value)
+		parent = context.builder.bitcast(getattr(payload, _numbaParentField), context.pyapi.pyobj)
+		context.pyapi.incref(parent)
+		context.context.nrt.decref(context.builder, numbaType, value)
+		return parent
 
 @dataclasses.dataclass(slots=True)
 class SymmetricFoldsState:
