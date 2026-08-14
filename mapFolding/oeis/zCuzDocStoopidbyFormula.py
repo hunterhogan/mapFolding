@@ -1,7 +1,8 @@
-# =Sin= ast source module.
-# pyright: reportUnusedImport=false
-# ruff: file-ignore[undocumented-public-function]
-# Run makeDocstrings.py
+#=Sin= ast source module.
+#ruff: file-ignore[undocumented-public-function]
+#=Sin= Don't remove `typing.Literal`.
+#pyright: reportUnusedImport=false
+#=Do= Run makeDocstrings.py
 """Compute a(n) for an OEIS ID by computing other OEIS IDs."""
 
 from __future__ import annotations
@@ -13,12 +14,17 @@ from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
 
-# TODO Think of a non-arbitrary way to determine which `f` ought to be the default. 1. Prefer formulas
-# with terms that are "not formulas".
-
-# TODO Figure out how to make the docstrings accessible from `oeisIDfor_n`.
+# TODO Think of a non-arbitrary way to determine which `f` ought to be the default.
+# - Prefer formulas with terms that are "not formulas".
 
 # TODO Standardize the formatting of the formulas.
+# - Use A000682 instead of A000136, except in A000682 and A000136.
+# - Use modulo to modulate by parity instead of bitwise AND.
+# - ONLY because these are Python expressions, use `//` for integer division instead of `/`.
+# - Put positive terms to the left of negative terms.
+# - Put "dominant" terms to the left of "subordinate" terms.
+
+# TODO Figure out how to make the docstrings accessible from `oeisIDfor_n`.
 
 @cache
 def A000136(n: int, f: LiteralString | None = None) -> int:
@@ -273,7 +279,7 @@ def A085973(n: int, f: LiteralString | None = None) -> int:
 			case 'A077054 and A005315':
 				countTotal = A077054(n) + A005315(n)
 			# ruff: ignore[commented-out-code]
-			# case 'A005315 and A005316':  #
+			# case 'A005315 and A005316':
 				# FIXME This formula system is not communicative for `n`, so `n + 1` gets boosted too
 				# much in A005315. I think I need a totally different paradigm.
 				# countTotal = A005315(n + 1) + _A005316(2 * n + 1)
@@ -292,10 +298,12 @@ def A208357(n: int, f: LiteralString | None = None) -> int:
 # TODO typo on 39? on https://oeis.org/A217310
 def A217310(n: int, f: LiteralString | None = None) -> int:
 	match f:
+		case 'A223093':
+			countTotal: int = (1 + (n % 2)) * A223093(n)
 		case 'A227167, A217318, and A005316':
-			countTotal: int = A227167(n) - A217318(n) - _A005316(n)
-		case 'A223093' | _:
-			countTotal = (1 + (n % 2)) * A223093(n)
+			countTotal = A227167(n) - A217318(n) - _A005316(n)
+		case 'A000682 and A005316' | _:
+			countTotal = ((1 + (n % 2)) * _A000682(n + 1)) - (2 * _A005316(n))
 	return countTotal
 
 def A217318(n: int, f: LiteralString | None = None) -> int:

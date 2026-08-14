@@ -640,9 +640,9 @@ def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None=None
             countTotal = _A005316(2 * n + 1) ** 2
     return countTotal
 
-def A217310(n: int, f: Literal['A227167, A217318, and A005316', 'A223093'] | LiteralString | None=None) -> int:
+def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000682 and A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A217310(n) as a function of A227167, A217318, and A005316 or A223093.
+    Compute A217310(n) as a function of A223093 or A227167, A217318, and A005316 or A000682 and A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310 is: "The number of meandering curves of order n, with only one extremity covered by its arcs."
 
@@ -665,17 +665,19 @@ def A217310(n: int, f: Literal['A227167, A217318, and A005316', 'A223093'] | Lit
         https://oeis.org/A217310
     """
     match f:
+        case 'A223093':
+            countTotal: int = (1 + n % 2) * A223093(n)
         case 'A227167, A217318, and A005316':
-            countTotal: int = A227167(n) - A217318(n) - _A005316(n)
-        case 'A223093' | _:
-            countTotal = (1 + n % 2) * A223093(n)
+            countTotal = A227167(n) - A217318(n) - _A005316(n)
+        case 'A000682 and A005316' | _:
+            countTotal = (1 + n % 2) * _A000682(n + 1) - 2 * _A005316(n)
     return countTotal
 
 def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005316 and A000682'] | LiteralString | None=None) -> int:
     """
     Compute A217318(n) as a function of A223095 or A227167, A217310, and A005316 or A005316 and A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318 is: "The number of meandering curves of order n, with both extremity covered by its arcs."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318 is: "The number of meandering curves of order n with both extremities covered by their arcs."
 
     The domain of A217318 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 45.
@@ -688,7 +690,7 @@ def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005
     Returns
     -------
     a(n) : int
-        The number of meandering curves of order n, with both extremity covered by its arcs.
+        The number of meandering curves of order n with both extremities covered by their arcs.
 
     Would You Like to Know More?
     ----------------------------

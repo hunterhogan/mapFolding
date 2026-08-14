@@ -1,4 +1,4 @@
-"""Generate all modules that require some assembly."""
+"""Overwrite all synthetic modules."""
 from __future__ import annotations
 
 from mapFolding.someAssemblyRequired.foldsSymmetric.makeModulesFoldsSymmetric import makeFoldsSymmetricModules

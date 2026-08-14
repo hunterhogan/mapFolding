@@ -1,3 +1,8 @@
+# Greetings from The On-Line Encyclopedia of Integer Sequences! http://oeis.org/
+
+Search: id:a259689
+Showing 1-1 of 1
+
 %I A259689 #46 Sep 16 2023 19:06:03
 %S A259689 1,2,2,2,6,4,10,10,4,32,26,8,68,64,34,8,220,186,82,16,528,488,276,98,
 %T A259689 16,1724,1484,744,226,32,4460,4086,2382,980,258,32,14664,12752,6822,
@@ -38,3 +43,5 @@
 %O A259689 2,2
 %A A259689 _N. J. A. Sloane_, Jul 04 2015
 %E A259689 Terms a(22) and beyond from _Andrew Howroyd_, Dec 05 2018
+
+# Content is available under The OEIS End-User License Agreement: http://oeis.org/LICENSE
