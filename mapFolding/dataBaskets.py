@@ -371,7 +371,7 @@ class SymmetricFoldsState:
 	"""Unchanging array representing connections between all leaves."""
 	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	indices: list[list[tuple[int, int]]] = dataclasses.field(init=False)
+	indices: tuple[tuple[tuple[int, int], ...], ...] = dataclasses.field(init=False)
 	"""Precomputed index pairs for symmetric fold checking."""
 	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
@@ -391,7 +391,9 @@ class SymmetricFoldsState:
 		totalLeavesAsInt = int(self.totalLeaves)
 		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		self.indices = [[((次 + folding) % (self.totalLeaves + 1), (-2 - 次 + folding) % (self.totalLeaves + 1)) for 次 in range(self.totalLeaves // 2)] for folding in range(self.totalLeaves + 1)]
+		self.indices = tuple(tuple(((次 + folding) % (self.totalLeaves + 1), (-2 - 次 + folding) % (self.totalLeaves + 1))
+				for 次 in range(self.totalLeaves // 2))
+				for folding in range(self.totalLeaves + 1))
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
