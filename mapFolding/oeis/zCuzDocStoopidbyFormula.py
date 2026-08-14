@@ -270,18 +270,23 @@ def A085973(n: int, f: LiteralString | None = None) -> int:
 		countTotal: int = 3
 	else:
 		match f:
-			case 'A005316':
-				countTotal = _A005316(2 * n) + _A005316(2 * n - 1)
-			case 'A077054 and A005315' | _:
+			case 'A077054 and A005315':
 				countTotal = A077054(n) + A005315(n)
+			# ruff: ignore[commented-out-code]
+			# case 'A005315 and A005316':  #
+				# FIXME This formula system is not communicative for `n`, so `n + 1` gets boosted too
+				# much in A005315. I think I need a totally different paradigm.
+				# countTotal = A005315(n + 1) + _A005316(2 * n + 1)
+			case 'A005316' | _:
+				countTotal = _A005316(2 * n) + _A005316(2 * n - 1)
 	return countTotal
 
 def A208357(n: int, f: LiteralString | None = None) -> int:
 	match f:
-		case 'A005316':
-			countTotal: int = _A005316(2 * n + 1) ** 2
-		case 'A005315' | _:
-			countTotal = A005315(n + 1) ** 2
+		case 'A005315':
+			countTotal: int = A005315(n + 1) ** 2
+		case 'A005316' | _:
+			countTotal = _A005316(2 * n + 1) ** 2
 	return countTotal
 
 # TODO typo on 39? on https://oeis.org/A217310
@@ -290,7 +295,7 @@ def A217310(n: int, f: LiteralString | None = None) -> int:
 		case 'A227167, A217318, and A005316':
 			countTotal: int = A227167(n) - A217318(n) - _A005316(n)
 		case 'A223093' | _:
-			countTotal = A223093(n) * (1 + (n % 2))
+			countTotal = (1 + (n % 2)) * A223093(n)
 	return countTotal
 
 def A217318(n: int, f: LiteralString | None = None) -> int:

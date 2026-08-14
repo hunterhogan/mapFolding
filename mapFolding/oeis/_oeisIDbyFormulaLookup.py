@@ -243,23 +243,23 @@ def A078592(n: int, f: Literal['A005316'] | LiteralString | None=None) -> int:
                 countTotal = (_A005316(2 * n) + _A005316(n)) // 2
     return countTotal
 
-def A085973(n: int, f: Literal['A005316', 'A077054 and A005315'] | LiteralString | None=None) -> int:
+def A085973(n: int, f: Literal['A077054 and A005315', 'A005316'] | LiteralString | None=None) -> int:
     if n == 0:
         countTotal: int = 3
     else:
         match f:
-            case 'A005316':
-                countTotal = _A005316(2 * n) + _A005316(2 * n - 1)
-            case 'A077054 and A005315' | _:
+            case 'A077054 and A005315':
                 countTotal = _A077054(n) + _A005315(n)
+            case 'A005316' | _:
+                countTotal = _A005316(2 * n) + _A005316(2 * n - 1)
     return countTotal
 
-def A208357(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None) -> int:
+def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None=None) -> int:
     match f:
-        case 'A005316':
-            countTotal: int = _A005316(2 * n + 1) ** 2
-        case 'A005315' | _:
-            countTotal = _A005315(n + 1) ** 2
+        case 'A005315':
+            countTotal: int = _A005315(n + 1) ** 2
+        case 'A005316' | _:
+            countTotal = _A005316(2 * n + 1) ** 2
     return countTotal
 
 def A217310(n: int, f: Literal['A227167, A217318, and A005316', 'A223093'] | LiteralString | None=None) -> int:
@@ -267,7 +267,7 @@ def A217310(n: int, f: Literal['A227167, A217318, and A005316', 'A223093'] | Lit
         case 'A227167, A217318, and A005316':
             countTotal: int = _A227167(n) - _A217318(n) - _A005316(n)
         case 'A223093' | _:
-            countTotal = _A223093(n) * (1 + n % 2)
+            countTotal = (1 + n % 2) * _A223093(n)
     return countTotal
 
 def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005316 and A000682'] | LiteralString | None=None) -> int:

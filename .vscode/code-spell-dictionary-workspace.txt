@@ -8,6 +8,7 @@ Aichholzer
 Alcover
 Alie
 allclose
+alloca
 alphita
 Anders
 antidivisor
@@ -37,6 +38,7 @@ baat
 baseswap
 bidirected
 bignum
+bitcast
 bitwidths
 Bletionary
 boolop
@@ -49,6 +51,7 @@ cffconvert
 cffobj
 CFLAGS
 cfunc
+cgutils
 chevauchement
 Chevauchements
 chil
@@ -189,6 +192,7 @@ itemsize
 itertools
 Iwan
 jaxtyping
+jitclass
 jitted
 joeis
 juxt
@@ -329,12 +333,14 @@ problème
 prufer
 Prufer
 ptount
+pyapi
 pyarrow
 pydocstyle
 pyflakes
 Pylance
 Pynatics
 Pyndas
+pyobj
 pypa
 pyproject
 pytastic
@@ -377,6 +383,7 @@ stackoverflow
 standardised
 Stéphane
 Stoopid
+structref
 subclasshook
 subexponential
 succ
@@ -413,8 +420,10 @@ udivisor
 udivisors
 ufunc
 Ufunc
+uintp
 unaryop
 uncompiled
+unliteral
 unparameterized
 unparses
 unrank
@@ -432,6 +441,7 @@ VEECH
 Villars
 visualised
 Vlamos
+voidptr
 vtail
 Weisstein's
 Wextra

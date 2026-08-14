@@ -254,7 +254,7 @@ OEIS limits my proposed changes to a sequence to three sequences at a time. I ha
 
 - A060206, submitted.
 - A077460
-- A085973
+- A085973, submitted.
 - A208357
 - A217310
 - A217318, submitted.
