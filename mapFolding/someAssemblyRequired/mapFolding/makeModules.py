@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 from astToolkit import (
-	Be, DOT, extractClassDef, Grab, hasDOTbody, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, parsePathFilename2astModule, Then)
+	Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule,
+	parsePathFilename2astModule, Then)
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
-from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
+from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getModule, getPathFilename
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
 from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import (
@@ -21,12 +22,11 @@ import ast
 import dataclasses
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
 	from collections.abc import Sequence
 	from pathlib import PurePath
 	from typing import Any
 
-def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
+def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, _sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate parallel implementation with concurrent execution and task division.
 
 	Parameters
@@ -39,7 +39,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 		Name for the core parallel counting function.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
+	_sourceCallableDispatcher : str | None = None
 		Optional dispatcher function identifier.
 
 	Returns
@@ -54,39 +54,27 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable
 
-	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	dataclassIdentifier: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
+	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 
-	dataclassLogicalPathModule = None
-	for moduleWithLogicalPath, boxOfNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
-		for nameTuple in boxOfNameTuples:
-			if nameTuple[0] == dataclassIdentifier:
-				dataclassLogicalPathModule = moduleWithLogicalPath
-				break
-		if dataclassLogicalPathModule:
-			break
-	if dataclassLogicalPathModule is None:
-		raise Exception  # ruff: ignore[raise-vanilla-class]
-	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(dataclassLogicalPathModule, dataclassIdentifier, dataclassInstanceIdentifier)
+	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 
-# START add the parallel state fields to the count function ------------------------------------------------
-	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(dataclassLogicalPathModule, dataclassIdentifier))
-	dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + dataclassIdentifier
-	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(dataclassLogicalPathModule, dataclassIdentifierParallel))
+#-START add the parallel state fields to the count function ------------------------------------------------
+	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass))
+	dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + identifierDataclass
+	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, dataclassIdentifierParallel))
 	onlyParallelFields: list[dataclasses.Field[Any]] = [field for field in dataclassFieldsParallel if field.name not in [fieldBase.name for fieldBase in dataclassBaseFields]]
 
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(dataclassLogicalPathModule), dataclassIdentifierParallel)
+	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), dataclassIdentifierParallel)
 	if not dataclassClassDef:
-		message = f"I could not find `{dataclassIdentifierParallel = }` in `{dataclassLogicalPathModule = }`."
+		message = f"I could not find `{dataclassIdentifierParallel = }` in `{logicalPathDataclass = }`."
 		raise ValueError(message)
 
 	for aField in onlyParallelFields:
 		Official_fieldOrder.append(aField.name)
-		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(dataclassLogicalPathModule, dataclassClassDef, dataclassInstanceIdentifier, aField)
+		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
 
 	shatteredDataclassParallel = ShatteredDataclass(
 		countingVariableAnnotation=shatteredDataclass.countingVariableAnnotation,
@@ -101,20 +89,20 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 		map_stateDOTfield2Name={**shatteredDataclass.map_stateDOTfield2Name, **{dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder}},
 		)
 	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.boxOfName4Parameters, Make.Store())
-	shatteredDataclassParallel.repack = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(dataclassIdentifierParallel), list_keyword=shatteredDataclassParallel.boxOf_keyword_field__field4init))
+	shatteredDataclassParallel.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(dataclassIdentifierParallel), list_keyword=shatteredDataclassParallel.boxOf_keyword_field__field4init))
 	shatteredDataclassParallel.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclassParallel.boxOfAnnotations))
 
 	shatteredDataclassParallel.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclassParallel.imports.addImportFrom_asStr(dataclassLogicalPathModule, dataclassIdentifierParallel)
+	shatteredDataclassParallel.imports.addImportFrom_asStr(logicalPathDataclass, dataclassIdentifierParallel)
 	shatteredDataclassParallel.imports.update(shatteredDataclass.imports)
-	shatteredDataclassParallel.imports.removeImportFrom(dataclassLogicalPathModule, dataclassIdentifier)
+	shatteredDataclassParallel.imports.removeImportFrom(logicalPathDataclass, identifierDataclass)
 
-# END add the parallel state fields to the count function ------------------------------------------------
+#-END add the parallel state fields to the count function ------------------------------------------------
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclassParallel)
 
-# START add the parallel logic to the count function ------------------------------------------------
+#-START add the parallel logic to the count function ------------------------------------------------
 
 	findThis = Be.While.testIs(Be.Compare.leftIs(IfThis.isNameIdentifier('leafConnectee')))
 	captureCountGapsCodeBlock: NodeTourist[ast.While, Sequence[ast.stmt]] = NodeTourist(findThis, doThat=Then.extractIt(DOT.body))
@@ -127,29 +115,27 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 	countGapsCodeBlockNew: list[ast.stmt] = [thisIsMyTaskIndexCodeBlock, countGapsCodeBlock[-1]]
 	NodeChanger[ast.While, hasDOTbody](findThis, doThat=Grab.bodyAttribute(Then.replaceWith(countGapsCodeBlockNew))).visit(ingredientsFunction.astFunctionDef)
 
-# END add the parallel logic to the count function ------------------------------------------------
+#-END add the parallel logic to the count function ------------------------------------------------
 
 	ingredientsFunction.removeUnusedParameters()
 
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
-# START unpack/repack the dataclass function ------------------------------------------------
+#-START unpack/repack the dataclass function ------------------------------------------------
 	sourceCallableIdentifier = default['function']['dispatcher']
 
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	NodeChanger(
-			findThis=Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == dataclassIdentifier))
+			findThis=Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == identifierDataclass))
 			, doThat=Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
 		).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
-	# FIXME Remember why I can't get the TypeChecker to see ast.Tuple, and document it.
-	# ty: ignore[invalid-assignment]
-	astTuple: ast.Tuple = raiseIfNone(NodeTourist(Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))  # pyright: ignore[reportAssignmentType, reportArgumentType]  #
+	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple | None](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
 		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))

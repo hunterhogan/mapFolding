@@ -33,18 +33,17 @@ tailored for specific computational requirements essential to large-scale map fo
 
 from __future__ import annotations
 
-from astToolkit import Be, DOT, NodeTourist, parseLogicalPath2astModule, Then
+from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePath
 from typing import TYPE_CHECKING
+import ast
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction
 	from os import PathLike
-	import ast
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
 	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
@@ -75,8 +74,8 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	identifierDataclassInstance : str
 		Identifier of the `dataclass` instance.
 	"""
-	dataclassName: ast.expr = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	identifierDataclass: str = raiseIfNone(NodeTourist(Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
+	dataclassName: ast.expr = raiseIfNone(NodeTourist[ast.arg, ast.expr](Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	identifierDataclass: str = raiseIfNone(NodeTourist[ast.Name, str](Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
 	logicalPathDataclass = None
 	for moduleWithLogicalPath, boxOfNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
 		for nameTuple in boxOfNameTuples:
@@ -85,7 +84,7 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 				break
 		if logicalPathDataclass:
 			break
-	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist[ast.arg, identifierDotAttribute](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	return raiseIfNone(logicalPathDataclass), identifierDataclass, identifierDataclassInstance
 
 def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *identifierModule: str | None) -> identifierDotAttribute:

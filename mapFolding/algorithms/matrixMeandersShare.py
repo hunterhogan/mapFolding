@@ -219,7 +219,7 @@ def getTotalBuckets(state: MatrixMeandersState, totalArcCodes: int = 0) -> int:
 
 	Notes
 	-----
-	FIXME remake this function from scratch.
+	TODO remake this function from scratch.
 
 	Factors:
 		- The starting quantity of `arcCode`.

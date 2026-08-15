@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Sequence
 	from typing import Any
 
-# FIXME `getTotalLeaves` comprehensive tests.
+# TODO `getTotalLeaves` comprehensive tests.
 def test_getTotalLeaves_edge_cases() -> None:
 	"""Test edge cases for getTotalLeaves."""
 	# Order independence

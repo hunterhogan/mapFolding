@@ -268,7 +268,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
-	# FIXME This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
+	# TODO This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
 	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
 
 	decoratorModule = Z0Z_numbaDataTypeModule

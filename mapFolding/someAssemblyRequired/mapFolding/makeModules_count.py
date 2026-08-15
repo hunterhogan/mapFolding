@@ -15,15 +15,16 @@ from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
 from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.theSSOT import settingsPackage
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING
+import ast
 import operator
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from pathlib import PurePath
-	import ast
 
 def makeDaoOfMapFoldingNumba(astModule: ast.Module, identifierModule: str, _identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, _sourceCallableDispatcher: str | None = None) -> PurePath:
+	"""Add jit_module to the end of a module."""
 	parametersNumbaHARDCODED: ParametersNumba = parametersNumbaLight
 	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
 	ingredientsModule.imports.addImportFrom_asStr('numba', 'jit_module')
@@ -76,9 +77,7 @@ def makeInlineNumba(astModule: ast.Module, identifierModule: str, identifierCall
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		# FIXME Remember why I can't get the TypeChecker to see ast.Tuple, and document it.
-		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
-				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
+		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return.valueIs(Be.Tuple), doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
@@ -121,7 +120,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
-	dataclassInstanceIdentifier: str = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	dataclassInstanceIdentifier: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	theCountingIdentifier: str = dictionaryIdentifiers['variable']['counting']
 	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
@@ -150,7 +149,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		, doThat=Grab.testAttribute(Grab.comparatorsAttribute(Then.replaceWith([Make.Constant(4)])))
 	).visit(ingredientsFunction.astFunctionDef)
 
-	insertLeaf = NodeTourist(
+	insertLeaf = NodeTourist[ast.If, list[ast.stmt]](
 		findThis=findThisIf0
 		, doThat=Then.extractIt(DOT.body)
 	).captureLastMatch(ingredientsFunction.astFunctionDef)
@@ -180,7 +179,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 
-		# Update any calls to the original function name with the new target function name
+		#Update any calls to the original function name with the new target function name
 		NodeChanger(
 			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(dictionaryIdentifiers['function']['counting'])))
 			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
@@ -188,7 +187,7 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(identifierCallableInitializeDataclass), [Make.Name(dataclassInstanceIdentifier)]))
 
-		# Insert the transitionOnGroupsOfFolds call at the beginning of the function
+		#Insert the transitionOnGroupsOfFolds call at the beginning of the function
 		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, AssignInitializedDataclass)
 
 		dotModule: identifierDotAttribute = getLogicalPath(settingsPackage.identifierPackage, logicalPathInfix, identifierModuleInitializeDataclass)
@@ -245,9 +244,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
-		# FIXME Remember why I can't get the TypeChecker to see ast.Tuple, and document it.
-		astTuple: ast.Tuple = cast('ast.Tuple', raiseIfNone(NodeTourist(Be.Return.valueIs(Be.Tuple)
-				, doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef)))
+		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return.valueIs(Be.Tuple), doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
@@ -291,7 +288,7 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
-	identifierDataclassInstance: str = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	identifierDataclassInstance: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	NodeChanger(
 		findThis=IfThis.isIfUnaryNotAttributeNamespaceIdentifier(identifierDataclassInstance, 'dimensionsUnconstrained')
@@ -305,7 +302,7 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
 
-		# Update any calls to the original function name with the new target function name
+		#Update any calls to the original function name with the new target function name
 		NodeChanger(
 			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
 			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))

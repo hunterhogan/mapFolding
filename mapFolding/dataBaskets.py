@@ -115,15 +115,15 @@ class MapFoldingState:
 	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
 	"""Count of dimensions not subject to folding constraints."""
 
-	countDimensionsGapped: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	countDimensionsGapped: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking computed number of dimensions with gaps."""
-	gapRangeStart: 形Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DElephino.__args__[1].__args__[0]})
+	gapRangeStart: 形Array1DElephino = dataclasses.field(default_factory=lambda: 形Array1DElephino([]), init=True, metadata={'dtype': 形Array1DElephino.__args__[1].__args__[0]})
 	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	gapsWhere: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafAbove: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafBelow: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
 
 	connectionGraph: 形Array3DTotalLeaves = dataclasses.field(init=False, metadata={'dtype': 形Array3DTotalLeaves.__args__[1].__args__[0]})
@@ -162,15 +162,15 @@ class MapFoldingState:
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
-		if self.gapsWhere is None:
+		if not self.gapsWhere.shape:
 			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
-		if self.countDimensionsGapped is None:
+		if not self.countDimensionsGapped.shape:
 			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if self.gapRangeStart is None:
+		if not self.gapRangeStart.shape:
 			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if self.leafAbove is None:
+		if not self.leafAbove.shape:
 			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if self.leafBelow is None:
+		if not self.leafBelow.shape:
 			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 
 if find_spec('numba') is not None:
@@ -354,17 +354,17 @@ class SymmetricFoldsState:
 	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
 	"""Count of dimensions not subject to folding constraints."""
 
-	countDimensionsGapped: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	countDimensionsGapped: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking computed number of dimensions with gaps."""
-	gapRangeStart: 形Array1DElephino = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DElephino.__args__[1].__args__[0]})
+	gapRangeStart: 形Array1DElephino = dataclasses.field(default_factory=lambda: 形Array1DElephino([]), init=True, metadata={'dtype': 形Array1DElephino.__args__[1].__args__[0]})
 	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	gapsWhere: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafAbove: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves above to the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafBelow: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array tracking the leaves below to the current leaf, `leaf1ndex`, during computation."""
-	leafComparison: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafComparison: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""Array for finding symmetric folds."""
 
 	connectionGraph: 形Array3DTotalLeaves = dataclasses.field(init=False, metadata={'dtype': 形Array3DTotalLeaves.__args__[1].__args__[0]})
@@ -397,17 +397,17 @@ class SymmetricFoldsState:
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
-		if self.gapsWhere is None:
+		if not self.gapsWhere.shape:
 			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
-		if self.countDimensionsGapped is None:
+		if not self.countDimensionsGapped.shape:
 			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if self.gapRangeStart is None:
+		if not self.gapRangeStart.shape:
 			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if self.leafAbove is None:
+		if not self.leafAbove.shape:
 			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if self.leafBelow is None:
+		if not self.leafBelow.shape:
 			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
-		if self.leafComparison is None:
+		if not self.leafComparison.shape:
 			self.leafComparison = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
 
 @dataclasses.dataclass

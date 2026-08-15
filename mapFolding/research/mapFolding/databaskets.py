@@ -31,7 +31,7 @@ class LeafSequenceState(MapFoldingState):
 		Array storing the sequence of leaf connections discovered.
 	"""
 
-	leafSequence: 形Array1DTotalLeaves = dataclasses.field(default=None, init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafSequence: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
 	"""
 	Array storing the sequence of leaf connections discovered during computation.
 
@@ -56,7 +56,7 @@ class LeafSequenceState(MapFoldingState):
 
 		"""
 		super().__post_init__()
-		if self.leafSequence is None:
+		if not self.leafSequence.shape:
 			totalFoldsKnown: int | None = getTotalFoldsKnown(self.mapShape)
 			if totalFoldsKnown is not None:
 				groupsOfFoldsKnown: int = totalFoldsKnown // self.totalLeaves
