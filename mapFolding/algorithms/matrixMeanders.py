@@ -52,12 +52,12 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
                 state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
 
             if bitsAlfaHasArcs:
-                arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3
+                arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3  # `bitsAlfaIsEven` has `bitsAlfa` in it.
                 if arcCodeAnalysis < state.MAXIMUMarcCode:
                     state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
 
             if bitsZuluHasArcs:
-                arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1
+                arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1  # `bitsZuluIsEven` has `bitsZulu` in it.
                 if arcCodeAnalysis < state.MAXIMUMarcCode:
                     state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
 

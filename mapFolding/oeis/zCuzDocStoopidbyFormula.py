@@ -423,11 +423,11 @@ def A301620(n: int, f: LiteralString | None = None) -> int:
 	return countTotal
 
 def A333971(n: int, f: LiteralString | None = None) -> int:
-	if n in {2, 3}:
-		countTotal: int = n - 1
-	else:
-		match f:
-			case 'A000682' | _:
+	match f:
+		case 'A000682' | _:
+			if n in {2, 3}:
+				countTotal: int = n - 1
+			else:
 				countTotal = 4 * (_A000682(n - 1) - _A000682(n - 2))
 	return countTotal
 

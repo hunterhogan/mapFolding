@@ -371,11 +371,11 @@ def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259
     return countTotal
 
 def A333971(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
-    if n in {2, 3}:
-        countTotal: int = n - 1
-    else:
-        match f:
-            case 'A000682' | _:
+    match f:
+        case 'A000682' | _:
+            if n in {2, 3}:
+                countTotal: int = n - 1
+            else:
                 countTotal = 4 * (_A000682(n - 1) - _A000682(n - 2))
     return countTotal
 
