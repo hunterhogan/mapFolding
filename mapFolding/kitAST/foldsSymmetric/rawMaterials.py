@@ -36,8 +36,8 @@ from __future__ import annotations
 
 from astToolkit import extractFunctionDef, Make
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import defaultFoldsSymmetric
 from mapFolding.kitAST.kitMakeModules import getModule
+from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
 import ast
 
 FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(logicalPathInfix='algorithms', identifierModule='foldsSymmetric'), defaultFoldsSymmetric['function']['filterAsymmetricFolds']))

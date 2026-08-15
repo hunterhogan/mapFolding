@@ -9,11 +9,12 @@ from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import default, Default, IfThis, ShatteredDataclass
+from mapFolding.kitAST import IfThis, ShatteredDataclass
 from mapFolding.kitAST.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.kitAST.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
+from mapFolding.kitAST.theSSOT import default
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
@@ -21,6 +22,7 @@ import operator
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
+	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 
 def makeDaoOfMapFoldingNumba(astModule: ast.Module, identifierModule: str, _identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, _sourceCallableDispatcher: str | None = None) -> PurePath:

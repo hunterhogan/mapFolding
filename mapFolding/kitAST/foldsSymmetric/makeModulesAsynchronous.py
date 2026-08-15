@@ -5,9 +5,10 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import defaultFoldsSymmetric, IfThis
+from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.foldsSymmetric.rawMaterials import ExprCallFilterAsymmetricFoldsState
 from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
+from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 

@@ -5,11 +5,12 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, parsePathFilena
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import default, defaultFoldsSymmetric, IfThis
+from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.foldsSymmetric.rawMaterials import adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds
 from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
 from mapFolding.kitAST.mapFolding.makeModules_count import makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric, defaultMapFolding
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -20,16 +21,16 @@ if TYPE_CHECKING:
 
 def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
 	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(defaultMapFolding['variable']['stateDataclass']))
 			, Grab.idAttribute(Then.replaceWith(defaultFoldsSymmetric['variable']['stateDataclass']))
 		).visit(astModule)
 
-	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(default['variable']['stateDataclass']))
+	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(defaultMapFolding['variable']['stateDataclass']))
 			, Grab.nameAttribute(Then.replaceWith(defaultFoldsSymmetric['variable']['stateDataclass']))
 		).visit(astModule)
 
 	FunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
-		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(default['function']['counting']))
+		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(defaultMapFolding['function']['counting']))
 		, doThat=Then.extractIt
 		).captureLastMatch(astModule))
 	FunctionDef_count.name = identifierCallable or defaultFoldsSymmetric['function']['counting']
@@ -37,7 +38,7 @@ def addSymmetryCheck(astModule: ast.Module, identifierModule: str, identifierCal
 	NodeChanger(Be.Return, Then.insertThisAbove([adjustTotalFolds])).visit(FunctionDef_count)
 
 	NodeChanger(
-		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(default['variable']['stateInstance'], default['variable']['counting']))
+		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(defaultMapFolding['variable']['stateInstance'], defaultMapFolding['variable']['counting']))
 		, doThat=Then.replaceWith(foldsSymmetricIncrementCount)
 		).visit(FunctionDef_count)
 
@@ -69,7 +70,7 @@ def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCal
 
 def makeModulesFoldsSymmetric() -> None:
 	"""Make."""
-	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
+	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultFoldsSymmetric['module']['algorithm'], defaultFoldsSymmetric['function']['counting']
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], None)
 

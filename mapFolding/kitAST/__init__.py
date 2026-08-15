@@ -1,6 +1,8 @@
 """
 Map folding AST transformation system: Comprehensive framework for converting dataclass-based algorithms to optimized implementations.
 
+(AI generated docstring, and it's old)
+
 This subpackage implements a sophisticated Abstract Syntax Tree (AST) transformation system specifically designed to convert
 high-level dataclass-based map folding algorithms into highly optimized, Numba-compatible implementations. The transformation
 system addresses a fundamental challenge in high-performance scientific computing: bridging the gap between maintainable,
@@ -63,21 +65,18 @@ providing significant performance improvements essential to map folding research
 
 ## Usage Guidance
 
-Begin exploration with `infoBooth` for understanding configuration options and complexity estimates. Proceed to
-`transformationTools` for core transformation capabilities, then examine `RecipeJob` for orchestration patterns. Advanced users
-developing custom transformations should study `_toolIfThis` and `_toolkitContainers` for foundational pattern recognition and
-structural manipulation capabilities.
+Proceed to `transformationTools` for core transformation capabilities, then examine `RecipeJob` for
+orchestration patterns. Advanced users developing custom transformations should study `_toolIfThis`
+and `_toolkitContainers` for foundational pattern recognition and structural manipulation
+capabilities.
 
-The transformation system represents the culmination of systematic AST manipulation research, enabling previously intractable
-calculations through the strategic application of compiler optimization techniques to abstract mathematical algorithms.
+The transformation system represents the culmination of systematic AST manipulation research, enabling
+previously intractable calculations through the strategic application of compiler optimization
+techniques to abstract mathematical algorithms.
 """
 
 # isort: split
 from __future__ import annotations
-
-from mapFolding.kitAST.infoBooth import (
-	default as default, Default as Default, defaultFoldsSymmetric as defaultFoldsSymmetric,
-	dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding)
 
 # isort: split
 from mapFolding.kitAST._toolIfThis import IfThis as IfThis

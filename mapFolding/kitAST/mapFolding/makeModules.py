@@ -8,7 +8,7 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
-from mapFolding.kitAST import default, DeReConstructField2ast, IfThis, ShatteredDataclass
+from mapFolding.kitAST import DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.kitAST.kitMakeModules import findDataclass, getModule, getPathFilename
 from mapFolding.kitAST.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
@@ -16,6 +16,7 @@ from mapFolding.kitAST.mapFolding.makeModules_count import (
 	makeDaoOfMapFoldingNumba, makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
 from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.kitAST.theSSOT import defaultMapFolding
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
@@ -48,7 +49,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 		Filesystem path where the parallel module was written.
 
 	"""
-	sourceCallableIdentifier = default['function']['counting']
+	sourceCallableIdentifier = defaultMapFolding['function']['counting']
 	if identifierCallable is None:
 		identifierCallable = sourceCallableIdentifier
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
@@ -122,7 +123,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
 #-START unpack/repack the dataclass function ------------------------------------------------
-	sourceCallableIdentifier = default['function']['dispatcher']
+	sourceCallableIdentifier = defaultMapFolding['function']['dispatcher']
 
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
@@ -183,26 +184,26 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 
 def makeModulesMapFolding() -> None:
 	"""Make multidimensional map folding modules."""
-	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
+	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
 
-	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeInlineNumba(astModule, 'inlineNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
+	pathFilename = makeInlineNumba(astModule, 'inlineNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
 
-	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeInlineParallelNumba(astModule, 'countParallelNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
+	pathFilename = makeInlineParallelNumba(astModule, 'countParallelNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
 
-	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
-	makeInitializeState(astModule, default['module']['initializeState'], default['function']['initializeState'], default['logicalPath']['synthetic'])
+	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
+	makeInitializeState(astModule, defaultMapFolding['module']['initializeState'], defaultMapFolding['function']['initializeState'], defaultMapFolding['logicalPath']['synthetic'], identifiers=defaultMapFolding)
 
-	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeTheorem2(astModule, 'theorem2', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
-
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
+	pathFilename = makeTheorem2(astModule, 'theorem2', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'], identifiers=defaultMapFolding)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
 
 if __name__ == '__main__':
 	makeModulesMapFolding()

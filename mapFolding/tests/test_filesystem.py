@@ -29,7 +29,7 @@ from mapFolding.kitFilesystem import (
 	makePathFilenameFolds, readDataFrame, saveTotal)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
-from mapFolding.theSSOT import pathDataSamples
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 import io
 import numpy
@@ -73,7 +73,7 @@ def test_makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: Path, suf
 	'pathFilename, expected',
 	[
 		pytest.param(
-			pathDataSamples / 'arrayFoldings2上4Dimensional.pkl',
+			settingsPackage.pathDataSamples / 'arrayFoldings2上4Dimensional.pkl',
 			((12, 16), 'uint8', (5, 15)),
 			id='arrayFoldings2上4Dimensional',
 		),
@@ -91,7 +91,7 @@ def test_readDataFrame(pathFilename: Path, expected: tuple[tuple[int, int], str,
 @pytest.mark.parametrize(
 	'pathFilename, expected',
 	[
-		pytest.param(pathDataSamples / 'arrayFoldings2上3Dimensional.pkl', FileNotFoundError, id='missingPickle'),
+		pytest.param(settingsPackage.pathDataSamples / 'arrayFoldings2上3Dimensional.pkl', FileNotFoundError, id='missingPickle'),
 	],
 )
 def test_readDataFrameError(pathFilename: Path, expected: type[Exception]) -> None:

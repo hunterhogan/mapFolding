@@ -39,7 +39,7 @@ from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.theSSOT import pathDataSamples, settingsPackage
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
@@ -145,7 +145,7 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') ->
 	"""
 	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
-def makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: PathLike[str] = pathDataSamples, *, suffix: str = '.pkl') -> Path:
+def makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: PathLike[str] = settingsPackage.pathDataSamples, *, suffix: str = '.pkl') -> Path:
 	# DOCUMENT
 	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
 

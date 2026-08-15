@@ -27,7 +27,7 @@ from __future__ import annotations
 
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
 from mapFolding.oeis import _theSSOT, getMetadata, oeisIDsImplemented
-from mapFolding.theSSOT import pathDataSamples
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
 import numpy
@@ -76,7 +76,7 @@ def setupWarningsAsErrors() -> Generator[None, Any]:
 #======== SSOT for test data paths and filenames ==============
 # TODO I might still need something like this to test the creation of a job. But I don't need to use
 # this for every tmp dir or file, and it doesn't need to be this complicated.
-path_tmpRoot: Path = pathDataSamples / "tmp"
+path_tmpRoot: Path = settingsPackage.pathDataSamples / "tmp"
 path_tmpRoot.mkdir(parents=True, exist_ok=True)
 
 # The registrar maintains the register of tmp filesystem objects
@@ -196,7 +196,7 @@ def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
 @pytest.fixture(scope="session", autouse=True)
 def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
 	"""Auto-fixture to setup test data directories and cleanup after."""
-	pathDataSamples.mkdir(exist_ok=True)
+	settingsPackage.pathDataSamples.mkdir(exist_ok=True)
 	path_tmpRoot.mkdir(exist_ok=True)
 	yield
 	registrarDeletesTemporaryFilesystemObjects()

@@ -1,13 +1,9 @@
 """Access and configure package settings."""
-
 from __future__ import annotations
 
 from hunterMakesPy import PackageSettings
-from typing import TYPE_CHECKING
+from pathlib import Path
 import dataclasses
-
-if TYPE_CHECKING:
-	from pathlib import Path
 
 @dataclasses.dataclass
 class mapFoldingPackageSettings(PackageSettings):
@@ -31,12 +27,12 @@ class mapFoldingPackageSettings(PackageSettings):
 	concurrencyPackage: str = 'multiprocessing'
 	"""Package identifier for concurrent execution operations."""
 
-identifierPackageFALLBACK = "mapFolding"
-"""Manually entered package name used as fallback when dynamic resolution fails."""
+	pathDataSamples: Path = dataclasses.field(init=False, default=Path())
 
-settingsPackage = mapFoldingPackageSettings(
-	identifierPackageFALLBACK=identifierPackageFALLBACK,
-)
+	def __post_init__(self, identifierPackageFALLBACK: str = '') -> None:  # ruff: ignore[undocumented-magic-method]
+		# DOCUMENT
+		super().__post_init__(identifierPackageFALLBACK)
+		self.pathDataSamples = self.pathPackage / 'tests' / 'dataSamples'
+
+settingsPackage = mapFoldingPackageSettings('mapFolding')
 """Global package settings."""
-
-pathDataSamples: Path = settingsPackage.pathPackage / 'tests' / 'dataSamples'

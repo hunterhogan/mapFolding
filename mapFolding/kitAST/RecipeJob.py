@@ -7,10 +7,11 @@ from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.kitAST import IfThis, Settings形
+from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.kitAST.theSSOT import defaultMapFolding, dictionaryEstimatesMapFolding
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
-from mapFolding.kitAST import default, dictionaryEstimatesMapFolding, IfThis, Settings形
-from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
@@ -96,17 +97,17 @@ class RecipeJobTheorem2:
 #-------- Source -----------------------------------------
 	source_astModule: ast.Module | None = None
 	"""Parsed AST of the source module containing the generic algorithm."""
-	identifierCallableSource: str = default['function']['counting']
+	identifierCallableSource: str = defaultMapFolding['function']['counting']
 	"""Name of the counting function to extract."""
 
 	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
 	"""Logical path to the dataclass module."""
-	sourceDataclassIdentifier: str = default['variable']['stateDataclass']
+	sourceDataclassIdentifier: str = defaultMapFolding['variable']['stateDataclass']
 	"""Name of the source dataclass."""
-	sourceDataclassInstance: str = default['variable']['stateInstance']
+	sourceDataclassInstance: str = defaultMapFolding['variable']['stateInstance']
 	"""Instance identifier for the dataclass."""
 
-	sourcePathPackage: PurePosixPath | None = default['filesystem']['sourcePackage']
+	sourcePathPackage: PurePosixPath | None = defaultMapFolding['filesystem']['sourcePackage']
 	"""Path to the source package."""
 	sourcePackageIdentifier: str | None = settingsPackage.identifierPackage
 	"""Name of the source package."""
@@ -114,7 +115,7 @@ class RecipeJobTheorem2:
 #-------- Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None
 	"""Override path for the target package."""
-	pathModule: PurePosixPath | None = default['filesystem']['jobModule']
+	pathModule: PurePosixPath | None = defaultMapFolding['filesystem']['jobModule']
 	"""Override path for the target module directory."""
 	fileExtension: str = settingsPackage.fileExtension
 	"""File extension for generated modules."""
@@ -178,7 +179,7 @@ class RecipeJobTheorem2:
 
 		This property computes the target location where the generated computation
 		module will be written. It respects the `pathModule` override if specified,
-		otherwise constructs the path using the default package structure.
+		otherwise constructs the path using the defaultMapFolding package structure.
 
 		Returns
 		-------
@@ -195,7 +196,7 @@ class RecipeJobTheorem2:
 		"""Initialize computed fields and validate configuration after dataclass creation.
 
 		This method performs post-initialization setup including deriving module
-		identifier from map shape if not explicitly provided, setting default paths
+		identifier from map shape if not explicitly provided, setting defaultMapFolding paths
 		for fold total output files, and creating shattered dataclass metadata for
 		code transformations.
 
@@ -215,7 +216,7 @@ class RecipeJobTheorem2:
 			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
 
 		if self.source_astModule is None:
-			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{default["logicalPath"]["synthetic"]}.theorem2Numba')
+			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultMapFolding["logicalPath"]["synthetic"]}.theorem2Numba')
 
 def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
 	"""Create a binary executable for `mapShape`."""

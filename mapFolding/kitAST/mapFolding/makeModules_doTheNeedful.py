@@ -1,18 +1,19 @@
 """Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
 from __future__ import annotations
 
-from astToolkit import Be, DOT, Grab, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, Grab, identifierDotAttribute, NodeChanger, NodeTourist, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import default, Default, IfThis
+from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.kitMakeModules import getPathFilename
+from mapFolding.kitAST.theSSOT import default
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
+	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 
 def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
@@ -52,7 +53,7 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
 
-	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist(Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist[ast.arg, identifierDotAttribute | None](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	theCountingIdentifier: identifierDotAttribute = dictionaryIdentifiers['variable']['counting']
 
 	findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')

@@ -18,7 +18,7 @@ from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, pa
 from astToolkit.containers import IngredientsModule
 from astToolkit.transformationTools import makeDictionaryFunctionDef, pythonCode2ast_expr, write_astModule
 from humpy_cytoolz import valmap
-from mapFolding.theSSOT import pathDataSamples, settingsPackage
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 
@@ -75,7 +75,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis', list_alias=[Make.alias('getValuesKnown')]))
 	pathFilename: Path = write_astModule(astModule, pathFilenameWrite, identifierPackage=settingsPackage.identifierPackage)
 
-	pathFilenameDataSamples: Path = pathDataSamples / f"OEISidByFormulaLookup{settingsPackage.fileExtension}"
+	pathFilenameDataSamples: Path = settingsPackage.pathDataSamples / f"OEISidByFormulaLookup{settingsPackage.fileExtension}"
 
 	dictionaryLiterals = valmap(ast.literal_eval, dictionaryLiterals)
 	moduleDataSamples = IngredientsModule()

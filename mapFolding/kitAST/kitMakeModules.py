@@ -30,12 +30,11 @@ Generated modules maintain algorithmic correctness while providing significant p
 improvements through just-in-time compilation, parallel execution, and optimized data structures
 tailored for specific computational requirements essential to large-scale map folding research.
 """
-
 from __future__ import annotations
 
 from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import default
+from mapFolding.kitAST.theSSOT import default
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePath
 from typing import TYPE_CHECKING
@@ -98,7 +97,7 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 		boxOfLogicalPathParts.extend([module for module in identifierModule if module is not None])
 	return '.'.join(boxOfLogicalPathParts)
 
-def getModule(identifierPackage: str | None = settingsPackage.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = default['module']['algorithm']) -> ast.Module:
+def getModule(identifierPackage: str | None = settingsPackage.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = None) -> ast.Module:
 	"""Get Module."""
 	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, identifierModule)
 	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)

@@ -13,12 +13,13 @@ from astToolkit import parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import SymmetricFoldsState
-from mapFolding.oeis import getValuesKnown
-from mapFolding.kitAST import defaultFoldsSymmetric, Settings形
+from mapFolding.kitAST import Settings形
 from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
+from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
+from mapFolding.oeis import getValuesKnown
 from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath

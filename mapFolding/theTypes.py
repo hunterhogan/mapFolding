@@ -6,18 +6,20 @@ from numpy import dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy
 from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
+	from hunterMakesPy import identifierDotAttribute
 	from hunterMakesPy.theTypes import Limitation
 	from os import PathLike
+	from pathlib import PurePosixPath
 	from typing import LiteralString, TypeAlias
 
 type OEISid = LiteralString
 
-#================== `TypeVar` when a NumPy integer type is mandatory =======
+#================== `TypeVar` when a NumPy integer type is mandatory ==============================
 
 形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 
-#================== Matrix meanders ===========================================================
+#================== Matrix meanders ===============================================================
 
 # Hypothetically, the dtypes could be different from each other, especially in pandas.
 形ArcCode: TypeAlias = numpy_uint64
@@ -26,7 +28,7 @@ type OEISid = LiteralString
 形Crossings: TypeAlias = numpy_uint64
 """The fixed-size integer type used to store `crossings`."""
 
-#================== Flexible `TypeAlias` for granular control over fixed-width integers =======
+#================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
 
 形TotalLeaves: TypeAlias = int
 """Use on unsigned integers that will never exceed the magnitude of `totalLeaves`."""
@@ -105,3 +107,14 @@ class 形KeywordArgumentsCount(TypedDict, total=False):
 	pathLikeWrite: PathLike[str] | None
 	CPUlimit: Limitation
 	suffix: str
+
+#================== Managing values with defaults. ================================================
+
+class Default(TypedDict):
+	"""Default values."""
+
+	filesystem: dict[str, PurePosixPath]
+	function: dict[str, str]
+	logicalPath: dict[str, identifierDotAttribute]
+	module: dict[str, str]
+	variable: dict[str, str]
