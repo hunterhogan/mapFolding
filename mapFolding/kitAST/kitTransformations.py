@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction
 
-def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute, identifierDataclass: str, identifierDataclassInstance: str) -> ShatteredDataclass:
+def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDataclass: str, identifierDataclassInstance: str) -> ShatteredDataclass:
 	"""Decompose a dataclass definition into AST components for manipulation and code generation.
 
 	(AI generated docstring)
@@ -119,7 +119,7 @@ def shatter_dataclassesDOTdataclass(logicalPathDataclass: identifierDotAttribute
 
 	return shatteredDataclass
 
-def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+def removeDataclass(ingredients: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	"""Transform a function that operates on dataclass instances to work with individual field parameters.
 
 	(AI generated docstring)
@@ -138,7 +138,7 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 
 	Parameters
 	----------
-	ingredientsTarget : IngredientsFunction
+	ingredients : IngredientsFunction
 		The function definition and its dependencies to be transformed.
 	shatteredDataclass : ShatteredDataclass
 		The decomposed dataclass components providing AST mappings and transformations.
@@ -149,18 +149,18 @@ def removeDataclassFromFunction(ingredientsTarget: IngredientsFunction, shattere
 		The modified function ingredients with dataclass dependencies removed.
 
 	"""
-	ingredientsTarget.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated4ArgumentsSpecification)
-	ingredientsTarget.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
-	NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))).visit(ingredientsTarget.astFunctionDef)
-	ingredientsTarget.astFunctionDef = unparseFindReplace(ingredientsTarget.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
-	return ingredientsTarget
+	ingredients.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated4ArgumentsSpecification)
+	ingredients.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))).visit(ingredients.astFunctionDef)
+	ingredients.astFunctionDef = unparseFindReplace(ingredients.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)
+	return ingredients
 
-def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFunction, identifierCallee: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
+def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
 	"""Transform a caller function to interface with a dataclass-free target function.
 
 	(AI generated docstring)
 
-	This function complements `removeDataclassFromFunction` by modifying calling code to work with
+	This function complements `removeDataclass` by modifying calling code to work with
 	the transformed target function. It implements the unpacking and repacking pattern required
 	when a dataclass-based caller needs to invoke a function that has been converted to accept
 	individual field parameters instead of dataclass instances.
@@ -176,7 +176,7 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 
 	Parameters
 	----------
-	ingredientsCaller : IngredientsFunction
+	ingredients : IngredientsFunction
 		The calling function definition and its dependencies to be transformed.
 	identifierCallee : str
 		The name of the target function being called.
@@ -190,7 +190,7 @@ def unpackDataclassCallFunctionRepackDataclass(ingredientsCaller: IngredientsFun
 
 	"""
 	AssignAndCall: ast.Assign = Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=Make.Call(Make.Name(identifierCallee), shatteredDataclass.boxOfName4Parameters))
-	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.replaceWith(AssignAndCall)).visit(ingredientsCaller.astFunctionDef)
-	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.boxOfUnpack)).visit(ingredientsCaller.astFunctionDef)
-	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredientsCaller.astFunctionDef)
-	return ingredientsCaller
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.replaceWith(AssignAndCall)).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.boxOfUnpack)).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredients.astFunctionDef)
+	return ingredients

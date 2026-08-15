@@ -23,7 +23,6 @@ Classes:
 			and control flow patterns involving namespaced identifiers essential to map folding
 			algorithm transformations.
 """
-
 from __future__ import annotations
 
 from astToolkit import Be, IfThis as astToolkit_IfThis

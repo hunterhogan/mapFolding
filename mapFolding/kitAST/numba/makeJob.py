@@ -14,7 +14,7 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsMod
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.kitAST import Settings形
-from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.kitAST.kitTransformations import shatterDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
@@ -97,7 +97,7 @@ def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
 	totalFoldsEstimated: int = getValuesKnown('A007822').get(n, 0)
-	shatteredDataclass = shatter_dataclassesDOTdataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
+	shatteredDataclass = shatterDataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
 		, defaultFoldsSymmetric['variable']['stateDataclass'], defaultFoldsSymmetric['variable']['stateInstance'])
 	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['logicalPath']['synthetic']}.theorem2Numba')
 	identifierCallableSource: str = defaultFoldsSymmetric['function']['counting']

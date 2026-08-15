@@ -306,14 +306,14 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223095 and A223093', 'A0
             countTotal = n * _A000682(n) - _A000682(n + 1)
     return countTotal
 
-def A223095(n: int, f: Literal['A077014, and A000682', 'A217318', 'A223094 and A223093'] | LiteralString | None=None) -> int:
+def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A217318'] | LiteralString | None=None) -> int:
     match f:
         case 'A077014, and A000682':
             countTotal: int = _A077014(n) + n * _A000682(n) - 2 * _A000682(n + 1)
-        case 'A217318':
-            countTotal = (2 - n % 2) * _A217318(n)
-        case 'A223094 and A223093' | _:
+        case 'A223094 and A223093':
             countTotal = _A223094(n) - _A223093(n)
+        case 'A217318' | _:
+            countTotal = (2 - n % 2) * _A217318(n)
     return countTotal
 
 def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | LiteralString | None=None) -> int:

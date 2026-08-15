@@ -5,7 +5,7 @@ from __future__ import annotations
 from humpy_cytoolz import concat
 from itertools import product as CartesianProduct
 from mapFolding.oeis import getMetadata, getValuesKnown
-from mapFolding.oeis._oeisIDbyFormulaLookup import *
+from mapFolding.oeis._byFormulaLookup import *
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.OEISidByFormulaLookup import dictionaryLiterals
 from more_itertools import always_iterable

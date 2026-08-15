@@ -6,8 +6,8 @@ from mapFolding.kitAST.foldsSymmetric.makeModulesAsynchronous import makeModules
 from mapFolding.kitAST.makeProofOEISidByFormula import makeOEISidByFormulaLookup
 from mapFolding.kitAST.mapFolding.makeModules import makeModulesMapFolding
 from mapFolding.kitAST.meanders.makeModules import makeModulesMeanders
+from mapFolding.kitAST.zCuzDocStoopid.makeDocstrings import sourcePrefix, transformOEISidByFormula
 from mapFolding.theSSOT import settingsPackage
-from mapFolding.zCuzDocStoopid.makeDocstrings import sourcePrefix, transformOEISidByFormula
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

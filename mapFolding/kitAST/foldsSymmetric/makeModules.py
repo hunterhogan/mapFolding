@@ -78,8 +78,7 @@ def makeModulesFoldsSymmetric() -> None:
 	pathFilename = makeDaoOfMapFoldingNumba(astModule, defaultFoldsSymmetric['module']['algorithm'] + 'Numba', None, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 	astModule = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
-	makeInitializeState(astModule, defaultFoldsSymmetric['module']['initializeState']
-		, defaultFoldsSymmetric['function']['initializeState'], defaultFoldsSymmetric['logicalPath']['synthetic'], None, identifiers=defaultFoldsSymmetric)
+	makeInitializeState(astModule, defaultFoldsSymmetric)
 
 	astModule = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
 	pathFilename = makeTheorem2(astModule, 'theorem2', defaultFoldsSymmetric['function']['counting']

@@ -52,7 +52,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 
 	[2] `mapFolding.tests.conftest.pathDataSamples`
 	"""
-	pathFilenameWrite: Path = pathFilenameSource.with_stem('_oeisID' + pathFilenameSource.stem + 'Lookup')
+	pathFilenameWrite: Path = pathFilenameSource.with_stem('_' + pathFilenameSource.stem + 'Lookup')
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)
 	dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
 
@@ -90,7 +90,3 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	moduleDataSamples.write_astModule(pathFilenameDataSamples)
 
 	return pathFilename
-
-if __name__ == "__main__":
-	pathFilename: Path = settingsPackage.pathPackage / "oeis" / "byFormula.py"
-	pathFilename = makeOEISidByFormulaLookup(pathFilename)

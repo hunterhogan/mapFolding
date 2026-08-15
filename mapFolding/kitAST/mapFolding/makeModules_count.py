@@ -11,8 +11,7 @@ from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis, ShatteredDataclass
 from mapFolding.kitAST.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
-from mapFolding.kitAST.kitTransformations import (
-	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+from mapFolding.kitAST.kitTransformations import removeDataclass, shatterDataclass, toFieldsToCallToDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.theSSOT import default
 from mapFolding.theSSOT import settingsPackage
@@ -64,10 +63,10 @@ def makeInlineNumba(astModule: ast.Module, identifierModule: str, identifierCall
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
 
-	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(*findDataclass(ingredientsFunction))
+	shatteredDataclass: ShatteredDataclass = shatterDataclass(*findDataclass(ingredientsFunction))
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
-	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
+	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
@@ -78,7 +77,7 @@ def makeInlineNumba(astModule: ast.Module, identifierModule: str, identifierCall
 		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
+		ingredientsFunctionDispatcher = toFieldsToCallToDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
 		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return.valueIs(Be.Tuple), doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTuple.ctx = Make.Store()
 
@@ -231,10 +230,10 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 
 	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 
-	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
+	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
-	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclass)
+	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
 
@@ -245,7 +244,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
 		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-		ingredientsFunctionDispatcher = unpackDataclassCallFunctionRepackDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
+		ingredientsFunctionDispatcher = toFieldsToCallToDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
 		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return.valueIs(Be.Tuple), doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTuple.ctx = Make.Store()
 

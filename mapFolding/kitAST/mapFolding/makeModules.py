@@ -10,8 +10,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.kitAST.kitMakeModules import findDataclass, getModule, getPathFilename
-from mapFolding.kitAST.kitTransformations import (
-	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
+from mapFolding.kitAST.kitTransformations import removeDataclass, shatterDataclass, toFieldsToCallToDataclass
 from mapFolding.kitAST.mapFolding.makeModules_count import (
 	makeDaoOfMapFoldingNumba, makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
 from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
@@ -57,7 +56,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 
 	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 
-	shatteredDataclass: ShatteredDataclass = shatter_dataclassesDOTdataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
+	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 
 #-START add the parallel state fields to the count function ------------------------------------------------
 	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass))
@@ -101,7 +100,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 #-END add the parallel state fields to the count function ------------------------------------------------
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
-	ingredientsFunction: IngredientsFunction = removeDataclassFromFunction(ingredientsFunction, shatteredDataclassParallel)
+	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclassParallel)
 
 #-START add the parallel logic to the count function ------------------------------------------------
 
@@ -134,7 +133,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 		).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
 	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
-	unRepackDataclass = unpackDataclassCallFunctionRepackDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
+	unRepackDataclass = toFieldsToCallToDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
 
 	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple | None](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	astTuple.ctx = Make.Store()
@@ -194,7 +193,7 @@ def makeModulesMapFolding() -> None:
 	pathFilename = makeInlineParallelNumba(astModule, 'countParallelNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
 
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
-	makeInitializeState(astModule, defaultMapFolding['module']['initializeState'], defaultMapFolding['function']['initializeState'], defaultMapFolding['logicalPath']['synthetic'], identifiers=defaultMapFolding)
+	makeInitializeState(astModule, defaultMapFolding)
 
 	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
 	pathFilename = makeTheorem2(astModule, 'theorem2', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'], identifiers=defaultMapFolding)

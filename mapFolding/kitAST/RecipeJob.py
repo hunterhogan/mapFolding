@@ -8,7 +8,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitAST import IfThis, Settings形
-from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.kitAST.kitTransformations import shatterDataclass
 from mapFolding.kitAST.theSSOT import defaultMapFolding, dictionaryEstimatesMapFolding
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
@@ -213,7 +213,7 @@ class RecipeJobTheorem2:
 			self.moduleIdentifier = self.pathFilenameTotalFolds.stem
 
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance:
-			self.shatteredDataclass = shatter_dataclassesDOTdataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
+			self.shatteredDataclass = shatterDataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
 
 		if self.source_astModule is None:
 			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultMapFolding["logicalPath"]["synthetic"]}.theorem2Numba')

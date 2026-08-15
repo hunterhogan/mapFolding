@@ -1,22 +1,22 @@
 """Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
 from __future__ import annotations
 
-from astToolkit import Be, DOT, Grab, identifierDotAttribute, NodeChanger, NodeTourist, Then
+from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
-from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.kitMakeModules import getPathFilename
+from mapFolding.kitAST.kitMakeModules import findDataclass, getPathFilename
 from mapFolding.kitAST.theSSOT import default
-from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
 	from mapFolding.theTypes import Default
+	from os import PathLike
 	from pathlib import PurePath
+	from typing import Any
 
-def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableIdentifier: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
+def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Generate initialization module for counting variable setup.
 
 	(AI generated docstring)
@@ -33,9 +33,9 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 	----------
 	astModule : ast.Module
 		Source module containing the base algorithm.
-	moduleIdentifier : str
+	identifierModule : str
 		Name for the generated initialization module.
-	callableIdentifier : str | None = None
+	identifierCallable : str | None = None
 		Name for the initialization function.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
@@ -48,19 +48,26 @@ def makeInitializeState(astModule: ast.Module, moduleIdentifier: str, callableId
 		Filesystem path where the initialization module was written.
 
 	"""
-	dictionaryIdentifiers: Default = identifiers or default
-	sourceCallableIdentifier: identifierDotAttribute = dictionaryIdentifiers['function']['counting']
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = callableIdentifier or sourceCallableIdentifier
+	identifiers = identifiers or default
+	identifierCallableSource: identifierDotAttribute = keywordArguments.get('identifierCallableSource') or identifiers['function']['counting']
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(identifierCallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = keywordArguments.get('identifierCallable') or identifiers['function'].get('initializeState') or identifierCallableSource
 
-	dataclassInstanceIdentifier: identifierDotAttribute = raiseIfNone(NodeTourist[ast.arg, identifierDotAttribute | None](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	theCountingIdentifier: identifierDotAttribute = dictionaryIdentifiers['variable']['counting']
+	_logicalPathDataclass, _identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
+	identifierCounting: identifierDotAttribute = keywordArguments.get('identifierCounting') or identifiers['variable']['counting']
 
-	findThis = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	doThat = Grab.testAttribute(Grab.andDoAllOf([Grab.opsAttribute(Then.replaceWith([ast.Eq()])), Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(theCountingIdentifier)))]))
-	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef.body[0])
+	NodeChanger(findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'leaf1ndex')
+		, doThat=Grab.testAttribute(Grab.andDoAllOf([
+			Grab.opsAttribute(Then.replaceWith([ast.Eq()]))
+			, Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(identifierCounting)))]))
+	).visit(ingredientsFunction.astFunctionDef.body[0])
 
-	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, moduleIdentifier)
-	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	identifierModule: str = keywordArguments.get('identifierModule') or identifiers['module']['initializeState']
+
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, identifierModule)
+	identifierPackage: str = keywordArguments.get('identifierPackage') or identifiers['module']['identifierPackage']
+	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, identifierPackage)
 
 	return pathFilename

@@ -12,6 +12,7 @@ from typing import Final
 default = Default(
 	filesystem={
 		'jobModule': PurePosixPath(getPathRootJobDEFAULT())
+		, 'pathRoot': PurePosixPath(settingsPackage.pathPackage)
 		, 'sourcePackage': PurePosixPath(settingsPackage.pathPackage)
 	}
 	, function={
@@ -24,6 +25,7 @@ default = Default(
 	}
 	, module={
 		'dataBasket': 'dataBaskets'
+        , 'identifierPackage': settingsPackage.identifierPackage
 		, 'initializeState': 'initializeState'
 	}
 	, variable={

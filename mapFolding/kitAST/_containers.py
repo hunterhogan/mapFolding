@@ -32,7 +32,7 @@ from astToolkit.containers import LedgerOfImports
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-from typing import cast, NamedTuple, TYPE_CHECKING
+from typing import NamedTuple, TYPE_CHECKING
 import ast
 import dataclasses
 
@@ -41,9 +41,9 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from typing import Any
 
-dummyAssign = Make.Assign([Make.Name("dummyTarget")], Make.Constant(None))
-dummySubscript = Make.Subscript(Make.Name("dummy"), Make.Name("slice"))
-dummyTuple = Make.Tuple([Make.Name("dummyElement")])
+# DEVELOPMENT `astToolkit` was created after these dataclasses specifically to make all of this
+# easier. That's why they don't use `astToolkit` idioms very often. Try to apply some of these
+# concepts https://github.com/python/typing/discussions/2092.
 
 @dataclasses.dataclass(slots=True)
 class ShatteredDataclass:
@@ -75,7 +75,7 @@ class ShatteredDataclass:
 	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict[str, tuple[ast.AnnAssign | ast.Assign, str]])
 	"""Temporary mapping for field assignments with constructor type information."""
 
-	fragments4AssignmentOrParameters: ast.Tuple = dummyTuple
+	fragments4AssignmentOrParameters: ast.Tuple = dataclasses.field(default_factory=lambda: Make.Tuple([Make.Name("dummyElement")]))
 	"""AST tuple used as target for assignment to capture returned field values."""
 
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
@@ -102,10 +102,10 @@ class ShatteredDataclass:
 	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict[ast.AST, ast.Name])
 	"""Maps dataclass attribute access expressions to field name nodes for find-replace operations."""
 
-	repack: ast.Assign = dummyAssign
+	repack: ast.Assign = dataclasses.field(default_factory=lambda: Make.Assign([Make.Name("dummyTarget")], Make.Constant(None)))
 	"""AST assignment statement that reconstructs the original dataclass instance from individual fields."""
 
-	signatureReturnAnnotation: ast.Subscript = dummySubscript
+	signatureReturnAnnotation: ast.Subscript = dataclasses.field(default_factory=lambda: Make.Subscript(Make.Name("dummy"), Make.Name("slice")))
 	"""Tuple-based return type annotation for functions returning decomposed field values."""
 
 @dataclasses.dataclass(slots=True)
@@ -224,10 +224,10 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		self.astAnnotation = cast("ast.Name", raiseIfNone(NodeTourist(
+		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.Name](
 			findThis=Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
 			, doThat=Then.extractIt(DOT.annotation)
-		).captureLastMatch(dataclassClassDef)))
+		).captureLastMatch(dataclassClassDef))
 
 		self.ast_argAnnotated = Make.arg(self.name, self.astAnnotation)
 
