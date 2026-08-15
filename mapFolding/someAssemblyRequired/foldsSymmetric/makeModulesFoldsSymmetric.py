@@ -9,8 +9,8 @@ from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfTh
 from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import (
 	adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
-from mapFolding.someAssemblyRequired.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
-from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.someAssemblyRequired.mapFolding.makeModules_doTheNeedful import makeInitializeState
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 

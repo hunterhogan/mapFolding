@@ -13,7 +13,7 @@ from mapFolding.someAssemblyRequired import default, Default, IfThis, ShatteredD
 from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.theSSOT import settingsPackage
 from typing import cast, TYPE_CHECKING
 import operator
@@ -23,7 +23,19 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	import ast
 
-def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def makeDaoOfMapFoldingNumba(astModule: ast.Module, identifierModule: str, _identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, _sourceCallableDispatcher: str | None = None) -> PurePath:
+	parametersNumbaHARDCODED: ParametersNumba = parametersNumbaLight
+	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
+	ingredientsModule.imports.addImportFrom_asStr('numba', 'jit_module')
+	NodeChanger(Be.Import, Then.removeIt).visit(astModule)
+	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
+	ingredientsModule.appendEpilogue(astModule)
+	parametersNumba: ParametersNumba = parametersNumbaHARDCODED
+	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+	ingredientsModule.appendEpilogue(statement=Make.Expr(Make.Call(Make.Name('jit_module'), list_keyword=list_keyword)))
+	return ingredientsModule.write_astModule(getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule), settingsPackage.identifierPackage)
+
+def makeInlineNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of an algorithm.
 
 	Parameters
@@ -78,11 +90,7 @@ def makeMapFoldingNumba(astModule: ast.Module, identifierModule: str, identifier
 
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
-
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
-
-	return pathFilename
+	return ingredientsModule.write_astModule(getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule), settingsPackage.identifierPackage)
 
 def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:
 	"""Generate module by applying optimization predicted by Theorem 2.

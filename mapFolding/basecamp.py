@@ -1,5 +1,5 @@
 #=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
-# ruff: file-ignore[import-outside-top-level]
+#ruff: file-ignore[import-outside-top-level]
 """You can use this module to access the central dispatch functions for all map-folding computations.
 
 This module provides the primary entry points for computing distinct foldings of multidimensional maps
@@ -66,7 +66,7 @@ if TYPE_CHECKING:
 	from typing import Literal, LiteralString
 
 def countFolds(mapShape: Sequence[int]
-				, flow: Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
+				, flow: Literal['daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 				, pathLikeWrite: PathLike[str] | None = None
 				, *
 				, CPUlimit: Limitation = None
@@ -175,22 +175,20 @@ def countFolds(mapShape: Sequence[int]
 	else:
 		if flow == 'daoOfMapFolding':
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+		elif flow == 'daoOfMapFoldingNumba':
+			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+		elif flow == 'numba':
+			from mapFolding.syntheticModules.inlineNumba import doTheNeedful
 		elif any(map((2).__lt__, mapShape)) or mapShapeIs2上nDimensions(mapShape, youMustBeDimensionsTallToRideThis=2):
 			match flow:
-				case 'theorem2':
-					from mapFolding.syntheticModules.theorem2 import doTheNeedful
 				case 'theorem2Numba':
 					from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
 				case 'theorem2Trimmed':
 					from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
-				case _:
+				case 'theorem2' | _:
 					from mapFolding.syntheticModules.theorem2 import doTheNeedful
 		else:
-			match flow:
-				case 'numba':
-					from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
-				case _:
-					from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
+			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
 		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
 		mapFoldingState = doTheNeedful(mapFoldingState)

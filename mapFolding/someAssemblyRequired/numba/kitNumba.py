@@ -269,15 +269,15 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		parametersNumba = parametersNumbaDefault
 
 	# FIXME This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
-	boxOfDecoratorKeywords: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
+	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
 
 	decoratorModule = Z0Z_numbaDataTypeModule
 	decoratorCallable = Z0Z_decoratorCallable
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	#=Sin= Leave this line in so that global edits will change it.
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator, boxOfDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator, list_keyword)
 	# ruff: ignore[redefined-while-unused]
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=boxOfDecoratorKeywords)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=list_keyword)
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction

@@ -20,22 +20,22 @@ if __name__ == '__main__':
 	pathLikeWrite: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
 	CPUlimit: Limitation = None
-	flow = 'daoOfMapFolding'
 	flow = 'numba'
 	flow = 'theorem2'
-	flow = 'theorem2Codon'
+	flow = 'daoOfMapFolding'
 	flow = 'theorem2Numba'
+	flow = 'daoOfMapFoldingNumba'
 
 	oeisID = 'A001416'
-	oeisID = 'A001418'
 	oeisID = 'A195646'
+	oeisID = 'A001418'
 	oeisID = 'A001417'
-	oeisID = 'A001415'
 	oeisID = 'A000136'
+	oeisID = 'A001415'
 
 	printEasyRunHeader(oeisID, flow)
 
-	for n in range(3, 25):
+	for n in range(3, 10):
 
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 

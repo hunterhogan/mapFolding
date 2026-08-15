@@ -9,11 +9,12 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
-from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.someAssemblyRequired.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from mapFolding.someAssemblyRequired.makeModules_count import makeMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
-from mapFolding.someAssemblyRequired.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import (
+	makeDaoOfMapFoldingNumba, makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+from mapFolding.someAssemblyRequired.mapFolding.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	from typing import Any
 
-def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
+def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:  # ruff: ignore[unused-function-argument]
 	"""Generate parallel implementation with concurrent execution and task division.
 
 	Parameters
@@ -197,10 +198,13 @@ def makeDaoOfMapFoldingParallelNumba(astModule: ast.Module, identifierModule: st
 def makeMapFoldingModules() -> None:
 	"""Make multidimensional map folding modules."""
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename: PurePath = makeMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule = getModule(logicalPathInfix='algorithms')
-	pathFilename = makeDaoOfMapFoldingParallelNumba(astModule, 'countParallelNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+	pathFilename = makeInlineNumba(astModule, 'inlineNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
+
+	astModule = getModule(logicalPathInfix='algorithms')
+	pathFilename = makeInlineParallelNumba(astModule, 'countParallelNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
 	makeInitializeState(astModule, default['module']['initializeState'], default['function']['initializeState'], default['logicalPath']['synthetic'])

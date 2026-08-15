@@ -33,7 +33,7 @@ from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape
 from mapFolding.someAssemblyRequired.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
-from mapFolding.someAssemblyRequired.numba.makeJobTheorem2Numba import makeJobNumba
+from mapFolding.someAssemblyRequired.numba.makeJob import makeJobNumba
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests import assertEqualTo, messageTestFailure
@@ -62,7 +62,7 @@ if TYPE_CHECKING:
 			, ('A001417', (3, 5))
 			, ('A001418', (4,))
 			, ('A195646', (2,))) for n, flow in CartesianProduct(nValues
-				, ('numba', 'theorem2Numba')
+				, ('numba', 'theorem2Numba', 'daoOfMapFoldingNumba')
 		)]
 		, *[pytest.param(oeisID, n, flow, id=f'{flow},{oeisID}({n})') for oeisID, nValues in (
 			('A000136', (2, 3, 12))
@@ -71,7 +71,7 @@ if TYPE_CHECKING:
 			, ('A001417', (3,))
 			, ('A001418', (3,))
 			, ('A195646', (1,))) for n, flow in CartesianProduct(nValues
-				, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed', 'testZ')
+				, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed')
 )]])
 def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float | None) -> None:
 	"""Validate that different computational flows produce valid results."""
