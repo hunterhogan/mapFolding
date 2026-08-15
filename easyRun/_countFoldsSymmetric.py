@@ -17,14 +17,14 @@ if __name__ == '__main__':
 	CPUlimit: Limitation = None
 	flow = 'asynchronous'
 	flow = 'theorem2'
-	flow = 'theorem2Codon'
 	flow = 'theorem2Trimmed'
 	flow = 'theorem2Numba'
 	flow = 'algorithm'
+	flow = 'algorithmNumba'
 
 	printEasyRunHeader(oeisID, flow)
 
-	for n in range(1, 6):
+	for n in range(9, 11):
 
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 

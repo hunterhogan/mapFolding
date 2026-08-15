@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from mapFolding.dataBaskets import SymmetricFoldsState
+from numba import jit_module
 
 def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.次Leaf = 1
@@ -161,3 +162,4 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
 def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state = count(state)
     return state
+jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True)

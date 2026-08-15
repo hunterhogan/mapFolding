@@ -1,8 +1,8 @@
 """Overwrite all synthetic modules."""
 from __future__ import annotations
 
-from mapFolding.someAssemblyRequired.foldsSymmetric.makeModulesFoldsSymmetric import makeFoldsSymmetricModules
-from mapFolding.someAssemblyRequired.foldsSymmetric.makeModulesFoldsSymmetricAsynchronous import makeFoldsSymmetricAsynchronousModules
+from mapFolding.someAssemblyRequired.foldsSymmetric.makeModules import makeFoldsSymmetricModules
+from mapFolding.someAssemblyRequired.foldsSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
 from mapFolding.someAssemblyRequired.makeProofOEISidByFormula import makeOEISidByFormulaLookup
 from mapFolding.someAssemblyRequired.mapFolding.makeModules import makeMapFoldingModules
 from mapFolding.someAssemblyRequired.meanders.makeModulesMeanders import makeMeandersModules
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 makeMapFoldingModules()
 
 makeFoldsSymmetricModules()
-makeFoldsSymmetricAsynchronousModules()
+makeModulesFoldsSymmetricAsynchronous()
 
 makeMeandersModules()
 

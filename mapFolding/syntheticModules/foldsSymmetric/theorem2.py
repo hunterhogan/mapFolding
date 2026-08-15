@@ -10,7 +10,7 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
                 state.次Leaf = 1
                 state.leafComparison[0] = 1
                 state.leafConnectee = 1
-                while state.leafConnectee < state.totalLeaves + 1:
+                while state.leafConnectee <= state.totalLeaves:
                     state.次MiniGap = state.leafBelow[state.次Leaf]
                     state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
                     state.次Leaf = state.次MiniGap

@@ -6,7 +6,7 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import defaultFoldsSymmetric, IfThis
-from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import ExprCallFilterAsymmetricFoldsState
+from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterials import ExprCallFilterAsymmetricFoldsState
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -97,11 +97,11 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifierModule: str, i
 
 	return pathFilename
 
-def makeFoldsSymmetricAsynchronousModules() -> PurePath:
+def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
 	"""Make asynchronous modules for foldsSymmetric."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
 	return addSymmetryCheckAsynchronous(astModule, defaultFoldsSymmetric['module']['asynchronous'], defaultFoldsSymmetric['function']['counting']
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':
-	makeFoldsSymmetricAsynchronousModules()
+	makeModulesFoldsSymmetricAsynchronous()

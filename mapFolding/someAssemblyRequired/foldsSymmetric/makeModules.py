@@ -6,10 +6,10 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfThis
-from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterialsFoldsSymmetric import (
+from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterials import (
 	adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
 from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
-from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2, makeDaoOfMapFoldingNumba
 from mapFolding.someAssemblyRequired.mapFolding.makeModules_doTheNeedful import makeInitializeState
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -73,6 +73,9 @@ def makeFoldsSymmetricModules() -> None:
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultFoldsSymmetric['module']['algorithm'], defaultFoldsSymmetric['function']['counting']
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], None)
+
+	astModule = parsePathFilename2astModule(pathFilename)
+	pathFilename = makeDaoOfMapFoldingNumba(astModule, defaultFoldsSymmetric['module']['algorithm'] + 'Numba', None, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 	astModule = getModule(logicalPathInfix=defaultFoldsSymmetric['logicalPath']['synthetic'], identifierModule=defaultFoldsSymmetric['module']['algorithm'])
 	makeInitializeState(astModule, defaultFoldsSymmetric['module']['initializeState']

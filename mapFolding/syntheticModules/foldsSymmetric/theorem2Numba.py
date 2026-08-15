@@ -14,7 +14,7 @@ def count(symmetricFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling:
                 次Leaf = 1
                 leafComparison[0] = 1
                 leafConnectee = 1
-                while leafConnectee < totalLeaves + 1:
+                while leafConnectee <= totalLeaves:
                     次MiniGap = leafBelow[次Leaf]
                     leafComparison[leafConnectee] = (totalLeaves + 次MiniGap - 次Leaf) % totalLeaves
                     次Leaf = 次MiniGap

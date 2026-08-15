@@ -201,7 +201,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return totalFolds
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".totalFolds") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".totalFolds") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -214,7 +214,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	----------
 	mapShape : tuple[int, ...]
 		The strip dimensions, expressed as `(1, 2 * n)` for sequence index `n`.
-	flow : str | Literal['algorithm', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
+	flow : str | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = ''
 		The counting method. `'algorithm'` or `''` selects the standard method. The other supported values select
 		alternative methods with the same result.
 	pathLikeWrite : PathLike[str] | None = None
@@ -253,6 +253,8 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 		totalFolds = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
 	else:
 		match flow:
+			case 'algorithmNumba':
+				from mapFolding.syntheticModules.foldsSymmetric.algorithmNumba import doTheNeedful
 			case 'theorem2':
 				from mapFolding.syntheticModules.foldsSymmetric.theorem2 import doTheNeedful
 			case 'theorem2Numba':
