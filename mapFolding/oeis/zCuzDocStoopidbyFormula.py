@@ -24,7 +24,16 @@ from typing import Literal, LiteralString
 # - Put positive terms to the left of negative terms.
 # - Put "dominant" terms to the left of "subordinate" terms.
 
+# TODO Learn if there are other algorithms to directly compute other sequences.
+
+# TODO For each sequence,
+# 1. All formulas that exclusively use the terms `n` and the "Not formulas".
+# 2. All formulas that use only `n` and one other sequence.
+
 # TODO Figure out how to make the docstrings accessible from `oeisIDfor_n`.
+
+# FIXME I only use `cache` to speed up pytest. Figure out how to remove cache from the module, and use
+# cache during pytest.
 
 @cache
 def A000136(n: int, f: LiteralString | None = None) -> int:
@@ -142,7 +151,7 @@ def A005315(n: int, f: LiteralString | None = None) -> int:
 				if n % 2:
 					countTotal = 4 * A077460(n) - _A005316(n) - A060206((n - 1) // 2)
 				else:
-					countTotal = 4 * A077460(n) - 2 * _A005316(n)
+					countTotal = 4 * A077460(n) - _A005316(n) - _A005316(n)
 			case 'A078591':
 				countTotal = 2 * A078591(n)
 			case 'A085973 and A077054':
@@ -295,7 +304,7 @@ def A208357(n: int, f: LiteralString | None = None) -> int:
 			countTotal = _A005316(2 * n + 1) ** 2
 	return countTotal
 
-# TODO typo on 39? on https://oeis.org/A217310
+# TODO typo on 39 of https://oeis.org/A217310, submitted.
 def A217310(n: int, f: LiteralString | None = None) -> int:
 	match f:
 		case 'A223093':

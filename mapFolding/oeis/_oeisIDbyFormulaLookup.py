@@ -115,7 +115,7 @@ def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085
                 if n % 2:
                     countTotal = 4 * _A077460(n) - _A005316(n) - _A060206((n - 1) // 2)
                 else:
-                    countTotal = 4 * _A077460(n) - 2 * _A005316(n)
+                    countTotal = 4 * _A077460(n) - _A005316(n) - _A005316(n)
             case 'A078591':
                 countTotal = 2 * _A078591(n)
             case 'A085973 and A077054':

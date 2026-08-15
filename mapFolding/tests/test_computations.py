@@ -31,7 +31,7 @@ from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDfor_n
+from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape
 from mapFolding.someAssemblyRequired.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
 from mapFolding.someAssemblyRequired.numba.makeJobTheorem2Numba import makeJobNumba
 from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
@@ -47,7 +47,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from importlib.machinery import ModuleSpec
-	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
+	from mapFolding.theTypes import OEISid
 	from os import PathLike
 	from pathlib import Path
 	from types import ModuleType
@@ -71,7 +71,7 @@ if TYPE_CHECKING:
 			, ('A001417', (3,))
 			, ('A001418', (3,))
 			, ('A195646', (1,))) for n, flow in CartesianProduct(nValues
-				, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed')
+				, ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed', 'testZ')
 )]])
 def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float | None) -> None:
 	"""Validate that different computational flows produce valid results."""
@@ -105,64 +105,6 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString) -> None:
 	expected: int = getValuesKnown(fml[kind])[n]
 	actual: int = countMeanders(kind, n, flow, None)
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
-
-# TODO Make param that isn't stoopid.
-@pytest.mark.parametrize(
-	'oeisID, n, f, keywordArguments'
-	, [
-		pytest.param('A000136', 3, '', {'flow': 'daoOfMapFolding'}, id='A000136,countFolds')
-		, pytest.param('A001415', 3, '', {'flow': 'daoOfMapFolding'}, id='A001415,countFolds')
-		, pytest.param('A001416', 3, '', {'flow': 'daoOfMapFolding'}, id='A001416,countFolds')
-		, pytest.param('A001417', 3, '', {'flow': 'daoOfMapFolding'}, id='A001417,countFolds')
-		, pytest.param('A001418', 3, '', {'flow': 'daoOfMapFolding'}, id='A001418,countFolds')
-		, pytest.param('A195646', 2, '', {'flow': 'daoOfMapFolding'}, id='A195646,countFolds')
-		, pytest.param('A000682', 3, '', {'flow': 'matrixMeanders'}, id='A000682,countMeanders')
-		, pytest.param('A005316', 3, '', {'flow': 'matrixMeanders'}, id='A005316,countMeanders')
-		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric,countFoldsSymmetric')
-	]
-)
-def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString, keywordArguments: 形KeywordArgumentsCount) -> None:
-	"""Verify OEIS sequence value calculations against known reference values."""
-	expected: int = getValuesKnown(oeisID)[n]
-	actual: int = oeisIDfor_n(oeisID, n, f, **keywordArguments)
-	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, n, f, **keywordArguments)
-
-# TODO Make param that isn't stoopid.
-@pytest.mark.parametrize(
-	'oeisID, f'
-	, [
-		pytest.param('A000560', '', id='A000560')
-		, pytest.param('A000136', 'A000682', id='A000136,A000682')
-		, pytest.param('A000136', 'A000560', id='A000136,A000560')
-		, pytest.param('A000682', 'A000560', id='A000682,A000560')
-		, pytest.param('A000682', 'A301620', id='A000682,A301620')
-		, pytest.param('A000682', 'A259689', id='A000682,A259689')
-		, pytest.param('A000682', 'A000136', id='A000682,A000136')
-		, pytest.param('A000682', 'A223094', id='A000682,A223094')
-		, pytest.param('A001010', 'A000682 and A007822', id='A001010,A000682-and-A007822')
-		, pytest.param('A001010', 'A001011 and A000136', id='A001010,A001011-and-A000136')
-		, pytest.param('A223094', 'A000136 and A000682', id='A223094,A000136-and-A000682')
-		, pytest.param('A223094', 'A223094 and A000682', id='A223094,A223094-and-A000682')
-		, pytest.param('A223094', 'A000682', id='A223094,A000682')
-		, pytest.param('A259689', '', id='A259689')
-		, pytest.param('A001011', '', id='A001011')
-		, pytest.param('A005315', '', id='A005315')
-		, pytest.param('A060206', '', id='A060206')
-		, pytest.param('A077460', '', id='A077460')
-		, pytest.param('A078591', '', id='A078591')
-		, pytest.param('A301620', '', id='A301620')
-		, pytest.param('A301620', 'A259689', id='A301620,A259689')
-	]
-)
-@pytest.mark.parametrize(
-	'oeis_n'
-	, [pytest.param(0, id='offset'), pytest.param(2, id='offsetPlus2'), pytest.param(5, id='offsetPlus5')]
-	, indirect=True
-)
-def test_oeisIDfor_n_byFormula(oeisID: OEISid, oeis_n: int, f: LiteralString) -> None:
-	expected: int = getValuesKnown(oeisID)[oeis_n]
-	actual: int = oeisIDfor_n(oeisID, oeis_n, f=f)
-	assertEqualTo(actual, expected, oeisIDfor_n.__name__, oeisID, oeis_n, f=f)
 
 @pytest.fixture
 def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.

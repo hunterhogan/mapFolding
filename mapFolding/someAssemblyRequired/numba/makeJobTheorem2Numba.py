@@ -35,10 +35,10 @@ if TYPE_CHECKING:
 # needs. I now have a safe upper bound for that. Somewhere.
 boxOfSettings形: list[Settings形] = [
 	Settings形(datatypeIdentifier='形TotalLeaves', typeModule='numba', typeIdentifier='uint8', type_asname='形TotalLeaves'),
-	Settings形(datatypeIdentifier='形Elephino', typeModule='numba', typeIdentifier='uint8', type_asname='形Elephino'),
+	Settings形(datatypeIdentifier='形Elephino', typeModule='numba', typeIdentifier='uint16', type_asname='形Elephino'),
 	Settings形(datatypeIdentifier='形TotalFolds', typeModule='numba', typeIdentifier='uint64', type_asname='形TotalFolds'),
 	Settings形(datatypeIdentifier='形Array1DTotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DTotalLeaves'),
-	Settings形(datatypeIdentifier='形Array1DElephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array1DElephino'),
+	Settings形(datatypeIdentifier='形Array1DElephino', typeModule='numpy', typeIdentifier='uint16', type_asname='形Array1DElephino'),
 	Settings形(datatypeIdentifier='形Array3DTotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形Array3DTotalLeaves'),
 ]
 
@@ -125,5 +125,5 @@ def makeFoldsSymmetric(n: int) -> None:
 
 if __name__ == '__main__':
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
-	mapShape: tuple[形TotalLeaves, ...] = (6, 6)
+	mapShape: tuple[形TotalLeaves, ...] = (3, 15)
 	makeJobNumba(fromMapShape(mapShape), spices)

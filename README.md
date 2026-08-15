@@ -262,6 +262,22 @@ OEIS limits my proposed changes to a sequence to three sequences at a time. I ha
 - A333971, values.
 - A334615, values.
 
+## Computing new values
+
+- Folds of multidimensional map (2, 2, 2, 2, 2, 2, 2, 2), which is [A001417(8)](https://oeis.org/A001417): estimated 14 days with my current hardware and a non-published algorithm.
+- Folds of multidimensional map (2, 21), which is [A001415(21)](https://oeis.org/A001415): estimated 7 days with my current hardware and one of the compiled "Theorem 2" algorithm versions.
+- Folds of multidimensional map (2, 22), which is [A001415(22)](https://oeis.org/A001415): estimated 15 days with my current hardware and one of the compiled "Theorem 2" algorithm versions.
+- Folds of multidimensional map (3, 15), which is [A001416(15)](https://oeis.org/A001416): estimated 11 days with my current hardware and one of the compiled "Theorem 2" algorithm versions.
+- Semi-meanders with 46 crossings, which is [A000682(46)](https://oeis.org/A000682): estimated 1–2 hours if I had 64 GB of system memory.
+
+Computation times assume:
+
+1. No power interruptions. (I don't have a UPS, and in the last two months the longest gap between power interruptions was 8 days 6 hours.)
+2. No system crashes.
+3. Single-core computations are given priority over other tasks.
+4. The core of single-core computations is regularly boosted.
+5. No heat issues.
+
 ## My recovery
 
 [![2011 August: Homeless since](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
