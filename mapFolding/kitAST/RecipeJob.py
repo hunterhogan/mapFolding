@@ -9,8 +9,8 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
-from mapFolding.someAssemblyRequired import default, dictionaryEstimatesMapFolding, IfThis, Settings形
-from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.kitAST import default, dictionaryEstimatesMapFolding, IfThis, Settings形
+from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
@@ -22,8 +22,8 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from mapFolding.dataBaskets import SymmetricFoldsState
-	from mapFolding.someAssemblyRequired import ShatteredDataclass
-	from mapFolding.someAssemblyRequired.numba.kitNumba import SpicesJobNumba
+	from mapFolding.kitAST import ShatteredDataclass
+	from mapFolding.kitAST.numba.kitNumba import SpicesJobNumba
 	from mapFolding.theTypes import 形TotalLeaves
 
 @dataclasses.dataclass(slots=True)

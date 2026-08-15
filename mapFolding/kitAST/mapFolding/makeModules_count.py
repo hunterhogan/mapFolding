@@ -9,11 +9,11 @@ from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import default, Default, IfThis, ShatteredDataclass
-from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
-from mapFolding.someAssemblyRequired.kitTransformations import (
+from mapFolding.kitAST import default, Default, IfThis, ShatteredDataclass
+from mapFolding.kitAST.kitMakeModules import findDataclass, getLogicalPath, getPathFilename
+from mapFolding.kitAST.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast

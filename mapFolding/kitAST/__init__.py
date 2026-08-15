@@ -75,15 +75,15 @@ calculations through the strategic application of compiler optimization techniqu
 # isort: split
 from __future__ import annotations
 
-from mapFolding.someAssemblyRequired.infoBooth import (
+from mapFolding.kitAST.infoBooth import (
 	default as default, Default as Default, defaultFoldsSymmetric as defaultFoldsSymmetric,
 	dictionaryEstimatesMapFolding as dictionaryEstimatesMapFolding)
 
 # isort: split
-from mapFolding.someAssemblyRequired._toolIfThis import IfThis as IfThis
+from mapFolding.kitAST._toolIfThis import IfThis as IfThis
 
 # isort: split
-from mapFolding.someAssemblyRequired._containers import (
+from mapFolding.kitAST._containers import (
 	DeReConstructField2ast as DeReConstructField2ast, Settings形 as Settings形, ShatteredDataclass as ShatteredDataclass)
 
 # TODO Problem: `LedgerOfImports` from `astToolkit` does not handle TYPE_CHECKING blocks very well.

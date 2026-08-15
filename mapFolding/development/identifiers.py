@@ -5,7 +5,7 @@ from astToolkit.containers import makeDictionaryClassDef, makeDictionaryFunction
 from astToolkit.transformationTools import makeDictionaryMosDef
 from collections import Counter
 from humpy_cytoolz import concat
-from mapFolding.someAssemblyRequired import IfThis
+from mapFolding.kitAST import IfThis
 from mapFolding.theSSOT import settingsPackage
 from operator import methodcaller
 from pprint import pprint
@@ -48,7 +48,7 @@ if 'core' in scope:
 		, settingsPackage.pathPackage.glob('*.py')
 		, (settingsPackage.pathPackage / 'algorithms').rglob('*.py')
 		, (settingsPackage.pathPackage / 'oeis').rglob('*.py')
-		, (settingsPackage.pathPackage / 'someAssemblyRequired').rglob('*.py')
+		, (settingsPackage.pathPackage / 'kitAST').rglob('*.py')
 	])
 
 if 'elimination' in scope:

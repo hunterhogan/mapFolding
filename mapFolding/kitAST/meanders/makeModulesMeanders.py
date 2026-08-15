@@ -5,8 +5,8 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import default, IfThis
-from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getModule, getPathFilename
+from mapFolding.kitAST import default, IfThis
+from mapFolding.kitAST.kitMakeModules import findDataclass, getModule, getPathFilename
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -48,10 +48,10 @@ def makeCountBigInt(astModule: ast.Module, identifierModule: str, callableIdenti
 
 	return pathFilename
 
-def makeMeandersModules() -> None:
+def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule='matrixMeanders')
 	makeCountBigInt(astModule, 'bigInt', 'countBigInt', logicalPathInfixMeanders, default['function']['dispatcher'])
 
 if __name__ == '__main__':
-	makeMeandersModules()
+	makeModulesMeanders()

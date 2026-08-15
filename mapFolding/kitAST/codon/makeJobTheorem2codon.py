@@ -4,8 +4,8 @@ from __future__ import annotations
 from astToolkit import Be, Grab, Make, NodeChanger, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import IfThis, Settings形
-from mapFolding.someAssemblyRequired.RecipeJob import (
+from mapFolding.kitAST import IfThis, Settings形
+from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
 from pathlib import Path

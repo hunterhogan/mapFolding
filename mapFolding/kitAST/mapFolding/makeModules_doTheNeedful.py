@@ -5,8 +5,8 @@ from astToolkit import Be, DOT, Grab, NodeChanger, NodeTourist, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import default, Default, IfThis
-from mapFolding.someAssemblyRequired.kitMakeModules import getPathFilename
+from mapFolding.kitAST import default, Default, IfThis
+from mapFolding.kitAST.kitMakeModules import getPathFilename
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast

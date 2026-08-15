@@ -35,7 +35,7 @@ from __future__ import annotations
 
 from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import default
+from mapFolding.kitAST import default
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePath
 from typing import TYPE_CHECKING

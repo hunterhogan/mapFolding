@@ -1,11 +1,11 @@
 """Overwrite all synthetic modules."""
 from __future__ import annotations
 
-from mapFolding.someAssemblyRequired.foldsSymmetric.makeModules import makeFoldsSymmetricModules
-from mapFolding.someAssemblyRequired.foldsSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
-from mapFolding.someAssemblyRequired.makeProofOEISidByFormula import makeOEISidByFormulaLookup
-from mapFolding.someAssemblyRequired.mapFolding.makeModules import makeMapFoldingModules
-from mapFolding.someAssemblyRequired.meanders.makeModulesMeanders import makeMeandersModules
+from mapFolding.kitAST.foldsSymmetric.makeModules import makeModulesFoldsSymmetric
+from mapFolding.kitAST.foldsSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
+from mapFolding.kitAST.makeProofOEISidByFormula import makeOEISidByFormulaLookup
+from mapFolding.kitAST.mapFolding.makeModules import makeModulesMapFolding
+from mapFolding.kitAST.meanders.makeModulesMeanders import makeModulesMeanders
 from mapFolding.theSSOT import settingsPackage
 from mapFolding.zCuzDocStoopid.makeDocstrings import sourcePrefix, transformOEISidByFormula
 from typing import TYPE_CHECKING
@@ -13,12 +13,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pathlib import Path
 
-makeMapFoldingModules()
+makeModulesMapFolding()
 
-makeFoldsSymmetricModules()
+makeModulesFoldsSymmetric()
 makeModulesFoldsSymmetricAsynchronous()
 
-makeMeandersModules()
+makeModulesMeanders()
 
 pathRoot: Path = settingsPackage.pathPackage / "oeis"
 pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()

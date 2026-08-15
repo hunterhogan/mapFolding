@@ -14,10 +14,10 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsMod
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.oeis import getValuesKnown
-from mapFolding.someAssemblyRequired import defaultFoldsSymmetric, Settings形
-from mapFolding.someAssemblyRequired.kitTransformations import shatter_dataclassesDOTdataclass
-from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
-from mapFolding.someAssemblyRequired.RecipeJob import (
+from mapFolding.kitAST import defaultFoldsSymmetric, Settings形
+from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
+from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage

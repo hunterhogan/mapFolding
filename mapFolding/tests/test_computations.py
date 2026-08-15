@@ -32,9 +32,9 @@ from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape
-from mapFolding.someAssemblyRequired.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
-from mapFolding.someAssemblyRequired.numba.makeJob import makeJobNumba
-from mapFolding.someAssemblyRequired.RecipeJob import RecipeJobTheorem2
+from mapFolding.kitAST.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
+from mapFolding.kitAST.numba.makeJob import makeJobNumba
+from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
 from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject

@@ -8,14 +8,14 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
-from mapFolding.someAssemblyRequired import default, DeReConstructField2ast, IfThis, ShatteredDataclass
-from mapFolding.someAssemblyRequired.kitMakeModules import findDataclass, getModule, getPathFilename
-from mapFolding.someAssemblyRequired.kitTransformations import (
+from mapFolding.kitAST import default, DeReConstructField2ast, IfThis, ShatteredDataclass
+from mapFolding.kitAST.kitMakeModules import findDataclass, getModule, getPathFilename
+from mapFolding.kitAST.kitTransformations import (
 	removeDataclassFromFunction, shatter_dataclassesDOTdataclass, unpackDataclassCallFunctionRepackDataclass)
-from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import (
+from mapFolding.kitAST.mapFolding.makeModules_count import (
 	makeDaoOfMapFoldingNumba, makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
-from mapFolding.someAssemblyRequired.mapFolding.makeModules_doTheNeedful import makeInitializeState
-from mapFolding.someAssemblyRequired.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
@@ -181,7 +181,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 
 	return pathFilename
 
-def makeMapFoldingModules() -> None:
+def makeModulesMapFolding() -> None:
 	"""Make multidimensional map folding modules."""
 	astModule = getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
@@ -205,4 +205,4 @@ def makeMapFoldingModules() -> None:
 	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, default['logicalPath']['synthetic'], default['function']['dispatcher'])
 
 if __name__ == '__main__':
-	makeMapFoldingModules()
+	makeModulesMapFolding()

@@ -30,7 +30,7 @@ from __future__ import annotations
 from astToolkit import Be, extractClassDef, Make, NodeChanger, parseLogicalPath2astModule, Then
 from astToolkit.transformationTools import unparseFindReplace
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
-from mapFolding.someAssemblyRequired import DeReConstructField2ast, IfThis, ShatteredDataclass
+from mapFolding.kitAST import DeReConstructField2ast, IfThis, ShatteredDataclass
 from typing import TYPE_CHECKING
 import ast
 import dataclasses

@@ -31,7 +31,7 @@ from astToolkit import Be, DOT, Make, NodeTourist, Then
 from astToolkit.containers import LedgerOfImports
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import IfThis
+from mapFolding.kitAST import IfThis
 from typing import cast, NamedTuple, TYPE_CHECKING
 import ast
 import dataclasses

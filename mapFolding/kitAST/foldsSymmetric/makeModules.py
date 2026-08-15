@@ -5,12 +5,11 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, parsePathFilena
 from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.someAssemblyRequired import default, defaultFoldsSymmetric, IfThis
-from mapFolding.someAssemblyRequired.foldsSymmetric.rawMaterials import (
-	adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds)
-from mapFolding.someAssemblyRequired.kitMakeModules import getModule, getPathFilename
-from mapFolding.someAssemblyRequired.mapFolding.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2, makeDaoOfMapFoldingNumba
-from mapFolding.someAssemblyRequired.mapFolding.makeModules_doTheNeedful import makeInitializeState
+from mapFolding.kitAST import default, defaultFoldsSymmetric, IfThis
+from mapFolding.kitAST.foldsSymmetric.rawMaterials import adjustTotalFolds, foldsSymmetricIncrementCount, FunctionDef_filterAsymmetricFolds
+from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
+from mapFolding.kitAST.mapFolding.makeModules_count import makeDaoOfMapFoldingNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -68,7 +67,7 @@ def _numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCal
 
 	return pathFilename
 
-def makeFoldsSymmetricModules() -> None:
+def makeModulesFoldsSymmetric() -> None:
 	"""Make."""
 	astModule: ast.Module = getModule(logicalPathInfix='algorithms')
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultFoldsSymmetric['module']['algorithm'], defaultFoldsSymmetric['function']['counting']
@@ -94,4 +93,4 @@ def makeFoldsSymmetricModules() -> None:
 		, defaultFoldsSymmetric['logicalPath']['synthetic'], defaultFoldsSymmetric['function']['dispatcher'])
 
 if __name__ == '__main__':
-	makeFoldsSymmetricModules()
+	makeModulesFoldsSymmetric()

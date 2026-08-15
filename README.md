@@ -143,7 +143,7 @@ Pass `pathLikeWrite` to a counting function to preserve a result. An existing di
 | [`mapFolding/oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis)                                 | OEIS dispatch, formulas, metadata, and cached values                         |
 | [`mapFolding/algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms)                     | Handwritten source algorithms                                                |
 | [`mapFolding/syntheticModules/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/syntheticModules)         | Generated implementations; regenerate these instead of editing them directly |
-| [`mapFolding/someAssemblyRequired/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/someAssemblyRequired) | Project-specific AST transformations and module generators                   |
+| [`mapFolding/kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST) | Project-specific AST transformations and module generators                   |
 | [`mapFolding/_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e)                                     | Experimental elimination-based algorithms and analysis                       |
 | [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests)                               | Main correctness, dispatch, filesystem, and parameter tests                  |
 | [`mapFolding/reference/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/reference)                       | Historical implementations, completed jobs, notes, and research artifacts    |
