@@ -1,13 +1,27 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import MapFoldingState
-from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.synthesized.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 
-def count(state: MapFoldingState) -> MapFoldingState:
+def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:
-                state.groupsOfFolds += 1
+                state.次Leaf = 1
+                state.leafComparison[0] = 1
+                state.leafConnectee = 1
+                while state.leafConnectee <= state.totalLeaves:
+                    state.次MiniGap = state.leafBelow[state.次Leaf]
+                    state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
+                    state.次Leaf = state.次MiniGap
+                    state.leafConnectee += 1
+                for boxOfTuples in state.indices:
+                    state.leafConnectee = 1
+                    for 次Left, 次Right in boxOfTuples:
+                        if state.leafComparison[次Left] != state.leafComparison[次Right]:
+                            state.leafConnectee = 0
+                            break
+                    state.symmetricFolds += state.leafConnectee
             else:
                 state.dimensionsUnconstrained = state.totalDimensions
                 state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
@@ -49,10 +63,11 @@ def count(state: MapFoldingState) -> MapFoldingState:
         state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
         state.leaf1ndex += 1
     else:
-        state.groupsOfFolds *= 2
+        state.symmetricFolds *= 2
+    state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
-def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state

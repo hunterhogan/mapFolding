@@ -165,7 +165,7 @@ def countFolds(mapShape: Sequence[int]
 		"""
 		totalFolds = 1
 	elif 1 < taskDivisions:
-		from mapFolding.syntheticModules.countParallelNumba import doTheNeedful
+		from mapFolding.synthesized.countParallelNumba import doTheNeedful
 
 		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
 
@@ -176,17 +176,17 @@ def countFolds(mapShape: Sequence[int]
 		if flow == 'daoOfMapFolding':
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 		elif flow == 'daoOfMapFoldingNumba':
-			from mapFolding.syntheticModules.daoOfMapFoldingNumba import doTheNeedful
+			from mapFolding.synthesized.daoOfMapFoldingNumba import doTheNeedful
 		elif flow == 'numba':
-			from mapFolding.syntheticModules.inlineNumba import doTheNeedful
+			from mapFolding.synthesized.inlineNumba import doTheNeedful
 		elif any(map((2).__lt__, mapShape)) or mapShapeIs2上nDimensions(mapShape, youMustBeDimensionsTallToRideThis=2):
 			match flow:
 				case 'theorem2Numba':
-					from mapFolding.syntheticModules.theorem2Numba import doTheNeedful
+					from mapFolding.synthesized.theorem2Numba import doTheNeedful
 				case 'theorem2Trimmed':
-					from mapFolding.syntheticModules.theorem2Trimmed import doTheNeedful
+					from mapFolding.synthesized.theorem2Trimmed import doTheNeedful
 				case 'theorem2' | _:
-					from mapFolding.syntheticModules.theorem2 import doTheNeedful
+					from mapFolding.synthesized.theorem2 import doTheNeedful
 		else:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
@@ -249,20 +249,20 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 #-------- Algorithm version -----------------------------------------------------
 
 	if flow == 'asynchronous':
-		from mapFolding.syntheticModules.foldsSymmetric.asynchronous import doTheNeedful
+		from mapFolding.synthesized.foldsSymmetric.asynchronous import doTheNeedful
 		totalFolds = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
 	else:
 		match flow:
 			case 'algorithmNumba':
-				from mapFolding.syntheticModules.foldsSymmetric.algorithmNumba import doTheNeedful
+				from mapFolding.synthesized.foldsSymmetric.algorithmNumba import doTheNeedful
 			case 'theorem2':
-				from mapFolding.syntheticModules.foldsSymmetric.theorem2 import doTheNeedful
+				from mapFolding.synthesized.foldsSymmetric.theorem2 import doTheNeedful
 			case 'theorem2Numba':
-				from mapFolding.syntheticModules.foldsSymmetric.theorem2Numba import doTheNeedful
+				from mapFolding.synthesized.foldsSymmetric.theorem2Numba import doTheNeedful
 			case 'theorem2Trimmed':
-				from mapFolding.syntheticModules.foldsSymmetric.theorem2Trimmed import doTheNeedful
+				from mapFolding.synthesized.foldsSymmetric.theorem2Trimmed import doTheNeedful
 			case 'algorithm' | _:
-				from mapFolding.syntheticModules.foldsSymmetric.algorithm import doTheNeedful
+				from mapFolding.synthesized.foldsSymmetric.algorithm import doTheNeedful
 
 		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
 

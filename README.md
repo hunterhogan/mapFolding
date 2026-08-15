@@ -137,17 +137,17 @@ Pass `pathLikeWrite` to a counting function to preserve a result. An existing di
 
 ## Repository guide
 
-| Path                                                                                                              | Role                                                                         |
-| ----------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`mapFolding/basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py)            | Stable high-level dispatch for folding and meander computations              |
-| [`mapFolding/oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis)                         | OEIS dispatch, formulas, metadata, and cached values                         |
-| [`mapFolding/algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms)             | Handwritten source algorithms                                                |
-| [`mapFolding/syntheticModules/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/syntheticModules) | Generated implementations; regenerate these instead of editing them directly |
-| [`mapFolding/kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST)                     | Project-specific AST transformations and module generators                   |
-| [`mapFolding/_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e)                             | Experimental elimination-based algorithms and analysis                       |
-| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests)                       | Main correctness, dispatch, filesystem, and parameter tests                  |
-| [`mapFolding/reference/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/reference)               | Historical implementations, completed jobs, notes, and research artifacts    |
-| [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun)                                         | Benchmark and exploration harnesses                                          |
+| Path                                                                                                    | Role                                                                         |
+| ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`mapFolding/basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py)  | Stable high-level dispatch for folding and meander computations              |
+| [`mapFolding/oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis)               | OEIS dispatch, formulas, metadata, and cached values                         |
+| [`mapFolding/algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms)   | Handwritten source algorithms                                                |
+| [`mapFolding/synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized) | Generated implementations; regenerate these instead of editing them directly |
+| [`mapFolding/kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST)           | Project-specific AST transformations and module generators                   |
+| [`mapFolding/_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e)                   | Experimental elimination-based algorithms and analysis                       |
+| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests)             | Main correctness, dispatch, filesystem, and parameter tests                  |
+| [`mapFolding/reference/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/reference)     | Historical implementations, completed jobs, notes, and research artifacts    |
+| [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun)                               | Benchmark and exploration harnesses                                          |
 
 General-purpose transformation primitives developed alongside this project now live in [astToolkit](https://github.com/hunterhogan/astToolkit) and [astToolFactory](https://github.com/hunterhogan/astToolFactory). The transformation pipeline retained here is specific to generating and validating `mapFolding` implementations.
 

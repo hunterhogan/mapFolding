@@ -12,7 +12,7 @@ from mapFolding.kitAST.kitTransformations import shatter_dataclassesDOTdataclass
 from mapFolding.kitAST.theSSOT import defaultMapFolding, dictionaryEstimatesMapFolding
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
-from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -405,7 +405,7 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 	preserving _abstract_ names for datatypes, such as `形Array1DTotalLeaves` and `形TotalFolds`. This function well
 	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
 	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
-	for example, `mapFolding.syntheticModules.foldsSymmetric.asynchronousNumba` or its equivalent), ought to still have the abstract
+	for example, `mapFolding.synthesized.foldsSymmetric.asynchronousNumba` or its equivalent), ought to still have the abstract
 	names, this function gives you the power to change the datatype from numpy to numba and/or from 8-bits to 16-bits merely by
 	changing the import statements. You shouldn't need to change any "business" logic.
 

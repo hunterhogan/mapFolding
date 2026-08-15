@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from mapFolding.dataBaskets import (
 	MapFoldingState, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形TotalFolds, 形TotalLeaves)
-from mapFolding.syntheticModules.initializeState import transitionOnGroupsOfFolds
+from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from numba import jit
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)

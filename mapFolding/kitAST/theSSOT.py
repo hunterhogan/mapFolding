@@ -20,7 +20,7 @@ default = Default(
 	}
 	, logicalPath={
 		'algorithm': 'algorithms'
-		, 'synthetic': 'syntheticModules'
+		, 'synthetic': 'synthesized'
 	}
 	, module={
 		'dataBasket': 'dataBaskets'

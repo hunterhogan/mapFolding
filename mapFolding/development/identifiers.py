@@ -57,7 +57,7 @@ if 'elimination' in scope:
 		, (settingsPackage.pathPackage / '_e').glob('*.py')
 		, (settingsPackage.pathPackage / '_e.algorithms').rglob('*.py')
 		, (settingsPackage.pathPackage / '_e.kitAST').rglob('*.py')
-		, (settingsPackage.pathPackage / '_e.syntheticModules').rglob('*.py')
+		, (settingsPackage.pathPackage / '_e.synthesized').rglob('*.py')
 	])
 
 if '2上nDimensional' in scope:

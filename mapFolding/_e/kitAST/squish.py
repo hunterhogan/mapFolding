@@ -6,7 +6,7 @@ from astToolkit import Be, IfThis, Make, NodeChanger, NodeTourist, parseLogicalP
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule, LedgerOfImports
 from humpy_cytoolz import juxt
 from itertools import repeat, starmap
-from mapFolding._e.kitAST.infoBooth import default
+from mapFolding._e.kitAST.theSSOT import default
 from mapFolding.kitAST.kitLinux import toCodon
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path

@@ -20,7 +20,7 @@ from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
 from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
 from mapFolding.oeis import getValuesKnown
-from mapFolding.syntheticModules.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
+from mapFolding.synthesized.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING

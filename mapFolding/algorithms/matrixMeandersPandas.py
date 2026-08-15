@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
-from mapFolding.syntheticModules.meanders.bigInt import countBigInt
+from mapFolding.synthesized.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Crossings
 from typing import TYPE_CHECKING
 from warnings import warn
