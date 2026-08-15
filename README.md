@@ -255,9 +255,9 @@ OEIS limits my proposed changes to a sequence to three sequences at a time. I ha
 - A077460, values.
 - A208357, values.
 - A217310, submitted.
-- A223093
+- A223093, submitted.
 - A223094
-- A223095, values.
+- A223095
 - A334615, values.
 
 ## Computing new values

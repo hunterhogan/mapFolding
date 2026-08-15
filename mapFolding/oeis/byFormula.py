@@ -706,9 +706,9 @@ def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005
             countTotal = _A005316(n) + n * _A000682(n) - _A000682(n + 1) - ((1 - n % 2) * (n * _A000682(n) // 2) + n % 2 * _A000682(n + 1))
     return countTotal
 
-def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A077014'] | LiteralString | None=None) -> int:
+def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A077014', 'A000682 and A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A223093(n) as a function of A217310 or A223094 and A223095 or A000682 and A077014.
+    Compute A223093(n) as a function of A217310 or A223094 and A223095 or A000682 and A077014 or A000682 and A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093 is: "Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards)."
 
@@ -735,8 +735,10 @@ def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A0
             countTotal: int = A217310(n) // (1 + n % 2)
         case 'A223094 and A223095':
             countTotal = A223094(n) - A223095(n)
-        case 'A000682 and A077014' | _:
+        case 'A000682 and A077014':
             countTotal = _A000682(n + 1) - A077014(n)
+        case 'A000682 and A005316' | _:
+            countTotal = _A000682(n + 1) - (2 - n % 2) * _A005316(n)
     return countTotal
 
 def A223094(n: int, f: Literal['A223094 and A000682', 'A223095 and A223093', 'A000682'] | LiteralString | None=None) -> int:
@@ -776,9 +778,9 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223095 and A223093', 'A0
             countTotal = n * _A000682(n) - _A000682(n + 1)
     return countTotal
 
-def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A217318'] | LiteralString | None=None) -> int:
+def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A217318', 'A000682 and A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A223095(n) as a function of A077014, and A000682 or A223094 and A223093 or A217318.
+    Compute A223095(n) as a function of A077014, and A000682 or A223094 and A223093 or A217318 or A000682 and A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095 is: "Number of foldings of n labeled stamps in which both end leaves are inwards."
 
@@ -805,8 +807,10 @@ def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A
             countTotal: int = A077014(n) + n * _A000682(n) - 2 * _A000682(n + 1)
         case 'A223094 and A223093':
             countTotal = A223094(n) - A223093(n)
-        case 'A217318' | _:
+        case 'A217318':
             countTotal = (2 - n % 2) * A217318(n)
+        case 'A000682 and A005316' | _:
+            countTotal = (2 - n % 2) * _A005316(n) + n * _A000682(n) - 2 * _A000682(n + 1)
     return countTotal
 
 def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | LiteralString | None=None) -> int:

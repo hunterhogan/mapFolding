@@ -331,8 +331,10 @@ def A223093(n: int, f: LiteralString | None = None) -> int:
 			countTotal: int = A217310(n) // (1 + (n % 2))
 		case 'A223094 and A223095':
 			countTotal = A223094(n) - A223095(n)
-		case 'A000682 and A077014' | _:
+		case 'A000682 and A077014':
 			countTotal = _A000682(n + 1) - A077014(n)
+		case 'A000682 and A005316' | _:
+			countTotal = _A000682(n + 1) - (2 - (n % 2)) * _A005316(n)
 	return countTotal
 
 def A223094(n: int, f: LiteralString | None = None) -> int:
@@ -355,8 +357,10 @@ def A223095(n: int, f: LiteralString | None = None) -> int:
 			countTotal: int = A077014(n) + (n * _A000682(n)) - (2 * _A000682(n + 1))
 		case 'A223094 and A223093':
 			countTotal = A223094(n) - A223093(n)
-		case 'A217318' | _:
+		case 'A217318':
 			countTotal = (2 - (n % 2)) * A217318(n)
+		case 'A000682 and A005316' | _:
+			countTotal = ((2 - (n % 2)) * _A005316(n)) + (n * _A000682(n)) - (2 * _A000682(n + 1))
 	return countTotal
 
 def A227167(n: int, f: LiteralString | None = None) -> int:
