@@ -6,14 +6,13 @@ from astToolkit.containers import IngredientsFunction, IngredientsModule, Ledger
 from astToolkit.transformationTools import inlineFunctionDef
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import findDataclass
-from mapFolding.kitAST.kitMakeModules import getPathFilename
+from mapFolding.kitAST.mapFolding.makeModules_count import toDisk
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
 	from mapFolding.theTypes import Default
-	from os import PathLike
 	from pathlib import PurePath
 	from typing import Any
 
@@ -33,12 +32,8 @@ def makeInitializeState(astModule: ast.Module, identifiers: Default | None = Non
 			, Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(名Counting)))]))
 	).visit(ingredientsFunction.astFunctionDef.body[0])
 
-	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
-	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	ingredientsModule = IngredientsModule(ingredientsFunction)
+
 	名Module: str = keywordArguments.get('名Module') or identifiers['module']['initializeState']
 
-	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
-	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
-	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, 名Package)
-
-	return pathFilename
+	return toDisk(ingredientsModule, identifiers, keywordArguments, 名Module)
