@@ -82,7 +82,6 @@ from __future__ import annotations
 from mapFolding.kitAST._toolIfThis import IfThis as IfThis
 
 # isort: split
-from mapFolding.kitAST._containers import (
-	DeReConstructField2ast as DeReConstructField2ast, Settings形 as Settings形, ShatteredDataclass as ShatteredDataclass)
+from mapFolding.kitAST._containers import Settings形 as Settings形
 
 # TODO Problem: `LedgerOfImports` from `astToolkit` does not handle TYPE_CHECKING blocks very well.

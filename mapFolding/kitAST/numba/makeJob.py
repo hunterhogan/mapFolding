@@ -14,7 +14,7 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsMod
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import SymmetricFoldsState
 from mapFolding.kitAST import Settings形
-from mapFolding.kitAST.kitTransformations import shatterDataclass
+from mapFolding.kitAST.dataclasses import shatterDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)

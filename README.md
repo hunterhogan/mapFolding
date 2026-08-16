@@ -279,10 +279,14 @@ Computation times assume:
 ## Near-term goals
 
 Use kitAST, especially the ability to make transformations of transformations without modifying the
-transforming module, to create numba "jobs" of multidimensional map: for the six OEIS IDs, for each
-mapShape from offset (or offset + 1) to value unknown, inclusive, make a module. Then, after
+transforming module, to create numba "jobs" of multidimensional map folding: for the six OEIS IDs, for
+each mapShape from offset (or offset + 1) to value unknown, inclusive, make a module. Then, after
 installing `mapFolding`, a user can cause numba to compile and cache all of the modules. The run times
 for the modules will be super fast.
+
+1. More convergence in the transformation modules.
+2. Create subroutines.
+3. Modernize the semiotics.
 
 ## My recovery
 

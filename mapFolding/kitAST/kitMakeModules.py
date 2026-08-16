@@ -32,61 +32,18 @@ tailored for specific computational requirements essential to large-scale map fo
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
+from astToolkit import identifierDotAttribute, parseLogicalPath2astModule
 from humpy_cytoolz import get_in
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST.theSSOT import default
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePath
 from typing import TYPE_CHECKING
-import ast
 
 if TYPE_CHECKING:
-	from astToolkit.containers import IngredientsFunction
 	from mapFolding.theTypes import Default
 	from os import PathLike
-
-def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
-	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
-
-	Like many things in the "IngredientsFunction/IngredientsModule" ecosystem, this has specific
-	requirements. `ingredientsFunction` must have the dataclass as its first parameter. The
-	`LedgerOfImports` in `ingredientsFunction` must have the import information for the dataclass. If
-	you are not using `IngredientsFunction`, you can still use this function to get the information
-	you want.
-
-	```python
-	from astToolkit import astModuleToIngredientsFunction
-
-	tupleInformation = findDataclass(astModuleToIngredientsFunction(astAST, identifier))
-	```
-
-	Parameters
-	----------
-	ingredientsFunction : IngredientsFunction
-		Function container with AST and import information.
-
-	Returns
-	-------
-	logicalPathDataclass : identifierDotAttribute
-		Logical path from which the `dataclass` is imported, which might not be the real source of the `dataclass`.
-	identifierDataclass : str
-		Identifier of the `dataclass`.
-	identifierDataclassInstance : str
-		Identifier of the `dataclass` instance.
-	"""
-	dataclassName: ast.expr = raiseIfNone(NodeTourist[ast.arg, ast.expr](Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	identifierDataclass: str = raiseIfNone(NodeTourist[ast.Name, str](Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
-	logicalPathDataclass = None
-	for moduleWithLogicalPath, boxOfNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
-		for nameTuple in boxOfNameTuples:
-			if nameTuple[0] == identifierDataclass:
-				logicalPathDataclass = moduleWithLogicalPath
-				break
-		if logicalPathDataclass:
-			break
-	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist[ast.arg, identifierDotAttribute](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	return raiseIfNone(logicalPathDataclass), identifierDataclass, identifierDataclassInstance
+	import ast
 
 def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *identifierModule: str) -> identifierDotAttribute:
 	"""Get logical path from components."""

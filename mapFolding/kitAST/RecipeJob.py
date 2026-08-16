@@ -8,7 +8,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import MapFoldingState
 from mapFolding.kitAST import IfThis, Settings形
-from mapFolding.kitAST.kitTransformations import shatterDataclass
+from mapFolding.kitAST.dataclasses import shatterDataclass
 from mapFolding.kitAST.theSSOT import defaultMapFolding, dictionaryEstimatesMapFolding
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from mapFolding.dataBaskets import SymmetricFoldsState
-	from mapFolding.kitAST import ShatteredDataclass
+	from mapFolding.kitAST.dataclasses import ShatteredDataclass
 	from mapFolding.kitAST.numba.kitNumba import SpicesJobNumba
 	from mapFolding.theTypes import 形TotalLeaves
 

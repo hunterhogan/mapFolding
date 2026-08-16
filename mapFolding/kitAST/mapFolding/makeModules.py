@@ -8,9 +8,10 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from astToolkit.transformationTools import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
-from mapFolding.kitAST import DeReConstructField2ast, IfThis, ShatteredDataclass
-from mapFolding.kitAST.kitMakeModules import findDataclass, getModule, getPathFilename
-from mapFolding.kitAST.kitTransformations import removeDataclass, shatterDataclass, toFieldsToCallToDataclass
+from mapFolding.kitAST import IfThis
+from mapFolding.kitAST.dataclasses import (
+	DeReConstructField2ast, findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass)
+from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
 from mapFolding.kitAST.mapFolding.makeModules_count import makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, make_jit_module, ParametersNumba, parametersNumbaLight

@@ -5,7 +5,8 @@ from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.transformationTools import inlineFunctionDef
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.kitMakeModules import findDataclass, getPathFilename
+from mapFolding.kitAST.dataclasses import findDataclass
+from mapFolding.kitAST.kitMakeModules import getPathFilename
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 import ast
