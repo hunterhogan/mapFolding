@@ -53,8 +53,8 @@ Each positive integer in `mapShape` is the length of one dimension. A `(2, 3)` m
 ```python
 from mapFolding.basecamp import countFolds
 
-folds_total = countFolds((2, 3))
-print(folds_total)  # 60
+totalFolds = countFolds((2, 3))
+print(totalFolds)  # 60
 ```
 
 ### Calculate an OEIS term
@@ -62,8 +62,8 @@ print(folds_total)  # 60
 ```python
 from mapFolding.oeis import oeisIDfor_n
 
-folds_total = oeisIDfor_n('A001415', 6)
-print(folds_total)  # 10512
+totalFolds = oeisIDfor_n('A001415', 6)
+print(totalFolds)  # 10512
 ```
 
 The installed commands expose the same sequence registry:
@@ -188,36 +188,30 @@ To cite this software, use the metadata in [`CITATION.cff`](https://github.com/h
 
 ## Research references
 
+### Folding a strip of stamps
+
+- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Koehler1968.bib)
+- DOI: [10.1016/S0021-9800(68)80048-1](https://doi.org/10.1016/S0021-9800(68)80048-1)
+
 ### A map-folding problem
 
 - [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon1968.bib)
 - DOI: [10.1090/S0025-5718-1968-0221957-8](https://doi.org/10.1090/S0025-5718-1968-0221957-8)
 - PDF: [American Mathematical Society](https://pubs.ams.org/journals/mcom/1968-22-101/S0025-5718-1968-0221957-8/S0025-5718-1968-0221957-8.pdf)
 
-### Folding a strip of stamps
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Koehler1968.bib)
-- DOI: [10.1016/S0021-9800(68)80048-1](https://doi.org/10.1016/S0021-9800(68)80048-1)
-
 ### Multi-dimensional map-folding
 
 - [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon.bib)
 - DOI: [10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75)
 - PDF: [Oxford Academic](https://academic.oup.com/comjnl/article-pdf/14/1/75/1020149/140075.pdf)
+- [Java implementation](https://github.com/archmageirvine/joeis/blob/9e2bd5f6b5a51bc40833c19ca04555ec12044edc/src/irvine/oeis/a001/A001415.java) by Sean A. Irvine.
 
 ### A transfer matrix approach to the enumeration of plane meanders
 
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib)
-- [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/cond-mat/0008178)
+- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/cond-mat/0008178)
 - DOI: [10.1088/0305-4470/33/34/301](https://doi.org/10.1088/0305-4470/33/34/301)
 - Free preprint: [arXiv:cond-mat/0008178](https://arxiv.org/abs/cond-mat/0008178)
-
-### A new transfer-matrix algorithm for exact enumerations: self-avoiding polygons on the square lattice
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/ClisbyJensen2012.bib)
-- [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/1111.5877)
-- DOI: [10.1088/1751-8113/45/11/115202](https://doi.org/10.1088/1751-8113/45/11/115202)
-- Free preprint: [arXiv:1111.5877](https://arxiv.org/abs/1111.5877)
+- [C# implementation described](https://oeis.org/A005316/a005316.cs.txt) by Andrew Howroyd. [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Howroyd.bib)
 
 ### Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms
 
@@ -227,16 +221,9 @@ To cite this software, use the metadata in [`CITATION.cff`](https://github.com/h
 
 ### Foldings and meanders
 
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Legendre2014.bib)
-- [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/1302.2025)
+- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Legendre2014.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/1302.2025)
 - PDF: [The Australasian Journal of Combinatorics](https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf)
 - Free preprint: [arXiv:1302.2025](https://arxiv.org/abs/1302.2025)
-
-### Valid Orderings of Layers When Simple-Folding a Map
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Jia2020.bib)
-- DOI: [10.2197/ipsjjip.28.816](https://doi.org/10.2197/ipsjjip.28.816)
-- PDF: [Journal of Information Processing](https://www.jstage.jst.go.jp/article/ipsjjip/28/0/28_816/_pdf/-char/en)
 
 ### jOEIS: Java Online Encyclopedia of Integer Sequences
 
@@ -257,7 +244,7 @@ OEIS limits my proposed changes to a sequence to three sequences at a time. I ha
 - A217310, submitted.
 - A223093, submitted.
 - A223094
-- A223095
+- A223095, submitted.
 - A334615, values.
 
 ## Computing new values
@@ -275,18 +262,6 @@ Computation times assume:
 3. Single-core computations are given priority over other tasks.
 4. The core of single-core computations is regularly boosted.
 5. No heat issues.
-
-## Near-term goals
-
-Use kitAST, especially the ability to make transformations of transformations without modifying the
-transforming module, to create numba "jobs" of multidimensional map folding: for the six OEIS IDs, for
-each mapShape from offset (or offset + 1) to value unknown, inclusive, make a module. Then, after
-installing `mapFolding`, a user can cause numba to compile and cache all of the modules. The run times
-for the modules will be super fast.
-
-1. More convergence in the transformation modules.
-2. Create subroutines.
-3. Modernize the semiotics.
 
 ## My recovery
 
