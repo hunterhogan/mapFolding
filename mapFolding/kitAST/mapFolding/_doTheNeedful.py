@@ -6,7 +6,7 @@ from astToolkit.containers import IngredientsFunction, IngredientsModule, Ledger
 from astToolkit.transformationTools import inlineFunctionDef
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import findDataclass
-from mapFolding.kitAST.mapFolding.makeModules_count import toDisk
+from mapFolding.kitAST.mapFolding._count import toDisk
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 import ast

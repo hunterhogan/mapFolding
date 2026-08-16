@@ -7,7 +7,7 @@ from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
-from mapFolding.kitAST.mapFolding.makeModules_count import makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.kitAST.mapFolding._count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
 from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric, defaultMapFolding
