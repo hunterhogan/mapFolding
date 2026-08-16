@@ -11,48 +11,37 @@ from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import DeReConstructField2ast, IfThis, ShatteredDataclass
 from mapFolding.kitAST.kitMakeModules import findDataclass, getModule, getPathFilename
 from mapFolding.kitAST.kitTransformations import removeDataclass, shatterDataclass, toFieldsToCallToDataclass
-from mapFolding.kitAST.mapFolding.makeModules_count import (
-	makeDaoOfMapFoldingNumba, makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2)
+from mapFolding.kitAST.mapFolding.makeModules_count import makeInlineNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.kitAST.mapFolding.makeModules_doTheNeedful import makeInitializeState
-from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, make_jit_module, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.theSSOT import defaultMapFolding
-from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
+	from mapFolding.theTypes import Default
+	from os import PathLike
 	from pathlib import PurePath
 	from typing import Any
 
-def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, _sourceCallableDispatcher: str | None = None) -> PurePath:
-	"""Generate parallel implementation with concurrent execution and task division.
+def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+	"""Generate parallel implementation with concurrent execution and task division."""
+	identifiers = identifiers or defaultMapFolding
+	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function']['counting']
+	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('inlineParallelNumba') or 名CallableSource
+	名CallableDispatcherSource: str = keywordArguments.get('名CallableDispatcherSource') or identifiers['function']['dispatcher']
+	名CallableDispatcher: str = keywordArguments.get('名CallableDispatcher') or identifiers['function'].get('inlineParallelDispatcher') or 名CallableDispatcherSource
+	名Counting: str = keywordArguments.get('名Counting') or identifiers['variable']['counting']
+	parametersNumba: ParametersNumba = keywordArguments.get('parametersNumba') or parametersNumbaLight
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名Module: str = keywordArguments.get('名Module') or identifiers['module']['countParallelNumba']
+	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
 
-	Parameters
-	----------
-	astModule : ast.Module
-		Source module containing the base algorithm.
-	identifierModule : str
-		Name for the generated parallel module.
-	identifierCallable : str | None = None
-		Name for the core parallel counting function.
-	logicalPathInfix : identifierDotAttribute | None = None
-		Directory path for organizing the generated module.
-	_sourceCallableDispatcher : str | None = None
-		Optional dispatcher function identifier.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Filesystem path where the parallel module was written.
-
-	"""
-	sourceCallableIdentifier = defaultMapFolding['function']['counting']
-	if identifierCallable is None:
-		identifierCallable = sourceCallableIdentifier
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = identifierCallable
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = 名Callable
 
 	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 
@@ -60,16 +49,16 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 
 #-START add the parallel state fields to the count function ------------------------------------------------
 	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass))
-	dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + identifierDataclass
-	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, dataclassIdentifierParallel))
+	名dataclassParallel: identifierDotAttribute = 'Parallel' + identifierDataclass
+	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, 名dataclassParallel))
 	onlyParallelFields: list[dataclasses.Field[Any]] = [field for field in dataclassFieldsParallel if field.name not in [fieldBase.name for fieldBase in dataclassBaseFields]]
 
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), dataclassIdentifierParallel)
+	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), 名dataclassParallel)
 	if not dataclassClassDef:
-		message = f"I could not find `{dataclassIdentifierParallel = }` in `{logicalPathDataclass = }`."
+		message = f"I could not find `{名dataclassParallel = }` in `{logicalPathDataclass = }`."
 		raise ValueError(message)
 
 	for aField in onlyParallelFields:
@@ -89,11 +78,11 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 		map_stateDOTfield2Name={**shatteredDataclass.map_stateDOTfield2Name, **{dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder}},
 		)
 	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.boxOfName4Parameters, Make.Store())
-	shatteredDataclassParallel.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(dataclassIdentifierParallel), list_keyword=shatteredDataclassParallel.boxOf_keyword_field__field4init))
+	shatteredDataclassParallel.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(名dataclassParallel), list_keyword=shatteredDataclassParallel.boxOf_keyword_field__field4init))
 	shatteredDataclassParallel.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclassParallel.boxOfAnnotations))
 
 	shatteredDataclassParallel.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclassParallel.imports.addImportFrom_asStr(logicalPathDataclass, dataclassIdentifierParallel)
+	shatteredDataclassParallel.imports.addImportFrom_asStr(logicalPathDataclass, 名dataclassParallel)
 	shatteredDataclassParallel.imports.update(shatteredDataclass.imports)
 	shatteredDataclassParallel.imports.removeImportFrom(logicalPathDataclass, identifierDataclass)
 
@@ -119,51 +108,53 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 
 	ingredientsFunction.removeUnusedParameters()
 
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumba)
 
 #-START unpack/repack the dataclass function ------------------------------------------------
-	sourceCallableIdentifier = defaultMapFolding['function']['dispatcher']
-
-	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableIdentifier)
-	unRepackDataclass.astFunctionDef.name = 'unRepack' + dataclassIdentifierParallel
+	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
+	unRepackDataclass.astFunctionDef.name = 'unRepack' + 名dataclassParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	NodeChanger(
 			findThis=Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == identifierDataclass))
-			, doThat=Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(dataclassIdentifierParallel)))
+			, doThat=Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(名dataclassParallel)))
 		).visit(unRepackDataclass.astFunctionDef)
-	unRepackDataclass.astFunctionDef.returns = Make.Name(dataclassIdentifierParallel)
-	targetCallableIdentifier: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
-	unRepackDataclass = toFieldsToCallToDataclass(unRepackDataclass, targetCallableIdentifier, shatteredDataclassParallel)
+	unRepackDataclass.astFunctionDef.returns = Make.Name(名dataclassParallel)
+	名CallableTarget: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
+	NodeChanger(
+		findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))
+		, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(名CallableTarget)))
+	).visit(unRepackDataclass.astFunctionDef)
+	unRepackDataclass = toFieldsToCallToDataclass(unRepackDataclass, 名CallableTarget, shatteredDataclassParallel)
 
 	astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple | None](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	astTuple.ctx = Make.Store()
 	changeAssignCallToTarget: NodeChanger[ast.Assign, ast.Assign] = NodeChanger(
-		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-		, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts)))
+		findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(名CallableTarget))
+		, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(名CallableTarget), astTuple.elts)))
 	)
 	changeAssignCallToTarget.visit(unRepackDataclass.astFunctionDef)
 
 	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
-		astFunctionDef=Make.FunctionDef('doTheNeedful'
-			, argumentSpecification=Make.arguments(list_arg=[Make.arg('state', annotation=Make.Name(dataclassIdentifierParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
-			, body=[Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('state')]))
-				, Make.AnnAssign(Make.Name('boxOfStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))
+		astFunctionDef=Make.FunctionDef(名CallableDispatcher
+			, argumentSpecification=Make.arguments(list_arg=[Make.arg(identifierDataclassInstance, annotation=Make.Name(名dataclassParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
+			, body=[Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name(identifierDataclassInstance)]))
+				, Make.AnnAssign(Make.Name('boxOfStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(名dataclassParallel))
 					, value=Make.Mult.join([Make.List([Make.Name('stateParallel')]), Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')]))
 				, Make.AnnAssign(Make.Name('groupsOfTotalFolds', Make.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
 
-				, Make.AnnAssign(Make.Name('dictionaryConcurrency', Make.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(dataclassIdentifierParallel))])), value=Make.Dict())
+				, Make.AnnAssign(Make.Name('dictionaryConcurrency', Make.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(名dataclassParallel))])), value=Make.Dict())
 				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', Make.Store()))]
 					, body=[Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
-							, body=[Make.Assign([Make.Name('state', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
-								, Make.Assign([Make.Attribute(Make.Name('state'), 'task次', context=Make.Store())], value=Make.Name('indexSherpa'))
-								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name('state')]))])
+							, body=[Make.Assign([Make.Name(identifierDataclassInstance, Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
+								, Make.Assign([Make.Attribute(Make.Name(identifierDataclassInstance), 'task次', context=Make.Store())], value=Make.Name('indexSherpa'))
+								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name(identifierDataclassInstance)]))])
 						, Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
-								, Make.AugAssign(Make.Name('groupsOfTotalFolds', Make.Store()), op=Make.Add(), value=Make.Attribute(Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa')), 'groupsOfFolds'))])])
+								, Make.AugAssign(Make.Name('groupsOfTotalFolds', Make.Store()), op=Make.Add(), value=Make.Attribute(Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa')), 名Counting))])])
 
 				, Make.AnnAssign(Make.Name('totalFolds', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfTotalFolds'), Make.Attribute(Make.Name('stateParallel'), 'totalLeaves')]))
 				, Make.Return(Make.Tuple([Make.Name('totalFolds'), Make.Name('boxOfStatesParallel')]))]
-			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(dataclassIdentifierParallel))])))
+			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(名dataclassParallel))])))
 		, imports=LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
 			Make.ImportFrom('copy', list_alias=[Make.alias('deepcopy')]),
 			Make.ImportFrom('multiprocessing', list_alias=[Make.alias('set_start_method', asName='multiprocessing_set_start_method')])])
@@ -175,34 +166,21 @@ def makeInlineParallelNumba(astModule: ast.Module, identifierModule: str, identi
 	)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
 
-	ingredientsModule.write_astModule(pathFilename, settingsPackage.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, 名Package)
 
 	return pathFilename
 
 def makeModulesMapFolding() -> None:
 	"""Make multidimensional map folding modules."""
-	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
-	pathFilename: PurePath = makeDaoOfMapFoldingNumba(astModule, 'daoOfMapFoldingNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
-
-	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
-	pathFilename = makeInlineNumba(astModule, 'inlineNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
-
-	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
-	pathFilename = makeInlineParallelNumba(astModule, 'countParallelNumba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
-
-	astModule: ast.Module = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
-	makeInitializeState(astModule, defaultMapFolding)
-
-	astModule = getModule(logicalPathInfix='algorithms', identifierModule=defaultMapFolding['module']['algorithm'])
-	pathFilename = makeTheorem2(astModule, 'theorem2', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'], identifiers=defaultMapFolding)
-
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = trimTheorem2(astModule, 'theorem2Trimmed', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
-
-	astModule = parsePathFilename2astModule(pathFilename)
-	pathFilename = numbaOnTheorem2(astModule, 'theorem2Numba', None, defaultMapFolding['logicalPath']['synthetic'], defaultMapFolding['function']['dispatcher'])
+	make_jit_module(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+	makeInlineNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+	makeInlineParallelNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+	makeInitializeState(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+	pathFilename: PurePath = makeTheorem2(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
+	numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
 
 if __name__ == '__main__':
 	makeModulesMapFolding()

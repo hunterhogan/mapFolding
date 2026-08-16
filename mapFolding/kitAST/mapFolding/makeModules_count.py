@@ -14,7 +14,6 @@ from mapFolding.kitAST.kitMakeModules import findDataclass, getLogicalPath, getP
 from mapFolding.kitAST.kitTransformations import removeDataclass, shatterDataclass, toFieldsToCallToDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.theSSOT import default
-from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 import operator
@@ -22,35 +21,24 @@ import operator
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from mapFolding.theTypes import Default
+	from os import PathLike
 	from pathlib import PurePath
+	from typing import Any
 
-def makeDaoOfMapFoldingNumba(astModule: ast.Module, identifierModule: str, _identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, _sourceCallableDispatcher: str | None = None) -> PurePath:
-	"""Add jit_module to the end of a module."""
-	parametersNumbaHARDCODED: ParametersNumba = parametersNumbaLight
-	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
-	ingredientsModule.imports.addImportFrom_asStr('numba', 'jit_module')
-	NodeChanger(Be.Import, Then.removeIt).visit(astModule)
-	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
-	ingredientsModule.appendEpilogue(astModule)
-	parametersNumba: ParametersNumba = parametersNumbaHARDCODED
-	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
-	ingredientsModule.appendEpilogue(statement=Make.Expr(Make.Call(Make.Name('jit_module'), list_keyword=list_keyword)))
-	return ingredientsModule.write_astModule(getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule), settingsPackage.identifierPackage)
-
-def makeInlineNumba(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Generate Numba-optimized sequential implementation of an algorithm.
 
 	Parameters
 	----------
 	astModule : ast.Module
 		Source module containing the base algorithm.
-	identifierModule : str
+	名Module : str
 		Name for the generated optimized module.
-	identifierCallable : str | None = None
+	名Callable : str | None = None
 		Name for the main computational function.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
+	名CallableDispatcherSource : str | None = None
 		Optional dispatcher function for dataclass integration.
 
 	Returns
@@ -59,53 +47,68 @@ def makeInlineNumba(astModule: ast.Module, identifierModule: str, identifierCall
 		Filesystem path where the optimized module was written.
 
 	"""
-	sourceCallableIdentifier: str = default['function']['counting']
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
+	identifiers = identifiers or default
+	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function']['counting']
+	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('inlineNumba') or 名CallableSource
+	名CallableDispatcherSource: str | None = keywordArguments.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
+	parametersNumba: ParametersNumba = keywordArguments.get('parametersNumba') or parametersNumbaLight
+
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = 名Callable
 
 	shatteredDataclass: ShatteredDataclass = shatterDataclass(*findDataclass(ingredientsFunction))
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumba)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	if sourceCallableDispatcher is not None:
+	if 名CallableDispatcherSource is not None:
 
-		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
+		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
-		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-		ingredientsFunctionDispatcher = toFieldsToCallToDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
+		名CallableTarget = ingredientsFunction.astFunctionDef.name
+		NodeChanger(
+			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))
+			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(名CallableTarget)))
+		).visit(ingredientsFunctionDispatcher.astFunctionDef)
+		ingredientsFunctionDispatcher = toFieldsToCallToDataclass(ingredientsFunctionDispatcher, 名CallableTarget, shatteredDataclass)
 		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return.valueIs(Be.Tuple), doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
-			findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-			, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
+			findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(名CallableTarget))
+			, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(名CallableTarget), astTuple.elts))))
 		changeAssignCallToTarget.visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
 	ingredientsModule.removeImportFromModule('numpy')
 
-	return ingredientsModule.write_astModule(getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule), settingsPackage.identifierPackage)
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名Module: str = keywordArguments.get('名Module') or identifiers['module']['inlineNumba']
 
-def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None, identifiers: Default | None = None) -> PurePath:
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
+	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
+	return ingredientsModule.write_astModule(pathFilename, 名Package)
+
+def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Generate module by applying optimization predicted by Theorem 2.
 
 	Parameters
 	----------
 	astModule : ast.Module
 		Source module containing the base algorithm.
-	identifierModule : str
+	名Module : str
 		Name for the generated theorem-optimized module.
-	identifierCallable : str | None = None
+	名Callable : str | None = None
 		Name for the optimized computational function.
 	logicalPathInfix : identifierDotAttribute | None = None
 		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
+	名CallableDispatcherSource : str | None = None
 		Optional dispatcher function identifier.
 
 	Returns
@@ -113,23 +116,27 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	pathFilename : PurePath
 		Filesystem path where the theorem-optimized module was written.
 	"""
-	dictionaryIdentifiers: Default = identifiers or default
-	identifierCallableInitializeDataclass: str = dictionaryIdentifiers['function']['initializeState']
-	identifierModuleInitializeDataclass: str = dictionaryIdentifiers['module']['initializeState']
+	identifiers = identifiers or default
+	名CallableInitializeState: str = keywordArguments.get('名CallableInitializeState') or identifiers['function'].get('initializeState') or identifiers['function']['counting']
+	名ModuleInitializeState: str = keywordArguments.get('名ModuleInitializeState') or identifiers['module']['initializeState']
+	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function']['counting']
+	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('theorem2') or 名CallableSource
+	名Counting: str = keywordArguments.get('名Counting') or identifiers['variable']['counting']
+	名CallableDispatcherSource: str | None = keywordArguments.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名Module: str = keywordArguments.get('名Module') or identifiers['module']['theorem2']
+	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
 
-	sourceCallableIdentifier: str = dictionaryIdentifiers['function']['counting']
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = 名Callable
 
-	dataclassInstanceIdentifier: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	名dataclassInstance: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
-	theCountingIdentifier: str = dictionaryIdentifiers['variable']['counting']
-	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(dataclassInstanceIdentifier), theCountingIdentifier), Make.Mult(), Make.Constant(2))
+	doubleTheCount: ast.AugAssign = Make.AugAssign(Make.Attribute(Make.Name(名dataclassInstance), 名Counting), Make.Mult(), Make.Constant(2))
 
-	findThisWhile0 = IfThis.isWhile0LessThanAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex')
-	findThisIf0 = IfThis.isIf0LessThanAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex')
-	findThisWhile0 = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
-	findThisIf0 = IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(dataclassInstanceIdentifier, 'leaf1ndex')
+	findThisWhile0 = IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(名dataclassInstance, 'leaf1ndex')
+	findThisIf0 = IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(名dataclassInstance, 'leaf1ndex')
 
 	findThis = Be.While.orelseIs(lambda ImaList: ImaList)
 	doThat = Grab.orelseAttribute(Grab.index(0, Then.insertThisBelow([doubleTheCount])))
@@ -159,10 +166,8 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		, doThat=Then.replaceWith(insertLeaf)
 	).visit(ingredientsFunction.astFunctionDef)
 
-	findThis_leftIsDOTleaf1ndex = Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex'))
+	findThis_leftIsDOTleaf1ndex = Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(名dataclassInstance, 'leaf1ndex'))
 	findThis_comparatorsIs0 = Be.Compare.comparatorsIs(Be.at(0, IfThis.isConstant_value(0)))
-	findThisDOTleaf1ndex = Be.Compare.comparatorsIs(Be.at(0, IfThis.isAttributeNamespaceIdentifier(dataclassInstanceIdentifier, 'leaf1ndex')))
-	findThis0 = Be.Compare.leftIs(IfThis.isConstant_value(0))
 
 #========== isAttributeNamespaceIdentifierGreaterThan0 ======
 	findThis = findThis_leftIsDOTleaf1ndex
@@ -176,46 +181,46 @@ def makeTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	if sourceCallableDispatcher is not None:
-		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
-		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
+	if 名CallableDispatcherSource is not None:
+		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
+		名CallableTarget = ingredientsFunction.astFunctionDef.name
 
 		#Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(dictionaryIdentifiers['function']['counting'])))
-			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
+			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))
+			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(名CallableTarget)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 
-		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(dataclassInstanceIdentifier)], value=Make.Call(Make.Name(identifierCallableInitializeDataclass), [Make.Name(dataclassInstanceIdentifier)]))
+		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(名dataclassInstance)], value=Make.Call(Make.Name(名CallableInitializeState), [Make.Name(名dataclassInstance)]))
 
 		#Insert the transitionOnGroupsOfFolds call at the beginning of the function
 		ingredientsFunctionDispatcher.astFunctionDef.body.insert(0, AssignInitializedDataclass)
 
-		dotModule: identifierDotAttribute = getLogicalPath(settingsPackage.identifierPackage, logicalPathInfix, identifierModuleInitializeDataclass)
-		ingredientsFunctionDispatcher.imports.addImportFrom_asStr(dotModule, identifierCallableInitializeDataclass)
+		dotModule: identifierDotAttribute = getLogicalPath(名Package, logicalPathInfix, 名ModuleInitializeState)
+		ingredientsFunctionDispatcher.imports.addImportFrom_asStr(dotModule, 名CallableInitializeState)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
-	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
-
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
+	ingredientsModule.write_astModule(pathFilename, 名Package)
 
 	return pathFilename
 
-def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+# SEMIOTICS
+def numbaOnTheorem2(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Generate Numba-accelerated Theorem 2 implementation with dataclass decomposition.
 
 	Parameters
 	----------
 	astModule : ast.Module
 		Source module containing the Theorem 2 implementation.
-	identifierModule : str
+	名Module : str
 		Name for the generated Numba-accelerated module.
-	identifierCallable : str | None = None
+	名Callable : str | None = None
 		Name for the accelerated computational function.
 	logicalPathInfix : PathLike[str] | str | None = None
 		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
+	名CallableDispatcherSource : str | None = None
 		Optional dispatcher function identifier (unused).
 
 	Returns
@@ -224,9 +229,18 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 		Filesystem path where the accelerated module was written.
 
 	"""
-	sourceCallableIdentifier = default['function']['counting']
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
+	identifiers = identifiers or default
+	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('theorem2Trimmed') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
+	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('theorem2Numba') or 名CallableSource
+	名CallableDispatcherSource: str | None = keywordArguments.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
+	parametersNumba: ParametersNumba = keywordArguments.get('parametersNumba') or parametersNumbaLight
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名Module: str = keywordArguments.get('名Module') or identifiers['module']['theorem2Numba']
+	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
+
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = 名Callable
 
 	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 
@@ -235,48 +249,52 @@ def numbaOnTheorem2(astModule: ast.Module, identifierModule: str, identifierCall
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumbaLight)
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumba)
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	if sourceCallableDispatcher is not None:
-		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
+	if 名CallableDispatcherSource is not None:
+		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
 		ingredientsFunctionDispatcher.imports.update(shatteredDataclass.imports)
-		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
-		ingredientsFunctionDispatcher = toFieldsToCallToDataclass(ingredientsFunctionDispatcher, targetCallableIdentifier, shatteredDataclass)
+		名CallableTarget = ingredientsFunction.astFunctionDef.name
+		NodeChanger(
+			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))
+			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(名CallableTarget)))
+		).visit(ingredientsFunctionDispatcher.astFunctionDef)
+		ingredientsFunctionDispatcher = toFieldsToCallToDataclass(ingredientsFunctionDispatcher, 名CallableTarget, shatteredDataclass)
 		astTuple: ast.Tuple = raiseIfNone(NodeTourist[ast.Return, ast.Tuple](Be.Return.valueIs(Be.Tuple), doThat=Then.extractIt(DOT.value)).captureLastMatch(ingredientsFunction.astFunctionDef))
 		astTuple.ctx = Make.Store()
 
 		changeAssignCallToTarget = NodeChanger(
-			findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(targetCallableIdentifier))
-			, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(targetCallableIdentifier), astTuple.elts))))
+			findThis=Be.Assign.valueIs(IfThis.isCallIdentifier(名CallableTarget))
+			, doThat=Then.replaceWith(Make.Assign([astTuple], value=Make.Call(Make.Name(名CallableTarget), astTuple.elts))))
 		changeAssignCallToTarget.visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
 	ingredientsModule.removeImportFromModule('numpy')
 
-	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
 
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, 名Package)
 
 	return pathFilename
 
-def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallable: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, sourceCallableDispatcher: str | None = None) -> PurePath:
+def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Generate constrained Theorem 2 implementation by removing unnecessary logic.
 
 	Parameters
 	----------
 	astModule : ast.Module
 		Source module containing the Theorem 2 implementation.
-	identifierModule : str
+	名Module : str
 		Name for the generated trimmed module.
-	identifierCallable : str | None = None
+	名Callable : str | None = None
 		Name for the trimmed computational function.
 	logicalPathInfix : PathLike[str] | str | None = None
 		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
+	名CallableDispatcherSource : str | None = None
 		Optional dispatcher function identifier (unused).
 
 	Returns
@@ -285,9 +303,17 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 		Filesystem path where the trimmed module was written.
 
 	"""
-	sourceCallableIdentifier: str = default['function']['counting']
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(sourceCallableIdentifier, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = identifierCallable or sourceCallableIdentifier
+	identifiers = identifiers or default
+	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
+	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('theorem2Trimmed') or 名CallableSource
+	名CallableDispatcherSource: str | None = keywordArguments.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名Module: str = keywordArguments.get('名Module') or identifiers['module']['theorem2Trimmed']
+	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
+
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = 名Callable
 
 	identifierDataclassInstance: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
@@ -299,20 +325,20 @@ def trimTheorem2(astModule: ast.Module, identifierModule: str, identifierCallabl
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 	ingredientsModule.removeImportFromModule('numpy')
 
-	if sourceCallableDispatcher is not None:
-		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, sourceCallableDispatcher)
-		targetCallableIdentifier = ingredientsFunction.astFunctionDef.name
+	if 名CallableDispatcherSource is not None:
+		ingredientsFunctionDispatcher: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
+		名CallableTarget = ingredientsFunction.astFunctionDef.name
 
 		#Update any calls to the original function name with the new target function name
 		NodeChanger(
-			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(default['function']['counting'])))
-			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(targetCallableIdentifier)))
+			findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))
+			, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(名CallableTarget)))
 		).visit(ingredientsFunctionDispatcher.astFunctionDef)
 
 		ingredientsModule.appendIngredientsFunction(ingredientsFunctionDispatcher)
 
-	pathFilename: PurePath = getPathFilename(settingsPackage.pathPackage, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
 
-	ingredientsModule.write_astModule(pathFilename, identifierPackage=settingsPackage.identifierPackage)
+	ingredientsModule.write_astModule(pathFilename, 名Package)
 
 	return pathFilename

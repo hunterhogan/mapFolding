@@ -40,7 +40,7 @@ from mapFolding.kitAST.kitMakeModules import getModule
 from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
 import ast
 
-FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(logicalPathInfix='algorithms', identifierModule='foldsSymmetric'), defaultFoldsSymmetric['function']['filterAsymmetricFolds']))
+FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(defaultFoldsSymmetric['module']['algorithmSource'], defaultFoldsSymmetric['logicalPath']['algorithm']), defaultFoldsSymmetric['function']['filterAsymmetricFolds']))
 """Insert the extracted symmetry-filter function into generated modules."""
 
 ImaString: str = f"{defaultFoldsSymmetric['variable']['stateInstance']} = {defaultFoldsSymmetric['function']['filterAsymmetricFolds']}({defaultFoldsSymmetric['variable']['stateInstance']})"

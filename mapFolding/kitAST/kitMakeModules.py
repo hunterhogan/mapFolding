@@ -33,6 +33,7 @@ tailored for specific computational requirements essential to large-scale map fo
 from __future__ import annotations
 
 from astToolkit import Be, DOT, identifierDotAttribute, NodeTourist, parseLogicalPath2astModule, Then
+from humpy_cytoolz import get_in
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST.theSSOT import default
 from mapFolding.theSSOT import settingsPackage
@@ -42,6 +43,7 @@ import ast
 
 if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction
+	from mapFolding.theTypes import Default
 	from os import PathLike
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
@@ -86,24 +88,28 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist[ast.arg, identifierDotAttribute](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	return raiseIfNone(logicalPathDataclass), identifierDataclass, identifierDataclassInstance
 
-def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *identifierModule: str | None) -> identifierDotAttribute:
+def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: identifierDotAttribute | None = None, *identifierModule: str) -> identifierDotAttribute:
 	"""Get logical path from components."""
-	boxOfLogicalPathParts: list[str] = []
-	if identifierPackage:
-		boxOfLogicalPathParts.append(identifierPackage)
-	if logicalPathInfix:
-		boxOfLogicalPathParts.append(logicalPathInfix)
-	if identifierModule:
-		boxOfLogicalPathParts.extend([module for module in identifierModule if module is not None])
-	return '.'.join(boxOfLogicalPathParts)
+	return '.'.join(filter(None, [identifierPackage, logicalPathInfix, *identifierModule]))
 
-def getModule(identifierPackage: str | None = settingsPackage.identifierPackage, logicalPathInfix: identifierDotAttribute | None = default['logicalPath']['synthetic'], identifierModule: str | None = None) -> ast.Module:
+def getModule(
+	identifierModule: str | None = None
+	, logicalPathInfix: identifierDotAttribute | None = None
+	, identifierPackage: str | None = None
+	, identifiers: Default | None = None
+) -> ast.Module:
 	"""Get Module."""
-	logicalPathSourceModule: identifierDotAttribute = getLogicalPath(identifierPackage, logicalPathInfix, identifierModule)
-	astModule: ast.Module = parseLogicalPath2astModule(logicalPathSourceModule)
-	return astModule
+	identifierPackage = identifierPackage or get_in(('module', 'package'), identifiers or {}) or default['module']['package']
+	logicalPathInfix = logicalPathInfix or get_in(('logicalPath', 'default'), identifiers or {}) or default['logicalPath']['default']
+	identifierModule = identifierModule or get_in(('module', 'default'), identifiers or {}) or default['module']['default']
+	return parseLogicalPath2astModule(getLogicalPath(identifierPackage, logicalPathInfix, raiseIfNone(identifierModule)))
 
-def getPathFilename(pathRoot: PathLike[str] | None = settingsPackage.pathPackage, logicalPathInfix: identifierDotAttribute | None = None, identifierModule: str = '', fileExtension: str = settingsPackage.fileExtension) -> PurePath:
+def getPathFilename(
+	pathRoot: PathLike[str] | None = settingsPackage.pathPackage
+	, logicalPathInfix: identifierDotAttribute | None = None
+	, identifierModule: str = ''
+	, fileExtension: str = settingsPackage.fileExtension
+) -> PurePath:
 	"""Construct filesystem path from logical path.
 
 	Parameters

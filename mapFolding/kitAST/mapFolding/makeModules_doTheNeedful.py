@@ -17,57 +17,27 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
-	"""Generate initialization module for counting variable setup.
-
-	(AI generated docstring)
-
-	Creates a specialized module containing initialization logic for the counting variables used in
-	map folding computations. The generated function transforms the original algorithm's loop
-	conditions to use equality comparisons instead of greater-than comparisons, optimizing the
-	initialization phase.
-
-	This transformation is particularly important for ensuring that counting variables are properly
-	initialized before the main computational loops begin executing.
-
-	Parameters
-	----------
-	astModule : ast.Module
-		Source module containing the base algorithm.
-	identifierModule : str
-		Name for the generated initialization module.
-	identifierCallable : str | None = None
-		Name for the initialization function.
-	logicalPathInfix : identifierDotAttribute | None = None
-		Directory path for organizing the generated module.
-	sourceCallableDispatcher : str | None = None
-		Optional dispatcher function identifier.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Filesystem path where the initialization module was written.
-
-	"""
+	"""Generate initialization module."""
 	identifiers = identifiers or default
-	identifierCallableSource: identifierDotAttribute = keywordArguments.get('identifierCallableSource') or identifiers['function']['counting']
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(identifierCallableSource, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = keywordArguments.get('identifierCallable') or identifiers['function'].get('initializeState') or identifierCallableSource
+	名CallableSource: identifierDotAttribute = keywordArguments.get('名CallableSource') or identifiers['function']['counting']
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = keywordArguments.get('identifierCallable') or identifiers['function'].get('initializeState') or 名CallableSource
 
 	_logicalPathDataclass, _identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
-	identifierCounting: identifierDotAttribute = keywordArguments.get('identifierCounting') or identifiers['variable']['counting']
+	名Counting: identifierDotAttribute = keywordArguments.get('名Counting') or identifiers['variable']['counting']
 
 	NodeChanger(findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'leaf1ndex')
 		, doThat=Grab.testAttribute(Grab.andDoAllOf([
 			Grab.opsAttribute(Then.replaceWith([ast.Eq()]))
-			, Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(identifierCounting)))]))
+			, Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(名Counting)))]))
 	).visit(ingredientsFunction.astFunctionDef.body[0])
 
 	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
 	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
-	identifierModule: str = keywordArguments.get('identifierModule') or identifiers['module']['initializeState']
+	名Module: str = keywordArguments.get('名Module') or identifiers['module']['initializeState']
 
-	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, identifierModule)
-	identifierPackage: str = keywordArguments.get('identifierPackage') or identifiers['module']['identifierPackage']
-	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, identifierPackage)
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
+	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
+	IngredientsModule(ingredientsFunction).write_astModule(pathFilename, 名Package)
 
 	return pathFilename

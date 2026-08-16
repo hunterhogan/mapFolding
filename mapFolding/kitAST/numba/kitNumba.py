@@ -28,17 +28,22 @@ system to produce standalone modules optimized for specific map dimensions and c
 
 from __future__ import annotations
 
-from astToolkit import Make
+from astToolkit import Be, identifierDotAttribute, Make, NodeChanger, Then
+from astToolkit.containers import IngredientsModule, LedgerOfImports
+from mapFolding.kitAST.kitMakeModules import getPathFilename
+from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING, TypedDict
 import ast
 import dataclasses
 import warnings
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction
 	from collections.abc import Callable, Sequence
+	from mapFolding.theTypes import Default
 	from numba.core.compiler import CompilerBase as numbaCompilerBase
+	from os import PathLike
+	from pathlib import PurePath
 	from typing import Any, Final, NotRequired
 
 class ParametersNumba(TypedDict):
@@ -315,3 +320,24 @@ class SpicesJobNumba:
 
 	parametersNumba: ParametersNumba = dataclasses.field(default_factory=parametersNumbaDefault.copy)
 	"""Numba compilation parameters; defaults to empty dict allowing decorator defaults."""
+
+def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+	"""Add jit_module to the end of a module."""
+	identifiers = identifiers or default
+	parametersNumba: ParametersNumba = keywordArguments.get('parametersNumba') or parametersNumbaLight
+
+	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
+	ingredientsModule.imports.addImportFrom_asStr('numba', 'jit_module')
+	NodeChanger(Be.Import, Then.removeIt).visit(astModule)
+	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
+	ingredientsModule.appendEpilogue(astModule)
+	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+	ingredientsModule.appendEpilogue(statement=Make.Expr(Make.Call(Make.Name('jit_module'), list_keyword=list_keyword)))
+
+	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	identifierModule: str = keywordArguments.get('identifierModule') or identifiers['module']['algorithmNumba']
+
+	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, identifierModule)
+	identifierPackage: str = keywordArguments.get('package') or identifiers['module']['package']
+	return ingredientsModule.write_astModule(pathFilename, identifierPackage)

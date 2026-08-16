@@ -21,58 +21,73 @@ default = Default(
 	}
 	, logicalPath={
 		'algorithm': 'algorithms'
+		, 'default': ''
 		, 'synthetic': 'synthesized'
 	}
 	, module={
 		'dataBasket': 'dataBaskets'
-        , 'identifierPackage': settingsPackage.identifierPackage
+		, 'default': ''
+		, 'package': settingsPackage.identifierPackage
 		, 'initializeState': 'initializeState'
 	}
 	, variable={
-		'stateInstance': 'state'
+		'counting': 'groupsOfFolds'
+		, 'stateInstance': 'state'
 	}
 )
-# TODO Figure out how to centralize more variables. Example: I renamed
-# mapFolding\algorithms\symmetricFolds.py to mapFolding\algorithms\foldsSymmetric.py.
+
 defaultMapFolding: Default = deepcopy(default)
 defaultMapFolding['function'].update({
 	'initializeState': 'transitionOnGroupsOfFolds'
 })
 defaultMapFolding['module'].update({
 	'algorithm': 'daoOfMapFolding'
+	, 'algorithmNumba': 'daoOfMapFoldingNumba'
+	, 'countParallelNumba': 'countParallelNumba'
+	, 'inlineNumba': 'inlineNumba'
+	, 'theorem2': 'theorem2'
+	, 'theorem2Numba': 'theorem2Numba'
+	, 'theorem2Trimmed': 'theorem2Trimmed'
 })
 defaultMapFolding['variable'].update({
 	'counting': 'groupsOfFolds'
-# TODO Didn't I make a clever function to dynamically extract this value? `findDataclass`
 	, 'stateDataclass': 'MapFoldingState'
 })
+defaultMapFolding['logicalPath']['default'] = defaultMapFolding['logicalPath']['algorithm']
+defaultMapFolding['module']['default'] = defaultMapFolding['module']['algorithm']
 
-defaultFoldsSymmetric: Default = deepcopy(default)
+defaultFoldsSymmetric: Default = deepcopy(defaultMapFolding)
 defaultFoldsSymmetric['function'].update({
 	'_processCompletedFutures': '_processCompletedFutures'
+	, 'activeLeafGreaterThan0': 'activeLeafGreaterThan0'
 	, 'filterAsymmetricFolds': 'filterAsymmetricFolds'
 	, 'getSymmetricTotalFolds': 'getSymmetricTotalFolds'
 	, 'initializeConcurrencyManager': 'initializeConcurrencyManager'
-    , 'initializeState': defaultMapFolding['function']['initializeState']
+	, 'initializeState': defaultMapFolding['function']['initializeState']
 })
 defaultFoldsSymmetric['logicalPath']['synthetic'] += '.foldsSymmetric'
 defaultFoldsSymmetric['logicalPath'].update({'assembly': 'kitAST.foldsSymmetric'})
 defaultFoldsSymmetric['module'].update({
 	'algorithm': 'algorithm'
+	, 'algorithmNumba': 'algorithmNumba'
+	, 'algorithmSource': 'foldsSymmetric'
 	, 'asynchronous': 'asynchronous'
+	, 'asynchronousAnnex': '_asynchronousAnnex'
 })
 defaultFoldsSymmetric['variable'].update({
-# TODO Ambitious: can I dynamically extract this value from the hand-made algorithm?
 	'counting': 'symmetricFolds'
-# TODO Didn't I make a clever function to dynamically extract this value? `findDataclass`
+	, 'indices': 'indices'
+	, 'maxWorkers': 'maxWorkers'
 	, 'stateDataclass': 'SymmetricFoldsState'
 })
+defaultFoldsSymmetric['logicalPath']['default'] = defaultFoldsSymmetric['logicalPath']['synthetic']
+defaultFoldsSymmetric['module']['default'] = defaultFoldsSymmetric['module']['algorithm']
 
 dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
-	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000,  # Probably less than 12 days with my T4 discovery.
-	(2, 21): 776374224866624,
-	(3, 15): 824761667826225,
-	(3, 3, 3, 3): 85109616000000000000000000000000,
-	(8, 8): 791274195985524900,  # Two tests, months apart, estimated 300,000 hours to compute.
+	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000
+	, (2, 21): 776374224866624
+	, (3, 15): 824761667826225
+	, (3, 3, 3, 3): 85109616000000000000000000000000
+	, (8, 8): 791274195985524900  # Two tests, months apart, estimated 300,000 hours to compute.
 }
 """Estimates of multidimensional map folding `totalFolds`."""
