@@ -158,13 +158,14 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	known: int = getValuesKnown(oeisID).get(n, -errorL33T)
 	match: bool = computed == known
 	sys.stdout.write(
-		f"{match}\t"
-		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}"
-		f"{n}\t{computed}\t{known}\t"
+		f"{n:2}\t"
+		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}{match}{ansiColorReset}\t"
+		f"{time.perf_counter() - timeStart:5.2f}\t"
+		f"{computed}\t{known}\t"
 	)
 	if ratio and computed:
 		sys.stdout.write(f"{known / computed}\t")
-	sys.stdout.write(f"{time.perf_counter() - timeStart:.2f}\t{ansiColorReset}\n")
+	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunHeader(oeisID: str, flow: str) -> None:
 	"""Print a colored header line for an easy run benchmark session.

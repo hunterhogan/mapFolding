@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from archive.permutationMeanders.stamp_meander import doTheNeedful
+from mapFolding.algorithms.stamp_meander import doTheNeedful
 from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 
+# TODO This module doesn't conform.
 @pytest.mark.parametrize(
 	'oeisID, n, expected',
 	[
@@ -17,8 +18,8 @@ if TYPE_CHECKING:
 		pytest.param('A005316', 0, 1, id='open-meanders-base'),
 		pytest.param('A005316', 6, 14, id='open-meanders'),
 		pytest.param('A077055', 0, 1, id='symmetric-open-meanders-base'),
-		pytest.param('A077055', 6, 8, id='symmetric-open-meanders'),
-		pytest.param('A077055', 7, 13, id='symmetric-open-meanders-odd'),
+		pytest.param('A077055', 6, 13, id='symmetric-open-meanders'),
+		pytest.param('A077055', 7, 42, id='symmetric-open-meanders-odd'),
 		pytest.param('A000682', 1, 1, id='semi-meanders-base'),
 		pytest.param('A000682', 2, 1, id='semi-meanders-index-shift'),
 	],

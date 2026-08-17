@@ -39,16 +39,16 @@ if __name__ == '__main__':
 		4. Connect ends across the line.
 		"""
 
-		nList: list[int] = []
-		# nList.extend(range(2, 10))
-		# nList.extend(range(10, 28))
-		# nList.extend(range(28, 33))
-		nList.extend(range(33, 38))
-		# nList.extend(range(38, 43))
-		# nList.extend(range(43, 45))
-		# nList.extend(range(45, 50))
+		boxOf_n: list[int] = []
+		boxOf_n.extend(range(2, 10))
+		boxOf_n.extend(range(10, 28))
+		boxOf_n.extend(range(28, 33))
+		boxOf_n.extend(range(33, 38))
+		boxOf_n.extend(range(38, 43))
+		boxOf_n.extend(range(43, 45))
+		boxOf_n.extend(range(45, 50))
 
-		for n in nList:
+		for n in boxOf_n:
 			gc.collect()
 			timeStart: float = time.perf_counter()
 			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)

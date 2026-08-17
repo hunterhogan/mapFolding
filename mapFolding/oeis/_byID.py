@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from archive.permutationMeanders.stamp_meander import doTheNeedful as countSawadaLi
 from hunterMakesPy.parseParameters import intInnit
+from mapFolding.algorithms.stamp_meander import doTheNeedful as countSawadaLi
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import byFormula, getMetadata, makeMapShape, oeisIDsMapFoldingImplemented
 from mapFolding.oeis._beDRY import formatOEISid
