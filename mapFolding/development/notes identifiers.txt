@@ -24,3 +24,19 @@ Does "List" mean
 - boxOf
 
 Better identifier: `shapeAsBoxOfSlice`
+
+nMinus1Factorial = factorial(n - 1)
+nMinus1Factorial is a good identifier. Hypothetically, it could be next to
+nPlus1Factorial = factorial(n + 1)
+Because the word "less" is the same length as "plus", identifiers with "less" and "more" will stay
+physically aligned in the code. For _only_ the alignment reason, I prefer "less" over "minus."
+nLess1Factorial = factorial(n - 1)
+nPlus1Factorial = factorial(n + 1)
+nMinus1Factorial = factorial(n - 1)
+
+Similarly, I prefer the pair "less than" and "more than" over "less than" and "greater than" _only_
+because of the symmetric alignment of related identifiers in the code.
+
+Luckily, in European languages other than English, the semiotics tend to be the equivalent of "n less
+1" rather than "n minus 1" and "n [is] more than 2" rather than "n greater than 2". So, for many ESL
+readers, nLess1 is more natural, for example, than nMinus1.

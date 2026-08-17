@@ -79,10 +79,10 @@ def A000682(n: int, f: LiteralString | None = None) -> int:
 			case 'A000136':
 				countTotal = A000136(n) // n
 			case 'A223094':
-				nMinus1Factorial: int = factorial(n - 1)
-				countTotal = nMinus1Factorial - sum(A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n))
+				nLess1Factorial: int = factorial(n - 1)
+				countTotal = nLess1Factorial - sum(A223094(n下k) * (nLess1Factorial // factorial(n下k)) for n下k in range(3, n))
 			case 'A001010':
-				countTotal = A001010(2 * n - 2) // 2
+				countTotal = A001010((2 * n) - 2) // 2
 			case 'A060206 and A000560':
 				if n % 2:
 					countTotal = A060206((n - 1) // 2)
@@ -90,26 +90,26 @@ def A000682(n: int, f: LiteralString | None = None) -> int:
 					countTotal = 2 * A000560(n - 1)
 			case 'A077460, A005316, and A000560':
 				if n % 2:
-					countTotal = 4 * A077460(n) - _A005316(2 * n - 1) - _A005316(n)
+					countTotal = (4 * A077460(n)) - _A005316((2 * n) - 1) - _A005316(n)
 				else:
 					countTotal = 2 * A000560(n - 1)
 			case 'A223093 and A077014':
 				countTotal = A223093(n - 1) + A077014(n - 1)
 			case 'A223093 and A005316':
-				countTotal = A223093(n - 1) + (1 + (n % 2)) * _A005316(n - 1)
+				countTotal = A223093(n - 1) + ((1 + (n % 2)) * _A005316(n - 1))
 			case 'A000136 and A223094':
 				countTotal = A000136(n - 1) - A223094(n - 1)
 			case 'A223094 and A000682':
-				countTotal = (n - 1) * _A000682(n - 1) - A223094(n - 1)
+				countTotal = ((n - 1) * _A000682(n - 1)) - A223094(n - 1)
 			case 'A000136, A077014, and A223095':
 				countTotal = (A000136(n - 1) + A077014(n - 1) - A223095(n - 1)) // 2
 			case 'A259702 and A000682':
 				countTotal = 2 * (A259702(n) + _A000682(n - 1))
 			case 'A333971 and A000682':
-				countTotal = A333971(n + 1) // 4 + _A000682(n - 1)
+				countTotal = (A333971(n + 1) // 4) + _A000682(n - 1)
 			case 'A334615, A000682, and A000560':
 				if 4 <= n:
-					countTotal = A334615(n) + 4 * _A000682(n - 1) - 4 * _A000682(n - 2)
+					countTotal = A334615(n) + (4 * _A000682(n - 1)) - (4 * _A000682(n - 2))
 				else:
 					countTotal = 2 * A000560(n - 1)
 			case 'A337581':
@@ -124,7 +124,7 @@ def A001010(n: int, f: LiteralString | None = None) -> int:
 	else:
 		match f:
 			case 'A001011 and A000682':
-				countTotal = 4 * A001011(n) - (n * _A000682(n))
+				countTotal = (4 * A001011(n)) - (n * _A000682(n))
 			case 'A007822 and A000682' | _:
 				if n % 2:
 					countTotal = 2 * _A007822((n - 1) // 2 + 1)
@@ -133,11 +133,11 @@ def A001010(n: int, f: LiteralString | None = None) -> int:
 	return countTotal
 
 def A001011(n: int, f: LiteralString | None = None) -> int:
-	if n == 1:
-		countTotal: int = 1
-	else:
-		match f:
-			case 'A001010 and A000682' | _:
+	match f:
+		case 'A001010 and A000682' | _:
+			if n == 1:
+				countTotal: int = 1
+			else:
 				countTotal = (A001010(n) + (n * _A000682(n))) // 4
 	return countTotal
 
@@ -149,9 +149,9 @@ def A005315(n: int, f: LiteralString | None = None) -> int:
 		match f:
 			case 'A077460, A005316, and A060206':
 				if n % 2:
-					countTotal = 4 * A077460(n) - _A005316(n) - A060206((n - 1) // 2)
+					countTotal = (4 * A077460(n)) - _A005316(n) - A060206((n - 1) // 2)
 				else:
-					countTotal = 4 * A077460(n) - _A005316(n) - _A005316(n)
+					countTotal = (4 * A077460(n)) - _A005316(n) - _A005316(n)
 			case 'A078591':
 				countTotal = 2 * A078591(n)
 			case 'A085973 and A077054':
@@ -177,14 +177,14 @@ def A005316(n: int, f: LiteralString | None = None) -> int:
 					countTotal = A077054(n // 2)
 			case 'A077460, A005315, and A060206':
 				if n % 2:
-					countTotal = 4 * A077460(n) - A005315(n) - A060206((n - 1) // 2)
+					countTotal = (4 * A077460(n)) - A005315(n) - A060206((n - 1) // 2)
 				else:
-					countTotal = (4 * A077460(n) - A005315(n)) // 2
+					countTotal = ((4 * A077460(n)) - A005315(n)) // 2
 			case 'A078592 and A005315':
 				if n % 2:
 					countTotal = A005315((n + 1) // 2)
 				else:
-					countTotal = 2 * A078592(n // 2) - _A005316(n // 2)
+					countTotal = (2 * A078592(n // 2)) - _A005316(n // 2)
 			case 'A227167, A217310, and A217318':
 				countTotal = A227167(n) - A217310(n) - A217318(n)
 			case 'A000682 and A223093' | _:
@@ -192,11 +192,11 @@ def A005316(n: int, f: LiteralString | None = None) -> int:
 	return countTotal
 
 def A007822(n: int, f: LiteralString | None = None) -> int:
-	if n == 1:
-		countTotal: int = 1
-	else:
-		match f:
-			case 'A001010' | _:
+	match f:
+		case 'A001010' | _:
+			if n == 1:
+				countTotal: int = 1
+			else:
 				countTotal = A001010(2 * n - 1) // 2
 	return countTotal
 
@@ -204,7 +204,7 @@ def A060206(n: int, f: LiteralString | None = None) -> int:
 	match f:
 		case 'A077460, A005315, and A005316':
 			if 0 < n:
-				countTotal: int = 4 * A077460(2 * n + 1) - A005315(2 * n + 1) - _A005316(2 * n + 1)
+				countTotal: int = (4 * A077460(2 * n + 1)) - A005315(2 * n + 1) - _A005316(2 * n + 1)
 			else:
 				countTotal = A077460(2 * n + 1)
 		case 'A000682' | _:
@@ -222,7 +222,7 @@ def A077014(n: int, f: LiteralString | None = None) -> int:
 				else:
 					countTotal = _A000682(n + 1) - A223093(n)
 			case 'A223095 and A000682':
-				countTotal = A223095(n) - (n * _A000682(n)) + 2 * _A000682(n + 1)
+				countTotal = A223095(n) - (n * _A000682(n)) + (2 * _A000682(n + 1))
 			case 'A005316' | _:
 				countTotal = (2 - (n % 2)) * _A005316(n)
 	return countTotal
@@ -247,17 +247,17 @@ def A077460(n: int, f: LiteralString | None = None) -> int:
 				if n % 2:
 					countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
 				else:
-					countTotal = (_A005316(2 * n - 1) + 2 * _A005316(n)) // 4
+					countTotal = (_A005316(2 * n - 1) + (2 * _A005316(n))) // 4
 			case 'A005315, A005316, and A060206':
 				if n % 2:
 					countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
 				else:
-					countTotal = (A005315(n) + 2 * _A005316(n)) // 4
+					countTotal = (A005315(n) + (2 * _A005316(n))) // 4
 			case 'A000682 and A005316' | _:
 				if n % 2:
 					countTotal = (_A000682(n) + _A005316(2 * n - 1) + _A005316(n)) // 4
 				else:
-					countTotal = (_A005316(2 * n - 1) + 2 * _A005316(n)) // 4
+					countTotal = (_A005316(2 * n - 1) + (2 * _A005316(n))) // 4
 	return countTotal
 
 def A078591(n: int, f: LiteralString | None = None) -> int:
@@ -272,11 +272,11 @@ def A078591(n: int, f: LiteralString | None = None) -> int:
 	return countTotal
 
 def A078592(n: int, f: LiteralString | None = None) -> int:
-	if n == 0:
-		countTotal: int = 1
-	else:
-		match f:
-			case 'A005316' | _:
+	match f:
+		case 'A005316' | _:
+			if n == 0:
+				countTotal: int = 1
+			else:
 				countTotal = (_A005316(2 * n) + _A005316(n)) // 2
 	return countTotal
 
@@ -334,7 +334,7 @@ def A223093(n: int, f: LiteralString | None = None) -> int:
 		case 'A000682 and A077014':
 			countTotal = _A000682(n + 1) - A077014(n)
 		case 'A000682 and A005316' | _:
-			countTotal = _A000682(n + 1) - (2 - (n % 2)) * _A005316(n)
+			countTotal = _A000682(n + 1) - ((2 - (n % 2)) * _A005316(n))
 	return countTotal
 
 def A223094(n: int, f: LiteralString | None = None) -> int:
@@ -344,7 +344,7 @@ def A223094(n: int, f: LiteralString | None = None) -> int:
 				countTotal: int = 0
 			else:
 				nFactorial: int = factorial(n)
-				countTotal = nFactorial - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)) - _A000682(n + 1)
+				countTotal = nFactorial - _A000682(n + 1) - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n))
 		case 'A223095 and A223093':
 			countTotal = A223095(n) + A223093(n)
 		case 'A000682' | _:
@@ -385,16 +385,14 @@ def A259689(n: int, f: LiteralString | None = None) -> int:
 
 	match f:
 		case 'A000682' | _:
-			if nRow >= 4 and n下k == nRow // 2:
-				countTotal: int = 2 ** ((nRow - 1) // 2) * (nRow - 4) + 2
-			elif nRow > 2 and n下k == (nRow + 2) // 2:
+			if (4 <= nRow) and (n下k == (nRow // 2)):
+				countTotal: int = (2 ** ((nRow - 1) // 2)) * (nRow - 4) + 2
+			elif (2 < nRow) and (n下k == ((nRow + 2) // 2)):
 				countTotal = 2 ** ((nRow - 1) // 2)
 			else:
-				countTotal = (
-					_A000682(nRow + 1)
-					- sum(
-						n下kOther * getValuesKnown('A259689')[((nRow - 1) ** 2) // 4 + n下kOther]
-						for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))
+				countTotal = (_A000682(nRow + 1)
+					- sum(n下i * getValuesKnown('A259689')[((nRow - 1) ** 2) // 4 + n下i]
+							for n下i in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))
 					)
 				) // n下k
 	return countTotal
@@ -407,7 +405,7 @@ def A259702(n: int, f: LiteralString | None = None) -> int:
 			case 'A301620':
 				countTotal = A301620(n - 2) // 2
 			case 'A000682' | _:
-				countTotal = _A000682(n) // 2 - _A000682(n - 1)
+				countTotal = (_A000682(n) // 2) - _A000682(n - 1)
 	return countTotal
 
 @cache
@@ -415,15 +413,15 @@ def A301620(n: int, f: LiteralString | None = None) -> int:
 	match f:
 		case 'A334615, A301620, and A000682':
 			if 2 <= n:
-				countTotal: int = A334615(n + 2) + 2 * A301620(n - 1)
+				countTotal: int = A334615(n + 2) + (2 * A301620(n - 1))
 			else:
-				countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
+				countTotal = _A000682(n + 2) - (2 * _A000682(n + 1))
 		case 'A259689':
-			countTotal = sum(A259689(n**2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n + 3) // 2 + 1))
+			countTotal = sum(A259689(((n**2) // 4) + n下k) * (n下k - 2) for n下k in range(3, ((n + 3) // 2) + 1))
 		case 'A259702':
 			countTotal = 2 * A259702(n + 2)
 		case 'A000682' | _:
-			countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
+			countTotal = _A000682(n + 2) - (2 * _A000682(n + 1))
 	return countTotal
 
 def A333971(n: int, f: LiteralString | None = None) -> int:
@@ -441,9 +439,9 @@ def A334615(n: int, f: LiteralString | None = None) -> int:
 	else:
 		match f:
 			case 'A301620':
-				countTotal = A301620(n - 2) - 2 * A301620(n - 3)
+				countTotal = A301620(n - 2) - (2 * A301620(n - 3))
 			case 'A000682' | _:
-				countTotal = _A000682(n) - 4 * _A000682(n - 1) + 4 * _A000682(n - 2)
+				countTotal = _A000682(n) - (4 * _A000682(n - 1)) + (4 * _A000682(n - 2))
 	return countTotal
 
 def A337581(n: int, f: LiteralString | None = None) -> int:

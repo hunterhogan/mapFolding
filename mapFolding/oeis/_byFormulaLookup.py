@@ -44,8 +44,8 @@ def A000682(n: int, f: Literal['A301620', 'A259689', 'A000136', 'A223094', 'A001
             case 'A000136':
                 countTotal = _A000136(n) // n
             case 'A223094':
-                nMinus1Factorial: int = factorial(n - 1)
-                countTotal = nMinus1Factorial - sum((_A223094(n下k) * (nMinus1Factorial // factorial(n下k)) for n下k in range(3, n)))
+                nLess1Factorial: int = factorial(n - 1)
+                countTotal = nLess1Factorial - sum((_A223094(n下k) * (nLess1Factorial // factorial(n下k)) for n下k in range(3, n)))
             case 'A001010':
                 countTotal = _A001010(2 * n - 2) // 2
             case 'A060206 and A000560':
@@ -98,11 +98,11 @@ def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | L
     return countTotal
 
 def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None=None) -> int:
-    if n == 1:
-        countTotal: int = 1
-    else:
-        match f:
-            case 'A001010 and A000682' | _:
+    match f:
+        case 'A001010 and A000682' | _:
+            if n == 1:
+                countTotal: int = 1
+            else:
                 countTotal = (_A001010(n) + n * _A000682(n)) // 4
     return countTotal
 
@@ -155,11 +155,11 @@ def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A0053
     return countTotal
 
 def A007822(n: int, f: Literal['A001010'] | LiteralString | None=None) -> int:
-    if n == 1:
-        countTotal: int = 1
-    else:
-        match f:
-            case 'A001010' | _:
+    match f:
+        case 'A001010' | _:
+            if n == 1:
+                countTotal: int = 1
+            else:
                 countTotal = _A001010(2 * n - 1) // 2
     return countTotal
 
@@ -235,11 +235,11 @@ def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None
     return countTotal
 
 def A078592(n: int, f: Literal['A005316'] | LiteralString | None=None) -> int:
-    if n == 0:
-        countTotal: int = 1
-    else:
-        match f:
-            case 'A005316' | _:
+    match f:
+        case 'A005316' | _:
+            if n == 0:
+                countTotal: int = 1
+            else:
                 countTotal = (_A005316(2 * n) + _A005316(n)) // 2
     return countTotal
 
@@ -301,7 +301,7 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223095 and A223093', 'A0
                 countTotal: int = 0
             else:
                 nFactorial: int = factorial(n)
-                countTotal = nFactorial - sum((_A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n))) - _A000682(n + 1)
+                countTotal = nFactorial - _A000682(n + 1) - sum((_A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)))
         case 'A223095 and A223093':
             countTotal = _A223095(n) + _A223093(n)
         case 'A000682' | _:
@@ -340,12 +340,12 @@ def A259689(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
         n下k = 次InRowsPair - rowLength + 2
     match f:
         case 'A000682' | _:
-            if nRow >= 4 and n下k == nRow // 2:
+            if 4 <= nRow and n下k == nRow // 2:
                 countTotal: int = 2 ** ((nRow - 1) // 2) * (nRow - 4) + 2
-            elif nRow > 2 and n下k == (nRow + 2) // 2:
+            elif 2 < nRow and n下k == (nRow + 2) // 2:
                 countTotal = 2 ** ((nRow - 1) // 2)
             else:
-                countTotal = (_A000682(nRow + 1) - sum((n下kOther * getValuesKnown('A259689')[(nRow - 1) ** 2 // 4 + n下kOther] for n下kOther in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))))) // n下k
+                countTotal = (_A000682(nRow + 1) - sum((n下i * getValuesKnown('A259689')[(nRow - 1) ** 2 // 4 + n下i] for n下i in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))))) // n下k
     return countTotal
 
 def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None=None) -> int:
