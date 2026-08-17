@@ -434,13 +434,63 @@ def A333971(n: int, f: LiteralString | None = None) -> int:
 	return countTotal
 
 def A334615(n: int, f: LiteralString | None = None) -> int:
-	if n in {2, 3}:
-		countTotal: int = 0
-	else:
-		match f:
-			case 'A301620':
+	match f:
+		case 'A000560':
+			if 2 <= n < 5:
+				countTotal: int = 0
+			else:
+				countTotal = 2 * (A000560(n - 1) - (4 * A000560(n - 2)) + (4 * A000560(n - 3)))
+		case 'A001010':
+			countTotal = (A001010((2 * n) - 2) // 2) - (2 * A001010((2 * n) - 4)) + (2 * A001010((2 * n) - 6))
+		case 'A259702':
+			countTotal = 2 * (A259702(n) - (2 * A259702(n - 1)))
+		case 'A337581':
+			countTotal = (A337581(n + 2) // 4) - A337581(n + 1) + A337581(n)
+		case 'A227167':
+			if 2 <= n < 4:
+				countTotal = 0
+			else:
+				countTotal = (((2 - (n % 2)) * A227167(n - 0) // (n - 0))
+						- (4 * (1 + (n % 2)) * A227167(n - 1) // (n - 1))
+						+ (4 * (2 - (n % 2)) * A227167(n - 2) // (n - 2))
+					)
+		case 'A223094':
+			if 2 <= n < 4:
+				countTotal = 0
+			else:
+				offset: int = 0
+				nLess1factorial: int = factorial(n - 1 + offset)
+				countTotal = nLess1factorial - sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))
+
+				offset -= 1
+				nLess1factorial = factorial(n - 1 + offset)
+				countTotal = countTotal - (4 * (nLess1factorial  # ruff: ignore[non-augmented-assignment]
+								- sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
+
+				offset -= 1
+				nLess1factorial = factorial(n - 1 + offset)
+				countTotal = countTotal + (4 * (nLess1factorial  # ruff: ignore[non-augmented-assignment]
+								- sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
+
+		case 'A301620':
+			if 2 <= n < 4:
+				countTotal = 0
+			else:
 				countTotal = A301620(n - 2) - (2 * A301620(n - 3))
-			case 'A000682' | _:
+		case 'A005316 and A223093':
+			countTotal = ((A223093(n - 1) + ((1 + (n % 2)) * _A005316(n - 1)))
+					- (4 * (A223093(n - 2) + ((2 - (n % 2)) * _A005316(n - 2))))
+					+ (4 * (A223093(n - 3) + ((1 + (n % 2)) * _A005316(n - 3))))
+				)
+		case 'A005316 and A217310':
+			countTotal = (((A217310(n - 1) + (2 * _A005316(n - 1))) // (2 - (n % 2)))
+					- ((4 * (A217310(n - 2) + (2 * _A005316(n - 2)))) // (1 + (n % 2)))
+					+ ((4 * (A217310(n - 3) + (2 * _A005316(n - 3)))) // (2 - (n % 2)))
+				)
+		case 'A000682' | _:
+			if 2 <= n < 4:
+				countTotal = 0
+			else:
 				countTotal = _A000682(n) - (4 * _A000682(n - 1)) + (4 * _A000682(n - 2))
 	return countTotal
 

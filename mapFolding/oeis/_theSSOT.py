@@ -17,7 +17,7 @@ oeisIDsMapFoldingImplemented: tuple[LiteralString, ...] = ('A000136', 'A001415',
 """OEIS IDs of multidimensional map-folding algorithms."""
 
 oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented, 'A000560', 'A000682', 'A001010', 'A001011'
-	, 'A005315', 'A005316', 'A007822', 'A060206', 'A077014', 'A077054', 'A077460', 'A078591'
+	, 'A005315', 'A005316', 'A007822', 'A060206', 'A077014', 'A077054', 'A077055', 'A077460', 'A078591'
 	, 'A078592', 'A085973', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095'
 	, 'A227167', 'A259689', 'A259702', 'A301620', 'A333971', 'A334615', 'A337581')
 """Every implemented OEIS ID."""
