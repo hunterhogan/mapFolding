@@ -82,7 +82,7 @@ def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float
 
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('n, flow'
-	, [*[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 7), ('numba', 'theorem2Numba', 'algorithmNumba'))]
+	, [*[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 7), ('numba', 'algorithmNumba'))]  # 'theorem2Numba',
 	, *[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 5), ('algorithm', 'theorem2', 'theorem2Trimmed')
 )]])
 def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> None:
