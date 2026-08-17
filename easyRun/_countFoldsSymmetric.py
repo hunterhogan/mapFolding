@@ -18,9 +18,9 @@ if __name__ == '__main__':
 	flow = 'asynchronous'
 	flow = 'theorem2'
 	flow = 'theorem2Trimmed'
-	flow = 'theorem2Numba'
 	flow = 'algorithm'
 	flow = 'algorithmNumba'
+	flow = 'theorem2Numba'
 
 	printEasyRunHeader(oeisID, flow)
 

@@ -23,8 +23,8 @@ if __name__ == '__main__':
 	flow = 'numba'
 	flow = 'theorem2'
 	flow = 'daoOfMapFolding'
-	flow = 'theorem2Numba'
 	flow = 'daoOfMapFoldingNumba'
+	flow = 'theorem2Numba'
 
 	oeisID = 'A001416'
 	oeisID = 'A195646'

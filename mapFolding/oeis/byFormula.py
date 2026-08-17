@@ -254,7 +254,7 @@ def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085
     OEIS : webpage
         https://oeis.org/A005315
     """
-    if n in {0, 1}:
+    if 0 <= n < 2:
         countTotal: int = 1
     else:
         match f:
@@ -298,7 +298,7 @@ def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A0053
     OEIS : webpage
         https://oeis.org/A005316
     """
-    if n in {0, 1}:
+    if 0 <= n < 2:
         countTotal: int = 1
     else:
         match f:
@@ -464,9 +464,9 @@ def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString
                 countTotal = _A005316(2 * n)
     return countTotal
 
-def A077460(n: int, f: Literal['A005316, A005315, and A060206', 'A005315, A005316, and A060206', 'A000682 and A005316'] | LiteralString | None=None) -> int:
+def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A005316'] | LiteralString | None=None) -> int:
     """
-    Compute A077460(n) as a function of A005316, A005315, and A060206 or A005315, A005316, and A060206 or A000682 and A005316.
+    Compute A077460(n) as a function of A005315, A005316, and A060206 or A000682 and A005316.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
 
@@ -488,15 +488,10 @@ def A077460(n: int, f: Literal['A005316, A005315, and A060206', 'A005315, A00531
     OEIS : webpage
         https://oeis.org/A077460
     """
-    if n in {0, 1}:
+    if 0 <= n < 2:
         countTotal: int = 1
     else:
         match f:
-            case 'A005316, A005315, and A060206':
-                if n % 2:
-                    countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
-                else:
-                    countTotal = (_A005316(2 * n - 1) + 2 * _A005316(n)) // 4
             case 'A005315, A005316, and A060206':
                 if n % 2:
                     countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
@@ -506,7 +501,7 @@ def A077460(n: int, f: Literal['A005316, A005315, and A060206', 'A005315, A00531
                 if n % 2:
                     countTotal = (_A000682(n) + _A005316(2 * n - 1) + _A005316(n)) // 4
                 else:
-                    countTotal = (_A005316(2 * n - 1) + 2 * _A005316(n)) // 4
+                    countTotal = (_A005316(n) + _A005316(2 * n - 1) + _A005316(n)) // 4
     return countTotal
 
 def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None) -> int:
@@ -533,7 +528,7 @@ def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None
     OEIS : webpage
         https://oeis.org/A078591
     """
-    if n in {0, 1}:
+    if 0 <= n < 2:
         countTotal: int = 1
     else:
         match f:
@@ -741,9 +736,9 @@ def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A0
             countTotal = _A000682(n + 1) - (2 - n % 2) * _A005316(n)
     return countTotal
 
-def A223094(n: int, f: Literal['A223094 and A000682', 'A223095 and A223093', 'A000682'] | LiteralString | None=None) -> int:
+def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A000682'] | LiteralString | None=None) -> int:
     """
-    Compute A223094(n) as a function of A223094 and A000682 or A223095 and A223093 or A000682.
+    Compute A223094(n) as a function of A223094 and A000682 or A223093 and A223095 or A000682.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is: "Number of foldings of n labeled stamps in which leaf n is inwards."
 
@@ -772,8 +767,8 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223095 and A223093', 'A0
             else:
                 nFactorial: int = factorial(n)
                 countTotal = nFactorial - _A000682(n + 1) - sum((A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)))
-        case 'A223095 and A223093':
-            countTotal = A223095(n) + A223093(n)
+        case 'A223093 and A223095':
+            countTotal = A223093(n) + A223095(n)
         case 'A000682' | _:
             countTotal = n * _A000682(n) - _A000682(n + 1)
     return countTotal

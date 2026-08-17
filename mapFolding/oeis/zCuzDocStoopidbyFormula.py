@@ -143,7 +143,7 @@ def A001011(n: int, f: LiteralString | None = None) -> int:
 
 @cache
 def A005315(n: int, f: LiteralString | None = None) -> int:
-	if n in {0, 1}:
+	if 0 <= n < 2:
 		countTotal: int = 1
 	else:
 		match f:
@@ -164,7 +164,7 @@ def A005315(n: int, f: LiteralString | None = None) -> int:
 
 @cache
 def A005316(n: int, f: LiteralString | None = None) -> int:
-	if n in {0, 1}:
+	if 0 <= n < 2:
 		countTotal: int = 1
 	else:
 		match f:
@@ -239,15 +239,10 @@ def A077054(n: int, f: LiteralString | None = None) -> int:
 	return countTotal
 
 def A077460(n: int, f: LiteralString | None = None) -> int:
-	if n in {0, 1}:
+	if 0 <= n < 2:
 		countTotal: int = 1
 	else:
 		match f:
-			case 'A005316, A005315, and A060206':
-				if n % 2:
-					countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
-				else:
-					countTotal = (_A005316(2 * n - 1) + (2 * _A005316(n))) // 4
 			case 'A005315, A005316, and A060206':
 				if n % 2:
 					countTotal = (A005315(n) + _A005316(n) + A060206((n - 1) // 2)) // 4
@@ -255,13 +250,13 @@ def A077460(n: int, f: LiteralString | None = None) -> int:
 					countTotal = (A005315(n) + (2 * _A005316(n))) // 4
 			case 'A000682 and A005316' | _:
 				if n % 2:
-					countTotal = (_A000682(n) + _A005316(2 * n - 1) + _A005316(n)) // 4
+					countTotal = (_A000682(n) + _A005316((2 * n) - 1) + _A005316(n)) // 4
 				else:
-					countTotal = (_A005316(2 * n - 1) + (2 * _A005316(n))) // 4
+					countTotal = (_A005316(n) + _A005316((2 * n) - 1) + _A005316(n)) // 4
 	return countTotal
 
 def A078591(n: int, f: LiteralString | None = None) -> int:
-	if n in {0, 1}:
+	if 0 <= n < 2:
 		countTotal: int = 1
 	else:
 		match f:
@@ -289,7 +284,7 @@ def A085973(n: int, f: LiteralString | None = None) -> int:
 				countTotal = A077054(n) + A005315(n)
 			# ruff: ignore[commented-out-code]
 			# case 'A005315 and A005316':
-				# FIXME This formula system is not communicative for `n`, so `n + 1` gets boosted too
+				# FIXME This formula system is not commutative for `n`, so `n + 1` gets boosted too
 				# much in A005315. I think I need a totally different paradigm.
 				# countTotal = A005315(n + 1) + _A005316(2 * n + 1)
 			case 'A005316' | _:
@@ -345,8 +340,8 @@ def A223094(n: int, f: LiteralString | None = None) -> int:
 			else:
 				nFactorial: int = factorial(n)
 				countTotal = nFactorial - _A000682(n + 1) - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n))
-		case 'A223095 and A223093':
-			countTotal = A223095(n) + A223093(n)
+		case 'A223093 and A223095':
+			countTotal = A223093(n) + A223095(n)
 		case 'A000682' | _:
 			countTotal = (n * _A000682(n)) - _A000682(n + 1)
 	return countTotal
