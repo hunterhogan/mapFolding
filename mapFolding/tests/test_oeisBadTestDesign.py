@@ -30,7 +30,6 @@ from contextlib import redirect_stdout
 from mapFolding.oeis import getMetadata, getOEISids, getTotalFoldsKnown, getValuesKnown, OEIS_for_n, oeisIDfor_n, oeisIDsImplemented
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.tests import assertEqualTo, messageTestFailure
-from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
 from typing import LiteralString, TYPE_CHECKING
 import io
 import pytest
@@ -40,6 +39,7 @@ import unittest.mock
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
+	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
 	from typing import Any
 
 def test_formatOEISid(oeisID: OEISid) -> None:

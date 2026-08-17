@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
 	printEasyRunHeader(oeisID, flow)
 
-	for n in range(9, 11):
+	for n in range(7, 9):
 
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 
