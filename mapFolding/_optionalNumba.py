@@ -1,8 +1,35 @@
-# DOCUMENT
 #=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
 # pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
 #=SIN= Ruff suppression: Numba StructRef integration requires its private payload utilities and native value accessor.
 # ruff: file-ignore[private-member-access]
+"""Provide optional Numba integration for map-folding state containers.
+
+(AI generated docstring)
+
+You can use this module to set Numba thread limits with the package `CPUlimit` convention and to
+bridge `MapFoldingState` and `SymmetricFoldsState` into Numba `StructRef` values [1][2][3]. The
+module keeps the public Python state objects alive while Numba reads and reflects the compiled
+payload fields.
+
+Contents
+--------
+Functions
+	defineProcessorLimitNumba
+		Set Numba's worker-thread limit from the package CPU-limit convention.
+
+Classes
+	形NumbaMapFoldingState
+		Represent a Numba `StructRef` view of map-folding state objects.
+
+References
+----------
+[1] Numba documentation
+	https://numba.readthedocs.io/en/stable/
+[2] `mapFolding.dataBaskets.MapFoldingState`
+
+[3] `mapFolding.dataBaskets.SymmetricFoldsState`
+
+"""
 from __future__ import annotations
 
 from contextlib import ExitStack
@@ -21,7 +48,46 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def defineProcessorLimitNumba(CPUlimit: Limitation) -> int:
-	# DOCUMENT
+	"""Set Numba's worker-thread limit from the package `CPUlimit` convention.
+
+	(AI generated docstring)
+
+	You can use this function to apply the package-wide `CPUlimit` convention to Numba's global
+	thread setting [1][2]. `defineProcessorLimitNumba` reads the current Numba worker capacity,
+	computes `concurrencyLimit` with `defineConcurrencyLimit`, updates Numba in place, and returns
+	the effective thread count.
+
+	Parameters
+	----------
+	CPUlimit : Limitation
+		CPU-usage limit in the package convention defined by `defineConcurrencyLimit` [2].
+
+	Returns
+	-------
+	concurrencyLimit : int
+		Effective number of Numba worker threads after `set_num_threads` updates the process-global
+		limit [1].
+
+	Examples
+	--------
+	The repository dispatches to `defineProcessorLimitNumba` from
+	`mapFolding.beDRY.defineProcessorLimit` [3].
+
+	```python
+	from mapFolding._optionalNumba import defineProcessorLimitNumba
+
+	concurrencyLimit = defineProcessorLimitNumba(CPUlimit)
+	```
+
+	References
+	----------
+	[1] Numba documentation
+		https://numba.readthedocs.io/en/stable/
+	[2] hunterMakesPy - Context7
+		https://context7.com/hunterhogan/huntermakespy
+	[3] `mapFolding.beDRY.defineProcessorLimit`
+
+	"""
 	concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
 	set_num_threads(concurrencyLimit)
 	return get_num_threads()

@@ -89,7 +89,26 @@ def getPathRootJobDEFAULT() -> Path:
 	return pathJobDEFAULT
 
 def makeFilenameArrayFoldings(totalDimensions: int, suffix: str = '.pkl') -> str:
-	# DOCUMENT
+	"""Build the standard filename for array-foldings data.
+
+	(AI generated docstring)
+
+	You can use this function when you want the package's preferred filename for array-foldings data
+	with `totalDimensions`. This function keeps the filename convention in one place, so callers do
+	not need to know or repeat that convention themselves.
+
+	Parameters
+	----------
+	totalDimensions : int
+		Total number of dimensions represented by the array-foldings data.
+	suffix : str = '.pkl'
+		Filename suffix appended to the standard filename stem.
+
+	Returns
+	-------
+	filenameArrayFoldings : str
+		Standard filename for the array-foldings data.
+	"""
 	return makeFilenameCount(f'arrayFoldings2上{totalDimensions}Dimensional', suffix=suffix)
 
 def makeFilenameCount(*underscore: str, suffix: str = '.countTotal', **dash: str) -> str:
@@ -146,7 +165,28 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') ->
 	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
 def makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: PathLike[str] = settingsPackage.pathDataSamples, *, suffix: str = '.pkl') -> Path:
-	# DOCUMENT
+	"""Build the standard path for array-foldings data.
+
+	(AI generated docstring)
+
+	You can use this function when you want the package's preferred path for array-foldings data with
+	`totalDimensions`. This function combines `pathRoot` with the standard filename and returns the
+	result as a `Path`. This function does not create directories.
+
+	Parameters
+	----------
+	totalDimensions : int
+		Total number of dimensions represented by the array-foldings data.
+	pathRoot : PathLike[str] = settingsPackage.pathDataSamples
+		Root directory that should contain the array-foldings data.
+	suffix : str = '.pkl'
+		Filename suffix appended to the standard filename stem.
+
+	Returns
+	-------
+	pathFilenameArrayFoldings : Path
+		Standard path for the array-foldings data under `pathRoot`.
+	"""
 	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
 
 def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
@@ -423,7 +463,30 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	return data
 
 def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:
-	# DOCUMENT
+	"""Load array-foldings data for `state.totalDimensions`.
+
+	(AI generated docstring)
+
+	You can use this function when you want the package's array-foldings data for an
+	`EliminationState`. This function looks in the package's standard data location for
+	`state.totalDimensions`, returns the data as a `pandas.DataFrame` [1], and returns `None` after
+	writing a diagnostic to the standard error stream when the data is unavailable.
+
+	Parameters
+	----------
+	state : EliminationState
+		Elimination state that supplies `state.totalDimensions`.
+
+	Returns
+	-------
+	dataframeFoldings : DataFrame | None
+		Array-foldings data for `state.totalDimensions`, or `None` when the data is unavailable.
+
+	References
+	----------
+	[1] pandas.DataFrame
+		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
+	"""
 	pathFilename: Path = makePathFilenameArrayFoldings(state.totalDimensions)
 	dataframeFoldings: DataFrame | None = None
 	if pathFilename.exists():
@@ -462,7 +525,34 @@ def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
 		return tuple(tuple(map(int, row)) for row in csv_reader(streamRead))
 
 def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
-	# DOCUMENT
+	"""Load folding data from `pathFilename` into a `pandas.DataFrame`.
+
+	(AI generated docstring)
+
+	You can use this function when you already know the data file location and want the folding data
+	in tabular form. This function keeps the package's DataFrame-loading convention in one place and
+	returns the loaded `pandas.DataFrame` [1].
+
+	Parameters
+	----------
+	pathFilename : PathLike[str]
+		Path to the data file.
+
+	Returns
+	-------
+	dataframeFoldings : DataFrame
+		Folding data loaded from `pathFilename` as a `DataFrame`.
+
+	See Also
+	--------
+	`getDataFrameFoldings`
+		Load array-foldings data from the package's standard location.
+
+	References
+	----------
+	[1] pandas.DataFrame
+		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
+	"""
 	#=Sin= `pandas` is optional.
 	import pandas  # ruff: ignore[import-outside-top-level]
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))

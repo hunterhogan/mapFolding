@@ -1,5 +1,24 @@
-# ruff: ignore[undocumented-public-module]
-# DOCUMENT
+"""Store shared naming defaults for AST-generated map-folding modules.
+
+(AI generated docstring)
+
+You can use this module to retrieve canonical identifier mappings, logical paths,
+filesystem roots, and selected estimate data for AST-driven code generation. The module
+centralizes the default naming schemes for generic algorithms, map-folding algorithms,
+and symmetry-aware map-folding algorithms.
+
+Contents
+--------
+Variables
+	default
+		Baseline identifier and path mapping for generated algorithm modules.
+	defaultFoldsSymmetric
+		Identifier and path mapping specialized for symmetric-fold counting modules.
+	defaultMapFolding
+		Identifier and path mapping specialized for multidimensional map-folding modules.
+	dictionaryEstimatesMapFolding
+		Selected estimated `totalFolds` values for expensive multidimensional shapes.
+"""
 from __future__ import annotations
 
 from copy import deepcopy

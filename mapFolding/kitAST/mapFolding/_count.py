@@ -391,7 +391,32 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords: dict[str, Any], identifierModule: str, **override: Any) -> PurePath:
-	# DOCUMENT
+	"""Write a generated module to its configured output path.
+
+	(AI generated docstring)
+
+	You can use this function to resolve the output location for `ingredientsModule` from
+	`identifiers`, `keywords`, and `override`, then write the generated module to disk. The
+	function applies explicit overrides before identifier defaults and returns the final path.
+
+	Parameters
+	----------
+	ingredientsModule : IngredientsModule
+		Generated module wrapper that knows how to write the assembled module.
+	identifiers : Default
+		Default identifier mapping that provides package, path, and logical-path fallbacks.
+	keywords : dict[str, Any]
+		Keyword overrides forwarded from the caller.
+	identifierModule : str
+		Module identifier used when constructing the destination filename.
+	**override : Any
+		Explicit override values that take precedence over `keywords` and `identifiers`.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the written module file.
+	"""
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or keywords.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	pathRoot: PathLike[str] = override.get('pathRoot') or keywords.get('pathRoot') or identifiers['filesystem']['pathRoot']
 	identifierPackage: str = override.get('package') or keywords.get('package') or identifiers['module']['package']

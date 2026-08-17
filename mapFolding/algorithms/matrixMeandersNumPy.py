@@ -24,7 +24,33 @@ type ArrayGeneral = ndarray[tuple[Any, ...], dtype[形ArcCode]]
 type ArraySelector = ndarray[tuple[int], dtype[numpy.intp]]
 
 def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
-	# DOCUMENT
+	"""Create a named `numpy.memmap` work array for matrix-meander computation [1].
+
+	(AI generated docstring)
+
+	You can use this function to allocate a `numpy.memmap` [1] with the requested `shape`
+	and integer `datatype`. The `name` value supplies the file stem for the backing file,
+	so `name` must not be `None`.
+
+	Parameters
+	----------
+	shape : tuple[Any, ...]
+		Shape of the memory-mapped array.
+	datatype : type[形NumPyInteger]
+		Integer dtype used for each array element.
+	name : str | None = None
+		File stem used to build the backing path `f"{name}.mM"`.
+
+	Returns
+	-------
+	container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
+		Memory-mapped array backed by the file `f"{name}.mM"` in the current working directory.
+
+	References
+	----------
+	[1] `numpy.memmap`
+		https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
+	"""
 	# Change from memmap to in memory ndarray, merely by changing this function.
 	return numpy.memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
 

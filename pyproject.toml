@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.31.0"
+version = "0.32.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -103,13 +103,12 @@ run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFoldin
   "**/tests/*",
   "getLLVMforNoReason.py",
   "mapFolding/algorithms/foldsSymmetric.py",
-  "mapFolding/reference/*",
   "Z0Z_*",
   "zCuzDocStoopid*.py",
 ], parallel = true, source = ["."] }
 
 [tool.pytest]
-addopts = ["--color=yes", "-n", "5", "--dist", "loadgroup"]
+addopts = ["--color=yes", "-n", "5"]
 log_auto_indent = "On"
 testpaths = ["**/tests"]
 

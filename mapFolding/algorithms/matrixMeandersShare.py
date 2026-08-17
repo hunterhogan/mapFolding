@@ -82,7 +82,39 @@ def integersWide吗(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[
 		)
 
 def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
-	# DOCUMENT
+	"""Create the starting `dictionaryMeanders` for a matrix meander count.
+
+	(AI generated docstring)
+
+	You can use this function to build the initial `arcCode` → count mapping for a semi-meander
+	or meander computation. The function chooses the starting `arcCode` pattern from `kind`, `n`,
+	and `boundary`, and returns a dictionary whose values are initialized to `1`. For
+	`kind == 'semi'`, the function returns one or more starting `arcCode` values determined by the
+	parity of `n` and extended until the largest `arcCode` reaches the range implied by
+	`boundary`. For `kind == 'meanders'`, the function returns one starting `arcCode`, with the
+	choice determined by the parity of `n`.
+
+	Parameters
+	----------
+	kind : Literal['semi', 'meanders'] | LiteralString
+		Which family of meander count to initialize. Supported values are `'semi'` and `'meanders'`.
+	n : int
+		The sequence index whose parity determines the starting `arcCode` pattern.
+	boundary : int
+		The current boundary width used to limit how many initial semi-meander `arcCode` values to
+		generate.
+
+	Returns
+	-------
+	dictionaryMeanders : dict[int, int]
+		A dictionary whose keys are initial `arcCode` values and whose values are all initialized to
+		`1`.
+
+	Raises
+	------
+	ValueError
+		Raised when `kind` is not `'semi'` or `'meanders'`.
+	"""
 	# TODO Consider: If semi is essentially A000136 * totalLeaves, then my graphs of A000136 are
 	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
 	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
