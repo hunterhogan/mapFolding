@@ -25,6 +25,7 @@ from typing import Literal, LiteralString
 # - Put "dominant" terms to the left of "subordinate" terms.
 
 # TODO Learn if there are other algorithms to directly compute other sequences.
+# Yes, Sawada and Li. 'A000136', 'A000560', 'A001011', 'A077055'.
 
 # TODO For each sequence,
 # 1. All formulas that exclusively use the terms `n` and the "Not formulas".
@@ -35,7 +36,8 @@ from typing import Literal, LiteralString
 # FIXME I only use `cache` to speed up pytest. Figure out how to remove cache from the module, and use
 # cache during pytest.
 
-@cache
+# TODO Add A077055.
+
 def A000136(n: int, f: LiteralString | None = None) -> int:
 	if n in {1, 2}:
 		countTotal: int = n * _A000682(n)
@@ -159,7 +161,7 @@ def A005315(n: int, f: LiteralString | None = None) -> int:
 			case 'A208357':
 				countTotal = isqrt(A208357(n - 1))
 			case 'A005316' | _:
-				countTotal = _A005316(2 * n - 1)
+				countTotal = _A005316((2 * n) - 1)
 	return countTotal
 
 @cache
@@ -197,18 +199,18 @@ def A007822(n: int, f: LiteralString | None = None) -> int:
 			if n == 1:
 				countTotal: int = 1
 			else:
-				countTotal = A001010(2 * n - 1) // 2
+				countTotal = A001010((2 * n) - 1) // 2
 	return countTotal
 
 def A060206(n: int, f: LiteralString | None = None) -> int:
 	match f:
 		case 'A077460, A005315, and A005316':
 			if 0 < n:
-				countTotal: int = (4 * A077460(2 * n + 1)) - A005315(2 * n + 1) - _A005316(2 * n + 1)
+				countTotal: int = (4 * A077460((2 * n) + 1)) - A005315((2 * n) + 1) - _A005316((2 * n) + 1)
 			else:
-				countTotal = A077460(2 * n + 1)
+				countTotal = A077460((2 * n) + 1)
 		case 'A000682' | _:
-			countTotal = _A000682(2 * n + 1)
+			countTotal = _A000682((2 * n) + 1)
 	return countTotal
 
 def A077014(n: int, f: LiteralString | None = None) -> int:
@@ -261,7 +263,7 @@ def A078591(n: int, f: LiteralString | None = None) -> int:
 	else:
 		match f:
 			case 'A005316':
-				countTotal = _A005316(2 * n - 1) // 2
+				countTotal = _A005316((2 * n) - 1) // 2
 			case 'A005315' | _:
 				countTotal = A005315(n) // 2
 	return countTotal
@@ -286,9 +288,9 @@ def A085973(n: int, f: LiteralString | None = None) -> int:
 			# case 'A005315 and A005316':
 				# FIXME This formula system is not commutative for `n`, so `n + 1` gets boosted too
 				# much in A005315. I think I need a totally different paradigm.
-				# countTotal = A005315(n + 1) + _A005316(2 * n + 1)
+				# countTotal = A005315(n + 1) + _A005316((2 * n) + 1)
 			case 'A005316' | _:
-				countTotal = _A005316(2 * n) + _A005316(2 * n - 1)
+				countTotal = _A005316(2 * n) + _A005316((2 * n) - 1)
 	return countTotal
 
 def A208357(n: int, f: LiteralString | None = None) -> int:
@@ -296,7 +298,7 @@ def A208357(n: int, f: LiteralString | None = None) -> int:
 		case 'A005315':
 			countTotal: int = A005315(n + 1) ** 2
 		case 'A005316' | _:
-			countTotal = _A005316(2 * n + 1) ** 2
+			countTotal = _A005316((2 * n) + 1) ** 2
 	return countTotal
 
 # TODO typo on 39 of https://oeis.org/A217310, submitted.
@@ -436,11 +438,11 @@ def A334615(n: int, f: LiteralString | None = None) -> int:
 			else:
 				countTotal = 2 * (A000560(n - 1) - (4 * A000560(n - 2)) + (4 * A000560(n - 3)))
 		case 'A001010':
-			countTotal = (A001010((2 * n) - 2) // 2) - (2 * A001010((2 * n) - 4)) + (2 * A001010((2 * n) - 6))
+			countTotal = (A001010((2 * n) - 2) - (4 * A001010((2 * n) - 4)) + (4 * A001010((2 * n) - 6))) // 2
 		case 'A259702':
 			countTotal = 2 * (A259702(n) - (2 * A259702(n - 1)))
 		case 'A337581':
-			countTotal = (A337581(n + 2) // 4) - A337581(n + 1) + A337581(n)
+			countTotal = (A337581(n + 2) - (4 * A337581(n + 1)) + (4 * A337581(n))) // 4
 		case 'A227167':
 			if 2 <= n < 4:
 				countTotal = 0
@@ -466,7 +468,6 @@ def A334615(n: int, f: LiteralString | None = None) -> int:
 				nLess1factorial = factorial(n - 1 + offset)
 				countTotal = countTotal + (4 * (nLess1factorial  # ruff: ignore[non-augmented-assignment]
 								- sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
-
 		case 'A301620':
 			if 2 <= n < 4:
 				countTotal = 0

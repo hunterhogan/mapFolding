@@ -188,6 +188,11 @@ To cite this software, use the metadata in [`CITATION.cff`](https://github.com/h
 
 ## Research references
 
+### Sur les Chevauchements des Permutations
+
+- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sade1949.bib)
+- PDF: [OEIS](https://oeis.org/A000108/a000108_17.pdf)
+
 ### Folding a strip of stamps
 
 - [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Koehler1968.bib)
@@ -234,16 +239,6 @@ To cite this software, use the metadata in [`CITATION.cff`](https://github.com/h
 
 - [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bib)
 - [Available at oeis.org.](https://oeis.org)
-
-## Extending OEIS sequences
-
-OEIS limits my proposed changes to a sequence to three sequences at a time. I have values to extend the following sequences, but I cannot submit them all at the same time.
-
-- A077460, values.
-- A208357, submitted.
-- A217310, submitted.
-- A223094, submitted.
-- A334615
 
 ## Computing new values
 

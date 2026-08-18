@@ -12,10 +12,6 @@ if TYPE_CHECKING:
 	from pathlib import Path
 	from pytest import FixtureRequest
 
-@pytest.fixture
-def path_tmpTesting(tmp_path: Path) -> Path:
-	return tmp_path
-
 #================== Test-function parameters ======================================================
 
 @pytest.fixture()
@@ -39,6 +35,10 @@ def rtol(request: FixtureRequest) -> float:
 	return 1e-05
 
 #================== Fixtures ======================================================
+
+@pytest.fixture()
+def path_tmpTesting(tmp_path: Path) -> Path:
+	return tmp_path
 
 @pytest.fixture()
 def arrayAlbum2上nDimensional(totalDimensions: int) -> NDArray[numpy.uint8]:

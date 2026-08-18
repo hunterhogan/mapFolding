@@ -11,7 +11,6 @@ from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
 
-@cache
 def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A000682', 'A223095, A077014, and A000682', 'A227167', 'A000682'] | LiteralString | None=None) -> int:
     """
     Compute A000136(n) as a function of A000560 or A001011 and A001010 or A223094 and A000682 or A223095, A077014, and A000682 or A227167 or A000682.
@@ -1019,11 +1018,11 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
             else:
                 countTotal = 2 * (A000560(n - 1) - 4 * A000560(n - 2) + 4 * A000560(n - 3))
         case 'A001010':
-            countTotal = A001010(2 * n - 2) // 2 - 2 * A001010(2 * n - 4) + 2 * A001010(2 * n - 6)
+            countTotal = (A001010(2 * n - 2) - 4 * A001010(2 * n - 4) + 4 * A001010(2 * n - 6)) // 2
         case 'A259702':
             countTotal = 2 * (A259702(n) - 2 * A259702(n - 1))
         case 'A337581':
-            countTotal = A337581(n + 2) // 4 - A337581(n + 1) + A337581(n)
+            countTotal = (A337581(n + 2) - 4 * A337581(n + 1) + 4 * A337581(n)) // 4
         case 'A227167':
             if 2 <= n < 4:
                 countTotal = 0

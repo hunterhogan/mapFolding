@@ -6,6 +6,7 @@ line-length = 140
 preview = true
 allowed-confusables = [
   "–",
+  "’",
   "′",
   "×",
   "−",

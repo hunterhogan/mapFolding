@@ -261,7 +261,7 @@ class SymmetricFoldsState:
 	"""Unchanging array representing connections between all leaves."""
 	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	indices: tuple[tuple[tuple[int, int], ...], ...] = dataclasses.field(init=False)
+	indices: list[list[tuple[int, int]]] = dataclasses.field(init=False)
 	"""Precomputed index pairs for symmetric fold checking."""
 	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""

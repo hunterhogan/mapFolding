@@ -27,7 +27,6 @@ which is useful if you're working with the code synthesis features of the packag
 
 from __future__ import annotations
 
-from hunterMakesPy import raiseIfNone
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.dataBaskets import MapFoldingState
@@ -36,21 +35,18 @@ from mapFolding.kitAST.numba.makeJob import makeJobNumba
 from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
 from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
-from mapFolding.tests import assertEqualTo, messageTestFailure
-from mapFolding.tests.conftest import registrarRecordsTemporaryFilesystemObject
+from mapFolding.tests import assertEqualTo
 from numba.core.errors import NumbaPendingDeprecationWarning
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
-import importlib.util
 import pytest
+import runpy
 import warnings
 
 if TYPE_CHECKING:
-	from importlib.machinery import ModuleSpec
 	from mapFolding.theTypes import OEISid
 	from os import PathLike
 	from pathlib import Path
-	from types import ModuleType
 	from typing import LiteralString
 
 @pytest.mark.parametrize('CPUlimit', (None,))
@@ -107,53 +103,40 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString) -> None:
 	actual: int = countMeanders(kind, n, flow, None)
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
-@pytest.fixture
-def oneTestCuzTestsOverwritingTests() -> tuple[int, ...]:  # Note to AI: DO NOT CHANGE THIS IDENTIFIER NAME.
-	"""Return one deterministic map shape suitable for code generation tests."""
-	return makeMapShape('A000136', 3)
-
-@pytest.mark.parametrize('pathFilename_tmpTesting', ['.py'], indirect=True)
-def test_writeJobNumba(oneTestCuzTestsOverwritingTests: tuple[int, ...], pathFilename_tmpTesting: Path) -> None:
+@pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136-n3')])
+def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Path) -> None:
 	"""Test dynamic code generation and execution for computational modules.
 
 	(AI generated docstring)
 
-	This test validates the package's ability to generate, compile, and execute
-	optimized computational code at runtime. It's essential for users working with
-	the code synthesis features or implementing custom optimization strategies.
+	This test validates the package's ability to generate, compile, and execute optimized
+	computational code at runtime. It's essential for users working with the code synthesis features
+	or implementing custom optimization strategies.
 
-	The test creates a complete computational module, executes it, and verifies
-	that the generated code produces mathematically correct results. This pattern
-	can be adapted for testing other dynamically generated computational approaches.
+	The test creates a complete computational module, executes it, and verifies that the generated
+	code produces mathematically correct results. This pattern can be adapted for testing other
+	dynamically generated computational approaches.
 
 	Parameters
 	----------
-	oneTestCuzTestsOverwritingTests : tuple[int, ...]
+	mapShape : tuple[int, ...]
 		The map shape dimensions for testing code generation.
-	pathFilename_tmpTesting : Path
-		The temporary file path for generated module testing.
+	pathRootJobDEFAULTTesting : Path
+		The pytest-managed job directory.
 
 	"""
-	mapShape: tuple[int, ...] = oneTestCuzTestsOverwritingTests
 	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
 
-	pathFilenameModule: Path = pathFilename_tmpTesting.absolute()
+	pathFilenameModule: Path = pathRootJobDEFAULTTesting / 'jobNumba.py'
 	pathFilenameTotalFolds: Path = pathFilenameModule.with_suffix('.totalFoldsTesting')
-	registrarRecordsTemporaryFilesystemObject(pathFilenameTotalFolds)
 
-	jobTest = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem
+	recipeJobTheorem2 = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem
 		, pathFilenameTotalFolds=PurePosixPath(pathFilenameTotalFolds), totalFoldsMultiplier=state.totalLeaves)
-	spices = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
-	makeJobNumba(jobTest, spices)
+	spicesJobNumba = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
+	makeJobNumba(recipeJobTheorem2, spicesJobNumba)
 
-	Don_Lapre_Road_to_Self_Improvement: ModuleSpec = raiseIfNone(importlib.util.spec_from_file_location('__main__', pathFilenameModule))
-	module: ModuleType = importlib.util.module_from_spec(Don_Lapre_Road_to_Self_Improvement)
+	runpy.run_path(str(pathFilenameModule), run_name='__main__')
 
-	module.__name__ = '__main__'
-	loader = Don_Lapre_Road_to_Self_Improvement.loader
-	assert loader is not None, messageTestFailure(loader, 'a module loader', 'importlib.util.spec_from_file_location', '__main__', pathFilenameModule)
-	loader.exec_module(module)
-
-	expected: str = str(getTotalFoldsKnown(oneTestCuzTestsOverwritingTests) or 0)
+	expected: str = str(getTotalFoldsKnown(mapShape))
 	actual: str = pathFilenameTotalFolds.read_text(encoding='utf-8').strip()
 	assertEqualTo(actual, expected, 'Path.read_text', pathFilenameTotalFolds, encoding='utf-8')

@@ -1,7 +1,7 @@
 """Test framework infrastructure and shared fixtures for mapFolding.
 
 This module serves as the foundation for the entire test suite, providing standardized
-fixtures, temporary file management, and testing utilities. It implements the Single
+fixtures and testing utilities. It implements the Single
 Source of Truth principle for test configuration and establishes consistent patterns
 that make the codebase easier to extend and maintain.
 
@@ -12,7 +12,6 @@ The testing framework is designed for multiple audiences:
 - Future maintainers who need to debug or modify tests
 
 Key Components:
-- Temporary file management with automatic cleanup
 - Standardized assertion functions with uniform error messages
 - Test data generation from OEIS sequences for reproducible results
 - Mock objects for external dependencies and timing-sensitive operations
@@ -25,26 +24,24 @@ research domain.
 
 from __future__ import annotations
 
+from mapFolding import kitFilesystem
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
-from mapFolding.oeis import _theSSOT, getMetadata, oeisIDsImplemented
-from mapFolding.theSSOT import settingsPackage
-from pathlib import Path
+from mapFolding.oeis import getMetadata, oeisIDsImplemented
 from typing import TYPE_CHECKING
 import numpy
 import pytest
 import random
-import shutil
-import uuid
 import warnings
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Generator
 	from mapFolding.theTypes import OEISid
 	from numpy.typing import NDArray
+	from pathlib import Path
 	from pytest import FixtureRequest
 	from typing import Any
 
-# ================== Test-function parameters ======================================================
+#================== Test-function parameters ======================================================
 
 @pytest.fixture()
 def approx_abs(request: FixtureRequest) -> float:
@@ -73,133 +70,14 @@ def setupWarningsAsErrors() -> Generator[None, Any]:
 	yield
 	warnings.resetwarnings()
 
-#======== SSOT for test data paths and filenames ==============
-# TODO I might still need something like this to test the creation of a job. But I don't need to use
-# this for every tmp dir or file, and it doesn't need to be this complicated.
-path_tmpRoot: Path = settingsPackage.pathDataSamples / "tmp"
-path_tmpRoot.mkdir(parents=True, exist_ok=True)
-
-# The registrar maintains the register of tmp filesystem objects
-registerOfTemporaryFilesystemObjects: set[Path] = set()
-
-def registrarDeletesTemporaryFilesystemObjects() -> None:
-	"""The registrar cleans up tmp filesystem objects in the register."""
-	for path_tmp in sorted(registerOfTemporaryFilesystemObjects, reverse=True):
-		if path_tmp.is_file():
-			path_tmp.unlink(missing_ok=True)
-		elif path_tmp.is_dir():
-			shutil.rmtree(path_tmp, ignore_errors=True)
-	registerOfTemporaryFilesystemObjects.clear()
-
-def registrarRecordsTemporaryFilesystemObject(path: Path) -> None:
-	"""The registrar adds a tmp filesystem object to the register.
-
-	Parameters
-	----------
-	path : Path
-		The filesystem path to register for cleanup.
-
-	"""
-	registerOfTemporaryFilesystemObjects.add(path)
+#======== Filesystem isolation =====================================
 
 @pytest.fixture
-def pathCacheTesting(path_tmpTesting: Path) -> Generator[Path, Any]:
-	"""Temporarily replace the OEIS cache directory with a test directory.
-
-	Parameters
-	----------
-	path_tmpTesting : Path
-		Temporary directory path from the `path_tmpTesting` fixture.
-
-	Yields
-	------
-	temporaryCachePath : Generator[Path, Any, None]
-		Context manager that provides the temporary cache path and restores original.
-
-	"""
-	pathCacheOriginal: Path = _theSSOT.pathCache
-	_theSSOT.pathCache = path_tmpTesting
-	yield path_tmpTesting
-	_theSSOT.pathCache = pathCacheOriginal
-
-@pytest.fixture
-def pathFilenameTotalFoldsTesting(path_tmpTesting: Path) -> Path:
-	"""Creates a temporary file path for folds total testing.
-
-	Parameters
-	----------
-	path_tmpTesting : Path
-		Temporary directory path from the `path_tmpTesting` fixture.
-
-	Returns
-	-------
-	totalFoldsFilePath : Path
-		Path to a temporary file for testing folds total functionality.
-
-	"""
-	return path_tmpTesting.joinpath("totalFoldsTest.txt")
-
-@pytest.fixture
-def pathFilename_tmpTesting(request: pytest.FixtureRequest) -> Path:
-	"""Creates a unique temporary file path for testing.
-
-	Parameters
-	----------
-	request : pytest.FixtureRequest
-		The pytest request object, optionally containing `param` for file extension.
-
-	Returns
-	-------
-	temporaryFilePath : Path
-		Path to a unique temporary file that will be cleaned up automatically.
-
-	"""
-	try:
-		extension = request.param
-	except AttributeError:
-		extension = ".txt"
-
-	# "Z0Z_" ensures the name does not start with a number, which would make it an invalid Python identifier
-	uuid_hex: str = uuid.uuid4().hex
-	relativePath: str = "Z0Z_" + uuid_hex[0:-8]
-	filenameStem: str = "Z0Z_" + uuid_hex[-8:None]
-
-	pathFilename_tmp = Path(path_tmpRoot, relativePath, filenameStem + extension)
-	pathFilename_tmp.parent.mkdir(parents=True, exist_ok=False)
-
-	registrarRecordsTemporaryFilesystemObject(pathFilename_tmp.parent)
-	return pathFilename_tmp
-
-@pytest.fixture
-def path_tmpTesting(request: pytest.FixtureRequest) -> Path:
-	"""Creates a unique temporary directory for testing.
-
-	Parameters
-	----------
-	request : pytest.FixtureRequest
-		The pytest request object providing test context.
-
-	Returns
-	-------
-	temporaryPath : Path
-		Path to a unique temporary directory that will be cleaned up automatically.
-
-	"""
-	# "Z0Z_" ensures the directory name does not start with a number, which would make it an invalid Python identifier
-	uuid_hex: str = uuid.uuid4().hex
-	path_tmp: Path = path_tmpRoot / ("Z0Z_" + uuid_hex)
-	path_tmp.mkdir(parents=True, exist_ok=False)
-
-	registrarRecordsTemporaryFilesystemObject(path_tmp)
-	return path_tmp
-
-@pytest.fixture(scope="session", autouse=True)
-def setupTeardownTemporaryFilesystemObjects() -> Generator[None]:
-	"""Auto-fixture to setup test data directories and cleanup after."""
-	settingsPackage.pathDataSamples.mkdir(exist_ok=True)
-	path_tmpRoot.mkdir(exist_ok=True)
-	yield
-	registrarDeletesTemporaryFilesystemObjects()
+def pathRootJobDEFAULTTesting(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
+	pathRootJobDEFAULT: Path = tmp_path / 'jobs'
+	pathRootJobDEFAULT.mkdir()
+	monkeypatch.setattr(kitFilesystem, 'getPathRootJobDEFAULT', lambda: pathRootJobDEFAULT)
+	return pathRootJobDEFAULT
 
 #======== OEIS ids =====================================
 

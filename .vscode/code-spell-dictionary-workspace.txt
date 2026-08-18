@@ -359,6 +359,7 @@ rtol
 Ruskey
 Saakov
 saam
+Sadé
 savez
 Sawada
 sayeth
