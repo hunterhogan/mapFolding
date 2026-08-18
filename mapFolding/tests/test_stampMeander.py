@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mapFolding.algorithms.stamp_meander import doTheNeedful
+from mapFolding.algorithms.permutationsAnnex import doTheNeedful
 from typing import TYPE_CHECKING
 import pytest
 
