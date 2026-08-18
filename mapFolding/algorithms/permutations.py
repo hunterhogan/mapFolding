@@ -24,6 +24,7 @@ References
 from __future__ import annotations
 
 from itertools import repeat, starmap
+from mapFolding.theTypes import OEISid
 from typing import TYPE_CHECKING
 import dataclasses
 
@@ -34,7 +35,10 @@ if TYPE_CHECKING:
 - head, tail
 - left, right
 - previous, next
-- wind, unwinding?
+"""
+
+"""# DEVELOPMENT flow control or other
+- wind, unwinding
 - visited: T/F
 - old
 """
@@ -75,12 +79,6 @@ class StateStampMeander:
 	boxOfIntervals: list[Interval] = dataclasses.field(init=False)
 	boxOfNodes: list[Node] = dataclasses.field(init=False)
 
-	meanders: bool = False
-	semiMeanders: bool = False
-	folds: bool = False
-	equivalenceClasses: bool = False
-	symmetricSemiMeanders: bool = False
-
 	def __post_init__(self) -> None:
 		"""I use this to allocate independent mutable records for one enumeration.
 
@@ -102,16 +100,16 @@ def initializeState(state: StateStampMeander) -> None:
 	state.boxOfIntervals[2].permutationPrevious = 1
 	state.boxOfIntervals[2].permutationNext = empty
 
-def generate(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int) -> None:
+def generate(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, mode: SettingsMode) -> None:
 	if state.n < crossingNext:
-		if not state.equivalenceClasses or permutationCanonical吗(state):
+		if not mode.equivalenceClasses or permutationCanonical吗(state):
 			state.total += 1
-	elif state.meanders and ((state.n - crossingNext) <= windFactor):
-		cross(state, crossingNext, 次node, windFactor, state.boxOfNodes[次node].sideUnwinding, state.boxOfNodes[次node].intervalUnwinding, unwindingIntervalVisited=False)
+	elif mode.meanders and ((state.n - crossingNext) <= windFactor):
+		cross(state, crossingNext, 次node, windFactor, state.boxOfNodes[次node].sideUnwinding, state.boxOfNodes[次node].intervalUnwinding, unwindingIntervalVisited=False, mode=mode)
 	else:
-		visitIntervals(state, crossingNext, 次node, windFactor, sideLeft)
-		if not state.symmetricSemiMeanders or (crossingNext != 2):
-			visitIntervals(state, crossingNext, 次node, windFactor, sideRight)
+		visitIntervals(state, crossingNext, 次node, windFactor, sideLeft, mode)
+		if not mode.symmetricSemiMeanders or (crossingNext != 2):
+			visitIntervals(state, crossingNext, 次node, windFactor, sideRight, mode)
 
 # DEVELOPMENT Only `equivalenceClasses`.
 def permutationCanonical吗(state: StateStampMeander) -> bool:
@@ -139,7 +137,7 @@ def permutationCanonical吗(state: StateStampMeander) -> bool:
 
 	return leaf1BeforeLeafLast and (comparisonCanonical <= 0)
 
-def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, side: Side, 次interval: int, *, unwindingIntervalVisited: bool) -> None:
+def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, side: Side, 次interval: int, *, unwindingIntervalVisited: bool, mode: SettingsMode) -> None:
 	node: Node = state.boxOfNodes[次node]
 	interval: Interval = state.boxOfIntervals[次interval]
 	次intervalNext: int = interval.next
@@ -159,12 +157,12 @@ def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor:
 	nodeRight.sideUnwinding = sideLeft
 
 	if side == sideLeft:
-		if state.folds and (windFactor == 0) and (次interval == node.intervalsLeft.首):
+		if mode.folds and (windFactor == 0) and (次interval == node.intervalsLeft.首):
 			if nodeNext.intervalsLeft.首 != empty:
 				setHeadTail(nodeNext, empty, empty, nodeNext.intervalsLeft.首, nodeNext.intervalsLeft.Ω)
 			move(state, node.intervalsRight.Ω, node.intervalsRight, nodeNext.intervalsRight, nodeNext.intervalsRight.Ω, empty, 次intervalLeft)
 		elif node.intervalUnwinding == 次interval:
-			if (state.meanders or state.semiMeanders) and windFactor == 0:
+			if (mode.meanders or mode.semiMeanders) and windFactor == 0:
 				nodeNext.intervalUnwinding = 次intervalLeft
 				nodeNext.sideUnwinding = sideLeft
 		elif unwindingIntervalVisited or node.sideUnwinding == sideRight:
@@ -181,12 +179,12 @@ def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor:
 		setHeadTail(nodeLeft, node.intervalsLeft.首, 次intervalPrevious, node.intervalsRight.首, node.intervalsRight.Ω)
 		setHeadTail(nodeRight, empty, empty, 次intervalNext, node.intervalsLeft.Ω)
 	else:
-		if state.folds and (windFactor == 0) and (次interval == node.intervalsRight.Ω):
+		if mode.folds and (windFactor == 0) and (次interval == node.intervalsRight.Ω):
 			if nodeNext.intervalsRight.首 != empty:
 				setHeadTail(nodeNext, nodeNext.intervalsRight.首, nodeNext.intervalsRight.Ω, empty, empty)
 			move(state, node.intervalsLeft.首, node.intervalsLeft, nodeNext.intervalsLeft, empty, nodeNext.intervalsLeft.首, 次intervalRight)
 		elif node.intervalUnwinding == 次interval:
-			if (state.meanders or state.semiMeanders) and windFactor == 0:
+			if (mode.meanders or mode.semiMeanders) and windFactor == 0:
 				nodeNext.intervalUnwinding = 次intervalRight
 				nodeNext.sideUnwinding = sideRight
 		elif unwindingIntervalVisited:
@@ -213,12 +211,12 @@ def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor:
 
 	cross_updatePermutation(state, crossingNext, 次interval)
 
-	if state.folds and (windFactor == 0) and (次interval in {node.intervalsRight.Ω, node.intervalsLeft.首}):
-		generate(state, crossingNext + 1, 次nodeNext, 0)
+	if mode.folds and (windFactor == 0) and (次interval in {node.intervalsRight.Ω, node.intervalsLeft.首}):
+		generate(state, crossingNext + 1, 次nodeNext, 0, mode)
 	elif node.intervalUnwinding == 次interval:
-		generate(state, crossingNext + 1, 次nodeNext, max(0, windFactor - 1))
+		generate(state, crossingNext + 1, 次nodeNext, max(0, windFactor - 1), mode)
 	else:
-		generate(state, crossingNext + 1, 次nodeNext, windFactor + 1)
+		generate(state, crossingNext + 1, 次nodeNext, windFactor + 1, mode)
 
 	cross_restorePermutation(state, 次interval)
 
@@ -233,7 +231,7 @@ def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor:
 	nodeNext.intervalUnwinding = intervalUnwindingOld
 	nodeNext.sideUnwinding = sideUnwindingOld
 
-	if state.folds and (windFactor == 0):
+	if mode.folds and (windFactor == 0):
 		if 次interval == node.intervalsLeft.首:
 			move(state, nodeNext.intervalsRight.Ω, nodeNext.intervalsRight, node.intervalsRight, node.intervalsRight.Ω, empty, 次nodeNext)
 		if 次interval == node.intervalsRight.Ω:
@@ -268,7 +266,7 @@ def cross_updatePermutation(state: StateStampMeander, crossingNext: int, 次inte
 	if 次intervalNext != empty:
 		state.boxOfIntervals[次intervalNext].permutationPrevious = 次intervalRight
 
-def visitIntervals(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, side: Side) -> None:
+def visitIntervals(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, side: Side, mode: SettingsMode) -> None:
 	if side == sideLeft:
 		次interval: int = state.boxOfNodes[次node].intervalsLeft.首
 	else:
@@ -277,9 +275,9 @@ def visitIntervals(state: StateStampMeander, crossingNext: int, 次node: int, wi
 
 	while 次interval != empty:
 		次intervalNext: int = state.boxOfIntervals[次interval].next
-		cross(state, crossingNext, 次node, windFactor, side, 次interval, unwindingIntervalVisited=unwindingIntervalVisited)
+		cross(state, crossingNext, 次node, windFactor, side, 次interval, unwindingIntervalVisited=unwindingIntervalVisited, mode=mode)
 		unwindingIntervalVisited = unwindingIntervalVisited or 次interval == state.boxOfNodes[次node].intervalUnwinding
-		if state.folds and windFactor == 0:
+		if mode.folds and windFactor == 0:
 			if side == sideLeft:
 				unwindingIntervalVisited = unwindingIntervalVisited or 次interval == state.boxOfNodes[次node].intervalsLeft.首
 			else:
@@ -334,3 +332,77 @@ def setHeadTail(node: Node, intervalLeftHead: int, intervalLeftTail: int, interv
 	else:
 		node.intervalsRight.首 = intervalRightHead
 		node.intervalsRight.Ω = intervalRightTail
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class SettingsMode:
+	meanders: bool = False
+	semiMeanders: bool = False
+	folds: bool = False
+	equivalenceClasses: bool = False
+	symmetricSemiMeanders: bool = False
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class SettingsGeneration:
+	oeisOffset: int = 1
+	Z0Z_normalizeIndex: int = 0
+
+lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
+	'A000136': (SettingsGeneration(), SettingsMode(folds=True)),
+	'A000560': (SettingsGeneration(oeisOffset=2), SettingsMode(symmetricSemiMeanders=True)),
+	'A000682': (SettingsGeneration(Z0Z_normalizeIndex=1), SettingsMode(semiMeanders=True)),
+	'A001011': (SettingsGeneration(), SettingsMode(folds=True, equivalenceClasses=True)),
+	'A005316': (SettingsGeneration(oeisOffset=0), SettingsMode(meanders=True)),
+	'A077055': (SettingsGeneration(Z0Z_normalizeIndex=-1, oeisOffset=0), SettingsMode(meanders=True, equivalenceClasses=True)),
+}
+
+def doTheNeedful(oeisID: OEISid, n: int) -> int:
+	"""Count one Sawada-Li sequence at order `n` [1].
+
+	(AI generated docstring)
+
+	You can use this function to select any of the six sequences implemented by Sawada and Li and
+	return the number of generated objects. The function creates fresh mutable state for every call.
+	The recursive core retains the paper's order convention; this boundary translates the current
+	OEIS indexing, which differs by one for A000682.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Sequence identifier from A000136, A000560, A000682, A001011, A005316, or A077055.
+	n : int
+		Current OEIS index of the stamp folding, semi-meander, or open meander.
+
+	Returns
+	-------
+	aOFn : int
+		Number of objects or equivalence classes at OEIS index `n`.
+
+	Raises
+	------
+	ValueError
+		Raised when `oeisID` is unsupported or `n` precedes the sequence's OEIS offset.
+
+	References
+	----------
+	[1] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-meanders, and Open Meanders:
+		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
+		https://doi.org/10.37236/2404
+	"""
+	if oeisID not in lookupSettings:
+		message: str = f'I received `{oeisID = }`, but the Sawada-Li algorithm supports only {tuple(lookupSettings)}.'
+		raise ValueError(message)
+
+	generationMode, mode = lookupSettings[oeisID]
+	if n < generationMode.oeisOffset:
+		message = f'I received `{n = }`, but OEIS sequence `{oeisID}` is not defined below `offset = {generationMode.oeisOffset}`.'
+		raise ValueError(message)
+
+	orderSawadaLi: int = n - generationMode.Z0Z_normalizeIndex
+	if orderSawadaLi == 0:
+		return 1
+
+	state: StateStampMeander = StateStampMeander(orderSawadaLi)
+
+	initializeState(state)
+	generate(state, 2, 0, 0, mode)
+	return state.total

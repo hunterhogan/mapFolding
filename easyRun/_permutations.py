@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mapFolding.algorithms.permutationsAnnex import doTheNeedful
+from mapFolding.algorithms.permutations import doTheNeedful
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time
@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(4, 5):
+		for n in range(4, 15):
 
 			timeStart: float = time.perf_counter()
 			aOFn: int = doTheNeedful(oeisID, n)
