@@ -1,4 +1,4 @@
-# FIXME `MapFoldingState` restructure https://github.com/python/typing/discussions/2092
+# FIXME `StateMapFolding` restructure https://github.com/python/typing/discussions/2092
 # pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
 #=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
 # pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 	from typing import Any
 
 @dataclasses.dataclass(slots=True)
-class MapFoldingState:
+class StateMapFolding:
 	"""Core computational state for map folding algorithms.
 
 	This class encapsulates all data needed to perform map folding computations and metadata useful for code transformations.
@@ -174,7 +174,7 @@ class MapFoldingState:
 			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 
 @dataclasses.dataclass(slots=True)
-class SymmetricFoldsState:
+class StateMapFoldingSymmetric:
 	"""Core computational state for symmetric map folding algorithms.
 
 	Attributes
@@ -301,12 +301,12 @@ class SymmetricFoldsState:
 			self.leafComparison = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
 
 @dataclasses.dataclass
-class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `dataclassIdentifierParallel: identifierDotAttribute = 'Parallel' + dataclassIdentifier`.
+class StateMapFoldingParallel(StateMapFolding):
 	"""Computational state for task division operations.
 
 	(AI generated docstring)
 
-	This class extends the base MapFoldingState with additional attributes
+	This class extends the base StateMapFolding with additional attributes
 	needed for experimental task division of map folding computations. It manages
 	task division state while inheriting all the core computational arrays and
 	properties from the base class.
@@ -361,7 +361,7 @@ class ParallelMapFoldingState(MapFoldingState):  # This identifier because of `d
 			self.taskDivisions = 形TotalLeaves(int(self.totalLeaves))
 
 @dataclasses.dataclass(slots=True)
-class MatrixMeandersState:
+class StateMeanders:
 	"""Hold the state of a meanders transfer matrix algorithm computation."""
 
 	n: int

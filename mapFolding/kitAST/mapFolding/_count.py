@@ -270,7 +270,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 #-START add the parallel state fields to the count function ------------------------------------------------
 	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass))
-	名dataclassParallel: identifierDotAttribute = 'Parallel' + identifierDataclass
+	名dataclassParallel: identifierDotAttribute = identifierDataclass + 'Parallel'
 	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, 名dataclassParallel))
 	onlyParallelFields: list[dataclasses.Field[Any]] = [field for field in dataclassFieldsParallel if field.name not in [fieldBase.name for fieldBase in dataclassBaseFields]]
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from functools import cache
 from mapFolding.algorithms.matrixMeandersShare import integersWide吗
-from mapFolding.dataBaskets import MatrixMeandersState
+from mapFolding.dataBaskets import StateMeanders
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -56,7 +56,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
             findTheExtra_0b1 -= 1
     return flipExtra_0b1_Here
 
-def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
+def countBigInt(state: StateMeanders) -> StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
@@ -65,12 +65,12 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 
     Parameters
     ----------
-    state : MatrixMeandersState
+    state : StateMeanders
         The algorithm state.
 
     Returns
     -------
-    state : MatrixMeandersState
+    state : StateMeanders
         The same `state` instance after all boundary layers have been processed.
 
     Transfer Steps
@@ -81,7 +81,7 @@ def countBigInt(state: MatrixMeandersState) -> MatrixMeandersState:
 
     References
     ----------
-    [1] `mapFolding.dataBaskets.MatrixMeandersState`
+    [1] `mapFolding.dataBaskets.StateMeanders`
 
     [2] `walkDyckPath`
     """

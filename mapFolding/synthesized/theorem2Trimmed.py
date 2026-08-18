@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 
-def count(state: MapFoldingState) -> MapFoldingState:
+def count(state: StateMapFolding) -> StateMapFolding:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:
@@ -46,7 +46,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
         state.groupsOfFolds *= 2
     return state
 
-def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+def doTheNeedful(state: StateMapFolding) -> StateMapFolding:
     state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state

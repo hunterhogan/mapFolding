@@ -9,7 +9,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e import getDomainLeaf, pileOrigin
 from mapFolding._e._2上nDimensional import getLeafPredecessors, getLeafSuccessors, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd, 零
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from pprint import pprint
 from typing import TYPE_CHECKING
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, Pile
 	from typing import Any
 
-def getLeafUnconditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
+def getLeafUnconditionalPrecedence(state: StateElimination) -> pandas.DataFrame:
 	"""Identify leaves that always precede other leaves across all folding sequences.
 
 	(AI generated docstring)
@@ -37,7 +37,7 @@ def getLeafUnconditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		The elimination state containing the map shape and dimension information.
 
 	Returns
@@ -79,7 +79,7 @@ def getLeafUnconditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 	return dataframePrecedence
 
-def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
+def getLeafConditionalPrecedence(state: StateElimination) -> pandas.DataFrame:
 	"""Identify precedence relationships that emerge only when a leaf is at its earliest column.
 
 	(AI generated docstring)
@@ -95,7 +95,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		The elimination state containing the map shape and dimension information.
 
 	Returns
@@ -161,7 +161,7 @@ def getLeafConditionalPrecedence(state: EliminationState) -> pandas.DataFrame:
 
 	return dataframeConditionalPrecedence
 
-def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) -> pandas.DataFrame:
+def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: StateElimination) -> pandas.DataFrame:
 	"""Identify precedence relationships that emerge only when a leaf is at the last pile in its domain.
 
 	(AI generated docstring)
@@ -176,7 +176,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		The elimination state containing the map shape and dimension information.
 
 	Returns
@@ -243,7 +243,7 @@ def getLeafConditionalPrecedenceAtLastPileOfLeafDomain(state: EliminationState) 
 
 	return dataframeConditionalPrecedenceAtLastPile
 
-def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
+def getLeafConditionalSuccession(state: StateElimination) -> pandas.DataFrame:
 	"""When a leaf is at the last pile in its domain, identify leaves that must come after it."""
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[int] | None = [pileOrigin, 零, state.pileLast]
@@ -299,7 +299,7 @@ def getLeafConditionalSuccession(state: EliminationState) -> pandas.DataFrame:
 
 	return dataframeConditionalSuccession
 
-def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLater: Leaf) -> pandas.DataFrame:
+def getLeafConditionalPrecedenceAcrossLeafDomain(state: StateElimination, leafLater: Leaf) -> pandas.DataFrame:
 	dataframeSequences: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	columnsToExclude: list[Pile] | None = [pileOrigin, 零, state.pileLast]
 	if columnsToExclude is not None:
@@ -356,7 +356,7 @@ def getLeafConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leafLa
 	dataframeConditionalPrecedenceAcrossDomain: pandas.DataFrame = pandas.DataFrame(boxOfConditionalRelationships, columns=['Earlier', 'Later', 'AtColumn']).sort_values(['AtColumn', 'Earlier']).reset_index(drop=True)
 	return dataframeConditionalPrecedenceAcrossDomain
 
-def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationState, leafLater: Leaf) -> list[list[Pile]]:
+def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: StateElimination, leafLater: Leaf) -> list[list[Pile]]:
 	dataframeConditional: pandas.DataFrame = getLeafConditionalPrecedenceAcrossLeafDomain(state, leafLater)
 	pilesSortedUnique: list[Pile]
 	if dataframeConditional.empty:
@@ -374,14 +374,14 @@ def getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state: EliminationSta
 			boxOfPileGroups.append([pile])
 	return boxOfPileGroups
 
-def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, leaf: Leaf) -> list[Pile]:
+def getLeafPilesAtDomainEndFromConditionalPrecedenceAcrossLeafDomain(state: StateElimination, leaf: Leaf) -> list[Pile]:
 	boxOfPileGroups: list[list[Pile]] = getLeafConditionalPrecedenceAcrossLeafDomainPileGroups(state, leaf)
 	boxOfPilesAtEnd: list[Pile] = []
 	if boxOfPileGroups:
 		boxOfPilesAtEnd = boxOfPileGroups[-1]
 	return boxOfPilesAtEnd
 
-def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: EliminationState, boxOfLeavesAnalyzed: list[Leaf] | None = None) -> dict[Leaf, list[Pile]]:
+def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state: StateElimination, boxOfLeavesAnalyzed: list[Leaf] | None = None) -> dict[Leaf, list[Pile]]:
 	if boxOfLeavesAnalyzed is None:
 		leavesExcluded: set[Leaf] = {pileOrigin, 零, state.totalLeaves - 零}
 		boxOfLeavesAnalyzed = [leaf for leaf in range(state.totalLeaves) if leaf not in leavesExcluded]
@@ -394,7 +394,7 @@ def getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(stat
 	return dictionaryPilesAtDomainEnds
 
 if __name__ == '__main__':
-	state = EliminationState((2,) * 6)
+	state = StateElimination((2,) * 6)
 	# leaf33 is wrong because of step = 4.
 	# leaf33 and leaf49 are already known from prior analysis.
 	dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)

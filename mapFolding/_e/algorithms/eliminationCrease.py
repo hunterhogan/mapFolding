@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import partial
 from itertools import chain, repeat, starmap
 from mapFolding._e._2上nDimensional.pinIt import boxOfFunctionsReduction2上nDimensional, pinPilesAtEnds
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from math import factorial
 from multiprocessing import get_context
@@ -17,17 +17,17 @@ if TYPE_CHECKING:
 	from multiprocessing.process import BaseProcess
 	from multiprocessing.queues import Queue
 
-def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
-	return EliminationState(mapShape, boxOfPermutationSpace=[permutationSpace]
+def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> StateElimination:
+	return StateElimination(mapShape, boxOfPermutationSpace=[permutationSpace]
 		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
 
 def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
 	return chain.from_iterable(map(PermutationSpace.deconstructPile, boxOfPermutationSpace))
 
-def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
+def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[StateElimination]) -> None:
 	tuple(map(queueStates.put, map(partial(pinByCrease, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
-def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
+def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
 	"""Do the things necessary so that `pinByCrease` operates efficiently."""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -37,7 +37,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	processManager: BaseContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
-	queueStates: Queue[EliminationState] = processManager.Queue()
+	queueStates: Queue[StateElimination] = processManager.Queue()
 
 	state.groupsOfFolds = len(state.boxOfFolding)
 
@@ -55,7 +55,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	tqdmQueue = tqdm(total=queuePermutationSpacesLength)
 	while queuePermutationSpacesLength:
 		tuple(map(queuePermutationSpace.put, boxOfPermutationSpace))
-		sherpa: EliminationState = queueStates.get()
+		sherpa: StateElimination = queueStates.get()
 		state.groupsOfFolds += len(sherpa.boxOfFolding)
 		state.boxOfFolding.extend(sherpa.boxOfFolding)
 		boxOfPermutationSpace = list(deconstructPermutationSpaces(sherpa.boxOfPermutationSpace))

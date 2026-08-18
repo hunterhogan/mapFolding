@@ -53,7 +53,7 @@ from __future__ import annotations
 
 from mapFolding.algorithms.matrixMeandersShare import makeDictionaryMeanders
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
-from mapFolding.dataBaskets import MapFoldingState, MatrixMeandersState, ParallelMapFoldingState, SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -167,7 +167,7 @@ def countFolds(mapShape: Sequence[int]
 	elif 1 < taskDivisions:
 		from mapFolding.synthesized.countParallelNumba import doTheNeedful
 
-		mapFoldingParallelState: ParallelMapFoldingState = ParallelMapFoldingState(mapShape, taskDivisions=taskDivisions)
+		mapFoldingParallelState: StateMapFoldingParallel = StateMapFoldingParallel(mapShape, taskDivisions=taskDivisions)
 
 		# TODO Figure out a better place to document this. `boxOfStatesParallel` exists so you can research the parallel computation.
 		totalFolds, _boxOfStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
@@ -190,7 +190,7 @@ def countFolds(mapShape: Sequence[int]
 		else:
 			from mapFolding.algorithms.daoOfMapFolding import doTheNeedful
 
-		mapFoldingState: MapFoldingState = MapFoldingState(mapShape)
+		mapFoldingState: StateMapFolding = StateMapFolding(mapShape)
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		totalFolds = mapFoldingState.totalFolds
 
@@ -250,7 +250,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 
 	if flow == 'asynchronous':
 		from mapFolding.synthesized.foldsSymmetric.asynchronous import doTheNeedful
-		totalFolds = doTheNeedful(SymmetricFoldsState(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
+		totalFolds = doTheNeedful(StateMapFoldingSymmetric(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
 	else:
 		match flow:
 			case 'algorithmNumba':
@@ -264,7 +264,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 			case 'algorithm' | _:
 				from mapFolding.synthesized.foldsSymmetric.algorithm import doTheNeedful
 
-		symmetricState: SymmetricFoldsState = SymmetricFoldsState(mapShape)
+		symmetricState: StateMapFoldingSymmetric = StateMapFoldingSymmetric(mapShape)
 
 		symmetricState = doTheNeedful(symmetricState)
 		totalFolds = symmetricState.symmetricFolds
@@ -329,7 +329,7 @@ def countMeanders(
 
 		boundary: int = n - 1
 		dictionaryMeanders: dict[int, int] = makeDictionaryMeanders(kind, n, boundary)
-		state: MatrixMeandersState = MatrixMeandersState(n, kind, boundary, dictionaryMeanders)
+		state: StateMeanders = StateMeanders(n, kind, boundary, dictionaryMeanders)
 		countTotal: int = doTheNeedful(state)
 
 #-------- Follow memorialization instructions ---------------------------------------------

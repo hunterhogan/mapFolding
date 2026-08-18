@@ -18,10 +18,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import Leaf
 
-def getDomainLeaf(state: EliminationState, leaf: Leaf) -> range:
+def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	"""Compute the candidate `Pile` range for one `leaf`.
 
 	(AI generated docstring)
@@ -31,7 +31,7 @@ def getDomainLeaf(state: EliminationState, leaf: Leaf) -> range:
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		Elimination state that provides the map dimensions and total `Leaf` count.
 	leaf : Leaf
 		`Leaf` index whose candidate `Pile` range is requested.
@@ -49,7 +49,7 @@ def getDomainLeaf(state: EliminationState, leaf: Leaf) -> range:
 	from mapFolding._e._2上nDimensional.leafDomains import _getDomainLeaf  # ruff: ignore[import-outside-top-level]
 	return _getDomainLeaf(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 
-def getLookupDomainsLeaves(state: EliminationState) -> dict[int, range]:
+def getLookupDomainsLeaves(state: StateElimination) -> dict[int, range]:
 	"""Dictionary of `Leaf` to `range` of `Pile` in which `Leaf` may be found in a `Folding`.
 
 	For each `Leaf`, the associated Python `range` defines the mathematical domain:

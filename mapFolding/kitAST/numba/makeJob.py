@@ -12,7 +12,7 @@ from __future__ import annotations
 from astToolkit import parseLogicalPath2astModule
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFoldingSymmetric
 from mapFolding.kitAST import Settings形
 from mapFolding.kitAST.dataclasses import shatterDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
@@ -95,7 +95,7 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> None:
 
 def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
-	state = transitionOnGroupsOfFolds(SymmetricFoldsState((1, 2 * n)))
+	state = transitionOnGroupsOfFolds(StateMapFoldingSymmetric((1, 2 * n)))
 	totalFoldsEstimated: int = getValuesKnown('A007822').get(n, 0)
 	shatteredDataclass = shatterDataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
 		, defaultFoldsSymmetric['variable']['stateDataclass'], defaultFoldsSymmetric['variable']['stateInstance'])

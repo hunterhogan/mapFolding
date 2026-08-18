@@ -5,14 +5,14 @@ applyTo: 'mapFolding/_e/**'
 
 # `_e` quick map
 
-`mapFolding/_e/` is the experimental elimination workbench. It is mostly self-contained and revolves around `EliminationState`, `PermutationSpace`, pinning, and folding validation.
+`mapFolding/_e/` is the experimental elimination workbench. It is mostly self-contained and revolves around `StateElimination`, `PermutationSpace`, pinning, and folding validation.
 
 ## Start here
 
 | path | role |
 | --- | --- |
 | `basecamp.py` | `eliminateFolds(...)` dispatcher; selects `flow` and handles persistence / CPU limits. |
-| `dataBaskets.py` | `EliminationState`; shared runtime state, derived constants, and `totalFolds`. |
+| `dataBaskets.py` | `StateElimination`; shared runtime state, derived constants, and `totalFolds`. |
 | `__init__.py` | Re-export surface used by most `_e` modules. |
 
 ## Main flows
@@ -66,7 +66,7 @@ applyTo: 'mapFolding/_e/**'
 
 ## Mental model
 
-1. `basecamp.eliminateFolds(...)` builds or receives `EliminationState`.
+1. `basecamp.eliminateFolds(...)` builds or receives `StateElimination`.
 2. A flow works over `PermutationSpace` values, usually through `pinIt.py` and/or `pin2上nDimensional*.py`.
 3. `algorithms/iff.py` validates or prunes candidates.
 4. Results accumulate in `state.groupsOfFolds`, `state.boxOfFolding`, and `state.totalFolds`.

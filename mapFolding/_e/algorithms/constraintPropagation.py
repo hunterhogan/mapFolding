@@ -5,7 +5,7 @@ from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
 from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, 工dimensionTail, 工dimension首零
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding.beDRY import mapShapeIs2上nDimensions
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf
 	from pathlib import Path
 
-def count(state: EliminationState) -> EliminationState:
+def count(state: StateElimination) -> StateElimination:
 	model = cp_model.CpModel()
 
 	boxOfLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.pileLast, f"leafInPile[{pile}]") for pile in range(state.totalLeaves)]
@@ -163,7 +163,7 @@ def count(state: EliminationState) -> EliminationState:
 
 	return state
 
-def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
+def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
 	"""Do the things necessary so that `count` operates efficiently."""
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
@@ -173,15 +173,15 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 	state.permutationSpace = PermutationSpace()
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
-		boxOfClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(count, EliminationState(state.mapShape, permutationSpace=permutationSpace))
+		boxOfClaimTickets: list[Future[StateElimination]] = [
+			concurrencyManager.submit(count, StateElimination(state.mapShape, permutationSpace=permutationSpace))
 				for permutationSpace in state.boxOfPermutationSpace
 		]
 
 		state.boxOfPermutationSpace = []
 
 		for claimTicket in tqdm(as_completed(boxOfClaimTickets), total=len(boxOfClaimTickets), disable=False, desc=f"PermutationSpace {len(boxOfClaimTickets)}"):
-			sherpa: EliminationState = claimTicket.result()
+			sherpa: StateElimination = claimTicket.result()
 
 			# DEVELOPMENT temporary data collection for p2d7
 			if (sherpa.totalDimensions == 7) and (sherpa.boxOfFolding):

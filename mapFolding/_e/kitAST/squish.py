@@ -24,7 +24,7 @@ launcher = """
 # ruff: file-ignore[commented-out-code, print]
 if __name__ == "__main__":
 	CPUlimit: int | float | None = None
-	state: EliminationState = EliminationState((2,) * 5)
+	state: StateElimination = StateElimination((2,) * 5)
 	# state = pinPile零Ante首零(state)
 	state = pinPilesAtEnds(state, 3)
 	state = pinLeavesDimension首二(state)

@@ -4,7 +4,7 @@ from contextlib import suppress
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
-from mapFolding.dataBaskets import MatrixMeandersState, ShapeArray, ShapeSlicer
+from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.synthesized.meanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
@@ -54,17 +54,17 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
 	# Change from memmap to in memory ndarray, merely by changing this function.
 	return numpy.memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
 
-def count(state: MatrixMeandersState) -> MatrixMeandersState:
+def count(state: StateMeanders) -> StateMeanders:
 	"""Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : StateMeanders
 		The algorithm state.
 
 	Returns
 	-------
-	state : MatrixMeandersState
+	state : StateMeanders
 		Updated state including `boundary` and `arrayMeanders`.
 
 	Notes
@@ -96,7 +96,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
 	while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
-		def recordAnalysis(arrayAnalyzed: ArrayGeneral, state: MatrixMeandersState, arcCode: Array1D, arrayMeanders: ArrayGeneral) -> MatrixMeandersState:
+		def recordAnalysis(arrayAnalyzed: ArrayGeneral, state: StateMeanders, arcCode: Array1D, arrayMeanders: ArrayGeneral) -> StateMeanders:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
 
 			This abstraction makes it easier to implement `numpy.memmap` or other options.
@@ -308,12 +308,12 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
 	return state
 
-def doTheNeedful(state: MatrixMeandersState) -> int:
+def doTheNeedful(state: StateMeanders) -> int:
 	"""Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : StateMeanders
 		The algorithm state.
 
 	Returns

@@ -3,7 +3,7 @@ from __future__ import annotations
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
 from copy import deepcopy
 from mapFolding.dataBaskets import (
-	ParallelMapFoldingState, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形TotalFolds, 形TotalLeaves)
+	StateMapFoldingParallel, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形TotalFolds, 形TotalLeaves)
 from multiprocessing import set_start_method as multiprocessing_set_start_method
 from numba import jit
 
@@ -60,7 +60,7 @@ def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 
             leaf1ndex += 1
     return (groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次)
 
-def unRepackParallelMapFoldingState(state: ParallelMapFoldingState) -> ParallelMapFoldingState:
+def unRepackStateMapFoldingParallel(state: StateMapFoldingParallel) -> StateMapFoldingParallel:
     mapShape: tuple[形TotalLeaves, ...] = state.mapShape
     groupsOfFolds: 形TotalFolds = state.groupsOfFolds
     gap1ndex: 形Elephino = state.gap1ndex
@@ -82,19 +82,19 @@ def unRepackParallelMapFoldingState(state: ParallelMapFoldingState) -> ParallelM
     taskDivisions: 形TotalLeaves = state.taskDivisions
     task次: 形TotalLeaves = state.task次
     groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次 = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次)
-    state = ParallelMapFoldingState(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, 次Dimension=次Dimension, 次Leaf=次Leaf, 次MiniGap=次MiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, taskDivisions=taskDivisions, task次=task次)
+    state = StateMapFoldingParallel(mapShape=mapShape, groupsOfFolds=groupsOfFolds, gap1ndex=gap1ndex, gap1ndexCeiling=gap1ndexCeiling, 次Dimension=次Dimension, 次Leaf=次Leaf, 次MiniGap=次MiniGap, leaf1ndex=leaf1ndex, leafConnectee=leafConnectee, dimensionsUnconstrained=dimensionsUnconstrained, countDimensionsGapped=countDimensionsGapped, gapRangeStart=gapRangeStart, gapsWhere=gapsWhere, leafAbove=leafAbove, leafBelow=leafBelow, taskDivisions=taskDivisions, task次=task次)
     return state
 
-def doTheNeedful(state: ParallelMapFoldingState, concurrencyLimit: int) -> tuple[int, list[ParallelMapFoldingState]]:
+def doTheNeedful(state: StateMapFoldingParallel, concurrencyLimit: int) -> tuple[int, list[StateMapFoldingParallel]]:
     stateParallel = deepcopy(state)
-    boxOfStatesParallel: list[ParallelMapFoldingState] = [stateParallel] * stateParallel.taskDivisions
+    boxOfStatesParallel: list[StateMapFoldingParallel] = [stateParallel] * stateParallel.taskDivisions
     groupsOfTotalFolds: int = 0
-    dictionaryConcurrency: dict[int, ConcurrentFuture[ParallelMapFoldingState]] = {}
+    dictionaryConcurrency: dict[int, ConcurrentFuture[StateMapFoldingParallel]] = {}
     with ProcessPoolExecutor(concurrencyLimit) as concurrencyManager:
         for indexSherpa in range(stateParallel.taskDivisions):
             state = deepcopy(stateParallel)
             state.task次 = indexSherpa
-            dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(unRepackParallelMapFoldingState, state)
+            dictionaryConcurrency[indexSherpa] = concurrencyManager.submit(unRepackStateMapFoldingParallel, state)
         for indexSherpa in range(stateParallel.taskDivisions):
             boxOfStatesParallel[indexSherpa] = dictionaryConcurrency[indexSherpa].result()
             groupsOfTotalFolds += boxOfStatesParallel[indexSherpa].groupsOfFolds

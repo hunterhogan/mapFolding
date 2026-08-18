@@ -5,18 +5,18 @@ from __future__ import annotations
 
 from mapFolding._e import leafOrigin
 from mapFolding.beDRY import makeDataContainer
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.oeis import getTotalFoldsKnown
 from mapFolding.theTypes import 形Array1DTotalLeaves
 import dataclasses
 
 @dataclasses.dataclass(slots=True)
-class LeafSequenceState(MapFoldingState):
+class LeafSequenceState(StateMapFolding):
 	"""Specialized computational state for tracking leaf sequences during analysis.
 
 	(AI generated docstring)
 
-	This class extends the base MapFoldingState with additional capability for recording and analyzing
+	This class extends the base StateMapFolding with additional capability for recording and analyzing
 	the sequence of leaf connections discovered during map folding computations. It integrates with
 	the OEIS (Online Encyclopedia of Integer Sequences) system to leverage known sequence data for
 	optimization and validation.

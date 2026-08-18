@@ -9,7 +9,7 @@ from mapFolding._e._2上nDimensional import getLeafPredecessors, getLeavesCrease
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from math import prod
 from operator import methodcaller
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
 	from mapFolding._e.theTypes import ChoicesLeaf
 
-def printStatisticsPermutations(state: EliminationState) -> None:
+def printStatisticsPermutations(state: StateElimination) -> None:
 	def prodOfDOTvalues(boxOfChoicesLeaf: Iterable[ChoicesLeaf]) -> int:
 		return prod(map(lengthChoicesLeaf, boxOfChoicesLeaf))
 
@@ -32,7 +32,7 @@ def printStatisticsPermutations(state: EliminationState) -> None:
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
-	state: EliminationState = EliminationState((2,) * 5, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional)
+	state: StateElimination = StateElimination((2,) * 5, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional)
 
 	printThis = True
 

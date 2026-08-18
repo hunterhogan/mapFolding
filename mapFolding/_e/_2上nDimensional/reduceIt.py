@@ -89,12 +89,12 @@ from Z0Z_tools import DOTitems, reverseLookup
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
-	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding._e.theTypes import ChoicesLeaf, PinnedLeaves
 
 #======== Reducing `ChoicesLeaf` ===============================
 
-def _byCrease2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def _byCrease2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce crease adjacency constraints.
 
 	I use this constraint encoder to enforce that when a leaf is pinned at a pile and the
@@ -104,7 +104,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -144,7 +144,7 @@ def _byCrease2上nDimensional(state: EliminationState, permutationSpace: Permuta
 
 	return permutationSpace
 
-def _conditionalPredecessors2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def _conditionalPredecessors2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce conditional predecessor constraints.
 
 	I use this constraint encoder to enforce that when a `Leaf` is pinned at a `Pile` and the `Leaf`
@@ -156,7 +156,7 @@ def _conditionalPredecessors2上nDimensional(state: EliminationState, permutatio
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -201,7 +201,7 @@ def _odd吗(_mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile,
 		return bool(oddLeaf2上nDimensional吗(dimension, leaf=pileLeaf[1]))
 	return workhorse
 
-def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def _crossedCreases2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and eliminate crossed creases.
 
 	I use this constraint encoder to detect configurations where two creases would cross physically
@@ -212,7 +212,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -293,7 +293,7 @@ def _crossedCreases2上nDimensional(state: EliminationState, permutationSpace: P
 
 	return permutationSpace
 
-def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce head-before-tail ordering constraints.
 
 	I use this constraint encoder to enforce that leaves with large coordinates in a dimension (tail)
@@ -318,7 +318,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -368,7 +368,7 @@ def _headsBeforeTails2上nDimensional(state: EliminationState, permutationSpace:
 
 	return permutationSpace
 
-def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def _noConsecutiveDimensions2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to enforce non-consecutive dimension constraints.
 
 	I use this constraint encoder to detect arithmetic progressions in pinned leaves and forbid
@@ -386,7 +386,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -428,7 +428,7 @@ def _noConsecutiveDimensions2上nDimensional(state: EliminationState, permutatio
 	return permutationSpace
 
 # FIXME The order of the functions can cause tests to fail. I don't think that ought to happen.
-boxOfFunctionsReduction2上nDimensional: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
+boxOfFunctionsReduction2上nDimensional: Sequence[Callable[[StateElimination, PermutationSpace], PermutationSpace]] = (
 	_noConsecutiveDimensions2上nDimensional,
 	_crossedCreases2上nDimensional,
 	_conditionalPredecessors2上nDimensional,

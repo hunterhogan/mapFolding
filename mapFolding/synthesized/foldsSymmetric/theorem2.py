@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFoldingSymmetric
 from mapFolding.synthesized.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
 
-def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:
@@ -67,7 +67,7 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
-def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def doTheNeedful(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state

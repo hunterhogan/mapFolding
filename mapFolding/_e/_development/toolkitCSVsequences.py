@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import getLeavesCreasePost
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePath
 from typing import TextIO
 
-def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> None:
+def subdivideP2d7s0_1_3_2CSVFile(state: StateElimination, pathDataRaw: Path) -> None:
 	pathSorted: Path = pathDataRaw / "sorted"
 	pathSorted.mkdir(exist_ok=True)
 
@@ -52,7 +52,7 @@ def subdivideP2d7s0_1_3_2CSVFile(state: EliminationState, pathDataRaw: Path) -> 
 			for appendStream in dictionaryAppendStreams.values():
 				appendStream.close()
 
-def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath) -> None:
+def cleanAndSortSequencesCSVFile(state: StateElimination, pathFilename: PurePath) -> None:
 	pathFilenameTarget: Path = Path(pathFilename)
 	pathSorted: Path = pathFilenameTarget.parent / "sorted"
 	pathSorted.mkdir(exist_ok=True)
@@ -123,7 +123,7 @@ def cleanAndSortSequencesCSVFile(state: EliminationState, pathFilename: PurePath
 			writeStream.write(','.join(str(value) for value in boxOfSequence))
 			writeStream.write('\n')
 
-def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> None:
+def sortP2d7GeneratedCSVFiles(state: StateElimination, pathDataRaw: Path) -> None:
 	pathSorted: Path = pathDataRaw / "sorted"
 	pathSorted.mkdir(exist_ok=True)
 
@@ -179,7 +179,7 @@ def sortP2d7GeneratedCSVFiles(state: EliminationState, pathDataRaw: Path) -> Non
 if __name__ == '__main__':
 	sortEm = True
 	if sortEm:
-		state = EliminationState((2,) * 7)
+		state = StateElimination((2,) * 7)
 		pathDataRaw: Path = settingsPackage.pathPackage / "_e" / '_development' / "dataRaw"
 		sortP2d7GeneratedCSVFiles(state, pathDataRaw)
 		subdivideP2d7s0_1_3_2CSVFile(state, pathDataRaw)

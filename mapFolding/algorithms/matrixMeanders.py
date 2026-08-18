@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cache
-from mapFolding.dataBaskets import MatrixMeandersState
+from mapFolding.dataBaskets import StateMeanders
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -55,7 +55,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
             findTheExtra_0b1 -= 1
     return flipExtra_0b1_Here
 
-def count(state: MatrixMeandersState) -> MatrixMeandersState:
+def count(state: StateMeanders) -> StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
@@ -64,12 +64,12 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
     Parameters
     ----------
-    state : MatrixMeandersState
+    state : StateMeanders
         The algorithm state.
 
     Returns
     -------
-    state : MatrixMeandersState
+    state : StateMeanders
         The same `state` instance after all boundary layers have been processed.
 
     Transfer Steps
@@ -80,7 +80,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
     References
     ----------
-    [1] `mapFolding.dataBaskets.MatrixMeandersState`
+    [1] `mapFolding.dataBaskets.StateMeanders`
 
     [2] `walkDyckPath`
     """
@@ -128,7 +128,7 @@ def count(state: MatrixMeandersState) -> MatrixMeandersState:
 
     return state
 
-def doTheNeedful(state: MatrixMeandersState) -> int:
+def doTheNeedful(state: StateMeanders) -> int:
     """Compute the total meander count encoded in `state.dictionaryMeanders`.
 
     You can use `doTheNeedful` as the meander transfer-matrix entry point for the `matrixMeanders`
@@ -139,7 +139,7 @@ def doTheNeedful(state: MatrixMeandersState) -> int:
 
     Parameters
     ----------
-    state : MatrixMeandersState
+    state : StateMeanders
         The algorithm state.
 
     Returns

@@ -11,10 +11,10 @@ Notes
 """
 from __future__ import annotations
 
-from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
 # TODO this algorithm is slow.
-def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
 	state.次Leaf = 1
 	state.leafComparison[0] = 1
 	state.leafConnectee = 1

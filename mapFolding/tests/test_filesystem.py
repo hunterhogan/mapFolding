@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from hunterMakesPy import raiseIfNone
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import (
 	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
 	saveTotal)
@@ -67,13 +67,13 @@ def test_readDataFrameError(pathFilename: Path, expected: type[Exception]) -> No
 	with pytest.raises(expected):
 		readDataFrame(pathFilename)
 
-@pytest.mark.parametrize('state, expected', [pytest.param(EliminationState((2,) * 4), (12, 16), id='dimensions4'), pytest.param(EliminationState((2,) * 6), (7840, 64), id='dimensions6')])
-def test_getDataFrameFoldings(state: EliminationState, expected: tuple[int, int]) -> None:
+@pytest.mark.parametrize('state, expected', [pytest.param(StateElimination((2,) * 4), (12, 16), id='dimensions4'), pytest.param(StateElimination((2,) * 6), (7840, 64), id='dimensions6')])
+def test_getDataFrameFoldings(state: StateElimination, expected: tuple[int, int]) -> None:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	assertEqualTo(dataframeFoldings.shape, expected, getDataFrameFoldings.__name__, state)
 
-@pytest.mark.parametrize('state, expected', [pytest.param(EliminationState((2,) * 3), None, id='dimensions3-missing')])
-def test_getDataFrameFoldingsError(state: EliminationState, expected: None, capsys: pytest.CaptureFixture[str]) -> None:
+@pytest.mark.parametrize('state, expected', [pytest.param(StateElimination((2,) * 3), None, id='dimensions3-missing')])
+def test_getDataFrameFoldingsError(state: StateElimination, expected: None, capsys: pytest.CaptureFixture[str]) -> None:
 	dataframeFoldings: pandas.DataFrame | None = getDataFrameFoldings(state)
 	standardError: str = capsys.readouterr().err
 	assertEqualTo(dataframeFoldings, expected, getDataFrameFoldings.__name__, state)

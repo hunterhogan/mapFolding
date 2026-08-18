@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import StateMapFolding
 
-def transitionOnGroupsOfFolds(state: MapFoldingState) -> MapFoldingState:
+def transitionOnGroupsOfFolds(state: StateMapFolding) -> StateMapFolding:
     while state.groupsOfFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:

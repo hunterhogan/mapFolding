@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import pinIt
 from mapFolding._e.basecamp import eliminateFolds
-from mapFolding._e.dataBaskets import EliminationState  # ruff: ignore[typing-only-third-party-import]
+from mapFolding._e.dataBaskets import StateElimination  # ruff: ignore[typing-only-third-party-import]
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time
@@ -18,7 +18,7 @@ if __name__ == "__main__":
 	oeisID: OEISid = ""
 	flow: str = ""
 	CPUlimit: Limitation = -2
-	state: EliminationState | None = None
+	state: StateElimination | None = None
 
 	flow = "constraintPropagation"
 	flow = "crease"
@@ -37,7 +37,7 @@ if __name__ == "__main__":
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and n > 3:
-			# state = EliminationState(mapShape)
+			# state = StateElimination(mapShape)
 			# state = pinIt.pinPile零Ante首零(state)
 			# state = pinIt.pinPilesAtEnds(state, 3)
 			# state = pinIt.pinLeavesDimension首二(state)

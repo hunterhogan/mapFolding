@@ -70,7 +70,7 @@ defaultMapFolding['module'].update({
 })
 defaultMapFolding['variable'].update({
 	'counting': 'groupsOfFolds'
-	, 'stateDataclass': 'MapFoldingState'
+	, 'stateDataclass': 'StateMapFolding'
 })
 defaultMapFolding['logicalPath']['default'] = defaultMapFolding['logicalPath']['algorithm']
 defaultMapFolding['module']['default'] = defaultMapFolding['module']['algorithm']
@@ -97,7 +97,7 @@ defaultFoldsSymmetric['variable'].update({
 	'counting': 'symmetricFolds'
 	, 'indices': 'indices'
 	, 'maxWorkers': 'maxWorkers'
-	, 'stateDataclass': 'SymmetricFoldsState'
+	, 'stateDataclass': 'StateMapFoldingSymmetric'
 })
 defaultFoldsSymmetric['logicalPath']['default'] = defaultFoldsSymmetric['logicalPath']['synthetic']
 defaultFoldsSymmetric['module']['default'] = defaultFoldsSymmetric['module']['algorithm']

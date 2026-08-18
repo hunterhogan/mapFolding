@@ -7,7 +7,7 @@ module uses `partition` [2] to split open and closed `PermutationSpace` dictiona
 This module uses `tqdm` [3] to show progress. This module uses `operator` [4] for
 arithmetic helpers. This module uses `hunterMakesPy` [5] for parameter parsing.
 
-This module refines `EliminationState.boxOfPermutationSpace` [6] by pinning specific
+This module refines `StateElimination.boxOfPermutationSpace` [6] by pinning specific
 `pile` values or specific `leaf` values. Core deconstruction logic lives in
 `mapFolding._e.pin2上nDimensionsAnnex` [7] and `mapFolding._e.pinIt` [8].
 
@@ -44,7 +44,7 @@ References
 	https://docs.python.org/3/library/operator.html
 [5] hunterMakesPy - Context7.
 	https://context7.com/hunterhogan/huntermakespy
-[6] mapFolding._e.dataBaskets.EliminationState.
+[6] mapFolding._e.dataBaskets.StateElimination.
 	Internal package reference.
 [7] mapFolding._e.pin2上nDimensionsAnnex.
 	Internal package reference.
@@ -64,7 +64,7 @@ from mapFolding._e._2上nDimensional.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
 from more_itertools import partition
@@ -82,7 +82,7 @@ if TYPE_CHECKING:
 
 #-------- Shared logic ---------------------------------------
 
-def _pinPiles(state: EliminationState, maximumSizeBoxOfPermutationSpace: int, pileProcessingOrder: list[Pile], *, CPUlimit: Limitation = None) -> EliminationState:
+def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pileProcessingOrder: list[Pile], *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin each `pile` in `pileProcessingOrder` by deconstructing open `PermutationSpace` dictionaries.
 
 	(AI generated docstring)
@@ -102,7 +102,7 @@ def _pinPiles(state: EliminationState, maximumSizeBoxOfPermutationSpace: int, pi
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	maximumSizeBoxOfPermutationSpace : int
 		Stop once `len(state.boxOfPermutationSpace)` reaches `maximumSizeBoxOfPermutationSpace`.
@@ -113,7 +113,7 @@ def _pinPiles(state: EliminationState, maximumSizeBoxOfPermutationSpace: int, pi
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with an updated `state.boxOfPermutationSpace`.
 
 	References
@@ -140,8 +140,8 @@ def _pinPiles(state: EliminationState, maximumSizeBoxOfPermutationSpace: int, pi
 		state.boxOfPermutationSpace = list(thesePilesAreOpen[False])
 
 		with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
-			boxOfClaimTickets: list[Future[EliminationState]] = [
-				concurrencyManager.submit(_pinPilesConcurrentTask, EliminationState(mapShape=state.mapShape, permutationSpace=permutationSpace, pile=pile))
+			boxOfClaimTickets: list[Future[StateElimination]] = [
+				concurrencyManager.submit(_pinPilesConcurrentTask, StateElimination(mapShape=state.mapShape, permutationSpace=permutationSpace, pile=pile))
 				for permutationSpace in thesePilesAreOpen[True]
 			]
 
@@ -150,7 +150,7 @@ def _pinPiles(state: EliminationState, maximumSizeBoxOfPermutationSpace: int, pi
 
 	return state
 
-def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
+def _pinPilesConcurrentTask(state: StateElimination) -> StateElimination:
 	"""You can deconstruct `state.permutationSpace` at `state.pile` using `_getLeavesAtPile`.
 
 	(AI generated docstring)
@@ -160,12 +160,12 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that provides `state.pile` and `state.permutationSpace`.
 
 	Returns
 	-------
-	statePinned : EliminationState
+	statePinned : StateElimination
 		State returned by `PermutationSpace.deconstructPermutationSpaceAtPile`.
 
 	References
@@ -177,7 +177,7 @@ def _pinPilesConcurrentTask(state: EliminationState) -> EliminationState:
 	state.boxOfPermutationSpace.extend(state.permutationSpace.deconstructPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
 
-def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
+def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 	"""You can select an `Iterable` of `Leaf` values to pin at `state.pile`.
 
 	(AI generated docstring)
@@ -191,7 +191,7 @@ def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that provides `state.pile`, `state.首`, and `state.totalDimensions`.
 
 	Returns
@@ -232,7 +232,7 @@ def _getLeavesAtPile(state: EliminationState) -> Iterable[Leaf]:
 
 #-------- Plebian functions -----------------------------------------
 
-def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin piles near both ends of the pile sequence for (2,) * n map shapes.
 
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
@@ -248,7 +248,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	pileDepth : int = 4
 		Depth of the symmetric `pile` list. A larger `pileDepth` pins more piles.
@@ -259,7 +259,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with an updated `state.boxOfPermutationSpace`.
 
 	Raises
@@ -271,9 +271,9 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 	--------
 	The following usage appears in `mapFolding/_e/easyRun/pinning.py`.
 
-	>>> from mapFolding._e.dataBaskets import EliminationState
+	>>> from mapFolding._e.dataBaskets import StateElimination
 	>>> from mapFolding._e.pin2上nDimensions import pinLeavesDimension首二, pinPilesAtEnds
-	>>> state = EliminationState((2,) * 5)
+	>>> state = StateElimination((2,) * 5)
 	>>> state = pinPilesAtEnds(state, 4)
 	>>> state = pinLeavesDimension首二(state)
 
@@ -327,7 +327,7 @@ def pinPilesAtEnds(state: EliminationState, pileDepth: int = 4, maximumSizeBoxOf
 
 	return _pinPiles(state, maximumSizeBoxOfPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
-def pinPile零Ante首零(state: EliminationState, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin `pile` `neg(零) + 首零(state.totalDimensions)` for (2,) * n map shapes.
 
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
@@ -346,7 +346,7 @@ def pinPile零Ante首零(state: EliminationState, maximumSizeBoxOfPermutationSpa
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	maximumSizeBoxOfPermutationSpace : int = 2**14
 		Maximum size allowed for `state.boxOfPermutationSpace` while pinning.
@@ -355,16 +355,16 @@ def pinPile零Ante首零(state: EliminationState, maximumSizeBoxOfPermutationSpa
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with an updated `state.boxOfPermutationSpace`.
 
 	Examples
 	--------
 	The following usage appears in `mapFolding/_e/easyRun/pinning.py`.
 
-	>>> from mapFolding._e.dataBaskets import EliminationState
+	>>> from mapFolding._e.dataBaskets import StateElimination
 	>>> from mapFolding._e.pin2上nDimensions import pinLeavesDimensions0零一, pinPile零Ante首零
-	>>> state = EliminationState((2,) * 5)
+	>>> state = StateElimination((2,) * 5)
 	>>> state = pinPile零Ante首零(state)
 	>>> state = pinLeavesDimensions0零一(state)
 
@@ -398,7 +398,7 @@ def pinPile零Ante首零(state: EliminationState, maximumSizeBoxOfPermutationSpa
 #======== Pin by `leaf` ======================================================
 
 #-------- Shared logic ---------------------------------------------
-def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> EliminationState:
+def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin multiple `leaf` values by deconstructing each `PermutationSpace` using combined leaf domains.
 
 	(AI generated docstring)
@@ -416,7 +416,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	leaves : tuple[Leaf, ...]
 		Leaves to pin.
@@ -429,7 +429,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	References
@@ -459,8 +459,8 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	with ProcessPoolExecutor(defineProcessorLimit(CPUlimit)) as concurrencyManager:
 
-		boxOfClaimTickets: list[Future[EliminationState]] = [
-			concurrencyManager.submit(_pinLeavesByDomainConcurrentTask, EliminationState(state.mapShape, permutationSpace=permutationSpace), leaves, leavesDomain)
+		boxOfClaimTickets: list[Future[StateElimination]] = [
+			concurrencyManager.submit(_pinLeavesByDomainConcurrentTask, StateElimination(state.mapShape, permutationSpace=permutationSpace), leaves, leavesDomain)
 			for permutationSpace in boxOfPermutationSpace
 		]
 
@@ -470,7 +470,7 @@ def _pinLeavesByDomain(state: EliminationState, leaves: Sequence[Leaf], leavesDo
 
 	return state
 
-def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> EliminationState:
+def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> StateElimination:
 	"""You can deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	This function calls `PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1] to build
@@ -480,7 +480,7 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.permutationSpace`.
 	leaves : tuple[Leaf, ...]
 		Leaves to pin.
@@ -489,7 +489,7 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a populated `state.boxOfPermutationSpace`.
 
 	References
@@ -505,13 +505,13 @@ def _pinLeavesByDomainConcurrentTask(state: EliminationState, leaves: Sequence[L
 
 #--- Logic that wants to join the shared logic ---
 
-def _pinLeafByDomain(state: EliminationState, leaf: Leaf, leafDomain: Sequence[Pile], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> EliminationState:
+def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[Pile], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin one `leaf` value by deconstructing each `PermutationSpace` using a computed leaf domain.
 
 	(AI generated docstring)
 
 	This function computes `leavesDomain` for each input `PermutationSpace` dictionary by calling
-	`getDomainLeaf(EliminationState(...), leaf)`. This function then concurrently deconstructs each `PermutationSpace` dictionary
+	`getDomainLeaf(StateElimination(...), leaf)`. This function then concurrently deconstructs each `PermutationSpace` dictionary
 	using `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1] inside a `ProcessPoolExecutor` [2] and aggregates results with
 	`as_completed` [2]. This function uses `tqdm` [3] to show progress.
 
@@ -523,7 +523,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, leafDomain: Sequence[P
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	leaf : Leaf
 		Leaf to pin.
@@ -536,7 +536,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, leafDomain: Sequence[P
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	References
@@ -566,9 +566,9 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, leafDomain: Sequence[P
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 
-		boxOfClaimTickets: list[Future[EliminationState]] = [
+		boxOfClaimTickets: list[Future[StateElimination]] = [
 			concurrencyManager.submit(_pinLeafByDomainConcurrentTask
-							, state=EliminationState(mapShape=state.mapShape, permutationSpace=permutationSpace)
+							, state=StateElimination(mapShape=state.mapShape, permutationSpace=permutationSpace)
 							, leaves=leaf
 							, leavesDomain=leafDomain)
 			for permutationSpace in boxOfPermutationSpace
@@ -579,7 +579,7 @@ def _pinLeafByDomain(state: EliminationState, leaf: Leaf, leafDomain: Sequence[P
 
 	return state
 
-def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leavesDomain: Sequence[Pile]) -> EliminationState:
+def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leavesDomain: Sequence[Pile]) -> StateElimination:
 	"""You can deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	(AI generated docstring)
@@ -590,7 +590,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.permutationSpace`.
 	leaves : Leaf
 		Leaf to pin.
@@ -599,7 +599,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a populated `state.boxOfPermutationSpace`.
 
 	References
@@ -615,7 +615,7 @@ def _pinLeafByDomainConcurrentTask(state: EliminationState, leaves: Leaf, leaves
 
 #-------- Plebian functions -----------------------------------------
 
-def pinLeavesDimension0(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeavesDimension0(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin `leafOrigin` and `首零(state.totalDimensions)` using a fixed two-pile domain.
 
 	This function calls `_pinLeavesByDomain` [1] with `leaves=(leafOrigin, 首零(state.totalDimensions))`
@@ -624,14 +624,14 @@ def pinLeavesDimension0(state: EliminationState, *, CPUlimit: Limitation = None)
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	References
@@ -641,7 +641,7 @@ def pinLeavesDimension0(state: EliminationState, *, CPUlimit: Limitation = None)
 	leaves: tuple[Leaf, Leaf] = (leafOrigin, 首零(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
 
-def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin `leaf` `首零(state.totalDimensions) + 零` using `getDomainLeaf首零Plus零`.
 
 	(AI generated docstring)
@@ -651,14 +651,14 @@ def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	References
@@ -670,7 +670,7 @@ def pinLeaf首零Plus零(state: EliminationState, *, CPUlimit: Limitation = None
 	leaf: Leaf = (零) + 首零(state.totalDimensions)
 	return _pinLeafByDomain(state, leaf, getDomainLeaf首零Plus零(state, leaf), CPUlimit=CPUlimit)
 
-def pinLeavesDimension零(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeavesDimension零(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin the dimension-零 leaves by pinning `leaf` `首零(state.totalDimensions) + 零`.
 
 	This function ensures the end-pile seed state by calling `pinPilesAtEnds(state, 0)` [1],
@@ -678,14 +678,14 @@ def pinLeavesDimension零(state: EliminationState, *, CPUlimit: Limitation = Non
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	References
@@ -697,7 +697,7 @@ def pinLeavesDimension零(state: EliminationState, *, CPUlimit: Limitation = Non
 	state = pinPilesAtEnds(state, 0)
 	return pinLeaf首零Plus零(state, CPUlimit=CPUlimit)
 
-def pinLeavesDimension一(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeavesDimension一(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin the dimension-一 leaves using `getDomainDimension一`.
 
 	This function pins `leaf` values `(一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))`
@@ -705,14 +705,14 @@ def pinLeavesDimension一(state: EliminationState, *, CPUlimit: Limitation = Non
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	References
@@ -724,30 +724,30 @@ def pinLeavesDimension一(state: EliminationState, *, CPUlimit: Limitation = Non
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension一(state), CPUlimit=CPUlimit)
 
-def pinLeavesDimensions0零一(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin the dimension-0, dimension-零, and dimension-一 leaves using a combined call sequence.
 
 	This function calls `pinLeavesDimension一` [1] and then calls `pinLeavesDimension零` [2].
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	Examples
 	--------
 	The following usage appears in `mapFolding/_e/easyRun/pinning.py`.
 
-	>>> from mapFolding._e.dataBaskets import EliminationState
+	>>> from mapFolding._e.dataBaskets import StateElimination
 	>>> from mapFolding._e.pin2上nDimensions import pinLeavesDimensions0零一, pinPile零Ante首零
-	>>> state = EliminationState((2,) * 5)
+	>>> state = StateElimination((2,) * 5)
 	>>> state = pinPile零Ante首零(state)
 	>>> state = pinLeavesDimensions0零一(state)
 
@@ -760,7 +760,7 @@ def pinLeavesDimensions0零一(state: EliminationState, *, CPUlimit: Limitation 
 	state = pinLeavesDimension一(state, CPUlimit=CPUlimit)
 	return pinLeavesDimension零(state, CPUlimit=CPUlimit)
 
-def pinLeavesDimension二(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeavesDimension二(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin the dimension-二 leaves using `getDomainDimension二`.
 
 	This function pins `leaf` values `(二 + 一, 二 + 一 + 零, 二 + 零, 二)` by calling
@@ -768,23 +768,23 @@ def pinLeavesDimension二(state: EliminationState, *, CPUlimit: Limitation = Non
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	Examples
 	--------
 	The following usage appears in `mapFolding/_e/easyRun/pinning.py`.
 
-	>>> from mapFolding._e.dataBaskets import EliminationState
+	>>> from mapFolding._e.dataBaskets import StateElimination
 	>>> from mapFolding._e.pin2上nDimensions import pinLeavesDimension二
-	>>> state = EliminationState((2,) * 5)
+	>>> state = StateElimination((2,) * 5)
 	>>> state = pinLeavesDimension二(state)
 
 	References
@@ -796,7 +796,7 @@ def pinLeavesDimension二(state: EliminationState, *, CPUlimit: Limitation = Non
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二 + 一, 二 + 一 + 零, 二 + 零, 二)
 	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
 
-def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin the head-二 leaves using `getDomainDimension首二`.
 
 	This function pins `leaf` values `(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))`
@@ -804,23 +804,23 @@ def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = 
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
 	CPUlimit : bool | float | int | None = None
 		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
-	state : EliminationState
+	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
 
 	Examples
 	--------
 	The following usage appears in `mapFolding/_e/easyRun/pinning.py`.
 
-	>>> from mapFolding._e.dataBaskets import EliminationState
+	>>> from mapFolding._e.dataBaskets import StateElimination
 	>>> from mapFolding._e.pin2上nDimensions import pinLeavesDimension首二, pinPilesAtEnds
-	>>> state = EliminationState((2,) * 5)
+	>>> state = StateElimination((2,) * 5)
 	>>> state = pinPilesAtEnds(state, 4)
 	>>> state = pinLeavesDimension首二(state)
 
@@ -833,8 +833,8 @@ def pinLeavesDimension首二(state: EliminationState, *, CPUlimit: Limitation = 
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
 
-def pin3beans2(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pin3beans2(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	return _pinLeavesByDomain(state, (一 + 零, 一), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 一 + 零)), CPUlimit=CPUlimit)
 
-def pin首beans(state: EliminationState, *, CPUlimit: Limitation = None) -> EliminationState:
+def pin首beans(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
 	return _pinLeavesByDomain(state, (首一(state.totalDimensions), 首零一(state.totalDimensions)), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 首一(state.totalDimensions))), CPUlimit=CPUlimit)

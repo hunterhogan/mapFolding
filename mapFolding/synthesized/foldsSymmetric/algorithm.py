@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
-def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Leaf = 1
     state.leafComparison[0] = 1
     state.leafConnectee = 1
@@ -20,55 +20,55 @@ def filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
         state.symmetricFolds += state.leafConnectee
     return state
 
-def activeLeafGreaterThan0(state: SymmetricFoldsState) -> bool:
+def activeLeafGreaterThan0(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > 0
 
-def activeLeafGreaterThanTotalLeaves(state: SymmetricFoldsState) -> bool:
+def activeLeafGreaterThanTotalLeaves(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > state.totalLeaves
 
-def activeLeafIsTheFirstLeaf(state: SymmetricFoldsState) -> bool:
+def activeLeafIsTheFirstLeaf(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex <= 1
 
-def activeLeafIsUnconstrainedInAllDimensions(state: SymmetricFoldsState) -> bool:
+def activeLeafIsUnconstrainedInAllDimensions(state: StateMapFoldingSymmetric) -> bool:
     return not state.dimensionsUnconstrained
 
-def activeLeafUnconstrainedInThisDimension(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def activeLeafUnconstrainedInThisDimension(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.dimensionsUnconstrained -= 1
     return state
 
-def filterCommonGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def filterCommonGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.次MiniGap]
     if state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] == state.dimensionsUnconstrained:
         state = incrementActiveGap(state)
     state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] = 0
     return state
 
-def gapAvailable(state: SymmetricFoldsState) -> bool:
+def gapAvailable(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > 0
 
-def incrementActiveGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def incrementActiveGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gap1ndex += 1
     return state
 
-def incrementGap1ndexCeiling(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def incrementGap1ndexCeiling(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gap1ndexCeiling += 1
     return state
 
-def incrementIndexMiniGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def incrementIndexMiniGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次MiniGap += 1
     return state
 
-def initializeIndexMiniGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def initializeIndexMiniGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次MiniGap = state.gap1ndex
     return state
 
-def initializeVariablesToFindGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def initializeVariablesToFindGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.dimensionsUnconstrained = state.totalDimensions
     state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
     state.次Dimension = 0
     return state
 
-def insertActiveLeaf(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def insertActiveLeaf(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Leaf = 0
     while state.次Leaf < state.leaf1ndex:
         state.gapsWhere[state.gap1ndexCeiling] = state.次Leaf
@@ -76,7 +76,7 @@ def insertActiveLeaf(state: SymmetricFoldsState) -> SymmetricFoldsState:
         state.次Leaf += 1
     return state
 
-def insertActiveLeafAtGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def insertActiveLeafAtGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gap1ndex -= 1
     state.leafAbove[state.leaf1ndex] = state.gapsWhere[state.gap1ndex]
     state.leafBelow[state.leaf1ndex] = state.leafBelow[state.leafAbove[state.leaf1ndex]]
@@ -86,50 +86,50 @@ def insertActiveLeafAtGap(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.leaf1ndex += 1
     return state
 
-def leafBelowSentinelIs1(state: SymmetricFoldsState) -> bool:
+def leafBelowSentinelIs1(state: StateMapFoldingSymmetric) -> bool:
     return state.leafBelow[0] == 1
 
-def leafConnecteeIsActiveLeaf(state: SymmetricFoldsState) -> bool:
+def leafConnecteeIsActiveLeaf(state: StateMapFoldingSymmetric) -> bool:
     return state.leafConnectee == state.leaf1ndex
 
-def lookForGaps(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def lookForGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gapsWhere[state.gap1ndexCeiling] = state.leafConnectee
     if state.countDimensionsGapped[state.leafConnectee] == 0:
         state = incrementGap1ndexCeiling(state)
     state.countDimensionsGapped[state.leafConnectee] += 1
     return state
 
-def lookupLeafConnecteeInConnectionGraph(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def lookupLeafConnecteeInConnectionGraph(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
     return state
 
-def loopingLeavesConnectedToActiveLeaf(state: SymmetricFoldsState) -> bool:
+def loopingLeavesConnectedToActiveLeaf(state: StateMapFoldingSymmetric) -> bool:
     return state.leafConnectee != state.leaf1ndex
 
-def loopingThroughTheDimensions(state: SymmetricFoldsState) -> bool:
+def loopingThroughTheDimensions(state: StateMapFoldingSymmetric) -> bool:
     return state.次Dimension < state.totalDimensions
 
-def loopingToActiveGapCeiling(state: SymmetricFoldsState) -> bool:
+def loopingToActiveGapCeiling(state: StateMapFoldingSymmetric) -> bool:
     return state.次MiniGap < state.gap1ndexCeiling
 
-def noGapsHere(state: SymmetricFoldsState) -> bool:
+def noGapsHere(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > 0 and state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1]
 
-def tryAnotherLeafConnectee(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def tryAnotherLeafConnectee(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
     return state
 
-def tryNextDimension(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def tryNextDimension(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Dimension += 1
     return state
 
-def undoLastLeafPlacement(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def undoLastLeafPlacement(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.leaf1ndex -= 1
     state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leafBelow[state.leaf1ndex]
     state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
     return state
 
-def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     while activeLeafGreaterThan0(state):
         if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
             if activeLeafGreaterThanTotalLeaves(state):
@@ -158,6 +158,6 @@ def count(state: SymmetricFoldsState) -> SymmetricFoldsState:
     state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
-def doTheNeedful(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def doTheNeedful(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state = count(state)
     return state

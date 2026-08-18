@@ -13,17 +13,17 @@ from Z0Z_tools import exclude
 if TYPE_CHECKING:
 	from collections.abc import Iterator
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import Leaf
 
 #======== crease-based subroutines for analyzing a specific `pile`. =======
-def _getLeavesCrease(state: EliminationState, leaf: Leaf) -> tuple[Leaf, ...]:
+def _getLeavesCrease(state: StateElimination, leaf: Leaf) -> tuple[Leaf, ...]:
 	if 0 < leaf:
 		return tuple(getLeavesCreaseAnte(state, abs(leaf)))
 	return tuple(getLeavesCreasePost(state, abs(leaf)))
 
 #-------- Depth 2 ------------------------------------
-def pinPile一ByCrease(state: EliminationState) -> Iterator[Leaf]:
+def pinPile一ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = sub
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -36,7 +36,7 @@ def pinPile一ByCrease(state: EliminationState) -> Iterator[Leaf]:
 		boxOfCreaseIndicesExcluded.extend([*range(工dimensionTail(leafAt一Ante首) - 零, state.totalDimensions - 一)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
-def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
+def pinPile一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = add
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -50,7 +50,7 @@ def pinPile一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 #-------- Depth 3 ------------------------------------
-def pinPile一零ByCrease(state: EliminationState) -> Iterator[Leaf]:
+def pinPile一零ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = sub
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -66,7 +66,7 @@ def pinPile一零ByCrease(state: EliminationState) -> Iterator[Leaf]:
 		boxOfCreaseIndicesExcluded.extend([*range(工dimensionTail(leafAt一Ante首) + 零, state.totalDimensions)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
-def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
+def pinPile零一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = add
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -83,7 +83,7 @@ def pinPile零一Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 #-------- Depth 4 ------------------------------------
-def pinPile二ByCrease(state: EliminationState) -> Iterator[Leaf]:
+def pinPile二ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = sub
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -110,7 +110,7 @@ def pinPile二ByCrease(state: EliminationState) -> Iterator[Leaf]:
 			boxOfCreaseIndicesExcluded.extend([ptount(leafAt一零), state.totalDimensions - 3, state.totalDimensions - 4])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
-def pinPile二Ante首ByCrease(state: EliminationState) -> Iterator[Leaf]:
+def pinPile二Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	direction: CallableFunction[[int, int], int] = add
 
 	boxOfCreaseIndicesExcluded: list[int] = []

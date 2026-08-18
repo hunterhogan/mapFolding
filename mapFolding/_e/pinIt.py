@@ -11,15 +11,15 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable
-	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding._e.theTypes import Leaf, Pile
 
-def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> EliminationState:
+def excludeLeaf_rBeforeLeaf_k(state: StateElimination, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> StateElimination:
 	"""Exclude `leaf_r` from appearing before `leaf_k` in every `pile` in the domain of `leaf_k`.
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		Data basket, state of the local context, and state of the global context.
 	leaf_k : int
 		`leaf` that must be in a `pile` preceding the `pile` of `leaf_r`.
@@ -32,7 +32,7 @@ def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Lea
 
 	Returns
 	-------
-	EliminationState
+	StateElimination
 		Same state instance, mutated with updated `boxOfPermutationSpace`.
 
 	See Also
@@ -46,12 +46,12 @@ def excludeLeaf_rBeforeLeaf_k(state: EliminationState, leaf_k: Leaf, leaf_r: Lea
 	return state
 
 def excludeLeaf_rBeforeLeaf_kAtPile_k(
-	state: EliminationState
+	state: StateElimination
 	, leaf_k: Leaf
 	, leaf_r: Leaf
 	, pile_k: Pile
 	, domainOf_leaf_r: Iterable[Pile] | None = None
-) -> EliminationState:
+) -> StateElimination:
 	boxOfPermutationSpace: list[PermutationSpace] = state.boxOfPermutationSpace
 	state.boxOfPermutationSpace = []
 

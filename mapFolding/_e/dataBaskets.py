@@ -577,7 +577,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	valid: bool = True
 
 @dataclasses.dataclass(slots=True)
-class EliminationState:
+class StateElimination:
 	"""Computational state for algorithms that compute `totalFolds` by elimination.
 
 	This data basket stores both mutable workbench fields (which change during the search) and
@@ -641,7 +641,7 @@ class EliminationState:
 	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
 	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
-	boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['EliminationState', PermutationSpace], PermutationSpace]], init=True)
+	boxOfFunctionsReduction: Sequence[Callable[[StateElimination, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['StateElimination', PermutationSpace], PermutationSpace]], init=True)
 
 	groupsOfFolds: int = 0
 	"""`totalFolds` is divisible by `totalLeaves`; the algorithm counts each `Folding` that represents a group of `totalLeaves`-many foldings."""
@@ -767,13 +767,13 @@ class EliminationState:
 			, self.pile in _e.getDomainLeaf(self, leaf)
 		))
 
-	def reduceAllPermutationSpace(self, boxOfFunctionsReduction: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] | None = None) -> Self:
+	def reduceAllPermutationSpace(self, boxOfFunctionsReduction: Sequence[Callable[[StateElimination, PermutationSpace], PermutationSpace]] | None = None) -> Self:
 		boxOfFunctionsReduction = boxOfFunctionsReduction or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
 		boxOfPermutationSpace: list[PermutationSpace] = 是valid(self.boxOfPermutationSpace)
 		self.boxOfPermutationSpace = []
 		boxOfPermutationSpaceIrreducible: list[PermutationSpace] = []
 
-		functionsReduction: list[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = list(boxOfFunctionsReduction)
+		functionsReduction: list[Callable[[StateElimination, PermutationSpace], PermutationSpace]] = list(boxOfFunctionsReduction)
 		for permutationSpace in boxOfPermutationSpace:
 			#------------ Initialize `permutationSpace` ------------------------------
 			sumPermutationSpace: Leaf | ChoicesLeaf = sum(permutationSpace.values())
@@ -781,7 +781,7 @@ class EliminationState:
 
 			while 次:
 				次 -= 1
-				reducer: Callable[[EliminationState, PermutationSpace], PermutationSpace] = functionsReduction[次]
+				reducer: Callable[[StateElimination, PermutationSpace], PermutationSpace] = functionsReduction[次]
 				permutationSpace: PermutationSpace = reducer(self, permutationSpace)
 
 				if not permutationSpace.valid:

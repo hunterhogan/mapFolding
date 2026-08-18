@@ -43,14 +43,14 @@ from mapFolding._e._2上nDimensional import 一, 零
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.dataBaskets import StateElimination
 
-def 工totalDimensionsTail(state: EliminationState, integerNonnegative: int) -> int:
+def 工totalDimensionsTail(state: StateElimination, integerNonnegative: int) -> int:
 	"""Count consecutive tail radix-2 digits with value `1` in `integerNonnegative`.
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		State container that provides `state.totalDimensions`.
 	integerNonnegative : int
 		Input value interpreted as a base-2 positional coordinate encoding.

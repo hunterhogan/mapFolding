@@ -1,57 +1,57 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import StateMapFolding
 from numba import jit_module
 
-def activeLeafGreaterThan0(state: MapFoldingState) -> bool:
+def activeLeafGreaterThan0(state: StateMapFolding) -> bool:
     return state.leaf1ndex > 0
 
-def activeLeafGreaterThanTotalLeaves(state: MapFoldingState) -> bool:
+def activeLeafGreaterThanTotalLeaves(state: StateMapFolding) -> bool:
     return state.leaf1ndex > state.totalLeaves
 
-def activeLeafIsTheFirstLeaf(state: MapFoldingState) -> bool:
+def activeLeafIsTheFirstLeaf(state: StateMapFolding) -> bool:
     return state.leaf1ndex <= 1
 
-def activeLeafIsUnconstrainedInAllDimensions(state: MapFoldingState) -> bool:
+def activeLeafIsUnconstrainedInAllDimensions(state: StateMapFolding) -> bool:
     return not state.dimensionsUnconstrained
 
-def activeLeafUnconstrainedInThisDimension(state: MapFoldingState) -> MapFoldingState:
+def activeLeafUnconstrainedInThisDimension(state: StateMapFolding) -> StateMapFolding:
     state.dimensionsUnconstrained -= 1
     return state
 
-def filterCommonGaps(state: MapFoldingState) -> MapFoldingState:
+def filterCommonGaps(state: StateMapFolding) -> StateMapFolding:
     state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.次MiniGap]
     if state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] == state.dimensionsUnconstrained:
         state = incrementActiveGap(state)
     state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] = 0
     return state
 
-def gapAvailable(state: MapFoldingState) -> bool:
+def gapAvailable(state: StateMapFolding) -> bool:
     return state.leaf1ndex > 0
 
-def incrementActiveGap(state: MapFoldingState) -> MapFoldingState:
+def incrementActiveGap(state: StateMapFolding) -> StateMapFolding:
     state.gap1ndex += 1
     return state
 
-def incrementGap1ndexCeiling(state: MapFoldingState) -> MapFoldingState:
+def incrementGap1ndexCeiling(state: StateMapFolding) -> StateMapFolding:
     state.gap1ndexCeiling += 1
     return state
 
-def incrementIndexMiniGap(state: MapFoldingState) -> MapFoldingState:
+def incrementIndexMiniGap(state: StateMapFolding) -> StateMapFolding:
     state.次MiniGap += 1
     return state
 
-def initializeIndexMiniGap(state: MapFoldingState) -> MapFoldingState:
+def initializeIndexMiniGap(state: StateMapFolding) -> StateMapFolding:
     state.次MiniGap = state.gap1ndex
     return state
 
-def initializeVariablesToFindGaps(state: MapFoldingState) -> MapFoldingState:
+def initializeVariablesToFindGaps(state: StateMapFolding) -> StateMapFolding:
     state.dimensionsUnconstrained = state.totalDimensions
     state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
     state.次Dimension = 0
     return state
 
-def insertActiveLeaf(state: MapFoldingState) -> MapFoldingState:
+def insertActiveLeaf(state: StateMapFolding) -> StateMapFolding:
     state.次Leaf = 0
     while state.次Leaf < state.leaf1ndex:
         state.gapsWhere[state.gap1ndexCeiling] = state.次Leaf
@@ -59,7 +59,7 @@ def insertActiveLeaf(state: MapFoldingState) -> MapFoldingState:
         state.次Leaf += 1
     return state
 
-def insertActiveLeafAtGap(state: MapFoldingState) -> MapFoldingState:
+def insertActiveLeafAtGap(state: StateMapFolding) -> StateMapFolding:
     state.gap1ndex -= 1
     state.leafAbove[state.leaf1ndex] = state.gapsWhere[state.gap1ndex]
     state.leafBelow[state.leaf1ndex] = state.leafBelow[state.leafAbove[state.leaf1ndex]]
@@ -69,50 +69,50 @@ def insertActiveLeafAtGap(state: MapFoldingState) -> MapFoldingState:
     state.leaf1ndex += 1
     return state
 
-def leafBelowSentinelIs1(state: MapFoldingState) -> bool:
+def leafBelowSentinelIs1(state: StateMapFolding) -> bool:
     return state.leafBelow[0] == 1
 
-def leafConnecteeIsActiveLeaf(state: MapFoldingState) -> bool:
+def leafConnecteeIsActiveLeaf(state: StateMapFolding) -> bool:
     return state.leafConnectee == state.leaf1ndex
 
-def lookForGaps(state: MapFoldingState) -> MapFoldingState:
+def lookForGaps(state: StateMapFolding) -> StateMapFolding:
     state.gapsWhere[state.gap1ndexCeiling] = state.leafConnectee
     if state.countDimensionsGapped[state.leafConnectee] == 0:
         state = incrementGap1ndexCeiling(state)
     state.countDimensionsGapped[state.leafConnectee] += 1
     return state
 
-def lookupLeafConnecteeInConnectionGraph(state: MapFoldingState) -> MapFoldingState:
+def lookupLeafConnecteeInConnectionGraph(state: StateMapFolding) -> StateMapFolding:
     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
     return state
 
-def loopingLeavesConnectedToActiveLeaf(state: MapFoldingState) -> bool:
+def loopingLeavesConnectedToActiveLeaf(state: StateMapFolding) -> bool:
     return state.leafConnectee != state.leaf1ndex
 
-def loopingThroughTheDimensions(state: MapFoldingState) -> bool:
+def loopingThroughTheDimensions(state: StateMapFolding) -> bool:
     return state.次Dimension < state.totalDimensions
 
-def loopingToActiveGapCeiling(state: MapFoldingState) -> bool:
+def loopingToActiveGapCeiling(state: StateMapFolding) -> bool:
     return state.次MiniGap < state.gap1ndexCeiling
 
-def noGapsHere(state: MapFoldingState) -> bool:
+def noGapsHere(state: StateMapFolding) -> bool:
     return state.leaf1ndex > 0 and state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1]
 
-def tryAnotherLeafConnectee(state: MapFoldingState) -> MapFoldingState:
+def tryAnotherLeafConnectee(state: StateMapFolding) -> StateMapFolding:
     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
     return state
 
-def tryNextDimension(state: MapFoldingState) -> MapFoldingState:
+def tryNextDimension(state: StateMapFolding) -> StateMapFolding:
     state.次Dimension += 1
     return state
 
-def undoLastLeafPlacement(state: MapFoldingState) -> MapFoldingState:
+def undoLastLeafPlacement(state: StateMapFolding) -> StateMapFolding:
     state.leaf1ndex -= 1
     state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leafBelow[state.leaf1ndex]
     state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
     return state
 
-def count(state: MapFoldingState) -> MapFoldingState:
+def count(state: StateMapFolding) -> StateMapFolding:
     while activeLeafGreaterThan0(state):
         if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
             if activeLeafGreaterThanTotalLeaves(state):
@@ -140,7 +140,7 @@ def count(state: MapFoldingState) -> MapFoldingState:
             state = insertActiveLeafAtGap(state)
     return state
 
-def doTheNeedful(state: MapFoldingState) -> MapFoldingState:
+def doTheNeedful(state: StateMapFolding) -> StateMapFolding:
     state = count(state)
     return state
 jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True)

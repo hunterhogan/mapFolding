@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
-def transitionOnGroupsOfFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def transitionOnGroupsOfFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     while state.symmetricFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:

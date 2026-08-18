@@ -5,7 +5,7 @@ from __future__ import annotations
 from hunterMakesPy import raiseIfNone
 from mapFolding._e import getDomainLeaf, pileOrigin
 from mapFolding._e._2上nDimensional import 工dimensionTail, 零
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from typing import Any, TYPE_CHECKING
 import numpy
@@ -14,7 +14,7 @@ import pandas
 if TYPE_CHECKING:
 	from pandas import DataFrame, Series
 
-def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | None = None) -> pandas.DataFrame:
+def measureEntropy(state: StateElimination, boxOfLeavesAnalyzed: list[int] | None = None) -> pandas.DataFrame:
 	"""Measure the relative entropy and distributional properties of leaves across folding sequences.
 
 	This function analyzes how leaves are distributed across their mathematical domains by comparing
@@ -24,7 +24,7 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		The elimination state containing the map shape and dimension information.
 	boxOfLeavesAnalyzed : list[int] | None = None
 		Specific leaves to analyze. If None, analyzes all leaves except the trivial ones
@@ -105,7 +105,7 @@ def measureEntropy(state: EliminationState, boxOfLeavesAnalyzed: list[int] | Non
 def analyzeEntropyForDimension(totalDimensions: int = 6) -> None:
 	"""Analyze entropy for all non-trivial leaves in a given dimension configuration."""
 	mapShape: tuple[int, ...] = (2,) * totalDimensions
-	state: EliminationState = EliminationState(mapShape)
+	state: StateElimination = StateElimination(mapShape)
 
 	print(f"\n{'=' * 80}")
 	print(f"Entropy Analysis for 2^{totalDimensions} (mapShape={mapShape})")

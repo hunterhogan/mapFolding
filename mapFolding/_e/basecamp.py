@@ -2,7 +2,7 @@
 # ruff: file-ignore[import-outside-top-level]
 from __future__ import annotations
 
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
 from mapFolding.kitFilesystem import makePathFilenameFolds, saveTotal, saveTotalFAILearly
 from mapFolding.theSSOT import settingsPackage
@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 
 def eliminateFolds(
 	mapShape: tuple[int, ...] | None = None
-	, state: EliminationState | None = None
+	, state: StateElimination | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, CPUlimit: Limitation = None
@@ -71,7 +71,7 @@ def eliminateFolds(
 		if not mapShape:
 			message: str = f'I received `{mapShape = }` and `{state = }`, and I was unable to select a `mapShape`.'
 			raise ValueError(message)
-		state = EliminationState(mapShape)
+		state = StateElimination(mapShape)
 
 	concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
 

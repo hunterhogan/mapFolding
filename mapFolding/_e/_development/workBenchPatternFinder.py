@@ -10,7 +10,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding._e import getChoicesLeaf, getIteratorOfLeaves, getLookupDomainsLeaves
 from mapFolding._e._2上nDimensional import (
 	getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 工dimension首零, 零, 首一, 首二, 首零, 首零一)
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from more_itertools import flatten
@@ -23,17 +23,17 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, Pile
 	import pandas
 
-def _getGroupedBy(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
+def _getGroupedBy(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
-def getExcludedLeaves(state: EliminationState, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
+def getExcludedLeaves(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
 	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryChoicesLeaf(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
 
-	state = EliminationState((2,) * 6)
+	state = StateElimination((2,) * 6)
 	"""
 000011	3
 		5	(5, 6, 10, 18, 34)
@@ -160,19 +160,19 @@ pp3  = (3, 5, 9, 17, 33)
 
 	pileRangeByFormula: bool = False
 	if pileRangeByFormula:
-		state = EliminationState((2,) * 6)
+		state = StateElimination((2,) * 6)
 
 		# works for 9 <= odd piles <= 47
 		# I _think_ I need to be able to pass start/stop to intraDimensionalLeaves
 		# Yes, sort of. `Z0Z_alfaBeta` and `intraDimensionalLeaves` need to be the same function: and I need to be able to tweak all of the parameters.
 
-		def intraDimensionalLeaves(state: EliminationState, dimensionOrigin: int) -> list[int]:
+		def intraDimensionalLeaves(state: StateElimination, dimensionOrigin: int) -> list[int]:
 			return list(map(partial(add, dimensionOrigin + 2), state.mapShapeProductsSums[1: 工dimension首零(dimensionOrigin)]))
 
-		def Z0Z_alfaBeta(state: EliminationState, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
+		def Z0Z_alfaBeta(state: StateElimination, alfaStart: int = 0, betaStop: int = 0, charlieStep: int = 1) -> list[int]:
 			return list(flatten(map(partial(intraDimensionalLeaves, state), state.mapShapeProducts[2 + alfaStart: (state.totalDimensions - 1) + betaStop: charlieStep])))
 
-		def Z0Z_getPileRange(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
+		def Z0Z_getPileRange(state: StateElimination, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
 
 			# odd leaves < 32.
@@ -203,7 +203,7 @@ pp3  = (3, 5, 9, 17, 33)
 
 			return tuple(sorted(pileRange))
 
-		def Z0Z_getPileRangeEven(state: EliminationState, pile: Pile) -> Iterable[Leaf]:
+		def Z0Z_getPileRangeEven(state: StateElimination, pile: Pile) -> Iterable[Leaf]:
 			pileRange: list[Leaf] = []
 
 			for yy in range(3):

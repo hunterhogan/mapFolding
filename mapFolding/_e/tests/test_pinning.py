@@ -5,7 +5,7 @@ from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.tests import assertEqualTo
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTvalues
@@ -18,18 +18,18 @@ if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
 
-def beansWithoutCornbread(state: EliminationState, permutationSpace: PermutationSpace) -> bool:
+def beansWithoutCornbread(state: StateElimination, permutationSpace: PermutationSpace) -> bool:
 	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace)) for beans, cornbread in ((一 + 零, 一), (首一(state.totalDimensions), 首零一(state.totalDimensions))))
 
 @pytest.mark.parametrize("pinningFunction", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))
 @pytest.mark.parametrize("totalDimensions", [5, 6], ids=lambda totalDimensions: f"2^{totalDimensions}-dimensional")
 def test_pinningFunctions(
-	pinningFunction: CallableFunction[..., EliminationState],
+	pinningFunction: CallableFunction[..., StateElimination],
 	totalDimensions: int,
 	CPUlimit: Limitation,
 	arrayAlbum2上nDimensional: NDArray[numpy.uint8],
 ) -> None:
-	state: EliminationState = EliminationState((2,) * totalDimensions)
+	state: StateElimination = StateElimination((2,) * totalDimensions)
 
 	state = pinningFunction(state, CPUlimit=CPUlimit)
 

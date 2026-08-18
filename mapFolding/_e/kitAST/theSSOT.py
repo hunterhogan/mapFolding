@@ -21,5 +21,5 @@ defaultElimination['module'].update({
 	})
 defaultElimination['variable'].update({
 		'counting': 'groupsOfFolds'
-		, 'stateDataclass': 'EliminationState'
+		, 'stateDataclass': 'StateElimination'
 	})

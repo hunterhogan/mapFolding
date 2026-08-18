@@ -4,7 +4,7 @@ from functools import partial
 from itertools import chain, pairwise, product as CartesianProduct, repeat, starmap
 from mapFolding._e import getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
-from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 	from multiprocessing.process import BaseProcess
 	from multiprocessing.queues import Queue
 
-def count(state: EliminationState) -> EliminationState:
+def count(state: StateElimination) -> StateElimination:
 	state.groupsOfFolds += sum(map(countPermutationSpace, state.boxOfPermutationSpace, repeat(state.mapShape)))
 	return state
 
@@ -31,17 +31,17 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 					for _pile, choicesLeaf in sorted(DOTitems(permutationSpace.undeterminedPiles()))))))
 					, repeat(mapShape)))
 
-def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> EliminationState:
-	return EliminationState(mapShape, boxOfPermutationSpace=[permutationSpace]
+def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> StateElimination:
+	return StateElimination(mapShape, boxOfPermutationSpace=[permutationSpace]
 		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT).moveToBoxOfFolding()
 
 def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
 	return chain.from_iterable(map(PermutationSpace.deconstructPile, boxOfPermutationSpace))
 
-def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[EliminationState]) -> None:
+def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[StateElimination]) -> None:
 	tuple(map(queueStates.put, map(partial(reducePermutationSpace, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
-def theorem2b(state: EliminationState) -> EliminationState:
+def theorem2b(state: StateElimination) -> StateElimination:
 	if state.Theorem4Multiplier == 1 and (2 < max(state.mapShape)) and (4 < state.totalLeaves):
 		state.Theorem2Multiplier = 2
 		dimension: int = state.mapShape.index(max(state.mapShape))
@@ -51,7 +51,7 @@ def theorem2b(state: EliminationState) -> EliminationState:
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 	return state
 
-def theorem4(state: EliminationState) -> EliminationState:
+def theorem4(state: StateElimination) -> StateElimination:
 	for indicesSameDimensionLength in mapShapeLengthsAreEqual(state.mapShape):
 		state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
 		for 次k, 次r in pairwise(indicesSameDimensionLength):
@@ -59,7 +59,7 @@ def theorem4(state: EliminationState) -> EliminationState:
 			state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 	return state
 
-def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationState:
+def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
 	if state.totalLeaves == 0:
 		state.groupsOfFolds = 1
 		return state
@@ -74,7 +74,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	processManager: BaseContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
-	queueStates: Queue[EliminationState] = processManager.Queue()
+	queueStates: Queue[StateElimination] = processManager.Queue()
 
 	state.groupsOfFolds = len(state.boxOfFolding)
 	state.boxOfFolding = []
@@ -92,7 +92,7 @@ def doTheNeedful(state: EliminationState, workersMaximum: int) -> EliminationSta
 
 	while permutationSpacesLiving:
 		tuple(map(queuePermutationSpace.put, boxOfPermutationSpace))
-		sherpa: EliminationState = queueStates.get()
+		sherpa: StateElimination = queueStates.get()
 		state.groupsOfFolds += len(sherpa.boxOfFolding)
 		boxOfPermutationSpace = list(deconstructPermutationSpaces(sherpa.boxOfPermutationSpace))
 		permutationSpacesLiving += -1 + len(boxOfPermutationSpace)

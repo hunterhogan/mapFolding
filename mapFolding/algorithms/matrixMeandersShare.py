@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
-	from mapFolding.dataBaskets import MatrixMeandersState
+	from mapFolding.dataBaskets import StateMeanders
 	from numpy import dtype, ndarray
 	from typing import Any, Literal, LiteralString
 	import pandas
@@ -24,12 +24,12 @@ if TYPE_CHECKING:
 - Convert duplicate code to procedures.
 """
 
-def integersWide吗(state: MatrixMeandersState, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+def integersWide吗(state: StateMeanders, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : StateMeanders
 		The current state of the computation, including `dictionaryMeanders`.
 	dataframe : pandas.DataFrame | None = None
 		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of
@@ -178,7 +178,7 @@ arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]
 
 #================== Buckets =======================================================================
 
-def getTotalBuckets(state: MatrixMeandersState, totalArcCodes: int = 0) -> int:
+def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	"""Return the allocation length for one transfer-matrix step.
 
 	The function returns an exact recorded `totalBuckets` when the current `kind`, `n`, and
@@ -187,7 +187,7 @@ def getTotalBuckets(state: MatrixMeandersState, totalArcCodes: int = 0) -> int:
 
 	Parameters
 	----------
-	state : MatrixMeandersState
+	state : StateMeanders
 		The current transfer-matrix state.
 	totalArcCodes : int
 		Number of unique input `arcCode` at the current boundary.

@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 	from _csv import Writer
 	from collections.abc import Iterable, Iterator
 	from io import TextIOWrapper
-	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import Folding
 	from os import PathLike
 	from pandas import DataFrame
@@ -462,19 +462,19 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 
 	return data
 
-def getDataFrameFoldings(state: EliminationState) -> DataFrame | None:
+def getDataFrameFoldings(state: StateElimination) -> DataFrame | None:
 	"""Load array-foldings data for `state.totalDimensions`.
 
 	(AI generated docstring)
 
 	You can use this function when you want the package's array-foldings data for an
-	`EliminationState`. This function looks in the package's standard data location for
+	`StateElimination`. This function looks in the package's standard data location for
 	`state.totalDimensions`, returns the data as a `pandas.DataFrame` [1], and returns `None` after
 	writing a diagnostic to the standard error stream when the data is unavailable.
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		Elimination state that supplies `state.totalDimensions`.
 
 	Returns

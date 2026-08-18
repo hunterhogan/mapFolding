@@ -15,7 +15,7 @@ from Z0Z_tools import DOTitems, DOTvalues, reverseLookup
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Sequence
-	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
 
 def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, ChoicesLeaf]], antiChoicesLeaf: ChoicesLeaf) -> PermutationSpace:
@@ -97,7 +97,7 @@ def _odd吗(mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile, 
 		return bool(oddLeaf吗(mapShape, dimension=dimension, leaf=pileLeaf[1]))
 	return workhorse
 
-def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and eliminate crossed creases.
 
 	I use this constraint encoder to detect configurations where two creases would cross physically
@@ -108,7 +108,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -193,7 +193,7 @@ def _crossedCreases(state: EliminationState, permutationSpace: PermutationSpace)
 
 	return permutationSpace
 
-def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def reducePermutationSpace_LeafIsPinned(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to propagate leaf pinning constraints.
 
 	I use this constraint encoder to enforce that every pinned leaf can appear at only one pile. For
@@ -203,7 +203,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: choicesLeaf`.
@@ -225,7 +225,7 @@ def reducePermutationSpace_LeafIsPinned(state: EliminationState, permutationSpac
 
 	return permutationSpace
 
-def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""I use this to detect and exploit naked subset constraints.
 
 	I use this constraint encoder to detect naked subsets in the permutation space and remove
@@ -248,7 +248,7 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -282,12 +282,12 @@ def reducePermutationSpace_nakedSubset(state: EliminationState, permutationSpace
 
 	return permutationSpace
 
-def reducePermutationSpace_leafDomainOf0or1(state: EliminationState, permutationSpace: PermutationSpace) -> PermutationSpace:
+def reducePermutationSpace_leafDomainOf0or1(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Detect leaves with domain size of one or no domain.
 
 	Parameters
 	----------
-	state : EliminationState
+	state : StateElimination
 		A data basket to facilitate computations and actions.
 	permutationSpace : PermutationSpace
 		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
@@ -314,7 +314,7 @@ def reducePermutationSpace_leafDomainOf0or1(state: EliminationState, permutation
 				permutationSpaceHasNewLeaf = True
 	return permutationSpace
 
-boxOfFunctionsReductionDEFAULT: Sequence[Callable[[EliminationState, PermutationSpace], PermutationSpace]] = (
+boxOfFunctionsReductionDEFAULT: Sequence[Callable[[StateElimination, PermutationSpace], PermutationSpace]] = (
 	reducePermutationSpace_nakedSubset
 	, reducePermutationSpace_leafDomainOf0or1
 	, _crossedCreases

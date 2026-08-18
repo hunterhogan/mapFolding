@@ -1,9 +1,9 @@
-"""You can use this module to share elimination-algorithm utilities that avoid `EliminationState` imports.
+"""You can use this module to share elimination-algorithm utilities that avoid `StateElimination` imports.
 
 This module is a workbench utility layer for `mapFolding._e` algorithms. The module primarily contains utilities that are intended
 to work beyond the $2^n$-dimensional special case.
 
-You should avoid putting functions in this module that only work on $2^n$-dimensional maps. You cannot import `EliminationState`
+You should avoid putting functions in this module that only work on $2^n$-dimensional maps. You cannot import `StateElimination`
 into this module without causing circular import problems. This constraint exists as of 2026-01-26.
 
 Contents
@@ -46,7 +46,7 @@ Flow control
 
 References
 ----------
-[1] mapFolding._e.dataBaskets.EliminationState
+[1] mapFolding._e.dataBaskets.StateElimination
 	Internal package reference
 
 """
@@ -261,7 +261,7 @@ def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 
 	Examples
 	--------
-	The function is used during `EliminationState` initialization.
+	The function is used during `StateElimination` initialization.
 
 		self.mapShapeProducts = getMapShapeProducts(self.mapShape)
 
@@ -271,7 +271,7 @@ def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 		https://docs.python.org/3/library/itertools.html#itertools.accumulate
 	[2] operator.mul
 		https://docs.python.org/3/library/operator.html#operator.mul
-	[3] mapFolding._e.dataBaskets.EliminationState
+	[3] mapFolding._e.dataBaskets.StateElimination
 	"""
 	return tuple(accumulate(mapShape, mul, initial=1))
 
@@ -293,7 +293,7 @@ def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 
 	Examples
 	--------
-	The function is used during `EliminationState` initialization.
+	The function is used during `StateElimination` initialization.
 
 		self.mapShapeProductsSums = getMapShapeProductsSums(self.mapShape)
 
@@ -305,7 +305,7 @@ def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 		https://docs.python.org/3/library/operator.html#operator.add
 	[3] mapFolding._e._beDRY.getMapShapeProducts
 
-	[4] mapFolding._e.dataBaskets.EliminationState
+	[4] mapFolding._e.dataBaskets.StateElimination
 	"""
 	return tuple(accumulate(getMapShapeProducts(mapShape), add, initial=0))
 

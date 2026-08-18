@@ -6,7 +6,7 @@ from astToolkit.transformationTools import pythonCode2ast_expr
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST import IfThis, Settings形
 from mapFolding.kitAST.dataclasses import shatterDataclass
 from mapFolding.kitAST.theSSOT import defaultMapFolding, dictionaryEstimatesMapFolding
@@ -22,7 +22,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
-	from mapFolding.dataBaskets import SymmetricFoldsState
+	from mapFolding.dataBaskets import StateMapFoldingSymmetric
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass
 	from mapFolding.kitAST.numba.kitNumba import SpicesJobNumba
 	from mapFolding.theTypes import 形TotalLeaves
@@ -37,7 +37,7 @@ class RecipeJobTheorem2:
 
 	Attributes
 	----------
-	state : MapFoldingState
+	state : StateMapFolding
 		The map folding computation state containing dimensions and initial values.
 	totalFoldsEstimated : int = 0
 		Estimated total number of folds for progress tracking.
@@ -49,7 +49,7 @@ class RecipeJobTheorem2:
 		Name of the counting function to extract.
 	sourceLogicalPathModuleDataclass : identifierDotAttribute
 		Logical path to the dataclass module.
-	sourceDataclassIdentifier : str = 'MapFoldingState'
+	sourceDataclassIdentifier : str = 'StateMapFolding'
 		Name of the source dataclass.
 	sourceDataclassInstance : str
 		Instance identifier for the dataclass.
@@ -87,7 +87,7 @@ class RecipeJobTheorem2:
 		Type alias for leaf count datatype.
 	"""
 
-	state: MapFoldingState | SymmetricFoldsState
+	state: StateMapFolding | StateMapFoldingSymmetric
 	"""The map folding computation state containing dimensions and initial values."""
 	totalFoldsEstimated: int = 0
 	"""Estimated total number of folds for progress tracking."""
@@ -220,7 +220,7 @@ class RecipeJobTheorem2:
 
 def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
 	"""Create a binary executable for `mapShape`."""
-	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	state: StateMapFolding = transitionOnGroupsOfFolds(StateMapFolding(mapShape))
 	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
 	pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePath
@@ -63,7 +63,7 @@ def makeVerificationDataLeavesDomain(sequenceTotalDimensions: Sequence[int], box
 
 	for totalDimensions in sequenceTotalDimensions:
 		mapShape: tuple[int, ...] = (2,) * totalDimensions
-		state: EliminationState = EliminationState(mapShape)
+		state: StateElimination = StateElimination(mapShape)
 		dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 
 		boxOfResolvedLeaves: list[int] = [resolveLeaf(leafSpec, totalDimensions) for leafSpec in boxOfLeaves]

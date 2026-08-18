@@ -17,7 +17,7 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
-	from mapFolding._e.dataBaskets import EliminationState, PermutationSpace
+	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding._e.theTypes import PinnedLeaves
 
 @dataclass
@@ -60,7 +60,7 @@ def detectPermutationSpaceErrors(arrayFoldings: numpy.ndarray, boxOfPermutationS
 
 #======== Specialized tools ===============================
 
-def verifyPinning2Dn(state: EliminationState) -> None:
+def verifyPinning2Dn(state: StateElimination) -> None:
 	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:
 		return permutationSpace.pinnedLeaves()
 	arrayFoldings = getDataFrameFoldings(state)

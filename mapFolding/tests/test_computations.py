@@ -29,7 +29,7 @@ from __future__ import annotations
 
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
-from mapFolding.dataBaskets import MapFoldingState
+from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
 from mapFolding.kitAST.numba.makeJob import makeJobNumba
 from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
@@ -125,7 +125,7 @@ def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Pat
 		The pytest-managed job directory.
 
 	"""
-	state: MapFoldingState = transitionOnGroupsOfFolds(MapFoldingState(mapShape))
+	state: StateMapFolding = transitionOnGroupsOfFolds(StateMapFolding(mapShape))
 
 	pathFilenameModule: Path = pathRootJobDEFAULTTesting / 'jobNumba.py'
 	pathFilenameTotalFolds: Path = pathFilenameModule.with_suffix('.totalFoldsTesting')

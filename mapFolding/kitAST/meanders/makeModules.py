@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 	import ast
 
 def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
-	"""Make `countBigInt` module for meanders using `MatrixMeandersState` dataclass."""
+	"""Make `countBigInt` module for meanders using `StateMeanders` dataclass."""
 	identifiers = identifiers or default
 	名Callable: str = keywordArguments.get('名Callable') or identifiers['function']['counting']
 	名CallableDispatcherSource: str | None = keywordArguments.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')

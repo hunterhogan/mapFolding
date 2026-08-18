@@ -7,7 +7,7 @@ from mapFolding._e import getDomainLeaf, leafOrigin
 from mapFolding._e._2上nDimensional import (
 	dimensionIndex, 一, 三, 二, 四, 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零, 工totalDimensionsOdd, 零, 首一, 首一二, 首三,
 	首二, 首零, 首零一, 首零一二, 首零二)
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
@@ -84,7 +84,7 @@ mapShapeProductsSums
 """
 
 """products of dimensions and sums of products emerge from the formulas in `getDomainLeaf`.
-state = EliminationState((2,) * 6)
+state = StateElimination((2,) * 6)
 domainsOfDimensionOrigins = tuple(getDomainLeaf(state, leaf) for leaf in state.mapShapeProducts)[0:-1]
 sumsOfDimensionOrigins = tuple(accumulate(state.mapShapeProducts))[0:-1]
 sumsOfDimensionOriginsReversed = tuple(accumulate(state.mapShapeProducts[::-1], initial=-state.totalLeaves))[1:None]
@@ -102,7 +102,7 @@ for dimensionOrigin, domain, sumOrigins, sumReversed in zip(state.mapShapeProduc
 The piles of dimension origins (sums of products of dimensions) emerge from the following formulas!
 
 (Note: the function below is included to capture the function as it existed at this point in development. I hope the package has improved/evolved by the time you read this.)
-def getDomainLeaf(state: EliminationState, leaf: int) -> range:
+def getDomainLeaf(state: StateElimination, leaf: int) -> range:
 	def workhorse(leaf: int, totalDimensions: int, mapShape: tuple[int, ...], totalLeaves: int) -> range:
 		originPinned =  leaf == leafOrigin
 		return range(
@@ -117,7 +117,7 @@ def getDomainLeaf(state: EliminationState, leaf: int) -> range:
 	return workhorse(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 """
 
-def getDomainDimension一(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
+def getDomainDimension一(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
 	"""The beans and cornbread and beans and cornbread dimension.
 
 	(leaf一零, leaf一, leaf首一, leaf首零一)
@@ -160,7 +160,7 @@ def _getDomainDimension一(domain一零: tuple[int, ...], domain首一: tuple[in
 
 	return tuple(filter(allUnique吗, domainCombined))
 
-def getDomainDimension二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
+def getDomainDimension二(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
 	"""(leaf二一, leaf二一零, leaf二零, leaf二)."""
 	domain二零and二: tuple[tuple[int, int], ...] = getDomain二零and二(state)
 	domain二一零and二一: tuple[tuple[int, int], ...] = getDomain二一零and二一(state)
@@ -266,7 +266,7 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 
 	return tuple(sorted(filter(allUnique吗, set(domainCombined))))
 
-def getDomainDimension首二(state: EliminationState) -> tuple[tuple[int, int, int, int], ...]:
+def getDomainDimension首二(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
 	"""(leaf首二, leaf首零二, leaf首零一二, leaf首一二)."""
 	domain首零二and首二: tuple[tuple[int, int], ...] = getDomain首零二and首二(state)
 	domain首零一二and首一二: tuple[tuple[int, int], ...] = getDomain首零一二and首一二(state)
@@ -349,14 +349,14 @@ def _getDomainDimension首二(totalDimensions: int, domain首零二and首二: tu
 
 	return tuple(sorted(filter(allUnique吗, set(domainCombined))))
 
-def getDomain二零and二(state: EliminationState) -> tuple[tuple[int, int], ...]:
+def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf二零 and leaf二."""
 	domain二零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 零))
 	domain二: tuple[int, ...] = tuple(getDomainLeaf(state, 二))
 	direction: CallableFunction[[int, int], int] = add
 	return _getDomains二Or二一(domain二零, domain二, direction, state.totalDimensions, state.mapShapeProductsSums)
 
-def getDomain二一零and二一(state: EliminationState) -> tuple[tuple[int, int], ...]:
+def getDomain二一零and二一(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf二一零 and leaf二一."""
 	domain二一零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一 + 零))
 	domain二一: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一))
@@ -487,7 +487,7 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 
 	return tuple(sorted(set(domainCombined)))
 
-def getDomain首零二and首二(state: EliminationState) -> tuple[tuple[int, int], ...]:
+def getDomain首零二and首二(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf首零二 and leaf首二."""
 	domain首零二: tuple[int, ...] = tuple(getDomainLeaf(state, 首零二(state.totalDimensions)))
 	domain首二: tuple[int, ...] = tuple(getDomainLeaf(state, 首二(state.totalDimensions)))
@@ -569,7 +569,7 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 
 	return tuple(sorted(set(domainCombined)))
 
-def getDomain首零一二and首一二(state: EliminationState) -> tuple[tuple[int, int], ...]:
+def getDomain首零一二and首一二(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Combined domain of leaf首零一二 and leaf首一二."""
 	domain首零一二: tuple[int, ...] = tuple(getDomainLeaf(state, 首零一二(state.totalDimensions)))
 	domain首一二: tuple[int, ...] = tuple(getDomainLeaf(state, 首一二(state.totalDimensions)))
@@ -653,7 +653,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 @cache
 def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], totalLeaves: int) -> range:
 	"""The subroutines assume `dimensionLength == 2`, but I think the concept could be extended to other `mapShape`."""
-	state: EliminationState = EliminationState(mapShape)
+	state: StateElimination = StateElimination(mapShape)
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
 		return range(
@@ -670,7 +670,7 @@ def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], 
 				)
 	return range(totalLeaves)
 
-def getDomainLeaf首零Plus零(state: EliminationState, leaf: Leaf | None = None) -> tuple[Pile, ...]:
+def getDomainLeaf首零Plus零(state: StateElimination, leaf: Leaf | None = None) -> tuple[Pile, ...]:
 	"""Get the full domain of `leaf首零Plus零` that is valid in all cases, or if `leaf一零` and `leaf首零一` are pinned in `state.permutationSpace`, get a domain of `leaf首零Plus零` customized to `pileOfLeaf一零` and `pileOfLeaf首零一`."""
 	if leaf is None:
 		leaf = (零) + 首零(state.totalDimensions)

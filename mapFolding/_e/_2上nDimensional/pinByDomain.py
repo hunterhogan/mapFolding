@@ -13,12 +13,12 @@ from typing import TYPE_CHECKING
 from Z0Z_tools import exclude
 
 if TYPE_CHECKING:
-	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
 
 #======== Domain-based subroutines for analyzing a specific `pile`. =======
 
-def pinPile零Ante首零AfterDepth4(state: EliminationState) -> list[int]:
+def pinPile零Ante首零AfterDepth4(state: StateElimination) -> list[int]:
 	"""All fourth-order piles must be pinned or you will get an error.
 
 	Unless I've made a mistake:

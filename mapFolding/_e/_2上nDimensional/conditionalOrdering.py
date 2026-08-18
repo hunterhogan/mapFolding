@@ -7,7 +7,7 @@ from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
 from mapFolding._e import getLookupDomainsLeaves, getMapShape首ProductsSums
 from mapFolding._e._2上nDimensional import leafInSubHyperplane, 一, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd, 零, 首一, 首零, 首零一
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from operator import neg
 from typing import TYPE_CHECKING
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, Pile
 
 # TODO getDictionaryConditionalLeafPredecessors development
-def getLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
+def getLeafPredecessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafPredecessor`].
 
 	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
@@ -29,7 +29,7 @@ def getLeafPredecessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[L
 @cache
 def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""Prototype."""
-	state = EliminationState(mapShape)
+	state = StateElimination(mapShape)
 	dictionaryDomains: dict[Leaf, range] = getLookupDomainsLeaves(state)
 
 	dictionaryPrecedence: dict[Leaf, dict[Pile, list[Leaf]]] = {}
@@ -151,12 +151,12 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 	return dictionaryPrecedence
 
 # TODO getDictionaryConditionalLeafSuccessors development
-def getLeafSuccessors(state: EliminationState) -> dict[Leaf, dict[Pile, list[Leaf]]]:
+def getLeafSuccessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafSuccessor`]."""
 	return _getDictionaryConditionalLeafSuccessors(state.mapShape)
 @cache
 def _getDictionaryConditionalLeafSuccessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
-	state = EliminationState(mapShape)
+	state = StateElimination(mapShape)
 	dictionaryDomains: dict[Leaf, range] = getLookupDomainsLeaves(state)
 
 	dictionarySuccessor: dict[Leaf, dict[Pile, list[Leaf]]] = {}

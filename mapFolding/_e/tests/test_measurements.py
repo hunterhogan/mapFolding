@@ -14,7 +14,7 @@ from __future__ import annotations
 from mapFolding._e._2上nDimensional import (
 	invertLeafIn2上nDimensions, leafInSubHyperplane, ptount, 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零,
 	工totalDimensionsOdd, 工totalDimensionsTail)
-from mapFolding._e.dataBaskets import EliminationState
+from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples.measurementData import (
 	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionSecondNearest, dataDimensionThirdNearest, dataHowMany0coordinatesAtTail,
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', dataTotalDimensionsTail)
 def test_工totalDimensionsTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int) -> None:
-	state: EliminationState = EliminationState(mapShape)
+	state: StateElimination = StateElimination(mapShape)
 	assertEqualTo(工totalDimensionsTail(state, integerNonnegative), expectedResult, '工totalDimensionsTail', state, integerNonnegative)
 
 @pytest.mark.parametrize('functionTarget, inputValue, expectedResult', [

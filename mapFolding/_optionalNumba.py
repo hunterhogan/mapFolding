@@ -7,7 +7,7 @@
 (AI generated docstring)
 
 You can use this module to set Numba thread limits with the package `CPUlimit` convention and to
-bridge `MapFoldingState` and `SymmetricFoldsState` into Numba `StructRef` values [1][2][3]. The
+bridge `StateMapFolding` and `StateMapFoldingSymmetric` into Numba `StructRef` values [1][2][3]. The
 module keeps the public Python state objects alive while Numba reads and reflects the compiled
 payload fields.
 
@@ -25,16 +25,16 @@ References
 ----------
 [1] Numba documentation
 	https://numba.readthedocs.io/en/stable/
-[2] `mapFolding.dataBaskets.MapFoldingState`
+[2] `mapFolding.dataBaskets.StateMapFolding`
 
-[3] `mapFolding.dataBaskets.SymmetricFoldsState`
+[3] `mapFolding.dataBaskets.StateMapFoldingSymmetric`
 
 """
 from __future__ import annotations
 
 from contextlib import ExitStack
 from hunterMakesPy.parseParameters import defineConcurrencyLimit
-from mapFolding.dataBaskets import MapFoldingState, SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
 from numba import get_num_threads, set_num_threads, typeof
 from numba.core import cgutils, types
 from numba.experimental import structref
@@ -105,9 +105,9 @@ class _形NumbaMapFoldingState(types.StructRef):
 
 形NumbaMapFoldingState = _形NumbaMapFoldingState
 
-@typeof_impl.register(SymmetricFoldsState)
-@typeof_impl.register(MapFoldingState)
-def _typeofMapFoldingState(value: MapFoldingState | SymmetricFoldsState, _context: Any) -> _形NumbaMapFoldingState:
+@typeof_impl.register(StateMapFoldingSymmetric)
+@typeof_impl.register(StateMapFolding)
+def _typeofMapFoldingState(value: StateMapFolding | StateMapFoldingSymmetric, _context: Any) -> _形NumbaMapFoldingState:
 	def _typeofField(field: dataclasses.Field[Any]) -> tuple[str, types.Type]:
 		return field.name, typeof(getattr(value, field.name))
 

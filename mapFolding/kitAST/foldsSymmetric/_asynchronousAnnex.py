@@ -4,13 +4,13 @@
 from __future__ import annotations
 
 from copy import deepcopy
-from mapFolding.dataBaskets import SymmetricFoldsState
+from mapFolding.dataBaskets import StateMapFoldingSymmetric
 from mapFolding.theTypes import 形TotalFolds
 from queue import Queue
 from threading import Lock, Thread
 
 boxOfThreads: list[Thread] = []
-queueFutures: Queue[SymmetricFoldsState] = Queue()
+queueFutures: Queue[StateMapFoldingSymmetric] = Queue()
 symmetricTotalFolds: int = 0
 LOCKsymmetricTotalFolds = Lock()
 # TODO There isn't a better way to do this?
@@ -33,18 +33,18 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> No
 def _threadDoesSomething() -> None:
 	global symmetricTotalFolds
 	while True:
-		state: SymmetricFoldsState = queueFutures.get()
+		state: StateMapFoldingSymmetric = queueFutures.get()
 		if state is STOPsignal:
 			break
 		state = _filterAsymmetricFolds(state)
 		with LOCKsymmetricTotalFolds:
 			symmetricTotalFolds += state.symmetricFolds
 
-def _filterAsymmetricFolds(state: SymmetricFoldsState) -> SymmetricFoldsState:
+def _filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
 	"""Add real function during generation; the signature is here to preview its interactions with the module."""
 	return state
 
-def filterAsymmetricFolds(state: SymmetricFoldsState) -> None:
+def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
 	queueFutures.put_nowait(deepcopy(state))
 
 def getSymmetricTotalFolds() -> 形TotalFolds:

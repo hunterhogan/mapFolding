@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
-	from mapFolding._e.dataBaskets import EliminationState
+	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import Leaf
 
-def getLeavesCreaseAnte(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
+def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `totalDimensions - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in `leaf` number.
@@ -20,7 +20,7 @@ def getLeavesCreaseAnte(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""
 	return iter(_getCreases(state, leaf, increase=False))
 
-def getLeavesCreasePost(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
+def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `totalDimensions - 1` many creases.
 
 	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in `leaf` number.
@@ -29,7 +29,7 @@ def getLeavesCreasePost(state: EliminationState, leaf: Leaf) -> Iterator[Leaf]:
 	"""
 	return iter(_getCreases(state, leaf, increase=True))
 
-def _getCreases(state: EliminationState, leaf: Leaf, *, increase: bool = True) -> tuple[Leaf, ...]:
+def _getCreases(state: StateElimination, leaf: Leaf, *, increase: bool = True) -> tuple[Leaf, ...]:
 	return _makeCreases(leaf, state.totalDimensions)[increase]
 @cache
 def _makeCreases(leaf: Leaf, totalDimensions: int) -> tuple[tuple[Leaf, ...], tuple[Leaf, ...]]:
