@@ -106,6 +106,7 @@ defaultMatrixMeanders: Default = deepcopy(default)
 defaultMatrixMeanders['function'].update({
     'bigInt': 'countBigInt'
     , 'bigIntTest': 'integersWide吗'
+    , 'Dyck': 'walkDyckPath'
 })
 defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
 defaultMatrixMeanders['module'].update({

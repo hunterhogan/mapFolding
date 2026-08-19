@@ -12,3 +12,6 @@ def removeFunctionDef(identifier: str, node: ast.AST) -> None:
 
 def renameFunctionDef(identifier: str, identifierNew: str, node: ast.AST) -> None:
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(identifier)), Grab.nameAttribute(Then.replaceWith(identifierNew))).visit(node)
+
+def renameName(identifier: str, identifierNew: str, node: ast.AST) -> None:
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(identifier)), Grab.idAttribute(Then.replaceWith(identifierNew))).visit(node)

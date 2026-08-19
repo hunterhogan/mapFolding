@@ -16,15 +16,15 @@ if TYPE_CHECKING:
 	from pathlib import PurePath
 	from typing import Any
 
-def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Generate initialization module."""
 	identifiers = identifiers or default
-	名CallableSource: identifierDotAttribute = keywordArguments.get('名CallableSource') or identifiers['function']['counting']
+	名CallableSource: identifierDotAttribute = override.get('名CallableSource') or identifiers['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = keywordArguments.get('identifierCallable') or identifiers['function'].get('initializeState') or 名CallableSource
+	ingredientsFunction.astFunctionDef.name = override.get('identifierCallable') or identifiers['function'].get('initializeState') or 名CallableSource
 
 	_logicalPathDataclass, _identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
-	名Counting: identifierDotAttribute = keywordArguments.get('名Counting') or identifiers['variable']['counting']
+	名Counting: identifierDotAttribute = override.get('名Counting') or identifiers['variable']['counting']
 
 	NodeChanger(findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'leaf1ndex')
 		, doThat=Grab.testAttribute(Grab.andDoAllOf([
@@ -34,6 +34,6 @@ def makeInitializeState(astModule: ast.Module, identifiers: Default | None = Non
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
-	名Module: str = keywordArguments.get('名Module') or identifiers['module']['initializeState']
+	名Module: str = override.get('名Module') or identifiers['module']['initializeState']
 
-	return toDisk(ingredientsModule, identifiers, keywordArguments, 名Module)
+	return toDisk(ingredientsModule, identifiers, override, 名Module)

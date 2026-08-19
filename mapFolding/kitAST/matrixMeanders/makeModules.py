@@ -1,21 +1,24 @@
 """makeMeandersModules."""
 from __future__ import annotations
 
-from astToolkit import Grab, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef
+from mapFolding.kitAST.mapFolding._count import toDisk
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef, renameName
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from typing import TYPE_CHECKING
+import ast
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 	from typing import Any
-	import ast
 
 def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Make `countBigInt` module for meanders using `StateMeanders` dataclass."""
@@ -52,9 +55,25 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
+def makeQQ(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+	identifiers = identifiers or defaultMatrixMeanders
+	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
+	ingredients.astFunctionDef.decorator_list.clear()
+	ingredients = decorateCallableWithNumba(ingredients, parametersNumbaLight)
+	renameName('int', '形ArcCode', ingredients.astFunctionDef)
+	ingredients.imports.addImportFrom_asStr('mapFolding.theTypes', '形ArcCode')
+	value: ast.expr = raiseIfNone(NodeTourist[ast.Return, ast.expr](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredients.astFunctionDef))
+	NodeChanger(Be.Return, Grab.valueAttribute(Then.replaceWith(Make.Call(Make.Name('形ArcCode'), listParameters=[value])))).visit(ingredients.astFunctionDef)
+	ingredientsModule = IngredientsModule(ingredients)
+
+	名Module: str = override.get('名Module') or identifiers['module']['share']
+
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
+
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makeQQ(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':
 	makeModulesMeanders()

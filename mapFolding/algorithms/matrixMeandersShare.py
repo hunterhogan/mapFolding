@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from humpy_cytoolz import get_in
 from hunterMakesPy import errorL33T, raiseIfNone
-from mapFolding.algorithms.matrixMeanders import walkDyckPath
-from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
+from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
+from mapFolding.theTypes import 形ArcCode
 from typing import TYPE_CHECKING
-import numpy
+import numba
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
@@ -154,27 +154,38 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 
 #================== Dyck Path =====================================================================
 
-def _flipTheExtra_0b1(intWithExtra_0b1: 形NumPyInteger) -> 形NumPyInteger:
-	resize = type(intWithExtra_0b1)
-	return resize(intWithExtra_0b1 ^ walkDyckPath(int(intWithExtra_0b1)))
+#=SIN= Pyright suppression: `numba.vectorize` is partially unknown.
+@numba.vectorize((f"{形ArcCode.__name__}({形ArcCode.__name__})",), cache=True, nopython=True)  # pyright: ignore[reportUntypedFunctionDecorator, reportUnknownMemberType]
+def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
+	"""Flip a bit based on Dyck path with a Numba-generated universal function [1].
 
-flipTheExtra_0b1 = numpy.frompyfunc(_flipTheExtra_0b1, 1, 1)
-"""Flip a bit based on Dyck path: element-wise ufunc (*u*niversal *func*tion) for a NumPy `ndarray` (*Num*erical *Py*thon *n-d*imensional array).
+	You can call `flipTheExtra_0b1` with a `numpy.uint64`, a `numpy.ndarray` [2], or a
+	`pandas.Series` [3] that contains the fixed-width arc-code representation.
 
-Warning
--------
-The function will loop infinitely if _any_ element does not have a bit that needs flipping.
+	Warning
+	-------
+	The function will loop infinitely if _any_ element does not have a bit that needs flipping.
 
-Parameters
-----------
-arrayTarget : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
-	An array with one axis of unsigned integers and unbalanced closures.
+	Parameters
+	----------
+	intWithExtra_0b1 : numpy.uint64 | numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] | pandas.Series
+		One arc code or a container of arc codes with unbalanced closures.
 
-Returns
--------
-arrayFlipped : numpy.ndarray[tuple[int], numpy.dtype[numpy.unsignedinteger[Any]]]
-	An array with the same shape as `arrayTarget` but with one bit flipped in each element.
-"""
+	Returns
+	-------
+	flipped : numpy.uint64 | numpy.ndarray[tuple[int, ...], numpy.dtype[numpy.uint64]] | pandas.Series
+		The same scalar or container representation with one bit flipped in each arc code.
+
+	References
+	----------
+	[1] Numba - Creating NumPy universal functions
+		https://numba.readthedocs.io/en/stable/user/vectorize.html
+	[2] NumPy - Universal functions
+		https://numpy.org/doc/stable/reference/ufuncs.html
+	[3] pandas.Series
+		https://pandas.pydata.org/docs/reference/api/pandas.Series.html
+	"""
+	return intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1)
 
 #================== Buckets =======================================================================
 

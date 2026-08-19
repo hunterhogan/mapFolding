@@ -461,7 +461,7 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A00
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206 or A000682 and A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is: "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times."
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is: "Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation."
 
     The domain of A077460 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 29.
@@ -474,7 +474,7 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A00
     Returns
     -------
     a(n) : int
-        Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.
+        Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.
 
     Would You Like to Know More?
     ----------------------------
