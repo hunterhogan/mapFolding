@@ -1,10 +1,10 @@
 """Overwrite all synthetic modules."""
 from __future__ import annotations
 
-from mapFolding.kitAST.foldsSymmetric.makeModules import makeModulesFoldsSymmetric
-from mapFolding.kitAST.foldsSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
 from mapFolding.kitAST.mapFolding.makeModules import makeModulesMapFolding
-from mapFolding.kitAST.meanders.makeModules import makeModulesMeanders
+from mapFolding.kitAST.mapFoldingSymmetric.makeModules import makeModulesFoldsSymmetric
+from mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
+from mapFolding.kitAST.matrixMeanders.makeModules import makeModulesMeanders
 from mapFolding.kitAST.oeisIDByFormula import makeOEISidByFormulaLookup
 from mapFolding.kitAST.zCuzDocStoopid.makeDocstrings import sourcePrefix, transformOEISidByFormula
 from mapFolding.theSSOT import settingsPackage

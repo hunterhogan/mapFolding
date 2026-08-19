@@ -5,7 +5,7 @@ from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
-from mapFolding.synthesized.meanders.bigInt import countBigInt
+from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from tqdm.auto import tqdm

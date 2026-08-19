@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
-from mapFolding.synthesized.meanders.bigInt import countBigInt
+from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Crossings
 from typing import TYPE_CHECKING
 from warnings import warn
@@ -79,7 +79,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
 			dataframeMeanders['analyzed'] *= bitsTarget
 			del bitsTarget
-			dataframeMeanders = dataframeMeanders.loc[(1 < dataframeMeanders['analyzed'])]  # `if (bitsAlfaHasArcs and bitsZuluHasArcs)`  # ty: ignore[invalid-assignment]
+			dataframeMeanders = dataframeMeanders.loc[(1 < dataframeMeanders['analyzed'])]  # `if (bitsAlfaHasArcs and bitsZuluHasArcs)`
 
 			dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
 			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator				# `bitsAlfa`

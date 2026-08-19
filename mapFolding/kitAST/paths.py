@@ -1,35 +1,3 @@
-"""
-Map folding AST transformation system: Comprehensive transformation orchestration and module generation.
-
-This module provides the orchestration layer of the map folding AST transformation system,
-implementing comprehensive tools that coordinate all transformation stages to generate optimized
-implementations with diverse computational strategies and performance characteristics. Building
-upon the foundational pattern recognition, structural decomposition, core transformation tools,
-Numba integration, and configuration management established in previous layers, this module
-executes complete transformation processes that convert high-level dataclass-based algorithms
-into specialized variants optimized for specific execution contexts.
-
-The transformation orchestration addresses the full spectrum of optimization requirements for
-map folding computational research through systematic application of the complete transformation
-toolkit. The comprehensive approach decomposes dataclass parameters into primitive values for
-Numba compatibility while removing object-oriented overhead and preserving computational logic,
-generates concurrent execution variants using ProcessPoolExecutor with task division and result
-aggregation, creates dedicated modules for counting variable setup with transformed loop conditions,
-and provides theorem-specific transformations with configurable optimization levels including
-trimmed variants and Numba-accelerated implementations.
-
-The orchestration process operates through systematic AST manipulation that analyzes source
-algorithms to extract dataclass dependencies, transforms data access patterns, applies performance
-optimizations, and generates specialized modules with consistent naming conventions and filesystem
-organization. The comprehensive transformation process coordinates pattern recognition for structural
-analysis, dataclass decomposition for parameter optimization, function transformation for signature
-adaptation, Numba integration for compilation optimization, and configuration management for
-systematic generation control.
-
-Generated modules maintain algorithmic correctness while providing significant performance
-improvements through just-in-time compilation, parallel execution, and optimized data structures
-tailored for specific computational requirements essential to large-scale map folding research.
-"""
 from __future__ import annotations
 
 from astToolkit import identifierDotAttribute, parseLogicalPath2astModule

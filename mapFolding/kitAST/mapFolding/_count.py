@@ -14,8 +14,8 @@ from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import (
 	DeReConstructField2ast, findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass)
-from mapFolding.kitAST.kitMakeModules import getLogicalPath, getPathFilename
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
+from mapFolding.kitAST.paths import getLogicalPath, getPathFilename
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING

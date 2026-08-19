@@ -6,11 +6,11 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
 from mapFolding.kitAST.mapFolding._count import makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
-from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric, defaultMapFolding
+from mapFolding.kitAST.paths import getModule, getPathFilename
+from mapFolding.kitAST.theSSOT import defaultMapFolding, defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
-	identifiers = identifiers or defaultFoldsSymmetric
+	identifiers = identifiers or defaultMapFoldingSymmetric
 	名DataclassSource: str = keywordArguments.get('名DataclassSource') or identifiers['variable'].get('stateDataclassSource') or defaultMapFolding['variable']['stateDataclass']
 	名Dataclass: str = keywordArguments.get('名Dataclass') or identifiers['variable']['stateDataclass']
 	名DataclassInstanceSource: str = keywordArguments.get('名DataclassInstanceSource') or identifiers['variable'].get('stateInstanceSource') or defaultMapFolding['variable']['stateInstance']
@@ -35,13 +35,13 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 	名CountingSource: str = keywordArguments.get('名CountingSource') or identifiers['variable'].get('countingSource') or defaultMapFolding['variable']['counting']
 	名Counting: str = keywordArguments.get('名Counting') or identifiers['variable']['counting']
 	名Indices: str = keywordArguments.get('名Indices') or identifiers['variable']['indices']
-	名FilterAsymmetricFoldsSource: str = keywordArguments.get('名FilterAsymmetricFoldsSource') or identifiers['function'].get('filterAsymmetricFoldsSource') or defaultFoldsSymmetric['function']['filterAsymmetricFolds']
+	名FilterAsymmetricFoldsSource: str = keywordArguments.get('名FilterAsymmetricFoldsSource') or identifiers['function'].get('filterAsymmetricFoldsSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
 	名FilterAsymmetricFolds: str = keywordArguments.get('名FilterAsymmetricFolds') or identifiers['function']['filterAsymmetricFolds']
-	名DataclassFilterSource: str = keywordArguments.get('名DataclassFilterSource') or identifiers['variable'].get('stateDataclassFilterSource') or defaultFoldsSymmetric['variable']['stateDataclass']
-	名DataclassInstanceFilterSource: str = keywordArguments.get('名DataclassInstanceFilterSource') or identifiers['variable'].get('stateInstanceFilterSource') or defaultFoldsSymmetric['variable']['stateInstance']
-	名CountingFilterSource: str = keywordArguments.get('名CountingFilterSource') or identifiers['variable'].get('countingFilterSource') or defaultFoldsSymmetric['variable']['counting']
-	名IndicesFilterSource: str = keywordArguments.get('名IndicesFilterSource') or identifiers['variable'].get('indicesFilterSource') or defaultFoldsSymmetric['variable']['indices']
-	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultFoldsSymmetric['module']['package']
+	名DataclassFilterSource: str = keywordArguments.get('名DataclassFilterSource') or identifiers['variable'].get('stateDataclassFilterSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
+	名DataclassInstanceFilterSource: str = keywordArguments.get('名DataclassInstanceFilterSource') or identifiers['variable'].get('stateInstanceFilterSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
+	名CountingFilterSource: str = keywordArguments.get('名CountingFilterSource') or identifiers['variable'].get('countingFilterSource') or defaultMapFoldingSymmetric['variable']['counting']
+	名IndicesFilterSource: str = keywordArguments.get('名IndicesFilterSource') or identifiers['variable'].get('indicesFilterSource') or defaultMapFoldingSymmetric['variable']['indices']
+	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
 	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
 	logicalPathSource: identifierDotAttribute = keywordArguments.get('logicalPathSource') or identifiers['logicalPath']['algorithm']
 	名ModuleSource: str = keywordArguments.get('名ModuleSource') or identifiers['module']['algorithmSource']
@@ -176,7 +176,7 @@ def foldsSymmetric_numbaOnTheorem2(astModule: ast.Module, identifiers: Default |
 		https://numba.readthedocs.io/en/stable/
 	"""
 	# TODO Can this be integrated?
-	identifiers = identifiers or defaultFoldsSymmetric
+	identifiers = identifiers or defaultMapFoldingSymmetric
 	名DataclassInstance: str = keywordArguments.get('名DataclassInstance') or identifiers['variable']['stateInstance']
 	名Indices: str = keywordArguments.get('名Indices') or identifiers['variable']['indices']
 	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
@@ -197,18 +197,18 @@ def foldsSymmetric_numbaOnTheorem2(astModule: ast.Module, identifiers: Default |
 def makeModulesFoldsSymmetric() -> None:
 	"""Make."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultMapFolding['logicalPath']['algorithm'], identifierModule=defaultMapFolding['module']['algorithm'])
-	pathFilename: PurePath = addSymmetryCheck(astModule, defaultFoldsSymmetric)
+	pathFilename: PurePath = addSymmetryCheck(astModule, defaultMapFoldingSymmetric)
 
 	astModule = parsePathFilename2astModule(pathFilename)
-	make_jit_module(astModule, defaultFoldsSymmetric)
+	make_jit_module(astModule, defaultMapFoldingSymmetric)
 
-	makeInitializeState(getModule(identifiers=defaultFoldsSymmetric), defaultFoldsSymmetric)
+	makeInitializeState(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
-	pathFilename = makeTheorem2(getModule(identifiers=defaultFoldsSymmetric), defaultFoldsSymmetric)
+	pathFilename = makeTheorem2(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
-	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultFoldsSymmetric)
+	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
-	foldsSymmetric_numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultFoldsSymmetric)
+	foldsSymmetric_numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':
 	makeModulesFoldsSymmetric()

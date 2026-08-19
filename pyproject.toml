@@ -44,18 +44,14 @@ dependencies = [
   "gmpy2",
   "hunterMakesPy>=0.7.3",
   "more_itertools",
+  "numba",
+  "numba_progress",
   "numpy",
   "platformdirs",
   "tqdm",
   "urllib3",
 ]
-optional-dependencies = { codon = [
-  "anyascii",
-  "autoflake",
-  "codon-jit>=0.4.6; sys_platform == 'linux'",
-  "lief; sys_platform == 'linux'",
-  "python-minifier"
-], development = [
+optional-dependencies = { codon = ["anyascii", "autoflake", "codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'", "python-minifier"], development = [
   "gmpy2-stubs",
   "google-api-python-client-stubs>=1.35.0",
   "google-auth-oauthlib-stubs>=1.2.0",
@@ -67,11 +63,7 @@ optional-dependencies = { codon = [
   "pytest-cov",
   "setuptools",
   "sympy",
-], numba = ["numba", "numba_progress"], ortools = ["ortools"], pandas = [
-  "pandas",
-  "pyarrow"
-], testing = [
-  "numba",
+], ortools = ["ortools"], pandas = ["pandas", "pyarrow"], testing = [
   "ortools",
   "pandas",
   "pyarrow",
@@ -93,11 +85,7 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.coverage]
-report = { exclude_lines = [
-  "if TYPE_CHECKING:",
-  "if __name__ == \"__main__\":",
-  "numba.jit_module"
-], ignore_errors = false }
+report = { exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "numba.jit_module"], ignore_errors = false }
 run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFolding/tests/coverage/.coverage", omit = [
   "**/easyRun/**",
   "**/tests/*",

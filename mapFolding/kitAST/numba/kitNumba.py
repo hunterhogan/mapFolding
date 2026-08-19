@@ -30,7 +30,7 @@ from __future__ import annotations
 
 from astToolkit import Be, identifierDotAttribute, Make, NodeChanger, Then
 from astToolkit.containers import IngredientsModule, LedgerOfImports
-from mapFolding.kitAST.kitMakeModules import getPathFilename
+from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING, TypedDict
 import ast

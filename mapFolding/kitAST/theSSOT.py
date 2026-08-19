@@ -75,8 +75,8 @@ defaultMapFolding['variable'].update({
 defaultMapFolding['logicalPath']['default'] = defaultMapFolding['logicalPath']['algorithm']
 defaultMapFolding['module']['default'] = defaultMapFolding['module']['algorithm']
 
-defaultFoldsSymmetric: Default = deepcopy(defaultMapFolding)
-defaultFoldsSymmetric['function'].update({
+defaultMapFoldingSymmetric: Default = deepcopy(defaultMapFolding)
+defaultMapFoldingSymmetric['function'].update({
 	'_processCompletedFutures': '_processCompletedFutures'
 	, 'activeLeafGreaterThan0': 'activeLeafGreaterThan0'
 	, 'filterAsymmetricFolds': 'filterAsymmetricFolds'
@@ -84,25 +84,40 @@ defaultFoldsSymmetric['function'].update({
 	, 'initializeConcurrencyManager': 'initializeConcurrencyManager'
 	, 'initializeState': defaultMapFolding['function']['initializeState']
 })
-defaultFoldsSymmetric['logicalPath']['synthetic'] += '.foldsSymmetric'
-defaultFoldsSymmetric['logicalPath'].update({'assembly': 'kitAST.foldsSymmetric'})
-defaultFoldsSymmetric['module'].update({
+defaultMapFoldingSymmetric['logicalPath']['synthetic'] += '.mapFoldingSymmetric'
+defaultMapFoldingSymmetric['logicalPath'].update({'assembly': 'kitAST.mapFoldingSymmetric'})
+defaultMapFoldingSymmetric['module'].update({
 	'algorithm': 'algorithm'
 	, 'algorithmNumba': 'algorithmNumba'
 	, 'algorithmSource': 'foldsSymmetric'
 	, 'asynchronous': 'asynchronous'
 	, 'asynchronousAnnex': '_asynchronousAnnex'
 })
-defaultFoldsSymmetric['variable'].update({
+defaultMapFoldingSymmetric['variable'].update({
 	'counting': 'symmetricFolds'
 	, 'indices': 'indices'
 	, 'maxWorkers': 'maxWorkers'
 	, 'stateDataclass': 'StateMapFoldingSymmetric'
 })
-defaultFoldsSymmetric['logicalPath']['default'] = defaultFoldsSymmetric['logicalPath']['synthetic']
-defaultFoldsSymmetric['module']['default'] = defaultFoldsSymmetric['module']['algorithm']
+defaultMapFoldingSymmetric['logicalPath']['default'] = defaultMapFoldingSymmetric['logicalPath']['synthetic']
+defaultMapFoldingSymmetric['module']['default'] = defaultMapFoldingSymmetric['module']['algorithm']
 
-dictionaryEstimatesMapFolding: Final[dict[tuple[int, ...], int]] = {
+defaultMatrixMeanders: Default = deepcopy(default)
+defaultMatrixMeanders['function'].update({
+    'bigInt': 'countBigInt'
+    , 'bigIntTest': 'integersWide吗'
+})
+defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
+defaultMatrixMeanders['module'].update({
+    'algorithm': 'matrixMeanders'
+    , 'bigInt': 'bigInt'
+    , 'share': 'matrixMeandersShare'
+})
+defaultMatrixMeanders['module']['bigIntTest'] = defaultMatrixMeanders['module']['share']
+defaultMatrixMeanders['logicalPath']['default'] = defaultMatrixMeanders['logicalPath']['algorithm']
+defaultMatrixMeanders['module']['default'] = defaultMatrixMeanders['module']['algorithm']
+
+lookupMapFoldingEstimates: Final[dict[tuple[int, ...], int]] = {
 	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000
 	, (2, 21): 776374224866624
 	, (3, 15): 824761667826225

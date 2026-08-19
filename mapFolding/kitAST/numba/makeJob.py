@@ -18,9 +18,9 @@ from mapFolding.kitAST.dataclasses import shatterDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
 from mapFolding.kitAST.RecipeJob import (
 	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
-from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
+from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from mapFolding.oeis import getValuesKnown
-from mapFolding.synthesized.foldsSymmetric.initializeState import transitionOnGroupsOfFolds
+from mapFolding.synthesized.mapFoldingSymmetric.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -97,13 +97,13 @@ def makeFoldsSymmetric(n: int) -> None:
 	"""Generate and write an optimized Numba-compiled map folding module for a specific map shape."""
 	state = transitionOnGroupsOfFolds(StateMapFoldingSymmetric((1, 2 * n)))
 	totalFoldsEstimated: int = getValuesKnown('A007822').get(n, 0)
-	shatteredDataclass = shatterDataclass(f"{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['module']['dataBasket']}"
-		, defaultFoldsSymmetric['variable']['stateDataclass'], defaultFoldsSymmetric['variable']['stateInstance'])
-	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultFoldsSymmetric['logicalPath']['synthetic']}.theorem2Numba')
-	identifierCallableSource: str = defaultFoldsSymmetric['function']['counting']
+	shatteredDataclass = shatterDataclass(f"{settingsPackage.identifierPackage}.{defaultMapFoldingSymmetric['module']['dataBasket']}"
+		, defaultMapFoldingSymmetric['variable']['stateDataclass'], defaultMapFoldingSymmetric['variable']['stateInstance'])
+	source_astModule: ast.Module = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultMapFoldingSymmetric['logicalPath']['synthetic']}.theorem2Numba')
+	identifierCallableSource: str = defaultMapFoldingSymmetric['function']['counting']
 	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
-	sourceDataclassIdentifier: str = defaultFoldsSymmetric['variable']['stateDataclass']
-	sourceDataclassInstance: str = defaultFoldsSymmetric['variable']['stateInstance']
+	sourceDataclassIdentifier: str = defaultMapFoldingSymmetric['variable']['stateDataclass']
+	sourceDataclassInstance: str = defaultMapFoldingSymmetric['variable']['stateInstance']
 	sourcePathPackage: PurePosixPath | None = PurePosixPath(settingsPackage.pathPackage)
 	sourcePackageIdentifier: str | None = settingsPackage.identifierPackage
 	pathPackage: PurePosixPath | None = None

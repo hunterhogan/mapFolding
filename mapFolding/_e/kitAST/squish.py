@@ -7,7 +7,7 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsMod
 from humpy_cytoolz import juxt
 from itertools import repeat, starmap
 from mapFolding._e.kitAST.theSSOT import default
-from mapFolding.kitAST.kitLinux import toCodon
+from mapFolding.kitAST.linux import toCodon
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING

@@ -6,8 +6,8 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.transformationTools import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.kitMakeModules import getModule, getPathFilename
-from mapFolding.kitAST.theSSOT import defaultFoldsSymmetric
+from mapFolding.kitAST.paths import getModule, getPathFilename
+from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	3. To discover the foldsSymmetric count for n=27, which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
 	"""
-	identifiers = identifiers or defaultFoldsSymmetric
+	identifiers = identifiers or defaultMapFoldingSymmetric
 	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
 	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('asynchronous') or 名CallableSource
 	名CallableDispatcherSource: str = keywordArguments.get('名CallableDispatcherSource') or identifiers['function']['dispatcher']
@@ -56,14 +56,14 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	名MaximumWorkers: str = keywordArguments.get('名MaximumWorkers') or identifiers['variable']['maxWorkers']
 	logicalPathAssembly: identifierDotAttribute = keywordArguments.get('logicalPathAssembly') or identifiers['logicalPath']['assembly']
 	名ModuleAsynchronousAnnex: str = keywordArguments.get('名ModuleAsynchronousAnnex') or identifiers['module']['asynchronousAnnex']
-	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultFoldsSymmetric['module']['package']
-	名DataclassAnnexSource: str = keywordArguments.get('名DataclassAnnexSource') or identifiers['variable'].get('stateDataclassAnnexSource') or defaultFoldsSymmetric['variable']['stateDataclass']
-	名DataclassInstanceAnnexSource: str = keywordArguments.get('名DataclassInstanceAnnexSource') or identifiers['variable'].get('stateInstanceAnnexSource') or defaultFoldsSymmetric['variable']['stateInstance']
-	名CountingAnnexSource: str = keywordArguments.get('名CountingAnnexSource') or identifiers['variable'].get('countingAnnexSource') or defaultFoldsSymmetric['variable']['counting']
-	名MaximumWorkersAnnexSource: str = keywordArguments.get('名MaximumWorkersAnnexSource') or identifiers['variable'].get('maxWorkersAnnexSource') or defaultFoldsSymmetric['variable']['maxWorkers']
-	名InitializeConcurrencyManagerAnnexSource: str = keywordArguments.get('名InitializeConcurrencyManagerAnnexSource') or identifiers['function'].get('initializeConcurrencyManagerAnnexSource') or defaultFoldsSymmetric['function']['initializeConcurrencyManager']
-	名GetSymmetricTotalFoldsAnnexSource: str = keywordArguments.get('名GetSymmetricTotalFoldsAnnexSource') or identifiers['function'].get('getSymmetricTotalFoldsAnnexSource') or defaultFoldsSymmetric['function']['getSymmetricTotalFolds']
-	名FilterAsymmetricFoldsAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsAnnexSource') or defaultFoldsSymmetric['function']['filterAsymmetricFolds']
+	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
+	名DataclassAnnexSource: str = keywordArguments.get('名DataclassAnnexSource') or identifiers['variable'].get('stateDataclassAnnexSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
+	名DataclassInstanceAnnexSource: str = keywordArguments.get('名DataclassInstanceAnnexSource') or identifiers['variable'].get('stateInstanceAnnexSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
+	名CountingAnnexSource: str = keywordArguments.get('名CountingAnnexSource') or identifiers['variable'].get('countingAnnexSource') or defaultMapFoldingSymmetric['variable']['counting']
+	名MaximumWorkersAnnexSource: str = keywordArguments.get('名MaximumWorkersAnnexSource') or identifiers['variable'].get('maxWorkersAnnexSource') or defaultMapFoldingSymmetric['variable']['maxWorkers']
+	名InitializeConcurrencyManagerAnnexSource: str = keywordArguments.get('名InitializeConcurrencyManagerAnnexSource') or identifiers['function'].get('initializeConcurrencyManagerAnnexSource') or defaultMapFoldingSymmetric['function']['initializeConcurrencyManager']
+	名GetSymmetricTotalFoldsAnnexSource: str = keywordArguments.get('名GetSymmetricTotalFoldsAnnexSource') or identifiers['function'].get('getSymmetricTotalFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['getSymmetricTotalFolds']
+	名FilterAsymmetricFoldsAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
 	名FilterAsymmetricFoldsPrivateAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsPrivateAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsPrivateAnnexSource') or f'_{名FilterAsymmetricFoldsAnnexSource}'
 	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
 	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
@@ -219,7 +219,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 
 def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
 	"""Make asynchronous modules for foldsSymmetric."""
-	return addSymmetryCheckAsynchronous(getModule(identifiers=defaultFoldsSymmetric), defaultFoldsSymmetric)
+	return addSymmetryCheckAsynchronous(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':
 	makeModulesFoldsSymmetricAsynchronous()

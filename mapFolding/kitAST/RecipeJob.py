@@ -9,7 +9,7 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST import IfThis, Settings形
 from mapFolding.kitAST.dataclasses import shatterDataclass
-from mapFolding.kitAST.theSSOT import defaultMapFolding, dictionaryEstimatesMapFolding
+from mapFolding.kitAST.theSSOT import defaultMapFolding, lookupMapFoldingEstimates
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
@@ -221,7 +221,7 @@ class RecipeJobTheorem2:
 def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
 	"""Create a binary executable for `mapShape`."""
 	state: StateMapFolding = transitionOnGroupsOfFolds(StateMapFolding(mapShape))
-	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or dictionaryEstimatesMapFolding.get(state.mapShape, 0)
+	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or lookupMapFoldingEstimates.get(state.mapShape, 0)
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
 	pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
 	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameTotalFolds=pathFilenameTotalFolds
