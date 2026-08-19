@@ -366,6 +366,7 @@ sayeth
 scannability
 schreier
 searchsorted
+Semimeanders
 Seress
 setdiff
 setlocal

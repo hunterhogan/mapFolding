@@ -5,7 +5,7 @@
 
 (AI generated docstring)
 
-You can use this module to study the mutable node tree, linked permutation intervals, wind-factor
+You can use this module to study the mutable node tree, linked permutation gaps, wind-factor
 tracking, and symmetry filters from Sawada and Li's C implementation [1].
 
 Contents
@@ -31,17 +31,17 @@ import dataclasses
 if TYPE_CHECKING:
 	from typing import Literal
 
-"""# DEVELOPMENT relational words
-- head, tail
-- left, right
-- previous, next
+"""# DEVELOPMENT mode specific
+- wind
+- gapWindStop
+- gapWindStopVisited
+- sideWindStop
+- endLeft, endRight
+- gap首Permutation
+- permutationPrior, permutationAfter
 """
 
-"""# DEVELOPMENT flow control or other
-- wind, unwinding
-- visited: T/F
-- old
-"""
+# TODO try forcing leaf2 before leaf4 and total*2.
 
 type Side = Literal['left', 'right']
 
@@ -50,34 +50,47 @@ sideLeft: Side = 'left'
 sideRight: Side = 'right'
 
 @dataclasses.dataclass(slots=True)
-class Interval:
-	endpointLeft: int = empty
-	endpointRight: int = empty
-	previous: int = empty
-	next: int = empty
-	nodeNext: int = empty
-	permutationPrevious: int = empty
-	permutationNext: int = empty
+class Gap:
+	endLeft: int = empty
+	endRight: int = empty
+	prior: int = empty
+	after: int = empty
+	nodeAfter: int = empty
+	permutationPrior: int = empty
+	permutationAfter: int = empty
 
 @dataclasses.dataclass(slots=True)
-class IntervalHeadTail:
+class GapEnds:
 	首: int = empty
 	Ω: int = empty
 
+"""# DEVELOPMENT use lookup for side
+This
+```
+	if side == sideLeft:
+		次gap: int = state.boxOfNodes[次node].gapsLeft.首
+	else:
+		次gap = state.boxOfNodes[次node].gapsRight.首
+```
+
+Should be more like
+次gap = state.boxOfNodes[次node][side].首
+"""
+
 @dataclasses.dataclass(slots=True)
 class Node:
-	intervalsLeft: IntervalHeadTail = dataclasses.field(default_factory=IntervalHeadTail)
-	intervalsRight: IntervalHeadTail = dataclasses.field(default_factory=IntervalHeadTail)
-	intervalUnwinding: int = empty
-	sideUnwinding: Side = sideLeft
+	gapsLeft: GapEnds = dataclasses.field(default_factory=GapEnds)
+	gapsRight: GapEnds = dataclasses.field(default_factory=GapEnds)
+	gapWindStop: int = empty
+	sideWindStop: Side = sideLeft
 
 @dataclasses.dataclass(slots=True)
 class StateStampMeander:
 	n: int
 	total: int = 0
-	interval首Permutation: int = empty
-	boxOfIntervals: list[Interval] = dataclasses.field(init=False)
-	boxOfNodes: list[Node] = dataclasses.field(init=False)
+	gap首Permutation: int = empty
+	boxOfGaps: tuple[Gap, ...] = dataclasses.field(init=False)
+	boxOfNodes: tuple[Node, ...] = dataclasses.field(init=False)
 
 	def __post_init__(self) -> None:
 		"""I use this to allocate independent mutable records for one enumeration.
@@ -85,253 +98,257 @@ class StateStampMeander:
 		(AI generated docstring)
 		"""
 		totalDataStructures: int = 2 * self.n + 1
-		self.boxOfIntervals = list(starmap(Interval, repeat((), totalDataStructures)))
-		self.boxOfNodes = list(starmap(Node, repeat((), totalDataStructures)))
+		self.boxOfGaps = tuple(starmap(Gap, repeat((), totalDataStructures)))
+		self.boxOfNodes = tuple(starmap(Node, repeat((), totalDataStructures)))
 
-def initializeState(state: StateStampMeander) -> None:
-	state.boxOfNodes[0].intervalUnwinding = 2
-	state.boxOfNodes[0].sideUnwinding = sideRight
-	insert(state, state.boxOfNodes[0].intervalsLeft, 1, 0, 1, empty, empty, 2)
-	insert(state, state.boxOfNodes[0].intervalsRight, 2, 1, state.n + 1, empty, empty, 1)
-
-	state.interval首Permutation = 1
-	state.boxOfIntervals[1].permutationPrevious = empty
-	state.boxOfIntervals[1].permutationNext = 2
-	state.boxOfIntervals[2].permutationPrevious = 1
-	state.boxOfIntervals[2].permutationNext = empty
-
-def generate(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, mode: SettingsMode) -> None:
-	if state.n < crossingNext:
+def count(state: StateStampMeander, crossingAfter: int, 次node: int, wind: int, mode: SettingsMode)  -> StateStampMeander:
+	if state.n < crossingAfter:
 		if not mode.equivalenceClasses or permutationCanonical吗(state):
 			state.total += 1
-	elif mode.meanders and ((state.n - crossingNext) <= windFactor):
-		cross(state, crossingNext, 次node, windFactor, state.boxOfNodes[次node].sideUnwinding, state.boxOfNodes[次node].intervalUnwinding, unwindingIntervalVisited=False, mode=mode)
+	elif mode.meanders and ((state.n - crossingAfter) <= wind):
+		cross(state, crossingAfter, 次node, wind, state.boxOfNodes[次node].sideWindStop, state.boxOfNodes[次node].gapWindStop, gapWindStopVisited=False, mode=mode)
 	else:
-		visitIntervals(state, crossingNext, 次node, windFactor, sideLeft, mode)
-		if not mode.symmetricSemiMeanders or (crossingNext != 2):
-			visitIntervals(state, crossingNext, 次node, windFactor, sideRight, mode)
+		visitGaps(state, crossingAfter, 次node, wind, sideLeft, mode)
+		if not mode.symmetricSemiMeanders or (crossingAfter != 2):
+			visitGaps(state, crossingAfter, 次node, wind, sideRight, mode)
+	return state
 
-# DEVELOPMENT Only `equivalenceClasses`.
+def visitGaps(state: StateStampMeander, crossingAfter: int, 次node: int, wind: int, side: Side, mode: SettingsMode) -> None:
+	if side == sideLeft:
+		次gap: int = state.boxOfNodes[次node].gapsLeft.首
+	else:
+		次gap = state.boxOfNodes[次node].gapsRight.首
+	gapWindStopVisited: bool = False
+
+	while 次gap != empty:
+		次gapAfter: int = state.boxOfGaps[次gap].after
+		cross(state, crossingAfter, 次node, wind, side, 次gap, gapWindStopVisited=gapWindStopVisited, mode=mode)
+		gapWindStopVisited = gapWindStopVisited or 次gap == state.boxOfNodes[次node].gapWindStop
+		if mode.folds and wind == 0:
+			if side == sideLeft:
+				gapWindStopVisited = gapWindStopVisited or 次gap == state.boxOfNodes[次node].gapsLeft.首
+			else:
+				gapWindStopVisited = gapWindStopVisited or 次gap == state.boxOfNodes[次node].gapsRight.Ω
+		次gap = 次gapAfter
+
+def cross(state: StateStampMeander, crossingAfter: int, 次node: int, wind: int, side: Side, 次gap: int, *, gapWindStopVisited: bool, mode: SettingsMode) -> None:
+	node: Node = state.boxOfNodes[次node]
+	gap: Gap = state.boxOfGaps[次gap]
+	次gapAfter: int = gap.after
+	次gapPrior: int = gap.prior
+	次nodeAfter: int = gap.nodeAfter
+	nodeAfter: Node = state.boxOfNodes[次nodeAfter]
+	gapWindStopΩ: int = nodeAfter.gapWindStop
+	sideWindStopΩ: Side = nodeAfter.sideWindStop
+	次gapLeft: int = 2 * crossingAfter - 1
+	次gapRight: int = 2 * crossingAfter
+	nodeLeft: Node = state.boxOfNodes[次gapLeft]
+	nodeRight: Node = state.boxOfNodes[次gapRight]
+
+	nodeLeft.gapWindStop = empty
+	nodeLeft.sideWindStop = sideLeft
+	nodeRight.gapWindStop = empty
+	nodeRight.sideWindStop = sideLeft
+
+	if side == sideLeft:
+		if mode.folds and (wind == 0) and (次gap == node.gapsLeft.首):
+			if nodeAfter.gapsLeft.首 != empty:
+				setGapEnds(nodeAfter, empty, empty, nodeAfter.gapsLeft.首, nodeAfter.gapsLeft.Ω)
+			move(state, node.gapsRight.Ω, node.gapsRight, nodeAfter.gapsRight, nodeAfter.gapsRight.Ω, empty, 次gapLeft)
+		elif node.gapWindStop == 次gap:
+			if (mode.meanders or mode.semiMeanders) and wind == 0:
+				nodeAfter.gapWindStop = 次gapLeft
+				nodeAfter.sideWindStop = sideLeft
+		elif gapWindStopVisited or node.sideWindStop == sideRight:
+			nodeAfter.gapWindStop = 次gapLeft
+			nodeAfter.sideWindStop = sideLeft
+			nodeLeft.gapWindStop = node.gapWindStop
+			nodeLeft.sideWindStop = node.sideWindStop
+		else:
+			nodeAfter.gapWindStop = 次gapRight
+			nodeAfter.sideWindStop = sideRight
+			nodeRight.gapWindStop = node.gapWindStop
+			nodeRight.sideWindStop = sideRight
+
+		setGapEnds(nodeLeft, node.gapsLeft.首, 次gapPrior, node.gapsRight.首, node.gapsRight.Ω)
+		setGapEnds(nodeRight, empty, empty, 次gapAfter, node.gapsLeft.Ω)
+	else:
+		if mode.folds and (wind == 0) and (次gap == node.gapsRight.Ω):
+			if nodeAfter.gapsRight.首 != empty:
+				setGapEnds(nodeAfter, nodeAfter.gapsRight.首, nodeAfter.gapsRight.Ω, empty, empty)
+			move(state, node.gapsLeft.首, node.gapsLeft, nodeAfter.gapsLeft, empty, nodeAfter.gapsLeft.首, 次gapRight)
+		elif node.gapWindStop == 次gap:
+			if (mode.meanders or mode.semiMeanders) and wind == 0:
+				nodeAfter.gapWindStop = 次gapRight
+				nodeAfter.sideWindStop = sideRight
+		elif gapWindStopVisited:
+			nodeAfter.gapWindStop = 次gapLeft
+			nodeAfter.sideWindStop = sideLeft
+			nodeLeft.gapWindStop = node.gapWindStop
+			nodeLeft.sideWindStop = sideLeft
+		else:
+			nodeAfter.gapWindStop = 次gapRight
+			nodeAfter.sideWindStop = sideRight
+			nodeRight.gapWindStop = node.gapWindStop
+			nodeRight.sideWindStop = node.sideWindStop
+
+		setGapEnds(nodeLeft, node.gapsRight.首, 次gapPrior, empty, empty)
+		setGapEnds(nodeRight, node.gapsLeft.首, node.gapsLeft.Ω, 次gapAfter, node.gapsRight.Ω)
+
+	insert(state, nodeAfter.gapsLeft, 次gapLeft, gap.endLeft, crossingAfter, nodeAfter.gapsLeft.Ω, empty, 次gapLeft)
+	insert(state, nodeAfter.gapsRight, 次gapRight, crossingAfter, gap.endRight, empty, nodeAfter.gapsRight.首, 次gapRight)
+
+	if 次gapAfter != empty:
+		state.boxOfGaps[次gapAfter].prior = empty
+	if 次gapPrior != empty:
+		state.boxOfGaps[次gapPrior].after = empty
+
+	updatePermutation(state, crossingAfter, 次gap)
+
+	if mode.folds and (wind == 0) and (次gap in {node.gapsRight.Ω, node.gapsLeft.首}):
+		count(state, crossingAfter + 1, 次nodeAfter, 0, mode)
+	elif node.gapWindStop == 次gap:
+		count(state, crossingAfter + 1, 次nodeAfter, max(0, wind - 1), mode)
+	else:
+		count(state, crossingAfter + 1, 次nodeAfter, wind + 1, mode)
+
+	restorePermutation(state, 次gap)
+
+	if 次gapAfter != empty:
+		state.boxOfGaps[次gapAfter].prior = 次gap
+	if 次gapPrior != empty:
+		state.boxOfGaps[次gapPrior].after = 次gap
+
+	remove(state, nodeAfter.gapsLeft, 次gapLeft)
+	remove(state, nodeAfter.gapsRight, 次gapRight)
+
+	nodeAfter.gapWindStop = gapWindStopΩ
+	nodeAfter.sideWindStop = sideWindStopΩ
+
+	if mode.folds and (wind == 0):
+		if 次gap == node.gapsLeft.首:
+			move(state, nodeAfter.gapsRight.Ω, nodeAfter.gapsRight, node.gapsRight, node.gapsRight.Ω, empty, 次nodeAfter)
+		if 次gap == node.gapsRight.Ω:
+			move(state, nodeAfter.gapsLeft.首, nodeAfter.gapsLeft, node.gapsLeft, empty, node.gapsLeft.首, 次nodeAfter)
+
+def insert(state: StateStampMeander, gapEnds: GapEnds, 次gap: int, endLeft: int, endRight: int, 次gapPrior: int, 次gapAfter: int, 次nodeAfter: int) -> None:
+	if 次gapPrior != empty:
+		state.boxOfGaps[次gapPrior].after = 次gap
+	else:
+		gapEnds.首 = 次gap
+
+	if 次gapAfter != empty:
+		state.boxOfGaps[次gapAfter].prior = 次gap
+	else:
+		gapEnds.Ω = 次gap
+
+	state.boxOfGaps[次gap].endLeft = endLeft
+	state.boxOfGaps[次gap].endRight = endRight
+	state.boxOfGaps[次gap].prior = 次gapPrior
+	state.boxOfGaps[次gap].after = 次gapAfter
+	state.boxOfGaps[次gap].nodeAfter = 次nodeAfter
+
+def remove(state: StateStampMeander, gapEnds: GapEnds, 次gap: int) -> None:
+	if state.boxOfGaps[次gap].after == empty:
+		gapEnds.Ω = state.boxOfGaps[次gap].prior
+	else:
+		state.boxOfGaps[state.boxOfGaps[次gap].after].prior = empty
+
+	if state.boxOfGaps[次gap].prior == empty:
+		gapEnds.首 = state.boxOfGaps[次gap].after
+	else:
+		state.boxOfGaps[state.boxOfGaps[次gap].prior].after = empty
+
+def setGapEnds(node: Node, gapLeft首: int, gapLeftΩ: int, gapRight首: int, gapRightΩ: int) -> None:
+	if empty in {gapLeft首, gapLeftΩ}:
+		node.gapsLeft.首 = empty
+		node.gapsLeft.Ω = empty
+	else:
+		node.gapsLeft.首 = gapLeft首
+		node.gapsLeft.Ω = gapLeftΩ
+
+	if empty in {gapRight首, gapRightΩ}:
+		node.gapsRight.首 = empty
+		node.gapsRight.Ω = empty
+	else:
+		node.gapsRight.首 = gapRight首
+		node.gapsRight.Ω = gapRightΩ
+
+#================== Mode-specific functions ================================================================
+
+def restorePermutation(state: StateStampMeander, 次gap: int) -> None:
+	次gapPrior: int = state.boxOfGaps[次gap].permutationPrior
+	次gapAfter: int = state.boxOfGaps[次gap].permutationAfter
+
+	if 次gapPrior != empty:
+		state.boxOfGaps[次gapPrior].permutationAfter = 次gap
+	else:
+		state.gap首Permutation = 次gap
+	if 次gapAfter != empty:
+		state.boxOfGaps[次gapAfter].permutationPrior = 次gap
+
+def updatePermutation(state: StateStampMeander, crossingAfter: int, 次gap: int) -> None:
+	次gapPrior: int = state.boxOfGaps[次gap].permutationPrior
+	次gapAfter: int = state.boxOfGaps[次gap].permutationAfter
+	次gapLeft: int = 2 * crossingAfter - 1
+	次gapRight: int = 2 * crossingAfter
+
+	state.boxOfGaps[次gapLeft].permutationPrior = 次gapPrior
+	state.boxOfGaps[次gapLeft].permutationAfter = 次gapRight
+	state.boxOfGaps[次gapRight].permutationPrior = 次gapLeft
+	state.boxOfGaps[次gapRight].permutationAfter = 次gapAfter
+
+	if 次gapPrior != empty:
+		state.boxOfGaps[次gapPrior].permutationAfter = 次gapLeft
+	else:
+		state.gap首Permutation = 次gapLeft
+	if 次gapAfter != empty:
+		state.boxOfGaps[次gapAfter].permutationPrior = 次gapRight
+
+# Only `folds`.
+def move(state: StateStampMeander, 次gap: int, gapsSource: GapEnds, gapsTarget: GapEnds, 次gapPrior: int, 次gapAfter: int, 次nodeAfter: int) -> None:
+	remove(state, gapsSource, 次gap)
+	insert(state, gapsTarget, 次gap, state.boxOfGaps[次gap].endLeft, state.boxOfGaps[次gap].endRight, 次gapPrior, 次gapAfter, 次nodeAfter)
+
+# Only `equivalenceClasses`.
 def permutationCanonical吗(state: StateStampMeander) -> bool:
 	permutation: list[int] = [0] * state.n
-	次interval: int = state.interval首Permutation
+	次gap: int = state.gap首Permutation
 	leafOneVisited: bool = False
-	leaf1BeforeLeafLast: bool = True
+	leaf1PriorLeafLast: bool = True
 
 	次permutation: int = 0
 	while 次permutation < state.n:
-		permutation[次permutation] = state.boxOfIntervals[次interval].endpointRight
+		permutation[次permutation] = state.boxOfGaps[次gap].endRight
 		if permutation[次permutation] == 1:
 			leafOneVisited = True
 		elif (permutation[次permutation] == state.n) and not leafOneVisited:
-			leaf1BeforeLeafLast = False
-		次interval = state.boxOfIntervals[次interval].permutationNext
+			leaf1PriorLeafLast = False
+		次gap = state.boxOfGaps[次gap].permutationAfter
 		次permutation += 1
 
 	comparisonCanonical: int = 0
-	if leaf1BeforeLeafLast:
+	if leaf1PriorLeafLast:
 		次permutation = 0
 		while comparisonCanonical == 0 and 次permutation < state.n:
 			comparisonCanonical = permutation[次permutation] - (state.n - permutation[state.n - 次permutation - 1] + 1)
 			次permutation += 1
 
-	return leaf1BeforeLeafLast and (comparisonCanonical <= 0)
+	return leaf1PriorLeafLast and (comparisonCanonical <= 0)
 
-def cross(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, side: Side, 次interval: int, *, unwindingIntervalVisited: bool, mode: SettingsMode) -> None:
-	node: Node = state.boxOfNodes[次node]
-	interval: Interval = state.boxOfIntervals[次interval]
-	次intervalNext: int = interval.next
-	次intervalPrevious: int = interval.previous
-	次nodeNext: int = interval.nodeNext
-	nodeNext: Node = state.boxOfNodes[次nodeNext]
-	intervalUnwindingOld: int = nodeNext.intervalUnwinding
-	sideUnwindingOld: Side = nodeNext.sideUnwinding
-	次intervalLeft: int = 2 * crossingNext - 1
-	次intervalRight: int = 2 * crossingNext
-	nodeLeft: Node = state.boxOfNodes[次intervalLeft]
-	nodeRight: Node = state.boxOfNodes[次intervalRight]
+#================== Initialize ====================================================================
 
-	nodeLeft.intervalUnwinding = empty
-	nodeLeft.sideUnwinding = sideLeft
-	nodeRight.intervalUnwinding = empty
-	nodeRight.sideUnwinding = sideLeft
+def initializeState(state: StateStampMeander) -> None:
+	state.boxOfNodes[0].gapWindStop = 2
+	state.boxOfNodes[0].sideWindStop = sideRight
+	insert(state, state.boxOfNodes[0].gapsLeft, 1, 0, 1, empty, empty, 2)
+	insert(state, state.boxOfNodes[0].gapsRight, 2, 1, state.n + 1, empty, empty, 1)
 
-	if side == sideLeft:
-		if mode.folds and (windFactor == 0) and (次interval == node.intervalsLeft.首):
-			if nodeNext.intervalsLeft.首 != empty:
-				setHeadTail(nodeNext, empty, empty, nodeNext.intervalsLeft.首, nodeNext.intervalsLeft.Ω)
-			move(state, node.intervalsRight.Ω, node.intervalsRight, nodeNext.intervalsRight, nodeNext.intervalsRight.Ω, empty, 次intervalLeft)
-		elif node.intervalUnwinding == 次interval:
-			if (mode.meanders or mode.semiMeanders) and windFactor == 0:
-				nodeNext.intervalUnwinding = 次intervalLeft
-				nodeNext.sideUnwinding = sideLeft
-		elif unwindingIntervalVisited or node.sideUnwinding == sideRight:
-			nodeNext.intervalUnwinding = 次intervalLeft
-			nodeNext.sideUnwinding = sideLeft
-			nodeLeft.intervalUnwinding = node.intervalUnwinding
-			nodeLeft.sideUnwinding = node.sideUnwinding
-		else:
-			nodeNext.intervalUnwinding = 次intervalRight
-			nodeNext.sideUnwinding = sideRight
-			nodeRight.intervalUnwinding = node.intervalUnwinding
-			nodeRight.sideUnwinding = sideRight
-
-		setHeadTail(nodeLeft, node.intervalsLeft.首, 次intervalPrevious, node.intervalsRight.首, node.intervalsRight.Ω)
-		setHeadTail(nodeRight, empty, empty, 次intervalNext, node.intervalsLeft.Ω)
-	else:
-		if mode.folds and (windFactor == 0) and (次interval == node.intervalsRight.Ω):
-			if nodeNext.intervalsRight.首 != empty:
-				setHeadTail(nodeNext, nodeNext.intervalsRight.首, nodeNext.intervalsRight.Ω, empty, empty)
-			move(state, node.intervalsLeft.首, node.intervalsLeft, nodeNext.intervalsLeft, empty, nodeNext.intervalsLeft.首, 次intervalRight)
-		elif node.intervalUnwinding == 次interval:
-			if (mode.meanders or mode.semiMeanders) and windFactor == 0:
-				nodeNext.intervalUnwinding = 次intervalRight
-				nodeNext.sideUnwinding = sideRight
-		elif unwindingIntervalVisited:
-			nodeNext.intervalUnwinding = 次intervalLeft
-			nodeNext.sideUnwinding = sideLeft
-			nodeLeft.intervalUnwinding = node.intervalUnwinding
-			nodeLeft.sideUnwinding = sideLeft
-		else:
-			nodeNext.intervalUnwinding = 次intervalRight
-			nodeNext.sideUnwinding = sideRight
-			nodeRight.intervalUnwinding = node.intervalUnwinding
-			nodeRight.sideUnwinding = node.sideUnwinding
-
-		setHeadTail(nodeLeft, node.intervalsRight.首, 次intervalPrevious, empty, empty)
-		setHeadTail(nodeRight, node.intervalsLeft.首, node.intervalsLeft.Ω, 次intervalNext, node.intervalsRight.Ω)
-
-	insert(state, nodeNext.intervalsLeft, 次intervalLeft, interval.endpointLeft, crossingNext, nodeNext.intervalsLeft.Ω, empty, 次intervalLeft)
-	insert(state, nodeNext.intervalsRight, 次intervalRight, crossingNext, interval.endpointRight, empty, nodeNext.intervalsRight.首, 次intervalRight)
-
-	if 次intervalNext != empty:
-		state.boxOfIntervals[次intervalNext].previous = empty
-	if 次intervalPrevious != empty:
-		state.boxOfIntervals[次intervalPrevious].next = empty
-
-	cross_updatePermutation(state, crossingNext, 次interval)
-
-	if mode.folds and (windFactor == 0) and (次interval in {node.intervalsRight.Ω, node.intervalsLeft.首}):
-		generate(state, crossingNext + 1, 次nodeNext, 0, mode)
-	elif node.intervalUnwinding == 次interval:
-		generate(state, crossingNext + 1, 次nodeNext, max(0, windFactor - 1), mode)
-	else:
-		generate(state, crossingNext + 1, 次nodeNext, windFactor + 1, mode)
-
-	cross_restorePermutation(state, 次interval)
-
-	if 次intervalNext != empty:
-		state.boxOfIntervals[次intervalNext].previous = 次interval
-	if 次intervalPrevious != empty:
-		state.boxOfIntervals[次intervalPrevious].next = 次interval
-
-	remove(state, nodeNext.intervalsLeft, 次intervalLeft)
-	remove(state, nodeNext.intervalsRight, 次intervalRight)
-
-	nodeNext.intervalUnwinding = intervalUnwindingOld
-	nodeNext.sideUnwinding = sideUnwindingOld
-
-	if mode.folds and (windFactor == 0):
-		if 次interval == node.intervalsLeft.首:
-			move(state, nodeNext.intervalsRight.Ω, nodeNext.intervalsRight, node.intervalsRight, node.intervalsRight.Ω, empty, 次nodeNext)
-		if 次interval == node.intervalsRight.Ω:
-			move(state, nodeNext.intervalsLeft.首, nodeNext.intervalsLeft, node.intervalsLeft, empty, node.intervalsLeft.首, 次nodeNext)
-
-def cross_restorePermutation(state: StateStampMeander, 次interval: int) -> None:
-	次intervalPrevious: int = state.boxOfIntervals[次interval].permutationPrevious
-	次intervalNext: int = state.boxOfIntervals[次interval].permutationNext
-
-	if 次intervalPrevious != empty:
-		state.boxOfIntervals[次intervalPrevious].permutationNext = 次interval
-	else:
-		state.interval首Permutation = 次interval
-	if 次intervalNext != empty:
-		state.boxOfIntervals[次intervalNext].permutationPrevious = 次interval
-
-def cross_updatePermutation(state: StateStampMeander, crossingNext: int, 次interval: int) -> None:
-	次intervalPrevious: int = state.boxOfIntervals[次interval].permutationPrevious
-	次intervalNext: int = state.boxOfIntervals[次interval].permutationNext
-	次intervalLeft: int = 2 * crossingNext - 1
-	次intervalRight: int = 2 * crossingNext
-
-	state.boxOfIntervals[次intervalLeft].permutationPrevious = 次intervalPrevious
-	state.boxOfIntervals[次intervalLeft].permutationNext = 次intervalRight
-	state.boxOfIntervals[次intervalRight].permutationPrevious = 次intervalLeft
-	state.boxOfIntervals[次intervalRight].permutationNext = 次intervalNext
-
-	if 次intervalPrevious != empty:
-		state.boxOfIntervals[次intervalPrevious].permutationNext = 次intervalLeft
-	else:
-		state.interval首Permutation = 次intervalLeft
-	if 次intervalNext != empty:
-		state.boxOfIntervals[次intervalNext].permutationPrevious = 次intervalRight
-
-def visitIntervals(state: StateStampMeander, crossingNext: int, 次node: int, windFactor: int, side: Side, mode: SettingsMode) -> None:
-	if side == sideLeft:
-		次interval: int = state.boxOfNodes[次node].intervalsLeft.首
-	else:
-		次interval = state.boxOfNodes[次node].intervalsRight.首
-	unwindingIntervalVisited: bool = False
-
-	while 次interval != empty:
-		次intervalNext: int = state.boxOfIntervals[次interval].next
-		cross(state, crossingNext, 次node, windFactor, side, 次interval, unwindingIntervalVisited=unwindingIntervalVisited, mode=mode)
-		unwindingIntervalVisited = unwindingIntervalVisited or 次interval == state.boxOfNodes[次node].intervalUnwinding
-		if mode.folds and windFactor == 0:
-			if side == sideLeft:
-				unwindingIntervalVisited = unwindingIntervalVisited or 次interval == state.boxOfNodes[次node].intervalsLeft.首
-			else:
-				unwindingIntervalVisited = unwindingIntervalVisited or 次interval == state.boxOfNodes[次node].intervalsRight.Ω
-		次interval = 次intervalNext
-
-def insert(state: StateStampMeander, intervals: IntervalHeadTail, 次interval: int, endpointLeft: int, endpointRight: int, 次intervalPrevious: int, 次intervalNext: int, 次nodeNext: int) -> None:
-	if 次intervalPrevious != empty:
-		state.boxOfIntervals[次intervalPrevious].next = 次interval
-	else:
-		intervals.首 = 次interval
-
-	if 次intervalNext != empty:
-		state.boxOfIntervals[次intervalNext].previous = 次interval
-	else:
-		intervals.Ω = 次interval
-
-	state.boxOfIntervals[次interval].endpointLeft = endpointLeft
-	state.boxOfIntervals[次interval].endpointRight = endpointRight
-	state.boxOfIntervals[次interval].previous = 次intervalPrevious
-	state.boxOfIntervals[次interval].next = 次intervalNext
-	state.boxOfIntervals[次interval].nodeNext = 次nodeNext
-
-# DEVELOPMENT Only `folds`.
-def move(state: StateStampMeander, 次interval: int, intervalsSource: IntervalHeadTail, intervalsTarget: IntervalHeadTail, 次intervalPrevious: int, 次intervalNext: int, 次nodeNext: int) -> None:
-	remove(state, intervalsSource, 次interval)
-	insert(state, intervalsTarget, 次interval, state.boxOfIntervals[次interval].endpointLeft, state.boxOfIntervals[次interval].endpointRight, 次intervalPrevious, 次intervalNext, 次nodeNext)
-
-def remove(state: StateStampMeander, intervals: IntervalHeadTail, 次interval: int) -> None:
-	interval: Interval = state.boxOfIntervals[次interval]
-	if interval.next == empty:
-		intervals.Ω = interval.previous
-	else:
-		state.boxOfIntervals[interval.next].previous = empty
-
-	if interval.previous == empty:
-		intervals.首 = interval.next
-	else:
-		state.boxOfIntervals[interval.previous].next = empty
-
-def setHeadTail(node: Node, intervalLeftHead: int, intervalLeftTail: int, intervalRightHead: int, intervalRightTail: int) -> None:
-	if empty in {intervalLeftHead, intervalLeftTail}:
-		node.intervalsLeft.首 = empty
-		node.intervalsLeft.Ω = empty
-	else:
-		node.intervalsLeft.首 = intervalLeftHead
-		node.intervalsLeft.Ω = intervalLeftTail
-
-	if empty in {intervalRightHead, intervalRightTail}:
-		node.intervalsRight.首 = empty
-		node.intervalsRight.Ω = empty
-	else:
-		node.intervalsRight.首 = intervalRightHead
-		node.intervalsRight.Ω = intervalRightTail
+	state.gap首Permutation = 1
+	state.boxOfGaps[1].permutationPrior = empty
+	state.boxOfGaps[1].permutationAfter = 2
+	state.boxOfGaps[2].permutationPrior = 1
+	state.boxOfGaps[2].permutationAfter = empty
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsMode:
@@ -397,12 +414,12 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		message = f'I received `{n = }`, but OEIS sequence `{oeisID}` is not defined below `offset = {generationMode.oeisOffset}`.'
 		raise ValueError(message)
 
-	orderSawadaLi: int = n - generationMode.Z0Z_normalizeIndex
-	if orderSawadaLi == 0:
+	nNormalized: int = n - generationMode.Z0Z_normalizeIndex
+	if nNormalized == 0:
 		return 1
 
-	state: StateStampMeander = StateStampMeander(orderSawadaLi)
+	state: StateStampMeander = StateStampMeander(nNormalized)
 
 	initializeState(state)
-	generate(state, 2, 0, 0, mode)
+	state = count(state, 2, 0, 0, mode)
 	return state.total
