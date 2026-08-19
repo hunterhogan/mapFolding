@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from mapFolding._e._2上nDimensional import pinIt
 from mapFolding._e.basecamp import eliminateFolds
-from mapFolding._e.dataBaskets import StateElimination  # ruff: ignore[typing-only-third-party-import]
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy.theTypes import Limitation
+	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding.theTypes import OEISid
 	from os import PathLike
 
@@ -25,18 +25,18 @@ if __name__ == "__main__":
 	flow = "elimination"
 
 	oeisID = "A195646"
-	oeisID = "A000136"
 	oeisID = "A001418"
 	oeisID = "A001416"
 	oeisID = "A001415"
 	oeisID = "A001417"
+	oeisID = "A000136"
 
 	printEasyRunHeader(oeisID, flow)
 
-	for n in range(2, 4):
+	for n in range(2, 10):
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
-		if oeisID == "A001417" and n > 3:
+		if oeisID == "A001417" and 3 < n:  # pyright: ignore[reportUnnecessaryComparison]
 			# state = StateElimination(mapShape)
 			# state = pinIt.pinPile零Ante首零(state)
 			# state = pinIt.pinPilesAtEnds(state, 3)

@@ -6,7 +6,7 @@ from mapFolding._e import getIteratorOfLeaves, getMapShape首ProductsSums
 from mapFolding._e._2上nDimensional import (
 	dimensionIndex, getLeavesCreaseAnte, getLeavesCreasePost, leafInSubHyperplane, moreThanLeaf零吗, ptount, 一, 三, 二, 五, 四, 工dimensionTail,
 	工dimension首一, 工dimension首零, 工totalDimensionsOdd, 工totalDimensionsTail, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二)
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from more_itertools import last
 from operator import getitem, neg
 from typing import TYPE_CHECKING
@@ -62,7 +62,7 @@ def pinPile零Ante首零AfterDepth4(state: StateElimination) -> list[int]:
 	leafAt二:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(二))
 	leafAt二Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(二) + state.首))
 
-	dictionaryChoicesLeaf: dict[Pile, ChoicesLeaf] = getDictionaryChoicesLeaf(state)
+	dictionaryChoicesLeaf: dict[Pile, ChoicesLeaf] = getLookupChoicesLeaf(state)
 	boxOfRemoveLeaves: list[int] = []
 
 #========= use `leafAt一` to exclude a `leaf` from `pile` ===================

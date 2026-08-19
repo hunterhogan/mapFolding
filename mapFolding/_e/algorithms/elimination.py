@@ -5,7 +5,7 @@ from itertools import chain, pairwise, product as CartesianProduct, repeat, star
 from mapFolding._e import getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding._e.pinIt import excludeLeaf_rBeforeLeaf_k
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from math import factorial
@@ -66,7 +66,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getDictionaryChoicesLeaf(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getLookupChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 
 		state = theorem4(state)

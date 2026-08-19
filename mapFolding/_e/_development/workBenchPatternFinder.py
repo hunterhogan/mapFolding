@@ -11,7 +11,7 @@ from mapFolding._e import getChoicesLeaf, getIteratorOfLeaves, getLookupDomainsL
 from mapFolding._e._2上nDimensional import (
 	getLeavesCreaseAnte, getLeavesCreasePost, invertLeafIn2上nDimensions, 工dimension首零, 零, 首一, 首二, 首零, 首零一)
 from mapFolding._e.dataBaskets import StateElimination
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
@@ -29,7 +29,7 @@ def _getGroupedBy(state: StateElimination, pileTarget: Pile, groupByLeavesAtPile
 	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	return {leaves: sorted(set(getIteratorOfLeaves(getDictionaryChoicesLeaf(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
+	return {leaves: sorted(set(getIteratorOfLeaves(getLookupChoicesLeaf(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 if __name__ == '__main__':
 

@@ -1,5 +1,5 @@
 # ruff: ignore[undocumented-public-module]
-# FIXME https://github.com/python/typing/discussions/2092
+# TODO https://github.com/python/typing/discussions/2092
 
 from __future__ import annotations
 

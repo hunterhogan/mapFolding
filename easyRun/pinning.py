@@ -10,7 +10,7 @@ from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
 from mapFolding._e.dataBaskets import StateElimination
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from math import prod
 from operator import methodcaller
 from pprint import pprint
@@ -28,7 +28,7 @@ def printStatisticsPermutations(state: StateElimination) -> None:
 
 	permutationsPermutationSpaceTotal: Callable[[Iterable[Any]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('extractUndeterminedPiles'))))
 	print(len(str(mm := fac(state.totalLeaves))), mm, "Maximum permutations of leaves")
-	print(len(str(rr := prod(toolz_map(lengthChoicesLeaf, filter(None, DOTvalues(getDictionaryChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
+	print(len(str(rr := prod(toolz_map(lengthChoicesLeaf, filter(None, DOTvalues(getLookupChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 
 if __name__ == '__main__':
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 		state = pinIt.pinLeavesDimension一(state)
 		state = pinIt.pinLeavesDimension二(state)
 		pprint(dictionaryLeafDomains := getLookupDomainsLeaves(state))
-		pprint(dictionaryChoicesLeaf := getDictionaryChoicesLeaf(state), width=200)
+		pprint(dictionaryChoicesLeaf := getLookupChoicesLeaf(state), width=200)
 		pprint(getLeafPredecessors(state), width=260)
 		pprint(state.boxOfFolding)
 		pprint(state.boxOfPermutationSpace)

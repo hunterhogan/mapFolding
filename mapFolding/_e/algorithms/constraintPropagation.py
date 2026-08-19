@@ -6,7 +6,7 @@ from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
 from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, 工dimensionTail, 工dimension首零
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.theSSOT import settingsPackage
@@ -167,7 +167,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 	"""Do the things necessary so that `count` operates efficiently."""
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
-		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getDictionaryChoicesLeaf(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getLookupChoicesLeaf(state)))
 		state = state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT)
 
 	state.permutationSpace = PermutationSpace()

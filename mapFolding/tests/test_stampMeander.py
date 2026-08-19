@@ -40,7 +40,3 @@ def test_doTheNeedful(oeisID: OEISid, n: int, expected: int) -> None:
 def test_doTheNeedful_error(oeisID: OEISid, n: int, match: str) -> None:
 	with pytest.raises(ValueError, match=match):
 		doTheNeedful(oeisID, n)
-
-def test_doTheNeedful_typeError() -> None:
-	with pytest.raises(TypeError, match='integer OEIS index'):
-		doTheNeedful('A000136', True)

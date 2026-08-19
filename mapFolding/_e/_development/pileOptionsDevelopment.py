@@ -69,8 +69,8 @@ def _getGroupedBy(state: StateElimination, pileTarget: Pile, groupByLeavesAtPile
 	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
 def getExcludedLeaves(state: StateElimination, pile: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
-	from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
-	return {leaves: sorted(filterfalse(boxOfLeaves.__contains__, (getIteratorOfLeaves(getDictionaryChoicesLeaf(state)[pile]))))
+	from mapFolding._e.pileOptions import getLookupChoicesLeaf
+	return {leaves: sorted(filterfalse(boxOfLeaves.__contains__, (getIteratorOfLeaves(getLookupChoicesLeaf(state)[pile]))))
 		for leaves, boxOfLeaves in DOTitems(_getGroupedBy(state, pile, groupByLeavesAtPiles))}
 
 if __name__ == '__main__':

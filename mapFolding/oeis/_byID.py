@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding.algorithms.permutations import doTheNeedful as countSawadaLi
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import byFormula, getMetadata, makeMapShape, oeisIDsMapFoldingImplemented
 from mapFolding.oeis._beDRY import formatOEISid
@@ -120,8 +119,6 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 				totalFolds = byFormula.A077014(n, f)
 			case 'A077054':
 				totalFolds = byFormula.A077054(n, f)
-			case 'A077055' if not f:
-				totalFolds = countSawadaLi(oeisID, n)
 			case 'A077460':
 				totalFolds = byFormula.A077460(n, f)
 			case 'A078591':

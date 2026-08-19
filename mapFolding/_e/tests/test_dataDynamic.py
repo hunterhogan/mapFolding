@@ -20,7 +20,7 @@ from mapFolding._e._2上nDimensional import (
 	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二,
 	getLeavesCreaseAnte, getLeavesCreasePost)
 from mapFolding._e.dataBaskets import StateElimination
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
 	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_7_5_4, p2上nDimensionalDomain7_6,
@@ -58,7 +58,7 @@ def test_getDictionaryChoicesLeaf(mapShape: tuple[int, ...]) -> None:
 	state: StateElimination = StateElimination(mapShape=mapShape)
 	dictionaryChoicesLeafAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryChoicesLeafKnown[mapShape]
 
-	dictionaryChoicesLeafActual: dict[Pile, ChoicesLeaf] = getDictionaryChoicesLeaf(state)
+	dictionaryChoicesLeafActual: dict[Pile, ChoicesLeaf] = getLookupChoicesLeaf(state)
 
 	assertEqualTo(len(dictionaryChoicesLeafActual), state.totalLeaves, 'getDictionaryChoicesLeaf', mapShape)
 

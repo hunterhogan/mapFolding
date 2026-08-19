@@ -1,4 +1,4 @@
-# FIXME `StateMapFolding` restructure https://github.com/python/typing/discussions/2092
+# TODO `StateMapFolding` restructure https://github.com/python/typing/discussions/2092
 # pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
 #=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
 # pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false

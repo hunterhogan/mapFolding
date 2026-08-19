@@ -1,4 +1,4 @@
-# FIXME Modernize kitNumba.
+# TODO Modernize kitNumba.
 """
 Map folding AST transformation system: Numba integration and just-in-time compilation optimization.
 
@@ -128,7 +128,7 @@ Key features:
 	Allows Python object mode fallback when needed
 """
 
-Z0Z_numbaDataTypeModule: identifierDotAttribute = 'numba'
+名moduleNumbaDataType: identifierDotAttribute = 'numba'
 """
 Module identifier for Numba imports and type annotations.
 
@@ -137,7 +137,7 @@ in generated code. It serves as the single source of truth for the Numba module 
 enabling consistent import statements across all generated functions.
 """
 
-Z0Z_decoratorCallable: str = 'jit'
+名callableDecorator: str = 'jit'
 """
 The Numba decorator function name used for just-in-time compilation.
 
@@ -251,7 +251,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			return signatureElement.annotation
 		return None
 
-	datatypeModuleDecorator: str = Z0Z_numbaDataTypeModule
+	datatypeModuleDecorator: str = 名moduleNumbaDataType
 	boxOf_argsDecorator: Sequence[ast.expr] = []
 
 	boxOf_arg4signature_or_function: list[ast.expr] = []
@@ -276,8 +276,8 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	# TODO This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
 	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
 
-	decoratorModule = Z0Z_numbaDataTypeModule
-	decoratorCallable = Z0Z_decoratorCallable
+	decoratorModule = 名moduleNumbaDataType
+	decoratorCallable = 名callableDecorator
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
 	#=Sin= Leave this line in so that global edits will change it.
 	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator, list_keyword)

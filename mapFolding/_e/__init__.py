@@ -10,7 +10,7 @@ from mapFolding._e.semiotics import leafOrigin as leafOrigin, pileOrigin as pile
 
 # isort: split
 from mapFolding._e.leafDomains import getDomainLeaf as getDomainLeaf, getLookupDomainsLeaves as getLookupDomainsLeaves
-from mapFolding._e.pileOptions import getChoicesLeaf as getChoicesLeaf
+from mapFolding._e.pileOptions import getChoicesLeaf as getChoicesLeaf, getLookupChoicesLeaf as getLookupChoicesLeaf
 
 # isort: split
 from mapFolding._e._disaggregation import getIteratorOfLeaves as getIteratorOfLeaves

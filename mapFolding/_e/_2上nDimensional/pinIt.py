@@ -65,7 +65,7 @@ from mapFolding._e._2上nDimensional.pinByCrease import (
 from mapFolding._e._2上nDimensional.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-from mapFolding._e.pileOptions import getDictionaryChoicesLeaf
+from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
 from more_itertools import partition
 from operator import getitem, neg
@@ -295,7 +295,7 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 		return state
 
 	if not state.boxOfPermutationSpace:
-		state.boxOfPermutationSpace.append(PermutationSpace().updatePilesMissing(getDictionaryChoicesLeaf(state)))
+		state.boxOfPermutationSpace.append(PermutationSpace().updatePilesMissing(getLookupChoicesLeaf(state)))
 
 	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
 	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,

@@ -4,9 +4,8 @@ This is a generated file; edit the source file.
 """
 from __future__ import annotations
 
-from functools import cache
 from itertools import chain
-from mapFolding.basecamp import countFoldsSymmetric, countMeanders
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
@@ -84,10 +83,9 @@ def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None=None
             countTotal = _A000682(n + 1) // 2
     return countTotal
 
-@cache
-def A000682(n: int, f: Literal['A301620', 'A259689', 'A000136', 'A223094', 'A001010', 'A060206 and A000560', 'A077460, A005316, and A000560', 'A223093 and A077014', 'A223093 and A005316', 'A000136 and A223094', 'A223094 and A000682', 'A000136, A077014, and A223095', 'A259702 and A000682', 'A333971 and A000682', 'A334615, A000682, and A000560', 'A337581', 'A000560'] | LiteralString | None=None) -> int:
+def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301620', 'A337581', 'A077460, A005316, and A223093', 'A223093 and A005316', 'A223093 and A077014', 'A000136, A077014, and A223095', 'A223094 and A000682', 'A259702 and A000682', 'A333971 and A000682', 'A334615 and A000682', 'A060206 and A000560', 'A000136'] | LiteralString | None=None) -> int:
     """
-    Compute A000682(n) as a function of A301620 or A259689 or A000136 or A223094 or A001010 or A060206 and A000560 or A077460, A005316, and A000560 or A223093 and A077014 or A223093 and A005316 or A000136 and A223094 or A223094 and A000682 or A000136, A077014, and A223095 or A259702 and A000682 or A333971 and A000682 or A334615, A000682, and A000560 or A337581 or A000560.
+    Compute A000682(n) as a function of A000560 or A001010 or A223094 or A259689 or A301620 or A337581 or A077460, A005316, and A223093 or A223093 and A005316 or A223093 and A077014 or A000136, A077014, and A223095 or A223094 and A000682 or A259702 and A000682 or A333971 and A000682 or A334615 and A000682 or A060206 and A000560 or A000136.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682 is: "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times."
 
@@ -113,50 +111,48 @@ def A000682(n: int, f: Literal['A301620', 'A259689', 'A000136', 'A223094', 'A001
         countTotal: int = 1
     else:
         match f:
-            case 'A301620':
-                countTotal = 2 ** (n - 2) + sum((2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1)))
-            case 'A259689':
-                countTotal = 2 ** (n - 2) + sum((2 ** (n - 1 - n下j) * sum((A259689((n下j - 1) ** 2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + 1))) for n下j in range(4, n)))
-            case 'A000136':
-                countTotal = A000136(n) // n
+            case 'A000560':
+                countTotal = 2 * A000560(n - 1)
+            case 'A001010':
+                countTotal = A001010(2 * n - 2) // 2
             case 'A223094':
                 nLess1Factorial: int = factorial(n - 1)
                 countTotal = nLess1Factorial - sum((A223094(n下k) * (nLess1Factorial // factorial(n下k)) for n下k in range(3, n)))
-            case 'A001010':
-                countTotal = A001010(2 * n - 2) // 2
+            case 'A259689':
+                countTotal = 2 ** (n - 2) + sum((2 ** (n - 1 - n下j) * sum((A259689((n下j - 1) ** 2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + 1))) for n下j in range(4, n)))
+            case 'A301620':
+                countTotal = 2 ** (n - 2) + sum((2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1)))
+            case 'A337581':
+                countTotal = A337581(n + 2) // 4
+            case 'A077460, A005316, and A223093':
+                if n % 2:
+                    countTotal = 4 * A077460(n) - _A005316(2 * n - 1) - _A005316(n)
+                else:
+                    countTotal = A223093(n - 1) + (1 + n % 2) * _A005316(n - 1)
+            case 'A223093 and A005316':
+                countTotal = A223093(n - 1) + (1 + n % 2) * _A005316(n - 1)
+            case 'A223093 and A077014':
+                countTotal = A223093(n - 1) + A077014(n - 1)
+            case 'A000136, A077014, and A223095':
+                countTotal = (A000136(n - 1) + A077014(n - 1) - A223095(n - 1)) // 2
+            case 'A223094 and A000682':
+                countTotal = (n - 1) * _A000682(n - 1) - A223094(n - 1)
+            case 'A259702 and A000682':
+                countTotal = 2 * (A259702(n) + _A000682(n - 1))
+            case 'A333971 and A000682':
+                countTotal = A333971(n + 1) // 4 + _A000682(n - 1)
+            case 'A334615 and A000682':
+                if 4 <= n:
+                    countTotal = A334615(n) + 4 * _A000682(n - 1) - 4 * _A000682(n - 2)
+                else:
+                    countTotal = _A000682(n)
             case 'A060206 and A000560':
                 if n % 2:
                     countTotal = A060206((n - 1) // 2)
                 else:
                     countTotal = 2 * A000560(n - 1)
-            case 'A077460, A005316, and A000560':
-                if n % 2:
-                    countTotal = 4 * A077460(n) - _A005316(2 * n - 1) - _A005316(n)
-                else:
-                    countTotal = 2 * A000560(n - 1)
-            case 'A223093 and A077014':
-                countTotal = A223093(n - 1) + A077014(n - 1)
-            case 'A223093 and A005316':
-                countTotal = A223093(n - 1) + (1 + n % 2) * _A005316(n - 1)
-            case 'A000136 and A223094':
-                countTotal = A000136(n - 1) - A223094(n - 1)
-            case 'A223094 and A000682':
-                countTotal = (n - 1) * _A000682(n - 1) - A223094(n - 1)
-            case 'A000136, A077014, and A223095':
-                countTotal = (A000136(n - 1) + A077014(n - 1) - A223095(n - 1)) // 2
-            case 'A259702 and A000682':
-                countTotal = 2 * (A259702(n) + _A000682(n - 1))
-            case 'A333971 and A000682':
-                countTotal = A333971(n + 1) // 4 + _A000682(n - 1)
-            case 'A334615, A000682, and A000560':
-                if 4 <= n:
-                    countTotal = A334615(n) + 4 * _A000682(n - 1) - 4 * _A000682(n - 2)
-                else:
-                    countTotal = 2 * A000560(n - 1)
-            case 'A337581':
-                countTotal = A337581(n + 2) // 4
-            case 'A000560' | _:
-                countTotal = 2 * A000560(n - 1)
+            case 'A000136' | _:
+                countTotal = _A000136(n) // n
     return countTotal
 
 def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | LiteralString | None=None) -> int:
@@ -228,7 +224,6 @@ def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None=Non
                 countTotal = (A001010(n) + n * _A000682(n)) // 4
     return countTotal
 
-@cache
 def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085973 and A077054', 'A208357', 'A005316'] | LiteralString | None=None) -> int:
     """
     Compute A005315(n) as a function of A077460, A005316, and A060206 or A078591 or A085973 and A077054 or A208357 or A005316.
@@ -272,7 +267,6 @@ def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085
                 countTotal = _A005316(2 * n - 1)
     return countTotal
 
-@cache
 def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315', 'A227167, A217310, and A217318', 'A000682 and A223093'] | LiteralString | None=None) -> int:
     """
     Compute A005316(n) as a function of A077014 or A077054 and A005315 or A077460, A005315, and A060206 or A078592 and A005315 or A227167, A217310, and A217318 or A000682 and A223093.
@@ -838,7 +832,6 @@ def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | Lit
             countTotal = n * _A000682(n) // (2 - n % 2)
     return countTotal
 
-@cache
 def A259689(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A259689(n) as a function of A000682.
@@ -916,7 +909,6 @@ def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None=None
                 countTotal = _A000682(n) // 2 - _A000682(n - 1)
     return countTotal
 
-@cache
 def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259702', 'A000682'] | LiteralString | None=None) -> int:
     """
     Compute A301620(n) as a function of A334615, A301620, and A000682 or A259689 or A259702 or A000682.
@@ -1089,13 +1081,14 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
                 countTotal = 4 * _A000682(n - 2)
     return countTotal
 
-@cache
+def _A000136(n: int) -> int:
+    return countFolds(makeMapShape('A000136', n))
+
 def _A000682(n: int) -> int:
     return countMeanders('semi', n)
 
 def _A007822(n: int) -> int:
     return countFoldsSymmetric(makeMapShape('A007822', n))
 
-@cache
 def _A005316(n: int) -> int:
     return countMeanders('meanders', n)

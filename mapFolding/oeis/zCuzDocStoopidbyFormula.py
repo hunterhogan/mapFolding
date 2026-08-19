@@ -7,9 +7,8 @@
 
 from __future__ import annotations
 
-from functools import cache
 from itertools import chain
-from mapFolding.basecamp import countFoldsSymmetric, countMeanders
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
@@ -30,13 +29,6 @@ from typing import Literal, LiteralString
 # TODO For each sequence,
 # 1. All formulas that exclusively use the terms `n` and the "Not formulas".
 # 2. All formulas that use only `n` and one other sequence.
-
-# TODO Figure out how to make the docstrings accessible from `oeisIDfor_n`.
-
-# FIXME I only use `cache` to speed up pytest. Figure out how to remove cache from the module, and use
-# cache during pytest.
-
-# TODO Add A077055.
 
 def A000136(n: int, f: LiteralString | None = None) -> int:
 	if n in {1, 2}:
@@ -65,59 +57,56 @@ def A000560(n: int, f: LiteralString | None = None) -> int:
 			countTotal = _A000682(n + 1) // 2
 	return countTotal
 
-@cache
 def A000682(n: int, f: LiteralString | None = None) -> int:
 	if n in {1, 2}:
 		countTotal: int = 1
 	else:
 		match f:
-			case 'A301620':
-				countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
-			case 'A259689':
-				countTotal = 2 ** (n - 2) + sum(
-					2 ** (n - 1 - n下j) * sum(A259689(((n下j - 1) ** 2) // 4 + n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + 1))
-					for n下j in range(4, n)
-				)
-			case 'A000136':
-				countTotal = A000136(n) // n
+			case 'A000560':
+				countTotal = 2 * A000560(n - 1)
+			case 'A001010':
+				countTotal = A001010((2 * n) - 2) // 2
 			case 'A223094':
 				nLess1Factorial: int = factorial(n - 1)
 				countTotal = nLess1Factorial - sum(A223094(n下k) * (nLess1Factorial // factorial(n下k)) for n下k in range(3, n))
-			case 'A001010':
-				countTotal = A001010((2 * n) - 2) // 2
+			case 'A259689':
+				countTotal = 2 ** (n - 2) + sum(
+					2 ** (n - 1 - n下j) * sum(A259689(((n下j - 1) ** 2) // 4 + n下k) * (n下k - 2)
+					for n下k in range(3, (n下j + 2) // 2 + 1))
+					for n下j in range(4, n))
+			case 'A301620':
+				countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
+			case 'A337581':
+				countTotal = A337581(n + 2) // 4
+			case 'A077460, A005316, and A223093':
+				if n % 2:
+					countTotal = (4 * A077460(n)) - _A005316((2 * n) - 1) - _A005316(n)
+				else:
+					countTotal = A223093(n - 1) + ((1 + (n % 2)) * _A005316(n - 1))
+			case 'A223093 and A005316':
+				countTotal = A223093(n - 1) + ((1 + (n % 2)) * _A005316(n - 1))
+			case 'A223093 and A077014':
+				countTotal = A223093(n - 1) + A077014(n - 1)
+			case 'A000136, A077014, and A223095':
+				countTotal = (A000136(n - 1) + A077014(n - 1) - A223095(n - 1)) // 2
+			case 'A223094 and A000682':
+				countTotal = ((n - 1) * _A000682(n - 1)) - A223094(n - 1)
+			case 'A259702 and A000682':
+				countTotal = 2 * (A259702(n) + _A000682(n - 1))
+			case 'A333971 and A000682':
+				countTotal = (A333971(n + 1) // 4) + _A000682(n - 1)
+			case 'A334615 and A000682':
+				if 4 <= n:
+					countTotal = A334615(n) + (4 * _A000682(n - 1)) - (4 * _A000682(n - 2))
+				else:
+					countTotal = _A000682(n)
 			case 'A060206 and A000560':
 				if n % 2:
 					countTotal = A060206((n - 1) // 2)
 				else:
 					countTotal = 2 * A000560(n - 1)
-			case 'A077460, A005316, and A000560':
-				if n % 2:
-					countTotal = (4 * A077460(n)) - _A005316((2 * n) - 1) - _A005316(n)
-				else:
-					countTotal = 2 * A000560(n - 1)
-			case 'A223093 and A077014':
-				countTotal = A223093(n - 1) + A077014(n - 1)
-			case 'A223093 and A005316':
-				countTotal = A223093(n - 1) + ((1 + (n % 2)) * _A005316(n - 1))
-			case 'A000136 and A223094':
-				countTotal = A000136(n - 1) - A223094(n - 1)
-			case 'A223094 and A000682':
-				countTotal = ((n - 1) * _A000682(n - 1)) - A223094(n - 1)
-			case 'A000136, A077014, and A223095':
-				countTotal = (A000136(n - 1) + A077014(n - 1) - A223095(n - 1)) // 2
-			case 'A259702 and A000682':
-				countTotal = 2 * (A259702(n) + _A000682(n - 1))
-			case 'A333971 and A000682':
-				countTotal = (A333971(n + 1) // 4) + _A000682(n - 1)
-			case 'A334615, A000682, and A000560':
-				if 4 <= n:
-					countTotal = A334615(n) + (4 * _A000682(n - 1)) - (4 * _A000682(n - 2))
-				else:
-					countTotal = 2 * A000560(n - 1)
-			case 'A337581':
-				countTotal = A337581(n + 2) // 4
-			case 'A000560' | _:
-				countTotal = 2 * A000560(n - 1)
+			case 'A000136' | _:
+				countTotal = _A000136(n) // n
 	return countTotal
 
 def A001010(n: int, f: LiteralString | None = None) -> int:
@@ -143,7 +132,6 @@ def A001011(n: int, f: LiteralString | None = None) -> int:
 				countTotal = (A001010(n) + (n * _A000682(n))) // 4
 	return countTotal
 
-@cache
 def A005315(n: int, f: LiteralString | None = None) -> int:
 	if 0 <= n < 2:
 		countTotal: int = 1
@@ -164,7 +152,6 @@ def A005315(n: int, f: LiteralString | None = None) -> int:
 				countTotal = _A005316((2 * n) - 1)
 	return countTotal
 
-@cache
 def A005316(n: int, f: LiteralString | None = None) -> int:
 	if 0 <= n < 2:
 		countTotal: int = 1
@@ -239,6 +226,17 @@ def A077054(n: int, f: LiteralString | None = None) -> int:
 			case 'A005316' | _:
 				countTotal = _A005316(2 * n)
 	return countTotal
+
+# A223096: need a formula or algorithm.
+# ruff: ignore[commented-out-code]
+# def A077055(n: int, f: LiteralString | None = None) -> int:
+# 	match f:
+# 		case 'A005316' | _:
+# 			if n % 2:
+# 				countTotal: int = (_A005316(n) + 2 * A223096(n // 2)) // 4
+# 			else:
+# 				countTotal = (_A005316(n) + _A005316(n // 2)) // 2
+# 	return countTotal
 
 def A077460(n: int, f: LiteralString | None = None) -> int:
 	if 0 <= n < 2:
@@ -368,7 +366,6 @@ def A227167(n: int, f: LiteralString | None = None) -> int:
 			countTotal = (n * _A000682(n)) // (2 - (n % 2))
 	return countTotal
 
-@cache
 def A259689(n: int, f: LiteralString | None = None) -> int:
 	nFlattenedZeroBased: int = n - 2
 	rowLength: int = (isqrt(4 * nFlattenedZeroBased + 1) + 1) // 2
@@ -405,7 +402,6 @@ def A259702(n: int, f: LiteralString | None = None) -> int:
 				countTotal = (_A000682(n) // 2) - _A000682(n - 1)
 	return countTotal
 
-@cache
 def A301620(n: int, f: LiteralString | None = None) -> int:
 	match f:
 		case 'A334615, A301620, and A000682':
@@ -501,13 +497,14 @@ def A337581(n: int, f: LiteralString | None = None) -> int:
 
 #================== Not formulas ==========================
 
-@cache
+def _A000136(n: int) -> int:
+	return countFolds(makeMapShape('A000136', n))
+
 def _A000682(n: int) -> int:
 	return countMeanders('semi', n)
 
 def _A007822(n: int) -> int:
 	return countFoldsSymmetric(makeMapShape('A007822', n))
 
-@cache
 def _A005316(n: int) -> int:
 	return countMeanders('meanders', n)

@@ -10,7 +10,7 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	from mapFolding._e._2上nDimensional.pileOptions import _getChoicesLeaf  # ruff: ignore[import-outside-top-level]
 	return _getChoicesLeaf(pile, state.totalDimensions, state.mapShape, state.totalLeaves)
 
-def getDictionaryChoicesLeaf(state: StateElimination) -> UndeterminedPiles:
+def getLookupChoicesLeaf(state: StateElimination) -> UndeterminedPiles:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object.
 
 	Returns
