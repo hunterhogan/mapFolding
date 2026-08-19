@@ -105,7 +105,6 @@ def count(state: StateMeanders) -> StateMeanders:
 			bitsTarget = dataframeMeanders['arcCode'].copy()
 			bitsTarget &= state.bitsLocator            								# `bitsAlfa`
 
-			# TODO What changed so that I have to now use `.astype()`?
 			# `if bitsAlfaAtEven and not bitsZuluAtEven`, modify `bitsAlfaPairedToOdd`
 			bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = (
 				flipTheExtra_0b1(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]).astype(形ArcCode)

@@ -6,6 +6,8 @@ from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
 from mapFolding.theTypes import 形NumPyTotalLeaves
+#=SIN= Incomplete typing in `numba`.
+from numba import get_num_threads, set_num_threads  # pyright: ignore[reportUnknownVariableType]
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
@@ -46,10 +48,9 @@ def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = 
 	"""
 	match concurrencyPackage:
 		case 'numba':
-			#=Sin= `numba` is optional.
-			#ruff: ignore[import-outside-top-level]
-			from mapFolding._optionalNumba import defineProcessorLimitNumba
-			concurrencyLimit: int = defineProcessorLimitNumba(CPUlimit)
+			concurrencyLimit: int = defineConcurrencyLimit(limit=CPUlimit, cpuTotal=get_num_threads())
+			set_num_threads(concurrencyLimit)
+			concurrencyLimit = get_num_threads()
 		case 'multiprocessing' | _:
 			concurrencyLimit = defineConcurrencyLimit(limit=CPUlimit)
 	return concurrencyLimit

@@ -4,7 +4,7 @@ from humpy_cytoolz import get_in
 from hunterMakesPy import errorL33T, raiseIfNone
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
 from mapFolding.theTypes import 形ArcCode
-from typing import TYPE_CHECKING
+from typing import overload, TYPE_CHECKING
 import numba
 
 if TYPE_CHECKING:
@@ -154,9 +154,20 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 
 #================== Dyck Path =====================================================================
 
+@overload
+def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode: ...
+
+@overload
+def flipTheExtra_0b1(intWithExtra_0b1: ndarray[tuple[Any, ...], dtype[形ArcCode]]) -> ndarray[tuple[Any, ...], dtype[形ArcCode]]: ...
+
+@overload
+def flipTheExtra_0b1(intWithExtra_0b1: pandas.Series[Any]) -> pandas.Series[Any]: ...
+
 #=SIN= Pyright suppression: `numba.vectorize` is partially unknown.
 @numba.vectorize((f"{形ArcCode.__name__}({形ArcCode.__name__})",), cache=True, nopython=True)  # pyright: ignore[reportUntypedFunctionDecorator, reportUnknownMemberType]
-def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
+def flipTheExtra_0b1(
+	intWithExtra_0b1: 形ArcCode | ndarray[tuple[Any, ...], dtype[形ArcCode]] | pandas.Series[Any],
+) -> 形ArcCode | ndarray[tuple[Any, ...], dtype[形ArcCode]] | pandas.Series[Any]:
 	"""Flip a bit based on Dyck path with a Numba-generated universal function [1].
 
 	You can call `flipTheExtra_0b1` with a `numpy.uint64`, a `numpy.ndarray` [2], or a
@@ -185,7 +196,8 @@ def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
 	[3] pandas.Series
 		https://pandas.pydata.org/docs/reference/api/pandas.Series.html
 	"""
-	return intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1)
+	#=SIN= `pyright: ignore[...]` is required because the scalar kernel body is analyzed before `numba.vectorize` rewrites it into a ufunc that supports arrays and Series.
+	return intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1)  # pyright: ignore[reportOperatorIssue, reportArgumentType, reportUnknownVariableType]  # ty: ignore[unsupported-operator, invalid-argument-type]
 
 #================== Buckets =======================================================================
 
@@ -1159,6 +1171,7 @@ n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 		23: 275265172,
 		22: 425141790,
 		21: 617123017,
+		20: 823958692,
 	},
 }
 

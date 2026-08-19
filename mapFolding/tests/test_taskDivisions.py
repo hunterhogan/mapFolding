@@ -25,7 +25,7 @@ show how to balance performance with system resource constraints.
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import defineConcurrencyLimit
-from mapFolding import _optionalNumba, beDRY
+from mapFolding import beDRY
 from mapFolding.basecamp import countFolds
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions
 from mapFolding.oeis import getTotalFoldsKnown, makeMapShape
@@ -74,15 +74,21 @@ def test_countFolds_CPUlimitError(mapShape: tuple[int, ...], flow: LiteralString
 @pytest.mark.parametrize('CPUlimit,expected', [(None, 8), (False, 8), (True, 1), (4, 4), (0.5, 4), (-0.5, 4), (-2, 6), (0, 8), (1, 1)])
 def test_defineProcessorLimit(CPUlimit: Limitation, expected: int, concurrencyPackage: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
 	cpuTotalStatic: int = 8
+	numbaThreadCount: int = cpuTotalStatic
 
-	def deterministicConcurrency(*, limit: Limitation) -> int:
-		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic)
+	def deterministicConcurrency(*, limit: Limitation, cpuTotal: int | None = None) -> int:
+		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic if cpuTotal is None else cpuTotal)
 
-	def deterministicNumba(CPUlimit: Limitation) -> int:
-		return defineConcurrencyLimit(limit=CPUlimit, cpuTotal=cpuTotalStatic)
+	def deterministicGetNumThreads() -> int:
+		return numbaThreadCount
+
+	def deterministicSetNumThreads(threadCount: int) -> None:
+		nonlocal numbaThreadCount
+		numbaThreadCount = threadCount
 
 	monkeypatch.setattr(beDRY, 'defineConcurrencyLimit', deterministicConcurrency)
-	monkeypatch.setattr(_optionalNumba, 'defineProcessorLimitNumba', deterministicNumba)
+	monkeypatch.setattr(beDRY, 'get_num_threads', deterministicGetNumThreads)
+	monkeypatch.setattr(beDRY, 'set_num_threads', deterministicSetNumThreads)
 
 	actual: int = defineProcessorLimit(CPUlimit, concurrencyPackage)
 	assertEqualTo(actual, expected, defineProcessorLimit.__name__, CPUlimit, concurrencyPackage)
@@ -91,15 +97,21 @@ def test_defineProcessorLimit(CPUlimit: Limitation, expected: int, concurrencyPa
 @pytest.mark.parametrize('CPUlimit,expected', [([4], TypeError), ((2,), TypeError), ({2}, TypeError), ({'cores': 2}, TypeError)])
 def test_defineProcessorLimitError(CPUlimit: list[int] | tuple[int, ...] | set[int] | dict[str, int], expected: type[TypeError], concurrencyPackage: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
 	cpuTotalStatic: int = 8
+	numbaThreadCount: int = cpuTotalStatic
 
-	def deterministicConcurrency(*, limit: Limitation) -> int:
-		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic)
+	def deterministicConcurrency(*, limit: Limitation, cpuTotal: int | None = None) -> int:
+		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic if cpuTotal is None else cpuTotal)
 
-	def deterministicNumba(CPUlimit: Limitation) -> int:
-		return defineConcurrencyLimit(limit=CPUlimit, cpuTotal=cpuTotalStatic)
+	def deterministicGetNumThreads() -> int:
+		return numbaThreadCount
+
+	def deterministicSetNumThreads(threadCount: int) -> None:
+		nonlocal numbaThreadCount
+		numbaThreadCount = threadCount
 
 	monkeypatch.setattr(beDRY, 'defineConcurrencyLimit', deterministicConcurrency)
-	monkeypatch.setattr(_optionalNumba, 'defineProcessorLimitNumba', deterministicNumba)
+	monkeypatch.setattr(beDRY, 'get_num_threads', deterministicGetNumThreads)
+	monkeypatch.setattr(beDRY, 'set_num_threads', deterministicSetNumThreads)
 
 	with pytest.raises(expected) as exceptionInfo:
 		#=SIN= Invalid argument type: the test verifies rejection of values outside `Limitation`.
