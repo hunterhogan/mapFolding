@@ -24,7 +24,7 @@ if __name__ == '__main__':
 	flow = 'matrixNumPy'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
-			('A005316', 'meanders'),
+			# ('A005316', 'meanders'),
 			('A000682', 'semi'),
 		]
 
@@ -40,10 +40,10 @@ if __name__ == '__main__':
 		"""
 
 		boxOf_n: list[int] = []
-		# boxOf_n.extend(range(2, 10))
+		boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
-		boxOf_n.extend(range(28, 33))
-		# boxOf_n.extend(range(33, 38))
+		# boxOf_n.extend(range(28, 33))
+		boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 45))
 		# boxOf_n.extend(range(45, 50))
@@ -57,6 +57,6 @@ if __name__ == '__main__':
 
 r"""
 
-title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\meanders.py && title I'm done || title Error
+title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\_countMeanders.py && title I'm done || title Error
 
 """
