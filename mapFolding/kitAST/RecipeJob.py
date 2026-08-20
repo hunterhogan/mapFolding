@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
 from astToolkit.transformationTools import pythonCode2ast_expr
-from copy import deepcopy
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
@@ -379,9 +378,11 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Name(
 			raiseIfNone(job.shatteredDataclass).countingVariableName.id)))).visit(ingredientsFunction.astFunctionDef)
 		ingredientsFunction.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
-		boxOfLauncherBody.append(Make.Assign([Make.Name('totalFolds', Make.Store())], Make.Call(
-			deepcopy(raiseIfNone(job.shatteredDataclass).countingVariableAnnotation), [
-			Make.Mult().join([Make.Call(Make.Name(job.identifierCallable)), Make.Constant(job.totalFoldsMultiplier)])])))
+		boxOfLauncherBody.append(Make.Assign([Make.Name('totalFolds', Make.Store())]
+			, Make.Mult().join([Make.Call(Make.Name(job.identifierCallable))
+				, Make.Call(raiseIfNone(job.shatteredDataclass).countingVariableAnnotation, [Make.Constant(job.totalFoldsMultiplier)])
+			])
+		))
 
 	boxOfLauncherBody.extend([
 		Make.Expr(Make.Call(Make.Name('print'), [Make.Sub().join([

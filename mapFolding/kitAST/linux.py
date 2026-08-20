@@ -1,21 +1,23 @@
-# TODO Implement this module while on linux.
 from __future__ import annotations
 
+from hunterMakesPy import raiseIfNone
 from typing import TYPE_CHECKING
+import anyascii
 import lief
+import subprocess  # ruff: ignore[suspicious-subprocess-import]
 import sys
 
 if TYPE_CHECKING:
 	from pathlib import Path
 
 def binaryStrip(pathFilename: Path) -> Path:
-	binary = lief.parse(pathFilename)
+	binary: lief.OAT.Binary | lief.ELF.Binary = raiseIfNone(lief.parse(pathFilename))
 	binary.strip()
 	binary.write(pathFilename)
 	return pathFilename
 
-
 def toCodon(pathFilenamePython: Path) -> Path:
+	pathFilenamePython.write_text(anyascii.anyascii(pathFilenamePython.read_text(encoding='utf-8')[36:None]), encoding='ascii')
 	if sys.platform == 'linux':
 		commandBuild: list[str] = ['codon', 'build', '--exe', '--release', '--mcpu=native'
 			, '--fast-math', '--enable-unsafe-fp-math', '--disable-exceptions'
@@ -24,9 +26,10 @@ def toCodon(pathFilenamePython: Path) -> Path:
 		]
 
 		subprocess.run(commandBuild, check=False)
-		pathFilenameBinary = binaryStrip(pathFilenamePython.with_suffix(''))
+		pathFilenameBinary: Path = binaryStrip(pathFilenamePython.with_suffix(''))
 
-		sys.stdout.write(f"sudo systemd-run --unit={pathFilenameBinary.parent.name} --nice=-10 --property=CPUAffinity=0 {pathFilenameBinary}\n")
+		sys.stdout.write(f"sudo systemd-run --unit={pathFilenameBinary.name} --nice=-10 {pathFilenameBinary}\n")
+		sys.stdout.write(f"sudo nice -n -10 {pathFilenameBinary}\n")
 
 	else:
 		message: str = f"Python says {sys.platform = }, and I need 'linux'."

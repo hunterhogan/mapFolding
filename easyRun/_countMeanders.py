@@ -43,7 +43,7 @@ if __name__ == '__main__':
 		boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
 		# boxOf_n.extend(range(28, 33))
-		boxOf_n.extend(range(33, 38))
+		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 45))
 		# boxOf_n.extend(range(45, 50))
@@ -59,4 +59,5 @@ r"""
 
 title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\_countMeanders.py && title I'm done || title Error
 
+sudo nice -n -10 /home/hunte/mapFolding/.venv/bin/python -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on /home/hunte/mapFolding/easyRun/_countMeanders.py
 """

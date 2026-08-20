@@ -7,7 +7,6 @@ from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotal
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形NumPyInteger
-from numba import jit
 from numpy import bitwise_and, bitwise_left_shift, bitwise_or, bitwise_right_shift, bitwise_xor, greater, less_equal, multiply, subtract
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
@@ -156,24 +155,125 @@ def count(state: StateMeanders) -> StateMeanders:
 
 #================ analyze aligned ===== if 1 < bitsAlfa and 1 < bitsZulu =============================================
 		#=EndNotes##analyzeArcCodesAligned=
-		analyzeAligned(toPrepArea, bitsAlfa, bitsZulu)
+#-------- < * < 1 bitsAlfa < 1 bitsZulu --------------------
+		greater(bitsAlfa, 1, out=toPrepArea)
+
+		multiply(bitsZulu, toPrepArea, out=toPrepArea)
+		selectorGreaterThan1: ArrayBoolean = numpy.empty_like(toPrepArea, dtype=numpy.bool)
+		greater(toPrepArea, 1, out=selectorGreaterThan1)
+
+#-------- if bitsAlfaAtEven and not bitsZuluAtEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
+		bitwise_and(bitsZulu, 1, out=toPrepArea)
+
+		bitwise_xor(toPrepArea, 1, out=toPrepArea)
+		bitwise_or(bitsAlfa, toPrepArea, out=toPrepArea)
+		bitwise_and(toPrepArea, 1, out=toPrepArea)
+		bitwise_xor(toPrepArea, 1, out=toPrepArea)
+
+		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
+		arraySelectors: ArraySelector = numpy.flatnonzero(toPrepArea)
+
+		bitsAlfaStack: Array1D = bitsAlfa.copy()
+		bitsAlfaStack[arraySelectors] = flipTheExtra_0b1(bitsAlfaStack[arraySelectors])
+		del arraySelectors
+
+#-------- if bitsZuluAtEven and not bitsAlfaAtEven ------ #-------- ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ------------
+		bitwise_and(bitsAlfa, 1, out=toPrepArea)
+		bitwise_xor(toPrepArea, 1, out=toPrepArea)
+		bitwise_or(bitsZulu, toPrepArea, out=toPrepArea)
+		bitwise_and(toPrepArea, 1, out=toPrepArea)
+		bitwise_xor(toPrepArea, 1, out=toPrepArea)
+		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
+		arraySelectors: ArraySelector = numpy.flatnonzero(toPrepArea)
+
+#-------- bitsAlfaAtEven or bitsZuluAtEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
+		bitwise_and(bitsZulu, bitsAlfa, out=toPrepArea)
+		bitwise_xor(toPrepArea, 1, out=toPrepArea)
+
+		bitwise_and(selectorGreaterThan1, toPrepArea, out=toPrepArea)
+		del selectorGreaterThan1
+		bitwise_xor(toPrepArea, 1, out=toPrepArea)
+		selectorDisqualified: ArraySelector = numpy.flatnonzero(toPrepArea)
+
+		toPrepArea[:] = bitsZulu.copy()
+		toPrepArea[arraySelectors] = flipTheExtra_0b1(toPrepArea[arraySelectors])
+		del arraySelectors
+		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
+
+#-------- (bitsZulu >> 2 << 3 | bitsAlfa) >> 2 ---------- #-------- >> | << >> bitsZulu 2 3 bitsAlfa 2 ------------
+
+		bitwise_left_shift(toPrepArea, 3, out=toPrepArea)
+		bitwise_or(bitsAlfaStack, toPrepArea, out=toPrepArea)
+		del bitsAlfaStack
+		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
+
+		toPrepArea[selectorDisqualified] = 0
+		del selectorDisqualified
+
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
 #================== analyze bitsAlfa ====== (1 - (bitsAlfa & 1)) << 1 | bitsAlfa >> 2 | bitsZulu << 3 ========
-		analyzeBitsAlpha(arrayMeanders, toPrepArea, bitsAlfa, bitsZulu)
+		bitsAlfaStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
+#-------- >> | << | (<< - 1 & bitsAlfa 1 1) << bitsZulu 3 2 bitsAlfa 2 ----------
+		bitwise_and(bitsAlfa, 1, out=bitsAlfaStack)
+		subtract(1, bitsAlfaStack, out=bitsAlfaStack)
+		bitwise_left_shift(bitsAlfaStack, 1, out=bitsAlfaStack)
+
+		bitwise_left_shift(bitsZulu, 3, out=toPrepArea)
+
+		bitwise_or(bitsAlfaStack, toPrepArea, out=toPrepArea)
+		del bitsAlfaStack
+		bitwise_left_shift(toPrepArea, 2, out=toPrepArea)
+		bitwise_or(bitsAlfa, toPrepArea, out=toPrepArea)
+		bitwise_right_shift(toPrepArea, 2, out=toPrepArea)
+
+#-------- if 1 < bitsAlfa ------------ < 1 bitsAlfa -----
+		bitsAlfaStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
+		less_equal(bitsAlfa, 1, out=bitsAlfaStack)
+		arraySelectors: ArraySelector = numpy.flatnonzero(bitsAlfaStack)
+		del bitsAlfaStack
+		toPrepArea[arraySelectors] = 0
+		del arraySelectors
+
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
 #================== analyze bitsZulu ========== (1 - (bitsZulu & 1)) | bitsAlfa << 2 | bitsZulu >> 1 ============
-		analyzeBitsZulu(arrayMeanders, toPrepArea, bitsAlfa, bitsZulu)
+		bitsZuluStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
+#-------- >> | << | (- 1 & bitsZulu 1) << bitsAlfa 2 1 bitsZulu 1 ----------
+		bitwise_and(bitsZulu, 1, out=bitsZuluStack)
+		subtract(1, bitsZuluStack, out=bitsZuluStack)
+
+		bitwise_left_shift(bitsAlfa, 2, out=toPrepArea)
+
+		bitwise_or(bitsZuluStack, toPrepArea, out=toPrepArea)
+		del bitsZuluStack
+		bitwise_left_shift(toPrepArea, 1, out=toPrepArea)
+
+		bitwise_or(bitsZulu, toPrepArea, out=toPrepArea)
+		bitwise_right_shift(toPrepArea, 1, out=toPrepArea)
+
+#-------- if 1 < bitsZulu ------------- < 1 bitsZulu ------
+		bitsZuluStack: Array1D = numpy.empty_like(arrayMeanders[slicerArcCode])
+		less_equal(bitsZulu, 1, out=bitsZuluStack)
+		arraySelectors: ArraySelector = numpy.flatnonzero(bitsZuluStack)
+		del bitsZuluStack
+		toPrepArea[arraySelectors] = 0
+		del arraySelectors
+
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
 #================== analyze simple ======================= (bitsZulu << 1 | bitsAlfa) << 2 | 3 =======================
-		analyzeSimple(toPrepArea, bitsAlfa, bitsZulu)
+#-------- | << | bitsAlfa << bitsZulu 1 2 3 --------------
+		bitwise_left_shift(bitsZulu, 1, out=toPrepArea)
+		bitwise_or(bitsAlfa, toPrepArea, out=toPrepArea)
+		bitwise_left_shift(toPrepArea, 2, out=toPrepArea)
+		bitwise_or(toPrepArea, 3, out=toPrepArea)
+
 		state = recordAnalysis(arrayAnalyzed, state, toPrepArea, arrayMeanders)
 
+		del bitsAlfa, bitsZulu, toPrepArea, arrayWorkbench
 #================================================ aggregation ========================================================-
 
-		del bitsAlfa, bitsZulu, toPrepArea, arrayWorkbench
 		del arrayMeanders
 		goByeBye()
 		unique: UniqueInverseResult[形ArcCode] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
@@ -207,112 +307,6 @@ def count(state: StateMeanders) -> StateMeanders:
 		pathlib.Path('arrayPrepArea.mM').unlink()
 
 	return state
-
-# @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
-def analyzeSimple(toPrepArea: Array1D, bitsAlfa: Array1D, bitsZulu: Array1D) -> None:
-	#-------- | << | bitsAlfa << bitsZulu 1 2 3 --------------
-	toPrepArea[:] = bitwise_left_shift(bitsZulu, 形ArcCode(1))
-	toPrepArea[:] = bitwise_or(bitsAlfa, toPrepArea)
-	toPrepArea[:] = bitwise_left_shift(toPrepArea, 形ArcCode(2))
-	toPrepArea[:] = bitwise_or(toPrepArea, 形ArcCode(3))
-
-# @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
-def analyzeBitsZulu(arrayMeanders: ArrayGeneral, toPrepArea: Array1D, bitsAlfa: Array1D, bitsZulu: Array1D) -> None:
-	bitsZuluStack: Array1D = numpy.empty_like(arrayMeanders[..., 0])
-#-------- >> | << | (- 1 & bitsZulu 1) << bitsAlfa 2 1 bitsZulu 1 ----------
-	bitsZuluStack[:] = bitwise_and(bitsZulu, 形ArcCode(1))
-	bitsZuluStack[:] = subtract(形ArcCode(1), bitsZuluStack)
-
-	toPrepArea[:] = bitwise_left_shift(bitsAlfa, 形ArcCode(2))
-
-	toPrepArea[:] = bitwise_or(bitsZuluStack, toPrepArea)
-
-	toPrepArea[:] = bitwise_left_shift(toPrepArea, 形ArcCode(1))
-
-	toPrepArea[:] = bitwise_or(bitsZulu, toPrepArea)
-	toPrepArea[:] = bitwise_right_shift(toPrepArea, 形ArcCode(1))
-
-#-------- if 1 < bitsZulu ------------- < 1 bitsZulu ------
-	bitsZuluStack: Array1D = numpy.empty_like(arrayMeanders[..., 0])
-	bitsZuluStack[:] = less_equal(bitsZulu, 形ArcCode(1))
-	arraySelectors: ArraySelector = numpy.flatnonzero(bitsZuluStack)
-
-	toPrepArea[arraySelectors] = 形ArcCode(0)
-
-# @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
-def analyzeBitsAlpha(arrayMeanders: ArrayGeneral, toPrepArea: Array1D, bitsAlfa: Array1D, bitsZulu: Array1D) -> None:
-	bitsAlfaStack: Array1D = numpy.empty_like(arrayMeanders[..., 0])
-#-------- >> | << | (<< - 1 & bitsAlfa 1 1) << bitsZulu 3 2 bitsAlfa 2 ----------
-	bitsAlfaStack[:] = bitwise_and(bitsAlfa, 形ArcCode(1))
-	bitsAlfaStack[:] = subtract(形ArcCode(1), bitsAlfaStack)
-	bitsAlfaStack[:] = bitwise_left_shift(bitsAlfaStack, 形ArcCode(1))
-
-	toPrepArea[:] = bitwise_left_shift(bitsZulu, 形ArcCode(3))
-
-	toPrepArea[:] = bitwise_or(bitsAlfaStack, toPrepArea)
-
-	toPrepArea[:] = bitwise_left_shift(toPrepArea, 形ArcCode(2))
-	toPrepArea[:] = bitwise_or(bitsAlfa, toPrepArea)
-	toPrepArea[:] = bitwise_right_shift(toPrepArea, 形ArcCode(2))
-
-#-------- if 1 < bitsAlfa ------------ < 1 bitsAlfa -----
-	bitsAlfaStack: Array1D = numpy.empty_like(arrayMeanders[..., 0])
-	bitsAlfaStack[:] = less_equal(bitsAlfa, 形ArcCode(1))
-	arraySelectors: ArraySelector = numpy.flatnonzero(bitsAlfaStack)
-
-	toPrepArea[arraySelectors] = 形ArcCode(0)
-
-# @jit(cache=True, error_model='numpy', fastmath=True)
-def analyzeAligned(toPrepArea: Array1D, bitsAlfa: Array1D, bitsZulu: Array1D) -> None:
-	toPrepArea[:] = greater(bitsAlfa, 形ArcCode(1))
-#-------- < * < 1 bitsAlfa < 1 bitsZulu --------------------
-
-	toPrepArea[:] = multiply(bitsZulu, toPrepArea)
-	selectorGreaterThan1: ArrayBoolean = numpy.empty_like(toPrepArea, dtype=numpy.bool)
-	selectorGreaterThan1[:] = greater(toPrepArea, 形ArcCode(1))
-
-#-------- if bitsAlfaAtEven and not bitsZuluAtEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
-	toPrepArea[:] = bitwise_and(bitsZulu, 形ArcCode(1))
-
-	toPrepArea[:] = bitwise_xor(toPrepArea, 形ArcCode(1))
-	toPrepArea[:] = bitwise_or(bitsAlfa, toPrepArea)
-	toPrepArea[:] = bitwise_and(toPrepArea, 形ArcCode(1))
-	toPrepArea[:] = bitwise_xor(toPrepArea, 形ArcCode(1))
-
-	toPrepArea[:] = bitwise_and(selectorGreaterThan1, toPrepArea)
-	arraySelectors: ArraySelector = numpy.flatnonzero(toPrepArea)
-
-	bitsAlfaStack: Array1D = bitsAlfa.copy()
-	bitsAlfaStack[arraySelectors] = flipTheExtra_0b1(bitsAlfaStack[arraySelectors])
-
-#-------- if bitsZuluAtEven and not bitsAlfaAtEven ------ #-------- ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ------------
-	toPrepArea[:] = bitwise_and(bitsAlfa, 形ArcCode(1))
-	toPrepArea[:] = bitwise_xor(toPrepArea, 形ArcCode(1))
-	toPrepArea[:] = bitwise_or(bitsZulu, toPrepArea)
-	toPrepArea[:] = bitwise_and(toPrepArea, 形ArcCode(1))
-	toPrepArea[:] = bitwise_xor(toPrepArea, 形ArcCode(1))
-	toPrepArea[:] = bitwise_and(selectorGreaterThan1, toPrepArea)
-	arraySelectors: ArraySelector = numpy.flatnonzero(toPrepArea)
-
-#-------- bitsAlfaAtEven or bitsZuluAtEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
-	toPrepArea[:] = bitwise_and(bitsZulu, bitsAlfa)
-	toPrepArea[:] = bitwise_xor(toPrepArea, 形ArcCode(1))
-
-	toPrepArea[:] = bitwise_and(selectorGreaterThan1, toPrepArea)
-	toPrepArea[:] = bitwise_xor(toPrepArea, 形ArcCode(1))
-	selectorDisqualified: ArraySelector = numpy.flatnonzero(toPrepArea)
-
-	toPrepArea[:] = bitsZulu.copy()
-	toPrepArea[arraySelectors] = flipTheExtra_0b1(toPrepArea[arraySelectors])
-	toPrepArea[:] = bitwise_right_shift(toPrepArea, 形ArcCode(2))
-
-#-------- (bitsZulu >> 2 << 3 | bitsAlfa) >> 2 ---------- #-------- >> | << >> bitsZulu 2 3 bitsAlfa 2 ------------
-
-	toPrepArea[:] = bitwise_left_shift(toPrepArea, 形ArcCode(3))
-	toPrepArea[:] = bitwise_or(bitsAlfaStack, toPrepArea)
-	toPrepArea[:] = bitwise_right_shift(toPrepArea, 形ArcCode(2))
-
-	toPrepArea[selectorDisqualified] = 形ArcCode(0)
 
 def doTheNeedful(state: StateMeanders) -> int:
 	"""Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
