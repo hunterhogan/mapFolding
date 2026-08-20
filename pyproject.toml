@@ -40,7 +40,7 @@ classifiers = [
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
   "Z0Z_tools>=3.2.0",
-  "astToolkit>=0.11.4",
+  "astToolkit>=0.11.6",
   "gmpy2",
   "hunterMakesPy>=0.7.3",
   "more_itertools",
@@ -51,7 +51,7 @@ dependencies = [
   "tqdm",
   "urllib3",
 ]
-optional-dependencies = { codon = ["anyascii", "autoflake", "codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'", "python-minifier"], development = [
+optional-dependencies = { codon = ["anyascii", "codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'"], development = [
   "gmpy2-stubs",
   "google-api-python-client-stubs>=1.35.0",
   "google-auth-oauthlib-stubs>=1.2.0",

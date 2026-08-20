@@ -1,7 +1,7 @@
 #=SIN=
 # DEVELOPMENT module.
 # ruff: file-ignore[undocumented-public-class]
-"""Count the six Sawada-Li stamp-folding and meander sequences.
+"""Count the six permutation stamp-folding and meander sequences.
 
 (AI generated docstring)
 
@@ -89,6 +89,27 @@ class StateStampMeander:
 	n: int
 	total: int = 0
 	gap首Permutation: int = empty
+
+	crossingAfter: int = empty
+	endLeft: int = empty
+	endRight: int = empty
+	gapEnds: GapEnds = dataclasses.field(default_factory=GapEnds)
+	gapLeftΩ: int = empty
+	gapLeft首: int = empty
+	gapRightΩ: int = empty
+	gapRight首: int = empty
+	gapsSource: GapEnds = dataclasses.field(default_factory=GapEnds)
+	gapsTarget: GapEnds = dataclasses.field(default_factory=GapEnds)
+	gapWindStopVisited: bool = False
+	node: Node = dataclasses.field(default_factory=Node)
+	side: Side = sideLeft
+	wind: int = empty
+	次gap: int = empty
+	次gapAfter: int = empty
+	次gapPrior: int = empty
+	次node: int = empty
+	次nodeAfter: int = empty
+
 	boxOfGaps: tuple[Gap, ...] = dataclasses.field(init=False)
 	boxOfNodes: tuple[Node, ...] = dataclasses.field(init=False)
 
@@ -373,7 +394,7 @@ lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
 }
 
 def doTheNeedful(oeisID: OEISid, n: int) -> int:
-	"""Count one Sawada-Li sequence at order `n` [1].
+	"""Count one permutation sequence at order `n` [1].
 
 	(AI generated docstring)
 
@@ -406,7 +427,7 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		https://doi.org/10.37236/2404
 	"""
 	if oeisID not in lookupSettings:
-		message: str = f'I received `{oeisID = }`, but the Sawada-Li algorithm supports only {tuple(lookupSettings)}.'
+		message: str = f'I received `{oeisID = }`, but the permutation algorithm supports only {tuple(lookupSettings)}.'
 		raise ValueError(message)
 
 	generationMode, mode = lookupSettings[oeisID]

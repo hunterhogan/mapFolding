@@ -5,9 +5,7 @@ from astToolkit import Be, Grab, Make, NodeChanger, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis, Settings形
-from mapFolding.kitAST.linux import toCodon
-from mapFolding.kitAST.RecipeJob import (
-	addLauncher, customizeDatatypeViaImport, fromMapShape, move_arg2FunctionDefDOTbodyAndAssignInitialValues, RecipeJobTheorem2, staticValues)
+from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, setDatatypeViaImport, staticValues
 from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -45,19 +43,16 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 	ingredientsModule = IngredientsModule()
 	addLauncher(ingredientsModule, ingredientsCount, job)
 	ingredientsCount = variableCompatibility(ingredientsCount, job)
-	ingredientsCount = move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsCount, job)
+	ingredientsCount = move_argToBody(ingredientsCount, job)
 
-	ingredientsCount, ingredientsModule = customizeDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfSettings形)
-
-	ingredientsCount.imports.removeImportFromModule('mapFolding.dataBaskets')
+	ingredientsCount, ingredientsModule = setDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfSettings形)
 
 	ingredientsModule.appendIngredientsFunction(ingredientsCount)
 
-	Path(job.pathFilenameModule).parent.mkdir(parents=True, exist_ok=True)
-	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.packageIdentifier or '')
-	sys.stdout.write(f"python {Path(job.pathFilenameModule)}\n")
+	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.identifierPackage or '')
 
 	if sys.platform == 'linux':
+		from mapFolding.kitAST.linux import toCodon  # ruff: ignore[import-outside-top-level]
 		toCodon(Path(job.pathFilenameModule))
 
 	return job.pathFilenameModule

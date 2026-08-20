@@ -299,7 +299,6 @@ def A208357(n: int, f: LiteralString | None = None) -> int:
 			countTotal = _A005316((2 * n) + 1) ** 2
 	return countTotal
 
-# TODO typo on 39 of https://oeis.org/A217310, submitted.
 def A217310(n: int, f: LiteralString | None = None) -> int:
 	match f:
 		case 'A223093':

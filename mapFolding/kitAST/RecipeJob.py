@@ -1,13 +1,15 @@
 """Configuration by dataclass."""
 from __future__ import annotations
 
-from astToolkit import Be, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
+from astToolkit import Be, Make, NodeChanger, NodeTourist, Then
+from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST import IfThis, Settings形
 from mapFolding.kitAST.dataclasses import shatterDataclass
+from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMapFolding, lookupMapFoldingEstimates
 from mapFolding.kitFilesystem import makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
@@ -46,15 +48,15 @@ class RecipeJobTheorem2:
 		Parsed AST of the source module containing the generic algorithm.
 	sourceCountCallable : str = 'count'
 		Name of the counting function to extract.
-	sourceLogicalPathModuleDataclass : identifierDotAttribute
+	logicalPathModuleDataclassSource : identifierDotAttribute
 		Logical path to the dataclass module.
 	sourceDataclassIdentifier : str = 'StateMapFolding'
 		Name of the source dataclass.
-	sourceDataclassInstance : str
+	identifierDataclassInstanceSource : str
 		Instance identifier for the dataclass.
-	sourcePathPackage : PurePosixPath | None
+	pathPackageSource : PurePosixPath | None
 		Path to the source package.
-	sourcePackageIdentifier : str | None
+	identifierPackageSource : str | None
 		Name of the source package.
 	pathPackage : PurePosixPath | None = None
 		Override path for the target package.
@@ -99,16 +101,16 @@ class RecipeJobTheorem2:
 	identifierCallableSource: str = defaultMapFolding['function']['counting']
 	"""Name of the counting function to extract."""
 
-	sourceLogicalPathModuleDataclass: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
+	logicalPathModuleDataclassSource: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
 	"""Logical path to the dataclass module."""
-	sourceDataclassIdentifier: str = defaultMapFolding['variable']['stateDataclass']
+	identifierDataclassSource: str = defaultMapFolding['variable']['stateDataclass']
 	"""Name of the source dataclass."""
-	sourceDataclassInstance: str = defaultMapFolding['variable']['stateInstance']
+	identifierDataclassInstanceSource: str = defaultMapFolding['variable']['stateInstance']
 	"""Instance identifier for the dataclass."""
 
-	sourcePathPackage: PurePosixPath | None = defaultMapFolding['filesystem']['sourcePackage']
+	pathPackageSource: PurePosixPath | None = defaultMapFolding['filesystem']['sourcePackage']
 	"""Path to the source package."""
-	sourcePackageIdentifier: str | None = settingsPackage.identifierPackage
+	identifierPackageSource: str | None = settingsPackage.identifierPackage
 	"""Name of the source package."""
 
 #-------- Filesystem, names of physical objects ------------------------------------------
@@ -122,25 +124,25 @@ class RecipeJobTheorem2:
 	"""Path for writing fold count results."""
 
 #-------- Logical identifiers, as opposed to physical identifiers ------------------------
-	packageIdentifier: str = ''
+	identifierPackage: str = ''
 	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
 	"""Logical path root; probably corresponds to physical filesystem directory."""
-	moduleIdentifier: str | None = None
+	identifierModule: str | None = None
 	"""Target module identifier."""
 	identifierCallable: str = identifierCallableSource
 	"""Name of the counting function in generated module."""
-	identifierDataclass: str | None = sourceDataclassIdentifier
+	identifierDataclass: str | None = identifierDataclassSource
 	"""Target dataclass identifier."""
-	identifierDataclassInstance: str | None = sourceDataclassInstance
+	identifierDataclassInstance: str | None = identifierDataclassInstanceSource
 	"""Target dataclass instance identifier."""
-	logicalPathModuleDataclass: identifierDotAttribute | None = sourceLogicalPathModuleDataclass
+	logicalPathModuleDataclass: identifierDotAttribute | None = logicalPathModuleDataclassSource
 	"""Logical path to target dataclass module."""
 	totalFoldsMultiplier: int = 1
 
 #-------- Datatypes ------------------------------------------
 
-	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathINFIX: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:
+	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathInfix: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:
 		"""Construct a complete file path from component parts.
 
 		Parameters
@@ -160,17 +162,10 @@ class RecipeJobTheorem2:
 			Complete file path as a `PurePosixPath` object.
 
 		"""
-		if pathRoot is None:
-			pathRoot = self.pathPackage or PurePosixPath(Path.cwd())
-		if logicalPathINFIX:
-			whyIsThisStillAThing: list[str] = logicalPathINFIX.split('.')
-			pathRoot = pathRoot.joinpath(*whyIsThisStillAThing)
-		if filenameStem is None:
-			filenameStem = raiseIfNone(self.moduleIdentifier)
-		if fileExtension is None:
-			fileExtension = self.fileExtension
-		filename: str = filenameStem + fileExtension
-		return pathRoot.joinpath(filename)
+		pathRoot = pathRoot or self.pathPackage or PurePosixPath(Path.cwd())
+		identifierModule = filenameStem or raiseIfNone(self.identifierModule)
+		fileExtension = fileExtension or self.fileExtension
+		return PurePosixPath(getPathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension))
 
 	@property
 	def pathFilenameModule(self) -> PurePosixPath:
@@ -189,7 +184,7 @@ class RecipeJobTheorem2:
 		if self.pathModule is None:
 			return self._makePathFilename()
 		else:
-			return self._makePathFilename(pathRoot=self.pathModule, logicalPathINFIX=None)
+			return self._makePathFilename(pathRoot=self.pathModule, logicalPathInfix=None)
 
 	def __post_init__(self) -> None:
 		"""Initialize computed fields and validate configuration after dataclass creation.
@@ -208,8 +203,8 @@ class RecipeJobTheorem2:
 		if self.pathFilenameTotalFolds is None:
 			self.pathFilenameTotalFolds = pathFilenameTotalFolds
 
-		if self.moduleIdentifier is None:
-			self.moduleIdentifier = self.pathFilenameTotalFolds.stem
+		if self.identifierModule is None:
+			self.identifierModule = self.pathFilenameTotalFolds.stem
 
 		if self.shatteredDataclass is None and self.logicalPathModuleDataclass and self.identifierDataclass and self.identifierDataclassInstance:
 			self.shatteredDataclass = shatterDataclass(self.logicalPathModuleDataclass, self.identifierDataclass, self.identifierDataclassInstance)
@@ -262,7 +257,7 @@ def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> 
 			pass
 	return Ima___Assign
 
-def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
+def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Convert function parameters into initialized variables with concrete values.
 
 	(AI generated docstring)
@@ -284,7 +279,7 @@ def move_arg2FunctionDefDOTbodyAndAssignInitialValues(ingredientsFunction: Ingre
 	----------
 	ingredientsFunction : IngredientsFunction
 		The function to transform.
-	job : RecipeJobTheorem2Numba
+	job : RecipeJobTheorem2
 		Recipe containing concrete values for parameters and field metadata.
 
 	Returns
@@ -399,7 +394,7 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 #================== Datatypes =======================================================================
 
 # TODO Use this concept in general modules, not just custom jobs.
-def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
+def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
 	"""Customize data types in the given ingredients by adjusting imports.
 
 	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
@@ -418,7 +413,8 @@ def customizeDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredi
 		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
 	"""
 	for datatypeConfig in boxOfSettings形:
-		ingredientsFunction.imports.removeImportFrom(datatypeConfig.typeModule, None, datatypeConfig.datatypeIdentifier)
+		ingredientsFunction.imports.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
+		ingredientsModule.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
 		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
 
 	return ingredientsFunction, ingredientsModule

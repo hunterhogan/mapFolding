@@ -103,7 +103,7 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString) -> None:
 	actual: int = countMeanders(kind, n, flow, None)
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
-@pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136-n3')])
+@pytest.mark.parametrize('mapShape', [pytest.param((2, 4), id='p2x4')])
 def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Path) -> None:
 	"""Test dynamic code generation and execution for computational modules.
 
@@ -130,7 +130,7 @@ def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Pat
 	pathFilenameModule: Path = pathRootJobDEFAULTTesting / 'jobNumba.py'
 	pathFilenameTotalFolds: Path = pathFilenameModule.with_suffix('.totalFoldsTesting')
 
-	recipeJobTheorem2 = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), moduleIdentifier=pathFilenameModule.stem
+	recipeJobTheorem2 = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), identifierModule=pathFilenameModule.stem
 		, pathFilenameTotalFolds=PurePosixPath(pathFilenameTotalFolds), totalFoldsMultiplier=state.totalLeaves)
 	spicesJobNumba = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
 	makeJobNumba(recipeJobTheorem2, spicesJobNumba)

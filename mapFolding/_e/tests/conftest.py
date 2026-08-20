@@ -44,7 +44,7 @@ def path_tmpTesting(tmp_path: Path) -> Path:
 def arrayAlbum2上nDimensional(totalDimensions: int) -> NDArray[numpy.uint8]:
 	return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
 
-@pytest.fixture(params=(None,))
+@pytest.fixture(params=(0.75,))
 def CPUlimit(request: pytest.FixtureRequest) -> Limitation:
 	return request.param
 
