@@ -24,6 +24,7 @@ References
 from __future__ import annotations
 
 from itertools import repeat, starmap
+from mapFolding.algorithms.p000682 import doTheNeedful as do
 from mapFolding.theTypes import OEISid
 from typing import TYPE_CHECKING
 import dataclasses
@@ -36,9 +37,9 @@ if TYPE_CHECKING:
 - gapWindStop
 - gapWindStopVisited
 - sideWindStop
-- endLeft, endRight
+- end[left], end[right]
 - gap首Permutation
-- permutationPrior, permutationAfter
+- permutationLeft, permutationRight
 """
 
 # TODO try forcing leaf2 before leaf4 and total*2.
@@ -46,18 +47,32 @@ if TYPE_CHECKING:
 empty: int = 0
 
 type Side = Literal[0, 1]
-sideLeft: Side = 0
-sideRight: Side = 1
+left: Side = 0
+right: Side = 1
+
+here: int = 2
 
 @dataclasses.dataclass(slots=True)
 class Gap:
-	endLeft: int = empty
-	endRight: int = empty
-	toLeft: int = empty
-	toRight: int = empty
+	end: list[int] = dataclasses.field(default_factory=list[int])
+	to: list[int] = dataclasses.field(default_factory=list[int])
+	permutation: list[int] = dataclasses.field(default_factory=list[int])
 	nodeAfter: int = empty
-	permutationPrior: int = empty
-	permutationAfter: int = empty
+
+	def __post_init__(self) -> None:
+		if not self.end:
+			# DEVELOPMENT The following statements are self-verifying and self-documenting.
+			self.end.extend([left, right])
+			self.end[left] = empty
+			self.end[right] = empty
+		if not self.to:
+			self.to.extend([left, right])
+			self.to[left] = empty
+			self.to[right] = empty
+		if not self.permutation:
+			self.permutation.extend([left, right])
+			self.permutation[left] = empty
+			self.permutation[right] = empty
 
 @dataclasses.dataclass(slots=True)
 class GapEnds:
@@ -67,11 +82,19 @@ class GapEnds:
 @dataclasses.dataclass(slots=True)
 class GapEndsLeft(GapEnds):
 	@property
+	def inside(self) -> int:
+		return self.Ω
+
+	@property
 	def stop(self) -> int:
 		return self.首
 
 @dataclasses.dataclass(slots=True)
 class GapEndsRight(GapEnds):
+	@property
+	def inside(self) -> int:
+		return self.首
+
 	@property
 	def stop(self) -> int:
 		return self.Ω
@@ -82,32 +105,32 @@ class Node:
 	gapsRight: GapEndsRight = dataclasses.field(default_factory=GapEndsRight)
 	gaps: dict[Side, GapEndsLeft | GapEndsRight] = dataclasses.field(init=False)
 	gapWindStop: int = empty
-	sideWindStop: Side = sideLeft
+	sideWindStop: Side = left
 
 	def __post_init__(self) -> None:
-		self.gaps = {sideLeft: self.gapsLeft, sideRight: self.gapsRight}
+		self.gaps = {left: self.gapsLeft, right: self.gapsRight}
 
 @dataclasses.dataclass(slots=True)
 class StateStampMeander:
 	n: int
 	total: int = 0
-	gap首Permutation: int = empty
 
 	crossingAfter: int = 2
-	endLeft: int = empty
-	endRight: int = empty
-	gapEnds: GapEnds = dataclasses.field(default_factory=GapEnds)
+	gap首Permutation: int = empty
+	side: Side = left
+	wind: int = 0
+
 	gapsSource: GapEnds = dataclasses.field(default_factory=GapEnds)
 	gapsTarget: GapEnds = dataclasses.field(default_factory=GapEnds)
 	gapWindStopVisited: bool = False
-	side: Side = sideLeft
-	wind: int = 0
-	次gap: int = empty
-	次gapRight: int = empty
-	次gapLeft: int = empty
+
 	次node: int = 0
 	次nodeAfter: int = empty
 
+	次gap: list[int] = dataclasses.field(default_factory=list[int])
+	gap: list[GapEnds | GapEndsLeft | GapEndsRight] = dataclasses.field(default_factory=list[GapEnds | GapEndsLeft | GapEndsRight])
+	end: list[int] = dataclasses.field(default_factory=list[int])
+	gapEnds: GapEnds | GapEndsLeft | GapEndsRight = dataclasses.field(default_factory=GapEnds)
 	boxOfGaps: tuple[Gap, ...] = dataclasses.field(init=False)
 	boxOfNodes: tuple[Node, ...] = dataclasses.field(init=False)
 
@@ -119,6 +142,19 @@ class StateStampMeander:
 		totalDataStructures: int = 2 * self.n + 1
 		self.boxOfGaps = tuple(starmap(Gap, repeat((), totalDataStructures)))
 		self.boxOfNodes = tuple(starmap(Node, repeat((), totalDataStructures)))
+		if not self.end:
+			self.end.extend([left, right])
+			self.end[left] = empty
+			self.end[right] = empty
+		if not self.gap:
+			self.gap.extend([GapEndsLeft(), GapEndsRight()])
+			self.gap[left] = GapEndsLeft()
+			self.gap[right] = GapEndsRight()
+		if not self.次gap:
+			self.次gap.extend([left, right, here])
+			self.次gap[left] = empty
+			self.次gap[right] = empty
+			self.次gap[here] = empty
 
 def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
 	if state.n < state.crossingAfter:
@@ -126,20 +162,20 @@ def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
 			state.total += 1
 	elif mode.meanders and ((state.n - state.crossingAfter) <= state.wind):
 		state.side = state.boxOfNodes[state.次node].sideWindStop
-		state.次gap = state.boxOfNodes[state.次node].gapWindStop
+		state.次gap[here] = state.boxOfNodes[state.次node].gapWindStop
 		state.gapWindStopVisited = False
 		cross(state, mode=mode)
 	else:
 		crossingAfter: int = state.crossingAfter
 		次node: int = state.次node
 		wind: int = state.wind
-		state.side = sideLeft
+		state.side = left
 		visitGaps(state, mode)
 		if not mode.symmetricSemiMeanders or (crossingAfter != 2):
 			state.crossingAfter = crossingAfter
 			state.次node = 次node
 			state.wind = wind
-			state.side = sideRight
+			state.side = right
 			visitGaps(state, mode)
 	return state
 
@@ -154,12 +190,12 @@ def visitGaps(state: StateStampMeander, mode: SettingsMode) -> None:
 	gapWindStopVisited: bool = False
 
 	while 次gap:
-		次gapRight: int = state.boxOfGaps[次gap].toRight
+		次gapRight: int = state.boxOfGaps[次gap].to[right]
 		state.crossingAfter = crossingAfter
 		state.次node = 次node
 		state.wind = wind
 		state.side = side
-		state.次gap = 次gap
+		state.次gap[here] = 次gap
 		state.gapWindStopVisited = gapWindStopVisited
 		cross(state, mode=mode)
 		gapWindStopVisited = gapWindStopVisited or (次gap == node.gapWindStop)
@@ -169,70 +205,81 @@ def visitGaps(state: StateStampMeander, mode: SettingsMode) -> None:
 
 def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 	wind: int = state.wind
-	次gap: int = state.次gap
+	次gap: int = state.次gap[here]
 
 	node: Node = state.boxOfNodes[state.次node]
 	gap: Gap = state.boxOfGaps[次gap]
-	次gapRight: int = gap.toRight
-	次gapLeft: int = gap.toLeft
+	次gapRight: int = gap.to[right]
+	次gapLeft: int = gap.to[left]
 	次nodeAfter: int = gap.nodeAfter
 	nodeAfter: Node = state.boxOfNodes[次nodeAfter]
 	gapWindStopΩ: int = nodeAfter.gapWindStop
 	sideWindStopΩ: Side = nodeAfter.sideWindStop
+
 	次nodeLeft: int = 2 * state.crossingAfter - 1
 	次nodeRight: int = 2 * state.crossingAfter
+
 	nodeLeft: Node = state.boxOfNodes[次nodeLeft]
 	nodeRight: Node = state.boxOfNodes[次nodeRight]
 
 	nodeLeft.gapWindStop = empty
-	nodeLeft.sideWindStop = sideLeft
+	nodeLeft.sideWindStop = left
 	nodeRight.gapWindStop = empty
-	nodeRight.sideWindStop = sideLeft
+	nodeRight.sideWindStop = left
 
-	if state.side == sideLeft:
+	if state.side == left:
 		if mode.folds and (wind == 0) and (次gap == node.gaps[state.side].stop):
 			if nodeAfter.gaps[state.side].首:
-				setGapEnds(nodeAfter, empty, empty, nodeAfter.gaps[state.side].stop, nodeAfter.gaps[state.side].Ω)
-
-			state.次gap = node.gaps[state.side ^ 1].stop
+				state.gap[state.side].首 = empty
+				state.gap[state.side].Ω = empty
+				state.gap[state.side ^ 1].首 = nodeAfter.gaps[state.side].首
+				state.gap[state.side ^ 1].Ω = nodeAfter.gaps[state.side].Ω
+				setGapEnds(state, nodeAfter)
+			state.次gap[here] = node.gaps[state.side ^ 1].stop
 			state.gapsSource = node.gaps[state.side ^ 1]
 			state.gapsTarget = nodeAfter.gaps[state.side ^ 1]
-
-			state.次gapLeft = nodeAfter.gaps[state.side ^ 1].stop
-			state.次gapRight = empty
-
+			state.次gap[state.side] = nodeAfter.gaps[state.side ^ 1].stop
+			state.次gap[state.side ^ 1] = empty
 			state.次nodeAfter = 次nodeLeft
 			move(state)
 		elif node.gapWindStop == 次gap:
 			if (mode.meanders or mode.semiMeanders) and wind == 0:
 				nodeAfter.gapWindStop = 次nodeLeft
 				nodeAfter.sideWindStop = state.side
-		# DEVELOPMENT Note the difference from side = sideRight. But, the `or` test may be an unreachable test for the second side.
+		# DEVELOPMENT Note the difference from side = right. But, the `or` test may be an unreachable test for the second side.
 		elif state.gapWindStopVisited or node.sideWindStop == state.side ^ 1:
 			nodeAfter.gapWindStop = 次nodeLeft
-			nodeAfter.sideWindStop = sideLeft
+			nodeAfter.sideWindStop = state.side
 			nodeLeft.gapWindStop = node.gapWindStop
 			nodeLeft.sideWindStop = node.sideWindStop
 		else:
 			nodeAfter.gapWindStop = 次nodeRight
-			nodeAfter.sideWindStop = sideRight
+			nodeAfter.sideWindStop = state.side ^ 1
 			nodeRight.gapWindStop = node.gapWindStop
 			nodeRight.sideWindStop = state.side ^ 1
-
-		setGapEnds(nodeLeft, node.gapsLeft.stop, 次gapLeft, node.gapsRight.首, node.gapsRight.stop)
-		setGapEnds(nodeRight, empty, empty, 次gapRight, node.gapsLeft.Ω)
+		state.gap[state.side].首 = node.gaps[state.side].stop
+		state.gap[state.side].Ω = 次gapLeft
+		state.gap[state.side ^ 1].首 = node.gaps[state.side ^ 1].inside
+		state.gap[state.side ^ 1].Ω = node.gaps[state.side ^ 1].stop
+		setGapEnds(state, nodeLeft)
+		state.gap[state.side].首 = empty
+		state.gap[state.side].Ω = empty
+		state.gap[state.side ^ 1].首 = 次gapRight
+		state.gap[state.side ^ 1].Ω = node.gaps[state.side].inside
+		setGapEnds(state, nodeRight)
 	else:
 		if mode.folds and (wind == 0) and (次gap == node.gaps[state.side].stop):
 			if nodeAfter.gaps[state.side].首:
-				setGapEnds(nodeAfter, nodeAfter.gaps[state.side].首, nodeAfter.gaps[state.side].stop, empty, empty)
-
-			state.次gap = node.gaps[state.side ^ 1].stop
+				state.gap[state.side ^ 1].首 = nodeAfter.gaps[state.side].首
+				state.gap[state.side ^ 1].Ω = nodeAfter.gaps[state.side].Ω
+				state.gap[state.side].首 = empty
+				state.gap[state.side].Ω = empty
+				setGapEnds(state, nodeAfter)
+			state.次gap[here] = node.gaps[state.side ^ 1].stop
 			state.gapsSource = node.gaps[state.side ^ 1]
 			state.gapsTarget = nodeAfter.gaps[state.side ^ 1]
-
-			state.次gapLeft = empty
-			state.次gapRight = nodeAfter.gaps[state.side ^ 1].stop
-
+			state.次gap[state.side ^ 1] = empty
+			state.次gap[state.side] = nodeAfter.gaps[state.side ^ 1].stop
 			state.次nodeAfter = 次nodeRight
 			move(state)
 		elif node.gapWindStop == 次gap:
@@ -241,44 +288,53 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 				nodeAfter.sideWindStop = state.side
 		elif state.gapWindStopVisited:
 			nodeAfter.gapWindStop = 次nodeLeft
-			nodeAfter.sideWindStop = sideLeft
+			nodeAfter.sideWindStop = state.side ^ 1
 			nodeLeft.gapWindStop = node.gapWindStop
 			nodeLeft.sideWindStop = state.side ^ 1
 		else:
 			nodeAfter.gapWindStop = 次nodeRight
-			nodeAfter.sideWindStop = sideRight
+			nodeAfter.sideWindStop = state.side
 			nodeRight.gapWindStop = node.gapWindStop
 			nodeRight.sideWindStop = node.sideWindStop  # Not true: ... = side ^ 1
 
-		setGapEnds(nodeLeft, node.gapsRight.首, 次gapLeft, empty, empty)
-		setGapEnds(nodeRight, node.gapsLeft.stop, node.gapsLeft.Ω, 次gapRight, node.gapsRight.stop)
+		state.gap[state.side ^ 1].首 = node.gaps[state.side].inside
+		state.gap[state.side ^ 1].Ω = 次gapLeft
+		state.gap[state.side].首 = empty
+		state.gap[state.side].Ω = empty
+		setGapEnds(state, nodeLeft)
+		state.gap[state.side ^ 1].首 = node.gaps[state.side ^ 1].stop
+		state.gap[state.side ^ 1].Ω = node.gaps[state.side ^ 1].inside
+		state.gap[state.side].首 = 次gapRight
+		state.gap[state.side].Ω = node.gaps[state.side].stop
+		setGapEnds(state, nodeRight)
 
-	state.side = sideLeft
-	state.gapEnds = nodeAfter.gaps[state.side]
-	state.次gap = 次nodeLeft
-	state.endLeft = gap.endLeft
-	state.endRight = state.crossingAfter
-	state.次gapLeft = nodeAfter.gaps[state.side].Ω  # not GapEnds.stop
-	state.次gapRight = empty
+	side = left
+	state.gapEnds = nodeAfter.gaps[side]
+	state.次gap[here] = 次nodeLeft
+	state.end[side] = gap.end[side]
+	state.end[side ^ 1] = state.crossingAfter
+	state.次gap[side] = nodeAfter.gaps[side].Ω  # not GapEnds.stop
+	state.次gap[side ^ 1] = empty
 	state.次nodeAfter = 次nodeLeft
 	insert(state)
 	# TODO Why is an int not an int? Just like str?!
-	state.side ^= 1  # pyright: ignore[reportAttributeAccessIssue]
-	state.gapEnds = nodeAfter.gaps[state.side]
-	state.次gap = 次nodeRight
-	state.endLeft = state.crossingAfter
-	state.endRight = gap.endRight
-	state.次gapLeft = empty
-	state.次gapRight = nodeAfter.gaps[state.side].首  # not GapEnds.stop
+
+	side ^= 1  # pyright: ignore[reportAttributeAccessIssue]
+	state.gapEnds = nodeAfter.gaps[side]
+	state.次gap[here] = 次nodeRight
+	state.end[side ^ 1] = state.crossingAfter
+	state.end[side] = gap.end[side]
+	state.次gap[side ^ 1] = empty
+	state.次gap[side] = nodeAfter.gaps[side].首  # not GapEnds.stop
 	state.次nodeAfter = 次nodeRight
 	insert(state)
 
 	if 次gapRight:
-		state.boxOfGaps[次gapRight].toLeft = empty
+		state.boxOfGaps[次gapRight].to[left] = empty
 	if 次gapLeft:
-		state.boxOfGaps[次gapLeft].toRight = empty
+		state.boxOfGaps[次gapLeft].to[right] = empty
 
-	state.次gap = 次gap
+	state.次gap[here] = 次gap
 	updatePermutation(state)
 
 	state.crossingAfter += 1
@@ -291,21 +347,21 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 		state.wind = wind + 1
 	count(state, mode)
 
-	state.次gap = 次gap
+	state.次gap[here] = 次gap
 	restorePermutation(state)
 
 	if 次gapRight:
-		state.boxOfGaps[次gapRight].toLeft = 次gap
+		state.boxOfGaps[次gapRight].to[left] = 次gap
 	if 次gapLeft:
-		state.boxOfGaps[次gapLeft].toRight = 次gap
+		state.boxOfGaps[次gapLeft].to[right] = 次gap
 
-	state.side = sideLeft
+	state.side = left
 	state.gapEnds = nodeAfter.gaps[state.side]
-	state.次gap = 次nodeLeft
+	state.次gap[here] = 次nodeLeft
 	remove(state)
 	state.side ^= 1  # pyright: ignore[reportAttributeAccessIssue]
 	state.gapEnds = nodeAfter.gaps[state.side]
-	state.次gap = 次nodeRight
+	state.次gap[here] = 次nodeRight
 	remove(state)
 
 	nodeAfter.gapWindStop = gapWindStopΩ
@@ -313,72 +369,55 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 
 	if mode.folds and (wind == 0):
 		state.次nodeAfter = 次nodeAfter
-		state.side = sideLeft
-		if 次gap == node.gaps[state.side].stop:
-			state.side ^= 1  # pyright: ignore[reportAttributeAccessIssue]
-			state.次gap = nodeAfter.gaps[state.side].stop
-			state.gapsSource = nodeAfter.gaps[state.side]
-			state.gapsTarget = node.gaps[state.side]
-
-			state.次gapLeft = node.gaps[state.side].stop
-			state.次gapRight = empty
-
-			move(state)
-
-		state.side = sideRight
-		if 次gap == node.gaps[state.side].stop:
-			state.side ^= 1  # pyright: ignore[reportAttributeAccessIssue]
-			state.次gap = nodeAfter.gaps[state.side].stop
-			state.gapsSource = nodeAfter.gaps[state.side]
-			state.gapsTarget = node.gaps[state.side]
-
-			state.次gapLeft = empty
-			state.次gapRight = node.gaps[state.side].stop
-
-			move(state)
+		for side in (left, right):
+			if 次gap == node.gaps[side].stop:
+				state.次gap[here] = nodeAfter.gaps[side ^ 1].stop  # pyright: ignore[reportArgumentType]
+				state.gapsSource = nodeAfter.gaps[side ^ 1]  # pyright: ignore[reportArgumentType]
+				state.gapsTarget = node.gaps[side ^ 1]  # pyright: ignore[reportArgumentType]
+				state.次gap[side] = node.gaps[side ^ 1].stop  # pyright: ignore[reportArgumentType]
+				state.次gap[side ^ 1] = empty
+				move(state)
 
 def insert(state: StateStampMeander) -> None:
-	if state.次gapLeft:
-		state.boxOfGaps[state.次gapLeft].toRight = state.次gap
+	side = left
+	if state.次gap[side]:
+		state.boxOfGaps[state.次gap[side]].to[side ^ 1] = state.次gap[here]
 	else:
-		state.gapEnds.首 = state.次gap
+		state.gapEnds.首 = state.次gap[here]
 
-	if state.次gapRight:
-		state.boxOfGaps[state.次gapRight].toLeft = state.次gap
+	side = right
+	if state.次gap[side]:
+		state.boxOfGaps[state.次gap[side]].to[side ^ 1] = state.次gap[here]
 	else:
-		state.gapEnds.Ω = state.次gap
+		state.gapEnds.Ω = state.次gap[here]
 
-	state.boxOfGaps[state.次gap].endLeft = state.endLeft
-	state.boxOfGaps[state.次gap].endRight = state.endRight
-	state.boxOfGaps[state.次gap].toLeft = state.次gapLeft
-	state.boxOfGaps[state.次gap].toRight = state.次gapRight
-	state.boxOfGaps[state.次gap].nodeAfter = state.次nodeAfter
+	state.boxOfGaps[state.次gap[here]].end[left] = state.end[left]
+	state.boxOfGaps[state.次gap[here]].end[right] = state.end[right]
+	state.boxOfGaps[state.次gap[here]].to[left] = state.次gap[left]
+	state.boxOfGaps[state.次gap[here]].to[right] = state.次gap[right]
+	state.boxOfGaps[state.次gap[here]].nodeAfter = state.次nodeAfter
 
 def remove(state: StateStampMeander) -> None:
-	if state.boxOfGaps[state.次gap].toRight:
-		state.boxOfGaps[state.boxOfGaps[state.次gap].toRight].toLeft = empty
+	side = left
+	if state.boxOfGaps[state.次gap[here]].to[side]:
+		state.boxOfGaps[state.boxOfGaps[state.次gap[here]].to[side]].to[side ^ 1] = empty
 	else:
-		state.gapEnds.Ω = state.boxOfGaps[state.次gap].toLeft
+		state.gapEnds.首 = state.boxOfGaps[state.次gap[here]].to[side ^ 1]
 
-	if state.boxOfGaps[state.次gap].toLeft:
-		state.boxOfGaps[state.boxOfGaps[state.次gap].toLeft].toRight = empty
+	side = right
+	if state.boxOfGaps[state.次gap[here]].to[side]:
+		state.boxOfGaps[state.boxOfGaps[state.次gap[here]].to[side]].to[side ^ 1] = empty
 	else:
-		state.gapEnds.首 = state.boxOfGaps[state.次gap].toRight
+		state.gapEnds.Ω = state.boxOfGaps[state.次gap[here]].to[side ^ 1]
 
-def setGapEnds(node: Node, gapLeft首: int, gapLeftΩ: int, gapRight首: int, gapRightΩ: int) -> None:
-	if gapLeft首 and gapLeftΩ:
-		node.gapsLeft.首 = gapLeft首
-		node.gapsLeft.Ω = gapLeftΩ
-	else:
-		node.gapsLeft.首 = empty
-		node.gapsLeft.Ω = empty
-
-	if gapRight首 and gapRightΩ:
-		node.gapsRight.首 = gapRight首
-		node.gapsRight.Ω = gapRightΩ
-	else:
-		node.gapsRight.首 = empty
-		node.gapsRight.Ω = empty
+def setGapEnds(state: StateStampMeander, node: Node) -> None:
+	for side in (left, right):
+		if not state.gap[side].首 or not state.gap[side].Ω:
+			node.gaps[side].首 = empty
+			node.gaps[side].Ω = empty
+		else:
+			node.gaps[side].首 = state.gap[side].首
+			node.gaps[side].Ω = state.gap[side].Ω
 
 #================== Mode-specific functions ================================================================
 
@@ -387,38 +426,40 @@ def move(state: StateStampMeander) -> None:
 	state.gapEnds = state.gapsSource
 	remove(state)
 	state.gapEnds = state.gapsTarget
-	state.endLeft = state.boxOfGaps[state.次gap].endLeft
-	state.endRight = state.boxOfGaps[state.次gap].endRight
+	state.end[left] = state.boxOfGaps[state.次gap[here]].end[left]
+	state.end[right] = state.boxOfGaps[state.次gap[here]].end[right]
 	insert(state)
 
 def restorePermutation(state: StateStampMeander) -> None:
-	次gapLeft: int = state.boxOfGaps[state.次gap].permutationPrior
-	次gapRight: int = state.boxOfGaps[state.次gap].permutationAfter
+	次gapLeft: int = state.boxOfGaps[state.次gap[here]].permutation[left]
+	次gapRight: int = state.boxOfGaps[state.次gap[here]].permutation[right]
 
 	if 次gapLeft:
-		state.boxOfGaps[次gapLeft].permutationAfter = state.次gap
+		state.boxOfGaps[次gapLeft].permutation[right] = state.次gap[here]
 	else:
-		state.gap首Permutation = state.次gap
+		state.gap首Permutation = state.次gap[here]
+
 	if 次gapRight:
-		state.boxOfGaps[次gapRight].permutationPrior = state.次gap
+		state.boxOfGaps[次gapRight].permutation[left] = state.次gap[here]
 
 def updatePermutation(state: StateStampMeander) -> None:
-	次permutationPrior: int = state.boxOfGaps[state.次gap].permutationPrior
-	次permutationAfter: int = state.boxOfGaps[state.次gap].permutationAfter
+	次permutationLeft: int = state.boxOfGaps[state.次gap[here]].permutation[left]
+	次permutationRight: int = state.boxOfGaps[state.次gap[here]].permutation[right]
 	次gapLeft: int = 2 * state.crossingAfter - 1
 	次gapRight: int = 2 * state.crossingAfter
 
-	state.boxOfGaps[次gapLeft].permutationPrior = 次permutationPrior
-	state.boxOfGaps[次gapLeft].permutationAfter = 次gapRight
-	state.boxOfGaps[次gapRight].permutationPrior = 次gapLeft
-	state.boxOfGaps[次gapRight].permutationAfter = 次permutationAfter
+	state.boxOfGaps[次gapLeft].permutation[left] = 次permutationLeft
+	state.boxOfGaps[次gapLeft].permutation[right] = 次gapRight
+	state.boxOfGaps[次gapRight].permutation[left] = 次gapLeft
+	state.boxOfGaps[次gapRight].permutation[right] = 次permutationRight
 
-	if 次permutationPrior:
-		state.boxOfGaps[次permutationPrior].permutationAfter = 次gapLeft
+	if 次permutationLeft:
+		state.boxOfGaps[次permutationLeft].permutation[right] = 次gapLeft
 	else:
 		state.gap首Permutation = 次gapLeft
-	if 次permutationAfter:
-		state.boxOfGaps[次permutationAfter].permutationPrior = 次gapRight
+
+	if 次permutationRight:
+		state.boxOfGaps[次permutationRight].permutation[left] = 次gapRight
 
 # Only `equivalenceClasses`.
 def permutationCanonical吗(state: StateStampMeander) -> bool:
@@ -429,12 +470,12 @@ def permutationCanonical吗(state: StateStampMeander) -> bool:
 
 	次permutation: int = 0
 	while 次permutation < state.n:
-		permutation[次permutation] = state.boxOfGaps[次gap].endRight
+		permutation[次permutation] = state.boxOfGaps[次gap].end[right]
 		if permutation[次permutation] == 1:
 			leaf1Visited = True
 		elif (permutation[次permutation] == state.n) and not leaf1Visited:
 			leaf1PriorLeafLast = False
-		次gap = state.boxOfGaps[次gap].permutationAfter
+		次gap = state.boxOfGaps[次gap].permutation[right]
 		次permutation += 1
 
 	comparisonCanonical: int = 0
@@ -450,29 +491,27 @@ def permutationCanonical吗(state: StateStampMeander) -> bool:
 
 def initializeState(state: StateStampMeander) -> None:
 	state.boxOfNodes[0].gapWindStop = 2
-	state.boxOfNodes[0].sideWindStop = sideRight
+	state.boxOfNodes[0].sideWindStop = right
+
 	state.gapEnds = state.boxOfNodes[0].gapsLeft
-	state.次gap = 1
-	state.endLeft = 0
-	state.endRight = 1
-	state.次gapLeft = empty
-	state.次gapRight = empty
+	state.次gap[here] = 1
+	state.end[left] = 0
+	state.end[right] = 1
 	state.次nodeAfter = 2
 	insert(state)
+
 	state.gapEnds = state.boxOfNodes[0].gapsRight
-	state.次gap = 2
-	state.endLeft = 1
-	state.endRight = state.n + 1
-	state.次gapLeft = empty
-	state.次gapRight = empty
+	state.次gap[here] = 2
+	state.end[left] = 1
+	state.end[right] = state.n + 1
 	state.次nodeAfter = 1
 	insert(state)
 
 	state.gap首Permutation = 1
-	state.boxOfGaps[1].permutationPrior = empty
-	state.boxOfGaps[1].permutationAfter = 2
-	state.boxOfGaps[2].permutationPrior = 1
-	state.boxOfGaps[2].permutationAfter = empty
+	state.boxOfGaps[1].permutation[left] = empty
+	state.boxOfGaps[1].permutation[right] = 2
+	state.boxOfGaps[2].permutation[left] = 1
+	state.boxOfGaps[2].permutation[right] = empty
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsMode:
@@ -529,6 +568,9 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
 		https://doi.org/10.37236/2404
 	"""
+	# if oeisID == 'A000682':
+	# 	return do(n)  # ruff: ignore[commented-out-code]
+
 	if oeisID not in lookupSettings:
 		message: str = f'I received `{oeisID = }`, but the permutation algorithm supports only {tuple(lookupSettings)}.'
 		raise ValueError(message)

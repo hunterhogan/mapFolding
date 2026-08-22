@@ -17,17 +17,17 @@ if __name__ == '__main__':
 		n: int = 2
 	if True:
 		# ruff: ignore[repeated-append]
-		boxOfOEISid.append('A000560')
-		boxOfOEISid.append('A077055')
+		boxOfOEISid.append('A005316')
 		boxOfOEISid.append('A001011')
 		boxOfOEISid.append('A000136')
+		boxOfOEISid.append('A000560')
+		boxOfOEISid.append('A077055')
 		boxOfOEISid.append('A000682')
-		boxOfOEISid.append('A005316')
 
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(15, 16):
+		for n in range(8, 15):
 
 			timeStart: float = time.perf_counter()
 			aOFn: int = doTheNeedful(oeisID, n)
