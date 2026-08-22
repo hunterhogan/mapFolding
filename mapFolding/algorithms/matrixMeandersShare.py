@@ -1172,6 +1172,7 @@ n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 		22: 425141790,
 		21: 617123017,
 		20: 823958692,
+		19: 966286603,
 	},
 }
 
