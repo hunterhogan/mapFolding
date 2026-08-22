@@ -149,7 +149,7 @@ class RecipeJobTheorem2:
 		----------
 		pathRoot : PurePosixPath | None = None
 			Base directory path. Defaults to package path or current directory.
-		logicalPathINFIX : identifierDotAttribute | None = None
+		logicalPathInfix : identifierDotAttribute | None = None
 			Dot-separated path segments to insert between root and filename.
 		filenameStem : str | None = None
 			Base filename without extension. Defaults to module identifier.
@@ -220,6 +220,11 @@ def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
 	pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
 	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameTotalFolds=pathFilenameTotalFolds
 		, totalFoldsEstimated=totalFoldsEstimated, totalFoldsMultiplier=state.totalLeaves)
+
+# TODO Moving the static array, `connectionGraph`, out of the numba.jit function, reduces compile
+# time. mapShape 2^8 changes from 15 hours to 30 seconds.
+# def moveLocalToGlobal():
+# 	pass
 
 #================== Bulk changes ======================================================================
 
@@ -380,11 +385,12 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		))
 
 	boxOfLauncherBody.extend([
-		Make.Expr(Make.Call(Make.Name('print'), [Make.Sub().join([
-			Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')), Make.Name('timeStart')])]))
-		, Make.Expr(Make.Call(Make.Name('print'), [Make.Constant(f'\nmap {job.state.mapShape} ='), Make.Name('totalFolds')]))
-		, Make.Assign([Make.Name('writeStream', Make.Store())], Make.Call(Make.Name('open'), [
-			Make.Constant(raiseIfNone(job.pathFilenameTotalFolds).as_posix()), Make.Constant('w')]))
+		Make.Expr(Make.Call(Make.Name('print'), [
+			Make.Sub().join([Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')), Make.Name('timeStart')])]))
+		, Make.Expr(Make.Call(Make.Name('print'), [Make.Constant(f'\n{job.state.mapShape} ='), Make.Name('totalFolds')]))
+		, Make.Assign([Make.Name('writeStream', Make.Store())], Make.Call(Make.Name('open')
+			, [Make.Constant(raiseIfNone(job.pathFilenameTotalFolds).as_posix()), Make.Constant('w')]
+			, [Make.keyword('encoding', Make.Constant('utf-8'))]))
 		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'write'), [
 			Make.Call(Make.Name('str'), [Make.Name('totalFolds')])]))
 		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'close')))])

@@ -93,6 +93,7 @@ class ParametersNumba(TypedDict):
 	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
 	target: NotRequired[str]
 
+# TODO Learn more about the jit parameter benefits.
 parametersNumbaDefault: Final[ParametersNumba] = {'_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False}
 """
 Comprehensive Numba configuration for maximum performance optimization.
@@ -146,6 +147,9 @@ While Numba offers multiple decorators (`@jit`, `@njit`, `@vectorize`), this too
 on the general-purpose `@jit` decorator with configurable parameters for flexibility.
 """
 
+# TODO add subroutine to define `@jit(locals={...}`. Effects: 1. eliminate local variable annotations.
+# 2. Eliminate "constructors" on scalars. This, `leafConnectee: 形TotalLeaves = 形TotalLeaves(15)`
+# becomes `leafConnectee = 15`, but numba still knows the type is `形TotalLeaves`.
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
 	"""Transform a Python function into a Numba-accelerated version with appropriate decorators.
 
