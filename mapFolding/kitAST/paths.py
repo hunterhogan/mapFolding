@@ -1,3 +1,5 @@
+# ruff: ignore[undocumented-public-module]
+# DOCUMENT
 from __future__ import annotations
 
 from astToolkit.filesystem import parseLogicalPath2astModule

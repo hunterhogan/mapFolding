@@ -29,7 +29,7 @@ class mapFoldingPackageSettings(PackageSettings):
 
 	pathDataSamples: Path = dataclasses.field(init=False, default=Path())
 
-	def __post_init__(self, identifierPackageFALLBACK: str) -> None:
+	def __post_init__(self, identifierPackageFALLBACK: str) -> None:  # ruff: ignore[undocumented-magic-method]
 		# DOCUMENT
 		super().__post_init__(identifierPackageFALLBACK)
 		self.pathDataSamples = self.pathPackage / 'tests' / 'dataSamples'

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from itertools import starmap
 from mapFolding._e._2上nDimensional.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
@@ -14,7 +13,6 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from hunterMakesPy.theTypes import Limitation
 	from mapFolding.theTypes import OEISid
 
 def _getPinningFunctionName(pinningFunction: Callable[..., StateElimination]) -> str:

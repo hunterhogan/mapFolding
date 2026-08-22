@@ -5,10 +5,10 @@ function only works on a specific type of algorithm, it will be in a subdirector
 """
 from __future__ import annotations
 
-from astToolkit import (
-	Be, DOT, extractClassDef, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then)
+from astToolkit import Be, DOT, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit.changeDef import extractClassDef, inlineFunctionDef
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
-from astToolkit.transformationTools import inlineFunctionDef
+from astToolkit.filesystem import parseLogicalPath2astModule
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import IfThis

@@ -27,8 +27,10 @@ through specialized compilation paths essential for computationally intensive ma
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, extractClassDef, identifierDotAttribute, Make, NodeChanger, NodeTourist, parseLogicalPath2astModule, Then
+from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit.changeDef import extractClassDef
 from astToolkit.containers import IngredientsFunction, LedgerOfImports
+from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.transformationTools import unparseFindReplace
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone

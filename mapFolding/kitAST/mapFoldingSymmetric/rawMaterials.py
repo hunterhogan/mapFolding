@@ -34,7 +34,8 @@ References
 """
 from __future__ import annotations
 
-from astToolkit import extractFunctionDef, Make
+from astToolkit import Make
+from astToolkit.changeDef import extractFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST.paths import getModule
 from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric

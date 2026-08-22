@@ -1,11 +1,11 @@
 from __future__ import annotations  # ruff: ignore[undocumented-public-module]
 
-from astToolkit import Be, Grab, NodeTourist, parsePathFilename2astModule, Then
-from astToolkit.containers import makeDictionaryClassDef, makeDictionaryFunctionDef
-from astToolkit.transformationTools import makeDictionaryMosDef
+from astToolkit import Be, Grab, NodeTourist, Then
+from astToolkit.changeDef import makeDictionaryFunctionDef, makeDictionaryMosDef
+from astToolkit.containers import makeDictionaryClassDef
+from astToolkit.filesystem import parsePathFilename2astModule
 from collections import Counter
 from humpy_cytoolz import concat
-from mapFolding.kitAST import IfThis
 from mapFolding.theSSOT import settingsPackage
 from operator import methodcaller
 from pprint import pprint

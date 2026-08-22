@@ -1,3 +1,5 @@
+# ruff: ignore[undocumented-public-module]
+# DOCUMENT  #
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
@@ -10,13 +12,15 @@ import sys
 if TYPE_CHECKING:
 	from pathlib import Path
 
-def binaryStrip(pathFilename: Path) -> Path:
+def binaryStrip(pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	binary: lief.OAT.Binary | lief.ELF.Binary = raiseIfNone(lief.parse(pathFilename))
 	binary.strip()
 	binary.write(pathFilename)
 	return pathFilename
 
-def toCodon(pathFilenamePython: Path) -> Path:
+def toCodon(pathFilenamePython: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	pathFilenamePython.write_text(anyascii.anyascii(pathFilenamePython.read_text(encoding='utf-8')[36:None]), encoding='ascii')
 	if sys.platform == 'linux':
 		commandBuild: list[str] = ['codon', 'build', '--exe', '--release', '--mcpu=native'

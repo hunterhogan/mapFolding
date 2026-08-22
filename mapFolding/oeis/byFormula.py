@@ -10,7 +10,7 @@ from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
 
-def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A000682', 'A223095, A077014, and A000682', 'A227167', 'A000682'] | LiteralString | None=None) -> int:
+def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A000682', 'A223095, A077014, and A000682', 'A227167', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A000136(n) as a function of A000560 or A001011 and A001010 or A223094 and A000682 or A223095, A077014, and A000682 or A227167 or A000682.
 
@@ -52,7 +52,7 @@ def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A0
                 countTotal = n * _A000682(n)
     return countTotal
 
-def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None=None) -> int:
+def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A000560(n) as a function of A000136 or A000682.
 
@@ -83,7 +83,7 @@ def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None=None
             countTotal = _A000682(n + 1) // 2
     return countTotal
 
-def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301620', 'A337581', 'A077460, A005316, and A223093', 'A223093 and A005316', 'A223093 and A077014', 'A000136, A077014, and A223095', 'A223094 and A000682', 'A259702 and A000682', 'A333971 and A000682', 'A334615 and A000682', 'A060206 and A000560', 'A000136'] | LiteralString | None=None) -> int:
+def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301620', 'A337581', 'A077460, A005316, and A223093', 'A223093 and A005316', 'A223093 and A077014', 'A000136, A077014, and A223095', 'A223094 and A000682', 'A259702 and A000682', 'A333971 and A000682', 'A334615 and A000682', 'A060206 and A000560', 'A000136'] | LiteralString | None = None) -> int:
     """
     Compute A000682(n) as a function of A000560 or A001010 or A223094 or A259689 or A301620 or A337581 or A077460, A005316, and A223093 or A223093 and A005316 or A223093 and A077014 or A000136, A077014, and A223095 or A223094 and A000682 or A259702 and A000682 or A333971 and A000682 or A334615 and A000682 or A060206 and A000560 or A000136.
 
@@ -117,11 +117,11 @@ def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301
                 countTotal = A001010(2 * n - 2) // 2
             case 'A223094':
                 nLess1Factorial: int = factorial(n - 1)
-                countTotal = nLess1Factorial - sum((A223094(n下k) * (nLess1Factorial // factorial(n下k)) for n下k in range(3, n)))
+                countTotal = nLess1Factorial - sum(A223094(n下k) * (nLess1Factorial // factorial(n下k)) for n下k in range(3, n))
             case 'A259689':
-                countTotal = 2 ** (n - 2) + sum((2 ** (n - 1 - n下j) * sum((A259689((n下j - 1) ** 2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + 1))) for n下j in range(4, n)))
+                countTotal = 2 ** (n - 2) + sum(2 ** (n - 1 - n下j) * sum(A259689((n下j - 1) ** 2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n下j + 2) // 2 + 1)) for n下j in range(4, n))
             case 'A301620':
-                countTotal = 2 ** (n - 2) + sum((2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1)))
+                countTotal = 2 ** (n - 2) + sum(2 ** (n - n下x - 2) * A301620(n下x) for n下x in range(3, n - 1))
             case 'A337581':
                 countTotal = A337581(n + 2) // 4
             case 'A077460, A005316, and A223093':
@@ -155,7 +155,7 @@ def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301
                 countTotal = _A000136(n) // n
     return countTotal
 
-def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | LiteralString | None=None) -> int:
+def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | LiteralString | None = None) -> int:
     """
     Compute A001010(n) as a function of A001011 and A000682 or A007822 and A000682.
 
@@ -192,7 +192,7 @@ def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | L
                     countTotal = 2 * _A000682(n // 2 + 1)
     return countTotal
 
-def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None=None) -> int:
+def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None = None) -> int:
     """
     Compute A001011(n) as a function of A001010 and A000682.
 
@@ -224,7 +224,7 @@ def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None=Non
                 countTotal = (A001010(n) + n * _A000682(n)) // 4
     return countTotal
 
-def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085973 and A077054', 'A208357', 'A005316'] | LiteralString | None=None) -> int:
+def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085973 and A077054', 'A208357', 'A005316'] | LiteralString | None = None) -> int:
     """
     Compute A005315(n) as a function of A077460, A005316, and A060206 or A078591 or A085973 and A077054 or A208357 or A005316.
 
@@ -267,7 +267,7 @@ def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085
                 countTotal = _A005316(2 * n - 1)
     return countTotal
 
-def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315', 'A227167, A217310, and A217318', 'A000682 and A223093'] | LiteralString | None=None) -> int:
+def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315', 'A227167, A217310, and A217318', 'A000682 and A223093'] | LiteralString | None = None) -> int:
     """
     Compute A005316(n) as a function of A077014 or A077054 and A005315 or A077460, A005315, and A060206 or A078592 and A005315 or A227167, A217310, and A217318 or A000682 and A223093.
 
@@ -318,7 +318,7 @@ def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A0053
                 countTotal = (_A000682(n + 1) - A223093(n)) // (2 - n % 2)
     return countTotal
 
-def A007822(n: int, f: Literal['A001010'] | LiteralString | None=None) -> int:
+def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
     """
     Compute A007822(n) as a function of A001010.
 
@@ -350,7 +350,7 @@ def A007822(n: int, f: Literal['A001010'] | LiteralString | None=None) -> int:
                 countTotal = A001010(2 * n - 1) // 2
     return countTotal
 
-def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | LiteralString | None=None) -> int:
+def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A060206(n) as a function of A077460, A005315, and A005316 or A000682.
 
@@ -384,7 +384,7 @@ def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | Lit
             countTotal = _A000682(2 * n + 1)
     return countTotal
 
-def A077014(n: int, f: Literal['A000682 and A223093', 'A223095 and A000682', 'A005316'] | LiteralString | None=None) -> int:
+def A077014(n: int, f: Literal['A000682 and A223093', 'A223095 and A000682', 'A005316'] | LiteralString | None = None) -> int:
     """
     Compute A077014(n) as a function of A000682 and A223093 or A223095 and A000682 or A005316.
 
@@ -423,7 +423,7 @@ def A077014(n: int, f: Literal['A000682 and A223093', 'A223095 and A000682', 'A0
                 countTotal = (2 - n % 2) * _A005316(n)
     return countTotal
 
-def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString | None=None) -> int:
+def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString | None = None) -> int:
     """
     Compute A077054(n) as a function of A085973 and A005315 or A005316.
 
@@ -457,7 +457,7 @@ def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString
                 countTotal = _A005316(2 * n)
     return countTotal
 
-def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A005316'] | LiteralString | None=None) -> int:
+def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A005316'] | LiteralString | None = None) -> int:
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206 or A000682 and A005316.
 
@@ -497,7 +497,7 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A00
                     countTotal = (_A005316(n) + _A005316(2 * n - 1) + _A005316(n)) // 4
     return countTotal
 
-def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None) -> int:
+def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None = None) -> int:
     """
     Compute A078591(n) as a function of A005316 or A005315.
 
@@ -531,7 +531,7 @@ def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None=None
                 countTotal = A005315(n) // 2
     return countTotal
 
-def A078592(n: int, f: Literal['A005316'] | LiteralString | None=None) -> int:
+def A078592(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
     """
     Compute A078592(n) as a function of A005316.
 
@@ -563,7 +563,7 @@ def A078592(n: int, f: Literal['A005316'] | LiteralString | None=None) -> int:
                 countTotal = (_A005316(2 * n) + _A005316(n)) // 2
     return countTotal
 
-def A085973(n: int, f: Literal['A077054 and A005315', 'A005316'] | LiteralString | None=None) -> int:
+def A085973(n: int, f: Literal['A077054 and A005315', 'A005316'] | LiteralString | None = None) -> int:
     """
     Compute A085973(n) as a function of A077054 and A005315 or A005316.
 
@@ -597,7 +597,7 @@ def A085973(n: int, f: Literal['A077054 and A005315', 'A005316'] | LiteralString
                 countTotal = _A005316(2 * n) + _A005316(2 * n - 1)
     return countTotal
 
-def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None=None) -> int:
+def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None = None) -> int:
     """
     Compute A208357(n) as a function of A005315 or A005316.
 
@@ -628,7 +628,7 @@ def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None=None
             countTotal = _A005316(2 * n + 1) ** 2
     return countTotal
 
-def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000682 and A005316'] | LiteralString | None=None) -> int:
+def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000682 and A005316'] | LiteralString | None = None) -> int:
     """
     Compute A217310(n) as a function of A223093 or A227167, A217318, and A005316 or A000682 and A005316.
 
@@ -661,7 +661,7 @@ def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000
             countTotal = (1 + n % 2) * _A000682(n + 1) - 2 * _A005316(n)
     return countTotal
 
-def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005316 and A000682'] | LiteralString | None=None) -> int:
+def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005316 and A000682'] | LiteralString | None = None) -> int:
     """
     Compute A217318(n) as a function of A223095 or A227167, A217310, and A005316 or A005316 and A000682.
 
@@ -694,7 +694,7 @@ def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005
             countTotal = _A005316(n) + n * _A000682(n) - _A000682(n + 1) - ((1 - n % 2) * (n * _A000682(n) // 2) + n % 2 * _A000682(n + 1))
     return countTotal
 
-def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A077014', 'A000682 and A005316'] | LiteralString | None=None) -> int:
+def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A077014', 'A000682 and A005316'] | LiteralString | None = None) -> int:
     """
     Compute A223093(n) as a function of A217310 or A223094 and A223095 or A000682 and A077014 or A000682 and A005316.
 
@@ -729,7 +729,7 @@ def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A0
             countTotal = _A000682(n + 1) - (2 - n % 2) * _A005316(n)
     return countTotal
 
-def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A000682'] | LiteralString | None=None) -> int:
+def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A223094(n) as a function of A223094 and A000682 or A223093 and A223095 or A000682.
 
@@ -759,14 +759,14 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A0
                 countTotal: int = 0
             else:
                 nFactorial: int = factorial(n)
-                countTotal = nFactorial - _A000682(n + 1) - sum((A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n)))
+                countTotal = nFactorial - _A000682(n + 1) - sum(A223094(n下k) * (nFactorial // factorial(n下k)) for n下k in range(3, n))
         case 'A223093 and A223095':
             countTotal = A223093(n) + A223095(n)
         case 'A000682' | _:
             countTotal = n * _A000682(n) - _A000682(n + 1)
     return countTotal
 
-def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A217318', 'A000682 and A005316'] | LiteralString | None=None) -> int:
+def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A217318', 'A000682 and A005316'] | LiteralString | None = None) -> int:
     """
     Compute A223095(n) as a function of A077014, and A000682 or A223094 and A223093 or A217318 or A000682 and A005316.
 
@@ -801,7 +801,7 @@ def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A
             countTotal = (2 - n % 2) * _A005316(n) + n * _A000682(n) - 2 * _A000682(n + 1)
     return countTotal
 
-def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | LiteralString | None=None) -> int:
+def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | LiteralString | None = None) -> int:
     """
     Compute A227167(n) as a function of A217310, A217318, and A005316 or A000136.
 
@@ -832,7 +832,7 @@ def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | Lit
             countTotal = n * _A000682(n) // (2 - n % 2)
     return countTotal
 
-def A259689(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
+def A259689(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A259689(n) as a function of A000682.
 
@@ -872,10 +872,10 @@ def A259689(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
             elif 2 < nRow and n下k == (nRow + 2) // 2:
                 countTotal = 2 ** ((nRow - 1) // 2)
             else:
-                countTotal = (_A000682(nRow + 1) - sum((n下i * getValuesKnown('A259689')[(nRow - 1) ** 2 // 4 + n下i] for n下i in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2))))) // n下k
+                countTotal = (_A000682(nRow + 1) - sum(n下i * getValuesKnown('A259689')[(nRow - 1) ** 2 // 4 + n下i] for n下i in chain(range(2, n下k), range(n下k + 1, nRow // 2 + 2)))) // n下k
     return countTotal
 
-def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None=None) -> int:
+def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A259702(n) as a function of A301620 or A000682.
 
@@ -909,7 +909,7 @@ def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None=None
                 countTotal = _A000682(n) // 2 - _A000682(n - 1)
     return countTotal
 
-def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259702', 'A000682'] | LiteralString | None=None) -> int:
+def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259702', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A301620(n) as a function of A334615, A301620, and A000682 or A259689 or A259702 or A000682.
 
@@ -940,14 +940,14 @@ def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259
             else:
                 countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
         case 'A259689':
-            countTotal = sum((A259689(n ** 2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n + 3) // 2 + 1)))
+            countTotal = sum(A259689(n ** 2 // 4 + n下k) * (n下k - 2) for n下k in range(3, (n + 3) // 2 + 1))
         case 'A259702':
             countTotal = 2 * A259702(n + 2)
         case 'A000682' | _:
             countTotal = _A000682(n + 2) - 2 * _A000682(n + 1)
     return countTotal
 
-def A333971(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
+def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A333971(n) as a function of A000682.
 
@@ -979,7 +979,7 @@ def A333971(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
                 countTotal = 4 * (_A000682(n - 1) - _A000682(n - 2))
     return countTotal
 
-def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227167', 'A223094', 'A301620', 'A005316 and A223093', 'A005316 and A217310', 'A000682'] | LiteralString | None=None) -> int:
+def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227167', 'A223094', 'A301620', 'A005316 and A223093', 'A005316 and A217310', 'A000682'] | LiteralString | None = None) -> int:
     """
     Compute A334615(n) as a function of A000560 or A001010 or A259702 or A337581 or A227167 or A223094 or A301620 or A005316 and A223093 or A005316 and A217310 or A000682.
 
@@ -1026,13 +1026,13 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
             else:
                 offset: int = 0
                 nLess1factorial: int = factorial(n - 1 + offset)
-                countTotal = nLess1factorial - sum((A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
+                countTotal = nLess1factorial - sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))
                 offset -= 1
                 nLess1factorial = factorial(n - 1 + offset)
-                countTotal = countTotal - 4 * (nLess1factorial - sum((A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
+                countTotal = countTotal - 4 * (nLess1factorial - sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
                 offset -= 1
                 nLess1factorial = factorial(n - 1 + offset)
-                countTotal = countTotal + 4 * (nLess1factorial - sum((A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
+                countTotal = countTotal + 4 * (nLess1factorial - sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
         case 'A301620':
             if 2 <= n < 4:
                 countTotal = 0
@@ -1049,7 +1049,7 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
                 countTotal = _A000682(n) - 4 * _A000682(n - 1) + 4 * _A000682(n - 2)
     return countTotal
 
-def A337581(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
+def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A337581(n) as a function of A000682.
 

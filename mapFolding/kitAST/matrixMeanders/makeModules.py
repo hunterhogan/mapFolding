@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
-from astToolkit.transformationTools import write_astModule
+from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.mapFolding._count import toDisk
@@ -55,7 +55,8 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
-def makeQQ(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	identifiers = identifiers or defaultMatrixMeanders
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
 	ingredients.astFunctionDef.decorator_list.clear()
@@ -73,7 +74,7 @@ def makeQQ(astModule: ast.Module, identifiers: Default | None = None, **override
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makeQQ(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':
 	makeModulesMeanders()

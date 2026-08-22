@@ -1,9 +1,10 @@
 """addSymmetryCheck."""
 from __future__ import annotations
 
-from astToolkit import Be, extractFunctionDef, Grab, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
+from astToolkit.changeDef import extractFunctionDef
 from astToolkit.containers import LedgerOfImports
-from astToolkit.transformationTools import write_astModule
+from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.mapFolding._count import makeTheorem2, numbaOnTheorem2, trimTheorem2

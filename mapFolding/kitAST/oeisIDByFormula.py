@@ -14,9 +14,11 @@ Functions
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, parsePathFilename2astModule, Then
+from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
+from astToolkit.changeDef import makeDictionaryFunctionDef
 from astToolkit.containers import IngredientsModule
-from astToolkit.transformationTools import makeDictionaryFunctionDef, pythonCode2ast_expr, write_astModule
+from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
+from astToolkit.transformationTools import pythonCode2ast_expr
 from humpy_cytoolz import valmap
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING

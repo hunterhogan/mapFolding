@@ -1,7 +1,7 @@
 """makeMapFoldingModules."""
 from __future__ import annotations
 
-from astToolkit import parsePathFilename2astModule
+from astToolkit.filesystem import parsePathFilename2astModule
 from mapFolding.kitAST.mapFolding._count import makeInlineNumba, makeInlineParallelNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module

@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
+from astToolkit.changeDef import inlineFunctionDef
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
-from astToolkit.transformationTools import inlineFunctionDef
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import findDataclass
 from mapFolding.kitAST.mapFolding._count import toDisk
