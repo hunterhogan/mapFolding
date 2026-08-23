@@ -238,12 +238,7 @@ def initializeState(state: StateStampMeander) -> None:
 	insert(state)
 
 def doTheNeedful(n: int) -> int:
-	nNormalized: int = n - 1
-	if nNormalized == 0:
-		return 1
-
-	state: StateStampMeander = StateStampMeander(nNormalized)
-
+	state: StateStampMeander = StateStampMeander(n)
 	initializeState(state)
 	state = count(state)
 	return state.total

@@ -24,7 +24,7 @@ References
 from __future__ import annotations
 
 from itertools import repeat, starmap
-from mapFolding.algorithms.p000682 import doTheNeedful as do
+from mapFolding.algorithms.permutations_semi import doTheNeedful as do
 from mapFolding.theTypes import OEISid
 from typing import TYPE_CHECKING
 import dataclasses
@@ -568,9 +568,6 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
 		https://doi.org/10.37236/2404
 	"""
-	# if oeisID == 'A000682':
-	# 	return do(n)  # ruff: ignore[commented-out-code]
-
 	if oeisID not in lookupSettings:
 		message: str = f'I received `{oeisID = }`, but the permutation algorithm supports only {tuple(lookupSettings)}.'
 		raise ValueError(message)
@@ -583,6 +580,9 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 	nNormalized: int = n - generationMode.Z0Z_normalizeIndex
 	if nNormalized == 0:
 		return 1
+
+	if oeisID == 'A000682':
+		return do(nNormalized)
 
 	state: StateStampMeander = StateStampMeander(nNormalized)
 
