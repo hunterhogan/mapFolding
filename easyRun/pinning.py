@@ -41,7 +41,8 @@ if __name__ == '__main__':
 		state = makeAlbum2上nDimensional吗(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
-		from mapFolding._e._development.toolkit import verifyPinning2Dn
+		# TODO Is `verifyPinning2Dn` a duplicate of the code I have in `tests`?
+		from mapFolding._e._research.toolkit import verifyPinning2Dn
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 
