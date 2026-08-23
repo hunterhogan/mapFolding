@@ -244,7 +244,7 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 		, default=-errorL33T)
 
 	if totalBuckets <= 0:
-		if state.boundary <= (state.n - 1 - (state.boundary % 2)) // 3:
+		if state.boundary <= (state.n - 8) // 3:
 			totalBuckets = (355 * totalArcCodes + 99) // 100
 		else:
 			totalBuckets = totalArcCodes * 2
@@ -1176,6 +1176,7 @@ n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 		21: 617123017,
 		20: 823958692,
 		19: 966286603,
+		18: 926196929,
 	},
 }
 
