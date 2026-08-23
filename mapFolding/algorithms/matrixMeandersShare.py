@@ -244,7 +244,10 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 		, default=-errorL33T)
 
 	if totalBuckets <= 0:
-		totalBuckets = (355 * totalArcCodes + 99) // 100
+		if state.boundary <= (state.n - 1 - (state.boundary % 2)) // 3:
+			totalBuckets = (355 * totalArcCodes + 99) // 100
+		else:
+			totalBuckets = totalArcCodes * 2
 
 	return totalBuckets
 
