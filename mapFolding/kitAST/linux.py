@@ -1,5 +1,5 @@
 # ruff: ignore[undocumented-public-module]
-# DOCUMENT  #
+# DOCUMENT
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone

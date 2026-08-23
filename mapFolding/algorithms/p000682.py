@@ -1,5 +1,4 @@
 #=SIN=
-# DEVELOPMENT module.
 # ruff: file-ignore[undocumented-public-class, undocumented-magic-method, undocumented-public-method]
 from __future__ import annotations
 
@@ -9,8 +8,6 @@ import dataclasses
 
 if TYPE_CHECKING:
 	from typing import Literal
-
-# TODO try forcing leaf2 before leaf4 and total*2.
 
 empty: int = 0
 
@@ -26,7 +23,6 @@ class Gap:
 	nodeAfter: int = empty
 
 	def __post_init__(self) -> None:
-		# DEVELOPMENT The following statements are self-verifying and self-documenting.
 		if not self.to:
 			self.to.extend([left, right])
 			self.to[left] = empty
