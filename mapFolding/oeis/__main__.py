@@ -164,7 +164,8 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		f"{computed}\t{known}\t"
 	)
 	if ratio and computed:
-		sys.stdout.write(f"{known / computed}\t")
+		integer = (known / computed).is_integer()
+		sys.stdout.write(f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[integer]}{known / computed}{ansiColorReset}\t")
 	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunHeader(oeisID: str, flow: str) -> None:
