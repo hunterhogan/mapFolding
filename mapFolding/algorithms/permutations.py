@@ -43,8 +43,6 @@ if TYPE_CHECKING:
 - permutationLeft, permutationRight
 """
 
-# TODO try forcing leaf2 before leaf4 and total*2.
-
 empty: int = 0
 
 type Side = Literal[0, 1]
