@@ -1,10 +1,11 @@
-#=SIN=
+# DOCUMENT
 #ruff: file-ignore[undocumented-public-class]
 from __future__ import annotations
 
 from typing import Self
 
 class Interval:
+	# DOCUMENT
 	__slots__ = ('attachedTo', 'distal', 'proximal')
 
 	def __init__(self, attachedTo: Branch, proximal: Interval | None = None, distal: Interval | None = None) -> None:
@@ -13,6 +14,7 @@ class Interval:
 		self.distal: Interval | Self = distal or self
 
 class Branch:
+	# DOCUMENT
 	__slots__ = ('advance', 'intervalAdvance', 'intervalComplement')
 
 	def __init__(self) -> None:
@@ -24,12 +26,14 @@ class Branch:
 		self.intervalAdvance.proximal = Interval(self, proximal=self.intervalAdvance, distal=self.intervalComplement.proximal)
 
 def makeBranch() -> Branch:
+	# DOCUMENT
 	branch: Branch = Branch()
 	branch.advance = Branch()
 	branch.advance.advance = branch
 	return branch
 
 def countCrossing(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetric: bool) -> int:
+	# DOCUMENT
 	total: int = 1
 	if lineSegment < n:
 		lineSegment += 1
@@ -41,6 +45,7 @@ def countCrossing(lineSegment: int, branch: Branch, n: int, depth: int, *, symme
 	return total
 
 def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetric: bool) -> int:
+	# DOCUMENT
 	total: int = 0
 	interval: Interval = branch.intervalComplement.distal
 
@@ -72,6 +77,7 @@ def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetr
 	return total
 
 def crossLine(attachedTo: Branch, branch: Branch) -> Interval:
+	# DOCUMENT
 	interval: Interval = Interval(branch, distal=attachedTo.intervalComplement.distal)
 	interval.proximal = Interval(branch.advance, proximal=interval, distal=attachedTo.intervalComplement.proximal)
 
@@ -80,6 +86,7 @@ def crossLine(attachedTo: Branch, branch: Branch) -> Interval:
 	return interval
 
 def doTheNeedful(n: int, *, symmetric: bool) -> int:
+	# DOCUMENT
 	tree: Branch = makeBranch()
 	lineSegment: int = 0
 	depth: int = 0

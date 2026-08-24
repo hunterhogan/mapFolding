@@ -456,12 +456,12 @@ def A334615(n: int, f: LiteralString | None = None) -> int:
 
 				offset -= 1
 				nLess1factorial = factorial(n - 1 + offset)
-				countTotal = countTotal - (4 * (nLess1factorial  # ruff: ignore[non-augmented-assignment]
+				countTotal -= (4 * (nLess1factorial
 								- sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
 
 				offset -= 1
 				nLess1factorial = factorial(n - 1 + offset)
-				countTotal = countTotal + (4 * (nLess1factorial  # ruff: ignore[non-augmented-assignment]
+				countTotal += (4 * (nLess1factorial
 								- sum(A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))))
 		case 'A301620':
 			if 2 <= n < 4:

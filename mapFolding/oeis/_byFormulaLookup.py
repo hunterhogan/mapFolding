@@ -403,10 +403,10 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
                 countTotal = nLess1factorial - sum(_A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset))
                 offset -= 1
                 nLess1factorial = factorial(n - 1 + offset)
-                countTotal = countTotal - 4 * (nLess1factorial - sum(_A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
+                countTotal -= 4 * (nLess1factorial - sum(_A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
                 offset -= 1
                 nLess1factorial = factorial(n - 1 + offset)
-                countTotal = countTotal + 4 * (nLess1factorial - sum(_A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
+                countTotal += 4 * (nLess1factorial - sum(_A223094(n下k) * (nLess1factorial // factorial(n下k)) for n下k in range(3, n + offset)))
         case 'A301620':
             if 2 <= n < 4:
                 countTotal = 0
