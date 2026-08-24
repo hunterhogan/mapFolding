@@ -1,98 +1,90 @@
 #=SIN=
-# ruff: file-ignore[undocumented-public-class, undocumented-magic-method]
+#ruff: file-ignore[undocumented-public-class]
 from __future__ import annotations
 
-import dataclasses
+from typing import Self
 
-@dataclasses.dataclass(slots=True)
-class Gap:
-	arm: Arm
-	proximal: Gap = dataclasses.field(init=False)
-	distal: Gap = dataclasses.field(init=False)
+class Interval:
+	__slots__ = ('attachedTo', 'distal', 'proximal')
 
-	def __post_init__(self) -> None:
-		self.proximal = self
-		self.distal = self
+	def __init__(self, attachedTo: Branch, proximal: Interval | None = None, distal: Interval | None = None) -> None:
+		self.attachedTo: Branch = attachedTo
+		self.proximal: Interval | Self = proximal or self
+		self.distal: Interval | Self = distal or self
 
-class Arm:
-	__slots__ = ('complement', 'gapDistal', 'gapProximal')
+class Branch:
+	__slots__ = ('advance', 'intervalAdvance', 'intervalComplement')
 
 	def __init__(self) -> None:
-		self.complement: Arm = self
+		self.advance: Branch = self
+		self.intervalAdvance: Interval = Interval(self)
+		self.intervalComplement: Interval = Interval(self, distal=self.intervalAdvance)
 
-		self.gapProximal: Gap = Gap(self)
-		self.gapProximal.proximal = Gap(self)
-		self.gapProximal.proximal.proximal = self.gapProximal
+		self.intervalComplement.proximal = Interval(self, proximal=self.intervalComplement)
+		self.intervalAdvance.proximal = Interval(self, proximal=self.intervalAdvance, distal=self.intervalComplement.proximal)
 
-		self.gapDistal: Gap = Gap(self)
-		self.gapDistal.proximal = Gap(self)
-		self.gapDistal.proximal.proximal = self.gapDistal
+def makeBranch() -> Branch:
+	branch: Branch = Branch()
+	branch.advance = Branch()
+	branch.advance.advance = branch
+	return branch
 
-		self.gapProximal.distal = self.gapDistal
-		self.gapDistal.proximal.distal = self.gapProximal.proximal
-
-def count(crossingNext: int, arm: Arm, n: int) -> int:
+def countCrossing(lineSegment: int, branch: Branch, n: int, depth: int) -> int:
 	total: int = 1
-	if crossingNext <= n:
-		total = countArm(crossingNext, arm, n)
-		total += countArm(crossingNext, arm.complement, n)
+	if lineSegment < n:
+		lineSegment += 1
+		depth += 1
+		total = countBranch(lineSegment, branch, n, depth)
+		if depth != 2:
+			total += countBranch(lineSegment, branch.advance, n, depth)
+	depth -= 1
 	return total
 
-def countArm(crossingNext: int, arm: Arm, n: int) -> int:
+def countBranch(lineSegment: int, branch: Branch, n: int, depth: int) -> int:
 	total: int = 0
-	gap: Gap = arm.gapProximal.distal
+	interval: Interval = branch.intervalComplement.distal
 
-	while gap is not arm.gapDistal:
-		armTarget: Arm = gap.arm
-		armFragmentProximal: Arm = makeComplements()
-		gapProximal: Gap = arm.gapProximal
-		arm.gapProximal = armFragmentProximal.gapDistal
-		armFragmentProximal.gapDistal = gapProximal.proximal
-		armFragmentProximal.gapProximal.distal = gap.proximal.distal
-		gap.proximal.distal.proximal.distal = armFragmentProximal.gapProximal.proximal
-		arm.gapProximal.distal = gap.distal
-		gap.distal.proximal.distal = arm.gapProximal.proximal
+	while interval is not branch.intervalAdvance:
+		IllBeBack: Interval = branch.intervalComplement
 
-		gapFragmentDistal: Gap = makeGap(arm)
-		gapFragmentProximal: Gap = makeGap(armFragmentProximal)
-		insertGap(armTarget, gapFragmentDistal)
-		insertGap(armTarget.complement, gapFragmentProximal)
-		total += count(crossingNext + 1, armTarget, n)
-		removeGap(gapFragmentDistal)
-		removeGap(gapFragmentProximal)
+		branchAdvance: Branch = makeBranch()
+		branch.intervalComplement = branchAdvance.intervalAdvance
+		branchAdvance.intervalAdvance = IllBeBack.proximal
+		branch.intervalComplement.distal = interval.distal
+		branchAdvance.intervalComplement.distal = interval.proximal.distal
 
-		gap.proximal.distal.proximal.distal = gap
-		gap.distal.proximal.distal = gap.proximal
-		arm.gapProximal = gapProximal
-		gap = gap.distal
+		interval.proximal.distal.proximal.distal = branchAdvance.intervalComplement.proximal
+		interval.distal.proximal.distal = branch.intervalComplement.proximal
 
+		intervalDistal: Interval = crossLine(interval.attachedTo, branch)
+		intervalProximal: Interval = crossLine(interval.attachedTo.advance, branchAdvance)
+		total += countCrossing(lineSegment, interval.attachedTo, n, depth)
+
+		for uncross in (intervalDistal, intervalProximal):
+			uncross.proximal.distal.proximal.distal = uncross.distal
+			uncross.distal.proximal.distal = uncross.proximal.distal
+
+		interval.proximal.distal.proximal.distal = interval
+		interval.distal.proximal.distal = interval.proximal
+		interval = interval.distal
+
+		branch.intervalComplement = IllBeBack
 	return total
 
-def makeComplements() -> Arm:
-	arm: Arm = Arm()
-	arm.complement = Arm()
-	arm.complement.complement = arm
-	return arm
+def crossLine(attachedTo: Branch, branch: Branch) -> Interval:
+	interval: Interval = Interval(branch, distal=attachedTo.intervalComplement.distal)
+	interval.proximal = Interval(branch.advance, proximal=interval, distal=attachedTo.intervalComplement.proximal)
 
-def makeGap(arm: Arm) -> Gap:
-	gap: Gap = Gap(arm)
-	gap.proximal = Gap(arm.complement)
-	gap.proximal.proximal = gap
-	return gap
-
-def insertGap(arm: Arm, gap: Gap) -> None:
-	gapFollowing: Gap = arm.gapProximal.distal
-	gap.distal = gapFollowing
-	gap.proximal.distal = arm.gapProximal.proximal
-	gapFollowing.proximal.distal = gap.proximal
-	arm.gapProximal.distal = gap
-
-def removeGap(gap: Gap) -> None:
-	gap.proximal.distal.proximal.distal = gap.distal
-	gap.distal.proximal.distal = gap.proximal.distal
+	attachedTo.intervalComplement.distal.proximal.distal = interval.proximal
+	attachedTo.intervalComplement.distal = interval
+	return interval
 
 def doTheNeedful(n: int) -> int:
-	arm: Arm = makeComplements()
-	insertGap(arm, makeGap(makeComplements()))
-	insertGap(arm.complement, makeGap(makeComplements().complement))
-	return count(2, arm, n)
+	tree: Branch = makeBranch()
+	lineSegment: int = 0
+	depth: int = 0
+	crossLine(tree, makeBranch())
+	crossLine(tree.advance, makeBranch().advance)
+	lineSegment += 1
+	depth += 1
+	return countCrossing(lineSegment, tree, n, depth) * 2

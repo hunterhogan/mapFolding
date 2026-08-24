@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(2, 18):
+		for n in range(9, 16):
 
 			timeStart: float = time.perf_counter()
 			aOFn: int = doTheNeedful(oeisID, n)
