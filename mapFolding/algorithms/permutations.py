@@ -578,9 +578,9 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		return 1
 
 	if oeisID == 'A000560':
-		return do(nNormalized) // 2
+		return do(nNormalized, symmetric=True)
 	if oeisID == 'A000682':
-		return do(nNormalized)
+		return do(nNormalized, symmetric=False)
 
 	state: StateStampMeander = StateStampMeander(nNormalized)
 

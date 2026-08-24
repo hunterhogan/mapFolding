@@ -29,18 +29,18 @@ def makeBranch() -> Branch:
 	branch.advance.advance = branch
 	return branch
 
-def countCrossing(lineSegment: int, branch: Branch, n: int, depth: int) -> int:
+def countCrossing(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetric: bool) -> int:
 	total: int = 1
 	if lineSegment < n:
 		lineSegment += 1
 		depth += 1
-		total = countBranch(lineSegment, branch, n, depth)
-		if depth != 2:
-			total += countBranch(lineSegment, branch.advance, n, depth)
+		total = countBranch(lineSegment, branch, n, depth, symmetric=symmetric)
+		if (depth != 2) and not (symmetric and (lineSegment == 2)):
+			total += countBranch(lineSegment, branch.advance, n, depth, symmetric=symmetric)
 	depth -= 1
 	return total
 
-def countBranch(lineSegment: int, branch: Branch, n: int, depth: int) -> int:
+def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetric: bool) -> int:
 	total: int = 0
 	interval: Interval = branch.intervalComplement.distal
 
@@ -58,7 +58,7 @@ def countBranch(lineSegment: int, branch: Branch, n: int, depth: int) -> int:
 
 		intervalDistal: Interval = crossLine(interval.attachedTo, branch)
 		intervalProximal: Interval = crossLine(interval.attachedTo.advance, branchAdvance)
-		total += countCrossing(lineSegment, interval.attachedTo, n, depth)
+		total += countCrossing(lineSegment, interval.attachedTo, n, depth, symmetric=symmetric)
 
 		for uncross in (intervalDistal, intervalProximal):
 			uncross.proximal.distal.proximal.distal = uncross.distal
@@ -79,7 +79,7 @@ def crossLine(attachedTo: Branch, branch: Branch) -> Interval:
 	attachedTo.intervalComplement.distal = interval
 	return interval
 
-def doTheNeedful(n: int) -> int:
+def doTheNeedful(n: int, *, symmetric: bool) -> int:
 	tree: Branch = makeBranch()
 	lineSegment: int = 0
 	depth: int = 0
@@ -87,4 +87,4 @@ def doTheNeedful(n: int) -> int:
 	crossLine(tree.advance, makeBranch().advance)
 	lineSegment += 1
 	depth += 1
-	return countCrossing(lineSegment, tree, n, depth) * 2
+	return countCrossing(lineSegment, tree, n, depth, symmetric=symmetric) * (2 - symmetric)
