@@ -25,6 +25,7 @@ from __future__ import annotations
 
 from itertools import repeat, starmap
 from mapFolding.algorithms.permutations_semi import doTheNeedful as do
+from mapFolding.oeis import getMetadata
 from mapFolding.theTypes import OEISid
 from typing import TYPE_CHECKING
 import dataclasses
@@ -171,12 +172,11 @@ def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
 		wind: int = state.wind
 		state.side = left
 		visitGaps(state, mode)
-		if not mode.symmetricSemiMeanders or (crossingAfter != 2):
-			state.crossingAfter = crossingAfter
-			state.次node = 次node
-			state.wind = wind
-			state.side = right
-			visitGaps(state, mode)
+		state.crossingAfter = crossingAfter
+		state.次node = 次node
+		state.wind = wind
+		state.side = right
+		visitGaps(state, mode)
 	return state
 
 def visitGaps(state: StateStampMeander, mode: SettingsMode) -> None:
@@ -243,7 +243,7 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 			state.次nodeAfter = 次nodeLeft
 			move(state)
 		elif node.gapWindStop == 次gap:
-			if (mode.meanders or mode.semiMeanders) and wind == 0:
+			if mode.meanders and wind == 0:
 				nodeAfter.gapWindStop = 次nodeLeft
 				nodeAfter.sideWindStop = state.side
 		# DEVELOPMENT Note the difference from side = right. But, the `or` test may be an unreachable test for the second side.
@@ -283,7 +283,7 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 			state.次nodeAfter = 次nodeRight
 			move(state)
 		elif node.gapWindStop == 次gap:
-			if (mode.meanders or mode.semiMeanders) and wind == 0:
+			if mode.meanders and wind == 0:
 				nodeAfter.gapWindStop = 次nodeRight
 				nodeAfter.sideWindStop = state.side
 		elif state.gapWindStopVisited:
@@ -317,9 +317,8 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 	state.次gap[side ^ 1] = empty
 	state.次nodeAfter = 次nodeLeft
 	insert(state)
-	# TODO Why is an int not an int? Just like str?!
 
-	side ^= 1  # pyright: ignore[reportAttributeAccessIssue]
+	side = right
 	state.gapEnds = nodeAfter.gaps[side]
 	state.次gap[here] = 次nodeRight
 	state.end[side ^ 1] = state.crossingAfter
@@ -516,23 +515,20 @@ def initializeState(state: StateStampMeander) -> None:
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsMode:
 	meanders: bool = False
-	semiMeanders: bool = False
 	folds: bool = False
 	equivalenceClasses: bool = False
-	symmetricSemiMeanders: bool = False
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsGeneration:
-	oeisOffset: int = 1
 	Z0Z_normalizeIndex: int = 0
 
 lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
 	'A000136': (SettingsGeneration(), SettingsMode(folds=True)),
-	'A000560': (SettingsGeneration(oeisOffset=2), SettingsMode(symmetricSemiMeanders=True)),
-	'A000682': (SettingsGeneration(Z0Z_normalizeIndex=1), SettingsMode(semiMeanders=True)),
+	'A000560': (SettingsGeneration(), SettingsMode()),
+	'A000682': (SettingsGeneration(Z0Z_normalizeIndex=1), SettingsMode()),
 	'A001011': (SettingsGeneration(), SettingsMode(folds=True, equivalenceClasses=True)),
-	'A005316': (SettingsGeneration(oeisOffset=0), SettingsMode(meanders=True)),
-	'A077055': (SettingsGeneration(Z0Z_normalizeIndex=-1, oeisOffset=0), SettingsMode(meanders=True, equivalenceClasses=True)),
+	'A005316': (SettingsGeneration(), SettingsMode(meanders=True)),
+	'A077055': (SettingsGeneration(Z0Z_normalizeIndex=-1), SettingsMode(meanders=True, equivalenceClasses=True)),
 }
 
 def doTheNeedful(oeisID: OEISid, n: int) -> int:
@@ -573,14 +569,16 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		raise ValueError(message)
 
 	generationMode, mode = lookupSettings[oeisID]
-	if n < generationMode.oeisOffset:
-		message = f'I received `{n = }`, but OEIS sequence `{oeisID}` is not defined below `offset = {generationMode.oeisOffset}`.'
+	if n < getMetadata(oeisID)['offset']:
+		message = f'I received `{n = }`, but OEIS sequence `{oeisID}` is not defined below `offset = {getMetadata(oeisID)['offset']}`.'
 		raise ValueError(message)
 
 	nNormalized: int = n - generationMode.Z0Z_normalizeIndex
 	if nNormalized == 0:
 		return 1
 
+	if oeisID == 'A000560':
+		return do(nNormalized) // 2
 	if oeisID == 'A000682':
 		return do(nNormalized)
 
