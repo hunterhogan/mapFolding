@@ -135,66 +135,6 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 
 	return pathFilename
 
-# SEMIOTICS
-def foldsSymmetric_numbaOnTheorem2(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
-	"""Generate the folds-symmetric Theorem 2 module with typed `indices` conversion.
-
-	(AI generated docstring)
-
-	You can use this function to finish the folds-symmetric Theorem 2 module after
-	`numbaOnTheorem2()` has produced the first draft [1]. The function rewrites the generated
-	`indices` field initialization to wrap the stored value in `List(...)` from `numba.typed`
-	[2], adds the required import, writes the updated module to disk, and returns the written
-	path.
-
-	Parameters
-	----------
-	astModule : ast.Module
-		Source module used to generate the initial Theorem 2 variant.
-	identifiers : Default | None = None
-		Identifier mapping that selects symbol names and filesystem locations for the generated
-		module.
-	**keywordArguments : Any
-		Override values for identifier names, package names, and output-path settings.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Path to the updated generated module on disk.
-
-	See Also
-	--------
-	`addSymmetryCheck`
-		Generate the non-Numba folds-symmetric algorithm module.
-	`mapFolding.kitAST.mapFolding._count.numbaOnTheorem2`
-		Generate the base Theorem 2 Numba module before the folds-symmetric adjustment.
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding._count.numbaOnTheorem2`
-
-	[2] numba documentation
-		https://numba.readthedocs.io/en/stable/
-	"""
-	# TODO Can this be integrated?
-	identifiers = identifiers or defaultMapFoldingSymmetric
-	名DataclassInstance: str = keywordArguments.get('名DataclassInstance') or identifiers['variable']['stateInstance']
-	名Indices: str = keywordArguments.get('名Indices') or identifiers['variable']['indices']
-	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
-
-	pathFilename: PurePath = numbaOnTheorem2(astModule, identifiers, **keywordArguments)
-	astModule = parsePathFilename2astModule(pathFilename)
-
-	NodeChanger(Be.AnnAssign.valueIs(IfThis.isAttributeNamespaceIdentifier(名DataclassInstance, 名Indices))
-			, lambda node: Grab.valueAttribute(Then.replaceWith(Make.Call(Make.Name('List'), [raiseIfNone(node.value)])))(node)
-		).visit(astModule)
-
-	astModule.body.insert(0, Make.ImportFrom('numba.typed', [Make.alias('List')]))
-
-	write_astModule(astModule, pathFilename, identifierPackage=名Package)
-
-	return pathFilename
-
 def makeModulesFoldsSymmetric() -> None:
 	"""Make."""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultMapFolding['logicalPath']['algorithm'], identifierModule=defaultMapFolding['module']['algorithm'])
@@ -209,7 +149,7 @@ def makeModulesFoldsSymmetric() -> None:
 
 	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
-	foldsSymmetric_numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
+	numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':
 	makeModulesFoldsSymmetric()

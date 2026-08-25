@@ -12,9 +12,9 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSym
         state.leafComparison[state.leafConnectee] = (state.totalLeaves + state.次MiniGap - state.次Leaf) % state.totalLeaves
         state.次Leaf = state.次MiniGap
         state.leafConnectee += 1
-    for boxOfTuples in state.indices:
+    for arrayOfTuples in state.indices:
         state.leafConnectee = 1
-        for 次Left, 次Right in boxOfTuples:
+        for 次Left, 次Right in arrayOfTuples:
             if state.leafComparison[次Left] != state.leafComparison[次Right]:
                 state.leafConnectee = 0
                 break

@@ -14,19 +14,19 @@
 
 ## Data structures for better performance
 
-| Type        | Stable   | Ordered | Best For...       | Performance / Limitation Note                           |
-| :---------- | :------- | :------ | :---------------- | :------------------------------------------------------ |
-| iterator    | Fixed    | Yes     | Lazy processing   | Memory-efficient; single-use only.                      |
-| range       | Fixed    | Yes     | Integer sequences | $O(1)$ memory; $O(1)$ membership check.                 |
-| frozenset   | Fixed    | No      | Membership keys   | Hashable; used as keys for other sets/dicts.            |
-| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than lists; faster iteration.     |
-| NamedTuple  | Fixed    | Yes     | Named records     | Tuple performance with object-like access.              |
-| set         | Changing | No      | Uniqueness        | $O(1)$ lookup; high memory overhead (\~32 bytes/item).  |
-| Counter     | Changing | Yes     | Tallying          | Specialized for frequencies; supports multiset math.    |
-| deque       | Changing | Yes     | Stacks / Queues   | $O(1)$ at ends; $O(n)$ in middle; thread-safe ends.     |
-| list        | Changing | Yes     | General use       | $O(1)$ index; $O(n)$ insert/delete at start.            |
-| array.array | Changing | Yes     | Numeric data      | Stores raw C-types; memory compact; better cache use.   |
-| SortedList  | Changing | Sort    | Searchable data   | Maintains order automatically; $O(\\log n)$ operations. |
+| Type        | Stable   | Ordered | Best For...       | Performance / Limitation Note                         |
+| :---------- | :------- | :------ | :---------------- | :---------------------------------------------------- |
+| iterator    | Fixed    | Yes     | Lazy processing   | Memory-efficient; single-use only.                    |
+| range       | Fixed    | Yes     | Integer sequences | O(1) memory; O(1) membership check.                   |
+| frozenset   | Fixed    | No      | Membership keys   | Hashable; used as keys for other sets/dicts.          |
+| tuple       | Fixed    | Yes     | Static records    | Lower memory overhead than lists; faster iteration.   |
+| NamedTuple  | Fixed    | Yes     | Named records     | Tuple performance with object-like access.            |
+| set         | Changing | No      | Uniqueness        | O(1) lookup; high memory overhead (~32 bytes/item).   |
+| Counter     | Changing | Yes     | Tallying          | Specialized for frequencies; supports multiset math.  |
+| list        | Changing | Yes     | General use       | O(1) index; O(n) insert/delete at start.              |
+| deque       | Changing | Yes     | Stacks / Queues   | O(1) at ends; O(n) in middle; thread-safe ends.       |
+| array.array | Changing | Yes     | Numeric data      | Stores raw C-types; memory compact; better cache use. |
+| SortedList  | Changing | Sort    | Searchable data   | Maintains order automatically; O(log n) operations.   |
 
 ## 2^n-dimensional maps
 

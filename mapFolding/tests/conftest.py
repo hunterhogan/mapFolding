@@ -1,26 +1,4 @@
-"""Test framework infrastructure and shared fixtures for mapFolding.
-
-This module serves as the foundation for the entire test suite, providing standardized
-fixtures and testing utilities. It implements the Single
-Source of Truth principle for test configuration and establishes consistent patterns
-that make the codebase easier to extend and maintain.
-
-The testing framework is designed for multiple audiences:
-- Contributors who need to understand the test patterns
-- AI assistants that help maintain or extend the codebase
-- Users who want to test custom modules they create
-- Future maintainers who need to debug or modify tests
-
-Key Components:
-- Standardized assertion functions with uniform error messages
-- Test data generation from OEIS sequences for reproducible results
-- Mock objects for external dependencies and timing-sensitive operations
-
-The module follows Domain-Driven Design principles, organizing test concerns around
-the mathematical concepts of map folding rather than technical implementation details.
-This makes tests more meaningful and easier to understand in the context of the
-research domain.
-"""
+"""Test framework infrastructure and shared fixtures for mapFolding."""
 
 from __future__ import annotations
 
@@ -66,7 +44,7 @@ def rtol(request: FixtureRequest) -> float:
 @pytest.fixture(autouse=True)
 def setupWarningsAsErrors() -> Generator[None, Any]:
 	"""Convert all warnings to errors for all tests."""
-	warnings.filterwarnings("error")
+	warnings.filterwarnings('error')
 	yield
 	warnings.resetwarnings()
 
@@ -125,5 +103,4 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 	"""
 	def loader(totalDimensions: int) -> NDArray[numpy.uint8]:
 		return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
-
 	return loader

@@ -26,9 +26,9 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSym
 
 		state.leafConnectee += 1
 
-	for boxOfTuples in state.indices:
+	for arrayOfTuples in state.indices:
 		state.leafConnectee = 1
-		for 次Left, 次Right in boxOfTuples:
+		for 次Left, 次Right in arrayOfTuples:
 			# TODO The entire `leafComparison` array is computed, so when a `leafComparison` is
 			# disqualified, all of the computations for the remaining tuples were unnecessary
 			# computations. However, with the current algorithm for computing `leafComparison`, it

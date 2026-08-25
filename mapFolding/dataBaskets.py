@@ -1,10 +1,10 @@
 # TODO `StateMapFolding` restructure https://github.com/python/typing/discussions/2092
 # pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportUnknownMemberType=false, reportAttributeAccessIssue=false
 #=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
-# pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false
+#pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false
 #=SIN= Ruff suppression: Numba StructRef integration requires its private payload utilities and native value accessor.
-# ruff: file-ignore[function-call-in-dataclass-default-argument]
-# ty: ignore[invalid-assignment, unresolved-attribute]
+#ruff: file-ignore[function-call-in-dataclass-default-argument]
+#ty: ignore[invalid-assignment, unresolved-attribute]
 """
 Computational state orchestration for map folding analysis.
 
@@ -43,7 +43,7 @@ import dataclasses
 import numpy
 
 if TYPE_CHECKING:
-	from numpy import dtype, ndarray
+	from numpy import dtype, intp, ndarray
 	from types import EllipsisType
 	from typing import Any
 
@@ -266,7 +266,7 @@ class StateMapFoldingSymmetric:
 	"""Unchanging array representing connections between all leaves."""
 	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	indices: list[list[tuple[int, int]]] = dataclasses.field(init=False)
+	indices: 形Array3DTotalLeaves = dataclasses.field(init=False, metadata={'dtype': 形Array3DTotalLeaves.__args__[1].__args__[0]})
 	"""Precomputed index pairs for symmetric fold checking."""
 	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
 	"""Unchanging total number of leaves in the map."""
@@ -286,9 +286,10 @@ class StateMapFoldingSymmetric:
 		totalLeavesAsInt = int(self.totalLeaves)
 		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		self.indices = [[((次 + folding) % (self.totalLeaves + 1), (-2 - 次 + folding) % (self.totalLeaves + 1))
-				for 次 in range(self.totalLeaves // 2)]
-				for folding in range(self.totalLeaves + 1)]
+		arrayIndexCoordinates: ndarray[tuple[int, int, int], dtype[intp]] = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2), dtype=int)
+		self.indices = numpy.stack(((arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1)
+							, (-2 - arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1))
+							, axis=2).astype(self.__dataclass_fields__['indices'].metadata['dtype'], copy=False)
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))

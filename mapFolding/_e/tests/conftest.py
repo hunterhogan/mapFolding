@@ -41,7 +41,7 @@ def path_tmpTesting(tmp_path: Path) -> Path:
 	return tmp_path
 
 @pytest.fixture()
-def arrayAlbum2上nDimensional(totalDimensions: int) -> NDArray[numpy.uint8]:
+def arrayAlbum(totalDimensions: int) -> NDArray[numpy.uint8]:
 	return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
 
 @pytest.fixture(params=(0.75,))
@@ -49,8 +49,8 @@ def CPUlimit(request: pytest.FixtureRequest) -> Limitation:
 	return request.param
 
 @pytest.fixture()
-def expectedAlbum(request: FixtureRequest, arrayAlbum2上nDimensional: Callable[[int], NDArray[numpy.uint8]]) -> NDArray[numpy.uint8]:
-	return arrayAlbum2上nDimensional(int(request.param))
+def expectedAlbum(request: FixtureRequest, arrayAlbum: Callable[[int], NDArray[numpy.uint8]]) -> NDArray[numpy.uint8]:
+	return arrayAlbum(int(request.param))
 
 @pytest.fixture(params=(2, 3, 4), ids=lambda pileDepth: f"pileDepth={pileDepth}")
 def pileDepthPinningTests(request: pytest.FixtureRequest) -> int:

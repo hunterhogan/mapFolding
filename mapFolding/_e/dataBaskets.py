@@ -213,22 +213,20 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		def pileOpenByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
 				return self.pileUndetermined吗(domain[次])
-
 			return workhorse
 
 		def leafInPileRangeByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
 				choicesLeaf: ChoicesLeaf = raiseIfNone(self.getChoicesLeaf(domain[次], default=bit_mask(len(self))))
 				return leafInChoicesLeaf吗(leaves[次], choicesLeaf)
-
 			return workhorse
 
 		def isPinnedAtPileByIndex(leaf: Leaf, 次: int) -> CallableFunction[[Sequence[Pile]], bool]:
 			def workhorse(domain: Sequence[Pile]) -> bool:
 				return self.leafPinnedAtPile吗(leaf, domain[次])
-
 			return workhorse
 
+		self._solidifyLeafSpace()
 		if any(map(self.leafNotPinned吗, leaves)):
 			for 次 in range(len(leaves)):
 				"""Redefine leavesDomain by filtering out domains that are not possible with the current `PermutationSpace`."""
@@ -516,7 +514,42 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
 			leavesPinned: PinnedLeaves = self.pinnedLeaves()
 			antiChoicesLeaf: ChoicesLeaf = _e.makeAntiChoicesLeaf(len(self), leavesPinned.values())
-			for pile in filterfalse[Pile](leavesPinned.__contains__, self):
+			r"""
+(.venv) C:\apps\mapFolding>c:\apps\mapFolding\.venv\Scripts\python.exe c:/apps/mapFolding/easyRun/pinning.py
+concurrent.futures.process._RemoteTraceback:
+
+Traceback (most recent call last):
+  File "C:\Program Files\Python314\Lib\concurrent\futures\process.py", line 254, in _process_worker
+    r = call_item.fn(*call_item.args, **call_item.kwargs)
+  File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 503, in _pinLeavesByDomainConcurrentTask
+    state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\apps\mapFolding\mapFolding\_e\dataBaskets.py", line 229, in deconstructDomainsCombined
+    self._solidifyLeafSpace()
+    ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\apps\mapFolding\mapFolding\_e\dataBaskets.py", line 517, in _solidifyLeafSpace
+    for pile in filterfalse[Pile](leavesPinned.__contains__, self):
+                ~~~~~~~~~~~^^^^^^
+TypeError: type 'itertools.filterfalse' is not subscriptable
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:\apps\mapFolding\easyRun\pinning.py", line 40, in <module>
+    state = pinIt.pinLeavesDimension0(state)
+  File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 642, in pinLeavesDimension0
+    return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
+  File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 469, in _pinLeavesByDomain
+    state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
+                                       ~~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python314\Lib\concurrent\futures\_base.py", line 447, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+  File "C:\Program Files\Python314\Lib\concurrent\futures\_base.py", line 396, in __get_result
+    raise self._exception
+TypeError: type 'itertools.filterfalse' is not subscriptable
+			"""
+			for pile in filterfalse(leavesPinned.__contains__, self):
 				self[pile] &= antiChoicesLeaf
 			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
 			if count < self.leafCount:
@@ -527,14 +560,18 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		if choicesLeaf吗(rangeOfPile):
 			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
 			rangeOfPile = _e.choicesLeafLeafNone(rangeOfPile)
-			if choicesLeaf吗(rangeOfPile):
-				self[pile] = rangeOfPile
-			elif rangeOfPile is None:
+			if rangeOfPile is None:
 				self.valid = False
+			elif choicesLeaf吗(rangeOfPile):
+				self[pile] = rangeOfPile
+			elif rangeOfPile in self.values():
+				self.valid = False
+			else:
+				self[pile] = rangeOfPile
 
 	# TODO Does it matter whether this is a property or a method?
 	def pinnedLeaves(self) -> PinnedLeaves:
-		"""Create a dictionary *unsorted* by `pile` of only `pile: leaf` without `pile: choicesLeaf`.
+		"""Create a dictionary by `pile` of only `pile: leaf` without `pile: choicesLeaf`.
 
 		Returns
 		-------
@@ -544,7 +581,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return filterLeaf(leaf吗, self)
 
 	def undeterminedPiles(self) -> UndeterminedPiles:
-		"""Create a dictionary *unsorted* by `pile` of all `pile: choicesLeaf` in `PermutationSpace`.
+		"""Create a dictionary by `pile` of all `pile: choicesLeaf` in `PermutationSpace`.
 
 		Returns
 		-------

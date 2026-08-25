@@ -309,7 +309,7 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 		raise ValueError(message)
 
 	pileProcessingOrder: list[Pile] = []
-	if 0 < depth:
+	if 0 <= depth:
 		pileProcessingOrder.extend([pileOrigin])
 	if 1 <= depth:
 		pileProcessingOrder.extend([零, neg(零) + state.首])
