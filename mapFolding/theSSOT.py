@@ -29,8 +29,22 @@ class mapFoldingPackageSettings(PackageSettings):
 
 	pathDataSamples: Path = dataclasses.field(init=False, default=Path())
 
-	def __post_init__(self, identifierPackageFALLBACK: str) -> None:  # ruff: ignore[undocumented-magic-method]
-		# DOCUMENT
+	def __post_init__(self, identifierPackageFALLBACK: str) -> None:
+		"""Finish package initialization from `identifierPackageFALLBACK` and derive `pathDataSamples`.
+
+		(AI generated docstring)
+
+		This method completes initialization of `mapFoldingPackageSettings`. This method delegates
+		package discovery and package-root resolution to the inherited initialization logic using
+		`identifierPackageFALLBACK`. This method then sets `pathDataSamples` to
+		`pathPackage / 'tests' / 'dataSamples'` so the package can locate bundled sample data.
+
+		Parameters
+		----------
+		identifierPackageFALLBACK : str
+			Fallback package identifier used when automatic package discovery cannot resolve the
+			package name during initialization.
+		"""
 		super().__post_init__(identifierPackageFALLBACK)
 		self.pathDataSamples = self.pathPackage / 'tests' / 'dataSamples'
 

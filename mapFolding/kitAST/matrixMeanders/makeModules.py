@@ -55,8 +55,64 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
-def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+	"""Generate the shared Dyck-path module from `astModule` for matrix meander algorithms.
+
+	(AI generated docstring)
+
+	You can use this function to build the generated share module from the Dyck-path callable stored
+	in `astModule`. The function extracts the callable with `astToolkit` [1], removes source
+	decorators, applies a light `numba` compilation decorator [2], rewrites `int` references to
+	`形ArcCode` [3], and writes the assembled module to disk through `toDisk` [4].
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Parsed source module that contains the Dyck-path callable to extract and transform.
+	identifiers : Default | None = None
+		Identifier mapping that provides the source callable name, output module name, and package
+		defaults. When `identifiers` is `None`, `makeShare` uses `defaultMatrixMeanders` [5].
+	**override : Any
+		Explicit override values that can replace the output module name and path-resolution settings
+		forwarded to `toDisk` [4].
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the written generated share module.
+
+	See Also
+	--------
+	`makeCountBigInt`
+		Generate the big-integer meander counting module from the same source `astModule`.
+
+	Transformations
+	---------------
+	The generated module contains only the extracted Dyck-path callable. `makeShare` clears the
+	original decorator list before the function adds the repository's light JIT settings [2].
+	`makeShare` also imports `形ArcCode` and wraps the final `return` expression in
+	`形ArcCode(...)` so the written module returns the fixed-width arc-code type [3].
+
+	Examples
+	--------
+	In this module, `makeModulesMeanders` generates the share module with the following call.
+
+		```python
+		makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+		```
+
+	References
+	----------
+	[1] astToolkit - Context7
+		https://context7.com/hunterhogan/asttoolkit
+	[2] Numba documentation.
+		https://numba.readthedocs.io/en/stable/
+	[3] `mapFolding.theTypes.形ArcCode`
+
+	[4] `mapFolding.kitAST.mapFolding._count.toDisk`
+
+	[5] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
+	"""
 	identifiers = identifiers or defaultMatrixMeanders
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
 	ingredients.astFunctionDef.decorator_list.clear()
