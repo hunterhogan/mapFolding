@@ -22,35 +22,26 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
-	"""Create a named `numpy.memmap` work array for matrix-meander computation [1].
-
-	(AI generated docstring)
-
-	You can use this function to allocate a `numpy.memmap` [1] with the requested `shape`
-	and integer `datatype`. The `name` value supplies the file stem for the backing file,
-	so `name` must not be `None`.
+	"""Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
 
 	Parameters
 	----------
 	shape : tuple[Any, ...]
-		Shape of the memory-mapped array.
+		Shape of the `ndarray`.
 	datatype : type[形NumPyInteger]
-		Integer dtype used for each array element.
+		Integer `dtype` used for each array element.
 	name : str | None = None
-		File stem used to build the backing path `f"{name}.mM"`.
+		If applicable, filename stem `f"{name}.mM"` for a file based `ndarray`.
 
 	Returns
 	-------
 	container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-		Memory-mapped array backed by the file `f"{name}.mM"` in the current working directory.
-
-	References
-	----------
-	[1] `numpy.memmap`
-		https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
+		`numpy.ndarray` of `shape` with `datatype`.
 	"""
-	# Change from memmap to in memory ndarray, merely by changing this function.
-	return memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
+	# Change from memmap to in-memory ndarray, merely by changing this function.
+	if False:
+		return memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
+	return numpy.zeros(shape, datatype)
 
 def count(state: StateMeanders) -> StateMeanders:
 	"""Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
@@ -84,7 +75,7 @@ def count(state: StateMeanders) -> StateMeanders:
 	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
 
 	shape = ShapeArray(length=len(state.dictionaryMeanders), indexes=indexesAnalyzed)
-	arrayMeanders: ArrayArcCode = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayMeanders')
+	arrayMeanders: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
 	del shape
 
 	arrayMeanders[slicerArcCode] = array(list(state.dictionaryMeanders.keys()), dtype=形ArcCode)
@@ -92,7 +83,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
 	state.dictionaryMeanders = {}
 
-	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary})
+	boundaryProgressBar: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=False)
 	while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
 		def recordAnalysis(arrayAnalyzed: ArrayArcCode, 次Target: int, arcCode: Array1DArcCode, arrayMeanders: ArrayArcCode) -> int:
 			"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`.
@@ -124,11 +115,11 @@ def count(state: StateMeanders) -> StateMeanders:
 		state.setBitsLocator()
 
 		shape = ShapeArray(length=getTotalBuckets(state, len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)
-		arrayAnalyzed: ArrayArcCode = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayAnalyzed')
+		arrayAnalyzed: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
 		del shape
 
 		shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indexes=indexesWorkbench)
-		arrayWorkbench: ArrayArcCode = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayPrepArea')
+		arrayWorkbench: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayPrepArea')
 		del shape
 
 		#=EndNotes##arrayWorkbench=
@@ -275,7 +266,7 @@ def count(state: StateMeanders) -> StateMeanders:
 		unique: UniqueInverseResult[形ArcCode] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
 
 		shape = ShapeArray(length=len(unique.values), indexes=indexesAnalyzed)
-		arrayMeanders = makeDataContainer(shape=shape, datatype=形ArcCode, name='arrayMeanders')
+		arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
 		del shape
 
 		arrayMeanders[slicerArcCode] = unique.values
@@ -285,7 +276,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
 		del arrayAnalyzed
 
-		if 45 <= state.n:  # Data collection for 'reference' directory.
+		if 45 <= state.n:  # Data collection for 'research' directory.
 			# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
 			print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
 		boundaryProgressBar.update()
@@ -293,14 +284,15 @@ def count(state: StateMeanders) -> StateMeanders:
 	boundaryProgressBar.close()
 	state.dictionaryMeanders = {int(key): int(value) for key, value in zip(arrayMeanders[slicerArcCode], arrayMeanders[slicerCrossings], strict=True)}
 
-	del arrayMeanders
+	if isinstance(arrayMeanders, memmap):
+		del arrayMeanders
 
-	with suppress(Exception):
-		pathlib.Path('arrayMeanders.mM').unlink()
-	with suppress(Exception):
-		pathlib.Path('arrayAnalyzed.mM').unlink()
-	with suppress(Exception):
-		pathlib.Path('arrayPrepArea.mM').unlink()
+		with suppress(Exception):
+			pathlib.Path('arrayMeanders.mM').unlink()
+		with suppress(Exception):
+			pathlib.Path('arrayAnalyzed.mM').unlink()
+		with suppress(Exception):
+			pathlib.Path('arrayPrepArea.mM').unlink()
 
 	return state
 
