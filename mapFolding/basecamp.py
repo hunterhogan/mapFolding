@@ -51,7 +51,6 @@ References
 """
 from __future__ import annotations
 
-from mapFolding.algorithms.matrixMeandersShare import makeDictionaryMeanders
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
@@ -277,7 +276,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	return totalFolds
 
 #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
-# ruff: ignore[unused-function-argument]
+#ruff: ignore[unused-function-argument]
 def countMeanders(
 	kind: Literal['semi', 'meanders'] | LiteralString
 	, n: int
@@ -327,9 +326,7 @@ def countMeanders(
 			case 'matrixMeanders' | _:
 				from mapFolding.algorithms.matrixMeanders import doTheNeedful
 
-		boundary: int = n - 1
-		dictionaryMeanders: dict[int, int] = makeDictionaryMeanders(kind, n, boundary)
-		state: StateMeanders = StateMeanders(n, kind, boundary, dictionaryMeanders)
+		state: StateMeanders = StateMeanders(n, kind)
 		countTotal: int = doTheNeedful(state)
 
 #-------- Follow memorialization instructions ---------------------------------------------

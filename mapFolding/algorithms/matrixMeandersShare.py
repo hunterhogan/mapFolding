@@ -3,13 +3,12 @@ from __future__ import annotations
 from humpy_cytoolz import get_in
 from hunterMakesPy import errorL33T, raiseIfNone
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
-from mapFolding.theTypes import 形ArcCode
+from mapFolding.theTypes import ArrayArcCode, 形ArcCode
 from typing import overload, TYPE_CHECKING
 import numba
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
-	from numpy import dtype, ndarray
 	from typing import Any, Literal, LiteralString
 	import pandas
 
@@ -24,7 +23,7 @@ if TYPE_CHECKING:
 - Convert duplicate code to procedures.
 """
 
-def integersWide吗(state: StateMeanders, *, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]] | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+def integersWide吗(state: StateMeanders, *, arrayMeanders: ArrayArcCode | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
@@ -35,7 +34,7 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: ndarray[tuple[Any, .
 		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of
 		`state.dictionaryMeanders`.
 	fixedSizeMAXIMUMarcCode : bool = False
-		Set this to `True` if you cast `state.MAXIMUMarcCode` to the same fixed size integer type as
+		Set this to `True` if you cast `state.arcCodeMAXIMUM` to the same fixed size integer type as
 		`dtypeArcCode`.
 
 	Returns
@@ -45,20 +44,20 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: ndarray[tuple[Any, .
 
 	Notes
 	-----
-	Casting `state.MAXIMUMarcCode` to a fixed-size 64-bit unsigned integer might cause the flow to be
-	a little more complicated because `MAXIMUMarcCode` is usually 1-bit larger than the `max(arcCode)`
+	Casting `state.arcCodeMAXIMUM` to a fixed-size 64-bit unsigned integer might cause the flow to be
+	a little more complicated because `arcCodeMAXIMUM` is usually 1-bit larger than the `max(arcCode)`
 	value.
 
 	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,*
 	semi), then the flow will go to a function that does not use fixed size integers. When the
 	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
-	with fixed size integers. In that case, casting `MAXIMUMarcCode` to a fixed size merely delays the
+	with fixed size integers. In that case, casting `arcCodeMAXIMUM` to a fixed size merely delays the
 	transition from one function to the other by one iteration.
 
 	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the
 	function with fixed size integers and usually stays there until `crossings` is huge, which is near
-	the end of the computation. If you cast `MAXIMUMarcCode` into a 64-bit unsigned integer, however,
-	then around `state.boundary == 28`, the bit width of `MAXIMUMarcCode` might exceed the limit. That
+	the end of the computation. If you cast `arcCodeMAXIMUM` into a 64-bit unsigned integer, however,
+	then around `state.boundary == 28`, the bit width of `arcCodeMAXIMUM` might exceed the limit. That
 	will cause the flow to go to the function that does not have fixed size integers for a few
 	iterations before returning to the function with fixed size integers.
 	"""
@@ -72,43 +71,35 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: ndarray[tuple[Any, .
 		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
 		crossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
 
-	MAXIMUMarcCode: int = 0
+	arcCodeMAXIMUM: int = 0
 	if fixedSizeMAXIMUMarcCode:
-		MAXIMUMarcCode = state.MAXIMUMarcCode
+		arcCodeMAXIMUM = state.arcCodeMAXIMUM
 
 	return (raiseIfNone(state.bitWidthLimitArcCode) < arcCodeWidest
 		or raiseIfNone(state.bitWidthLimitCrossings) < crossingsWidest
-		or raiseIfNone(state.bitWidthLimitArcCode) < MAXIMUMarcCode
+		or raiseIfNone(state.bitWidthLimitArcCode) < arcCodeMAXIMUM
 		)
 
-def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int) -> dict[int, int]:
+def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
 	"""Create the starting `dictionaryMeanders` for a matrix meander count.
 
-	(AI generated docstring)
-
-	You can use this function to build the initial `arcCode` → count mapping for a semi-meander
-	or meander computation. The function chooses the starting `arcCode` pattern from `kind`, `n`,
-	and `boundary`, and returns a dictionary whose values are initialized to `1`. For
-	`kind == 'semi'`, the function returns one or more starting `arcCode` values determined by the
-	parity of `n` and extended until the largest `arcCode` reaches the range implied by
-	`boundary`. For `kind == 'meanders'`, the function returns one starting `arcCode`, with the
-	choice determined by the parity of `n`.
+	You can use this function to build the initial `arcCode` → total meanders count mapping. For `kind
+	== 'semi'`, the dictionary has two `arcCode` keys based on the parity of `n` and the magnitude of
+	`boundary`. For `kind == 'meanders'`, the dictionary has one `arcCode` based on the parity of `n`.
 
 	Parameters
 	----------
 	kind : Literal['semi', 'meanders'] | LiteralString
-		Which family of meander count to initialize. Supported values are `'semi'` and `'meanders'`.
+		Which family of meander count to initialize.
 	n : int
-		The sequence index whose parity determines the starting `arcCode` pattern.
-	boundary : int
-		The current boundary width used to limit how many initial semi-meander `arcCode` values to
-		generate.
+		The number of times the meander crosses the road.
+	boundary : int = `n` - 1
+		The boundary from which to start counting.
 
 	Returns
 	-------
 	dictionaryMeanders : dict[int, int]
-		A dictionary whose keys are initial `arcCode` values and whose values are all initialized to
-		`1`.
+		A dictionary whose keys are `arcCode` and whose values are `1`.
 
 	Raises
 	------
@@ -116,30 +107,32 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 		Raised when `kind` is not `'semi'` or `'meanders'`.
 	"""
 	# TODO Consider: If semi is essentially A000136 * totalLeaves, then my graphs of A000136 are
-	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I
-	# use the graphs to find the midpoint of a semi computation using the matrix algorithm? The
-	# problem with the matrix algorithm is memory usage. Unique signatures (buckets) grows
-	# predictably. Cutting the count in half... In `doTheNeedful`, I used `while state.boundary > 0:`
-	# and the ratio trick to find the midpoint: it didn't work.
+	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi. Can I use
+	# the graphs to find the midpoint of a semi computation using the matrix algorithm? NO. In
+	# `doTheNeedful`, I used `while state.boundary > 0:` and the ratio trick to find the midpoint: it
+	# didn't work.
+	if not boundary:
+		boundary = n - 1
+
 	if kind == 'semi':
 		if n == 1:
-			#=Sin= early return.
-			return {0b1: 1}
-		elif n & 0b1:
-			arcCode: int = 0b101
+			dictionaryMeanders: dict[int, int] = {0b1: 1}
 		else:
-			arcCode = 0b1
-		boxOfArcCodes: list[int] = [(arcCode << 1) | arcCode]
-#										   0b1010 | 0b0101 is 0b1111, or 0xf
-#											 0b10 |   0b01 is   0b11, or 0x3
+			if n & 0b1:
+				arcCode: int = 0b101
+			else:
+				arcCode = 0b1
+			boxOfArcCodes: list[int] = [(arcCode << 1) | arcCode]
+#											   0b 1010 | 0b 0101 = 0b 1111, or 0xf
+#											   0b   10 | 0b   01 = 0b   11, or 0x3
 
-		MAXIMUMarcCode: int = 1 << (2 * boundary + 4)
-		while boxOfArcCodes[-1] < MAXIMUMarcCode:
-			arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
-			boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
-			# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
-			# See "mapFolding/reference/A000682facts.py"
-		dictionaryMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
+			arcCodeMAXIMUM: int = 1 << (2 * boundary + 4)
+			while boxOfArcCodes[-1] < (arcCodeMAXIMUM >> 8):
+				arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
+				boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
+				# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
+				# See "mapFolding/research/matrixMeanders/A000682facts.py"
+			dictionaryMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
 
 	elif kind == 'meanders':
 		if n & 0b1:
@@ -158,16 +151,14 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode: ...
 
 @overload
-def flipTheExtra_0b1(intWithExtra_0b1: ndarray[tuple[Any, ...], dtype[形ArcCode]]) -> ndarray[tuple[Any, ...], dtype[形ArcCode]]: ...
+def flipTheExtra_0b1(intWithExtra_0b1: ArrayArcCode) -> ArrayArcCode: ...
 
 @overload
 def flipTheExtra_0b1(intWithExtra_0b1: pandas.Series[Any]) -> pandas.Series[Any]: ...
 
 #=SIN= Pyright suppression: `numba.vectorize` is partially unknown.
 @numba.vectorize((f"{形ArcCode.__name__}({形ArcCode.__name__})",), cache=True, nopython=True)  # pyright: ignore[reportUntypedFunctionDecorator, reportUnknownMemberType]
-def flipTheExtra_0b1(
-	intWithExtra_0b1: 形ArcCode | ndarray[tuple[Any, ...], dtype[形ArcCode]] | pandas.Series[Any],
-) -> 形ArcCode | ndarray[tuple[Any, ...], dtype[形ArcCode]] | pandas.Series[Any]:
+def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode | ArrayArcCode | pandas.Series[Any]) -> 形ArcCode | ArrayArcCode | pandas.Series[Any]:
 	"""Flip a bit based on Dyck path with a Numba-generated universal function [1].
 
 	You can call `flipTheExtra_0b1` with a `numpy.uint64`, a `numpy.ndarray` [2], or a

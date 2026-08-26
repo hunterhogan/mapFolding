@@ -8,9 +8,10 @@ from typing import TYPE_CHECKING, TypedDict, TypeVar
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
 	from hunterMakesPy.theTypes import Limitation
+	from numpy import bool as numpy_bool, intp as numpy_intp
 	from os import PathLike
 	from pathlib import PurePosixPath
-	from typing import LiteralString, TypeAlias
+	from typing import Any, LiteralString, TypeAlias
 
 type OEISid = LiteralString
 
@@ -27,6 +28,11 @@ type OEISid = LiteralString
 
 形Crossings: TypeAlias = numpy_uint64
 """The fixed-size integer type used to store `crossings`."""
+
+type Array1DArcCode = ndarray[tuple[int], dtype[形ArcCode]]
+type Array1DBoolean = ndarray[tuple[int], dtype[numpy_bool]]
+type ArrayArcCode = ndarray[tuple[Any, ...], dtype[形ArcCode]]
+type Array1DSelector = ndarray[tuple[int], dtype[numpy_intp]]
 
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
 

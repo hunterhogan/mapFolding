@@ -39,7 +39,7 @@ import numpy
 if TYPE_CHECKING:
 	from numpy import dtype, intp, ndarray
 	from types import EllipsisType
-	from typing import Any
+	from typing import Any, Literal, LiteralString
 
 @dataclasses.dataclass(slots=True)
 class StateMapFolding:
@@ -366,12 +366,12 @@ class StateMeanders:
 
 	n: int
 	"""The index of the meanders problem being solved."""
-	kind: str
+	kind: Literal['semi', 'meanders'] | LiteralString
 	"""'semi' for semi-meanders or 'meanders' for meanders."""
 
-	boundary: int
+	boundary: int = 0
 	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
-	dictionaryMeanders: dict[int, int]
+	dictionaryMeanders: dict[int, int] = dataclasses.field(default_factory=dict[int, int])
 	"""A Python `dict` (*dict*ionary) of `arcCode` to `crossings`. The values are stored as Python `int`
 	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
 	'bigint' (big *int*eger)."""
@@ -381,7 +381,7 @@ class StateMeanders:
 	`dataclass` computes a `property` from `bitWidth`."""
 	bitsLocator: int = 0
 	"""An odd-parity bit-mask with `bitWidth` bits."""
-	MAXIMUMarcCode: int = 0
+	arcCodeMAXIMUM: int = 0
 	"""The maximum value of `arcCode` for the current iteration of the transfer matrix."""
 
 	bitWidthLimitArcCode: int | None = None
@@ -395,7 +395,7 @@ class StateMeanders:
 		self.boundary -= 1
 		self.setBitWidth()
 		self.setBitsLocator()
-		self.setMAXIMUMarcCode()
+		self.set_arcCodeMAXIMUM()
 
 	def setBitsLocator(self) -> None:
 		"""Compute an odd-parity bit-mask with `bitWidth` bits.
@@ -421,15 +421,24 @@ class StateMeanders:
 		"""Set `bitWidth` from the current `arrayMeanders`."""
 		self.bitWidth = int(arrayMeanders.max()).bit_length()
 
-	def setMAXIMUMarcCode(self) -> None:
+	def set_arcCodeMAXIMUM(self) -> None:
 		"""Compute the maximum value of `arcCode` for the current iteration of the transfer matrix."""
-		self.MAXIMUMarcCode = 1 << (2 * self.boundary + 4)
+		self.arcCodeMAXIMUM = 1 << (2 * self.boundary + 4)
 
 	def __post_init__(self) -> None:
 		"""Post init."""
+		if not self.boundary:
+			self.boundary = self.n - 1
+
+		if not self.dictionaryMeanders:
+			#=SIN= Avoid "circular import".
+			#ruff: ignore[import-outside-top-level]
+			from mapFolding.algorithms.matrixMeandersShare import makeDictionaryMeanders
+			self.dictionaryMeanders = makeDictionaryMeanders(self.kind, self.n, self.boundary)
+
 		self.setBitWidth()
 		self.setBitsLocator()
-		self.setMAXIMUMarcCode()
+		self.set_arcCodeMAXIMUM()
 
 		if self.bitWidthLimitArcCode is None:
 			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * 8  # bits
@@ -460,13 +469,13 @@ class ShapeArray(NamedTuple):
 	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
 
 	length: int
-	indices: int
+	indexes: int
 
 class ShapeSlicer(NamedTuple):
 	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
 
 	length: EllipsisType | slice
-	indices: int
+	axis: int
 
 #================== `numba` types =================================================================
 
