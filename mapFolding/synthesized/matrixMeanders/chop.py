@@ -6,6 +6,7 @@ from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, integers
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import Array1DArcCode, Array1DBoolean, Array1DSelector, ArrayArcCode, 形ArcCode, 形NumPyInteger
+from more_itertools import loops
 from numpy import (
 	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
 	bool as numpy_bool, dtype, greater as moreThan, less_equal as lessThanEqual, multiply, ndarray, subtract)
@@ -195,26 +196,30 @@ def doTheNeedful(state: StateMeanders) -> int:
 			# math, physical memory available and needed to perform operations.
 			nn: int = 2**22
 
-			# Chop it up and save the small dictionaries to disk?
-			# Save the analysis, and merge after?
 			lPFn: list[Path] = []
-			goByeBye()
-			for index, batch in enumerate(batched(state.dictionaryMeanders.items(), nn, strict=False)):
-				pp = Path(str(index) + '.pkl')
-				pp.write_bytes(pickle.dumps(dict(batch)))
-				lPFn.append(pp)
-			state.dictionaryMeanders = {}
+			index = 0
+			batch: list[tuple[int, int]] = []
+			while state.dictionaryMeanders:
+				for _loop in loops(min(nn, len(state.dictionaryMeanders))):
+					batch.append(state.dictionaryMeanders.popitem())
+					pp = Path(str(index) + '.pkl')
+					index += 1
+					pp.write_bytes(pickle.dumps(dict(batch)))
+					lPFn.append(pp)
+					batch = []
+					goByeBye()
 
-			# for pp in lPFn:
 			for pp in tqdm(lPFn, position=1, leave=False):
 				state.dictionaryMeanders = pickle.loads(pp.read_bytes())
 				pp.write_bytes(pickle.dumps(count(state).dictionaryMeanders))
 
 			pp = lPFn.pop()
 			state.dictionaryMeanders = pickle.loads(pp.read_bytes())
+			pp.unlink()
 			for pp in tqdm(lPFn, position=1, leave=False):
 				for arcCode, total in pickle.loads(pp.read_bytes()).items():
 					state.dictionaryMeanders[arcCode] = total + state.dictionaryMeanders.get(arcCode, 0)
+				pp.unlink()
 
 		tqdmBoundary.update(bb - state.boundary)
 	tqdmBoundary.close()
