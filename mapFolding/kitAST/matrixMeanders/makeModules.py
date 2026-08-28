@@ -11,6 +11,7 @@ from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, paramete
 from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef, renameName
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
+from operator import getitem
 from typing import TYPE_CHECKING
 import ast
 
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Make `countBigInt` module for meanders using `StateMeanders` dataclass."""
 	identifiers = identifiers or defaultMatrixMeanders
-	logicalPathAlgorithms: identifierDotAttribute = override.get('logicalPathAlgorithms') or identifiers['logicalPath']['algorithm']
+	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	名Callable: str = override.get('名Callable') or identifiers['function']['bigInt']
 	名CallableBigIntTest: str = override.get('名CallableBigIntTest') or identifiers['function']['bigIntTest']
@@ -49,11 +50,56 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 				, Grab.testAttribute(Then.replaceWith(testNew))
 	).visit(astModule)
 
-	astModule.body.insert(0, Make.ImportFrom(getLogicalPath(名Package, logicalPathAlgorithms, 名ModuleBigIntTest), list_alias=[Make.alias(名CallableBigIntTest)]))
+	astModule.body.insert(0, Make.ImportFrom(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleBigIntTest), list_alias=[Make.alias(名CallableBigIntTest)]))
 
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=名Module)
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
+
+def makeNumPyQQ(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	identifiers = identifiers or defaultMatrixMeanders
+
+	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, 'makeDataContainer')
+	astReturn: ast.Return = Make.Return(Make.Call(Make.Attribute(Make.Name('numpy'), 'zeros'), listParameters=[Make.Name('shape'), Make.Name('datatype')]))
+	NodeChanger(Be.Return, Then.replaceWith(astReturn)).visit(ingredients.astFunctionDef)
+
+	ingredientsModule = IngredientsModule(ingredients)
+
+	名Callable: str = override.get('名Callable') or identifiers['function']['counting']
+	ingredients = astModuleToIngredientsFunction(astModule, 名Callable)
+
+	NodeChanger(Be.While
+			, Then.insertThisAbove(raiseIfNone(NodeTourist[ast.While, list[ast.stmt]](Be.While, Then.extractIt(DOT.body)
+		).captureLastMatch(ingredients.astFunctionDef)))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.While, Then.removeIt).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Delete, Then.removeIt).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.If, Then.removeIt).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('goByeBye')), Then.removeIt).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Expr.valueIs(Be.Call.funcIs(Be.Attribute.valueIs(IfThis.isNameIdentifier('tqdmBoundary'))))
+			, Then.removeIt).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.AnnAssign.targetIs(IfThis.isNameIdentifier('tqdmBoundary')), Then.removeIt).visit(ingredients.astFunctionDef)
+	totalArcCodes: ast.expr = getitem(raiseIfNone(NodeTourist[ast.Call, list[ast.expr]](IfThis.isCallIdentifier('getTotalBuckets')
+			, Then.extractIt(DOT.args)).captureLastMatch(ingredients.astFunctionDef)), 1)
+	totalArcCodes = Make.Call(Make.Name('max'), [Make.Constant(65536), Make.Mult.join([Make.Constant(4), totalArcCodes])])
+	NodeChanger(Be.Call.funcIs(IfThis.isNameIdentifier('getTotalBuckets')), Then.replaceWith(totalArcCodes)).visit(ingredients.astFunctionDef)
+
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
+	NodeChanger(Be.Expr.valueIs(Be.Call.funcIs(Be.Attribute.valueIs(IfThis.isNameIdentifier(名DataclassInstance))))
+			, Then.removeIt).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.AugAssign, Then.removeIt).visit(ingredients.astFunctionDef)
+
+	ingredientsModule.appendIngredientsFunction(ingredients)
+
+	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
+	ingredients = astModuleToIngredientsFunction(astModule, 名CallableDispatcher)
+
+	reduceBoundary = Make.Expr(Make.Call(Make.Attribute(Make.Name(名DataclassInstance), 'reduceBoundary')))
+	NodeChanger(Be.If, Grab.orelseAttribute(Grab.index(0, Then.insertThisAbove([reduceBoundary])))).visit(ingredients.astFunctionDef)
+
+	ingredientsModule.appendIngredientsFunction(ingredients)
+
+	名Module: str = override.get('名Module') or identifiers['module']['chop']
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Generate the shared Dyck-path module from `astModule` for matrix meander algorithms.
@@ -130,6 +176,7 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makeNumPyQQ(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':

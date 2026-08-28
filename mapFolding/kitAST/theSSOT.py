@@ -112,8 +112,10 @@ defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
 defaultMatrixMeanders['module'].update({
     'algorithm': 'matrixMeanders'
     , 'bigInt': 'bigInt'
-    , 'share': 'matrixMeandersShare'
+    , 'chop': 'chop'
 })
+defaultMatrixMeanders['module']['numpy'] = defaultMatrixMeanders['module']['algorithm'] + 'NumPy'
+defaultMatrixMeanders['module']['share'] = defaultMatrixMeanders['module']['algorithm'] + 'Share'
 defaultMatrixMeanders['module']['bigIntTest'] = defaultMatrixMeanders['module']['share']
 defaultMatrixMeanders['logicalPath']['default'] = defaultMatrixMeanders['logicalPath']['algorithm']
 defaultMatrixMeanders['module']['default'] = defaultMatrixMeanders['module']['algorithm']

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from mapFolding.basecamp import countMeanders
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
 import gc
@@ -19,9 +20,11 @@ if __name__ == '__main__':
 
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
-	flow = 'matrixMeanders'
+	pathLikeWrite = settingsPackage.pathPackage / 'jobs'
 	flow = 'matrixPandas'
+	flow = 'matrixMeanders'
 	flow = 'matrixNumPy'
+	flow = 'qq'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			# ('A005316', 'meanders'),
@@ -46,14 +49,15 @@ if __name__ == '__main__':
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 45))
-		boxOf_n.extend(range(45, 50))
+		# boxOf_n.extend(range(45, 46))
+		boxOf_n.extend(range(46, 50))
 
 		for n in boxOf_n:
 			gc.collect()
 			timeStart: float = time.perf_counter()
 			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)
 
-			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
+			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=True)
 
 r"""
 

@@ -280,7 +280,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 def countMeanders(
 	kind: Literal['semi', 'meanders'] | LiteralString
 	, n: int
-	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
+	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'qq'] | LiteralString | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, CPUlimit: Limitation = None
@@ -321,6 +321,8 @@ def countMeanders(
 		match flow:
 			case 'matrixNumPy':
 				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+			case 'qq':
+				from mapFolding.synthesized.matrixMeanders.chop import doTheNeedful
 			case 'matrixPandas':
 				from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
 			case 'matrixMeanders' | _:

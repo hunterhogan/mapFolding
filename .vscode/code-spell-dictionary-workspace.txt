@@ -451,9 +451,12 @@ Weisstein's
 Wextra
 withitem
 wocky
+Xand
 xdist
 xlabel
 xmpz
+Xshift
+Xxor
 yada
 yapf
 yeong
