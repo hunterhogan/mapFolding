@@ -272,7 +272,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
         del arrayAnalyzed
 
-        if 45 <= state.n:  # Data collection for 'research' directory.
+        if 46 <= state.n:  # Data collection for 'research' directory.
             # kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
             print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
         tqdmBoundary.update()

@@ -176,7 +176,7 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makeNumPyQQ(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	# makeNumPyQQ(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)  # ruff: ignore[commented-out-code]
 	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':

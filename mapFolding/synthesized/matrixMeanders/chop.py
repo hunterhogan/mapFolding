@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from gc import collect as goByeBye
-from itertools import batched
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, integersWide吗
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
@@ -167,6 +166,9 @@ def count(state: StateMeanders) -> StateMeanders:
 	arrayMeanders[slicerArcCode] = unique.values
 	arrayMeanders[slicerCrossings] = 0
 	numpy.add.at(arrayMeanders[slicerCrossings], unique.inverse_indices, arrayAnalyzed[slicerCrossings])
+	if 45 <= state.n and state.boundary <= 18:  # Data collection for 'research' directory.
+		# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+		print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
 	state.dictionaryMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerCrossings]), strict=True))
 	return state
 
@@ -194,14 +196,16 @@ def doTheNeedful(state: StateMeanders) -> int:
 			tqdmBoundary.set_postfix(boundary=state.boundary)  # pyright: ignore[reportUnknownMemberType]
 
 			# math, physical memory available and needed to perform operations.
-			nn: int = 2**22
+			# DEVELOPMENT This still requires too much memory.
+			nn: int = 2**20
 
 			lPFn: list[Path] = []
 			index = 0
 			batch: list[tuple[int, int]] = []
-			while state.dictionaryMeanders:
-				for _loop in loops(min(nn, len(state.dictionaryMeanders))):
-					batch.append(state.dictionaryMeanders.popitem())
+			goByeBye()
+			if nn <= len(state.dictionaryMeanders):
+				while state.dictionaryMeanders:
+					batch.extend(state.dictionaryMeanders.popitem() for _loop in loops(min(nn, len(state.dictionaryMeanders))))
 					pp = Path(str(index) + '.pkl')
 					index += 1
 					pp.write_bytes(pickle.dumps(dict(batch)))
@@ -209,17 +213,21 @@ def doTheNeedful(state: StateMeanders) -> int:
 					batch = []
 					goByeBye()
 
-			for pp in tqdm(lPFn, position=1, leave=False):
-				state.dictionaryMeanders = pickle.loads(pp.read_bytes())
-				pp.write_bytes(pickle.dumps(count(state).dictionaryMeanders))
+				for pp in tqdm(lPFn, position=1, leave=False):
+					state.dictionaryMeanders = pickle.loads(pp.read_bytes())
+					pp.write_bytes(pickle.dumps(count(state).dictionaryMeanders))
 
-			pp = lPFn.pop()
-			state.dictionaryMeanders = pickle.loads(pp.read_bytes())
-			pp.unlink()
-			for pp in tqdm(lPFn, position=1, leave=False):
-				for arcCode, total in pickle.loads(pp.read_bytes()).items():
-					state.dictionaryMeanders[arcCode] = total + state.dictionaryMeanders.get(arcCode, 0)
+				pp = lPFn.pop()
+				state.dictionaryMeanders = pickle.loads(pp.read_bytes())
 				pp.unlink()
+				goByeBye()
+				for pp in tqdm(lPFn, position=1, leave=False):
+					for arcCode, total in pickle.loads(pp.read_bytes()).items():
+						state.dictionaryMeanders[arcCode] = total + state.dictionaryMeanders.get(arcCode, 0)
+					pp.unlink()
+					goByeBye()
+			else:
+				state = count(state)
 
 		tqdmBoundary.update(bb - state.boundary)
 	tqdmBoundary.close()

@@ -126,6 +126,11 @@ def count(state: StateMeanders) -> StateMeanders:
 
         tuple(map(analyzeArcCode, dictionaryArcCodeToCrossings.keys(), dictionaryArcCodeToCrossings.values()))
 
+        if 46 <= state.n:  # Data collection for 'research' directory.
+            # kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+            # To count buckets, I have to add state.次Target += 1 after all four arcCodeMAXIMUM guards.
+            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.dictionaryMeanders), state.bitWidth, max(state.dictionaryMeanders.values()).bit_length(), sep=',')  # ruff: ignore[print]
+
     return state
 
 def doTheNeedful(state: StateMeanders) -> int:
@@ -146,13 +151,6 @@ def doTheNeedful(state: StateMeanders) -> int:
     -------
     crossings : int
         The computed value of `crossings`.
-
-    See Also
-    --------
-    `mapFolding.algorithms.matrixMeandersNumPyndas.doTheNeedful`
-        Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
-    `mapFolding.algorithms.matrixMeandersNumPyndas.doTheNeedfulPandas`
-        Compute `crossings` with a transfer matrix algorithm implemented in Pandas.
 
     References
     ----------

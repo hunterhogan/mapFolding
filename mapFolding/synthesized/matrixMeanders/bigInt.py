@@ -117,4 +117,6 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
         dictionaryArcCodeToCrossings: dict[int, int] = state.dictionaryMeanders.copy()
         state.dictionaryMeanders = {}
         tuple(map(analyzeArcCode, dictionaryArcCodeToCrossings.keys(), dictionaryArcCodeToCrossings.values()))
+        if 46 <= state.n:
+            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.dictionaryMeanders), state.bitWidth, max(state.dictionaryMeanders.values()).bit_length(), sep=',')
     return state
