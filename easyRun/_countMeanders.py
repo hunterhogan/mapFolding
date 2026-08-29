@@ -18,17 +18,17 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
+	pathLikeWrite = Path(settingsPackage.pathPackage, 'jobs')
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
-	pathLikeWrite = settingsPackage.pathPackage / 'jobs'
 	flow = 'matrixPandas'
+	flow = 'qq'
 	flow = 'matrixMeanders'
 	flow = 'matrixNumPy'
-	flow = 'qq'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
-			# ('A005316', 'meanders'),
-			('A000682', 'semi'),
+			('A005316', 'meanders'),
+			# ('A000682', 'semi'),
 		]
 
 	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
 		"""# Identifiers. improve
 		"generate up to four targets."
-		1. Adding a new loop.
+		1. Adding a new loop. Simple analysis.
 		2. Dragging up a loop end.
 		3. Dragging down a loop end.
 		4. Connect ends across the line.
@@ -48,14 +48,19 @@ if __name__ == '__main__':
 		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
-		# boxOf_n.extend(range(43, 45))
-		# boxOf_n.extend(range(45, 46))
-		boxOf_n.extend(range(46, 50))
+		# boxOf_n.extend(range(43, 46))
+		# boxOf_n.extend(range(46, 47))
+		boxOf_n.extend(range(47, 48))
 
 		for n in boxOf_n:
 			gc.collect()
 			timeStart: float = time.perf_counter()
 			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)
+			if kind == 'semi' and False:  # ruff: ignore[expr-and-false]
+				if 4 <= n:
+					countTotal += 2
+				if 6 <= n:
+					countTotal += (n + 1)**2 // 2 - 10
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=True)
 
