@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from mapFolding.algorithms.permutations import doTheNeedful, StateStampMeander
-from mapFolding.algorithms.permutations_semi import doTheNeedful as bilateral
+from mapFolding.algorithms.permutationsBilateral import doTheNeedful as bilateral
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from pprint import pprint
 from typing import TYPE_CHECKING
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 if __name__ == '__main__':
 	flow = 'bilateral'
-	flow = 'fast'
+	flow = 'permutations'
 
 	boxOfOEISid: list[OEISid] = []
 
@@ -47,3 +47,6 @@ if __name__ == '__main__':
 				# pprint(state.boxOfPermutations)
 
 			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=True)
+
+# Until I figure out how to integrate into basecamp, this must be a pseudo-basecamp
+# Create save to file option, but save the list of permutations as CSV

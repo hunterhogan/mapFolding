@@ -543,6 +543,7 @@ class SettingsMode:
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsGeneration:
+	# SEMIOTICS
 	Z0Z_normalizeIndex: int = 0
 
 lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
