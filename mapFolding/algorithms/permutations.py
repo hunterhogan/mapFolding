@@ -59,8 +59,8 @@ class Interval:
 	nodeAfter: int = empty
 
 	def __post_init__(self) -> None:
+		# DEVELOPMENT The following statements are self-verifying and self-documenting.
 		if not self.end:
-			# DEVELOPMENT The following statements are self-verifying and self-documenting.
 			self.end.extend([left, right])
 			self.end[left] = empty
 			self.end[right] = empty
