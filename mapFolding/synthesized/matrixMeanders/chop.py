@@ -38,7 +38,7 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], _
 	return numpy.zeros(shape, datatype)
 
 def count(state: StateMeanders) -> StateMeanders:
-	"""Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
+	"""Count meanders with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
 
 	Parameters
 	----------
@@ -58,31 +58,31 @@ def count(state: StateMeanders) -> StateMeanders:
 	NumPy implementations I tried.
 	"""
 	indexesAnalyzed: int = 2
-	次ArcCode, 次Crossings = range(indexesAnalyzed)
+	次ArcCode, 次Meanders = range(indexesAnalyzed)
 	slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., axis=次ArcCode)
-	slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., axis=次Crossings)
+	slicerMeanders: ShapeSlicer = ShapeSlicer(length=..., axis=次Meanders)
 	indexesWorkbench: int = 3
 	次PrepArea, 次Alfa, 次Zulu = range(indexesWorkbench)
 	slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., axis=次PrepArea)
 	slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
 	slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
-	shape = ShapeArray(length=len(state.dictionaryMeanders), indexes=indexesAnalyzed)
+	shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
 	arrayMeanders: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
-	arrayMeanders[slicerArcCode] = array(list(state.dictionaryMeanders.keys()), dtype=形ArcCode)
-	arrayMeanders[slicerCrossings] = array(list(state.dictionaryMeanders.values()), dtype=形ArcCode)
-	state.dictionaryMeanders = {}
+	arrayMeanders[slicerArcCode] = array(list(state.lookupMeanders.keys()), dtype=形ArcCode)
+	arrayMeanders[slicerMeanders] = array(list(state.lookupMeanders.values()), dtype=形ArcCode)
+	state.lookupMeanders = {}
 
 	def recordAnalysis(arrayAnalyzed: ArrayArcCode, 次Target: int, arcCode: Array1DArcCode, arrayMeanders: ArrayArcCode) -> int:
-		"""Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`."""
+		"""Record valid `arcCode` and corresponding `meanders` in `arrayAnalyzed`."""
 		selectorOverLimit: Array1DBoolean = state.arcCodeMAXIMUM < arcCode
 		arcCode[selectorOverLimit] = 0
 		selectorAnalysis: Array1DSelector = numpy.flatnonzero(arcCode)
 		次Stop: int = 次Target + len(selectorAnalysis)
 		sliceAnalysis: slice = slice(次Target, 次Stop)
 		slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次ArcCode)
-		slicerCrossingsAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次Crossings)
+		slicerMeandersAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次Meanders)
 		arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
-		arrayAnalyzed[slicerCrossingsAnalysis] = arrayMeanders[slicerCrossings][selectorAnalysis]
+		arrayAnalyzed[slicerMeandersAnalysis] = arrayMeanders[slicerMeanders][selectorAnalysis]
 		return 次Stop
 	shape = ShapeArray(length=max(65536, 4 * len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)
 	arrayAnalyzed: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
@@ -164,17 +164,17 @@ def count(state: StateMeanders) -> StateMeanders:
 	shape = ShapeArray(length=len(unique.values), indexes=indexesAnalyzed)
 	arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
 	arrayMeanders[slicerArcCode] = unique.values
-	arrayMeanders[slicerCrossings] = 0
-	numpy.add.at(arrayMeanders[slicerCrossings], unique.inverse_indices, arrayAnalyzed[slicerCrossings])
+	arrayMeanders[slicerMeanders] = 0
+	numpy.add.at(arrayMeanders[slicerMeanders], unique.inverse_indices, arrayAnalyzed[slicerMeanders])
 	if 45 <= state.n and state.boundary <= 18:  # Data collection for 'research' directory.
-		# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-		print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
-	state.dictionaryMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerCrossings]), strict=True))
+		# kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,meandersBitWidth
+		print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerMeanders].max()).bit_length(), sep=',')  # ruff: ignore[print]
+	state.lookupMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerMeanders]), strict=True))
 	return state
 
 # ruff: file-ignore[suspicious-pickle-usage]
 def doTheNeedful(state: StateMeanders) -> int:
-	"""Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
+	"""Compute `meanders` with a transfer matrix algorithm implemented in NumPy.
 
 	Parameters
 	----------
@@ -183,8 +183,8 @@ def doTheNeedful(state: StateMeanders) -> int:
 
 	Returns
 	-------
-	crossings : int
-		The computed value of `crossings`.
+	meanders : int
+		The computed value of `meanders`.
 	"""
 	tqdmBoundary: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=False)
 	while 0 < state.boundary:
@@ -203,9 +203,9 @@ def doTheNeedful(state: StateMeanders) -> int:
 			index = 0
 			batch: list[tuple[int, int]] = []
 			goByeBye()
-			if nn <= len(state.dictionaryMeanders):
-				while state.dictionaryMeanders:
-					batch.extend(state.dictionaryMeanders.popitem() for _loop in loops(min(nn, len(state.dictionaryMeanders))))
+			if nn <= len(state.lookupMeanders):
+				while state.lookupMeanders:
+					batch.extend(state.lookupMeanders.popitem() for _loop in loops(min(nn, len(state.lookupMeanders))))
 					pp = Path(str(index) + '.pkl')
 					index += 1
 					pp.write_bytes(pickle.dumps(dict(batch)))
@@ -214,16 +214,16 @@ def doTheNeedful(state: StateMeanders) -> int:
 					goByeBye()
 
 				for pp in tqdm(lPFn, position=1, leave=False):
-					state.dictionaryMeanders = pickle.loads(pp.read_bytes())
-					pp.write_bytes(pickle.dumps(count(state).dictionaryMeanders))
+					state.lookupMeanders = pickle.loads(pp.read_bytes())
+					pp.write_bytes(pickle.dumps(count(state).lookupMeanders))
 
 				pp = lPFn.pop()
-				state.dictionaryMeanders = pickle.loads(pp.read_bytes())
+				state.lookupMeanders = pickle.loads(pp.read_bytes())
 				pp.unlink()
 				goByeBye()
 				for pp in tqdm(lPFn, position=1, leave=False):
 					for arcCode, total in pickle.loads(pp.read_bytes()).items():
-						state.dictionaryMeanders[arcCode] = total + state.dictionaryMeanders.get(arcCode, 0)
+						state.lookupMeanders[arcCode] = total + state.lookupMeanders.get(arcCode, 0)
 					pp.unlink()
 					goByeBye()
 			else:
@@ -232,4 +232,4 @@ def doTheNeedful(state: StateMeanders) -> int:
 		tqdmBoundary.update(bb - state.boundary)
 	tqdmBoundary.close()
 
-	return sum(state.dictionaryMeanders.values())
+	return sum(state.lookupMeanders.values())

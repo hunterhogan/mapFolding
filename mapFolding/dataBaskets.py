@@ -31,7 +31,7 @@ from __future__ import annotations
 
 from mapFolding.beDRY import getConnectionGraph, getTotalLeaves, makeDataContainer
 from mapFolding.theTypes import (
-	形ArcCode, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Crossings, 形Elephino, 形TotalFolds, 形TotalLeaves)
+	形ArcCode, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形Meanders, 形TotalFolds, 形TotalLeaves)
 from typing import NamedTuple, TYPE_CHECKING
 import dataclasses
 import numpy
@@ -371,8 +371,8 @@ class StateMeanders:
 
 	boundary: int = 0
 	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
-	dictionaryMeanders: dict[int, int] = dataclasses.field(default_factory=dict[int, int])
-	"""A Python `dict` (*dict*ionary) of `arcCode` to `crossings`. The values are stored as Python `int`
+	lookupMeanders: dict[int, int] = dataclasses.field(default_factory=dict[int, int])
+	"""A Python `dict` (*dict*ionary) of `arcCode` to `meanders`. The values are stored as Python `int`
 	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
 	'bigint' (big *int*eger)."""
 
@@ -385,7 +385,7 @@ class StateMeanders:
 	"""The maximum value of `arcCode` for the current iteration of the transfer matrix."""
 
 	bitWidthLimitArcCode: int | None = None
-	bitWidthLimitCrossings: int | None = None
+	bitWidthLimitMeanders: int | None = None
 
 	次Target: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
@@ -414,8 +414,8 @@ class StateMeanders:
 		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
 
 	def setBitWidth(self) -> None:
-		"""Set `bitWidth` from the current `dictionaryMeanders`."""
-		self.bitWidth = max(self.dictionaryMeanders.keys()).bit_length()
+		"""Set `bitWidth` from the current `lookupMeanders`."""
+		self.bitWidth = max(self.lookupMeanders.keys()).bit_length()
 
 	def setBitWidthNumPy(self, arrayMeanders: ndarray[tuple[Any, ...], dtype[形ArcCode]]) -> None:
 		"""Set `bitWidth` from the current `arrayMeanders`."""
@@ -430,11 +430,11 @@ class StateMeanders:
 		if not self.boundary:
 			self.boundary = self.n - 1
 
-		if not self.dictionaryMeanders:
+		if not self.lookupMeanders:
 			#=SIN= Avoid "circular import".
 			#ruff: ignore[import-outside-top-level]
-			from mapFolding.algorithms.matrixMeandersShare import makeDictionaryMeanders
-			self.dictionaryMeanders = makeDictionaryMeanders(self.kind, self.n, self.boundary)
+			from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders
+			self.lookupMeanders = makeLookupMeanders(self.kind, self.n, self.boundary)
 
 		self.setBitWidth()
 		self.setBitsLocator()
@@ -451,15 +451,15 @@ class StateMeanders:
 
 			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
 
-		if self.bitWidthLimitCrossings is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Crossings).itemsize * 8  # bits
+		if self.bitWidthLimitMeanders is None:
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Meanders).itemsize * 8  # bits
 
 			offsetNecessary_: int = 0  # I don't know of any.
 			offsetEstimation_: int = 3  # See 'reference' directory.
 			offsetSafety_: int = 1
 			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
 
-			self.bitWidthLimitCrossings = bitWidthOfFixedSizeInteger_ - offset_
+			self.bitWidthLimitMeanders = bitWidthOfFixedSizeInteger_ - offset_
 
 			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
 

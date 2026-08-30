@@ -17,7 +17,7 @@ from __future__ import annotations
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
-from mapFolding.theTypes import 形ArcCode, 形Crossings
+from mapFolding.theTypes import 形ArcCode, 形Meanders
 from typing import TYPE_CHECKING
 from warnings import warn
 import pandas
@@ -31,25 +31,25 @@ def count(state: StateMeanders) -> StateMeanders:
 	Parameters
 	----------
 	state : StateMeanders
-		The algorithm state containing current `boundary`, `dictionaryMeanders`, and thresholds.
+		The algorithm state containing current `boundary`, `lookupMeanders`, and thresholds.
 
 	Returns
 	-------
 	state : StateMeanders
-		Updated state with new `boundary` and `dictionaryMeanders`.
+		Updated state with new `boundary` and `lookupMeanders`.
 	"""
 	dataframeAnalyzed = pandas.DataFrame({
-		'analyzed': pandas.Series(name='analyzed', data=state.dictionaryMeanders.keys(), copy=False, dtype=形ArcCode)
-		, 'crossings': pandas.Series(name='crossings', data=state.dictionaryMeanders.values(), copy=False, dtype=形Crossings)
+		'analyzed': pandas.Series(name='analyzed', data=state.lookupMeanders.keys(), copy=False, dtype=形ArcCode)
+		, 'meanders': pandas.Series(name='meanders', data=state.lookupMeanders.values(), copy=False, dtype=形Meanders)
 		}
 	)
-	state.dictionaryMeanders.clear()
+	state.lookupMeanders.clear()
 
 	while 0 < state.boundary and not integersWide吗(state, dataframe=dataframeAnalyzed):
 
 		def aggregateArcCodes()  -> None:
 			nonlocal dataframeAnalyzed
-			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.次Target].groupby('analyzed', sort=False)['crossings'].aggregate('sum').reset_index()
+			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.次Target].groupby('analyzed', sort=False)['meanders'].aggregate('sum').reset_index()
 
 		def analyzeArcCodesAligned(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
 			"""Compute `arcCode` from `bitsAlfa` and `bitsZulu` if at least one is an even number.
@@ -271,9 +271,9 @@ def count(state: StateMeanders) -> StateMeanders:
 								].to_numpy(dtype=形ArcCode, copy=False)
 				)
 
-				dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['crossings']] = (
-					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['crossings']
-								].to_numpy(dtype=形Crossings, copy=False)
+				dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['meanders']] = (
+					dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['meanders']
+								].to_numpy(dtype=形Meanders, copy=False)
 				)
 
 				state.次Target = 次StopAnalyzed
@@ -285,7 +285,7 @@ def count(state: StateMeanders) -> StateMeanders:
 		dataframeMeanders = pandas.DataFrame({
 			'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=形ArcCode)
 			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=形ArcCode)
-			, 'crossings': pandas.Series(name='crossings', data=dataframeAnalyzed['crossings'], copy=False, dtype=形Crossings)
+			, 'meanders': pandas.Series(name='meanders', data=dataframeAnalyzed['meanders'], copy=False, dtype=形Meanders)
 			}
 		)
 
@@ -297,7 +297,7 @@ def count(state: StateMeanders) -> StateMeanders:
 		length: int = getTotalBuckets(state, len(dataframeMeanders.index))
 		dataframeAnalyzed = pandas.DataFrame({
 			'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=形ArcCode)
-			, 'crossings': pandas.Series(name='crossings', data=0, index=pandas.RangeIndex(length), dtype=形Crossings)
+			, 'meanders': pandas.Series(name='meanders', data=0, index=pandas.RangeIndex(length), dtype=形Meanders)
 			}, index=pandas.RangeIndex(length)
 		)
 
@@ -322,12 +322,12 @@ def count(state: StateMeanders) -> StateMeanders:
 
 		aggregateArcCodes()
 
-	state.dictionaryMeanders = dataframeAnalyzed.set_index('analyzed')['crossings'].to_dict()
+	state.lookupMeanders = dataframeAnalyzed.set_index('analyzed')['meanders'].to_dict()
 	del dataframeAnalyzed
 	return state
 
 def doTheNeedful(state: StateMeanders) -> int:
-	"""Compute `crossings` with a transfer matrix algorithm implemented in pandas.
+	"""Compute `meanders` with a transfer matrix algorithm implemented in pandas.
 
 	Parameters
 	----------
@@ -336,12 +336,12 @@ def doTheNeedful(state: StateMeanders) -> int:
 
 	Returns
 	-------
-	crossings : int
-		The computed value of `crossings`.
+	meanders : int
+		The computed value of `meanders`.
 	"""
 	while 0 < state.boundary:
 		if integersWide吗(state):
 			state = countBigInt(state)
 		else:
 			state = count(state)
-	return sum(state.dictionaryMeanders.values())
+	return sum(state.lookupMeanders.values())

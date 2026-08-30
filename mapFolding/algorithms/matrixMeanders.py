@@ -59,7 +59,7 @@ def count(state: StateMeanders) -> StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
-    `state.dictionaryMeanders` in place [1]. The transition set includes new-arc insertion, left-right
+    `state.lookupMeanders` in place [1]. The transition set includes new-arc insertion, left-right
     crossing moves, and Dyck-path-based arc joining through `walkDyckPath` [2].
 
     Parameters
@@ -85,7 +85,7 @@ def count(state: StateMeanders) -> StateMeanders:
     [2] `walkDyckPath`
     """
     while 0 < state.boundary:
-        def analyzeArcCode(arcCode: int, crossings: int) -> None:
+        def analyzeArcCode(arcCode: int, meanders: int) -> None:
             bitsAlfa: int = arcCode & state.bitsLocator
             bitsAlfaHasArcs: bool = 1 < bitsAlfa
             bitsAlfaIsEven: int = bitsAlfa & 1 ^ 1
@@ -96,17 +96,17 @@ def count(state: StateMeanders) -> StateMeanders:
 
             arcCodeAnalysis: int = (bitsZulu << 1 | bitsAlfa) << 2 | 3  # Evaluate formula step-wise left to right: (parentheses) override precedence.
             if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsAlfaHasArcs:
                 arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3  # `bitsAlfaIsEven` has `bitsAlfa` in it.
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                    state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                    state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsZuluHasArcs:
                 arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1  # `bitsZuluIsEven` has `bitsZulu` in it.
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                    state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                    state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):
                 # This analysis might modify `bitsAlfa` or `bitsZulu`, so it should be last.
@@ -117,24 +117,24 @@ def count(state: StateMeanders) -> StateMeanders:
 
                 arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2  # Evaluate formula step-wise left to right: (parentheses) override precedence.
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                    state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                    state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
         state.reduceBoundary()
 
-        dictionaryArcCodeToCrossings: dict[int, int] = state.dictionaryMeanders.copy()
-        state.dictionaryMeanders = {}
+        lookupArcCodeMeanders: dict[int, int] = state.lookupMeanders.copy()
+        state.lookupMeanders = {}
 
-        tuple(map(analyzeArcCode, dictionaryArcCodeToCrossings.keys(), dictionaryArcCodeToCrossings.values()))
+        tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values()))
 
         if 46 <= state.n:  # Data collection for 'research' directory.
-            # kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
+            # kind,n,boundary,buckets,arcCodes,bitWidthArcCode,bitWidthMeanders
             # To count buckets, I have to add state.次Target += 1 after all four arcCodeMAXIMUM guards.
-            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.dictionaryMeanders), state.bitWidth, max(state.dictionaryMeanders.values()).bit_length(), sep=',')  # ruff: ignore[print]
+            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.lookupMeanders), state.bitWidth, max(state.lookupMeanders.values()).bit_length(), sep=',')  # ruff: ignore[print]
 
     return state
 
 def doTheNeedful(state: StateMeanders) -> int:
-    """Compute the total meander count encoded in `state.dictionaryMeanders`.
+    """Compute the total meander count encoded in `state.lookupMeanders`.
 
     You can use `doTheNeedful` as the meander transfer-matrix entry point for the `matrixMeanders`
     flow selected by `mapFolding.oeis.countingMeanders` [1]. The function runs `count(state)` and
@@ -149,8 +149,8 @@ def doTheNeedful(state: StateMeanders) -> int:
 
     Returns
     -------
-    crossings : int
-        The computed value of `crossings`.
+    meanders : int
+        The computed value of `meanders`.
 
     References
     ----------
@@ -168,4 +168,4 @@ def doTheNeedful(state: StateMeanders) -> int:
     [6] Irvine, S. A. (Java port). `A005316.java` in `archmageirvine/joeis`.
         https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
     """
-    return sum(count(state).dictionaryMeanders.values())
+    return sum(count(state).lookupMeanders.values())

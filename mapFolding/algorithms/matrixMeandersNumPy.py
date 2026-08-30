@@ -43,7 +43,7 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
     # return numpy.zeros(shape, datatype)  # ruff: ignore[commented-out-code]
 
 def count(state: StateMeanders) -> StateMeanders:
-    """Count crossings with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
+    """Count meanders with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
 
     Parameters
     ----------
@@ -63,9 +63,9 @@ def count(state: StateMeanders) -> StateMeanders:
     NumPy implementations I tried.
     """
     indexesAnalyzed: int = 2
-    次ArcCode, 次Crossings = range(indexesAnalyzed)
+    次ArcCode, 次Meanders = range(indexesAnalyzed)
     slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., axis=次ArcCode)
-    slicerCrossings: ShapeSlicer = ShapeSlicer(length=..., axis=次Crossings)
+    slicerMeanders: ShapeSlicer = ShapeSlicer(length=..., axis=次Meanders)
 
     indexesWorkbench: int = 3
     次PrepArea, 次Alfa, 次Zulu = range(indexesWorkbench)
@@ -73,19 +73,19 @@ def count(state: StateMeanders) -> StateMeanders:
     slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
     slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
 
-    shape = ShapeArray(length=len(state.dictionaryMeanders), indexes=indexesAnalyzed)
+    shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
     arrayMeanders: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
     del shape
 
-    arrayMeanders[slicerArcCode] = array(list(state.dictionaryMeanders.keys()), dtype=形ArcCode)
-    arrayMeanders[slicerCrossings] = array(list(state.dictionaryMeanders.values()), dtype=形ArcCode)
+    arrayMeanders[slicerArcCode] = array(list(state.lookupMeanders.keys()), dtype=形ArcCode)
+    arrayMeanders[slicerMeanders] = array(list(state.lookupMeanders.values()), dtype=形ArcCode)
 
-    state.dictionaryMeanders = {}
+    state.lookupMeanders = {}
 
     tqdmBoundary: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=False)
     while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
         def recordAnalysis(arrayAnalyzed: ArrayArcCode, 次Target: int, arcCode: Array1DArcCode, arrayMeanders: ArrayArcCode) -> int:
-            """Record valid `arcCode` and corresponding `crossings` in `arrayAnalyzed`."""
+            """Record valid `arcCode` and corresponding `meanders` in `arrayAnalyzed`."""
             selectorOverLimit: Array1DBoolean = state.arcCodeMAXIMUM < arcCode
             arcCode[selectorOverLimit] = 0
             del selectorOverLimit
@@ -96,14 +96,14 @@ def count(state: StateMeanders) -> StateMeanders:
             sliceAnalysis: slice = slice(次Target, 次Stop)
 
             slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次ArcCode)
-            slicerCrossingsAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次Crossings)
+            slicerMeandersAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次Meanders)
             del sliceAnalysis
 
             arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
             del slicerArcCodeAnalysis
 
-            arrayAnalyzed[slicerCrossingsAnalysis] = arrayMeanders[slicerCrossings][selectorAnalysis]
-            del slicerCrossingsAnalysis, selectorAnalysis
+            arrayAnalyzed[slicerMeandersAnalysis] = arrayMeanders[slicerMeanders][selectorAnalysis]
+            del slicerMeandersAnalysis, selectorAnalysis
 
             return 次Stop
 
@@ -266,20 +266,20 @@ def count(state: StateMeanders) -> StateMeanders:
         del shape
 
         arrayMeanders[slicerArcCode] = unique.values
-        arrayMeanders[slicerCrossings] = 0
-        numpy.add.at(arrayMeanders[slicerCrossings], unique.inverse_indices, arrayAnalyzed[slicerCrossings])
+        arrayMeanders[slicerMeanders] = 0
+        numpy.add.at(arrayMeanders[slicerMeanders], unique.inverse_indices, arrayAnalyzed[slicerMeanders])
         del unique
 
         del arrayAnalyzed
 
         if 46 <= state.n:  # Data collection for 'research' directory.
-            # kind,n,boundary,buckets,arcCodes,arcCodeBitWidth,crossingsBitWidth
-            print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerCrossings].max()).bit_length(), sep=',')  # ruff: ignore[print]
+            # kind,n,boundary,buckets,arcCodes,bitWidthArcCode,bitWidthMeanders
+            print(state.kind, state.n, state.boundary + 1, state.次Target, len(arrayMeanders[slicerArcCode]), int(arrayMeanders[slicerArcCode].max()).bit_length(), int(arrayMeanders[slicerMeanders].max()).bit_length(), sep=',')  # ruff: ignore[print]
         tqdmBoundary.update()
 
     tqdmBoundary.close()
 
-    state.dictionaryMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerCrossings]), strict=True))
+    state.lookupMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerMeanders]), strict=True))
 
     if isinstance(arrayMeanders, memmap):
         del arrayMeanders
@@ -294,7 +294,7 @@ def count(state: StateMeanders) -> StateMeanders:
     return state
 
 def doTheNeedful(state: StateMeanders) -> int:
-    """Compute `crossings` with a transfer matrix algorithm implemented in NumPy.
+    """Compute `meanders` with a transfer matrix algorithm implemented in NumPy.
 
     Parameters
     ----------
@@ -303,12 +303,12 @@ def doTheNeedful(state: StateMeanders) -> int:
 
     Returns
     -------
-    crossings : int
-        The computed value of `crossings`.
+    meanders : int
+        The computed value of `meanders`.
     """
     while 0 < state.boundary:
         if integersWide吗(state):
             state = countBigInt(state)
         else:
             state = count(state)
-    return sum(state.dictionaryMeanders.values())
+    return sum(state.lookupMeanders.values())

@@ -29,10 +29,10 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: ArrayArcCode | None 
 	Parameters
 	----------
 	state : StateMeanders
-		The current state of the computation, including `dictionaryMeanders`.
+		The current state of the computation, including `lookupMeanders`.
 	dataframe : pandas.DataFrame | None = None
-		DataFrame containing 'analyzed' and 'crossings' columns. If provided, use this instead of
-		`state.dictionaryMeanders`.
+		DataFrame containing 'analyzed' and 'meanders' columns. If provided, use this instead of
+		`state.lookupMeanders`.
 	fixedSizeMAXIMUMarcCode : bool = False
 		Set this to `True` if you cast `state.arcCodeMAXIMUM` to the same fixed size integer type as
 		`dtypeArcCode`.
@@ -48,14 +48,14 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: ArrayArcCode | None 
 	a little more complicated because `arcCodeMAXIMUM` is usually 1-bit larger than the `max(arcCode)`
 	value.
 
-	If you start the algorithm with very large `arcCode` in your `dictionaryMeanders` (*i.e.,*
+	If you start the algorithm with very large `arcCode` in your `lookupMeanders` (*i.e.,*
 	semi), then the flow will go to a function that does not use fixed size integers. When the
 	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
 	with fixed size integers. In that case, casting `arcCodeMAXIMUM` to a fixed size merely delays the
 	transition from one function to the other by one iteration.
 
-	If you start with small values in `dictionaryMeanders`, however, then the flow goes to the
-	function with fixed size integers and usually stays there until `crossings` is huge, which is near
+	If you start with small values in `lookupMeanders`, however, then the flow goes to the
+	function with fixed size integers and usually stays there until `meanders` is huge, which is near
 	the end of the computation. If you cast `arcCodeMAXIMUM` into a 64-bit unsigned integer, however,
 	then around `state.boundary == 28`, the bit width of `arcCodeMAXIMUM` might exceed the limit. That
 	will cause the flow to go to the function that does not have fixed size integers for a few
@@ -63,25 +63,25 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: ArrayArcCode | None 
 	"""
 	if dataframe is not None:
 		arcCodeWidest = int(dataframe['analyzed'].max()).bit_length()
-		crossingsWidest = int(dataframe['crossings'].max()).bit_length()
+		meandersWidest = int(dataframe['meanders'].max()).bit_length()
 	elif arrayMeanders is not None:
 		arcCodeWidest = int(arrayMeanders.max()).bit_length()
-		crossingsWidest = int(arrayMeanders.max()).bit_length()
+		meandersWidest = int(arrayMeanders.max()).bit_length()
 	else:
-		arcCodeWidest: int = max(state.dictionaryMeanders.keys()).bit_length()
-		crossingsWidest: int = max(state.dictionaryMeanders.values()).bit_length()
+		arcCodeWidest: int = max(state.lookupMeanders.keys()).bit_length()
+		meandersWidest: int = max(state.lookupMeanders.values()).bit_length()
 
 	arcCodeMAXIMUM: int = 0
 	if fixedSizeMAXIMUMarcCode:
 		arcCodeMAXIMUM = state.arcCodeMAXIMUM
 
 	return (raiseIfNone(state.bitWidthLimitArcCode) < arcCodeWidest
-		or raiseIfNone(state.bitWidthLimitCrossings) < crossingsWidest
+		or raiseIfNone(state.bitWidthLimitMeanders) < meandersWidest
 		or raiseIfNone(state.bitWidthLimitArcCode) < arcCodeMAXIMUM
 		)
 
-def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
-	"""Create the starting `dictionaryMeanders` for a matrix meander count.
+def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
+	"""Create the starting `lookupMeanders` for a matrix meander count.
 
 	You can use this function to build the initial `arcCode` → total meanders count mapping. For `kind
 	== 'semi'`, the dictionary has two `arcCode` keys based on the parity of `n` and the magnitude of
@@ -98,7 +98,7 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 
 	Returns
 	-------
-	dictionaryMeanders : dict[int, int]
+	lookupMeanders : dict[int, int]
 		A dictionary whose keys are `arcCode` and whose values are `1`.
 
 	Raises
@@ -114,9 +114,16 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 	if not boundary:
 		boundary = n - 1
 
-	if kind == 'semi':
+	if kind == 'closed':
+		lookupMeanders = {0b1111: 1}  # 0xf
+	elif kind == 'meanders':
+		if n & 0b1:
+			lookupMeanders = {0b1111: 1}  # 0xf
+		else:
+			lookupMeanders = {0b10110: 1}
+	elif kind == 'semi':
 		if n == 1:
-			dictionaryMeanders: dict[int, int] = {0b1: 1}
+			lookupMeanders: dict[int, int] = {0b1: 1}
 		else:
 			if n & 0b1:
 				arcCode: int = 0b101
@@ -132,18 +139,13 @@ def makeDictionaryMeanders(kind: Literal['semi', 'meanders'] | LiteralString, n:
 				boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
 				# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
 				# See "mapFolding/research/matrixMeanders/A000682facts.py"
-			dictionaryMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
+			lookupMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
 
-	elif kind == 'meanders':
-		if n & 0b1:
-			dictionaryMeanders = {0b1111: 1}  # 0xf
-		else:
-			dictionaryMeanders = {0b10110: 1}
 	else:
 		message: str = f"I received `{kind = }` for meander computation, but I only support 'semi' and 'meanders'."
 		raise ValueError(message)
 
-	return dictionaryMeanders
+	return lookupMeanders
 
 #================== Dyck Path =====================================================================
 

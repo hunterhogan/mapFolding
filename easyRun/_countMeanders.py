@@ -23,12 +23,13 @@ if __name__ == '__main__':
 	pathLikeWrite = None
 	flow = 'matrixPandas'
 	flow = 'qq'
-	flow = 'matrixMeanders'
 	flow = 'matrixNumPy'
+	flow = 'matrixMeanders'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
-			('A005316', 'meanders'),
-			# ('A000682', 'semi'),
+			# ('A005315', 'closed'),
+			# ('A005316', 'meanders'),
+			('A000682', 'semi'),
 		]
 
 	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
@@ -43,14 +44,17 @@ if __name__ == '__main__':
 		"""
 
 		boxOf_n: list[int] = []
-		# boxOf_n.extend(range(2, 10))
+		boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
 		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))
 		# boxOf_n.extend(range(46, 47))
-		boxOf_n.extend(range(47, 48))
+		# boxOf_n.extend(range(47, 48))
+
+		# boxOf_n.extend(range(10, 43, 2))
+		# boxOf_n.extend(range(11, 43, 2))
 
 		for n in boxOf_n:
 			gc.collect()

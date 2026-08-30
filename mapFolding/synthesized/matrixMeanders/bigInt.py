@@ -60,7 +60,7 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
-    `state.dictionaryMeanders` in place [1]. The transition set includes new-arc insertion, left-right
+    `state.lookupMeanders` in place [1]. The transition set includes new-arc insertion, left-right
     crossing moves, and Dyck-path-based arc joining through `walkDyckPath` [2].
 
     Parameters
@@ -87,7 +87,7 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
     """
     while 0 < state.boundary and integersWide吗(state):
 
-        def analyzeArcCode(arcCode: int, crossings: int) -> None:
+        def analyzeArcCode(arcCode: int, meanders: int) -> None:
             bitsAlfa: int = arcCode & state.bitsLocator
             bitsAlfaHasArcs: bool = 1 < bitsAlfa
             bitsAlfaIsEven: int = bitsAlfa & 1 ^ 1
@@ -96,15 +96,15 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
             bitsZuluIsEven: int = bitsZulu & 1 ^ 1
             arcCodeAnalysis: int = (bitsZulu << 1 | bitsAlfa) << 2 | 3
             if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsAlfaHasArcs:
                 arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                    state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                    state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsZuluHasArcs:
                 arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                    state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                    state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):
                 if bitsAlfaIsEven and (not bitsZuluIsEven):
                     bitsAlfa ^= walkDyckPath(bitsAlfa)
@@ -112,11 +112,11 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
                     bitsZulu ^= walkDyckPath(bitsZulu)
                 arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
-                    state.dictionaryMeanders[arcCodeAnalysis] = state.dictionaryMeanders.get(arcCodeAnalysis, 0) + crossings
+                    state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
         state.reduceBoundary()
-        dictionaryArcCodeToCrossings: dict[int, int] = state.dictionaryMeanders.copy()
-        state.dictionaryMeanders = {}
-        tuple(map(analyzeArcCode, dictionaryArcCodeToCrossings.keys(), dictionaryArcCodeToCrossings.values()))
+        lookupArcCodeMeanders: dict[int, int] = state.lookupMeanders.copy()
+        state.lookupMeanders = {}
+        tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values()))
         if 46 <= state.n:
-            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.dictionaryMeanders), state.bitWidth, max(state.dictionaryMeanders.values()).bit_length(), sep=',')
+            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.lookupMeanders), state.bitWidth, max(state.lookupMeanders.values()).bit_length(), sep=',')
     return state

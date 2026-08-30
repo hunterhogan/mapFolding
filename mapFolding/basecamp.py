@@ -278,7 +278,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 #ruff: ignore[unused-function-argument]
 def countMeanders(
-	kind: Literal['semi', 'meanders'] | LiteralString
+	kind: Literal['closed', 'meanders', 'semi'] | LiteralString
 	, n: int
 	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'qq'] | LiteralString | None = None
 	, pathLikeWrite: PathLike[str] | None = None
@@ -290,8 +290,8 @@ def countMeanders(
 
 	Parameters
 	----------
-	kind : Literal['semi', 'meanders']
-		Whether to compute semi-meanders or meanders.
+	kind : Literal['closed', 'semi', 'meanders']
+		Whether to compute closed meanders, semi-meanders, or meanders.
 	n : int
 		Sequence index.
 	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
@@ -318,6 +318,9 @@ def countMeanders(
 	if kind == 'semi' and n == 1:
 		countTotal: int = 1
 	else:
+		if kind == 'closed':
+			kind = 'meanders'
+			n = 2 * n - 1
 		match flow:
 			case 'matrixNumPy':
 				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful

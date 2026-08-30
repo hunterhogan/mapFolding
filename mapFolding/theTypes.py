@@ -26,8 +26,8 @@ type OEISid = LiteralString
 形ArcCode: TypeAlias = numpy_uint64
 """The fixed-size integer type used to store `arcCode`."""
 
-形Crossings: TypeAlias = numpy_uint64
-"""The fixed-size integer type used to store `crossings`."""
+形Meanders: TypeAlias = numpy_uint64
+"""The fixed-size integer type used to store `meanders`."""
 
 type Array1DArcCode = ndarray[tuple[int], dtype[形ArcCode]]
 type Array1DBoolean = ndarray[tuple[int], dtype[numpy_bool]]
