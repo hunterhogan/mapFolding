@@ -24,13 +24,13 @@ References
 from __future__ import annotations
 
 from itertools import repeat, starmap
-from mapFolding.algorithms.permutations_semi import doTheNeedful as do
 from mapFolding.oeis import getMetadata
 from mapFolding.theTypes import OEISid
 from typing import TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
+	from collections.abc import Sequence
 	from typing import Literal
 
 """# DEVELOPMENT mode specific
@@ -112,7 +112,7 @@ class Node:
 @dataclasses.dataclass(slots=True)
 class StateStampMeander:
 	n: int
-	total: int = 0
+	boxOfPermutations: list[tuple[int, ...]] = dataclasses.field(default_factory=list[tuple[int, ...]])
 
 	crossingAfter: int = 2
 	gap首Permutation: int = empty
@@ -130,8 +130,13 @@ class StateStampMeander:
 	gap: list[GapEnds | GapEndsLeft | GapEndsRight] = dataclasses.field(default_factory=list[GapEnds | GapEndsLeft | GapEndsRight])
 	end: list[int] = dataclasses.field(default_factory=list[int])
 	gapEnds: GapEnds | GapEndsLeft | GapEndsRight = dataclasses.field(default_factory=GapEnds)
+
 	boxOfGaps: tuple[Gap, ...] = dataclasses.field(init=False)
 	boxOfNodes: tuple[Node, ...] = dataclasses.field(init=False)
+
+	@property
+	def total(self) -> int:
+		return len(self.boxOfPermutations)
 
 	def __post_init__(self) -> None:
 		"""I use this to allocate independent mutable records for one enumeration.
@@ -157,24 +162,29 @@ class StateStampMeander:
 
 def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
 	if state.n < state.crossingAfter:
-		if not mode.equivalenceClasses or permutationCanonical吗(state):
-			state.total += 1
+		savePermutation(state, mode)
 	elif mode.meanders and ((state.n - state.crossingAfter) <= state.wind):
 		state.side = state.boxOfNodes[state.次node].sideWindStop
 		state.次gap[here] = state.boxOfNodes[state.次node].gapWindStop
 		state.gapWindStopVisited = False
 		cross(state, mode=mode)
 	else:
+		state.side = left
 		crossingAfter: int = state.crossingAfter
 		次node: int = state.次node
 		wind: int = state.wind
-		state.side = left
 		visitGaps(state, mode)
-		state.crossingAfter = crossingAfter
-		state.次node = 次node
-		state.wind = wind
-		state.side = right
-		visitGaps(state, mode)
+
+		if (not (mode.symmetricSemiMeanders and crossingAfter == 2)
+			and not (mode.semiMeanders and crossingAfter == 2)
+			and not (mode.folds and crossingAfter == 2 and not mode.equivalenceClasses)
+			and not (mode.meanders and crossingAfter == 2 and not mode.equivalenceClasses and state.n % 2)
+		):
+			state.side = right
+			state.crossingAfter = crossingAfter
+			state.次node = 次node
+			state.wind = wind
+			visitGaps(state, mode)
 	return state
 
 def visitGaps(state: StateStampMeander, mode: SettingsMode) -> None:
@@ -416,6 +426,45 @@ def setGapEnds(state: StateStampMeander, node: Node) -> None:
 			node.gaps[side].首 = state.gap[side].首
 			node.gaps[side].Ω = state.gap[side].Ω
 
+def savePermutation(state: StateStampMeander, mode: SettingsMode) -> None:
+	permutation: Sequence[int] = [0] * state.n
+	次gap: int = state.gap首Permutation
+	次permutation: int = 0
+	leaf1Visited: bool = False
+
+	while 次permutation < state.n:
+		permutation[次permutation] = state.boxOfGaps[次gap].end[right]
+		if permutation[次permutation] == 1:
+			leaf1Visited = True
+		elif mode.equivalenceClasses and (permutation[次permutation] == state.n) and not leaf1Visited:
+			return
+		次gap = state.boxOfGaps[次gap].permutation[right]
+		次permutation += 1
+
+	if mode.equivalenceClasses:
+		次permutation = 0
+		while 次permutation < state.n:
+			comparisonCanonical: int = state.n - permutation[state.n - 次permutation - 1] + 1
+			if permutation[次permutation] < comparisonCanonical:
+				break
+			if comparisonCanonical < permutation[次permutation]:
+				return
+			次permutation += 1
+
+	elif mode.folds and (not mode.equivalenceClasses) and (2 <= len(permutation)):
+		state.boxOfPermutations.append(tuple(reversed(permutation)))
+
+	elif mode.semiMeanders:
+		permutation = tuple(map((1).__add__, permutation))
+		if 2 <= len(permutation):
+			state.boxOfPermutations.append((1, *reversed(permutation)))
+		permutation = [1, *permutation]
+
+	elif mode.meanders and (not mode.equivalenceClasses) and (2 <= len(permutation)) and state.n % 2:
+		state.boxOfPermutations.append(tuple(reversed(permutation)))
+
+	state.boxOfPermutations.append(tuple(permutation))
+
 #================== Mode-specific functions ================================================================
 
 # Only `folds`.
@@ -458,32 +507,6 @@ def updatePermutation(state: StateStampMeander) -> None:
 	if 次permutationRight:
 		state.boxOfGaps[次permutationRight].permutation[left] = 次gapRight
 
-# Only `equivalenceClasses`.
-def permutationCanonical吗(state: StateStampMeander) -> bool:
-	permutation: list[int] = [0] * state.n
-	次gap: int = state.gap首Permutation
-	leaf1Visited: bool = False
-	leaf1PriorLeafLast: bool = True
-
-	次permutation: int = 0
-	while 次permutation < state.n:
-		permutation[次permutation] = state.boxOfGaps[次gap].end[right]
-		if permutation[次permutation] == 1:
-			leaf1Visited = True
-		elif (permutation[次permutation] == state.n) and not leaf1Visited:
-			leaf1PriorLeafLast = False
-		次gap = state.boxOfGaps[次gap].permutation[right]
-		次permutation += 1
-
-	comparisonCanonical: int = 0
-	if leaf1PriorLeafLast:
-		次permutation = 0
-		while comparisonCanonical == 0 and 次permutation < state.n:
-			comparisonCanonical = permutation[次permutation] - (state.n - permutation[state.n - 次permutation - 1] + 1)
-			次permutation += 1
-
-	return leaf1PriorLeafLast and (comparisonCanonical <= 0)
-
 #================== Initialize ====================================================================
 
 def initializeState(state: StateStampMeander) -> None:
@@ -512,9 +535,11 @@ def initializeState(state: StateStampMeander) -> None:
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsMode:
-	meanders: bool = False
-	folds: bool = False
 	equivalenceClasses: bool = False
+	folds: bool = False
+	meanders: bool = False
+	semiMeanders: bool = False
+	symmetricSemiMeanders: bool = False
 
 @dataclasses.dataclass(frozen=True, slots=True)
 class SettingsGeneration:
@@ -522,14 +547,14 @@ class SettingsGeneration:
 
 lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
 	'A000136': (SettingsGeneration(), SettingsMode(folds=True)),
-	'A000560': (SettingsGeneration(), SettingsMode()),
-	'A000682': (SettingsGeneration(Z0Z_normalizeIndex=1), SettingsMode()),
+	'A000560': (SettingsGeneration(), SettingsMode(symmetricSemiMeanders=True)),
+	'A000682': (SettingsGeneration(Z0Z_normalizeIndex=1), SettingsMode(semiMeanders=True)),
 	'A001011': (SettingsGeneration(), SettingsMode(folds=True, equivalenceClasses=True)),
 	'A005316': (SettingsGeneration(), SettingsMode(meanders=True)),
 	'A077055': (SettingsGeneration(Z0Z_normalizeIndex=-1), SettingsMode(meanders=True, equivalenceClasses=True)),
 }
 
-def doTheNeedful(oeisID: OEISid, n: int) -> int:
+def doTheNeedful(oeisID: OEISid, n: int) -> StateStampMeander:
 	"""Count one permutation sequence at order `n` [1].
 
 	(AI generated docstring)
@@ -572,18 +597,11 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		raise ValueError(message)
 
 	nNormalized: int = n - generationMode.Z0Z_normalizeIndex
-	if nNormalized == 0:
-		return 1
-
-	if oeisID == 'A000560':
-		return do(nNormalized, symmetric=True)
-	if oeisID == 'A000682':
-		if nNormalized == 1:
-			return 1
-		return do(nNormalized, symmetric=False)
-
 	state: StateStampMeander = StateStampMeander(nNormalized)
+	if nNormalized == 0:
+		savePermutation(state, mode)
 
-	initializeState(state)
-	state = count(state, mode)
-	return state.total
+	else:
+		initializeState(state)
+		state = count(state, mode)
+	return state

@@ -21,6 +21,7 @@ References
 from __future__ import annotations
 
 from itertools import repeat, starmap
+from pprint import pprint
 from typing import TYPE_CHECKING
 import dataclasses
 
@@ -45,12 +46,12 @@ class _GenerationMode:
 	symmetricSemiMeanders: bool = False
 
 _dictionaryGenerationModesByOEISid: dict[OEISid, _GenerationMode] = {
-	'A000136': _GenerationMode(stampFoldings=True),
-	'A000560': _GenerationMode(offsetOEIS=2, symmetricSemiMeanders=True),
-	'A000682': _GenerationMode(oeisIndexShiftFromSawadaLi=1, semiMeanders=True),
-	'A001011': _GenerationMode(stampFoldings=True, equivalenceClasses=True),
-	'A005316': _GenerationMode(offsetOEIS=0, meanders=True),
-	'A077055': _GenerationMode(offsetOEIS=0, meanders=True, equivalenceClasses=True),
+	'A000136': _GenerationMode(stampFoldings=True)
+	, 'A000560': _GenerationMode(offsetOEIS=2, symmetricSemiMeanders=True)
+	, 'A000682': _GenerationMode(oeisIndexShiftFromSawadaLi=1, semiMeanders=True)
+	, 'A001011': _GenerationMode(stampFoldings=True, equivalenceClasses=True)
+	, 'A005316': _GenerationMode(offsetOEIS=0, meanders=True)
+	, 'A077055': _GenerationMode(offsetOEIS=0, meanders=True, equivalenceClasses=True)
 }
 
 @dataclasses.dataclass(slots=True)
@@ -80,6 +81,7 @@ class StampMeanderState:
 	generationMode: _GenerationMode
 	n: int
 	total: int = 0
+	boxOfPermutations: list[tuple[int, ...]] = dataclasses.field(default_factory=list[tuple[int, ...]])
 	intervalHeadPermutation: int = _intervalMissing
 	boxOfIntervals: list[Interval] = dataclasses.field(init=False)
 	boxOfNodes: list[Node] = dataclasses.field(init=False)
@@ -130,13 +132,13 @@ def _cross(
 			if nodeNext.intervalsLeft.head != _intervalMissing:
 				_setHeadTail(nodeNext, _intervalMissing, _intervalMissing, nodeNext.intervalsLeft.head, nodeNext.intervalsLeft.tail)
 			_move(
-				state,
-				node.intervalsRight.tail,
-				node.intervalsRight,
-				nodeNext.intervalsRight,
-				nodeNext.intervalsRight.tail,
-				_intervalMissing,
-				次intervalLeft,
+				state
+				, node.intervalsRight.tail
+				, node.intervalsRight
+				, nodeNext.intervalsRight
+				, nodeNext.intervalsRight.tail
+				, _intervalMissing
+				, 次intervalLeft
 			)
 		elif node.intervalUnwinding == 次interval:
 			if (state.meanders or state.semiMeanders) and windFactor == 0:
@@ -160,13 +162,13 @@ def _cross(
 			if nodeNext.intervalsRight.head != _intervalMissing:
 				_setHeadTail(nodeNext, nodeNext.intervalsRight.head, nodeNext.intervalsRight.tail, _intervalMissing, _intervalMissing)
 			_move(
-				state,
-				node.intervalsLeft.head,
-				node.intervalsLeft,
-				nodeNext.intervalsLeft,
-				_intervalMissing,
-				nodeNext.intervalsLeft.head,
-				次intervalRight,
+				state
+				, node.intervalsLeft.head
+				, node.intervalsLeft
+				, nodeNext.intervalsLeft
+				, _intervalMissing
+				, nodeNext.intervalsLeft.head
+				, 次intervalRight
 			)
 		elif node.intervalUnwinding == 次interval:
 			if (state.meanders or state.semiMeanders) and windFactor == 0:
@@ -187,24 +189,24 @@ def _cross(
 		_setHeadTail(nodeRight, node.intervalsLeft.head, node.intervalsLeft.tail, 次intervalNext, node.intervalsRight.tail)
 
 	_insert(
-		state,
-		nodeNext.intervalsLeft,
-		次intervalLeft,
-		interval.endpointLeft,
-		crossingNext,
-		nodeNext.intervalsLeft.tail,
-		_intervalMissing,
-		次intervalLeft,
+		state
+		, nodeNext.intervalsLeft
+		, 次intervalLeft
+		, interval.endpointLeft
+		, crossingNext
+		, nodeNext.intervalsLeft.tail
+		, _intervalMissing
+		, 次intervalLeft
 	)
 	_insert(
-		state,
-		nodeNext.intervalsRight,
-		次intervalRight,
-		crossingNext,
-		interval.endpointRight,
-		_intervalMissing,
-		nodeNext.intervalsRight.head,
-		次intervalRight,
+		state
+		, nodeNext.intervalsRight
+		, 次intervalRight
+		, crossingNext
+		, interval.endpointRight
+		, _intervalMissing
+		, nodeNext.intervalsRight.head
+		, 次intervalRight
 	)
 
 	if 次intervalNext != _intervalMissing:
@@ -237,34 +239,34 @@ def _cross(
 	if state.stampFoldings and windFactor == 0:
 		if 次interval == node.intervalsLeft.head:
 			_move(
-				state,
-				nodeNext.intervalsRight.tail,
-				nodeNext.intervalsRight,
-				node.intervalsRight,
-				node.intervalsRight.tail,
-				_intervalMissing,
-				次nodeNext,
+				state
+				, nodeNext.intervalsRight.tail
+				, nodeNext.intervalsRight
+				, node.intervalsRight
+				, node.intervalsRight.tail
+				, _intervalMissing
+				, 次nodeNext
 			)
 		if 次interval == node.intervalsRight.tail:
 			_move(
-				state,
-				nodeNext.intervalsLeft.head,
-				nodeNext.intervalsLeft,
-				node.intervalsLeft,
-				_intervalMissing,
-				node.intervalsLeft.head,
-				次nodeNext,
+				state
+				, nodeNext.intervalsLeft.head
+				, nodeNext.intervalsLeft
+				, node.intervalsLeft
+				, _intervalMissing
+				, node.intervalsLeft.head
+				, 次nodeNext
 			)
 
 def _insert(
-	state: StampMeanderState,
-	intervals: IntervalHeadTail,
-	次interval: int,
-	endpointLeft: int,
-	endpointRight: int,
-	次intervalPrevious: int,
-	次intervalNext: int,
-	次nodeNext: int,
+	state: StampMeanderState
+	, intervals: IntervalHeadTail
+	, 次interval: int
+	, endpointLeft: int
+	, endpointRight: int
+	, 次intervalPrevious: int
+	, 次intervalNext: int
+	, 次nodeNext: int
 ) -> None:
 	if 次intervalPrevious != _intervalMissing:
 		state.boxOfIntervals[次intervalPrevious].next = 次interval
@@ -284,24 +286,24 @@ def _insert(
 	interval.nodeNext = 次nodeNext
 
 def _move(
-	state: StampMeanderState,
-	次interval: int,
-	intervalsSource: IntervalHeadTail,
-	intervalsTarget: IntervalHeadTail,
-	次intervalPrevious: int,
-	次intervalNext: int,
-	次nodeNext: int,
+	state: StampMeanderState
+	, 次interval: int
+	, intervalsSource: IntervalHeadTail
+	, intervalsTarget: IntervalHeadTail
+	, 次intervalPrevious: int
+	, 次intervalNext: int
+	, 次nodeNext: int
 ) -> None:
 	_remove(state, intervalsSource, 次interval)
 	_insert(
-		state,
-		intervalsTarget,
-		次interval,
-		state.boxOfIntervals[次interval].endpointLeft,
-		state.boxOfIntervals[次interval].endpointRight,
-		次intervalPrevious,
-		次intervalNext,
-		次nodeNext,
+		state
+		, intervalsTarget
+		, 次interval
+		, state.boxOfIntervals[次interval].endpointLeft
+		, state.boxOfIntervals[次interval].endpointRight
+		, 次intervalPrevious
+		, 次intervalNext
+		, 次nodeNext
 	)
 
 def _remove(state: StampMeanderState, intervals: IntervalHeadTail, 次interval: int) -> None:
@@ -360,29 +362,36 @@ def _restorePermutation(state: StampMeanderState, 次interval: int) -> None:
 	if 次intervalNext != _intervalMissing:
 		state.boxOfIntervals[次intervalNext].permutationPrevious = 次interval
 
-def _permutationCanonical吗(state: StampMeanderState) -> bool:
+def _savePermutation(state: StampMeanderState) -> None:
 	permutation: list[int] = [0] * state.n
 	次interval: int = state.intervalHeadPermutation
 	次permutation: int = 0
 	leafOneVisited: bool = False
-	leafOnePrecedesLeafLast: bool = True
 
 	while 次permutation < state.n:
 		permutation[次permutation] = state.boxOfIntervals[次interval].endpointRight
 		if permutation[次permutation] == 1:
 			leafOneVisited = True
-		elif permutation[次permutation] == state.n and not leafOneVisited:
-			leafOnePrecedesLeafLast = False
+		elif state.equivalenceClasses and (permutation[次permutation] == state.n) and not leafOneVisited:
+			return
 		次interval = state.boxOfIntervals[次interval].permutationNext
 		次permutation += 1
 
-	comparisonCanonical: int = 0
-	次permutation = 0
-	while comparisonCanonical == 0 and 次permutation < state.n:
-		comparisonCanonical = permutation[次permutation] - (state.n - permutation[state.n - 次permutation - 1] + 1)
-		次permutation += 1
+	if state.equivalenceClasses:
+		次permutation = 0
+		while 次permutation < state.n:
+			comparisonCanonical: int = state.n - permutation[state.n - 次permutation - 1] + 1
+			if permutation[次permutation] < comparisonCanonical:
+				break
+			if comparisonCanonical < permutation[次permutation]:
+				return
+			次permutation += 1
 
-	return leafOnePrecedesLeafLast and comparisonCanonical <= 0
+	if state.semiMeanders:
+		permutation = [1, *map((1).__add__, permutation)]
+
+	state.boxOfPermutations.append(tuple(permutation))
+	state.total += 1
 
 def initializeState(state: StampMeanderState) -> None:
 	state.boxOfNodes[0].intervalUnwinding = 2
@@ -417,26 +426,25 @@ def _visitIntervals(state: StampMeanderState, crossingNext: int, nodeCurrentInde
 
 def generate(state: StampMeanderState, crossingNext: int, nodeCurrentIndex: int, windFactor: int) -> None:
 	if state.n < crossingNext:
-		if not state.equivalenceClasses or _permutationCanonical吗(state):
-			state.total += 1
+		_savePermutation(state)
 	else:
 		nodeCurrent: Node = state.boxOfNodes[nodeCurrentIndex]
 		if state.meanders and state.n - crossingNext <= windFactor:
 			_cross(
-				state,
-				crossingNext,
-				nodeCurrentIndex,
-				windFactor,
-				nodeCurrent.sideUnwinding,
-				nodeCurrent.intervalUnwinding,
-				unwindingIntervalVisited=False,
+				state
+				, crossingNext
+				, nodeCurrentIndex
+				, windFactor
+				, nodeCurrent.sideUnwinding
+				, nodeCurrent.intervalUnwinding
+				, unwindingIntervalVisited=False
 			)
 		else:
 			_visitIntervals(state, crossingNext, nodeCurrentIndex, windFactor, sideLeft)
 			if not state.symmetricSemiMeanders or crossingNext != 2:
 				_visitIntervals(state, crossingNext, nodeCurrentIndex, windFactor, sideRight)
 
-def doTheNeedful(oeisID: OEISid, n: int) -> int:
+def doTheNeedful(oeisID: OEISid, n: int) -> StampMeanderState:
 	"""Count one Sawada-Li sequence at order `n` [1].
 
 	(AI generated docstring)
@@ -455,15 +463,8 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 
 	Returns
 	-------
-	aOFn : int
-		Number of objects or equivalence classes at OEIS index `n`.
-
-	Raises
-	------
-	TypeError
-		Raised when `n` is not an integer.
-	ValueError
-		Raised when `oeisID` is unsupported or `n` precedes the sequence's OEIS offset.
+	state : StampMeanderState
+		Enumeration state for OEIS index `n`, including `total` and `boxOfPermutations`.
 
 	References
 	----------
@@ -471,22 +472,18 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
 		https://doi.org/10.37236/2404
 	"""
-	generationMode: _GenerationMode | None = _dictionaryGenerationModesByOEISid.get(oeisID)
-	if generationMode is None:
-		message: str = f'I received `{oeisID = }`, but the Sawada-Li algorithm supports only {tuple(_dictionaryGenerationModesByOEISid)}.'
-		raise ValueError(message)
-	if not isinstance(n, int) or isinstance(n, bool):
-		message = f'I received `{n = }` in the form of `{type(n) = }`, but I need an integer OEIS index.'
-		raise TypeError(message)
-	if n < generationMode.offsetOEIS:
-		message = f'I received `{n = }`, but OEIS sequence `{oeisID}` is not defined below `offset = {generationMode.offsetOEIS}`.'
-		raise ValueError(message)
+	generationMode: _GenerationMode = _dictionaryGenerationModesByOEISid[oeisID]
 
 	orderSawadaLi: int = n - generationMode.oeisIndexShiftFromSawadaLi
-	if orderSawadaLi == 0:
-		return 1
-
 	state: StampMeanderState = StampMeanderState(generationMode, orderSawadaLi)
+	if orderSawadaLi == 0:
+		_savePermutation(state)
+		return state
+
 	initializeState(state)
 	generate(state, 2, 0, 0)
-	return state.total
+	return state
+
+if __name__ == '__main__':
+	state: StampMeanderState = doTheNeedful('A000682', 6)
+	pprint(state.boxOfPermutations)

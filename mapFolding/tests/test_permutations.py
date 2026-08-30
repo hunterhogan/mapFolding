@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from mapFolding.algorithms.permutations import doTheNeedful
+from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
 import pytest
 
@@ -25,9 +26,7 @@ if TYPE_CHECKING:
 	],
 )
 def test_doTheNeedful(oeisID: OEISid, n: int, expected: int) -> None:
-	actual: int = doTheNeedful(oeisID, n)
-
-	assert actual == expected, f'doTheNeedful({oeisID=}, {n=}) returned {actual=}, expected {expected=}.'
+	assertEqualTo(doTheNeedful(oeisID, n).total, expected, doTheNeedful.__name__, oeisID, n)
 
 @pytest.mark.parametrize(
 	'oeisID, n, match',
