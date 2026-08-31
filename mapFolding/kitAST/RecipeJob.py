@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from astToolkit import Be, Make, NodeChanger, NodeTourist, Then
 from astToolkit.filesystem import parseLogicalPath2astModule
-from astToolkit.transformationTools import pythonCode2ast_expr
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
@@ -23,10 +22,12 @@ import dataclasses
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 	from astToolkit.containers import IngredientsFunction, IngredientsModule
+	from collections.abc import Callable
 	from mapFolding.dataBaskets import StateMapFoldingSymmetric
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass
 	from mapFolding.kitAST.numba.kitNumba import SpicesJobNumba
 	from mapFolding.theTypes import 形TotalLeaves
+	from typing import Any, TypeIs
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:
@@ -142,6 +143,9 @@ class RecipeJobTheorem2:
 
 #-------- Datatypes ------------------------------------------
 
+	initializationConstructor: bool = True
+	"""Whether to use constructor initialization for scalar dataclass fields."""
+
 	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathInfix: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:
 		"""Construct a complete file path from component parts.
 
@@ -212,14 +216,14 @@ class RecipeJobTheorem2:
 		if self.source_astModule is None:
 			self.source_astModule = parseLogicalPath2astModule(f'{settingsPackage.identifierPackage}.{defaultMapFolding["logicalPath"]["synthetic"]}.theorem2Numba')
 
-def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
+def fromMapShape(mapShape: tuple[形TotalLeaves, ...], **keywordArguments: Any) -> RecipeJobTheorem2:
 	"""Create a binary executable for `mapShape`."""
 	state: StateMapFolding = transitionOnGroupsOfFolds(StateMapFolding(mapShape))
 	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or lookupMapFoldingEstimates.get(state.mapShape, 0)
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
 	pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
 	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameTotalFolds=pathFilenameTotalFolds
-		, totalFoldsEstimated=totalFoldsEstimated, totalFoldsMultiplier=state.totalLeaves)
+		, totalFoldsEstimated=totalFoldsEstimated, totalFoldsMultiplier=state.totalLeaves, **keywordArguments)
 
 # TODO Moving the static array, `connectionGraph`, out of the numba.jit function, reduces compile
 # time. mapShape 2^8 changes from 15 hours to 30 seconds.
@@ -227,40 +231,6 @@ def fromMapShape(mapShape: tuple[形TotalLeaves, ...]) -> RecipeJobTheorem2:
 # 	pass
 
 #================== Bulk changes ======================================================================
-
-def moveShatteredDataclass_arg2body(identifier: str, job: RecipeJobTheorem2) -> ast.AnnAssign | ast.Assign:
-	"""Embed a shattered dataclass field assignment into the function body.
-
-	(AI generated docstring)
-
-	This helper retrieves the pre-fabricated assignment for `identifier` from `job.shatteredDataclass`, hydrates the literal
-	payload from `job.state`, and returns the node ready for insertion into a generated function body. Scalar entries receive the
-	concrete integer value, array entries are encoded using the auto-decoding run-length encoded method from `hunterMakesPy`, and
-	other constructors are left untouched so downstream tooling can decide how to finalize them.
-
-	Parameters
-	----------
-	identifier : str
-		Field name keyed in `job.shatteredDataclass.Z0Z_field2AnnAssign`.
-	job : RecipeJobTheorem2
-		Job descriptor that supplies the current computation state and shattered metadata.
-
-	Returns
-	-------
-	Ima___Assign : ast.AnnAssign | ast.Assign
-		Assignment node mutated with state-backed values for the requested field.
-	"""
-	Ima___Assign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[identifier]
-	match elementConstructor:
-		case 'scalar':
-			cast('ast.Constant', cast('ast.Call', Ima___Assign.value).args[0]).value = int(eval(f"job.state.{identifier}"))  # ruff: ignore[suspicious-eval-usage]
-		case 'array':
-			dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{identifier}"), assumeAddSpaces=True)  # ruff: ignore[suspicious-eval-usage]
-			dataAs_ast_expr: ast.expr = pythonCode2ast_expr(dataAsStrRLE)
-			cast('ast.Call', Ima___Assign.value).args = [dataAs_ast_expr]
-		case _:
-			pass
-	return Ima___Assign
 
 def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Convert function parameters into initialized variables with concrete values.
@@ -302,14 +272,17 @@ def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheor
 	boxOfIdentifiersNotUsed: list[str] = list(set(boxOf_arg_arg) - set(boxOfIdentifiers))
 
 	for ast_arg in boxOf_argCuzMyBrainRefusesToThink:
-		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).field2AnnAssign:
+		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).lookupAnnAssignWithConstructor:
 			if ast_arg.arg in boxOfIdentifiersNotUsed:
 				pass
 			else:
 				ImaAnnAssign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[ast_arg.arg]
 				match elementConstructor:
 					case 'scalar':
-						cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff: ignore[suspicious-eval-usage]
+						if job.initializationConstructor:
+							cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff: ignore[suspicious-eval-usage]
+						else:
+							ImaAnnAssign = Make.Assign([Make.Name(ast_arg.arg, Make.Store())], Make.Constant(int(eval(f"job.state.{ast_arg.arg}"))))  # ruff: ignore[suspicious-eval-usage]
 					case 'array':
 						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # ruff: ignore[suspicious-eval-usage]
 						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
@@ -330,7 +303,16 @@ def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheor
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
 
-def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) -> None:
+def moveStaticArrays(job: RecipeJobTheorem2, ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule) -> tuple[IngredientsFunction, IngredientsModule]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	for identifier in raiseIfNone(job.shatteredDataclass).boxOfStaticArrays:
+		findThis: Callable[[ast.AST], TypeIs[ast.Assign]] = IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifier))
+		ingredientsModule.appendEpilogue(
+			statement=raiseIfNone(NodeTourist(findThis, Then.extractIt).captureLastMatch(ingredientsFunction.astFunctionDef)))
+		NodeChanger(findThis, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
+	return ingredientsFunction, ingredientsModule
+
+def replaceStaticScalars(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) -> None:
 	"""Replace static scalar identifiers with concrete constant values in a function AST.
 
 	Parameters
@@ -340,7 +322,7 @@ def staticValues(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) 
 	ingredientsCount : IngredientsFunction
 		Container holding the counting function's AST to be transformed.
 	"""
-	for identifier in raiseIfNone(job.shatteredDataclass).boxOfIdentifiersStaticScalars:
+	for identifier in raiseIfNone(job.shatteredDataclass).boxOfStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
 			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff: ignore[suspicious-eval-usage]
 		).visit(ingredientsCount.astFunctionDef)

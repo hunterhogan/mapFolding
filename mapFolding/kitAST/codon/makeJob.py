@@ -5,7 +5,8 @@ from astToolkit import Be, Grab, Make, NodeChanger, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis, Settings形
-from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, setDatatypeViaImport, staticValues
+from mapFolding.kitAST.RecipeJob import (
+	addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, replaceStaticScalars, setDatatypeViaImport)
 from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
 from pathlib import Path, PurePosixPath
 from typing import cast, TYPE_CHECKING
@@ -38,7 +39,7 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 	ingredientsCount.astFunctionDef.decorator_list = []
 
-	staticValues(job, ingredientsCount)
+	replaceStaticScalars(job, ingredientsCount)
 
 	ingredientsModule = IngredientsModule()
 	addLauncher(ingredientsModule, ingredientsCount, job)
@@ -77,7 +78,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 	ingredientsFunction : IngredientsFunction
 		Modified function.
 	"""
-	for ast_arg in raiseIfNone(job.shatteredDataclass).boxOf_argAnnotated4ArgumentsSpecification:
+	for ast_arg in raiseIfNone(job.shatteredDataclass).boxOf_argAnnotated:
 		identifier: str = ast_arg.arg
 		annotation: ast.expr = raiseIfNone(ast_arg.annotation)
 

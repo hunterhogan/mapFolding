@@ -33,7 +33,7 @@ from astToolkit.containers import IngredientsFunction, LedgerOfImports
 from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.transformationTools import unparseFindReplace
 from copy import deepcopy
-from hunterMakesPy import raiseIfNone
+from hunterMakesPy import errorL33T, raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import IfThis
 from typing import TYPE_CHECKING
@@ -48,6 +48,9 @@ if TYPE_CHECKING:
 # easier. That's why they don't use `astToolkit` idioms very often. Try to apply some of these
 # concepts https://github.com/python/typing/discussions/2092.
 
+# TODO Figure out how to deconstruct dataclasses with `astToolkit`. It's your effing package, Hunter.
+# The downstream code is difficult to change. Hell, the UPSTREAM dataclasses are difficult to change
+# because a change can break the ast transformations.
 @dataclasses.dataclass(slots=True)
 class ShatteredDataclass:
 	"""Container for decomposed dataclass components organized as AST nodes for code generation.
@@ -72,7 +75,7 @@ class ShatteredDataclass:
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
-	field2AnnAssign: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict[str, ast.AnnAssign | ast.Assign])
+	lookupAnnAssignWithConstructor: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict[str, ast.AnnAssign | ast.Assign])
 	"""Maps field names to their corresponding AST assignment expressions for initialization."""
 
 	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict[str, tuple[ast.AnnAssign | ast.Assign, str]])
@@ -84,13 +87,16 @@ class ShatteredDataclass:
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
 	"""Import records for the dataclass and its constituent field types."""
 
-	boxOf_argAnnotated4ArgumentsSpecification: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
+	boxOf_argAnnotated: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
 	"""Function argument nodes with type annotations for parameter specification."""
 
 	boxOf_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
 	"""Keyword arguments for dataclass initialization using field=field format."""
 
-	boxOfIdentifiersStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
+	boxOfStaticArrays: list[str] = dataclasses.field(default_factory=list[str])
+	"""Identifiers of unchanging array fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
+
+	boxOfStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
 	"""Identifiers of unchanging scalar fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
 
 	boxOfAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
@@ -255,7 +261,7 @@ class DeReConstructField2ast:
 			self.astAnnAssignConstructor = Make.Assign([self.astName], Make.Call(Make.Name(constructor), list_keyword=[Make.keyword('dtype', dtype_asnameName)]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
 		elif isinstance(self.astAnnotation, ast.Name):
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-1)]))
+			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-errorL33T)]))
 			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
 		elif isinstance(self.astAnnotation, ast.Subscript):
 			elementConstructor: str = self.metadata.get('elementConstructor', 'generic')
@@ -328,16 +334,17 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
 		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
-		field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
+		lookupAnnAssignWithConstructor={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
 		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
-		boxOf_argAnnotated4ArgumentsSpecification=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
+		boxOf_argAnnotated=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
 		boxOf_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
-		boxOfIdentifiersStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'scalar' and not dictionaryDeReConstruction[field].init)],
+		boxOfStaticArrays=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'array' and not dictionaryDeReConstruction[field].init)],
+		boxOfStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'scalar' and not dictionaryDeReConstruction[field].init)],
 		boxOfAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
 		boxOfName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
 		boxOfUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
 		map_stateDOTfield2Name={dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder},
-		)
+	)
 	shatteredDataclass.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclass.boxOfName4Parameters, ast.Store())
 	shatteredDataclass.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(identifierDataclass), list_keyword=shatteredDataclass.boxOf_keyword_field__field4init))
 	shatteredDataclass.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclass.boxOfAnnotations))
@@ -377,7 +384,7 @@ def removeDataclass(ingredients: IngredientsFunction, shatteredDataclass: Shatte
 		The modified function ingredients with dataclass dependencies removed.
 
 	"""
-	ingredients.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated4ArgumentsSpecification)
+	ingredients.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated)
 	ingredients.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
 	NodeChanger(Be.Return, Then.replaceWith(Make.Return(shatteredDataclass.fragments4AssignmentOrParameters))).visit(ingredients.astFunctionDef)
 	ingredients.astFunctionDef = unparseFindReplace(ingredients.astFunctionDef, shatteredDataclass.map_stateDOTfield2Name)

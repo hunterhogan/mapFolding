@@ -9,17 +9,20 @@ progress integration for long-running calculations, and launcher generation for 
 """
 from __future__ import annotations
 
+from astToolkit import Be, Grab, Make, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import Settings形
+from mapFolding.kitAST import IfThis, Settings形
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
-from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, setDatatypeViaImport, staticValues
+from mapFolding.kitAST.RecipeJob import (
+	addLauncher, fromMapShape, move_argToBody, moveStaticArrays, RecipeJobTheorem2, replaceStaticScalars, setDatatypeViaImport)
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction
 	from mapFolding.theTypes import 形TotalLeaves
 	from pathlib import Path
+	import ast
 
 # TODO Dynamically calculate the bitwidth of each datatype.
 # DEVELOPMENT I delayed dynamic calculation because I didn't know how to calculate what 'elephino'
@@ -63,25 +66,32 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> Path:
 		Optimization settings including Numba parameters and progress options.
 
 	"""
-	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
+	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 
-	staticValues(job, ingredientsCount)
+	replaceStaticScalars(job, ingredientsFunction)
 
 	ingredientsModule = IngredientsModule()
-	addLauncher(ingredientsModule, ingredientsCount, job, spices)
+	addLauncher(ingredientsModule, ingredientsFunction, job, spices)
 	if spices.useNumbaProgressBar:
 		spices.parametersNumba['nogil'] = True
 
-	ingredientsCount = move_argToBody(ingredientsCount, job)
+	ingredientsFunction = move_argToBody(ingredientsFunction, job)
+	ingredientsFunction, ingredientsModule = moveStaticArrays(job, ingredientsFunction, ingredientsModule)
+	ingredientsFunction, ingredientsModule = setDatatypeViaImport(ingredientsFunction, ingredientsModule, boxOfSettings形)
 
-	ingredientsCount, ingredientsModule = setDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfSettings形)
-
-	ingredientsCount.astFunctionDef.decorator_list = []  # TODO low-priority, handle this more elegantly
-	ingredientsCount = decorateCallableWithNumba(ingredientsCount, spices.parametersNumba)
-	ingredientsModule.appendIngredientsFunction(ingredientsCount)
+	ingredientsFunction.astFunctionDef.decorator_list = []  # TODO low-priority, handle this more elegantly
+	boxOfName: list[ast.Name] = []
+	NodeTourist(IfThis.isAllOf(IfThis.isAssignAndTargets0Is(Be.Name), Be.Assign.valueIs(Be.Constant))
+		, Grab.targetsAttribute(Grab.index(0, Then.appendTo(boxOfName)))).visit(ingredientsFunction.astFunctionDef)  # pyright: ignore[reportArgumentType, reportCallIssue] # ty: ignore[no-matching-overload]
+	boxOfIdentifiers: list[str] = list({astName.id for astName in boxOfName})
+	dd: dict[ast.Constant, ast.expr] = {Make.Constant(identifier): raiseIfNone(job.shatteredDataclass).lookupAnnAssignWithConstructor[identifier].annotation  # pyright: ignore[reportUnknownVariableType,reportAttributeAccessIssue,reportUnknownMemberType]  # ty: ignore[unresolved-attribute]
+		for identifier in boxOfIdentifiers}
+	spices.parametersNumba['locals'] = Make.Dict(tuple(dd), tuple(dd.values()))
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, spices.parametersNumba)
+	ingredientsModule.appendIngredientsFunction(ingredientsFunction)
 	return ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.identifierPackage or '')
 
 if __name__ == '__main__':
 	spices = SpicesJobNumba(useNumbaProgressBar=True, parametersNumba=parametersNumbaLight)
-	mapShape: tuple[形TotalLeaves, ...] = (2, 4)
-	makeJobNumba(fromMapShape(mapShape), spices)
+	mapShape: tuple[形TotalLeaves, ...] = (3, 15)
+	makeJobNumba(fromMapShape(mapShape, initializationConstructor=False), spices)

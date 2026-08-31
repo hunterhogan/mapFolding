@@ -123,6 +123,7 @@ defaultMatrixMeanders['module']['default'] = defaultMatrixMeanders['module']['al
 lookupMapFoldingEstimates: Final[dict[tuple[int, ...], int]] = {
 	(2, 2, 2, 2, 2, 2, 2, 2): 798148657152000
 	, (2, 21): 776374224866624
+	, (2, 22): 4037141814510720
 	, (3, 15): 824761667826225
 	, (3, 3, 3, 3): 85109616000000000000000000000000
 	, (8, 8): 791274195985524900  # Two tests, months apart, estimated 300,000 hours to compute.

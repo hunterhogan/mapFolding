@@ -30,9 +30,12 @@ from __future__ import annotations
 
 from astToolkit import Be, identifierDotAttribute, Make, NodeChanger, Then
 from astToolkit.containers import IngredientsModule, LedgerOfImports
+from humpy_cytoolz import valfilter as filterValue
 from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.kitAST.theSSOT import default
+from more_itertools import loops
 from typing import TYPE_CHECKING, TypedDict
+from Z0Z_tools import DOTitems
 import ast
 import dataclasses
 import warnings
@@ -44,7 +47,7 @@ if TYPE_CHECKING:
 	from numba.core.compiler import CompilerBase as numbaCompilerBase
 	from os import PathLike
 	from pathlib import PurePath
-	from typing import Any, Final, NotRequired
+	from typing import Any, Final, NotRequired, TypeIs
 
 class ParametersNumba(TypedDict):
 	"""
@@ -81,7 +84,7 @@ class ParametersNumba(TypedDict):
 	forceinline: NotRequired[bool]
 	forceobj: NotRequired[bool]
 	inline: NotRequired[str]
-	locals: NotRequired[dict[str, Any]]
+	locals: NotRequired[dict[str, Any] | ast.Dict]
 	looplift: NotRequired[bool]
 	no_cfunc_wrapper: NotRequired[bool]
 	no_cpython_wrapper: NotRequired[bool]
@@ -147,9 +150,9 @@ While Numba offers multiple decorators (`@jit`, `@njit`, `@vectorize`), this too
 on the general-purpose `@jit` decorator with configurable parameters for flexibility.
 """
 
-# TODO add subroutine to define `@jit(locals={...}`. Effects: 1. eliminate local variable annotations.
-# 2. Eliminate "constructors" on scalars. This, `leafConnectee: 形TotalLeaves = 形TotalLeaves(15)`
-# becomes `leafConnectee = 15`, but numba still knows the type is `形TotalLeaves`.
+def _bool_str吗(parameterValue: Any) -> TypeIs[bool | str]:
+	return isinstance(parameterValue, (bool, str))
+
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, parametersNumba: ParametersNumba | None = None) -> IngredientsFunction:
 	"""Transform a Python function into a Numba-accelerated version with appropriate decorators.
 
@@ -204,7 +207,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}", stacklevel=2)
 		return astCallable
 
-	def makeSpecialSignatureForNumba(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:
+	def make_numbaDotSignature(signatureElement: ast.arg) -> ast.Subscript | ast.Name | None:
 		"""Generate Numba-compatible type signatures for function parameters.
 
 		(AI generated docstring)
@@ -228,10 +231,11 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			Numba-compatible type signature AST node, or None if conversion not possible.
 
 		"""
+		returnMe: ast.Subscript | ast.Name | None = None
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
 			annotationShape: ast.expr = signatureElement.annotation.slice.elts[0]
 			if isinstance(annotationShape, ast.Subscript) and isinstance(annotationShape.slice, ast.Tuple):
-				shapeAsBoxOf_astSlice: list[ast.Slice] = [ast.Slice() for _axis in range(len(annotationShape.slice.elts))]
+				shapeAsBoxOf_astSlice: list[ast.Slice] = [ast.Slice() for _axis in loops(len(annotationShape.slice.elts))]
 				shapeAsBoxOf_astSlice[-1] = Make.Slice(step=Make.Constant(1))
 				shapeAST: ast.Slice | ast.Tuple = Make.Tuple(list(shapeAsBoxOf_astSlice))
 			else:
@@ -249,11 +253,11 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			ingredientsFunction.imports.addImportFrom_asStr(datatypeModuleDecorator, datatype_attr)
 			datatypeNumba = Make.Name(datatype_attr)
 
-			return Make.Subscript(datatypeNumba, slice=shapeAST)
+			returnMe = Make.Subscript(datatypeNumba, slice=shapeAST)
 
 		elif isinstance(signatureElement.annotation, ast.Name):
-			return signatureElement.annotation
-		return None
+			returnMe = signatureElement.annotation
+		return returnMe
 
 	datatypeModuleDecorator: str = 名moduleNumbaDataType
 	boxOf_argsDecorator: Sequence[ast.expr] = []
@@ -261,15 +265,14 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	boxOf_arg4signature_or_function: list[ast.expr] = []
 	for parameter in ingredientsFunction.astFunctionDef.args.args:
 		# For now, let Numba infer them.
-		signatureElement: ast.Subscript | ast.Name | None = makeSpecialSignatureForNumba(parameter)
+		continue
+		signatureElement: ast.Subscript | ast.Name | None = make_numbaDotSignature(parameter)
 		if signatureElement:
 			boxOf_arg4signature_or_function.append(signatureElement)
-		continue
 
 	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
 		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
-		boxOf_argsDecorator = [Make.Call(Make.Name(theReturn.id)
-							, boxOf_arg4signature_or_function or [], [])]
+		boxOf_argsDecorator = [Make.Call(Make.Name(theReturn.id), boxOf_arg4signature_or_function or [], [])]
 	elif boxOf_arg4signature_or_function:
 		boxOf_argsDecorator = [Make.Tuple(boxOf_arg4signature_or_function)]
 
@@ -277,8 +280,9 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
-	# TODO This crap is stoopid. What's the point of a TypedDict if the type checker doesn't know the types?
-	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType]  # ty: ignore[invalid-argument-type]
+	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue))
+		for parameterName, parameterValue in DOTitems(filterValue(_bool_str吗, parametersNumba))]
+	list_keyword.append(Make.keyword('locals', parametersNumba.get('locals', Make.Dict())))  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 
 	decoratorModule = 名moduleNumbaDataType
 	decoratorCallable = 名callableDecorator
@@ -335,7 +339,8 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 	NodeChanger(Be.Import, Then.removeIt).visit(astModule)
 	NodeChanger(Be.ImportFrom, Then.removeIt).visit(astModule)
 	ingredientsModule.appendEpilogue(astModule)
-	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue)) for parameterName, parameterValue in parametersNumba.items()]  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
+	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue))
+		for parameterName, parameterValue in DOTitems(filterValue(_bool_str吗, parametersNumba))]
 	ingredientsModule.appendEpilogue(statement=Make.Expr(Make.Call(Make.Name('jit_module'), list_keyword=list_keyword)))
 
 	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
