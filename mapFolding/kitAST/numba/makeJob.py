@@ -84,9 +84,9 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> Path:
 	NodeTourist(IfThis.isAllOf(IfThis.isAssignAndTargets0Is(Be.Name), Be.Assign.valueIs(Be.Constant))
 		, Grab.targetsAttribute(Grab.index(0, Then.appendTo(boxOfName)))).visit(ingredientsFunction.astFunctionDef)  # pyright: ignore[reportArgumentType, reportCallIssue] # ty: ignore[no-matching-overload]
 	boxOfIdentifiers: list[str] = list({astName.id for astName in boxOfName})
-	dd: dict[ast.Constant, ast.expr] = {Make.Constant(identifier): raiseIfNone(job.shatteredDataclass).lookupAnnAssignWithConstructor[identifier].annotation  # pyright: ignore[reportUnknownVariableType,reportAttributeAccessIssue,reportUnknownMemberType]  # ty: ignore[unresolved-attribute]
+	numbaDOTjit_locals: dict[ast.Constant, ast.expr] = {Make.Constant(identifier): raiseIfNone(job.shatteredDataclass).lookupAnnAssignWithConstructor[identifier].annotation  # pyright: ignore[reportUnknownVariableType,reportAttributeAccessIssue,reportUnknownMemberType]  # ty: ignore[unresolved-attribute]
 		for identifier in boxOfIdentifiers}
-	spices.parametersNumba['locals'] = Make.Dict(tuple(dd), tuple(dd.values()))
+	spices.parametersNumba['locals'] = Make.Dict(tuple(numbaDOTjit_locals), tuple(numbaDOTjit_locals.values()))
 	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, spices.parametersNumba)
 	ingredientsModule.appendIngredientsFunction(ingredientsFunction)
 	return ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.identifierPackage or '')

@@ -42,8 +42,42 @@ class _UnboxContext(NamedTuple):
 	pyapi: PythonAPI
 
 @structref.register  # pyright: ignore[reportUnknownMemberType]
-class 形DataclassNumba(numba_types.StructRef):  # ruff: ignore[undocumented-public-class]
-	# DOCUMENT
+class 形DataclassNumba(numba_types.StructRef):
+	"""Represent Python dataclass structures in Numba-compiled code.
+
+	(AI generated docstring)
+
+	You can use this type to bridge Python dataclasses to Numba's type system. This
+	`StructRef` [1] subclass enables Numba-compiled functions to manipulate dataclass
+	instances by converting Python dataclass fields to Numba struct fields. The type
+	preprocessing converts Numba literal types [2] to their unliteral equivalents,
+	which allows Numba to generate efficient compiled code for dataclass operations.
+
+	Numba Behavior
+	--------------
+	Numba requires type preprocessing for `StructRef` subclasses because Numba's type
+	inference can produce literal types that must be normalized before compilation.
+	This class applies `numba.types.unliteral` [3] to each field type during
+	preprocessing. The unliteral transformation converts compile-time constant types
+	to their runtime equivalents.
+
+	See Also
+	--------
+	`_typeofDataclass`
+		Register `StateMapFolding` and `StateMapFoldingSymmetric` to this type.
+
+	References
+	----------
+	[1] `numba.experimental.structref.StructRef`
+		https://numba.readthedocs.io/en/stable/reference/pysupported.html#structref
+
+	[2] Numba literal types - Numba documentation
+		https://numba.readthedocs.io/en/stable/reference/types.html#literal-types
+
+	[3] `numba.types.unliteral`
+		https://numba.readthedocs.io/en/stable/reference/types.html
+	"""
+
 	@override
 	def preprocess_fields(self, fields: Sequence[tuple[str, numba_types.Type]]) -> tuple[tuple[str, numba_types.Type], ...]:
 		def unliteral(aField: tuple[str, numba_types.Type]) -> tuple[str, numba_types.Type]:
