@@ -3,9 +3,8 @@ from __future__ import annotations
 
 from mapFolding.algorithms.permutations import doTheNeedful, StateStampMeander
 from mapFolding.algorithms.permutationsBilateral import doTheNeedful as bilateral
-from mapFolding.kitFilesystem import writeAlbum
+from mapFolding.kitFilesystem import makePathFilenameCount, writeAlbum
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
-from pathlib import Path
 from typing import TYPE_CHECKING
 import time
 
@@ -19,7 +18,6 @@ if __name__ == '__main__':
 
 	boxOfOEISid: list[OEISid] = []
 	pathLikeWrite: PathLike[str] | None = None
-	pathDirectoryWrite: Path | None = None
 
 	if False:
 		n: int = 2
@@ -32,15 +30,13 @@ if __name__ == '__main__':
 	if True:
 		boxOfOEISid.append('A005316')
 
-	if pathLikeWrite is not None:
-		pathDirectoryWrite = Path(pathLikeWrite)
-
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
 		for n in range(6, 17):
 
 			timeStart: float = time.perf_counter()
+			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
 			if flow == 'bilateral':
 				if oeisID == 'A000560':
 					total: int = bilateral(n, symmetric=True)
@@ -51,10 +47,7 @@ if __name__ == '__main__':
 			else:
 				state: StateStampMeander = doTheNeedful(oeisID, n)
 				total = state.total
-				if pathDirectoryWrite is not None:
-					writeAlbum(state.boxOfPermutations, pathDirectoryWrite / f'{oeisID}_{n}.csv')
+				if pathLikeWrite is not None:
+					writeAlbum(state.boxOfPermutations, makePathFilenameCount(pathLikeWrite, oeisID, n, suffix='.album'))
 
 			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=True)
-
-# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
-# Create save to file option, but save the list of permutations as CSV using `writeAlbum`.
