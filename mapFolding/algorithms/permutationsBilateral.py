@@ -1,42 +1,57 @@
-"""Count semi-meanders with a mirrored branch structure.
+"""Count semi-meanders and symmetric semi-meanders with a mirrored branch structure.
 
 (AI generated docstring)
 
-You can use this module to count the semi-meanders of Sawada and Li [1] and the corresponding
-symmetric semi-meanders obtained by forcing the second crossing to one side. This module
-re-expresses the paper's mutable node tree with mirrored `Branch` and `Interval` abstractions so
-the same splice and backtracking operations work from either end of the permutation.
+You can use this module to count semi-meanders and symmetric semi-meanders using a modified version of
+Sawada's and Li's [1] permutation algorithm. This module re-expresses the paper's mutable node tree
+with mirrored `Branch` and `Interval` abstractions so the same splice and backtracking operations work
+from either end of the permutation.
 
 Contents
 --------
 Classes
-	Branch
-		Represent one side of a mirrored branch pair.
-	Interval
-		Represent one mutable interval in the semi-meander branch structure.
+    Branch
+        Represent one side of a mirrored branch pair.
+    Interval
+        Represent one mutable interval in the semi-meander branch structure.
 
 Functions
-	countBranch
-		Count completions reachable from the intervals attached to `branch`.
-	countCrossing
-		Count completions after adding one crossing at `branch`.
-	crossLine
-		Insert a new crossing into the interval chain at `attachedTo`.
-	doTheNeedful
-		Count semi-meanders or symmetric semi-meanders of order `n`.
-	makeBranch
-		Create a mirrored pair of `Branch` records.
+    countBranch
+        Count completions reachable from the intervals attached to `branch`.
+    countCrossing
+        Count completions after crossing the line (the road) at `lineSegment`.
+    crossLine
+        Attach each new `Interval` created by crossing the line.
+    doTheNeedful
+        Count semi-meanders or symmetric semi-meanders of order `n`.
+    makeBranch
+        Create a mirrored pair of `Branch` records.
 
 References
 ----------
 [1] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-meanders, and Open Meanders:
-	Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
-	https://doi.org/10.37236/2404
+    Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
+    https://doi.org/10.37236/2404
 """
 from __future__ import annotations
 
 from typing import Self
 
+# SEMIOTICS I'm not satisfied with "interval." On the one hand, it is literally an interval, not
+# merely analogous to an interval. That is a STRONG reason to use the term: the word means what it is
+# and is what it means.
+
+# On the other hand, it's an interval of the line (boring), not the curve (what we are studying), and
+# the ends of the interval are ostensibly defined by two intersections of the curve with the line--but
+# you can't know anything about the two intersections if you don't know anything about at least one
+# other interval. It's not really a space between two points: it's a space between This Point--which
+# is or is not a point ending an adjacent interval, which in turn has a second point that is or is not
+# a point ending a different adjacent interval, until the series ends--and That Point, which is or is
+# not a point ending an adjacent interval, which in turn has a second point that is or is not a point
+# ending a different adjacent interval, until the series ends. It's "interval-ness" doesn't tell us
+# anything.
+
+# I despise "gap".
 class Interval:
 	"""Represent one mutable interval in the semi-meander branch structure.
 
@@ -56,7 +71,13 @@ class Interval:
 	distal : Interval
 		The neighboring `Interval` reached by following the distal link.
 	"""
+	# SEMIOTICS "distal" and "proximal" are excellent, but "attached" is focused on the data
+	# structure, not the problem. The semiotic _system_ needs to be about the programming or the
+	# problem, not a pastiche.
 	__slots__ = ('attachedTo', 'distal', 'proximal')
+	attachedTo: Branch
+	proximal: Interval
+	distal: Interval
 
 	def __init__(self, attachedTo: Branch, proximal: Interval | None = None, distal: Interval | None = None) -> None:
 		"""I use this to initialize one interval record and its optional neighbors.
@@ -78,9 +99,9 @@ class Interval:
 			The `Interval` to store in `self.distal`. When `distal` is `None`,
 			`self.distal` becomes `self`.
 		"""
-		self.attachedTo: Branch = attachedTo
-		self.proximal: Interval | Self = proximal or self
-		self.distal: Interval | Self = distal or self
+		self.attachedTo = attachedTo
+		self.proximal = proximal or self
+		self.distal = distal or self
 
 class Branch:
 	"""Represent one side of a mirrored branch pair.
@@ -104,11 +125,16 @@ class Branch:
 		The mirrored sentinel `Interval` paired with `intervalAdvance`.
 	"""
 	__slots__ = ('advance', 'intervalAdvance', 'intervalComplement')
+	advance: Branch
+	intervalAdvance: Interval
+	intervalComplement: Interval
 
 	def __init__(self) -> None:
-		self.advance: Branch = self
-		self.intervalAdvance: Interval = Interval(self)
-		self.intervalComplement: Interval = Interval(self, distal=self.intervalAdvance)
+		self.advance = self
+		# SEMIOTICS "advance": I almost always read it as the wrong part of speech. "complement": it's
+		# almost impossible to read it as meaning "the complement of advance".
+		self.intervalAdvance = Interval(self)
+		self.intervalComplement = Interval(self, distal=self.intervalAdvance)
 
 		self.intervalComplement.proximal = Interval(self, proximal=self.intervalComplement)
 		self.intervalAdvance.proximal = Interval(self, proximal=self.intervalAdvance, distal=self.intervalComplement.proximal)
@@ -156,18 +182,18 @@ def countCrossing(lineSegment: int, branch: Branch, n: int, depth: int, *, symme
 
 	Returns
 	-------
-	total : int
+	totalPermutations : int
 		The number of valid completions reachable from the updated state.
 	"""
-	total: int = 1
+	totalPermutations: int = 1
 	if lineSegment < n:
 		lineSegment += 1
 		depth += 1
-		total = countBranch(lineSegment, branch, n, depth, symmetric=symmetric)
+		totalPermutations = countBranch(lineSegment, branch, n, depth, symmetric=symmetric)
 		if (depth != 2) and not (symmetric and (lineSegment == 2)):
-			total += countBranch(lineSegment, branch.advance, n, depth, symmetric=symmetric)
+			totalPermutations += countBranch(lineSegment, branch.advance, n, depth, symmetric=symmetric)
 	depth -= 1
-	return total
+	return totalPermutations
 
 def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetric: bool) -> int:
 	"""Count completions reachable from the intervals attached to `branch`.
@@ -194,10 +220,10 @@ def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetr
 
 	Returns
 	-------
-	total : int
+	totalPermutations : int
 		The number of valid completions reachable from every interval on `branch`.
 	"""
-	total: int = 0
+	totalPermutations: int = 0
 	interval: Interval = branch.intervalComplement.distal
 
 	while interval is not branch.intervalAdvance:
@@ -214,7 +240,7 @@ def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetr
 
 		intervalDistal: Interval = crossLine(interval.attachedTo, branch)
 		intervalProximal: Interval = crossLine(interval.attachedTo.advance, branchAdvance)
-		total += countCrossing(lineSegment, interval.attachedTo, n, depth, symmetric=symmetric)
+		totalPermutations += countCrossing(lineSegment, interval.attachedTo, n, depth, symmetric=symmetric)
 
 		for uncross in (intervalDistal, intervalProximal):
 			uncross.proximal.distal.proximal.distal = uncross.distal
@@ -225,7 +251,7 @@ def countBranch(lineSegment: int, branch: Branch, n: int, depth: int, *, symmetr
 		interval = interval.distal
 
 		branch.intervalComplement = IllBeBack
-	return total
+	return totalPermutations
 
 def crossLine(attachedTo: Branch, branch: Branch) -> Interval:
 	"""Insert a new crossing into the interval chain at `attachedTo`.
@@ -275,8 +301,8 @@ def doTheNeedful(n: int, *, symmetric: bool) -> int:
 
 	Returns
 	-------
-	total : int
-		The number of semi-meanders of order `n`. When `symmetric` is `True`, `total` counts the
+	totalPermutations : int
+		The number of semi-meanders of order `n`. When `symmetric` is `True`, `totalPermutations` counts the
 		symmetric semi-meanders of order `n`.
 
 	See Also
@@ -290,11 +316,13 @@ def doTheNeedful(n: int, *, symmetric: bool) -> int:
 		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
 		https://doi.org/10.37236/2404
 	"""
-	tree: Branch = makeBranch()
 	lineSegment: int = 0
 	depth: int = 0
+	tree: Branch = makeBranch()
+	lineSegment += 1
+	# SEMIOTICS "depth" of the recursion focuses on the program instead of the problem. I think this
+	# corresponds to the "index" of a value in the permutation. Is there a technical term for that?
+	depth += 1
 	crossLine(tree, makeBranch())
 	crossLine(tree.advance, makeBranch().advance)
-	lineSegment += 1
-	depth += 1
 	return countCrossing(lineSegment, tree, n, depth, symmetric=symmetric) * (2 - symmetric)

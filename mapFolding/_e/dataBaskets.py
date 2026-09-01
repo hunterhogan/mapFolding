@@ -520,37 +520,37 @@ concurrent.futures.process._RemoteTraceback:
 
 Traceback (most recent call last):
   File "C:\Program Files\Python314\Lib\concurrent\futures\process.py", line 254, in _process_worker
-    r = call_item.fn(*call_item.args, **call_item.kwargs)
+	r = call_item.fn(*call_item.args, **call_item.kwargs)
   File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 503, in _pinLeavesByDomainConcurrentTask
-    state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
-                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
+								~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
   File "C:\apps\mapFolding\mapFolding\_e\dataBaskets.py", line 229, in deconstructDomainsCombined
-    self._solidifyLeafSpace()
-    ~~~~~~~~~~~~~~~~~~~~~~~^^
+	self._solidifyLeafSpace()
+	~~~~~~~~~~~~~~~~~~~~~~~^^
   File "C:\apps\mapFolding\mapFolding\_e\dataBaskets.py", line 517, in _solidifyLeafSpace
-    for pile in filterfalse[Pile](leavesPinned.__contains__, self):
-                ~~~~~~~~~~~^^^^^^
+	for pile in filterfalse[Pile](leavesPinned.__contains__, self):
+				~~~~~~~~~~~^^^^^^
 TypeError: type 'itertools.filterfalse' is not subscriptable
 
 The above exception was the direct cause of the following exception:
 
 Traceback (most recent call last):
   File "c:\apps\mapFolding\easyRun\pinning.py", line 40, in <module>
-    state = pinIt.pinLeavesDimension0(state)
+	state = pinIt.pinLeavesDimension0(state)
   File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 642, in pinLeavesDimension0
-    return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
   File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 469, in _pinLeavesByDomain
-    state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
-                                       ~~~~~~~~~~~~~~~~~~^^
+	state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
+									~~~~~~~~~~~~~~~~~~~~~^^
   File "C:\Program Files\Python314\Lib\concurrent\futures\_base.py", line 447, in result
-    return self.__get_result()
-           ~~~~~~~~~~~~~~~~~^^
+	return self.__get_result()
+		~~~~~~~~~~~~~~~~~~~~^^
   File "C:\Program Files\Python314\Lib\concurrent\futures\_base.py", line 396, in __get_result
-    raise self._exception
+	raise self._exception
 TypeError: type 'itertools.filterfalse' is not subscriptable
 			"""
 			for pile in filterfalse(leavesPinned.__contains__, self):
-				self[pile] &= antiChoicesLeaf
+				self[pile] &= antiChoicesLeaf  # ty: ignore[invalid-argument-type]
 			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
 			if count < self.leafCount:
 				self._solidifyLeafSpace()

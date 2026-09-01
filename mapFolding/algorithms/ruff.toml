@@ -3,6 +3,7 @@ extend = "../../ruff.toml"
 [lint]
 ignore = [
   "typing-only-first-party-import",
+  "undocumented-public-class",
   "undocumented-public-function",
   "undocumented-public-module",
   "unnecessary-assign",

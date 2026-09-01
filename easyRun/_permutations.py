@@ -13,8 +13,8 @@ if TYPE_CHECKING:
 	from os import PathLike
 
 if __name__ == '__main__':
-	flow = 'bilateral'
 	flow = 'permutations'
+	flow = 'bilateral'
 
 	boxOfOEISid: list[OEISid] = []
 	pathLikeWrite: PathLike[str] | None = None
@@ -26,14 +26,14 @@ if __name__ == '__main__':
 		boxOfOEISid.append('A000136')
 		boxOfOEISid.append('A077055')
 		boxOfOEISid.append('A000560')
-		boxOfOEISid.append('A000682')
-	if True:
 		boxOfOEISid.append('A005316')
+	if True:
+		boxOfOEISid.append('A000682')
 
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(6, 17):
+		for n in range(2, 19):
 
 			timeStart: float = time.perf_counter()
 			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
@@ -50,4 +50,4 @@ if __name__ == '__main__':
 				if pathLikeWrite is not None:
 					writeAlbum(state.boxOfPermutations, makePathFilenameCount(pathLikeWrite, oeisID, n, suffix='.album'))
 
-			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=True)
+			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=False)
