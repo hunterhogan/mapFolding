@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from mapFolding.algorithms.permutations import doTheNeedful, StateStampMeander
-from mapFolding.algorithms.permutationsBilateral import doTheNeedful as bilateral
+from mapFolding.algorithms.pp_cython import doTheNeedful as bilateral
 from mapFolding.kitFilesystem import makePathFilenameCount, writeAlbum
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING

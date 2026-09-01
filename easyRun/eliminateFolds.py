@@ -25,15 +25,15 @@ if __name__ == "__main__":
 	flow = "elimination"
 
 	oeisID = "A195646"
-	oeisID = "A001418"
 	oeisID = "A001416"
-	oeisID = "A001415"
 	oeisID = "A001417"
 	oeisID = "A000136"
+	oeisID = "A001418"
+	oeisID = "A001415"
 
 	printEasyRunHeader(oeisID, flow)
 
-	for n in range(2, 10):
+	for n in range(2, 7):
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and 3 < n:  # pyright: ignore[reportUnnecessaryComparison]

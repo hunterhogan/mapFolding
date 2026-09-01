@@ -46,6 +46,7 @@ boundscheck
 bsgs
 bsolute
 carmichaels
+cclass
 Celler
 cffconvert
 cffobj
@@ -382,6 +383,7 @@ sinclude
 sorez
 sqrtrem
 squarefree
+ssize
 SSOT
 stackoverflow
 standardised

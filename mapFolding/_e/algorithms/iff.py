@@ -63,11 +63,11 @@ Citations in BibTeX format at [mapFolding/citations](../../citations).
 from __future__ import annotations
 
 from functools import cache
+from heapq import heappush
 from itertools import combinations
 from mapFolding.beDRY import getTotalLeaves
 from math import prod
 from typing import TYPE_CHECKING
-from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Folding, Leaf, Pile, PinnedLeaves
@@ -209,22 +209,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 
 	[3] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
 	"""
-	leavesPinned: PinnedLeaves = dict(enumerate(folding))
-
-	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
-
-	for dimension in range(_totalDimensions(mapShape)):
-		boxOfPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
-		for pile, leaf in leavesPinned.items():
-			crease: int | None = getCreasePost(mapShape, leaf, dimension)
-			if crease:
-				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, leafToPile[crease]))
-		for groupedParity in boxOfPilePileCreaseByParity:
-			if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
-				for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
-					#=SIN= Early return.
-					return False
-	return True
+	return leavesPinnedValid吗(dict(enumerate(folding)), mapShape)
 
 def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) -> bool:
 	"""You can validate a concrete `Folding` by checking for crease crossings in every dimension.
@@ -282,14 +267,15 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 
 	[3] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
 	"""
-	leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(leavesPinned)}
+	lookupPile: dict[Leaf, Pile] = dict(zip(leavesPinned.values(), leavesPinned, strict=True))
 
 	for dimension in range(_totalDimensions(mapShape)):
 		boxOfPilePileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
-			if crease:
-				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, leafToPile[crease]))
+			if crease is not None:
+				# heappush(boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)], (pile, lookupPile[crease]))  # ruff: ignore[commented-out-code]
+				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, lookupPile[crease]))
 		for groupedParity in boxOfPilePileCreaseByParity:
 			if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
 				for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):

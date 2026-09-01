@@ -35,8 +35,6 @@ References
 """
 from __future__ import annotations
 
-from typing import Self
-
 # SEMIOTICS I'm not satisfied with "interval." On the one hand, it is literally an interval, not
 # merely analogous to an interval. That is a STRONG reason to use the term: the word means what it is
 # and is what it means.
