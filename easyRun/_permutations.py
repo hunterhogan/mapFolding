@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from mapFolding.algorithms.permutations import doTheNeedful, StateStampMeander
-from mapFolding.algorithms.pp_cython import doTheNeedful as bilateral
+from mapFolding.algorithms.pp_loop import doTheNeedful as bilateral
 from mapFolding.kitFilesystem import makePathFilenameCount, writeAlbum
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(2, 19):
+		for n in range(9, 17):
 
 			timeStart: float = time.perf_counter()
 			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
