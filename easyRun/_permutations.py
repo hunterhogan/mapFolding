@@ -26,22 +26,21 @@ if __name__ == '__main__':
 		boxOfOEISid.append('A000136')
 		boxOfOEISid.append('A077055')
 		boxOfOEISid.append('A005316')
-		boxOfOEISid.append('A000560')
 	if True:
+		# ruff: ignore[repeated-append]
 		boxOfOEISid.append('A000682')
+		boxOfOEISid.append('A000560')
 
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(8, 9):
+		for n in range(2, 17):
 
 			timeStart: float = time.perf_counter()
 			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
 			if flow == 'bilateral':
 				if oeisID == 'A000560' and 2 <= n:
 					total: int = bilateral(n, symmetric=True)
-				# elif n <= 2:
-				# 	total = 1
 				else:
 					total = bilateral(n - 1, symmetric=False)
 			else:
