@@ -3,23 +3,19 @@ from __future__ import annotations
 from typing import NamedTuple
 
 class Interval:
-	__slots__ = ('attachedTo', 'distal', 'proximal')
-	# SEMIOTICS If "Interval" is an element in a doubly linked list, then this attribute is the data.
-	# Side. RoadSide.
-	attachedTo: Branch
+	__slots__ = ('distal', 'milepost', 'proximal')
+	milepost: Milepost
 	proximal: Interval
 	distal: Interval
 
-	def __init__(self, attachedTo: Branch, proximal: Interval | None = None, distal: Interval | None = None) -> None:
-		self.attachedTo = attachedTo
+	def __init__(self, milepost: Milepost, proximal: Interval | None = None, distal: Interval | None = None) -> None:
+		self.milepost = milepost
 		self.proximal = proximal or self
 		self.distal = distal or self
 
-# SEMIOTICS If the road is west-east, then maybe a "Branch" is either north or south. PlanarHalf.
-# Boundary. Math terms: dart, half-edge.
-class Branch:
+class Milepost:
 	__slots__ = ('complement', 'interval', 'intervalComplement')
-	complement: Branch
+	complement: Milepost
 	interval: Interval
 	intervalComplement: Interval
 
@@ -31,11 +27,12 @@ class Branch:
 		self.intervalComplement.proximal = Interval(self, proximal=self.intervalComplement)
 		self.interval.proximal = Interval(self, proximal=self.interval, distal=self.intervalComplement.proximal)
 
-def makeBranch() -> Branch:
-	branch: Branch = Branch()
-	branch.complement = Branch()
-	branch.complement.complement = branch
-	return branch
+# DEVELOPMENT The de facto constructor. Try to put the "loopback" assignments in the real constructor.
+def makeMilepost() -> Milepost:
+	milepost: Milepost = Milepost()
+	milepost.complement = Milepost()
+	milepost.complement.complement = milepost
+	return milepost
 
 class ToDo(NamedTuple):
 	keepCounting: bool
@@ -44,7 +41,7 @@ class ToDo(NamedTuple):
 
 class Undo(NamedTuple):
 	n下i: int
-	branch: Branch
+	milepost: Milepost
 	interval: Interval
 	intervalComplement: Interval
 	intervalDistal: Interval
@@ -53,50 +50,50 @@ class Undo(NamedTuple):
 def whatToDo(n下i: int, n: int) -> ToDo:
 	return ToDo(n下i < n, n下i := n下i + 1, n下i != 2)
 
-def count(n下i: int, branch: Branch, n: int) -> int:
+def count(n下i: int, milepost: Milepost, n: int) -> int:
 	totalPermutations: int = 0
-	toDoUndoLIFO: list[tuple[int, Branch, Interval] | Undo] = [(n下i, branch, branch.intervalComplement.distal)]
+	toDoUndoLIFO: list[tuple[int, Milepost, Interval] | Undo] = [(n下i, milepost, milepost.intervalComplement.distal)]
 
 	while toDoUndoLIFO:
-		work: tuple[int, Branch, Interval] | Undo = toDoUndoLIFO.pop()
+		work: tuple[int, Milepost, Interval] | Undo = toDoUndoLIFO.pop()
 		if len(work) == 3:
-			n下i, branch, interval = work  # pyright: ignore[reportAssignmentType]
+			n下i, milepost, interval = work  # pyright: ignore[reportAssignmentType]
 
-			if interval is not branch.interval:
-				toDoUndoLIFO.append(Undo(n下i, *crossRoad(branch, interval)))
+			if interval is not milepost.interval:
+				toDoUndoLIFO.append(Undo(n下i, *crossRoad(milepost, interval)))
 
 				是: ToDo = whatToDo(n下i, n)
 				if 是.keepCounting:
 					if 是.countComplement:
-						toDoUndoLIFO.append((是.n下i, interval.attachedTo.complement, interval.attachedTo.complement.intervalComplement.distal))
-					toDoUndoLIFO.append((是.n下i, interval.attachedTo, interval.attachedTo.intervalComplement.distal))
+						toDoUndoLIFO.append((是.n下i, interval.milepost.complement, interval.milepost.complement.intervalComplement.distal))
+					toDoUndoLIFO.append((是.n下i, interval.milepost, interval.milepost.intervalComplement.distal))
 				else:
 					totalPermutations += 1
 		else:
 			toDoUndoLIFO.append(uncrossRoad(work))
 	return totalPermutations
 
-def crossRoad(branch: Branch, interval: Interval) -> tuple[Branch, Interval, Interval, Interval, Interval]:
-	intervalComplement: Interval = branch.intervalComplement
-	branchAdvance: Branch = makeBranch()
-	branch.intervalComplement = branchAdvance.interval
-	branchAdvance.interval = intervalComplement.proximal
-	branch.intervalComplement.distal = interval.distal
-	branchAdvance.intervalComplement.distal = interval.proximal.distal
-	interval.proximal.distal.proximal.distal = branchAdvance.intervalComplement.proximal
-	interval.distal.proximal.distal = branch.intervalComplement.proximal
-	intervalDistal, interval.attachedTo = _updateBranch(interval.attachedTo, branch)
-	intervalProximal, interval.attachedTo.complement = _updateBranch(interval.attachedTo.complement, branchAdvance)
-	return (branch, interval, intervalComplement, intervalDistal, intervalProximal)
+def crossRoad(milepost: Milepost, interval: Interval) -> tuple[Milepost, Interval, Interval, Interval, Interval]:
+	intervalComplement: Interval = milepost.intervalComplement  # NOT a local alias.
+	milepostDiagonal: Milepost = makeMilepost()
+	milepost.intervalComplement = milepostDiagonal.interval
+	milepostDiagonal.interval = intervalComplement.proximal
+	milepost.intervalComplement.distal = interval.distal
+	milepostDiagonal.intervalComplement.distal = interval.proximal.distal
+	interval.proximal.distal.proximal.distal = milepostDiagonal.intervalComplement.proximal
+	interval.distal.proximal.distal = milepost.intervalComplement.proximal
+	intervalDistal, interval.milepost = _updateMilepost(interval.milepost, milepost)
+	intervalProximal, interval.milepost.complement = _updateMilepost(interval.milepost.complement, milepostDiagonal)
+	return (milepost, interval, intervalComplement, intervalDistal, intervalProximal)
 
-def _updateBranch(attachedTo: Branch, branch: Branch) -> tuple[Interval, Branch]:
-	interval: Interval = Interval(branch, distal=attachedTo.intervalComplement.distal)
-	interval.proximal = Interval(branch.complement, proximal=interval, distal=attachedTo.intervalComplement.proximal)
-	attachedTo.intervalComplement.distal.proximal.distal = interval.proximal
-	attachedTo.intervalComplement.distal = interval
-	return interval, attachedTo
+def _updateMilepost(milepostComplement: Milepost, milepost: Milepost) -> tuple[Interval, Milepost]:
+	interval: Interval = Interval(milepost, distal=milepostComplement.intervalComplement.distal)
+	interval.proximal = Interval(milepost.complement, proximal=interval, distal=milepostComplement.intervalComplement.proximal)
+	milepostComplement.intervalComplement.distal.proximal.distal = interval.proximal
+	milepostComplement.intervalComplement.distal = interval
+	return interval, milepostComplement
 
-def uncrossRoad(是: Undo) -> tuple[int, Branch, Interval]:
+def uncrossRoad(是: Undo) -> tuple[int, Milepost, Interval]:
 	for uncross in (是.intervalDistal, 是.intervalProximal):
 		uncross.proximal.distal.proximal.distal = uncross.distal
 		uncross.distal.proximal.distal = uncross.proximal.distal
@@ -106,23 +103,23 @@ def uncrossRoad(是: Undo) -> tuple[int, Branch, Interval]:
 	interval.distal.proximal.distal = interval.proximal
 	interval = interval.distal
 
-	是.branch.intervalComplement = 是.intervalComplement
-	return 是.n下i, 是.branch, interval
+	是.milepost.intervalComplement = 是.intervalComplement
+	return 是.n下i, 是.milepost, interval
 
 def doTheNeedful(n: int, *, symmetric: bool) -> int:
 	totalPermutations: int = 1
-	branch: Branch = makeBranch()
+	milepost: Milepost = makeMilepost()
 	n下i: int = 1
 
 	是: ToDo = whatToDo(n下i, n)
 	if 是.keepCounting:
-		_updateBranch(branch, makeBranch())
-		_updateBranch(branch.complement, makeBranch().complement)
+		_updateMilepost(milepost, makeMilepost())
+		_updateMilepost(milepost.complement, makeMilepost().complement)
 
 	是: ToDo = whatToDo(n下i, n)
 	if 是.keepCounting:
-		totalPermutations = count(是.n下i, branch, n)
+		totalPermutations = count(是.n下i, milepost, n)
 		if 是.countComplement:
-			totalPermutations += count(是.n下i, branch.complement, n)
+			totalPermutations += count(是.n下i, milepost.complement, n)
 		totalPermutations *= (2 - symmetric)
 	return totalPermutations

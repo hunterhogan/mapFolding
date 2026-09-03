@@ -1,6 +1,6 @@
 #=SIN=
 # DEVELOPMENT module.
-# ruff: file-ignore[undocumented-public-class, undocumented-magic-method, undocumented-public-method]
+# ruff: file-ignore[undocumented-magic-method, undocumented-public-method]
 """Count the six permutation stamp-folding and meander sequences.
 
 (AI generated docstring)

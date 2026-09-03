@@ -26,15 +26,14 @@ if __name__ == '__main__':
 		boxOfOEISid.append('A000136')
 		boxOfOEISid.append('A077055')
 		boxOfOEISid.append('A005316')
-	if True:
-		# ruff: ignore[repeated-append]
 		boxOfOEISid.append('A000560')
+	if True:
 		boxOfOEISid.append('A000682')
 
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(1, 17):
+		for n in range(8, 9):
 
 			timeStart: float = time.perf_counter()
 			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
