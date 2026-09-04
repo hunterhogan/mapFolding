@@ -92,7 +92,7 @@ def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> No
 	actual: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
 	assertEqualTo(actual, expected, countFoldsSymmetric.__name__, n, flow)
 
-# FIXME Run the numpy/pandas tests in series because they cause namespace problems.
+# TODO Run the numpy/pandas tests in series because they cause namespace problems.
 @pytest.mark.parametrize('n, flow, kind', (
 	(30, 'matrixNumPy', 'semi'), (3, 'matrixMeanders', 'meanders'), (20, 'matrixPandas', 'meanders'), (10, 'matrixMeanders', 'semi')
 ))

@@ -56,7 +56,8 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
-def makeNumPyQQ(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+	"""Abandoned idea."""
 	identifiers = identifiers or defaultMatrixMeanders
 
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, 'makeDataContainer')
@@ -176,7 +177,6 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	# makeNumPyQQ(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)  # ruff: ignore[commented-out-code]
 	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':

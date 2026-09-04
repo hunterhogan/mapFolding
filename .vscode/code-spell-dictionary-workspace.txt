@@ -78,6 +78,7 @@ crescere
 cubefree
 cumsum
 cupy
+cyclotomic
 cytoolz
 databasket
 Dataclass

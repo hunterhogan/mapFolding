@@ -106,12 +106,6 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 	ValueError
 		Raised when `kind` is not `'semi'` or `'meanders'`.
 	"""
-	# TODO Consider: If semi is essentially A000136 * totalLeaves, then my graphs of A000136 are
-	# _literal_ graphs of semi. Since Theorem 2 applies to A000136, it must apply to semi.
-	# Furthermore, I successfully applied Theorem 2 to semi-meanders using the Sawada-Li permutation
-	# algorithm. Can I use the graphs to find the midpoint of a semi computation using the matrix
-	# algorithm? NO. In `doTheNeedful`, I tried to use `while state.boundary > 0:` and the ratio trick
-	# to find the midpoint: it didn't work on matrix meanders.
 	if not boundary:
 		boundary = n - 1
 
@@ -139,7 +133,7 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 				arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
 				boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
 				# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
-				# See "mapFolding/research/matrixMeanders/A000682facts.py"
+				# See "research/matrixMeanders/A000682facts.py"
 			lookupMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
 
 	else:

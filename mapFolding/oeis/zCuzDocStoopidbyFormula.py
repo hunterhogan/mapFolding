@@ -284,7 +284,7 @@ def A085973(n: int, f: LiteralString | None = None) -> int:
 				countTotal = A077054(n) + A005315(n)
 			# ruff: ignore[commented-out-code]
 			# case 'A005315 and A005316':
-				# FIXME This formula system is not commutative for `n`, so `n + 1` gets boosted too
+				# TODO This formula system is not commutative for `n`, so `n + 1` gets boosted too
 				# much in A005315. I think I need a totally different paradigm.
 				# countTotal = A005315(n + 1) + _A005316((2 * n) + 1)
 			case 'A005316' | _:

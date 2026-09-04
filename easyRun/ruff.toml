@@ -2,8 +2,11 @@ extend = "../ruff.toml"
 
 [lint]
 ignore = [
-  "import-private-name",
   "commented-out-code",
+  "import-private-name",
+  "p-print",
+  "print",
+  "repeated-append",
   "undocumented-public-function",
   "undocumented-public-module",
 ]

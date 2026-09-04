@@ -21,13 +21,11 @@ if __name__ == '__main__':
 
 	if False:
 		n: int = 2
-		# ruff: ignore[repeated-append]
 		boxOfOEISid.append('A001011')
 		boxOfOEISid.append('A000136')
 		boxOfOEISid.append('A077055')
 		boxOfOEISid.append('A005316')
 	if True:
-		# ruff: ignore[repeated-append]
 		boxOfOEISid.append('A000682')
 		boxOfOEISid.append('A000560')
 

@@ -22,7 +22,6 @@ if __name__ == '__main__':
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
 	flow = 'matrixPandas'
-	flow = 'qq'
 	flow = 'matrixNumPy'
 	flow = 'matrixMeanders'
 
@@ -64,13 +63,13 @@ if __name__ == '__main__':
 				if 4 <= n:
 					countTotal += 2
 				if 6 <= n:
-					countTotal += (n + 1)**2 // 2 - 10
+					countTotal += (n**2 + 2 * n - 19) // 2
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=True)
 
 r"""
 
-title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\_countMeanders.py && title I'm done || title Error
+title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\_countMeanders.py & title I'm done
 
 sudo nice -n -10 /home/hunte/mapFolding/.venv/bin/python -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on /home/hunte/mapFolding/easyRun/_countMeanders.py
 """
