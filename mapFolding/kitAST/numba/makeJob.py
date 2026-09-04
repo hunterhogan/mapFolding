@@ -24,9 +24,9 @@ if TYPE_CHECKING:
 	from pathlib import Path
 	import ast
 
-# TODO Dynamically calculate the bitwidth of each datatype.
-# DEVELOPMENT I delayed dynamic calculation because I didn't know how to calculate what 'elephino'
-# needs. I now have a safe upper bound for that. Somewhere.
+# TODO Dynamically calculate the bitwidth of each datatype. I delayed dynamic calculation because I
+# didn't know how to calculate what 'elephino' needs. I now have a safe upper bound for that in a
+# notebook somewhere.
 boxOfSettings形: list[Settings形] = [
 	Settings形(datatypeIdentifier='形TotalLeaves', typeModule='numba', typeIdentifier='uint8', type_asname='形TotalLeaves'),
 	Settings形(datatypeIdentifier='形Elephino', typeModule='numba', typeIdentifier='uint16', type_asname='形Elephino'),
@@ -79,10 +79,10 @@ def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> Path:
 	ingredientsFunction, ingredientsModule = moveStaticArrays(job, ingredientsFunction, ingredientsModule)
 	ingredientsFunction, ingredientsModule = setDatatypeViaImport(ingredientsFunction, ingredientsModule, boxOfSettings形)
 
-	ingredientsFunction.astFunctionDef.decorator_list = []  # TODO low-priority, handle this more elegantly
+	ingredientsFunction.astFunctionDef.decorator_list = []  # IMPROVEMENT low-priority, handle this more elegantly
 	boxOfName: list[ast.Name] = []
 	NodeTourist(IfThis.isAllOf(IfThis.isAssignAndTargets0Is(Be.Name), Be.Assign.valueIs(Be.Constant))
-		, Grab.targetsAttribute(Grab.index(0, Then.appendTo(boxOfName)))).visit(ingredientsFunction.astFunctionDef)  # pyright: ignore[reportArgumentType, reportCallIssue] # ty: ignore[no-matching-overload]
+					, Grab.targetsAttribute(Grab.index(0, Then.appendTo(boxOfName)))).visit(ingredientsFunction.astFunctionDef)
 	boxOfIdentifiers: list[str] = list({astName.id for astName in boxOfName})
 	numbaDOTjit_locals: dict[ast.Constant, ast.expr] = {Make.Constant(identifier): raiseIfNone(job.shatteredDataclass).lookupAnnAssignWithConstructor[identifier].annotation  # pyright: ignore[reportUnknownVariableType,reportAttributeAccessIssue,reportUnknownMemberType]  # ty: ignore[unresolved-attribute]
 		for identifier in boxOfIdentifiers}

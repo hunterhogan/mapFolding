@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
-# TODO this algorithm is slow.
+# IMPROVEMENT this algorithm is slow.
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
 	state.次Leaf = 1
 	state.leafComparison[0] = 1
@@ -29,7 +29,7 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSym
 	for arrayOfTuples in state.indices:
 		state.leafConnectee = 1
 		for 次Left, 次Right in arrayOfTuples:
-			# TODO The entire `leafComparison` array is computed, so when a `leafComparison` is
+			# IMPROVEMENT The entire `leafComparison` array is computed, so when a `leafComparison` is
 			# disqualified, all of the computations for the remaining tuples were unnecessary
 			# computations. However, with the current algorithm for computing `leafComparison`, it
 			# would be nearly impossible to efficiently validate tuples during the computation.

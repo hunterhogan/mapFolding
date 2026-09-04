@@ -66,8 +66,8 @@ def _creaseViolation吗(pileCreasePile: tuple[Pile, Pile], pileComparandCreasePi
 
 def doTheNeedful(n: int, nFinal: int, CPUlimit: Limitation = None) -> Path:
 	def preemptiveTheorem2(folding: Folding) -> bool:
-		# DEVELOPMENT Because all albums descend from this album, enforcing k before r now is
-		# preserved, and all albums will be half the size.
+		# Because all albums descend from this album, enforcing k before r is preserved in later
+		# albums without repeating this check. Net result: all albums will be half the size.
 		leaf_k: Leaf = 1
 		leaf_r: Leaf = 2
 		return folding.index(leaf_k) < folding.index(leaf_r)
@@ -118,9 +118,11 @@ if __name__ == '__main__':
 # me. However, there are packages that implement it, so that would likely be more robust, even if
 # it is not more compact.
 
+# On hold:
 # Check each crease as it is added: a violation will invalidate an entire branch. To do this, I would
 # need a new way of iterating(insert, check).
 
+# Completed:
 # Don't check every pair of creases because the existing folding is valid. Check the new crease
 # against same parity creases.
 

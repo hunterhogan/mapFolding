@@ -127,27 +127,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		return PermutationSpace(associateKeyValue(self, pile, leaf, PermutationSpace))
 
-	# TODO reconsider the role, necessity, and location of this function.
-	def atPilePinLeafSafetyFilter(self, pile: Pile, leaf: Leaf) -> bool:
-		"""Return `True` if it is safe to call `permutationSpace.atPilePinLeaf(pile, leaf)`.
-
-		For performance, you probably can and probably *should* create a set of filters for your
-		circumstances.
-
-		Parameters
-		----------
-		pile : int
-			`pile` at which to pin.
-		leaf : int
-			`leaf` to pin.
-
-		Returns
-		-------
-		isSafeToPin : bool
-			True if it is safe to pin `leaf` at `pile` in `permutationSpace`.
-		"""
-		return self.leafPinnedAtPile吗(leaf, pile) or (self.pileUndetermined吗(pile) and self.leafNotPinned吗(leaf))
-
 	def bifurcate(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Split a `PermutationSpace` into `PinnedLeaves` and `UndeterminedPiles`.
 
@@ -416,12 +395,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		self._solidifyLeafSpaceAtPile(pile)
 		return leaf == self[pile]
 
-	# TODO Consider implementing another method to make a `Folding` or _maybe_ cleverly overloading
-	# this method (I'm deeply skeptical that overload is a good idea). `makeFolding` handles _my_
-	# current needs. If I had to create ONE `makeFolding` function/method with the most utility,
-	# however, it would NOT look like this function. 2026 July 10: off the top of my head, passing
-	# `boxOfPileLeaf: Sequence[tuple[Pile, Leaf]]` would be better than the current function and is
-	# probably close to the ideal generalized function.
 	def makeFolding(self, leavesToInsert: Sequence[Leaf] = ()) -> Folding:
 		"""Complete this `PermutationSpace` as a `Folding`.
 
@@ -514,41 +487,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
 			leavesPinned: PinnedLeaves = self.pinnedLeaves()
 			antiChoicesLeaf: ChoicesLeaf = _e.makeAntiChoicesLeaf(len(self), leavesPinned.values())
-			r"""
-(.venv) C:\apps\mapFolding>c:\apps\mapFolding\.venv\Scripts\python.exe c:/apps/mapFolding/easyRun/pinning.py
-concurrent.futures.process._RemoteTraceback:
-
-Traceback (most recent call last):
-  File "C:\Program Files\Python314\Lib\concurrent\futures\process.py", line 254, in _process_worker
-	r = call_item.fn(*call_item.args, **call_item.kwargs)
-  File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 503, in _pinLeavesByDomainConcurrentTask
-	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
-								~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
-  File "C:\apps\mapFolding\mapFolding\_e\dataBaskets.py", line 229, in deconstructDomainsCombined
-	self._solidifyLeafSpace()
-	~~~~~~~~~~~~~~~~~~~~~~~^^
-  File "C:\apps\mapFolding\mapFolding\_e\dataBaskets.py", line 517, in _solidifyLeafSpace
-	for pile in filterfalse[Pile](leavesPinned.__contains__, self):
-				~~~~~~~~~~~^^^^^^
-TypeError: type 'itertools.filterfalse' is not subscriptable
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "c:\apps\mapFolding\easyRun\pinning.py", line 40, in <module>
-	state = pinIt.pinLeavesDimension0(state)
-  File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 642, in pinLeavesDimension0
-	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
-  File "C:\apps\mapFolding\mapFolding\_e\_2上nDimensional\pinIt.py", line 469, in _pinLeavesByDomain
-	state.boxOfPermutationSpace.extend(claimTicket.result().boxOfPermutationSpace)
-									~~~~~~~~~~~~~~~~~~~~~^^
-  File "C:\Program Files\Python314\Lib\concurrent\futures\_base.py", line 447, in result
-	return self.__get_result()
-		~~~~~~~~~~~~~~~~~~~~^^
-  File "C:\Program Files\Python314\Lib\concurrent\futures\_base.py", line 396, in __get_result
-	raise self._exception
-TypeError: type 'itertools.filterfalse' is not subscriptable
-			"""
 			for pile in filterfalse(leavesPinned.__contains__, self):
 				self[pile] &= antiChoicesLeaf  # ty: ignore[invalid-argument-type]
 			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
@@ -569,7 +507,7 @@ TypeError: type 'itertools.filterfalse' is not subscriptable
 			else:
 				self[pile] = rangeOfPile
 
-	# TODO Does it matter whether this is a property or a method?
+	# Does it matter whether this is a property or a method?
 	def pinnedLeaves(self) -> PinnedLeaves:
 		"""Create a dictionary by `pile` of only `pile: leaf` without `pile: choicesLeaf`.
 
@@ -661,12 +599,6 @@ class StateElimination:
 	首 : int
 		Unchanging single-base positional-numeral value of the first out-of-bounds Cartesian
 		coordinate.
-
-	Notes
-	-----
-	The computed `totalFolds` is `groupsOfFolds * totalLeaves * Theorem2Multiplier *
-	Theorem3Multiplier * Theorem4Multiplier`.
-
 	"""
 
 	mapShape: tuple[int, ...] = dataclasses.field(init=True)
@@ -695,8 +627,6 @@ class StateElimination:
 
 	totalDimensions: int = dataclasses.field(init=False)
 	"""Unchanging total number of dimensions in the map."""
-	foldingCheckSum: int = dataclasses.field(init=False)
-	"""Unchanging triangular number check-sum for a valid `Folding`, https://en.wikipedia.org/wiki/Triangular_number."""
 	leafLast: Leaf = dataclasses.field(init=False)
 	"""Unchanging 0-indexed largest `leaf` in a `Folding`."""
 	totalLeaves: int = dataclasses.field(init=False)
@@ -875,7 +805,6 @@ class StateElimination:
 		if 0 < self.totalLeaves:
 			self.Theorem2aMultiplier = self.totalLeaves
 		self.leafLast = self.totalLeaves - 1
-		self.foldingCheckSum = self.leafLast * self.totalLeaves // 2
 		self.pilesTotal = self.totalLeaves
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.totalLeaves

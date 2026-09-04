@@ -168,7 +168,7 @@ def countFolds(mapShape: Sequence[int]
 
 		mapFoldingParallelState: StateMapFoldingParallel = StateMapFoldingParallel(mapShape, taskDivisions=taskDivisions)
 
-		# TODO Figure out a better place to document this. `boxOfStatesParallel` exists so you can research the parallel computation.
+		# IMPROVEMENT Figure out a better place to document this. `boxOfStatesParallel` exists so you can research the parallel computation.
 		totalFolds, _boxOfStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
 
 	else:

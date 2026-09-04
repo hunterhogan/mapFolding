@@ -201,7 +201,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			Function definition with decorator list cleared.
 
 		"""
-		# TODO more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
+		# IMPROVEMENT more explicit handling of decorators. I'm able to ignore this because I know `algorithmSource` doesn't have any decorators.
 		for decoratorItem in astCallable.decorator_list.copy():
 			astCallable.decorator_list.remove(decoratorItem)
 			warnings.warn(f"Removed decorator {ast.unparse(decoratorItem)} from {astCallable.name}", stacklevel=2)

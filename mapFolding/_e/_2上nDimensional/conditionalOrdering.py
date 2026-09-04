@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Leaf, Pile
 
-# TODO getDictionaryConditionalLeafPredecessors development
+# IMPROVEMENT getDictionaryConditionalLeafPredecessors development
 def getLeafPredecessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafPredecessor`].
 
@@ -144,13 +144,16 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 			for pile in boxOfPiles[boxOfPiles.index(pileFirst): boxOfPiles.index(pileLast) + inclusive]:
 				dictionaryPrecedence[leaf].setdefault(pile, []).append(leafPredecessor)
 
-# DEVELOPMENT Some leaves, such as 16,48, have `leafPredecessor`, such as leaves 40 and 56, with a larger step size.
-# DEVELOPMENT There may be "knock-out" leaves, such as within the domain functions, above. Or I might have to find complex formulas, such
-# as in `pinPile二Crease`. Or, more likely, "knock-out" leaves might be complex formulas that I have not yet discovered.
+# REMINDER Some leaves, such as 16,48, have `leafPredecessor`, such as leaves 40 and 56, with a
+# larger step size.
+
+# DEVELOPMENT There are "knock-out" leaves, such as within the domain functions, above.
+# (Discontinuities in the sequence of conditional leaf predecessors.) The "knock-out" leaves have
+# patterns that I have not yet discovered: look for a crease relationship.
 
 	return dictionaryPrecedence
 
-# TODO getDictionaryConditionalLeafSuccessors development
+# IMPROVEMENT getDictionaryConditionalLeafSuccessors development
 def getLeafSuccessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""leaf: pile: [conditional `leafSuccessor`]."""
 	return _getDictionaryConditionalLeafSuccessors(state.mapShape)

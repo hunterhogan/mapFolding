@@ -11,7 +11,9 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
 	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
 
-# TODO formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code.
+# IMPROVEMENT formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code: this
+# module just rearranges the code for leaf domains. The formula would likely lead to new functions in
+# "reduce permutation space."
 
 #======== Boolean filters ======================================
 

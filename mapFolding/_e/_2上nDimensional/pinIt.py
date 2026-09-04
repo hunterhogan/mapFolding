@@ -45,11 +45,11 @@ References
 [5] hunterMakesPy - Context7.
 	https://context7.com/hunterhogan/huntermakespy
 [6] mapFolding._e.dataBaskets.StateElimination.
-	Internal package reference.
+
 [7] mapFolding._e.pin2上nDimensionsAnnex.
-	Internal package reference.
+
 [8] mapFolding._e.pinIt.
-	Internal package reference.
+
 
 """
 from __future__ import annotations
@@ -235,14 +235,13 @@ def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> StateElimination:
 	"""You can pin piles near both ends of the pile sequence for (2,) * n map shapes.
 
-	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
-	fails [1].
+	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)` fails [1].
 
-	This function seeds `state.boxOfPermutationSpace` using `addChoicesLeaf` [2]
-	when `state.boxOfPermutationSpace` is empty. This function validates `pileDepth`
-	using `intInnit` from `hunterMakesPy` [3] and `operator.getitem` [4]. This
-	function then chooses a symmetric sequence of `pile` values near both ends of the
-	pile order, and pins each `pile` value by calling `_pinPiles` [5].
+	This function seeds `state.boxOfPermutationSpace` using `addChoicesLeaf` [2] when
+	`state.boxOfPermutationSpace` is empty. This function validates `pileDepth` using `intInnit` from
+	`hunterMakesPy` [3] and `operator.getitem` [4]. This function then chooses a symmetric sequence of
+	`pile` values near both ends of the pile order, and pins each `pile` value by calling `_pinPiles`
+	[5].
 
 	This function forwards `CPUlimit` to `defineProcessorLimit` through `_pinPiles` [6].
 
@@ -262,11 +261,6 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 	state : StateElimination
 		Updated state with an updated `state.boxOfPermutationSpace`.
 
-	Raises
-	------
-	ValueError
-		Raised when `pileDepth` is less than 0.
-
 	Examples
 	--------
 	The following usage appears in `mapFolding/_e/easyRun/pinning.py`.
@@ -276,20 +270,6 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 	>>> state = StateElimination((2,) * 5)
 	>>> state = pinPilesAtEnds(state, 4)
 	>>> state = pinLeavesDimension首二(state)
-
-	References
-	----------
-	[1] mapFolding._e._beDRY.mapShapeIs2上nDimensions.
-
-	[2] mapFolding._e._beDRY.addChoicesLeaf.
-
-	[3] hunterMakesPy - Context7.
-		https://context7.com/hunterhogan/huntermakespy
-	[4] Python `operator` module documentation.
-		https://docs.python.org/3/library/operator.html
-	[5] mapFolding._e.pin2上nDimensions._pinPiles.
-
-	[6] mapFolding.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -297,16 +277,7 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 	if not state.boxOfPermutationSpace:
 		state.boxOfPermutationSpace.append(PermutationSpace().updatePilesMissing(getLookupChoicesLeaf(state)))
 
-	# TODO idk the right balance here. ONE GOAL: sanitize input. ANOTHER GOAL: don't be a jerk to the
-	# user. IDK why `pileDepth` might get passed as a `str`, but if the value is unambiguously an int,
-	# I want to accept it: `pinPilesAtEnds.pileDepth` being a `str` would be the most annoying reason
-	# why a multi-week computation failed to start. I created `intInnit` so that if a value is
-	# UNAMBIGUOUSLY an integer, it will be converted to `int` regardless of the original type. ANOTHER
-	# GOAL: less code because every line of code is a bug risk.
 	depth: int = getitem(intInnit((pileDepth,), 'pileDepth', int), 0)
-	if depth < 0:
-		message: str = f"I received `{pileDepth = }`, but I need a value greater than or equal to 0."
-		raise ValueError(message)
 
 	pileProcessingOrder: list[Pile] = []
 	if 0 <= depth:

@@ -72,12 +72,12 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	boxOfPermutationSpace = boxOfExcludeLeaf_r
 	del boxOfExcludeLeaf_r
 
-	# TODO Choose between `if domainOf_leaf_r is None:` and
-	# `domainOf_leaf_r = domainOf_leaf_r or getDomainLeaf(self, leaf_r)`.
+	# `if domainOf_leaf_r is None:` results in: 1) `None` is replaced with a default value and 2) a
+	# no-op if the `Iterable` doesn't have elements. Alternatively, I could use
 
-	# DEVELOPMENT
-	# Replace an empty `Iterable` to prevent an error state, or as a convenient default.
-	# Or passing an empty `Iterable` enables a no-op.
+	# `domainOf_leaf_r = domainOf_leaf_r or _e.getDomainLeaf(state, leaf_r)`. That would convert the
+	# no-op case to a default value. I "picked" this option due to inertia: I never got around to
+	# analyzing which behavior would be "better."
 	if domainOf_leaf_r is None:
 		domainOf_leaf_r = _e.getDomainLeaf(state, leaf_r)
 

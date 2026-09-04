@@ -210,7 +210,7 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 
 	Notes
 	-----
-	TODO remake this function from scratch.
+	TODO remake `getTotalBuckets` from scratch.
 
 	Factors:
 		- The starting quantity of `arcCode`.
@@ -224,6 +224,7 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 		- The maximum value.
 		- If decreasing, I don't really know the factors.
 		- If I know the actual value or if I must estimate it.
+		- Intentionally incomplete arcCode to total meanders dictionaries sometimes require more buckets. Crazy, but true.
 
 	Figure out an intelligent flow for so many factors.
 	"""

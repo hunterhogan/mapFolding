@@ -225,11 +225,6 @@ def fromMapShape(mapShape: tuple[形TotalLeaves, ...], **keywordArguments: Any) 
 	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameTotalFolds=pathFilenameTotalFolds
 		, totalFoldsEstimated=totalFoldsEstimated, totalFoldsMultiplier=state.totalLeaves, **keywordArguments)
 
-# TODO Moving the static array, `connectionGraph`, out of the numba.jit function, reduces compile
-# time. mapShape 2^8 changes from 15 hours to 30 seconds.
-# def moveLocalToGlobal():
-# 	pass
-
 #================== Bulk changes ======================================================================
 
 def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
