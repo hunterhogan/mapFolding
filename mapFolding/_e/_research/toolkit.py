@@ -6,19 +6,19 @@ from humpy_cytoolz import valfilter as filterLeaf
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding._e.filters import leaf吗
 from mapFolding._e.tests.test_pinning import beansWithoutCornbread
-from mapFolding.kitFilesystem import getDataFrameFoldings
+from mapFolding.kitFilesystem import getDataFrameFoldings, writeAlbum
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from pprint import pformat
 from typing import TYPE_CHECKING
-import csv
+from Z0Z_tools import DOTvalues
 import numpy
 import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-	from mapFolding._e.theTypes import PinnedLeaves
+	from mapFolding._e.theTypes import Folding, PinnedLeaves
 
 @dataclass
 class PermutationSpaceStatus:
@@ -69,10 +69,7 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.boxOfPermutationSpace)
 
 		boxOfSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.boxOfSurplusDictionaries
-		boxOfDictionaryPinned: list[PinnedLeaves] = [
-			getPermutationSpaceWithLeafValuesOnly(permutationSpace)
-			for permutationSpace in boxOfSurplusDictionariesOriginal
-		]
+		boxOfDictionaryPinned: list[PinnedLeaves] = [permutationSpace.pinnedLeaves() for permutationSpace in boxOfSurplusDictionariesOriginal]
 		if boxOfDictionaryPinned:
 			sys.stdout.write(ansiColors.YellowOnBlack)
 			sys.stdout.write(pformat(boxOfDictionaryPinned[0:5], width=200) + '\n')
@@ -81,15 +78,12 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 		sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
 		sys.stdout.write(ansiColorReset)
 
-		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/_development/excel/p2d{state.totalDimensions}SurplusDictionaries.csv")
+		pathFilename = Path(f"{settingsPackage.pathPackage}/_e/_research/excel/p2d{state.totalDimensions}SurplusDictionaries.csv")
 
 		if boxOfDictionaryPinned:
-			with pathFilename.open('w', encoding='utf-8', newline='') as writeStream:
-				writerCSV = csv.writer(writeStream)
-				boxOfPiles: list[int] = list(range(state.totalLeaves))
-				writerCSV.writerow(boxOfPiles)
-				for permutationSpace in boxOfDictionaryPinned:
-					writerCSV.writerow([permutationSpace.get(pile, '') for pile in boxOfPiles])
+			surplusDictionaries: list[Folding] = [tuple(range(state.totalLeaves))]
+			surplusDictionaries.extend(tuple(DOTvalues(dict(sorted(permutationSpace.items())))) for permutationSpace in boxOfDictionaryPinned)
+			writeAlbum(surplusDictionaries, pathFilename)
 
 		if pinningCoverage.indicesOverlappingPermutationSpace:
 			sys.stdout.write(f"{ansiColors.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")

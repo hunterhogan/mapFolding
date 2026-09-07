@@ -63,7 +63,7 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 		containing {-1: -1} if retrieval fails.
 	"""
 	# TODO Z0Z_tools, fix humpy_cytoolz.get_in overloads.
-	return get_in((str(formatOEISid(oeisID)), 'valuesKnown'), dictionaryOEIS, dict[int, int]([(-errorL33T, -errorL33T)]))
+	return get_in((str(formatOEISid(oeisID)), 'valuesKnown'), dictionaryOEIS, dict[int, int]([(-errorL33T, -errorL33T)]))  # pyright: ignore[reportReturnType]
 
 #================== Meat grinders =================================================================
 
@@ -169,6 +169,9 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 		valuesKnown: dict[int, int] = _getMetadata_bFile(oeisID)
 		description, offset = _getMetadataAFile(oeisID)
 		dictionary[oeisID] = MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
+
+	dictionary['A259689'].update(rowLength=lambda nRow: nRow // 2, rowStart=2)
+
 	return dictionary
 
 dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()

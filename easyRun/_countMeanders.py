@@ -65,7 +65,7 @@ if __name__ == '__main__':
 				if 6 <= n:
 					countTotal += (n**2 + 2 * n - 19) // 2
 
-			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=True)
+			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 
 r"""
 

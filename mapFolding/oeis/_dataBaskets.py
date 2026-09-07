@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from typing import TypedDict
+from typing import TYPE_CHECKING, TypedDict
+
+if TYPE_CHECKING:
+	from collections.abc import Callable
+	from typing import NotRequired
 
 class MetadataOEISid(TypedDict):
 	"""Settings for an implemented OEIS sequence."""
@@ -13,3 +17,6 @@ class MetadataOEISid(TypedDict):
 	"""Dictionary of sequence indices, 'n', to their known values, `totalFolds`."""
 	valueUnknown: int
 	"""The smallest value of 'n' for for which `totalFolds` is unknown."""
+
+	rowLength: NotRequired[Callable[[int], int]]
+	rowStart: NotRequired[int]

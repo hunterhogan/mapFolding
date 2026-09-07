@@ -8,8 +8,8 @@ from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown
 
 # isort: split
 from mapFolding.oeis.__main__ import (
-	getTotalFoldsKnown as getTotalFoldsKnown, makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark,
-	printEasyRunHeader as printEasyRunHeader)
+	getTotalFoldsKnown as getTotalFoldsKnown, getTriangleRows as getTriangleRows, makeMapShape as makeMapShape,
+	printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunHeader as printEasyRunHeader)
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n

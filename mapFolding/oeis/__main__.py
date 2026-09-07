@@ -22,16 +22,22 @@ from __future__ import annotations
 from functools import cache, partial
 from humpy_cytoolz import keymap, merge
 from hunterMakesPy import errorL33T
+from itertools import count
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.oeis import getValuesKnown
+from mapFolding.kitFilesystem import Z0Z_triangle
+from mapFolding.oeis import getMetadata, getValuesKnown
 from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.oeis._theSSOT import oeisIDsMapFoldingImplemented
 from more_itertools import loops
 from typing import TYPE_CHECKING
+import anyascii
 import sys
 import time
 
 if TYPE_CHECKING:
+	from collections.abc import Iterable
+	from mapFolding.oeis._dataBaskets import MetadataOEISid
+	from mapFolding.theTypes import OEISid
 	from typing import Literal, LiteralString
 
 @cache
@@ -130,6 +136,15 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 		raise ValueError(message)
 	return mapShape
 
+def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	rowStart: int = metadata.get('rowStart', metadata['offset'])
+	rowLengths: Iterable[int] | None = None
+	if 'rowLength' in metadata:
+		rowLengths = map(metadata['rowLength'], count(rowStart))
+	return Z0Z_triangle(metadata['valuesKnown'].values(), rowLengths, rowStart)
+
 def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
 	"""Print a benchmark comparison line for an OEIS sequence value.
 
@@ -168,26 +183,26 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		sys.stdout.write(f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[integer]}{known / computed}{ansiColorReset}\t")
 	sys.stdout.write(f"{ansiColorReset}\n")
 
-def printEasyRunHeader(oeisID: str, flow: str) -> None:
-	"""Print a colored header line for an easy run benchmark session.
+def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
+	"""Print a colored header line: limited to [a-Z,0-9] without spaces.
 
 	Outputs the OEIS ID and flow identifier in distinct colors based on their hash values, followed by
 	a color reset.
 
 	Parameters
 	----------
-	oeisID : str
-		The OEIS sequence identifier (e.g., 'A000136').
-	flow : str
-		A flow identifier string (e.g., 'main', 'test', 'benchmark').
+	title : str | int
+		The title string (e.g., 'A000136').
+	subtitle : str | int
+		A subtitle string (e.g., the flow, `n`, 'benchmark').
 
 	Notes
 	-----
 	Colors are selected by converting the string to a base-36 integer and modulo the number of
 	available ANSI colors. This provides consistent coloring for the same identifiers across runs.
 	"""
-	sys.stdout.write(f"{ansiColors[int(oeisID, 36) % len(ansiColors)]}{oeisID} ")
-	sys.stdout.write(f"{ansiColors[int(flow, 36) % len(ansiColors)]}{flow}")
+	sys.stdout.write(f"{ansiColors[int(anyascii.anyascii(str(title)), 36) % len(ansiColors)]}{title} ")
+	sys.stdout.write(f"{ansiColors[int(anyascii.anyascii(str(subtitle)), 36) % len(ansiColors)]} {subtitle} ")
 	sys.stdout.write(ansiColorReset + '\n')
 
 if __name__ == "__main__":

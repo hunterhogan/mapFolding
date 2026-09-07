@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from functools import partial
 from hunterMakesPy import decreasing, inclusive, zeroIndexed
-from itertools import chain, filterfalse
+from itertools import chain
 from mapFolding._e import leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding.beDRY import defineProcessorLimit
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
 
-pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_development' / 'albums'
+pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_research' / 'albums'
 
 def makeAlbums1xn(n: int, nFinal: int, workersMaximum: int) -> Path:
 	"""Construct every album through `nFinal`."""
@@ -103,7 +103,7 @@ def doTheNeedful(n: int, nFinal: int, CPUlimit: Limitation = None) -> Path:
 	return makeAlbums1xn(n, nFinal, workersMaximum)
 
 if __name__ == '__main__':
-	nFinal: int = 17
+	nFinal: int = 7
 	start: float = perf_counter()
 	aa = doTheNeedful(2, nFinal, -2)
 	print(f"{perf_counter() - start:.2f}")

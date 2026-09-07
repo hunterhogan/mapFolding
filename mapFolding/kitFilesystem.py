@@ -38,8 +38,10 @@ from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
+from itertools import count, takewhile
 from mapFolding import ansiColorReset, ansiColors
 from mapFolding.theSSOT import settingsPackage
+from more_itertools import split_into
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
@@ -51,12 +53,13 @@ import sys
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Iterable, Iterator
+	from collections.abc import Iterable, Mapping, Sequence
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import Folding
 	from os import PathLike
 	from pandas import DataFrame
+	from typing import Any
 	from urllib3.response import BaseHTTPResponse
 
 #================== Create appropriate paths and filenames =========================================
@@ -314,6 +317,12 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 
 #================== Write =========================================================================
 
+def _iterableToCSV(iterable: Iterable[Any], pathFilename: Path) -> Path:
+	with pathFilename.open(encoding="utf-8", mode="w", newline="") as streamWrite:
+		csvWriter: Writer = csv_writer(streamWrite)
+		csvWriter.writerows(iterable)
+	return pathFilename
+
 def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	"""Save `countTotal` value to disk with multiple fallback mechanisms.
 
@@ -397,12 +406,13 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	which is safe because `Leaf` values are integers. The large buffer size
 	(`2**16` bytes) reduces the number of system calls when writing many rows.
 	"""
-	with pathFilename.open(encoding="utf-8", mode="w", newline="", buffering=2**16) as streamWrite:
-		csvWriter: Writer = csv_writer(streamWrite)
-		csvWriter.writerows(album)
-	return pathFilename
+	return _iterableToCSV(album, pathFilename)
 
-#================== Read ==========================================================================
+def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return _iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
+
+#================== Read and write ================================================================
 
 def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	"""I use this to manage cached data retrieval with HTTP conditional requests.
@@ -454,13 +464,27 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 		httpPoolManager = PoolManager(retries=False)
 		with suppress(HTTPError, AttributeError):
 			response: BaseHTTPResponse = httpPoolManager.request("GET", url, headers=headers, preload_content=True, decode_content=True)
-			if response.status == 304:
-				pathFilenameCache.touch()  # Update cache file's modification time to server time.
+			if response.status == 304:  # Not Modified
+				pathFilenameCache.touch()  # Update cache file's modification time to local time.
 			elif response.status == 200:
 				writeStringToHere(data := response.data.decode("utf-8"), pathFilenameCache)
 		httpPoolManager.clear()
 
 	return data
+
+#================== Read ==========================================================================
+
+def _csvTo_int(pathFilename: Path) -> Iterable[tuple[int, ...]]:
+	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
+		yield from (tuple(map(int, row)) for row in csv_reader(streamRead))
+
+# TODO Which module should this be in?
+# SEMIOTICS
+def Z0Z_triangle(sequence: Iterable[int], rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	if rowLengths is None:
+		rowLengths = count(1)
+	return dict(enumerate(takewhile(bool, split_into(sequence, rowLengths)), rowStart))
 
 def getDataFrameFoldings(state: StateElimination) -> DataFrame | None:
 	"""Load array-foldings data for `state.totalDimensions`.
@@ -521,8 +545,7 @@ def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
 	streamAlbum : Lazily iterate over foldings without loading the entire file.
 	writeAlbum : Write an album of foldings to a CSV file.
 	"""
-	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
-		return tuple(tuple(map(int, row)) for row in csv_reader(streamRead))
+	return tuple(_csvTo_int(pathFilename))
 
 def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	"""Load folding data from `pathFilename` into a `pandas.DataFrame`.
@@ -557,6 +580,10 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	import pandas  # ruff: ignore[import-outside-top-level]
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))
 
+def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return {row[0]: tuple(row[1:]) for row in _csvTo_int(pathFilename)}
+
 def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	"""Lazily iterate over foldings in a CSV file, yielding one at a time.
 
@@ -589,10 +616,7 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	readAlbum : Read an entire album into memory at once.
 	writeAlbum : Write an album of foldings to a CSV file.
 	"""
-	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
-		csvReader: Iterator[list[str]] = csv_reader(streamRead)
-		for row in csvReader:
-			yield tuple(map(int, row))
+	yield from _csvTo_int(pathFilename)
 
 # Perhaps:
 #================== Find or enumerate files based on their purpose, not filename or path ==========

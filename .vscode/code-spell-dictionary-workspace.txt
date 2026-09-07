@@ -254,6 +254,7 @@ multiset
 mypy
 Natalya
 ncol
+Ndegree
 ndex
 neighbour
 neighbours
