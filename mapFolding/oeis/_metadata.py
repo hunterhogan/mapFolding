@@ -100,7 +100,8 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 
 	n_aOFn: dict[int, int] = {}
 	if oeisData:
-		n_aOFn.update(map(compose(tuple[int, int], partial(map, int), partial(take, 2)), map(methodcaller('split'), filterfalse(methodcaller('startswith', '#'), oeisData.strip().splitlines()))))
+		n_aOFn.update(map(compose(tuple[int, int], partial(map, int), partial(take, 2)), map(methodcaller('split'), filter(None, filterfalse(methodcaller('startswith', '#')
+			, oeisData.strip().splitlines())))))
 	return n_aOFn
 
 def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:

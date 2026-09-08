@@ -318,6 +318,7 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 #================== Write =========================================================================
 
 def _iterableToCSV(iterable: Iterable[Any], pathFilename: Path) -> Path:
+	pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	with pathFilename.open(encoding="utf-8", mode="w", newline="") as streamWrite:
 		csvWriter: Writer = csv_writer(streamWrite)
 		csvWriter.writerows(iterable)

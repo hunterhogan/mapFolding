@@ -46,6 +46,7 @@ boundscheck
 bsgs
 bsolute
 carmichaels
+Cassio
 cclass
 Celler
 cffconvert
@@ -223,6 +224,7 @@ linh
 Liskov
 LLLVVV
 loadgroup
+loopless
 looplift
 lpthread
 lunnan
@@ -258,6 +260,7 @@ Ndegree
 ndex
 neighbour
 neighbours
+Neri's
 nextprime
 nfac
 nhất
