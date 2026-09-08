@@ -1,7 +1,6 @@
 # pyright: reportUnnecessaryComparison=false
 from __future__ import annotations
 
-from hunterMakesPy import inclusive
 from itertools import chain
 from mapFolding.algorithms.catalanArch import doTheNeedful
 from mapFolding.kitFilesystem import writeStringToHere, writeTriangle
@@ -17,17 +16,17 @@ if TYPE_CHECKING:
 
 def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], list[int]] = doTheNeedful) -> Path:
 	triangle: dict[int, list[int]] = {}
-	pathFilename: Path = pathWrite / 'b287548.txt'
-	for n in tqdm(range(nStart, nStop + inclusive), initial=nStart - 1):
+	pathFilename: Path = pathWrite / 'b287548ADDENDUM.txt'
+	for n in tqdm(range(nStart, nStop)):
 		triangle[n] = counter(n)
-		writeTriangle(triangle, pathWrite / 'triangle.csv')
+		writeTriangle(triangle, pathWrite / 'triangleADDENDUM.csv')
 		writeStringToHere(''.join(map('{} {}\n'.format, range(1, sum(map(len, triangle.values())) + 1),
 			chain.from_iterable(triangle.values()))), pathFilename)
 	return pathFilename
 
 if __name__ == '__main__':
-	flow = 'write'
 	flow = 'reduce'
+	flow = 'write'
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/research/archReduction')
 	oeisID = 'A000682'
 
@@ -42,4 +41,4 @@ if __name__ == '__main__':
 			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=False)
 
 	else:
-		write(1, 20, pathLikeWrite)
+		write(21, 26, pathLikeWrite)

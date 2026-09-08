@@ -38,6 +38,8 @@ if __name__ == '__main__':
 
 			timeStart: float = time.perf_counter()
 			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
+			# Need CPUlimit argument.
+			# Still too slow: try numba and/or codon.
 			if flow == 'bilateralConcurrent':
 				if oeisID == 'A000560' and 2 <= n:
 					total: int = bilateralConcurrent(n, symmetric=True)

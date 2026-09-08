@@ -49,22 +49,24 @@ def doTheNeedful(n: int) -> list[int]:
 	return [sum(histogram[-(n - index):None]) for index in range(n)]
 
 # , no_cpython_wrapper=True, no_cfunc_wrapper=True
-nn = int64
-nSize = uint8
+two_n_bits = int64
+one_n_bitsMAYBE = uint32
+oneByte = uint8
+
 jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={
-	'Z0Z_calibrator': nn,
-	'archCode': nn,
-	'archCodeAlternating': nn,
-	'archCodeMaximum': nn,
-	'archCodePivoted': nn,
-	'bitEndpointFirst': nn,
-	'bitEndpointLast': uint32,
-	'bitPartnerFirst': nn,
-	'bitPivot': nn,
-	'depth': nSize,
-	'generationsSurvived': nSize,
+	'Z0Z_calibrator': two_n_bits,
+	'archCode': two_n_bits,
+	'archCodeAlternating': two_n_bits,
+	'archCodeMaximum': two_n_bits,
+	'archCodePivoted': two_n_bits,
+	'bitEndpointFirst': two_n_bits,
+	'bitEndpointLast': one_n_bitsMAYBE,
+	'bitPartnerFirst': two_n_bits,
+	'bitPivot': two_n_bits,
+	'depth': oneByte,
+	'generationsSurvived': oneByte,
 	'histogram': types.List(int64),
-	'index': nSize,
-	'n': nSize,
-	'pairsReset': nn,
+	'index': oneByte,
+	'n': oneByte,
+	'pairsReset': two_n_bits,
 })

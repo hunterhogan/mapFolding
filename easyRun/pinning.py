@@ -37,6 +37,7 @@ if __name__ == '__main__':
 
 	if printThis:
 		timeStart: float = time.perf_counter()
+		# Developing the Sade-insertion algorithm for 2上nDimensional.
 		state = makeAlbum2上nDimensional吗(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
@@ -52,6 +53,7 @@ if __name__ == '__main__':
 		recordAlbum2上nDimensional吗(state)
 
 	elif printThis:
+		# Primary reason for this module: testing pinning functions.
 		state = pinIt.pinPilesAtEnds(state, 0)
 		state = pinIt.pin首beans(state)
 		printStatisticsPermutations(state)
