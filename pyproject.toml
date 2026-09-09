@@ -48,6 +48,7 @@ dependencies = [
   "numba",
   "numba_progress",
   "numpy",
+  "oeis-tools",
   "platformdirs",
   "tqdm",
   "urllib3",

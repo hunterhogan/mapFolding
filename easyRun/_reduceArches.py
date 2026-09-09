@@ -19,21 +19,21 @@ def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], lis
 	pathFilename: Path = pathWrite / 'b287548ADDENDUM.txt'
 	for n in tqdm(range(nStart, nStop)):
 		triangle[n] = counter(n)
-		writeTriangle(triangle, pathWrite / 'triangleADDENDUM.csv')
+		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
 		writeStringToHere(''.join(map('{} {}\n'.format, range(1, sum(map(len, triangle.values())) + 1),
 			chain.from_iterable(triangle.values()))), pathFilename)
 	return pathFilename
 
 if __name__ == '__main__':
-	flow = 'reduce'
 	flow = 'write'
+	flow = 'reduce'
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/research/archReduction')
 	oeisID = 'A000682'
 
 	printEasyRunHeader(oeisID, flow)
 
 	if flow == 'reduce':
-		for n in range(1, 17):
+		for n in range(1, 18):
 
 			timeStart: float = time.perf_counter()
 			total = doTheNeedful(n)[-1]
@@ -41,4 +41,4 @@ if __name__ == '__main__':
 			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=False)
 
 	else:
-		write(21, 26, pathLikeWrite)
+		write(1, 23, pathLikeWrite)

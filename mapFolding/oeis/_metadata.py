@@ -9,6 +9,7 @@ from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.oeis._dataBaskets import MetadataOEISid
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
 from more_itertools import take
+from oeis_tools import oeis_bfile, oeis_url  # pyright: ignore[reportMissingTypeStubs] https://github.com/oeistools/oeis-tools/pull/12
 from operator import methodcaller
 from typing import TYPE_CHECKING
 import warnings
@@ -87,10 +88,9 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 		A dictionary mapping sequence indices to their corresponding values, or a fallback dictionary
 		containing {-1: -1} if retrieval fails.
 	"""
-	# TODO centralize b-file format.
-	filename: str = f"b{oeisID[1:]}.txt"
+	filename: str = oeis_bfile(oeisID)
 	pathFilenameCache: Path = pathCache / filename
-	url: str = f"https://oeis.org/{oeisID}/{filename}"
+	url: str = oeis_url(oeisID, fmt='bfile')
 
 	oeisData: str = getCacheOrURL(pathFilenameCache, cacheDays, url)
 
@@ -100,8 +100,9 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 
 	n_aOFn: dict[int, int] = {}
 	if oeisData:
-		n_aOFn.update(map(compose(tuple[int, int], partial(map, int), partial(take, 2)), map(methodcaller('split'), filter(None, filterfalse(methodcaller('startswith', '#')
-			, oeisData.strip().splitlines())))))
+		n_aOFn.update(map(compose(tuple[int, int], partial(map, int), partial(take, 2))
+					, map(methodcaller('split'), filterfalse(methodcaller('startswith', '#'), filter(None, oeisData.strip().splitlines()))
+		)))
 	return n_aOFn
 
 def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
@@ -133,7 +134,7 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	"""
 	oeisID = formatOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
-	url: str = f"https://oeis.org/search?q=id:{oeisID}&fmt=text"
+	url: str = oeis_url(oeisID, fmt='text')
 
 	oeisData: str = getCacheOrURL(pathFilenameCache, cacheDays, url)
 

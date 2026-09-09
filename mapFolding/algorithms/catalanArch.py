@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from numba import int64, jit_module, types, uint8, uint32
+from numba import int64, jit_module, types, uint8
+from operator import neg
 
 def count(n: int) -> list[int]:
 	archCodeMaximum: int = ((1 << n) - 1) << n
@@ -39,7 +40,7 @@ def findPartnerLast(archCode: int) -> int:
 	return bitEndpointLast
 
 def advanceDyck(archCode: int, archCodeAlternating: int) -> int:
-	bitPivot: int = (archCode ^ (2**63 - 1)) + 1 & archCode
+	bitPivot: int = archCode & neg(archCode)
 	archCodePivoted: int = archCode + bitPivot
 	pairsReset: int = (((archCode ^ archCodePivoted) // bitPivot) >> 2) + 1
 	return ((pairsReset * pairsReset - 1) & archCodeAlternating) | archCodePivoted
@@ -50,17 +51,15 @@ def doTheNeedful(n: int) -> list[int]:
 
 # , no_cpython_wrapper=True, no_cfunc_wrapper=True
 two_n_bits = int64
-one_n_bitsMAYBE = uint32
 oneByte = uint8
 
 jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={
-	'Z0Z_calibrator': two_n_bits,
 	'archCode': two_n_bits,
 	'archCodeAlternating': two_n_bits,
 	'archCodeMaximum': two_n_bits,
 	'archCodePivoted': two_n_bits,
 	'bitEndpointFirst': two_n_bits,
-	'bitEndpointLast': one_n_bitsMAYBE,
+	'bitEndpointLast': two_n_bits,
 	'bitPartnerFirst': two_n_bits,
 	'bitPivot': two_n_bits,
 	'depth': oneByte,
@@ -69,4 +68,5 @@ jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True, loc
 	'index': oneByte,
 	'n': oneByte,
 	'pairsReset': two_n_bits,
+	'Z0Z_calibrator': two_n_bits,
 })
