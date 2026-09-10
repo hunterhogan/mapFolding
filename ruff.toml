@@ -82,6 +82,7 @@ ignore = [
   "unused-variable",
   "useless-else-on-loop",
   "useless-import-alias",
+  "unnecessary-literal-dict",
   "yoda-conditions",
 ]
 select = ["ALL"]

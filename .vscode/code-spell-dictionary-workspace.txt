@@ -39,6 +39,7 @@ baseswap
 bfile
 bidirected
 bignum
+binom
 bitcast
 bitwidths
 Bletionary
@@ -270,6 +271,7 @@ nilpotent
 niversal
 njit
 nogil
+noncrossing
 nonisomorphic
 nonn
 noob
@@ -295,6 +297,7 @@ oeis
 olute
 onefile
 oneword
+operatorname
 optnone
 Orden
 ordinality
