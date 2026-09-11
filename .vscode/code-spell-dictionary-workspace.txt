@@ -429,6 +429,7 @@ totient
 Touchard
 tount
 tqdm
+transversally
 transversals
 triplewise
 Truncator

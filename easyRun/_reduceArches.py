@@ -25,20 +25,25 @@ def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], lis
 	return pathFilename
 
 if __name__ == '__main__':
-	flow = 'write'
-	flow = 'reduce'
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/research/archReduction')
 	oeisID = 'A000682'
+
+	flow = 'write'
+	flow = 'reduce'
+	nStart: int = 1
+	nStop: int = 20
 
 	printEasyRunHeader(oeisID, flow)
 
 	if flow == 'reduce':
-		for n in range(1, 18):
+		for n in range(nStart, nStop):
 
 			timeStart: float = time.perf_counter()
-			total = doTheNeedful(n)[-1]
+			triangleRow: list[int] = doTheNeedful(n)
+			print(triangleRow)
+			total: int = triangleRow[-1]
 
 			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=False)
 
 	else:
-		write(1, 23, pathLikeWrite)
+		write(nStart, nStop, pathLikeWrite)
