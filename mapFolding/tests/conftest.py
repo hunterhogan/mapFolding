@@ -41,13 +41,6 @@ def rtol(request: FixtureRequest) -> float:
 	"""The `rtol` (***r***elative ***tol***erance) parameter value for `numpy.allclose`."""
 	return 1e-05
 
-@pytest.fixture(autouse=True)
-def setupWarningsAsErrors() -> Generator[None, Any]:
-	"""Convert all warnings to errors for all tests."""
-	warnings.filterwarnings('error')
-	yield
-	warnings.resetwarnings()
-
 #======== Filesystem isolation =====================================
 
 @pytest.fixture

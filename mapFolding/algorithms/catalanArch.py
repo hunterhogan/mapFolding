@@ -49,7 +49,6 @@ def doTheNeedful(n: int) -> list[int]:
 	histogram: list[int] = count(n)
 	return [sum(histogram[-(n - index):None]) for index in range(n)]
 
-# , no_cpython_wrapper=True, no_cfunc_wrapper=True
 two_n_bits = int64
 oneByte = uint8
 

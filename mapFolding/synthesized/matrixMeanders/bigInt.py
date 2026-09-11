@@ -117,6 +117,4 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
         lookupArcCodeMeanders: dict[int, int] = state.lookupMeanders.copy()
         state.lookupMeanders = {}
         tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values()))
-        if 46 <= state.n:
-            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.lookupMeanders), state.bitWidth, max(state.lookupMeanders.values()).bit_length(), sep=',')
     return state

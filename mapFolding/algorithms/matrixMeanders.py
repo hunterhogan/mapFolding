@@ -126,11 +126,6 @@ def count(state: StateMeanders) -> StateMeanders:
 
         tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values()))
 
-        if 46 <= state.n:  # Data collection for 'research' directory.
-            # kind,n,boundary,buckets,arcCodes,bitWidthArcCode,bitWidthMeanders
-            # To count buckets, I have to add state.次Target += 1 after all four arcCodeMAXIMUM guards.
-            print(state.kind, state.n, state.boundary + 1, state.次Target, len(state.lookupMeanders), state.bitWidth, max(state.lookupMeanders.values()).bit_length(), sep=',')  # ruff: ignore[print]
-
     return state
 
 def doTheNeedful(state: StateMeanders) -> int:

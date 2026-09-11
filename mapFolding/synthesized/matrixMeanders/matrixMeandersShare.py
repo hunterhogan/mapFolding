@@ -3,7 +3,7 @@ from __future__ import annotations
 from mapFolding.theTypes import 形ArcCode
 from numba import jit
 
-@jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
+@jit(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
 def walkDyckPath(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
     """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
 
