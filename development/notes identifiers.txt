@@ -1,7 +1,7 @@
 get: expression, an existing value, don't mutate it.
 make: expression, a new value from existing values.
 工: expression. Use only on functions and similar.
-totalDimensionsOdd: int = 工totalDimensionsOdd(15)
+	totalDimensionsOdd: int = 工totalDimensionsOdd(15)
 
 identifierDataclass
 名 ming
@@ -15,28 +15,31 @@ lookup
 
 boxOf: plural prefix, especially list, set, tuple
 "boxOf" feels weird, but it reduces ambiguity, example:
-real identifier in `kitNumba`: `shapeAsListSlices`
 
-Does "List" mean
-- `numba.List`
-- builtins.list that must be a list for some reason
-- `ast.List`
-- boxOf
+	real identifier in `kitNumba`: `shapeAsListSlices`
+	Does "List" mean
+	- `numba.List`
+	- builtins.list that must be a list for some reason
+	- `ast.List`
+	- boxOf
 
-Better identifier: `shapeAsBoxOfSlice`
+	Better identifier: `shapeAsBoxOfSlice`
 
-nMinus1Factorial = factorial(n - 1)
-nMinus1Factorial is a good identifier. Hypothetically, it could be next to
-nPlus1Factorial = factorial(n + 1)
-Because the word "less" is the same length as "plus", identifiers with "less" and "more" will stay
-physically aligned in the code. For _only_ the alignment reason, I prefer "less" over "minus."
+Less and Plus
 nLess1Factorial = factorial(n - 1)
 nPlus1Factorial = factorial(n + 1)
+
+Compare to Minus
+nPlus1Factorial = factorial(n + 1)
+nMinus1Factorial = factorial(n - 1)
+nMinus1Factorial is a good identifier. Hypothetically, it could be next to
+Because the word "less" is the same length as "plus", identifiers with "less" and "more" will stay
+physically aligned in the code. For _only_ the alignment reason, I prefer "less" over "minus."
 nMinus1Factorial = factorial(n - 1)
 
-Similarly, I prefer the pair "less than" and "more than" over "less than" and "greater than" _only_
-because of the symmetric alignment of related identifiers in the code.
-
+More than vs greater than
+Similarly, I prefer the pair "less than" and "more than" over "less than"
+and "greater than" _only_ because of the symmetric alignment of related identifiers in the code.
 Luckily, in European languages other than English, the semiotics tend to be the equivalent of "n less
 1" rather than "n minus 1" and "n [is] more than 2" rather than "n greater than 2". So, for many ESL
 readers, nLess1 is more natural, for example, than nMinus1.

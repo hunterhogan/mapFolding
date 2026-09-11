@@ -18,17 +18,17 @@ if TYPE_CHECKING:
 
 #================== Settings and flow control ==================
 scope: list[str] = [
+	'2上nDimensional',
 	'core',
 	'elimination',
-	'2上nDimensional',
 ]
 
 find: list[str] = [
-	# 'astName',
-	# 'CallName',
-	# 'ClassDef',
+	'astName',
+	'CallName',
+	'ClassDef',
 	'FunctionDef',
-	# 'MosDef',
+	'MosDef',
 ]
 
 containsString: list[str] = [

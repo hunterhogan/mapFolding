@@ -42,6 +42,7 @@ bignum
 binom
 bitcast
 bitwidths
+bivariate
 Bletionary
 boolop
 boundscheck
@@ -161,6 +162,7 @@ hachi
 hahaha
 HARDWS
 hedron
+holonomicity
 howpublished
 Howroyd
 Hubba
@@ -255,6 +257,7 @@ metaprogramming
 mobius
 Mult
 multiset
+multisets
 mypy
 Natalya
 ncol
@@ -362,7 +365,9 @@ randint
 RECIPEPREFIX
 recurser
 redef
+rederivation
 reduceat
+reindexing
 relators
 rels
 rmuln
@@ -398,6 +403,7 @@ stackoverflow
 standardised
 Stéphane
 Stoopid
+stratifiable
 structref
 subclasshook
 subexponential
