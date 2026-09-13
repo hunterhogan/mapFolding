@@ -2,10 +2,14 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from csv import reader as csv_reader
 from functools import cache
 from hunterMakesPy import inclusive
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
+from itertools import count, starmap, takewhile
 from mapFolding.theTypes import 形NumPyTotalLeaves
+from more_itertools import split_into
+from operator import itemgetter
 #=SIN= Incomplete typing in `numba`.
 from numba import get_num_threads, set_num_threads  # pyright: ignore[reportUnknownVariableType]
 from sys import maxsize as sysMaxsize
@@ -13,10 +17,11 @@ from typing import TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
+	from collections.abc import Callable, Iterable, Mapping
 	from hunterMakesPy.theTypes import Limitation
 	from mapFolding.theTypes import 形Array1DTotalLeaves, 形Array2DTotalLeaves, 形Array3DTotalLeaves, 形NumPyInteger
 	from numpy import dtype as numpy_dtype, ndarray
-	from typing import Any
+	from typing import Any, Literal
 
 #======== Parse parameters ======================================
 
@@ -275,6 +280,61 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | 
 
 	"""
 	return numpy.zeros(shape, dtype=datatype)
+
+def makeLookupTriangle(sequence: Iterable[int], rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	if rowLengths is None:
+		rowLengths = count(1)
+	return dict(enumerate(takewhile(bool, split_into(sequence, rowLengths)), rowStart))
+
+# Improve
+def makeLookupDiagonal(  # ruff: ignore[undocumented-public-function]
+	triangle: Mapping[int, Sequence[int]], 次diagonal: int, *, fromRight: bool = True, rowLength: Callable[[int], int] | None = None
+) -> dict[int, int]:
+	# DOCUMENT
+	if 次diagonal < 0:
+		message: str = f"I received `{次diagonal = }`, but diagonal positions must be non-negative."
+		raise ValueError(message)
+
+	def locateColumn(rowNumber: int, sequence: Sequence[int]) -> tuple[int, Sequence[int], int]:
+		column: int = 次diagonal - 1
+		if fromRight:
+			column = (len(sequence) if rowLength is None else rowLength(rowNumber)) - 次diagonal
+		return rowNumber, sequence, column
+
+	return {coordinate[0]: coordinate[1][coordinate[2]]
+			for coordinate in filter(lambda coordinate: 0 <= coordinate[2] < len(coordinate[1])
+			, starmap(locateColumn, sorted(triangle.items())))}
+
+# Improve
+def parseCSVtoIntegers(lines: Iterable[str]) -> Iterable[tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
+	return (tuple(map(int, row)) for row in filter(bool, csv_reader(lines)))
+
+# Improve
+def parseTriangle(contents: str) -> dict[int, tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
+	return dict(map(itemgetter(0, slice(1, None)), parseCSVtoIntegers(contents.splitlines())))
+
+# Improve
+def parseDiagonal(contents: str, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV',  # ruff: ignore[undocumented-public-function]
+	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
+	diagonal: dict[int, int]
+	if formatData == 'diagonalCSV':
+		records: tuple[tuple[int, ...], ...] = tuple(parseCSVtoIntegers(contents.splitlines()))
+		if not all(len(record) == 3 for record in records):
+			message: str = "I received a diagonal CSV record without exactly three integers: a row, a diagonal, and a value."
+			raise ValueError(message)
+		records = tuple(filter(lambda record: record[1] == 次diagonal, records))
+		diagonal = dict(map(itemgetter(0, 2), records))
+		if len(diagonal) != len(records):
+			message = f"I received duplicate rows for `{次diagonal = }`."
+			raise ValueError(message)
+		diagonal = dict(sorted(diagonal.items()))
+	elif formatData == 'triangleCSV':
+		diagonal = makeLookupDiagonal(parseTriangle(contents), 次diagonal, fromRight=fromRight, rowLength=rowLength)
+	else:
+		message = f"I received `{formatData = }`, but I support 'triangleCSV' and 'diagonalCSV' diagonals."
+		raise ValueError(message)
+	return diagonal
 
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToRideThis: int = 3) -> bool:
 	"""Test whether `mapShape` is a sufficiently sized 2ⁿ-dimensional map.

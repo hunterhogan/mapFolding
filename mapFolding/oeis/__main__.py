@@ -24,8 +24,10 @@ from humpy_cytoolz import keymap, merge
 from hunterMakesPy import errorL33T
 from itertools import count
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.kitFilesystem import Z0Z_triangle
+from mapFolding.beDRY import makeLookupDiagonal, makeLookupTriangle
+from mapFolding.kitFilesystem import readText
 from mapFolding.oeis import getMetadata, getValuesKnown
+from mapFolding.oeis._beDRY import parseDiagonalBFile, parseTriangleBFile
 from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.oeis._theSSOT import oeisIDsMapFoldingImplemented
 from more_itertools import loops
@@ -35,9 +37,10 @@ import sys
 import time
 
 if TYPE_CHECKING:
-	from collections.abc import Iterable
+	from collections.abc import Callable, Iterable
 	from mapFolding.oeis._dataBaskets import MetadataOEISid
 	from mapFolding.theTypes import OEISid
+	from pathlib import Path
 	from typing import Literal, LiteralString
 
 @cache
@@ -143,7 +146,21 @@ def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:  # ruff: ignore[und
 	rowLengths: Iterable[int] | None = None
 	if 'rowLength' in metadata:
 		rowLengths = map(metadata['rowLength'], count(rowStart))
-	return Z0Z_triangle(metadata['valuesKnown'].values(), rowLengths, rowStart)
+	return makeLookupTriangle(metadata['valuesKnown'].values(), rowLengths, rowStart)
+
+def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	return makeLookupDiagonal(getTriangleRows(oeisID), 次diagonal, fromRight=fromRight,
+		rowLength=metadata.get('rowLength', lambda rowNumber: rowNumber - metadata.get('rowStart', metadata['offset']) + 1))
+
+# TODO remove
+def readTriangleBFile(pathFilename: Path, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
+	return parseTriangleBFile(readText(pathFilename), rowLengths, rowStart)
+
+# TODO remove
+def readDiagonalBFile(pathFilename: Path, 次diagonal: int, *, rowStart: int = 1,  # ruff: ignore[undocumented-public-function]
+	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
+	return parseDiagonalBFile(readText(pathFilename), 次diagonal, rowStart=rowStart, rowLength=rowLength, fromRight=fromRight)
 
 def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
 	"""Print a benchmark comparison line for an OEIS sequence value.

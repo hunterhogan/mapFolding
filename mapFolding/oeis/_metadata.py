@@ -1,16 +1,13 @@
 from __future__ import annotations
 
-from functools import cache, partial
-from humpy_cytoolz import compose, get_in
+from functools import cache
+from humpy_cytoolz import get_in
 from hunterMakesPy import errorL33T
-from itertools import filterfalse
 from mapFolding.kitFilesystem import getCacheOrURL
-from mapFolding.oeis._beDRY import formatOEISid
+from mapFolding.oeis._beDRY import formatOEISid, parseBFile
 from mapFolding.oeis._dataBaskets import MetadataOEISid
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
-from more_itertools import take
 from oeis_tools import oeis_bfile, oeis_url  # pyright: ignore[reportMissingTypeStubs] https://github.com/oeistools/oeis-tools/pull/12
-from operator import methodcaller
 from typing import TYPE_CHECKING
 import warnings
 
@@ -98,12 +95,7 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 		message: str = f"Failed to retrieve OEIS sequence information for {oeisID = }."
 		warnings.warn(message, stacklevel=0)
 
-	n_aOFn: dict[int, int] = {}
-	if oeisData:
-		n_aOFn.update(map(compose(tuple[int, int], partial(map, int), partial(take, 2))
-					, map(methodcaller('split'), filterfalse(methodcaller('startswith', '#'), filter(None, oeisData.strip().splitlines()))
-		)))
-	return n_aOFn
+	return parseBFile(oeisData)
 
 def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	"""Retrieve the description and offset metadata for an OEIS sequence.

@@ -33,15 +33,14 @@ astToolkit
 from __future__ import annotations
 
 from contextlib import suppress
-from csv import reader as csv_reader, writer as csv_writer
+from csv import writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from itertools import count, takewhile
 from mapFolding import ansiColorReset, ansiColors
+from mapFolding.beDRY import parseCSVtoIntegers, parseDiagonal, parseTriangle
 from mapFolding.theSSOT import settingsPackage
-from more_itertools import split_into
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
@@ -53,13 +52,13 @@ import sys
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Iterable, Mapping, Sequence
+	from collections.abc import Callable, Iterable, Mapping, Sequence
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding._e.theTypes import Folding
 	from os import PathLike
 	from pandas import DataFrame
-	from typing import Any
+	from typing import Any, Literal
 	from urllib3.response import BaseHTTPResponse
 
 #================== Create appropriate paths and filenames =========================================
@@ -317,9 +316,9 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 
 #================== Write =========================================================================
 
-def _iterableToCSV(iterable: Iterable[Any], pathFilename: Path) -> Path:
+def _iterableToCSV(iterable: Iterable[Any], pathFilename: Path, *, append: bool = False) -> Path:
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
-	with pathFilename.open(encoding="utf-8", mode="w", newline="") as streamWrite:
+	with pathFilename.open(encoding="utf-8", mode="a" if append else "w", newline="") as streamWrite:
 		csvWriter: Writer = csv_writer(streamWrite)
 		csvWriter.writerows(iterable)
 	return pathFilename
@@ -413,6 +412,17 @@ def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> 
 	# DOCUMENT
 	return _iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
 
+# Improve
+def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:  # ruff: ignore[undocumented-public-function]
+	return _iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)
+
+# Improve. Possibly make something in hunterMakesPy.
+def appendStringToHere(this: str, pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+	pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	with pathFilename.open(encoding='utf-8', mode='a', newline='') as streamWrite:
+		writeStringToHere(this, streamWrite)
+	return pathFilename
+
 #================== Read and write ================================================================
 
 def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
@@ -477,15 +487,14 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 
 def _csvTo_int(pathFilename: Path) -> Iterable[tuple[int, ...]]:
 	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
-		yield from (tuple(map(int, row)) for row in csv_reader(streamRead))
+		yield from parseCSVtoIntegers(streamRead)
 
-# TODO Which module should this be in?
-# SEMIOTICS
-def Z0Z_triangle(sequence: Iterable[int], rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
-	if rowLengths is None:
-		rowLengths = count(1)
-	return dict(enumerate(takewhile(bool, split_into(sequence, rowLengths)), rowStart))
+def readText(pathFilename: Path) -> str:  # ruff: ignore[undocumented-public-function]
+	return pathFilename.read_text(encoding='utf-8')
+
+def readDiagonal(pathFilename: Path, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV',  # ruff: ignore[undocumented-public-function]
+	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
+	return parseDiagonal(readText(pathFilename), 次diagonal, formatData=formatData, rowLength=rowLength, fromRight=fromRight)
 
 def getDataFrameFoldings(state: StateElimination) -> DataFrame | None:
 	"""Load array-foldings data for `state.totalDimensions`.
@@ -583,7 +592,7 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 
 def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT
-	return {row[0]: tuple(row[1:]) for row in _csvTo_int(pathFilename)}
+	return parseTriangle(readText(pathFilename))
 
 def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	"""Lazily iterate over foldings in a CSV file, yielding one at a time.

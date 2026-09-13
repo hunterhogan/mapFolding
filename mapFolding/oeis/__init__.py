@@ -1,6 +1,7 @@
 """OEIS."""
 from __future__ import annotations
 
+from mapFolding.oeis._beDRY import formatBFile as formatBFile
 from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, oeisIDsMapFoldingImplemented as oeisIDsMapFoldingImplemented
 
 # isort: split
@@ -8,8 +9,9 @@ from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown
 
 # isort: split
 from mapFolding.oeis.__main__ import (
-	getTotalFoldsKnown as getTotalFoldsKnown, getTriangleRows as getTriangleRows, makeMapShape as makeMapShape,
-	printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunHeader as printEasyRunHeader)
+	getTotalFoldsKnown as getTotalFoldsKnown, getTriangleDiagonal as getTriangleDiagonal, getTriangleRows as getTriangleRows,
+	makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunHeader as printEasyRunHeader,
+	readDiagonalBFile as readDiagonalBFile, readTriangleBFile as readTriangleBFile)
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n
