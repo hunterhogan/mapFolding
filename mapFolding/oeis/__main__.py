@@ -154,11 +154,11 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = T
 		rowLength=metadata.get('rowLength', lambda rowNumber: rowNumber - metadata.get('rowStart', metadata['offset']) + 1))
 
 # TODO remove
-def readTriangleBFile(pathFilename: Path, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
+def readBFileTriangle(pathFilename: Path, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
 	return parseTriangleBFile(readText(pathFilename), rowLengths, rowStart)
 
 # TODO remove
-def readDiagonalBFile(pathFilename: Path, 次diagonal: int, *, rowStart: int = 1,  # ruff: ignore[undocumented-public-function]
+def readBFileDiagonal(pathFilename: Path, 次diagonal: int, *, rowStart: int = 1,  # ruff: ignore[undocumented-public-function]
 	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
 	return parseDiagonalBFile(readText(pathFilename), 次diagonal, rowStart=rowStart, rowLength=rowLength, fromRight=fromRight)
 

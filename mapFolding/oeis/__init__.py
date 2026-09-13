@@ -11,7 +11,7 @@ from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown
 from mapFolding.oeis.__main__ import (
 	getTotalFoldsKnown as getTotalFoldsKnown, getTriangleDiagonal as getTriangleDiagonal, getTriangleRows as getTriangleRows,
 	makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunHeader as printEasyRunHeader,
-	readDiagonalBFile as readDiagonalBFile, readTriangleBFile as readTriangleBFile)
+	readBFileDiagonal as readBFileDiagonal, readBFileTriangle as readBFileTriangle)
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n
