@@ -9,9 +9,9 @@ from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
 from itertools import count, starmap, takewhile
 from mapFolding.theTypes import 形NumPyTotalLeaves
 from more_itertools import split_into
-from operator import itemgetter
 #=SIN= Incomplete typing in `numba`.
 from numba import get_num_threads, set_num_threads  # pyright: ignore[reportUnknownVariableType]
+from operator import itemgetter
 from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 import numpy
