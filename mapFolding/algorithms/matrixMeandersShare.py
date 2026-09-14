@@ -228,4 +228,4 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	else:
 		totalBuckets = totalArcCodes * 2
 
-	return min(totalBuckets, 100000)
+	return max(totalBuckets, 1000000)
