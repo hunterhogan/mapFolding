@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-from mapFolding._semiotics import ansiColorReset as ansiColorReset, ansiColors as ansiColors
+from mapFolding._semiotics import ansiColorReset as ansiColorReset, ansiColors as ansiColors, oneIndexed as oneIndexed
