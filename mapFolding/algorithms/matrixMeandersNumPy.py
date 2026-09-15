@@ -108,6 +108,13 @@ def count(state: StateMeanders) -> StateMeanders:
             return 次Stop
 
         state.setBitWidthNumPy(arrayMeanders)
+        # TODO Reconfirm and document my decision to recreate `bitsLocator` in the NumPy version.
+		# Reminder: unlike the baseline version that uses Python's dynamically-sized `int`, this uses
+		# a fixed-size integer. I distinctly remember that when I created most of this module (today:
+		# 2026 Sep 14; most of the work completed nine months ago), I reflected on the difference, and
+		# I performed empirical tests measuring processing speed. But I don't remember any insights or
+		# test results. I have a very vague memory that I couldn't find a performance difference, so I
+		# decided to use the same system in all versions so I could keep the code simple and uniform.
         state.setBitsLocator()
 
         shape = ShapeArray(length=getTotalBuckets(state, len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)

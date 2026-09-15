@@ -413,6 +413,16 @@ class StateMeanders:
 		"""
 		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
 
+	# SEMIOTICS
+	# What is `def setBitWidth`?
+	# `self.bitWidth = max(self.lookupMeanders.keys()).bit_length()`
+	# `bitWidth` is a variable. More precisely, it is a `field` in a `dataclass`, and therefore requires dot-notation syntax.
+	# `max(self.lookupMeanders.keys()).bit_length()` is an expression specifically designed to "inform" the variable.
+	# Therefore, in my current semiotic system, "工bitWidth" is the precise label for `max(self.lookupMeanders.keys()).bit_length()`.
+	# Simplify to the statement, `self.bitWidth = 工bitwidth(...)`.
+	# `setBitWidth` is a subroutine that realizes the statement `self.bitWidth = 工bitwidth(...)`.
+	# Therefore, what the fuck do I call it?
+
 	def setBitWidth(self) -> None:
 		"""Set `bitWidth` from the current `lookupMeanders`."""
 		self.bitWidth = max(self.lookupMeanders.keys()).bit_length()
