@@ -19,75 +19,11 @@ Earlier versions of this project were used to compute new terms for [OEIS A00141
 
 This is exact combinatorial enumeration: running time and memory requirements grow quickly. Start with small inputs. The supported high-level interfaces are in `mapFolding.basecamp` and `mapFolding.oeis`; other modules include evolving research code.
 
-## Installation
-
-`mapFolding` requires Python 3.13 or newer.
-
-```console
-pip install mapFolding
-```
-
-Install an optional backend only when you need its corresponding implementation:
-
-| Extra         | Purpose                                       |
-| ------------- | --------------------------------------------- |
-| `numba`       | Numba-compiled map-folding implementations    |
-| `pandas`      | Pandas and Arrow meander implementation       |
-| `codon`       | Codon-compiled implementations on Linux       |
-| `ortools`     | Experimental constraint-propagation work      |
-| `testing`     | Test dependencies                             |
-| `development` | Broader development and analysis dependencies |
-
-For example:
-
-```console
-pip install "mapFolding[numba,pandas]"
-```
-
 ## Quick start
 
-### Count map foldings
+Quick start your exploration of a new-to-you algorithm? Quick start your idea for improving an algorithm? Quick start your dissection of an algorithm's states?
 
-Each positive integer in `mapShape` is the length of one dimension. A `(2, 3)` map has six leaves.
-
-```python
-from mapFolding.basecamp import countFolds
-
-totalFolds = countFolds((2, 3))
-print(totalFolds)  # 60
-```
-
-### Calculate an OEIS term
-
-```python
-from mapFolding.oeis import oeisIDfor_n
-
-totalFolds = oeisIDfor_n('A001415', 6)
-print(totalFolds)  # 10512
-```
-
-The installed commands expose the same sequence registry:
-
-```console
-getOEISids
-OEIS_for_n A001415 6
-```
-
-The second command prints:
-
-```text
-10512 distinct folding patterns.
-Time elapsed: ... seconds
-```
-
-### Count semi-meanders and meanders
-
-```python
-from mapFolding.basecamp import countMeanders
-
-print(countMeanders('semi', 5))      # 10; OEIS A000682
-print(countMeanders('meanders', 4))  # 3; OEIS A005316
-```
+Considering the versatility and sophistication of this package, you can accomplish many things quickly, but a "Quick start" section doesn't make sense.
 
 ## Public interfaces
 
@@ -121,6 +57,8 @@ OEIS metadata and b-files are cached locally for 30 days. Missing or stale entri
 
 ## Algorithm selection and long computations
 
+Assume this is always out of date.
+
 Leave `flow=''` for the default implementation. The alternate selectors exist for research, validation, and performance comparisons:
 
 | Interface             | Supported `flow` values                                                                           |
@@ -137,6 +75,8 @@ Pass `pathLikeWrite` to a counting function to preserve a result. An existing di
 
 ## Repository guide
 
+This is a little out of date.
+
 | Path                                                                                                    | Role                                                                         |
 | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
 | [`mapFolding/basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py)  | Stable high-level dispatch for folding and meander computations              |
@@ -151,7 +91,31 @@ Pass `pathLikeWrite` to a counting function to preserve a result. An existing di
 
 General-purpose transformation primitives developed alongside this project now live in [astToolkit](https://github.com/hunterhogan/astToolkit) and [astToolFactory](https://github.com/hunterhogan/astToolFactory). The transformation pipeline retained here is specific to generating and validating `mapFolding` implementations.
 
-## Development
+## Installation
+
+`mapFolding` requires Python 3.13 or newer.
+
+```console
+pip install mapFolding
+```
+
+To avoid bloat, some packages are optional:
+
+| Extra         | Purpose                                                             |
+| ------------- | ------------------------------------------------------------------- |
+| `pandas`      | Pandas and Arrow meander implementation                             |
+| `codon`       | [Codon](https://docs.exaloop.io/)-compiled implementations on Linux |
+| `ortools`     | Experimental constraint-propagation work                            |
+| `testing`     | Test dependencies                                                   |
+| `development` | Broader development and analysis dependencies                       |
+
+For example:
+
+```console
+pip install "mapFolding[codon,pandas]"
+```
+
+## Development, or to have the archives, notes, and other supplemental materials
 
 Create and activate a virtual environment, then install both development extras:
 
@@ -159,25 +123,7 @@ Create and activate a virtual environment, then install both development extras:
 git clone https://github.com/hunterhogan/mapFolding.git
 cd mapFolding
 python -m venv .venv
-```
-
-PowerShell:
-
-```powershell
-.venv\Scripts\Activate.ps1
-```
-
-POSIX shells:
-
-```sh
-source .venv/bin/activate
-```
-
-Install and test:
-
-```console
 pip install -e ".[development,testing]"
-pytest
 ```
 
 The test suite compares independent implementations with known OEIS values and stored data samples. When adding an algorithm variant, begin with [`mapFolding/tests/test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py) and register the new flow beside the existing implementations.
@@ -255,6 +201,51 @@ Computation times assume:
 3. Single-core computations are given priority over other tasks.
 4. The core of single-core computations is regularly boosted.
 5. No heat issues.
+
+## Status reminders
+
+1. Acceleration
+    1. Building Py 3.14z (tail-call) is not working.
+    2. Codon: new release, new features.
+2. Remote execution
+    1. Google Colab: memmap causes everything to go to "disk" and the physical memory is unused.
+    2. GitHub Codespaces: ignores memmap and terminates on OOM.
+3. astToolkit: figure out a better container system than Ingredients Module, Ingredients Function, etc.
+4. Dao of map folding
+    1. Overhaul how I store and access type metadata for ndarray and other containers. Affects:
+        1. StateMapFolding
+        2. Shatter dataclass
+        3. ast transformations
+    2. Run 2^8 without a crash or power outage.
+    3. Compute (2, 21), (2, 22), and (3, 15).
+5. Symmetric 1xn
+    1. Symmetry algorithm is too slow.
+    2. Asynchronous + accelerated doesn't work yet.
+6. Matrix Meanders
+    1. I need a lot more tools in kitAST.
+    2. I hate `getTotalBuckets` but it _should_ be a brilliant function.
+7. Permutations
+    1. The base algorithm is a dumpster fire.
+    2. Bilateral concurrent can't produce a folding, but uses too much memory and is too slow to count folds.
+8. Reduce arches: slower than counting by hand.
+9. _e
+    1. Constraint propagation or SAT
+        1. ortools won't apply concurrency, and I don't know how to think about divisions of the problem space that actually reduce computation time.
+        2. Understanding other packages is harder than a self-enema with a firehouse.
+    2. 2^n-dimensional (aka elimination by crease)
+        1. Computation algorithms needed for: conditional predecessors, conditional successors,
+           DomainLeaf首零Plus零 in dimension零, the range of a pile (aka pile options, aka choices
+           leaf), pinPile二ByCrease, pinPile二Ante首ByCrease, and pinPile零Ante首零AfterDepth4.
+        2. Acceleration.
+        3. Bug in `boxOfFunctionsReduction2上nDimensional`.
+        4. Finish collecting 2^7 data.
+        5. Fastest algorithm for 2^5. Can't complete 2^6. I mean, wtf?
+        6. `PermutationSpace` and its OOP structure: I don't really know what I am doing.
+        7. The reduce-it concept is strong: reorient more code around it. Resolve the tension with `PermutationSpace._solidifyLeafSpace()`.
+    3. Elimination: atrophied.
+    4. Insert leaves: But for the data storage, it would be powerful. IDK anything about data compression. I lost the code I wrote for the notation I created to store graphs, and it seems I am too stupid to recreate or reverse engineer my own code from my own files AND OTHER FUNCTIONS. fml. Ironically, LLMs can't figure it out either because I guess my idea was novel. F.M.L.
+
+Hunter, this list is incomplete: you quit writing after you got upset. Resume at mapFolding.kitAST.
 
 ## My recovery
 

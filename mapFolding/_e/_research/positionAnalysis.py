@@ -1,7 +1,6 @@
 # DEVELOPMENT module.
 # pyright: reportAssignmentType=false, reportUnnecessaryComparison=false
 # ruff: file-ignore[print, p-print]
-# ty: ignore[invalid-assignment]
 from __future__ import annotations
 
 from gmpy2 import bit_mask
