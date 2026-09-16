@@ -4,7 +4,7 @@ from functools import cache
 from humpy_cytoolz import get_in
 from hunterMakesPy import errorL33T
 from mapFolding.kitFilesystem import getCacheOrURL
-from mapFolding.oeis._beDRY import formatOEISid, parseBFile
+from mapFolding.oeis._beDRY import formatOEISid, parse_bFile
 from mapFolding.oeis._dataBaskets import MetadataOEISid
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
 from oeis_tools import oeis_bfile, oeis_url  # pyright: ignore[reportMissingTypeStubs] https://github.com/oeistools/oeis-tools/pull/12
@@ -95,7 +95,7 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 		message: str = f"Failed to retrieve OEIS sequence information for {oeisID = }."
 		warnings.warn(message, stacklevel=0)
 
-	return parseBFile(oeisData)
+	return parse_bFile(oeisData)
 
 def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	"""Retrieve the description and offset metadata for an OEIS sequence.

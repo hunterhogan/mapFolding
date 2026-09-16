@@ -190,7 +190,7 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	known: int = getValuesKnown(oeisID).get(n, -errorL33T)
 	match: bool = computed == known
 	sys.stdout.write(
-		f"{n:2}\t"
+		f"{n:2} "
 		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}{match}{ansiColorReset}\t"
 		f"{time.perf_counter() - timeStart:5.2f}\t"
 		f"{computed}\t{known}\t"

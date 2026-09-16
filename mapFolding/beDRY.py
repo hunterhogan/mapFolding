@@ -283,8 +283,7 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | 
 
 def makeLookupTriangle(sequence: Iterable[int], rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT
-	if rowLengths is None:
-		rowLengths = count(1)
+	rowLengths = rowLengths or count(1)
 	return dict(enumerate(takewhile(bool, split_into(sequence, rowLengths)), rowStart))
 
 # Improve

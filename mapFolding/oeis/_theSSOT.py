@@ -23,9 +23,9 @@ oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented, 
 	, 'A077460', 'A078591'
 	, 'A078592', 'A085973', 'A204352'
 	, 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095'
-	, 'A227167', 'A259689', 'A259698', 'A259702', 'A259703', "A259974"
-	, 'A301620', 'A333971', 'A334615', 'A337581', "A380367"
+	, 'A227167', 'A259689', 'A259698', 'A259702', 'A259703', 'A259974', 'A287548'
+	, 'A301620', 'A333971', 'A334615', 'A337581', 'A380367'
 )
 """Every implemented OEIS ID."""
-pathCache: Path = settingsPackage.pathPackage / "oeis" / ".cache"
+pathCache: Path = settingsPackage.pathPackage / 'oeis' / '.cache'
 """Local directory path for storing cached OEIS sequence data and metadata."""
