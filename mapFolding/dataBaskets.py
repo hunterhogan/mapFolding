@@ -476,13 +476,25 @@ class StateMeanders:
 #================== Managing data structures in `matrixMeandersNumPy` algorithm ===================
 
 class ShapeArray(NamedTuple):
-	"""Always use this to construct arrays, so you can reorder the axes merely by reordering this class."""
+	"""Always use this `NamedTuple` for the `shape` parameter of `ndarray`; _always_ make the `NamedTuple` with _KEYWORD_ syntax, never positional syntax.
+
+	Why always use _KEYWORD_ syntax?
+	--------------------------------
+	If the order of the elements changes, expressions using positional syntax will break.
+
+	Why go through the extra effort?
+	----------------------------------------------------------
+	The shape of the array is a `tuple`, of course, and this `NamedTuple` abstracts the order of the
+	`tuple` elements. At the very least, it mitigates the risk of a bug due to mis-ordering the axes
+	when constructing the array. It creates a SSOT for the axis order. Refactoring the axis order for
+	the entire codebase does not require changing every `ndarray` constructor.
+	"""
 
 	length: int
 	indexes: int
 
 class ShapeSlicer(NamedTuple):
-	"""Always use this to construct slicers, so you can reorder the axes merely by reordering this class."""
+	"""Always use this for fancy indexing if possible: see `ShapeArray`."""
 
 	length: EllipsisType | slice
 	axis: int
