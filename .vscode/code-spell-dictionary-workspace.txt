@@ -89,6 +89,8 @@ Dataclass
 dataclasses
 datastructures
 datatypes
+degden
+degnum
 DELECROIX
 Demaine
 Dickau
