@@ -247,6 +247,13 @@ Computation times assume:
 
 Hunter, this list is incomplete: you quit writing after you got upset. Resume at mapFolding.kitAST.
 
+1. Research 1
+    1. Finish run D11.
+    2. Start partial runs in the R series.
+    3. Make NumPy version.
+    4. 2-sequence representation, 3-sequence representation, or something else?
+    5. Hypothesis: relationships are best described by the sum of n and hypothetical n, modulated by parity.
+
 ## My recovery
 
 [![2011 August: Homeless since](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
