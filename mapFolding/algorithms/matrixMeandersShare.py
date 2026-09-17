@@ -223,9 +223,9 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 
 	Figure out an intelligent flow for so many factors.
 	"""
-	if state.boundary <= (state.n - 8) // 3:
+	if state.boundary <= state.n * 2 // 3:
 		totalBuckets: int = (355 * totalArcCodes + 99) // 100
 	else:
 		totalBuckets = totalArcCodes * 2
 
-	return max(totalBuckets, 1000000)
+	return max(totalBuckets, 3000000)

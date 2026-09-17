@@ -4,22 +4,78 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
-from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
+from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMapFolding, StateMapFoldingSymmetric
 from numba import typeof, types as numba_types  # pyright: ignore[reportUnknownVariableType]
 from numba.core import cgutils
 from numba.experimental import structref
 from numba.experimental.jitclass.base import imp_dtor  # pyright: ignore[reportUnknownVariableType]
-from numba.extending import box, NativeValue, reflect, typeof_impl, unbox  # pyright: ignore[reportUnknownVariableType]
+from numba.extending import box, NativeValue, overload, reflect, typeof_impl, unbox  # pyright: ignore[reportUnknownVariableType]
+from operator import getitem, setitem
 from typing import cast, NamedTuple, override, TYPE_CHECKING
 import dataclasses
+import numpy
 
 if TYPE_CHECKING:
-	from collections.abc import Sequence
+	from collections.abc import Callable, Sequence
 	from llvmlite.ir import AllocaInstr, IRBuilder, Type as ir_Type
 	from numba.core.base import BaseContext
 	from numba.core.datamodel.models import DataModel
 	from numba.core.pythonapi import EnvironmentManager, PythonAPI
 	from typing import Any
+
+"""Teaching Numba to understand `ShapeArray` and `ShapeSlicer`.
+
+- Supports `ShapeSlicer` for array reads, writes, views, and augmented assignment.
+- Supports `ShapeArray` for `numpy.empty` and Numba allocation functions such as `numpy.zeros` that delegate to it.
+- Matches only the exact project NamedTuple classes.
+- Preserves declared NamedTuple field order as the SSOT by forwarding positional elements `[0]` and `[1]`.
+- Uses forced inlining; LLVM inspection found no remaining adapter calls.
+
+The cause is a Numba implementation gap:
+
+1. Numba correctly types `ShapeSlicer` as a NamedTuple.
+2. Array-index typing reconstructs it as an anonymous `Tuple`.
+3. During lowering—the conversion from typed Numba IR to machine-level operations—Numba needs to cast the original NamedTuple to that anonymous tuple.
+4. Numba’s tuple cast explicitly rejects `BaseNamedTuple`, producing the reported `NotImplementedError`.
+
+`ShapeArray` is a separate typing limitation: Numba’s shape parser accepts integer, `Tuple`, and `UniTuple`, but not `BaseNamedTuple`. A jitclass or `locals` declaration would not change that consumer whitelist. The overload follows Numba’s documented [high-level extension API](https://numba.readthedocs.io/en/stable/extending/index.html).
+"""
+def _numbaTypeRepresentsPythonType(numbaType: numba_types.BaseNamedTuple, pythonType: type[tuple[Any, ...]]) -> bool:
+	#=SIN= Pyright suppression: Numba's `BaseNamedTuple` stub omits its runtime `instance_class` attribute.
+	return numbaType.instance_class is pythonType  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[unresolved-attribute]
+
+@overload(getitem, jit_options={'forceinline': True})
+def _overloadGetitemShapeSlicer(arrayTarget: Any, slicer: Any) -> Callable[..., Any] | None:
+	if (isinstance(arrayTarget, numba_types.Array)
+		and isinstance(slicer, numba_types.BaseNamedTuple)
+		and _numbaTypeRepresentsPythonType(slicer, ShapeSlicer)):
+		def getitemShapeSlicer(arrayTarget: Any, slicer: Any) -> Any:
+			return arrayTarget[slicer[0], slicer[1]]
+		return getitemShapeSlicer
+	return None
+
+@overload(setitem, jit_options={'forceinline': True})
+def _overloadSetitemShapeSlicer(arrayTarget: Any, slicer: Any, value: Any) -> Callable[..., Any] | None:
+	#=SIN= Unused parameter: the `operator.setitem` overload contract requires `value`.
+	del value
+	if (isinstance(arrayTarget, numba_types.Array)
+		and isinstance(slicer, numba_types.BaseNamedTuple)
+		and _numbaTypeRepresentsPythonType(slicer, ShapeSlicer)):
+		def setitemShapeSlicer(arrayTarget: Any, slicer: Any, value: Any) -> None:
+			arrayTarget[slicer[0], slicer[1]] = value
+		return setitemShapeSlicer
+	return None
+
+@overload(numpy.empty, jit_options={'forceinline': True})
+def _overloadEmptyShapeArray(shape: Any, dtype: Any = float) -> Callable[..., Any] | None:
+	#=SIN= Unused parameter: the `numpy.empty` overload contract requires `dtype`.
+	del dtype
+	if (isinstance(shape, numba_types.BaseNamedTuple)
+		and _numbaTypeRepresentsPythonType(shape, ShapeArray)):
+		def emptyShapeArray(shape: Any, dtype: Any = float) -> Any:
+			return numpy.empty((shape[0], shape[1]), dtype=dtype)
+		return emptyShapeArray
+	return None
 
 class _BoxContext(NamedTuple):
 	context: BaseContext
