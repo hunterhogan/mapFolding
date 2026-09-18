@@ -108,6 +108,7 @@ banned-aliases = { numpy = ["np"], pandas = ["pd"], regex = ["re"] }
 "numpy" = "numpy"
 "pandas" = "pandas"
 "regex" = "regex"
+"sympy" = "sympy"
 "torch.autograd.grad" = "torch_grad"
 "torch.nn.functional" = "F"
 "torch.nn.parallel.DistributedDataParallel" = "DDP"
