@@ -276,6 +276,7 @@ nilpotent
 niversal
 njit
 nogil
+nonconstant
 noncrossing
 nonisomorphic
 nonn
