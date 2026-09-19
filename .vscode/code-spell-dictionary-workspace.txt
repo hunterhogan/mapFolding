@@ -11,6 +11,7 @@ allclose
 alloca
 alphita
 Anders
+ansatz
 antidivisor
 antidivisors
 anyascii
@@ -48,6 +49,7 @@ boolop
 boundscheck
 bsgs
 bsolute
+CAPSLOCK
 carmichaels
 Cassio
 cclass
@@ -157,6 +159,7 @@ GOUJARD
 grâce
 Graphes
 graycode
+groebner
 groupby
 Guitter
 Guttmann
@@ -246,6 +249,7 @@ mathamagic
 mathbb
 MATHEMATICA
 Mathématiques
+maxdeg
 mcpu
 meandric
 memmap
@@ -315,6 +319,7 @@ otypes
 Oughta
 ount
 ower
+Pade
 Paltrowitz
 Panayotopoulos
 pandoc
@@ -334,6 +339,7 @@ pipx
 platformdirs
 pleasedonotcrashwhileimportingtypes
 Plouffe
+polyfuncs
 polyominoes
 Pomerance
 popleft
@@ -350,6 +356,8 @@ primetest
 problème
 prufer
 Prufer
+pslq
+PSLQ
 ptount
 pyapi
 pyarrow

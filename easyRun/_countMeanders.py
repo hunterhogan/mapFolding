@@ -59,11 +59,6 @@ if __name__ == '__main__':
 			gc.collect()
 			timeStart: float = time.perf_counter()
 			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)
-			if kind == 'semi' and False:  # ruff: ignore[expr-and-false]
-				if 4 <= n:
-					countTotal += 2
-				if 6 <= n:
-					countTotal += (n**2 + 2 * n - 19) // 2
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 
