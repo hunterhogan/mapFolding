@@ -7,7 +7,7 @@ if TYPE_CHECKING:
 	from mapFolding._e.theTypes import ChoicesLeaf, Pile, UndeterminedPiles
 
 def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
-	from mapFolding._e._2上nDimensional.pileOptions import _getChoicesLeaf  # ruff: ignore[import-outside-top-level]
+	from mapFolding._e.p2上nDimensional.pileOptions import _getChoicesLeaf  # ruff: ignore[import-outside-top-level]
 	return _getChoicesLeaf(pile, state.totalDimensions, state.mapShape, state.totalLeaves)
 
 def getLookupChoicesLeaf(state: StateElimination) -> UndeterminedPiles:

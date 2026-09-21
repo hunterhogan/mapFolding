@@ -39,7 +39,7 @@ from email.utils import format_datetime
 from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.beDRY import parseCSVtoIntegers, parseDiagonal, parseTriangle
+from mapFolding.dataStructures import parseCSVtoIntegers, parseDiagonal, parseTriangle
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
@@ -55,7 +55,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Mapping, Sequence
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding._e.theTypes import Folding
+	from mapFolding.theTypes import Folding
 	from os import PathLike
 	from pandas import DataFrame
 	from typing import Any, Literal

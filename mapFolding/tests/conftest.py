@@ -9,10 +9,9 @@ from typing import TYPE_CHECKING
 import numpy
 import pytest
 import random
-import warnings
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Generator
+	from collections.abc import Callable
 	from mapFolding.theTypes import OEISid
 	from numpy.typing import NDArray
 	from pathlib import Path

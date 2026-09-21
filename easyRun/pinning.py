@@ -4,11 +4,11 @@ from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves, lengthChoicesLeaf
-from mapFolding._e._2上nDimensional import getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
-from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
 from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
 from mapFolding._e.dataBaskets import StateElimination
+from mapFolding._e.p2上nDimensional import getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
+from mapFolding._e.p2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from math import prod
 from operator import methodcaller
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 		state = makeAlbum2上nDimensional吗(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
-		from mapFolding._e._research.toolkit import verifyPinning2Dn
+		from mapFolding._e.research.toolkit import verifyPinning2Dn
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 

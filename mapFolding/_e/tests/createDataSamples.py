@@ -43,7 +43,7 @@ def makeVerificationDataLeavesDomain(sequenceTotalDimensions: Sequence[int], box
 
 	"""
 	def resolveLeaf(leafSpec: int | Callable[[int], int], totalDimensions: int) -> int:
-		return leafSpec(totalDimensions) if callable(leafSpec) else leafSpec  # ty: ignore[call-top-callable, invalid-return-type]
+		return leafSpec(totalDimensions) if callable(leafSpec) else leafSpec  # ty: ignore[invalid-return-type]
 
 	def getLeafName(leafSpec: int | Callable[[int], int]) -> str:
 		leafSpecName: str = str(leafSpec)

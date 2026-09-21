@@ -24,7 +24,7 @@ from humpy_cytoolz import keymap, merge
 from hunterMakesPy import errorL33T
 from itertools import count
 from mapFolding import ansiColorReset, ansiColors
-from mapFolding.beDRY import makeLookupDiagonal, makeLookupTriangle
+from mapFolding.dataStructures import makeLookupDiagonal, makeLookupTriangle
 from mapFolding.kitFilesystem import readText
 from mapFolding.oeis import getMetadata, getValuesKnown
 from mapFolding.oeis._beDRY import parseDiagonalBFile, parseTriangleBFile
@@ -148,7 +148,8 @@ def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:  # ruff: ignore[und
 		rowLengths = map(metadata['rowLength'], count(rowStart))
 	return makeLookupTriangle(metadata['valuesKnown'].values(), rowLengths, rowStart)
 
-def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:
+# TODO
+def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:  # ruff: ignore[undocumented-public-function]
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return makeLookupDiagonal(getTriangleRows(oeisID), 次diagonal, fromRight=fromRight,
 		rowLength=metadata.get('rowLength', lambda rowNumber: rowNumber - metadata.get('rowStart', metadata['offset']) + 1))

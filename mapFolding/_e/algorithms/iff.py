@@ -63,14 +63,14 @@ Citations in BibTeX format at [mapFolding/citations](../../citations).
 from __future__ import annotations
 
 from functools import cache
-from heapq import heappush
 from itertools import combinations
 from mapFolding.beDRY import getTotalLeaves
 from math import prod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Folding, Leaf, Pile, PinnedLeaves
+	from mapFolding._e.theTypes import Leaf, Pile, PinnedLeaves
+	from mapFolding.theTypes import Folding
 
 # DEVELOPMENT This module must be efficient. Imagine computing mapShape(3, 14), for example, which we
 # know has 98,420,246,759,688 valid foldings. With mathamagic, we only have to find one-half of them,
@@ -274,7 +274,6 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 		for pile, leaf in leavesPinned.items():
 			crease: int | None = getCreasePost(mapShape, leaf, dimension)
 			if crease is not None:
-				# heappush(boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)], (pile, lookupPile[crease]))  # ruff: ignore[commented-out-code]
 				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, lookupPile[crease]))
 		for groupedParity in boxOfPilePileCreaseByParity:
 			if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)

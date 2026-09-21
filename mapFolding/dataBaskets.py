@@ -5,6 +5,7 @@
 #=SIN= Ruff suppression: Numba StructRef integration requires its private payload utilities and native value accessor.
 #ruff: file-ignore[function-call-in-dataclass-default-argument]
 #ty: ignore[invalid-assignment, unresolved-attribute]
+# ty: ignore[redundant-condition]
 """
 Computational state orchestration for map folding analysis.
 
@@ -29,7 +30,8 @@ access patterns that enable efficient result persistence and retrieval.
 """
 from __future__ import annotations
 
-from mapFolding.beDRY import getConnectionGraph, getTotalLeaves, makeDataContainer
+from mapFolding.beDRY import getTotalLeaves
+from mapFolding.dataStructures import getConnectionGraph, makeDataContainer
 from mapFolding.theTypes import (
 	形ArcCode, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形Meanders, 形TotalFolds, 形TotalLeaves)
 from typing import NamedTuple, TYPE_CHECKING

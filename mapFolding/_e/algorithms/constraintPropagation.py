@@ -4,8 +4,8 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
-from mapFolding._e._2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, 工dimensionTail, 工dimension首零
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
+from mapFolding._e.p2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, 工dimensionTail, 工dimension首零
 from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding.beDRY import mapShapeIs2上nDimensions

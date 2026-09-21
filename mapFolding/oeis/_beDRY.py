@@ -4,7 +4,7 @@ from functools import partial
 from humpy_cytoolz import compose, take
 from hunterMakesPy import errorL33T
 from itertools import count, filterfalse
-from mapFolding.beDRY import makeLookupDiagonal, makeLookupTriangle
+from mapFolding.dataStructures import makeLookupDiagonal, makeLookupTriangle
 from operator import add, methodcaller
 from typing import cast as ILiterallyPromiseLiteralLiterallyMeansLiteral, LiteralString, TYPE_CHECKING
 

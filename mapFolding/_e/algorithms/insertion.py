@@ -20,7 +20,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding._e.theTypes import Folding, Leaf, Pile
+	from mapFolding._e.theTypes import Leaf, Pile
+	from mapFolding.theTypes import Folding
 	from pathlib import Path
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_research' / 'albums'

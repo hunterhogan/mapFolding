@@ -15,6 +15,10 @@ if TYPE_CHECKING:
 
 type OEISid = LiteralString
 
+Leaf: TypeAlias = int
+type Folding = tuple[Leaf, ...]
+"""`leaf` indexed to `pile`; length must be `totalLeaves`."""
+
 #================== `TypeVar` when a NumPy integer type is mandatory ==============================
 
 形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)

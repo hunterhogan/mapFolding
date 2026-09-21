@@ -15,8 +15,9 @@ from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import choicesLeaf吗, leafInChoicesLeaf吗, leaf吗, 是valid
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
-from mapFolding._e.theTypes import Folding, LeafSpace, Pile
+from mapFolding._e.theTypes import LeafSpace, Pile
 from mapFolding.beDRY import getTotalLeaves, validateMapShape
+from mapFolding.theTypes import Folding
 from math import prod
 from operator import attrgetter, methodcaller
 from typing import cast, overload, TYPE_CHECKING

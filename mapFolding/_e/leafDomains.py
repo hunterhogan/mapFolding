@@ -46,7 +46,7 @@ def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	`getLookupDomainsLeaves`
 		Build the candidate `Pile` range for each `leaf` in `state`.
 	"""
-	from mapFolding._e._2上nDimensional.leafDomains import _getDomainLeaf  # ruff: ignore[import-outside-top-level]
+	from mapFolding._e.p2上nDimensional.leafDomains import _getDomainLeaf  # ruff: ignore[import-outside-top-level]
 	return _getDomainLeaf(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 
 def getLookupDomainsLeaves(state: StateElimination) -> dict[int, range]:

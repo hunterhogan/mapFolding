@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from mapFolding._e._2上nDimensional.pinIt import (
-	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
-	pin首beans)
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import StateElimination
+from mapFolding._e.p2上nDimensional.pinIt import (
+	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
+	pin首beans)
 from mapFolding._e.tests import assertEqualTo
 from mapFolding.oeis import getMetadata, getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
 from typing import TYPE_CHECKING

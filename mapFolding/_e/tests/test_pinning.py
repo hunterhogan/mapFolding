@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from functools import partial
-from mapFolding._e._2上nDimensional import 一, 零, 首一, 首零一
-from mapFolding._e._2上nDimensional.pinIt import (
+from mapFolding._e.dataBaskets import StateElimination
+from mapFolding._e.p2上nDimensional import 一, 零, 首一, 首零一
+from mapFolding._e.p2上nDimensional.pinIt import (
 	pin3beans2, pinLeaf首零Plus零, pinLeavesDimension0, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension零,
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
-from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.tests import assertEqualTo, messageTestFailure
 from numpy import uint8
 from typing import TYPE_CHECKING

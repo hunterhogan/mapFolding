@@ -11,10 +11,10 @@ Multi-argument functions use curated static cases plus invalid-input coverage.
 
 from __future__ import annotations
 
-from mapFolding._e._2上nDimensional import (
+from mapFolding._e.dataBaskets import StateElimination
+from mapFolding._e.p2上nDimensional import (
 	invertLeafIn2上nDimensions, leafInSubHyperplane, ptount, 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零,
 	工totalDimensionsOdd, 工totalDimensionsTail)
-from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples.measurementData import (
 	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionSecondNearest, dataDimensionThirdNearest, dataHowMany0coordinatesAtTail,

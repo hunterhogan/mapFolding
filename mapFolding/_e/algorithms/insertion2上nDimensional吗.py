@@ -7,12 +7,12 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import keyfilter as filterPile
 from itertools import pairwise
 from mapFolding._e import getDomainLeaf, makeAntiChoicesLeaf
-from mapFolding._e._2上nDimensional import 一, 二, 零
-from mapFolding._e._2上nDimensional.pinIt import pinLeavesDimension二, pinPilesAtEnds
-from mapFolding._e._2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.algorithms.insertion import pathAlbum
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.filters import 是valid
+from mapFolding._e.p2上nDimensional import 一, 二, 零
+from mapFolding._e.p2上nDimensional.pinIt import pinLeavesDimension二, pinPilesAtEnds
+from mapFolding._e.p2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
 from mapFolding._e.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from mapFolding._e.reduceIt import reduceLeafSpace
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
@@ -24,7 +24,8 @@ from Z0Z_tools import DOTitems
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import ChoicesLeaf, Folding, Leaf, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
+	from mapFolding.theTypes import Folding
 	from pathlib import Path
 
 def makeDescendants(folding: Folding, state: StateElimination, position: int) -> StateElimination:

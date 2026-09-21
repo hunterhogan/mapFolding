@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from mapFolding._e._2上nDimensional import pinIt
 from mapFolding._e.basecamp import eliminateFolds
+from mapFolding._e.p2上nDimensional import pinIt  # pyright: ignore[reportUnusedImport]
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
 import time

@@ -114,8 +114,8 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 								, Be.Subscript.sliceIs(Be.Tuple))
 			, doThat=lambda node: Grab.sliceAttribute(Grab.eltsAttribute(
 				Then.replaceWith([
-					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])  # ty:ignore[unresolved-attribute] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
-					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
+					Make.Call(Make.Name('int'), listParameters=[cast('ast.Tuple', node.slice).elts[index]])
+					for index in range(len(cast('ast.Tuple', node.slice).elts))])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
 	return ingredientsFunction

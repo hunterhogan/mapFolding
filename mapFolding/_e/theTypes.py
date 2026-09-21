@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from gmpy2 import mpz
+from mapFolding.theTypes import Leaf
 from typing import TypeAlias
 
 #=EndNotes##TypeAlias=
@@ -9,7 +10,6 @@ from typing import TypeAlias
 type DimensionIndex = int
 """Zero-based index of a dimension."""
 
-Leaf: TypeAlias = int
 ChoicesLeaf: TypeAlias = mpz
 """Represent a set of `Leaf` indices as a bitset.
 
@@ -96,9 +96,6 @@ type LeafSpace = Leaf | ChoicesLeaf
 type Pile = int
 
 #======== Containers ============================
-
-type Folding = tuple[Leaf, ...]
-"""`leaf` indexed to `pile`; length must be `totalLeaves`."""
 
 type PinnedLeaves = dict[Pile, Leaf]
 """`pile: leaf`; length ought to be less than `totalLeaves`: when length equals `totalLeaves`, ought to convert to `Folding`."""
