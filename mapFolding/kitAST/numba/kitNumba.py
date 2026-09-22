@@ -28,12 +28,12 @@ system to produce standalone modules optimized for specific map dimensions and c
 
 from __future__ import annotations
 
-from astToolkit import Be, identifierDotAttribute, Make, NodeChanger, Then
+from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import IngredientsModule, LedgerOfImports
 from humpy_cytoolz import valfilter as filterValue
 from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.kitAST.theSSOT import default
-from more_itertools import loops
+from more_itertools import filter_map, loops
 from typing import TYPE_CHECKING, TypedDict
 from Z0Z_tools import DOTitems
 import ast
@@ -42,9 +42,11 @@ import warnings
 
 if TYPE_CHECKING:
 	from astToolkit.containers import IngredientsFunction
-	from collections.abc import Callable, Sequence
+	from collections.abc import Sequence
 	from mapFolding.theTypes import Default
 	from numba.core.compiler import CompilerBase as numbaCompilerBase
+	from numba.core.types.abstract import Type
+	from numba.core.typing.templates import Signature
 	from os import PathLike
 	from pathlib import PurePath
 	from typing import Any, Final, NotRequired, TypeIs
@@ -93,7 +95,9 @@ class ParametersNumba(TypedDict):
 	nopython: NotRequired[bool]
 	parallel: NotRequired[bool]
 	pipeline_class: NotRequired[type[numbaCompilerBase]]
-	signature_or_function: NotRequired[Any | Callable[..., Any] | str | tuple[Any, ...]]
+	# TODO implement logic for more options.
+	# signature_or_function: NotRequired[Signature | tuple[Type | Signature | str, ...] | str]  # ruff: ignore[commented-out-code]
+	signature_or_function: NotRequired[tuple[str, ...]]
 	target: NotRequired[str]
 
 # TODO Learn more about the jit parameter benefits.
@@ -259,27 +263,32 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 			returnMe = signatureElement.annotation
 		return returnMe
 
-	datatypeModuleDecorator: str = 名moduleNumbaDataType
-	boxOf_argsDecorator: Sequence[ast.expr] = []
-
-	boxOf_arg4signature_or_function: list[ast.expr] = []
-	for parameter in ingredientsFunction.astFunctionDef.args.args:
-		# For now, let Numba infer them.
-		continue
-		signatureElement: ast.Subscript | ast.Name | None = make_numbaDotSignature(parameter)
-		if signatureElement:
-			boxOf_arg4signature_or_function.append(signatureElement)
-
-	if ingredientsFunction.astFunctionDef.returns and isinstance(ingredientsFunction.astFunctionDef.returns, ast.Name):
-		theReturn: ast.Name = ingredientsFunction.astFunctionDef.returns
-		boxOf_argsDecorator = [Make.Call(Make.Name(theReturn.id), boxOf_arg4signature_or_function or [], [])]
-	elif boxOf_arg4signature_or_function:
-		boxOf_argsDecorator = [Make.Tuple(boxOf_arg4signature_or_function)]
-
-	ingredientsFunction.astFunctionDef = unhandledDecorators(ingredientsFunction.astFunctionDef)
 	if parametersNumba is None:
 		parametersNumba = parametersNumbaDefault
 
+	datatypeModuleDecorator: str = 名moduleNumbaDataType
+	boxOf_argsDecorator: Sequence[ast.expr] = []
+
+	signature_or_function = parametersNumba.get('signature_or_function')
+
+	if signature_or_function:
+		# TODO this doesn't work.
+		boxOf_argsDecorator = [Make.Tuple(tuple(map(Make.Constant, signature_or_function)))]
+	else:
+		boxOf_arg4signature_or_function: list[ast.expr] = list(filter_map(make_numbaDotSignature, ingredientsFunction.astFunctionDef.args.args))
+
+		astName: ast.Name | None = NodeTourist[ast.AST, ast.Name](Be.FunctionDef.returnsIs(Be.Name), Then.extractIt(DOT.returns)
+			).captureLastMatch(ingredientsFunction.astFunctionDef)
+
+		if astName:
+			boxOf_argsDecorator = [Make.Call(astName, listParameters=boxOf_arg4signature_or_function or [])]
+		elif boxOf_arg4signature_or_function:
+			boxOf_argsDecorator = [Make.Tuple(boxOf_arg4signature_or_function)]
+
+		# For now, let Numba infer them.
+		boxOf_argsDecorator = []
+
+	ingredientsFunction.astFunctionDef = unhandledDecorators(ingredientsFunction.astFunctionDef)
 	list_keyword: list[ast.keyword] = [Make.keyword(parameterName, Make.Constant(parameterValue))
 		for parameterName, parameterValue in DOTitems(filterValue(_bool_str吗, parametersNumba))]
 	list_keyword.append(Make.keyword('locals', parametersNumba.get('locals', Make.Dict())))  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
@@ -287,10 +296,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	decoratorModule = 名moduleNumbaDataType
 	decoratorCallable = 名callableDecorator
 	ingredientsFunction.imports.addImportFrom_asStr(decoratorModule, decoratorCallable)
-	#=Sin= Leave this line in so that global edits will change it.
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator, list_keyword)
-	# ruff: ignore[redefined-while-unused]
-	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), list_keyword=list_keyword)
+	astDecorator: ast.Call = Make.Call(Make.Name(decoratorCallable), boxOf_argsDecorator or None, list_keyword)
 
 	ingredientsFunction.astFunctionDef.decorator_list = [astDecorator]
 	return ingredientsFunction

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from functools import cache
 from mapFolding.dataBaskets import StateMeanders
+from operator import neg
 
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
@@ -52,7 +53,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
         if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
             findTheExtra_0b1 += 1
         else:
-            findTheExtra_0b1 -= 1
+            findTheExtra_0b1 += neg(1)
     return flipExtra_0b1_Here
 
 def count(state: StateMeanders) -> StateMeanders:

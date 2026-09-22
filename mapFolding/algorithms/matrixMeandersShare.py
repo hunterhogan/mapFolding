@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
-from mapFolding.theTypes import ArrayArcCode, 形ArcCode
+from mapFolding.theTypes import 形ArcCode
+from numba import int64, vectorize
 from typing import overload, TYPE_CHECKING
-import numba
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
+	from mapFolding.theTypes import ArrayArcCode, ArrayInteger
+	from numpy import int64 as numpy_int64
 	from typing import Any, Literal, LiteralString
 	import pandas
 
@@ -144,17 +146,17 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 #================== Dyck Path =====================================================================
 
 @overload
+def flipTheExtra_0b1(intWithExtra_0b1: numpy_int64) -> numpy_int64: ...
+@overload
 def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode: ...
-
 @overload
 def flipTheExtra_0b1(intWithExtra_0b1: ArrayArcCode) -> ArrayArcCode: ...
-
+@overload
+def flipTheExtra_0b1(intWithExtra_0b1: ArrayInteger) -> ArrayInteger: ...
 @overload
 def flipTheExtra_0b1(intWithExtra_0b1: pandas.Series[Any]) -> pandas.Series[Any]: ...
-
-#=SIN= Pyright suppression: `numba.vectorize` is partially unknown.
-@numba.vectorize((f"{形ArcCode.__name__}({形ArcCode.__name__})",), cache=True, nopython=True)  # pyright: ignore[reportUntypedFunctionDecorator, reportUnknownMemberType]
-def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode | ArrayArcCode | pandas.Series[Any]) -> 形ArcCode | ArrayArcCode | pandas.Series[Any]:
+@vectorize([int64(int64), f"{形ArcCode.__name__}({形ArcCode.__name__})"], cache=True, nopython=True, fastmath=True)
+def flipTheExtra_0b1(intWithExtra_0b1: int) -> int:
 	"""Flip a bit based on Dyck path with a Numba-generated universal function [1].
 
 	You can call `flipTheExtra_0b1` with a `numpy.uint64`, a `numpy.ndarray` [2], or a
@@ -183,8 +185,7 @@ def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode | ArrayArcCode | pandas.Series
 	[3] pandas.Series
 		https://pandas.pydata.org/docs/reference/api/pandas.Series.html
 	"""
-	#=SIN= `pyright: ignore[...]` is required because the scalar kernel body is analyzed before `numba.vectorize` rewrites it into a ufunc that supports arrays and Series.
-	return intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1)  # pyright: ignore[reportOperatorIssue, reportArgumentType, reportUnknownVariableType]  # ty: ignore[unsupported-operator, invalid-argument-type]
+	return intWithExtra_0b1 ^ walkDyckPath(intWithExtra_0b1)
 
 #================== Buckets =======================================================================
 

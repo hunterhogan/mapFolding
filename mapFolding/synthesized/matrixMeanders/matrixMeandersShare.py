@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from mapFolding.theTypes import 形ArcCode
-from numba import jit
+from numba import int64, jit, uint64
+from operator import neg
 
-@jit(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
-def walkDyckPath(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
+@jit([int64(int64), uint64(uint64)], cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
+def walkDyckPath(intWithExtra_0b1: int) -> int:
     """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
 
     You can use `walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
@@ -45,12 +45,12 @@ def walkDyckPath(intWithExtra_0b1: 形ArcCode) -> 形ArcCode:
     [2] Dyck language and balanced-parenthesis paths.
         https://en.wikipedia.org/wiki/Dyck_language
     """
-    findTheExtra_0b1: 形ArcCode = 0
-    flipExtra_0b1_Here: 形ArcCode = 1
+    findTheExtra_0b1: int = 0
+    flipExtra_0b1_Here: int = 1
     while 0 <= findTheExtra_0b1:
         flipExtra_0b1_Here <<= 2
         if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
             findTheExtra_0b1 += 1
         else:
-            findTheExtra_0b1 -= 1
-    return 形ArcCode(flipExtra_0b1_Here)
+            findTheExtra_0b1 += neg(1)
+    return flipExtra_0b1_Here

@@ -21,8 +21,8 @@ if __name__ == '__main__':
 	pathLikeWrite = Path(settingsPackage.pathPackage, 'jobs')
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
-	flow = 'matrixPandas'
 	flow = 'matrixNumPy'
+	flow = 'matrixPandas'
 	flow = 'matrixMeanders'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [

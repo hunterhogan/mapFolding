@@ -1,5 +1,7 @@
 """makeMeandersModules."""
 from __future__ import annotations
+from mapFolding.theTypes import 形ArcCode
+from numba import int64
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
@@ -7,7 +9,7 @@ from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.mapFolding._count import toDisk
-from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight
+from mapFolding.kitAST.numba.kitNumba import ParametersNumba, decorateCallableWithNumba, parametersNumbaLight
 from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef, renameName
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
@@ -163,11 +165,11 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 	identifiers = identifiers or defaultMatrixMeanders
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
 	ingredients.astFunctionDef.decorator_list.clear()
-	ingredients = decorateCallableWithNumba(ingredients, parametersNumbaLight)
-	renameName('int', '形ArcCode', ingredients.astFunctionDef)
+	parametersNumba: ParametersNumba = parametersNumbaLight
+	parametersNumba['signature_or_function'] = ("int64(int64)", f"{形ArcCode.__name__}({形ArcCode.__name__})")
+	ingredients = decorateCallableWithNumba(ingredients, parametersNumba)
 	ingredients.imports.addImportFrom_asStr('mapFolding.theTypes', '形ArcCode')
-	value: ast.expr = raiseIfNone(NodeTourist[ast.Return, ast.expr](Be.Return, Then.extractIt(DOT.value)).captureLastMatch(ingredients.astFunctionDef))
-	NodeChanger(Be.Return, Grab.valueAttribute(Then.replaceWith(Make.Call(Make.Name('形ArcCode'), listParameters=[value])))).visit(ingredients.astFunctionDef)
+	ingredients.imports.addImportFrom_asStr('numba', 'int64')
 	ingredientsModule = IngredientsModule(ingredients)
 
 	名Module: str = override.get('名Module') or identifiers['module']['share']
