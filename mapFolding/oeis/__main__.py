@@ -21,9 +21,8 @@ from __future__ import annotations
 
 from functools import cache, partial
 from humpy_cytoolz import keymap, merge
-from hunterMakesPy import errorL33T
+from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import count
-from mapFolding import ansiColor, ansiColorReset
 from mapFolding.dataStructures import makeLookupDiagonal, makeLookupTriangle
 from mapFolding.kitFilesystem import readText
 from mapFolding.oeis import getMetadata, getValuesKnown

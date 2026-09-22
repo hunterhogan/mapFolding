@@ -2,4 +2,4 @@
 
 from __future__ import annotations
 
-from mapFolding._semiotics import ansiColorReset as ansiColorReset, ansiColors as ansiColors, oneIndexed as oneIndexed
+from mapFolding._semiotics import leafOrigin as leafOrigin, pileOrigin as pileOrigin

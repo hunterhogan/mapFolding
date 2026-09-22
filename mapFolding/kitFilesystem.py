@@ -36,9 +36,8 @@ from contextlib import suppress
 from csv import writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
-from hunterMakesPy import errorL33T
+from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from mapFolding import ansiColorReset, ansiColors
 from mapFolding.dataStructures import parseCSVtoIntegers, parseDiagonal, parseTriangle
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
@@ -526,7 +525,7 @@ def getDataFrameFoldings(state: StateElimination) -> DataFrame | None:
 	if pathFilename.exists():
 		dataframeFoldings = readDataFrame(pathFilename)
 	else:
-		message: str = f"{ansiColors.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
+		message: str = f"{ansiColor.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
 		sys.stderr.write(message + '\n')
 	return dataframeFoldings
 

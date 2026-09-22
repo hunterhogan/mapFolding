@@ -13,15 +13,20 @@ if TYPE_CHECKING:
 	from pathlib import PurePosixPath
 	from typing import Any, LiteralString, TypeAlias
 
-type OEISid = LiteralString
-
+#=EndNotes##TypeAlias=
 Leaf: TypeAlias = int
+type Pile = int
+
 type Folding = tuple[Leaf, ...]
 """`leaf` indexed to `pile`; length must be `totalLeaves`."""
 
-type ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
+type OEISid = LiteralString
 
-#================== `TypeVar` when a NumPy integer type is mandatory ==============================
+#================== Generic NumPy =================================================================
+
+type Array1DBoolean = ndarray[tuple[int], dtype[numpy_bool]]
+type Array1DSelector = ndarray[tuple[int], dtype[numpy_intp]]
+type ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
 
 形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
@@ -36,9 +41,7 @@ type ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
 """The fixed-size integer type used to store `meanders`."""
 
 type Array1DArcCode = ndarray[tuple[int], dtype[形ArcCode]]
-type Array1DBoolean = ndarray[tuple[int], dtype[numpy_bool]]
 type ArrayArcCode = ndarray[tuple[Any, ...], dtype[形ArcCode]]
-type Array1DSelector = ndarray[tuple[int], dtype[numpy_intp]]
 
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
 
@@ -62,23 +65,25 @@ Colossal values are found with the cross humpy inequality:
 形TotalFolds: TypeAlias = int
 """Use on unsigned integers that might have colossal magnitudes similar to `totalFolds`."""
 
-#-------- Additional `TypeAlias` with NumPy types as their default ----------
+#-------- Additional `TypeAlias` with NumPy types as their default --------------------------------
 
 形NumPyTotalLeaves: TypeAlias = numpy_uint8
 """Use in NumPy data structures whose elements are unsigned integers that will never exceed the magnitude of `totalLeaves`."""
 
+# TODO use lessons from mapFolding\reference\multiDimensionalMapFolding\elephinoIntegerWidthAnalysis.ipynb.
 形NumPyElephino: TypeAlias = numpy_uint16
 """Use in NumPy data structures whose elements are unsigned integers that might exceed the magnitude of `totalLeaves` but that are not 'colossal.'"""
 
 形NumPyTotalFolds: TypeAlias = numpy_uint64
 """Use in NumPy data structures whose elements are unsigned integers that might have colossal magnitudes similar to `totalFolds`.
 
-Note well
----------
+Element value limit
+-------------------
 If your element values might exceed 1.8 x 10^19, then you should take extra steps to ensure the integrity of the data in NumPy or use a
-different data structure."""
+different data type."""
 
-#-------- Yet more `TypeAlias` with NumPy `ndarray` types ----------
+#-------- Yet more `TypeAlias` with NumPy `ndarray` types -----------------------------------------
+
 # Reminder: you can override the types with anything you want, not just `ndarray`. See, e.g., `makeJobTheorem2Numba`.
 
 形Array3DTotalLeaves: TypeAlias = ndarray[tuple[int, int, int], dtype[形NumPyTotalLeaves]]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from mapFolding import oneIndexed
+from hunterMakesPy import oneIndexed
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer
 from mapFolding.tests import assertEqualTo
 from numba import jit
