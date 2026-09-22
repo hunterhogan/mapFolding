@@ -8,7 +8,8 @@ from itertools import chain, combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import leafInChoicesLeaf吗, leafPinned吗, pileChoicesLeaf吗
-from mapFolding._e.theTypes import ChoicesLeaf, Leaf
+from mapFolding._e.theTypes import ChoicesLeaf
+from mapFolding.theTypes import Leaf
 from more_itertools import extract, first, one
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTvalues, reverseLookup
@@ -16,7 +17,8 @@ from Z0Z_tools import DOTitems, DOTvalues, reverseLookup
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Sequence
 	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-	from mapFolding._e.theTypes import LeafSpace, Pile, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import LeafSpace, PinnedLeaves, UndeterminedPiles
+	from mapFolding.theTypes import Pile
 
 def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, ChoicesLeaf]], antiChoicesLeaf: ChoicesLeaf) -> PermutationSpace:
 	"""Update permutation space by removing forbidden leaves from specified piles.

@@ -15,9 +15,9 @@ from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import choicesLeaf吗, leafInChoicesLeaf吗, leaf吗, 是valid
 from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
-from mapFolding._e.theTypes import LeafSpace, Pile
+from mapFolding._e.theTypes import LeafSpace
 from mapFolding.beDRY import getTotalLeaves, validateMapShape
-from mapFolding.theTypes import Folding
+from mapFolding.theTypes import Folding, Pile
 from math import prod
 from operator import attrgetter, methodcaller
 from typing import cast, overload, TYPE_CHECKING
@@ -27,7 +27,8 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, PinnedLeaves, UndeterminedPiles
+	from mapFolding._e.theTypes import ChoicesLeaf, PinnedLeaves, UndeterminedPiles
+	from mapFolding.theTypes import Leaf
 	from typing import Self
 
 #=EndNotes##pinning=

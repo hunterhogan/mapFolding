@@ -3,7 +3,8 @@ from __future__ import annotations
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive, raiseIfNone
-from mapFolding._e import getDomainLeaf, leafOrigin
+from mapFolding import leafOrigin
+from mapFolding._e import getDomainLeaf
 from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.p2上nDimensional import (
 	dimensionIndex, 一, 三, 二, 四, 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零, 工totalDimensionsOdd, 零, 首一, 首一二, 首三,
@@ -16,7 +17,7 @@ from Z0Z_tools import consecutive吗, exclude, reverseLookup
 
 if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import Leaf, Pile
+	from mapFolding.theTypes import Leaf, Pile
 
 """# DEVELOPMENT leaf domains are directly tied to mapShapeProductsSums and mapShape首ProductsSums
 

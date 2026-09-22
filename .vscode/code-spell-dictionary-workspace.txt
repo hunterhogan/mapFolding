@@ -27,6 +27,7 @@ Asano
 asmprinter
 asname
 Assimilee
+Asymptotics
 ative
 atleast
 Autocode
@@ -39,7 +40,10 @@ baat
 baseswap
 bfile
 bidirected
+bigl
 bignum
+bigr
+bijectively
 binom
 bitcast
 bitwidths
@@ -149,6 +153,7 @@ François
 fromiter
 fromlist
 frompyfunc
+Fukuda
 functoolz
 Fython
 gapter
@@ -228,6 +233,7 @@ LEGB
 Lehner
 libc
 LICEN
+Lieb
 Lindorfer
 líng
 linh
@@ -262,6 +268,7 @@ meshgrid
 Meshgrids
 metaprogramming
 mobius
+Möbius
 Mult
 multiset
 multisets
@@ -270,6 +277,7 @@ Natalya
 ncol
 Ndegree
 ndex
+Nechita's
 neighbour
 neighbours
 Neri's
@@ -431,6 +439,7 @@ Tcff
 Tcls
 Tctx
 Telt
+Temperley
 Tenabled
 testpaths
 testutil

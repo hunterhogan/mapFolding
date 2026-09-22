@@ -4,9 +4,9 @@
 from __future__ import annotations
 
 from gmpy2 import bit_mask
-from hunterMakesPy import raiseIfNone
-from mapFolding import ansiColorReset, ansiColors
-from mapFolding._e import getDomainLeaf, pileOrigin
+from hunterMakesPy import ansiColor, ansiColorReset, raiseIfNone
+from mapFolding import pileOrigin
+from mapFolding._e import getDomainLeaf
 from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.p2上nDimensional import getLeafPredecessors, getLeafSuccessors, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd, 零
 from mapFolding.kitFilesystem import getDataFrameFoldings
@@ -16,7 +16,7 @@ import numpy
 import pandas
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Leaf, Pile
+	from mapFolding.theTypes import Leaf, Pile
 	from typing import Any
 
 def getLeafUnconditionalPrecedence(state: StateElimination) -> pandas.DataFrame:
@@ -397,7 +397,7 @@ if __name__ == '__main__':
 	# leaf33 is wrong because of step = 4.
 	# leaf33 and leaf49 are already known from prior analysis.
 	dictionaryPilesAtDomainEnds = getDictionaryPilesAtDomainEndsFromConditionalPrecedenceAcrossLeafDomain(state)
-	print(ansiColors.BlackOnCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
+	print(ansiColor.BlackOnCyan + 'dictionaryPilesAtDomainEnds' + ansiColorReset)
 	pprint(dictionaryPilesAtDomainEnds, width=140)
 	pprint(getLeafPredecessors(state), width=380, compact=True)
 	pprint(getLeafSuccessors(state), width=380, compact=True)

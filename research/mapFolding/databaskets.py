@@ -1,11 +1,12 @@
 # ruff: ignore[undocumented-public-module]
 # TODO https://github.com/python/typing/discussions/2092
-
+# pyright: reportAttributeAccessIssue=false, reportUnknownMemberType=false
+# ty: ignore[unresolved-attribute,redundant-condition]
 from __future__ import annotations
 
-from mapFolding._e import leafOrigin
-from mapFolding.beDRY import makeDataContainer
+from mapFolding import leafOrigin
 from mapFolding.dataBaskets import StateMapFolding
+from mapFolding.dataStructures import makeDataContainer
 from mapFolding.oeis import getTotalFoldsKnown
 from mapFolding.theTypes import 形Array1DTotalLeaves
 import dataclasses

@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import partial
 from humpy_cytoolz import valfilter as filterLeaf
-from mapFolding import ansiColorReset, ansiColors
+from mapFolding import ansiColor, ansiColorReset
 from mapFolding._e.filters import leaf吗
 from mapFolding._e.tests.test_pinning import beansWithoutCornbread
 from mapFolding.kitFilesystem import getDataFrameFoldings, writeAlbum
@@ -72,10 +72,10 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 		boxOfSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.boxOfSurplusDictionaries
 		boxOfDictionaryPinned: list[PinnedLeaves] = [permutationSpace.pinnedLeaves() for permutationSpace in boxOfSurplusDictionariesOriginal]
 		if boxOfDictionaryPinned:
-			sys.stdout.write(ansiColors.YellowOnBlack)
+			sys.stdout.write(ansiColor.YellowOnBlack)
 			sys.stdout.write(pformat(boxOfDictionaryPinned[0:5], width=200) + '\n')
 		else:
-			sys.stdout.write(ansiColors.GreenOnBlack)
+			sys.stdout.write(ansiColor.GreenOnBlack)
 		sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
 		sys.stdout.write(ansiColorReset)
 
@@ -87,14 +87,14 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 			writeAlbum(surplusDictionaries, pathFilename)
 
 		if pinningCoverage.indicesOverlappingPermutationSpace:
-			sys.stdout.write(f"{ansiColors.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
+			sys.stdout.write(f"{ansiColor.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
 			for 次Dictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
 				sys.stdout.write(pformat(filterLeaf(leaf吗, state.boxOfPermutationSpace[次Dictionary]), width=140) + '\n')
 
 		beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
 		boxOfBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.boxOfPermutationSpace))
 		if boxOfBeans:
-			sys.stdout.write(f"{ansiColors.MagentaOnBlack}{len(boxOfBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")
+			sys.stdout.write(f"{ansiColor.MagentaOnBlack}{len(boxOfBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")
 			sys.stdout.write(pformat(getPermutationSpaceWithLeafValuesOnly(boxOfBeans[0]), width=140) + '\n')
 
 		maskUnion: numpy.ndarray = pinningCoverage.maskUnion
@@ -102,7 +102,7 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 		rowsTotal: int = pinningCoverage.rowsTotal
 		color = ansiColorReset
 		if rowsRequired < rowsTotal:
-			color = ansiColors.RedOnWhite
+			color = ansiColor.RedOnWhite
 			indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
 			for 次Row in indicesMissingRows[0:2]:
 				sys.stdout.write(f"{color}{arrayFoldings[次Row, :]}\n")

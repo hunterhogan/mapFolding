@@ -7,7 +7,7 @@ from __future__ import annotations
 from functools import partial
 from hunterMakesPy import decreasing, inclusive, zeroIndexed
 from itertools import chain
-from mapFolding._e import leafOrigin, pileOrigin
+from mapFolding import leafOrigin, pileOrigin
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding.beDRY import defineProcessorLimit
 from mapFolding.kitFilesystem import makePathFilenameFolds, streamAlbum, writeAlbum
@@ -20,8 +20,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding._e.theTypes import Leaf, Pile
-	from mapFolding.theTypes import Folding
+	from mapFolding.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_research' / 'albums'

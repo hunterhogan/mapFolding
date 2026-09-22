@@ -73,7 +73,7 @@ from gmpy2 import bit_flip
 from humpy_cytoolz import get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import combinations
-from mapFolding._e import leafOrigin, makeAntiChoicesLeaf
+from mapFolding._e import makeAntiChoicesLeaf
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.filters import choicesLeaf吗, leafPinned吗, leaf吗, notPileLast, pileChoicesLeaf吗
 from mapFolding._e.p2上nDimensional import (
@@ -81,8 +81,8 @@ from mapFolding._e.p2上nDimensional import (
 from mapFolding._e.p2上nDimensional.filters import oddLeaf2上nDimensional吗
 from mapFolding._e.reduceIt import (
 	reduceLeafSpace, reducePermutationSpace_leafDomainOf0or1, reducePermutationSpace_LeafIsPinned, reducePermutationSpace_nakedSubset)
-from mapFolding._e.theTypes import Leaf, Pile
 from mapFolding.beDRY import mapShapeIs2上nDimensions
+from mapFolding.theTypes import Leaf, Pile
 from more_itertools import extract, pairwise, triplewise
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems, reverseLookup
@@ -357,7 +357,7 @@ def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace:
 			if 0 < dimensionTail:
 				permutationSpace = reduceLeafSpace(permutationSpace
 					, DOTitems(filterPile(pile.__lt__, permutationSpace.undeterminedPiles()))
-					, makeAntiChoicesLeaf(state.totalLeaves, range(leafOrigin, state.mapShapeProductsSums[dimensionTail]))
+					, makeAntiChoicesLeaf(state.totalLeaves, range(state.mapShapeProductsSums[dimensionTail]))
 				)
 				if not permutationSpace.valid:
 					#=SIN= Early return.

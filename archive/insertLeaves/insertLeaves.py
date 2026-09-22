@@ -37,16 +37,18 @@ from __future__ import annotations
 
 from collections import Counter
 from functools import partial
-from hunterMakesPy import decreasing, inclusive
 from itertools import chain
-from mapFolding._e import leafOrigin, pileOrigin
-from mapFolding._e.algorithms.iff import creaseViolation吗, foldingValid吗
 from pprint import pprint
 from typing import TYPE_CHECKING
 
+from hunterMakesPy import decreasing, inclusive
+from mapFolding._e.algorithms.iff import creaseViolation吗, foldingValid吗
+from mapFolding._semiotics import leafOrigin, pileOrigin
+
 if TYPE_CHECKING:
 	from collections.abc import Collection
-	from mapFolding._e.theTypes import Folding, Leaf, Pile
+
+	from mapFolding.theTypes import Folding, Leaf, Pile
 
 def getAlbum(totalLeaves: int) -> tuple[Folding, ...]:
 	"""Construct the Sade album for `totalLeaves`.

@@ -24,7 +24,9 @@ from Z0Z_tools import DOTitems
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import Leaf, Pile
+
 	from mapFolding.theTypes import Folding
 	from pathlib import Path
 

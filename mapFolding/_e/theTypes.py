@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from gmpy2 import mpz
-from mapFolding.theTypes import Leaf
+from mapFolding.theTypes import Leaf, Pile
 from typing import TypeAlias
 
 #=EndNotes##TypeAlias=
@@ -92,8 +92,6 @@ References
 """
 
 type LeafSpace = Leaf | ChoicesLeaf
-
-type Pile = int
 
 #======== Containers ============================
 

@@ -42,13 +42,15 @@ References
 """
 from __future__ import annotations
 
-from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
+from mapFolding._e.theTypes import ChoicesLeaf
+from mapFolding.theTypes import Leaf
 from operator import attrgetter
 from typing import TYPE_CHECKING, TypeIs
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from mapFolding._e.theTypes import LeafSpace, PinnedLeaves
+	from mapFolding.theTypes import Pile
 
 #======== Boolean antecedents ================================================
 

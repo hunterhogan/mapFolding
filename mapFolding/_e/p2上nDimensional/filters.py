@@ -5,7 +5,8 @@ from mapFolding._e.p2上nDimensional import 零
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import DimensionIndex, Leaf, LeafSpace
+	from mapFolding._e.theTypes import DimensionIndex, LeafSpace
+	from mapFolding.theTypes import Leaf, Pile
 
 def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 	"""Test to ensure `leaf` is greater than `leafOrigin` (0) and `leaf零` (1).

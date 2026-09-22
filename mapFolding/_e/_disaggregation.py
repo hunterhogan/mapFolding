@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
-	from mapFolding._e.theTypes import ChoicesLeaf, Leaf
+	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import Leaf
 
 def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
 	"""Convert a `ChoicesLeaf` bitset into an `Iterator` of individual `Leaf` indices.

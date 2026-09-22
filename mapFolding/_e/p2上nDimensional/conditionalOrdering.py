@@ -13,7 +13,7 @@ from operator import neg
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Leaf, Pile
+	from mapFolding.theTypes import Leaf, Pile
 
 # IMPROVEMENT getDictionaryConditionalLeafPredecessors development
 def getLeafPredecessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:

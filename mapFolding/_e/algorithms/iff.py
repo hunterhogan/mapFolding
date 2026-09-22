@@ -69,8 +69,8 @@ from math import prod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding._e.theTypes import Leaf, Pile, PinnedLeaves
-	from mapFolding.theTypes import Folding
+	from mapFolding._e.theTypes import PinnedLeaves
+	from mapFolding.theTypes import Folding, Leaf, Pile
 
 # DEVELOPMENT This module must be efficient. Imagine computing mapShape(3, 14), for example, which we
 # know has 98,420,246,759,688 valid foldings. With mathamagic, we only have to find one-half of them,

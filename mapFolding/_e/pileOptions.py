@@ -4,7 +4,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding._e.theTypes import ChoicesLeaf, Pile, UndeterminedPiles
+	from mapFolding._e.theTypes import ChoicesLeaf, UndeterminedPiles
+	from mapFolding.theTypes import Pile
 
 def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	from mapFolding._e.p2上nDimensional.pileOptions import _getChoicesLeaf  # ruff: ignore[import-outside-top-level]

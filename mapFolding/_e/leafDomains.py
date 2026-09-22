@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding._e.theTypes import Leaf
+	from mapFolding.theTypes import Leaf
 
 def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	"""Compute the candidate `Pile` range for one `leaf`.

@@ -64,7 +64,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding._e.theTypes import ChoicesLeaf, Leaf
+	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import Leaf
 
 #======== `ChoicesLeaf` functions ================================================
 

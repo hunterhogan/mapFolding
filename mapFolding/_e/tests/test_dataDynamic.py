@@ -32,7 +32,9 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding._e.theTypes import ChoicesLeaf, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import Leaf, Pile
+
 	from types import ModuleType
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])

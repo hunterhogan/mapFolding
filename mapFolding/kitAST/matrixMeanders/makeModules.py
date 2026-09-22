@@ -1,18 +1,18 @@
 """makeMeandersModules."""
 from __future__ import annotations
-from mapFolding.theTypes import 形ArcCode
-from numba import int64
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
+# TODO move to otc?
 from mapFolding.kitAST.mapFolding._count import toDisk
-from mapFolding.kitAST.numba.kitNumba import ParametersNumba, decorateCallableWithNumba, parametersNumbaLight
-from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef, renameName
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
+from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
+from mapFolding.theTypes import 形ArcCode
 from operator import getitem
 from typing import TYPE_CHECKING
 import ast

@@ -14,7 +14,8 @@ from Z0Z_tools import exclude
 
 if TYPE_CHECKING:
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import Leaf, Pile
 
 #======== Domain-based subroutines for analyzing a specific `pile`. =======
 

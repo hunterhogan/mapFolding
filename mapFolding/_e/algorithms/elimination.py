@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from functools import partial
 from itertools import chain, pairwise, product as CartesianProduct, repeat, starmap
-from mapFolding._e import getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
+from mapFolding import leafOrigin, pileOrigin
+from mapFolding._e import getIteratorOfLeaves, mapShapeLengthsAreEqual
 from mapFolding._e.algorithms.iff import foldingValid吗
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.pileOptions import getLookupChoicesLeaf

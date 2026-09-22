@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from functools import cache
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
-from mapFolding._e import leafOrigin
+from mapFolding import leafOrigin
 from mapFolding._e.p2上nDimensional import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding._e.theTypes import Leaf
+	from mapFolding.theTypes import Leaf
 
 def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 	"""1) `leaf` has at most `totalDimensions - 1` many creases.

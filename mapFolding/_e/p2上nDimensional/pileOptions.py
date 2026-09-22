@@ -2,14 +2,16 @@ from __future__ import annotations
 
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask
-from mapFolding._e import leafOrigin, makeChoicesLeaf
+from mapFolding import leafOrigin
+from mapFolding._e import makeChoicesLeaf
 from mapFolding._e.p2上nDimensional import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd, 零, 首零
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding._e.theTypes import ChoicesLeaf, Leaf, Pile
+	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import Leaf, Pile
 
 # IMPROVEMENT formula for pile ranges instead of deconstructing leaf domains. Second best, DRYer code: this
 # module just rearranges the code for leaf domains. The formula would likely lead to new functions in

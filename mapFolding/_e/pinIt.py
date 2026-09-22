@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-	from mapFolding._e.theTypes import Leaf, Pile
+	from mapFolding.theTypes import Leaf, Pile
 
 def excludeLeaf_rBeforeLeaf_k(state: StateElimination, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> StateElimination:
 	"""Exclude `leaf_r` from appearing before `leaf_k` in every `pile` in the domain of `leaf_k`.

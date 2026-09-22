@@ -57,7 +57,8 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding._e import getDomainLeaf, leafOrigin, pileOrigin
+from mapFolding import leafOrigin, pileOrigin
+from mapFolding._e import getDomainLeaf
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.p2上nDimensional import (
 	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomainLeaf首零Plus零, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二)
@@ -76,7 +77,7 @@ if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from concurrent.futures import Future
 	from hunterMakesPy.theTypes import Limitation
-	from mapFolding._e.theTypes import Leaf, Pile
+	from mapFolding.theTypes import Leaf, Pile
 
 #======== Pin by `pile` ===========================================
 

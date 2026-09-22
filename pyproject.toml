@@ -43,7 +43,7 @@ dependencies = [
   "anyascii",
   "astToolkit>=0.11.6",
   "gmpy2",
-  "hunterMakesPy>=0.7.5",
+  "hunterMakesPy>=0.7.6",
   "more_itertools",
   "numba",
   "numba_progress",

@@ -23,7 +23,7 @@ from functools import cache, partial
 from humpy_cytoolz import keymap, merge
 from hunterMakesPy import errorL33T
 from itertools import count
-from mapFolding import ansiColorReset, ansiColors
+from mapFolding import ansiColor, ansiColorReset
 from mapFolding.dataStructures import makeLookupDiagonal, makeLookupTriangle
 from mapFolding.kitFilesystem import readText
 from mapFolding.oeis import getMetadata, getValuesKnown
@@ -192,13 +192,13 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	match: bool = computed == known
 	sys.stdout.write(
 		f"{n:2} "
-		f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[match]}{match}{ansiColorReset}\t"
+		f"{(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[match]}{match}{ansiColorReset}\t"
 		f"{time.perf_counter() - timeStart:5.2f}\t"
 		f"{computed}\t{known}\t"
 	)
 	if ratio and computed:
 		integer = (known / computed).is_integer()
-		sys.stdout.write(f"{(ansiColors.YellowOnRed, ansiColors.GreenOnBlack)[integer]}{known / computed}{ansiColorReset}\t")
+		sys.stdout.write(f"{(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[integer]}{known / computed}{ansiColorReset}\t")
 	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
@@ -219,8 +219,8 @@ def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
 	Colors are selected by converting the string to a base-36 integer and modulo the number of
 	available ANSI colors. This provides consistent coloring for the same identifiers across runs.
 	"""
-	sys.stdout.write(f"{ansiColors[int(anyascii.anyascii(str(title)), 36) % len(ansiColors)]}{title} ")
-	sys.stdout.write(f"{ansiColors[int(anyascii.anyascii(str(subtitle)), 36) % len(ansiColors)]} {subtitle} ")
+	sys.stdout.write(f"{ansiColor[int(anyascii.anyascii(str(title)), 36) % len(ansiColor)]}{title} ")
+	sys.stdout.write(f"{ansiColor[int(anyascii.anyascii(str(subtitle)), 36) % len(ansiColor)]} {subtitle} ")
 	sys.stdout.write(ansiColorReset + '\n')
 
 if __name__ == "__main__":

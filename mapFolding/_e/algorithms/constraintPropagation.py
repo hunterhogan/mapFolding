@@ -3,7 +3,8 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
-from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, leafOrigin, mapShapeLengthsAreEqual, pileOrigin
+from mapFolding import leafOrigin, pileOrigin
+from mapFolding._e import getDomainLeaf, getIteratorOfLeaves, mapShapeLengthsAreEqual
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
 from mapFolding._e.p2上nDimensional import getLeavesCreaseAnte, getLeavesCreasePost, 工dimensionTail, 工dimension首零
 from mapFolding._e.pileOptions import getLookupChoicesLeaf
@@ -20,7 +21,7 @@ import uuid
 
 if TYPE_CHECKING:
 	from concurrent.futures import Future
-	from mapFolding._e.theTypes import Leaf
+	from mapFolding.theTypes import Leaf
 	from pathlib import Path
 
 def count(state: StateElimination) -> StateElimination:
