@@ -39,7 +39,8 @@ import dataclasses
 import numpy
 
 if TYPE_CHECKING:
-	from numpy import dtype, intp, ndarray
+	from mapFolding.theTypes import ArraySelector
+	from numpy import dtype, ndarray
 	from types import EllipsisType
 	from typing import Any, Literal, LiteralString
 
@@ -282,7 +283,7 @@ class StateMapFoldingSymmetric:
 		totalLeavesAsInt = int(self.totalLeaves)
 		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		arrayIndexCoordinates: ndarray[tuple[int, int, int], dtype[intp]] = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2), dtype=int)
+		arrayIndexCoordinates: ArraySelector = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2))
 		self.indices = numpy.stack(((arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1)
 							, (-2 - arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1))
 							, axis=2).astype(self.__dataclass_fields__['indices'].metadata['dtype'], copy=False)
@@ -477,6 +478,7 @@ class StateMeanders:
 
 #================== Managing data structures in `matrixMeandersNumPy` algorithm ===================
 
+# TODO abstract `length` to that-which-is-indexed, and something like `int | tuple[Any, ...]` or `_ShapeLike`.
 class ShapeArray(NamedTuple):
 	"""Always use this `NamedTuple` for the `shape` parameter of `ndarray`; _always_ make the `NamedTuple` with _KEYWORD_ syntax, never positional syntax.
 
@@ -499,6 +501,9 @@ class ShapeSlicer(NamedTuple):
 	"""Always use this for fancy indexing if possible: see `ShapeArray`."""
 
 	length: EllipsisType | slice
+	# SEMIOTICS I think this field is really the "index in the indexing axis that indexes
+	# that-which-is-indexed." I think the axis is strictly determined by the order of the fields in
+	# the NamedTuple, so by being the second field, the axis is 2.
 	axis: int
 
 #================== `numba` types =================================================================

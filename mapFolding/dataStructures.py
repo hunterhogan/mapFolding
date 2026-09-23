@@ -14,7 +14,7 @@ import numpy
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Mapping, Sequence
 	from mapFolding.theTypes import 形Array1DTotalLeaves, 形Array2DTotalLeaves, 形Array3DTotalLeaves, 形NumPyInteger
-	from numpy import dtype as numpy_dtype, ndarray
+	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
 	from typing import Any, Literal
 
 def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
@@ -89,7 +89,15 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Arra
 					connectionGraph[次Dimension, activeLeaf1ndex, connectee1ndex] = connectee1ndex + cumulativeProduct[次Dimension]
 	return connectionGraph
 
-def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[Any, numpy_dtype[形NumPyInteger]]:
+# DOCUMENT Use `makeDataContainer` even if you know you want numpy.zeros. In the future, you can
+# change the algorithm by making a local `makeDataContainer` with a different data structure.
+# Furthermore, algorithm versions created by ast transformations can use the same technique to switch
+# data container implementations without changing the algorithm. For example, a local alias to call
+# `make_memmap`. Hence, `makeDataContainer` has the parameter `name`. You might assign a value to the
+# name field to account for a switch to memmap.
+
+# TODO Figure out `shape`. Factors include: `_ShapeLike`, `ShapeArray`, TypeVar for the shape?
+def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:
 	"""Create any data container as long as it is a `numpy.ndarray` full of zeroes of type `numpy.integer`.
 
 	By centralizing data container creation, you can more easily make global changes.
@@ -107,7 +115,29 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | 
 		A zero-filled `ndarray` with the specified `shape` and `datatype`.
 
 	"""
-	return numpy.zeros(shape, dtype=datatype)
+	return make_zeros(shape, datatype, name)
+
+def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
+	"""Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
+
+	Parameters
+	----------
+	shape : tuple[Any, ...]
+		Shape of the `ndarray`.
+	datatype : type[形NumPyInteger]
+		Integer `dtype` used for each array element.
+	name : str
+		Filename stem `f"{name}.mM"` for a file based `ndarray`.
+
+	Returns
+	-------
+	container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
+		`numpy.ndarray` of `shape` with `datatype`.
+	"""
+	return numpy.memmap(f'{name}.mM', datatype, mode='write', shape=shape)
+
+def make_zeros(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:  # ruff: ignore[undocumented-public-function, unused-function-argument]
+	return numpy.zeros(shape, datatype)
 
 def makeLookupTriangle(sequence: Iterable[int], rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT

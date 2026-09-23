@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from numpy import dtype, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
+from numpy import dtype, int64 as numpy_int64, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
 from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
@@ -26,8 +26,13 @@ type OEISid = LiteralString
 
 type Array1DBoolean = ndarray[tuple[int], dtype[numpy_bool]]
 type Array1DSelector = ndarray[tuple[int], dtype[numpy_intp]]
+type ArraySelector = ndarray[tuple[Any, ...], dtype[numpy_intp]]
 type ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
+type Array1Dint64 = ndarray[tuple[int], dtype[numpy_int64]]
+type Array2Dint64 = ndarray[tuple[int, int], dtype[numpy_int64]]
 
+# TODO Change to generic class? "The preferred way to construct a type variable is via the dedicated
+# syntax for generic functions, classes, and type aliases." <- type aliases? really?
 形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 

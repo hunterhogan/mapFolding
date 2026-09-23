@@ -5,6 +5,7 @@ from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
+from mapFolding.dataStructures import make_memmap
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
 from numpy import (
@@ -16,31 +17,10 @@ import numpy
 import pathlib
 
 if TYPE_CHECKING:
-    from mapFolding.theTypes import Array1DArcCode, Array1DBoolean, Array1DSelector, ArrayArcCode, 形NumPyInteger
-    from numpy import dtype, ndarray
-    from numpy.lib._arraysetops_impl import UniqueInverseResult
-    from typing import Any
-
-def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
-    """Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
-
-    Parameters
-    ----------
-    shape : tuple[Any, ...]
-        Shape of the `ndarray`.
-    datatype : type[形NumPyInteger]
-        Integer `dtype` used for each array element.
-    name : str | None = None
-        If applicable, filename stem `f"{name}.mM"` for a file based `ndarray`.
-
-    Returns
-    -------
-    container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-        `numpy.ndarray` of `shape` with `datatype`.
-    """
-    # Change from memmap to in-memory ndarray, merely by changing this function.
-    return memmap(f'{raiseIfNone(name)}.mM', datatype, 'write', shape=shape)
-    # return numpy.zeros(shape, datatype)  # ruff: ignore[commented-out-code]
+	from mapFolding.theTypes import Array1DArcCode, Array1DBoolean, Array1DSelector, ArrayArcCode, 形NumPyInteger
+	from numpy import dtype, ndarray
+	from numpy.lib._arraysetops_impl import UniqueInverseResult
+	from typing import Any
 
 def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
     """Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
@@ -59,7 +39,7 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
     container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
         `numpy.ndarray` of `shape` with `datatype`.
     """
-    return make_memmap(shape, datatype, name)
+    return make_memmap(shape, datatype, raiseIfNone(name))
 
 def count(state: StateMeanders) -> StateMeanders:
     """Count meanders with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
