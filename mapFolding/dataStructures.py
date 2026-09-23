@@ -7,6 +7,7 @@ from hunterMakesPy import inclusive
 from itertools import count, starmap, takewhile
 from mapFolding.theTypes import 形NumPyTotalLeaves
 from more_itertools import split_into
+from numba import jit
 from operator import itemgetter
 from typing import TYPE_CHECKING
 import numpy
@@ -136,6 +137,7 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 	"""
 	return numpy.memmap(f'{name}.mM', datatype, mode='write', shape=shape)
 
+@jit(nopython=True, error_model='numpy', fastmath=True)
 def make_zeros(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:  # ruff: ignore[undocumented-public-function, unused-function-argument]
 	return numpy.zeros(shape, datatype)
 
