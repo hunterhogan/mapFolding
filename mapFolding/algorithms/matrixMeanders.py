@@ -95,28 +95,28 @@ def count(state: StateMeanders) -> StateMeanders:
             bitsZuluHasArcs: bool = 1 < bitsZulu
             bitsZuluIsEven: int = bitsZulu & 1 ^ 1
 
-            arcCodeAnalysis: int = (bitsZulu << 1 | bitsAlfa) << 2 | 3  # Evaluate formula step-wise left to right: (parentheses) override precedence.
+            arcCodeAnalysis: int = (bitsZulu << 1 | bitsAlfa) << 2 | 3  # No stack required. Evaluate formula step-wise left to right: (parentheses) override precedence.
             if arcCodeAnalysis < state.arcCodeMAXIMUM:
                 state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsAlfaHasArcs:
-                arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3  # `bitsAlfaIsEven` has `bitsAlfa` in it.
+                arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3  # Stack of 1: `bitsAlfaIsEven` has `bitsAlfa` in it.
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsZuluHasArcs:
-                arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1  # `bitsZuluIsEven` has `bitsZulu` in it.
+                arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1  # Stack of 1: `bitsZuluIsEven` has `bitsZulu` in it.
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
-            if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):
+            if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):  # Stack of 1 if repeat bitsLocator operations. Lots of stacks to avoid duplicate work.
                 # This analysis might modify `bitsAlfa` or `bitsZulu`, so it should be last.
                 if bitsAlfaIsEven and not bitsZuluIsEven:
                     bitsAlfa ^= walkDyckPath(bitsAlfa)
                 elif bitsZuluIsEven and not bitsAlfaIsEven:
                     bitsZulu ^= walkDyckPath(bitsZulu)
 
-                arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2  # Evaluate formula step-wise left to right: (parentheses) override precedence.
+                arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2  # No stack required. Evaluate formula step-wise left to right: (parentheses) override precedence.
                 if arcCodeAnalysis < state.arcCodeMAXIMUM:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 

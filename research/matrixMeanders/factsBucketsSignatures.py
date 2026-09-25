@@ -3973,3 +3973,164 @@ signatures: dict[str, dict[int, dict[int, int]]] = {'A000682': {2: {1: 1, 2: 3},
 45: 6,
 46: 3,
 47: 1}}}
+meanders_nToBitWidth: dict[int, int] = {
+    0: 1, 1: 1, 2: 1, 3: 2, 4: 2, 5: 4, 6: 4, 7: 6, 8: 7, 9: 9
+    , 10: 10, 11: 11, 12: 12, 13: 14, 14: 15, 15: 17, 16: 18, 17: 20, 18: 22, 19: 23
+    , 20: 25, 21: 27, 22: 28, 23: 30, 24: 31, 25: 33, 26: 34, 27: 36, 28: 38, 29: 40
+    , 30: 41, 31: 43, 32: 44, 33: 46, 34: 48, 35: 50, 36: 51, 37: 53, 38: 54, 39: 56
+    , 40: 58, 41: 60, 42: 61, 43: 63, 44: 64, 45: 67, 46: 68, 47: 70, 48: 71, 49: 73
+    , 50: 75, 51: 77, 52: 78, 53: 80, 54: 82, 55: 84}
+meanders_boxOfBitWidthIncreases: list[int] = [0, 0, 1, 0, 2, 0, 2, 1, 2, 1, 1, 1, 2, 1, 2, 1, 2
+    , 2, 1, 2, 2, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1
+    , 3, 1, 2, 1, 2, 2, 2, 1, 2, 2, 2]
+meanders_bitWidthIncreaseMaximum = 3
+meanders_bitWidthIncreaseMean = 1.51
+meanders_bitWidthIncreaseMedian = 2
+meanders_bucketsIf_boundary_ODD_by_nLess_boundary: dict[int, int] = {
+1: 2,
+2: 7,
+3: 16,
+4: 42,
+5: 81,
+6: 207,
+7: 382,
+8: 974,
+9: 1769,
+10: 4522,
+11: 8154,
+12: 20903,
+13: 37548,
+14: 96475,
+15: 172905,
+16: 445014,
+17: 796413,
+18: 2052330,
+19: 3669370,
+20: 9464570,
+}
+meanders_bucketsIf_boundary_EVEN_by_nLess_boundary: dict[int, int] = {
+1: 3,
+2: 6,
+3: 20,
+4: 37,
+5: 100,
+6: 180,
+7: 468,
+8: 836,
+9: 2156,
+10: 3844,
+11: 9903,
+12: 17650,
+13: 45494,
+14: 81085,
+15: 209157,
+16: 372820,
+17: 962310,
+18: 1715463,
+19: 4430191,
+20: 7898072,
+}
+semiMeanders_nToBitWidth: dict[int, int] = {
+                1: 1, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 7: 7, 8: 8, 9: 9
+    , 10: 11, 11: 13, 12: 14, 13: 16, 14: 17, 15: 19, 16: 21, 17: 22, 18: 24, 19: 25
+    , 20: 27, 21: 29, 22: 30, 23: 32, 24: 34, 25: 36, 26: 37, 27: 39, 28: 41, 29: 42
+    , 30: 44, 31: 46, 32: 47, 33: 49, 34: 51, 35: 53, 36: 54, 37: 56, 38: 58, 39: 60
+    , 40: 61, 41: 63, 42: 65, 43: 67, 44: 68, 45: 70}
+semiMeanders_boxOfBitWidthIncreases: list[int] = [0, 1, 1, 1, 1, 2, 1, 1, 2, 2, 1, 2
+, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 1, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2]
+semiMeanders_bitWidthIncreaseMaximum = 2
+semiMeanders_bitWidthIncreaseMean = 1.57
+semiMeanders_bitWidthIncreaseMedian = 2
+semiMeanders_nToNumberOfInitialArcCodes: dict[int, int] = {  # numberOfInitialArcCodes = (n // 2)
+    2: 1,
+    3: 1,
+    4: 2,
+    5: 2,
+    6: 3,
+    7: 3,
+    8: 4,
+    9: 4,
+    10: 5,
+    11: 5,
+    12: 6,
+    13: 6,
+    14: 7,
+    15: 7,
+    16: 8,
+    17: 8,
+    18: 9,
+    19: 9,
+    20: 10,
+    21: 10,
+    22: 11,
+    23: 11,
+    24: 12,
+    25: 12,
+    26: 13,
+    27: 13,
+    28: 14,
+    29: 14,
+    30: 15,
+    31: 15,
+    32: 16,
+    33: 16,
+    34: 17,
+    35: 17,
+    36: 18,
+    37: 18,
+    38: 19,
+    39: 19,
+    40: 20,
+    41: 20,
+    42: 21,
+    43: 21,
+    44: 22,
+    45: 22,
+}
+semiMeanders_nToInitialArcCodes: dict[int, dict[int, int]] = {
+    2: {0x3: 1},
+    4: {0x3: 1, 0x3f: 1},
+    6: {0x3: 1, 0x3f: 1, 0x3ff: 1},  # {0b 11: 1, 0b 11 1111: 1, 0b 11 1111 1111: 1}
+    8: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1},
+    10: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1},
+    12: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1},
+    14: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1},
+    16: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1},
+    18: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1},
+    20: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1},
+    22: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1},
+    24: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1},
+    26: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1},
+    28: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1},
+    30: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1},
+    32: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1},
+    34: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1, 0x3ffffffffffffffff: 1},
+    36: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1, 0x3ffffffffffffffff: 1, 0x3fffffffffffffffff: 1},
+    38: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1, 0x3ffffffffffffffff: 1, 0x3fffffffffffffffff: 1, 0x3ffffffffffffffffff: 1},
+    40: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1, 0x3ffffffffffffffff: 1, 0x3fffffffffffffffff: 1, 0x3ffffffffffffffffff: 1, 0x3fffffffffffffffffff: 1},
+    42: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1, 0x3ffffffffffffffff: 1, 0x3fffffffffffffffff: 1, 0x3ffffffffffffffffff: 1, 0x3fffffffffffffffffff: 1, 0x3ffffffffffffffffffff: 1},
+    44: {0x3: 1, 0x3f: 1, 0x3ff: 1, 0x3fff: 1, 0x3ffff: 1, 0x3fffff: 1, 0x3ffffff: 1, 0x3fffffff: 1, 0x3ffffffff: 1, 0x3fffffffff: 1, 0x3ffffffffff: 1, 0x3fffffffffff: 1, 0x3ffffffffffff: 1, 0x3fffffffffffff: 1, 0x3ffffffffffffff: 1, 0x3fffffffffffffff: 1, 0x3ffffffffffffffff: 1, 0x3fffffffffffffffff: 1, 0x3ffffffffffffffffff: 1, 0x3fffffffffffffffffff: 1, 0x3ffffffffffffffffffff: 1, 0x3fffffffffffffffffffff: 1},
+
+    3: {0xf: 1},
+    5: {0xf: 1, 0xff: 1},
+    7: {0xf: 1, 0xff: 1, 0xfff: 1},  # {0b 1111: 1, 0b 1111 1111: 1, 0b 1111 1111 1111: 1}
+    9: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1},
+    11: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1},
+    13: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1},
+    15: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1},
+    17: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1},
+    19: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1},
+    21: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1},
+    23: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1},
+    25: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1},
+    27: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1},
+    29: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1},
+    31: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1},
+    33: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1},
+    35: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1},
+    37: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1},
+    39: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1, 0xfffffffffffffffffff: 1},
+    41: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1, 0xfffffffffffffffffff: 1, 0xffffffffffffffffffff: 1},
+    43: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1, 0xfffffffffffffffffff: 1, 0xffffffffffffffffffff: 1, 0xfffffffffffffffffffff: 1},
+    45: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1, 0xfffffffffffffffffff: 1, 0xffffffffffffffffffff: 1, 0xfffffffffffffffffffff: 1, 0xffffffffffffffffffffff: 1},
+}

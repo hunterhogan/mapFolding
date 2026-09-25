@@ -255,6 +255,7 @@ mathamagic
 mathbb
 MATHEMATICA
 Mathématiques
+mathrm
 maxdeg
 mcpu
 meandric
@@ -270,6 +271,7 @@ metaprogramming
 mobius
 Möbius
 Mult
+multinomial
 multiset
 multisets
 mypy
@@ -443,6 +445,7 @@ Temperley
 Tenabled
 testpaths
 testutil
+texttt
 Tfinalbody
 thất
 thon
@@ -472,6 +475,7 @@ unparameterized
 unparses
 unrank
 Unroller
+unshifted
 unsignedinteger
 untenably
 urldate
@@ -480,6 +484,8 @@ usegmt
 valfilter
 Valjean
 valmap
+Vandermonde
+Vandermonde's
 vararg
 VEECH
 Villars
