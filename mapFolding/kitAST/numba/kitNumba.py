@@ -45,8 +45,6 @@ if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from mapFolding.theTypes import Default
 	from numba.core.compiler import CompilerBase as numbaCompilerBase
-	from numba.core.types.abstract import Type
-	from numba.core.typing.templates import Signature
 	from os import PathLike
 	from pathlib import PurePath
 	from typing import Any, Final, NotRequired, TypeIs
@@ -272,8 +270,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 	signature_or_function = parametersNumba.get('signature_or_function')
 
 	if signature_or_function:
-		# TODO this doesn't work.
-		boxOf_argsDecorator = [Make.Tuple(tuple(map(Make.Constant, signature_or_function)))]
+		boxOf_argsDecorator = [Make.List(tuple(map(Make.Constant, signature_or_function)))]
 	else:
 		boxOf_arg4signature_or_function: list[ast.expr] = list(filter_map(make_numbaDotSignature, ingredientsFunction.astFunctionDef.args.args))
 

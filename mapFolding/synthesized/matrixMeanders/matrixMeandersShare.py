@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from numba import int64, jit, uint64
+from numba import jit
 from operator import neg
 
-@jit([int64(int64), uint64(uint64)], cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
+@jit(['int64(int64)', 'uint64(uint64)'], cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
 def walkDyckPath(intWithExtra_0b1: int) -> int:
     """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
 

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from itertools import repeat
+from mapFolding.algorithms.matrixMeandersTriangle import doTheNeedful
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from operator import call
 from research.matrixMeanders.formulasTriangle import A005315of0, boxOfDiagonals, checkFormulas
-from research.matrixMeanders.matrixMeanders import doTheNeedful
 from typing import TYPE_CHECKING
 import gc
 import time

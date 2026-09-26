@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
+from mapFolding.dataBaskets import StateMeanders
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
 from mapFolding.theTypes import 形ArcCode
 from numba import int64, vectorize
+from research.matrixMeanders.formulasTriangle import boxOfDiagonals
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding.dataBaskets import StateMeanders
+	from collections.abc import Callable
 	from mapFolding.theTypes import 形ArrayArcCode, 形ArrayInteger
 	from numpy import int64 as numpy_int64
 	from typing import Any, Literal, LiteralString
@@ -230,3 +232,16 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 		totalBuckets = totalArcCodes * 2
 
 	return max(totalBuckets, 3000000)
+
+def shortcut(state: StateMeanders) -> StateMeanders:
+	boundary: int = state.boundary + 1
+
+	def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
+		arcCode: int = (1 << (2 * (boundary - 2 * 次diagonal) + 2)) - 1
+		subtotalMeanders: int = state.lookupMeanders.pop(arcCode, 0)
+		return 工(boundary) * subtotalMeanders
+
+	state.n += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
+	if not state.lookupMeanders:
+		state.boundary = 0
+	return state
