@@ -43,9 +43,9 @@ if __name__ == '__main__':
 		"""
 
 		boxOf_n: list[int] = []
-		boxOf_n.extend(range(2, 10))
+		# boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
-		# boxOf_n.extend(range(28, 33))
+		boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))

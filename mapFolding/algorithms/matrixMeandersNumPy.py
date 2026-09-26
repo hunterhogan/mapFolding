@@ -8,6 +8,7 @@ from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.dataStructures import make_memmap
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
+from numba import jit
 from numpy import (
 	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
 	bool as numpy_bool, greater as moreThan, less_equal as lessThanEqual, memmap, multiply, subtract)
@@ -21,6 +22,17 @@ if TYPE_CHECKING:
 	from numpy import dtype, ndarray
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
 	from typing import Any
+
+indexesAnalyzed: int = 2
+次ArcCode, 次Meanders = range(indexesAnalyzed)
+slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., axis=次ArcCode)
+slicerMeanders: ShapeSlicer = ShapeSlicer(length=..., axis=次Meanders)
+
+indexesWorkbench: int = 3
+次PrepArea, 次Alfa, 次Zulu = range(indexesWorkbench)
+slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., axis=次PrepArea)
+slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
+slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
 
 def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
     """Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
@@ -61,17 +73,6 @@ def count(state: StateMeanders) -> StateMeanders:
     makes it faster due to less disk swapping--as compared to the pandas implementation and other
     NumPy implementations I tried.
     """
-    indexesAnalyzed: int = 2
-    次ArcCode, 次Meanders = range(indexesAnalyzed)
-    slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., axis=次ArcCode)
-    slicerMeanders: ShapeSlicer = ShapeSlicer(length=..., axis=次Meanders)
-
-    indexesWorkbench: int = 3
-    次PrepArea, 次Alfa, 次Zulu = range(indexesWorkbench)
-    slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., axis=次PrepArea)
-    slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
-    slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
-
     shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
     arrayMeanders: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
     del shape
@@ -265,6 +266,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
         del arrayMeanders
         goByeBye()
+
         unique: UniqueInverseResult[形ArcCode] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
 
         shape = ShapeArray(length=len(unique.values), indexes=indexesAnalyzed)
@@ -275,6 +277,13 @@ def count(state: StateMeanders) -> StateMeanders:
         arrayMeanders[slicerMeanders] = 0
         numpy.add.at(arrayMeanders[slicerMeanders], unique.inverse_indices, arrayAnalyzed[slicerMeanders])
         del unique
+
+		# ruff: ignore[commented-out-code]
+        # arrayAnalyzed, state.次Target = consolidateAnalyzed(arrayAnalyzed, state.次Target)
+        # shape = ShapeArray(length=state.次Target, indexes=indexesAnalyzed)
+        # arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+        # del shape
+        # arrayMeanders[:] = arrayAnalyzed[0:state.次Target]
 
         del arrayAnalyzed
 
@@ -295,6 +304,23 @@ def count(state: StateMeanders) -> StateMeanders:
             pathlib.Path('arrayPrepArea.mM').unlink()
 
     return state
+
+@jit(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
+def consolidateAnalyzed(arrayAnalyzed: 形ArrayArcCode, 次Stop: int) -> tuple[形ArrayArcCode, int]:
+    # PAINFULLY slow.
+	indexAnalyzed: int = 0
+	indexConsolidated: int = 0
+	#Custom compaction avoids the full-size index arrays required by NumPy's `unique`.
+	while indexAnalyzed < 次Stop:
+		arcCode: int = arrayAnalyzed[indexAnalyzed, 次ArcCode]
+		meanders: int = 0
+		while indexAnalyzed < 次Stop and arrayAnalyzed[indexAnalyzed, 次ArcCode] == arcCode:
+			meanders += arrayAnalyzed[indexAnalyzed, 次Meanders]
+			indexAnalyzed += 1
+		arrayAnalyzed[indexConsolidated, 次ArcCode] = arcCode
+		arrayAnalyzed[indexConsolidated, 次Meanders] = meanders
+		indexConsolidated += 1
+	return arrayAnalyzed, indexConsolidated
 
 def doTheNeedful(state: StateMeanders) -> int:
     """Compute `meanders` with a transfer matrix algorithm implemented in NumPy.

@@ -17,7 +17,7 @@ from tqdm.auto import tqdm
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
 	writeDiagonal({n: countDiagonal(n, 次diagonal)}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
 
-def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int) -> None:
+def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:
 	pathFilenameTriangleSemiText.parent.mkdir(parents=True, exist_ok=True)
 	#=SIN= For loop: the requested row writer preserves ordered output across its selected rows.
 	for n in tqdm(range(nStart, nStop), position=0, leave=True, disable=True):
