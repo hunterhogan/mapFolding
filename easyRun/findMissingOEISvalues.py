@@ -11,8 +11,7 @@ copy-pasting the computed values in the b-file.
 """
 from __future__ import annotations
 
-from hunterMakesPy import CallableFunction, errorL33T
-from mapFolding import ansiColor, ansiColorReset
+from hunterMakesPy import ansiColor, ansiColorReset, CallableFunction, errorL33T
 from mapFolding.oeis import getValuesKnown
 from mapFolding.oeis._byFormulaLookup import (
 	A000682, A060206, A077014, A077460, A085973, A208357, A217310, A217318, A223093, A223094, A223095, A259702, A333971, A334615, A337581)

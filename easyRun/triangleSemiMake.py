@@ -42,14 +42,19 @@ def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None
 
 if __name__ == '__main__':
 	flow: str = 'diagonal'
+	flow = 'rows'
 	if flow == 'rows':
-		nT: int = 490
+		nT: int = 491
 		nStart: int = 45
 		nStop: int = 46
-		kStart: int = 5
+		kStart: int = 6
 		writeTriangleRows(nT, nStart, nStop, kStart)
 	else:
 		次diagonal: int = 11
 		nStart = 289
 		nStop = 406
 		tuple(map(writeDiagonalCount, tqdm(range(nStart, nStop)), repeat(次diagonal)))
+"""
+source /home/hunte/mapFolding/.venv/bin/activate && cd mapFolding
+sudo nice -n -10 /home/hunte/mapFolding/.venv/bin/python -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on /home/hunte/mapFolding/easyRun/triangleSemiMake.py
+"""
