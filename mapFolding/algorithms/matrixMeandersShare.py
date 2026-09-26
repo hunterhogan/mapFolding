@@ -8,7 +8,7 @@ from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
-	from mapFolding.theTypes import ArrayArcCode, ArrayInteger
+	from mapFolding.theTypes import 形ArrayArcCode, 形ArrayInteger
 	from numpy import int64 as numpy_int64
 	from typing import Any, Literal, LiteralString
 	import pandas
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 - Convert duplicate code to procedures.
 """
 
-def integersWide吗(state: StateMeanders, *, arrayMeanders: ArrayArcCode | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
+def integersWide吗(state: StateMeanders, *, arrayMeanders: 形ArrayArcCode | None = None, dataframe: pandas.DataFrame | None = None, fixedSizeMAXIMUMarcCode: bool = False) -> bool:
 	"""Check if the largest values are wider than the maximum limits.
 
 	Parameters
@@ -150,9 +150,9 @@ def flipTheExtra_0b1(intWithExtra_0b1: numpy_int64) -> numpy_int64: ...
 @overload
 def flipTheExtra_0b1(intWithExtra_0b1: 形ArcCode) -> 形ArcCode: ...
 @overload
-def flipTheExtra_0b1(intWithExtra_0b1: ArrayArcCode) -> ArrayArcCode: ...
+def flipTheExtra_0b1(intWithExtra_0b1: 形ArrayArcCode) -> 形ArrayArcCode: ...
 @overload
-def flipTheExtra_0b1(intWithExtra_0b1: ArrayInteger) -> ArrayInteger: ...
+def flipTheExtra_0b1(intWithExtra_0b1: 形ArrayInteger) -> 形ArrayInteger: ...
 @overload
 def flipTheExtra_0b1(intWithExtra_0b1: pandas.Series[Any]) -> pandas.Series[Any]: ...
 @vectorize([int64(int64), f"{形ArcCode.__name__}({形ArcCode.__name__})"], cache=True, nopython=True, fastmath=True)

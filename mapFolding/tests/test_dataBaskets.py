@@ -9,17 +9,15 @@ import numpy
 import pytest
 
 if TYPE_CHECKING:
-	from numpy import dtype, int64 as numpy_int64, ndarray
-
-type Array2Dint64 = ndarray[tuple[int, int], dtype[numpy_int64]]
+	from mapFolding.theTypes import 形Array2Dint64
 
 次Values: int = 2
 次Subset: int = 3
 slicerValues: ShapeSlicer = ShapeSlicer(axis=次Values, length=...)
 
 @jit(cache=False, error_model='numpy', fastmath=True, forceinline=True, locals={})
-def exerciseShapeObjectsNumba(length: int, indexes: int, values: tuple[int, ...]) -> Array2Dint64:
-	arrayTarget: Array2Dint64 = numpy.zeros(ShapeArray(indexes=indexes, length=length), dtype=numpy.int64)
+def exerciseShapeObjectsNumba(length: int, indexes: int, values: tuple[int, ...]) -> 形Array2Dint64:
+	arrayTarget: 形Array2Dint64 = numpy.zeros(ShapeArray(indexes=indexes, length=length), dtype=numpy.int64)
 	arrayTarget[slicerValues] = values
 	arrayTarget[ShapeSlicer(axis=次Subset, length=slice(oneIndexed, length))] = values[oneIndexed:]
 	arrayTarget[slicerValues] >>= oneIndexed
@@ -47,6 +45,6 @@ def test_exerciseShapeObjectsNumba(
 	values: tuple[int, ...],
 	expected: tuple[tuple[int, ...], ...],
 ) -> None:
-	actual: Array2Dint64 = exerciseShapeObjectsNumba(length, indexes, values)
+	actual: 形Array2Dint64 = exerciseShapeObjectsNumba(length, indexes, values)
 
 	assertEqualTo(tuple(map(tuple, actual.tolist())), expected, exerciseShapeObjectsNumba.__name__, length, indexes, values)

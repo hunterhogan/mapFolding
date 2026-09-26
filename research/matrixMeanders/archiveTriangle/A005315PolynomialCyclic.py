@@ -12,9 +12,9 @@ def A005315of2(x: int, 次n: int = 2) -> int:
 	xOdd: int = x % 2
 	x //= 2
 	return int(
-		(pow(2, 1) + pow(2, 2) * pow(3, 1) * x + pow(2, 2) * comb(x, 2), pow(2, 3) + pow(2, 1) * pow(7, 1) * x + pow(2, 2) * comb(x, 2))[
-			xOdd
-		]
+		(pow(2, 1) + pow(2, 2) * pow(3, 1) * x + pow(2, 2) * comb(x, 2)
+		, pow(2, 3) + pow(2, 1) * pow(7, 1) * x + pow(2, 2) * comb(x, 2)
+		)[xOdd]
 	)
 
 def A005315of3(x: int, 次n: int = 3) -> int:
@@ -24,17 +24,18 @@ def A005315of3(x: int, 次n: int = 3) -> int:
 	return int(
 		(
 			Fraction(pow(2, 2) * pow(5, 1) * pow(11, 1), pow(3, 3))
-			+ Fraction(pow(2, 1) * pow(7, 1) * pow(59, 1), pow(3, 2)) * x
-			+ Fraction(pow(2, 1) * pow(23, 1) * pow(29, 1), pow(3, 2)) * comb(x, 2)
-			+ pow(2, 1) * pow(41, 1) * comb(x, 3)
-			+ Fraction(pow(2, 2) * pow(13, 1), pow(3, 1)) * comb(x, 4)
-			+ (neg(Fraction(pow(2, 2), pow(3, 3))), Fraction(pow(2, 1), pow(3, 3)), Fraction(pow(2, 1), pow(3, 3)))[x % 3]
+				+ Fraction(pow(2, 1) * pow(7, 1) * pow(59, 1), pow(3, 2)) * x
+				+ Fraction(pow(2, 1) * pow(23, 1) * pow(29, 1), pow(3, 2)) * comb(x, 2)
+				+ pow(2, 1) * pow(41, 1) * comb(x, 3)
+				+ Fraction(pow(2, 2) * pow(13, 1), pow(3, 1)) * comb(x, 4)
+					+ (neg(Fraction(pow(2, 2), pow(3, 3))), Fraction(pow(2, 1), pow(3, 3)), Fraction(pow(2, 1), pow(3, 3)))[x % 3]
+
 			, Fraction(pow(2, 2) * pow(283, 1), pow(3, 3))
-			+ Fraction(pow(2, 4) * pow(89, 1), pow(3, 2)) * x
-			+ Fraction(pow(2, 3) * pow(211, 1), pow(3, 2)) * comb(x, 2)
-			+ Fraction(pow(2, 4) * pow(17, 1), pow(3, 1)) * comb(x, 3)
-			+ Fraction(pow(2, 2) * pow(13, 1), pow(3, 1)) * comb(x, 4)
-			+ (Fraction(pow(2, 1), pow(3, 3)), neg(Fraction(pow(2, 2), pow(3, 3))), Fraction(pow(2, 1), pow(3, 3)))[x % 3]
+				+ Fraction(pow(2, 4) * pow(89, 1), pow(3, 2)) * x
+				+ Fraction(pow(2, 3) * pow(211, 1), pow(3, 2)) * comb(x, 2)
+				+ Fraction(pow(2, 4) * pow(17, 1), pow(3, 1)) * comb(x, 3)
+				+ Fraction(pow(2, 2) * pow(13, 1), pow(3, 1)) * comb(x, 4)
+					+ (Fraction(pow(2, 1), pow(3, 3)), neg(Fraction(pow(2, 2), pow(3, 3))), Fraction(pow(2, 1), pow(3, 3)))[x % 3]
 		)[xOdd]
 	)
 

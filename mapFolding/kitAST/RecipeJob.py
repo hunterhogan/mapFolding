@@ -381,7 +381,7 @@ def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsMo
 	"""Customize data types in the given ingredients by adjusting imports.
 
 	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
-	preserving _abstract_ names for datatypes, such as `形Array1DTotalLeaves` and `形TotalFolds`. This function well
+	preserving _abstract_ names for datatypes, such as `形ArrayTotalLeaves1D` and `形TotalFolds`. This function well
 	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
 	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
 	for example, `mapFolding.synthesized.foldsSymmetric.asynchronousNumba` or its equivalent), ought to still have the abstract

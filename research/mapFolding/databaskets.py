@@ -8,7 +8,7 @@ from mapFolding import leafOrigin
 from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.dataStructures import makeDataContainer
 from mapFolding.oeis import getTotalFoldsKnown
-from mapFolding.theTypes import 形Array1DTotalLeaves
+from mapFolding.theTypes import 形ArrayTotalLeaves1D
 import dataclasses
 
 @dataclasses.dataclass(slots=True)
@@ -28,11 +28,11 @@ class LeafSequenceState(StateMapFolding):
 
 	Attributes
 	----------
-	leafSequence : 形Array1DTotalLeaves = None
+	leafSequence : 形ArrayTotalLeaves1D = None
 		Array storing the sequence of leaf connections discovered.
 	"""
 
-	leafSequence: 形Array1DTotalLeaves = dataclasses.field(default_factory=lambda: 形Array1DTotalLeaves([]), init=True, metadata={'dtype': 形Array1DTotalLeaves.__args__[1].__args__[0]})
+	leafSequence: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
 	"""
 	Array storing the sequence of leaf connections discovered during computation.
 

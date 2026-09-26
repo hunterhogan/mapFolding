@@ -17,7 +17,7 @@ import numpy
 import pathlib
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import Array1DArcCode, Array1DBoolean, Array1DSelector, ArrayArcCode, 形NumPyInteger
+	from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
 	from numpy import dtype, ndarray
 	from numpy.lib._arraysetops_impl import UniqueInverseResult
 	from typing import Any
@@ -73,7 +73,7 @@ def count(state: StateMeanders) -> StateMeanders:
     slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
 
     shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
-    arrayMeanders: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+    arrayMeanders: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
     del shape
 
     arrayMeanders[slicerArcCode] = array(list(state.lookupMeanders.keys()), dtype=形ArcCode)
@@ -83,13 +83,13 @@ def count(state: StateMeanders) -> StateMeanders:
 
     tqdmBoundary: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=False)
     while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
-        def recordAnalysis(arrayAnalyzed: ArrayArcCode, 次Target: int, arcCode: Array1DArcCode, arrayMeanders: ArrayArcCode) -> int:
+        def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次Target: int, arcCode: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode) -> int:
             """Record valid `arcCode` and corresponding `meanders` in `arrayAnalyzed`."""
-            selectorOverLimit: Array1DBoolean = state.arcCodeMAXIMUM < arcCode
+            selectorOverLimit: 形ArrayBoolean1D = state.arcCodeMAXIMUM < arcCode
             arcCode[selectorOverLimit] = 0
             del selectorOverLimit
 
-            selectorAnalysis: Array1DSelector = numpy.flatnonzero(arcCode)
+            selectorAnalysis: 形ArraySelector1D = numpy.flatnonzero(arcCode)
 
             次Stop: int = 次Target + len(selectorAnalysis)
             sliceAnalysis: slice = slice(次Target, 次Stop)
@@ -117,17 +117,17 @@ def count(state: StateMeanders) -> StateMeanders:
         state.setBitsLocator()
 
         shape = ShapeArray(length=getTotalBuckets(state, len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)
-        arrayAnalyzed: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
+        arrayAnalyzed: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
         del shape
 
         shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indexes=indexesWorkbench)
-        arrayWorkbench: ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayPrepArea')
+        arrayWorkbench: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayPrepArea')
         del shape
 
         #=EndNotes##arrayWorkbench=
-        toPrepArea: Array1DArcCode = arrayWorkbench[slicerPrepArea].view()
-        bitsAlfa: Array1DArcCode = arrayWorkbench[slicerAlfa].view()
-        bitsZulu: Array1DArcCode = arrayWorkbench[slicerZulu].view()
+        toPrepArea: 形ArrayArcCode1D = arrayWorkbench[slicerPrepArea].view()
+        bitsAlfa: 形ArrayArcCode1D = arrayWorkbench[slicerAlfa].view()
+        bitsZulu: 形ArrayArcCode1D = arrayWorkbench[slicerZulu].view()
 
         Xand(arrayMeanders[slicerArcCode], state.bitsLocator, out=bitsAlfa)
         XshiftRight(arrayMeanders[slicerArcCode], 1, out=bitsZulu)
@@ -148,7 +148,7 @@ def count(state: StateMeanders) -> StateMeanders:
         moreThan(bitsAlfa, 1, out=toPrepArea)
 
         multiply(bitsZulu, toPrepArea, out=toPrepArea)
-        selectorGreaterThan1: Array1DBoolean = numpy.empty_like(toPrepArea, dtype=numpy_bool)
+        selectorGreaterThan1: 形ArrayBoolean1D = numpy.empty_like(toPrepArea, dtype=numpy_bool)
         moreThan(toPrepArea, 1, out=selectorGreaterThan1)
 
 #-------- if bitsAlfaAtEven and not bitsZuluAtEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
@@ -160,9 +160,9 @@ def count(state: StateMeanders) -> StateMeanders:
         Xxor(toPrepArea, 1, out=toPrepArea)
 
         Xand(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-        arraySelectors: Array1DSelector = numpy.flatnonzero(toPrepArea)
+        arraySelectors: 形ArraySelector1D = numpy.flatnonzero(toPrepArea)
 
-        bitsAlfaStack: Array1DArcCode = bitsAlfa.copy()
+        bitsAlfaStack: 形ArrayArcCode1D = bitsAlfa.copy()
         bitsAlfaStack[arraySelectors] = flipTheExtra_0b1(bitsAlfaStack[arraySelectors])
         del arraySelectors
 
@@ -173,7 +173,7 @@ def count(state: StateMeanders) -> StateMeanders:
         Xand(toPrepArea, 1, out=toPrepArea)
         Xxor(toPrepArea, 1, out=toPrepArea)
         Xand(selectorGreaterThan1, toPrepArea, out=toPrepArea)
-        arraySelectors: Array1DSelector = numpy.flatnonzero(toPrepArea)
+        arraySelectors: 形ArraySelector1D = numpy.flatnonzero(toPrepArea)
 
 #-------- bitsAlfaAtEven or bitsZuluAtEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
         Xand(bitsZulu, bitsAlfa, out=toPrepArea)
@@ -182,7 +182,7 @@ def count(state: StateMeanders) -> StateMeanders:
         Xand(selectorGreaterThan1, toPrepArea, out=toPrepArea)
         del selectorGreaterThan1
         Xxor(toPrepArea, 1, out=toPrepArea)
-        selectorDisqualified: Array1DSelector = numpy.flatnonzero(toPrepArea)
+        selectorDisqualified: 形ArraySelector1D = numpy.flatnonzero(toPrepArea)
 
         toPrepArea[:] = bitsZulu.copy()
         toPrepArea[arraySelectors] = flipTheExtra_0b1(toPrepArea[arraySelectors])
@@ -202,7 +202,7 @@ def count(state: StateMeanders) -> StateMeanders:
         state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders)
 
 #================== analyze bitsAlfa ====== (1 - (bitsAlfa & 1)) << 1 | bitsAlfa >> 2 | bitsZulu << 3 ========
-        bitsAlfaStack: Array1DArcCode = numpy.empty_like(arrayMeanders[slicerArcCode])
+        bitsAlfaStack: 形ArrayArcCode1D = numpy.empty_like(arrayMeanders[slicerArcCode])
 #-------- >> | << | (<< - 1 & bitsAlfa 1 1) << bitsZulu 3 2 bitsAlfa 2 ----------
         Xand(bitsAlfa, 1, out=bitsAlfaStack)
         subtract(1, bitsAlfaStack, out=bitsAlfaStack)
@@ -217,9 +217,9 @@ def count(state: StateMeanders) -> StateMeanders:
         XshiftRight(toPrepArea, 2, out=toPrepArea)
 
 #-------- if 1 < bitsAlfa ------------ < 1 bitsAlfa -----
-        bitsAlfaStack: Array1DArcCode = numpy.empty_like(arrayMeanders[slicerArcCode])
+        bitsAlfaStack: 形ArrayArcCode1D = numpy.empty_like(arrayMeanders[slicerArcCode])
         lessThanEqual(bitsAlfa, 1, out=bitsAlfaStack)
-        arraySelectors: Array1DSelector = numpy.flatnonzero(bitsAlfaStack)
+        arraySelectors: 形ArraySelector1D = numpy.flatnonzero(bitsAlfaStack)
         del bitsAlfaStack
         toPrepArea[arraySelectors] = 0
         del arraySelectors
@@ -227,7 +227,7 @@ def count(state: StateMeanders) -> StateMeanders:
         state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders)
 
 #================== analyze bitsZulu ========== (1 - (bitsZulu & 1)) | bitsAlfa << 2 | bitsZulu >> 1 ============
-        bitsZuluStack: Array1DArcCode = numpy.empty_like(arrayMeanders[slicerArcCode])
+        bitsZuluStack: 形ArrayArcCode1D = numpy.empty_like(arrayMeanders[slicerArcCode])
 #-------- >> | << | (- 1 & bitsZulu 1) << bitsAlfa 2 1 bitsZulu 1 ----------
         Xand(bitsZulu, 1, out=bitsZuluStack)
         subtract(1, bitsZuluStack, out=bitsZuluStack)
@@ -242,9 +242,9 @@ def count(state: StateMeanders) -> StateMeanders:
         XshiftRight(toPrepArea, 1, out=toPrepArea)
 
 #-------- if 1 < bitsZulu ------------- < 1 bitsZulu ------
-        bitsZuluStack: Array1DArcCode = numpy.empty_like(arrayMeanders[slicerArcCode])
+        bitsZuluStack: 形ArrayArcCode1D = numpy.empty_like(arrayMeanders[slicerArcCode])
         lessThanEqual(bitsZulu, 1, out=bitsZuluStack)
-        arraySelectors: Array1DSelector = numpy.flatnonzero(bitsZuluStack)
+        arraySelectors: 形ArraySelector1D = numpy.flatnonzero(bitsZuluStack)
         del bitsZuluStack
         toPrepArea[arraySelectors] = 0
         del arraySelectors

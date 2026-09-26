@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from mapFolding.dataBaskets import (
-	StateMapFolding, 形Array1DElephino, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形Elephino, 形TotalFolds, 形TotalLeaves)
+	StateMapFolding, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形Elephino, 形TotalFolds, 形TotalLeaves)
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from numba import jit
 
 @jit(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
-def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形TotalLeaves, 次MiniGap: 形Elephino, leaf1ndex: 形TotalLeaves, leafConnectee: 形TotalLeaves, dimensionsUnconstrained: 形TotalLeaves, countDimensionsGapped: 形Array1DTotalLeaves, gapRangeStart: 形Array1DElephino, gapsWhere: 形Array1DTotalLeaves, leafAbove: 形Array1DTotalLeaves, leafBelow: 形Array1DTotalLeaves, connectionGraph: 形Array3DTotalLeaves, totalDimensions: 形TotalLeaves, totalLeaves: 形TotalLeaves) -> tuple[形TotalFolds, 形Elephino, 形Elephino, 形TotalLeaves, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形Array1DTotalLeaves, 形Array1DElephino, 形Array1DTotalLeaves, 形Array1DTotalLeaves, 形Array1DTotalLeaves, 形Array3DTotalLeaves, 形TotalLeaves, 形TotalLeaves]:
+def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形TotalLeaves, 次MiniGap: 形Elephino, leaf1ndex: 形TotalLeaves, leafConnectee: 形TotalLeaves, dimensionsUnconstrained: 形TotalLeaves, countDimensionsGapped: 形ArrayTotalLeaves1D, gapRangeStart: 形ArrayElephino1D, gapsWhere: 形ArrayTotalLeaves1D, leafAbove: 形ArrayTotalLeaves1D, leafBelow: 形ArrayTotalLeaves1D, connectionGraph: 形ArrayTotalLeaves3D, totalDimensions: 形TotalLeaves, totalLeaves: 形TotalLeaves) -> tuple[形TotalFolds, 形Elephino, 形Elephino, 形TotalLeaves, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形ArrayTotalLeaves1D, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形TotalLeaves, 形TotalLeaves]:
     while leaf1ndex > 4:
         if leafBelow[0] == 1:
             if leaf1ndex > totalLeaves:
@@ -61,12 +61,12 @@ def doTheNeedful(state: StateMapFolding) -> StateMapFolding:
     leaf1ndex: 形TotalLeaves = state.leaf1ndex
     leafConnectee: 形TotalLeaves = state.leafConnectee
     dimensionsUnconstrained: 形TotalLeaves = state.dimensionsUnconstrained
-    countDimensionsGapped: 形Array1DTotalLeaves = state.countDimensionsGapped
-    gapRangeStart: 形Array1DElephino = state.gapRangeStart
-    gapsWhere: 形Array1DTotalLeaves = state.gapsWhere
-    leafAbove: 形Array1DTotalLeaves = state.leafAbove
-    leafBelow: 形Array1DTotalLeaves = state.leafBelow
-    connectionGraph: 形Array3DTotalLeaves = state.connectionGraph
+    countDimensionsGapped: 形ArrayTotalLeaves1D = state.countDimensionsGapped
+    gapRangeStart: 形ArrayElephino1D = state.gapRangeStart
+    gapsWhere: 形ArrayTotalLeaves1D = state.gapsWhere
+    leafAbove: 形ArrayTotalLeaves1D = state.leafAbove
+    leafBelow: 形ArrayTotalLeaves1D = state.leafBelow
+    connectionGraph: 形ArrayTotalLeaves3D = state.connectionGraph
     totalDimensions: 形TotalLeaves = state.totalDimensions
     totalLeaves: 形TotalLeaves = state.totalLeaves
     groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves = count(groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves)

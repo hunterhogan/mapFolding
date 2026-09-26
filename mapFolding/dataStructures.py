@@ -14,7 +14,7 @@ import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Mapping, Sequence
-	from mapFolding.theTypes import 形Array1DTotalLeaves, 形Array2DTotalLeaves, 形Array3DTotalLeaves, 形NumPyInteger
+	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger
 	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
 	from typing import Any, Literal
 
@@ -37,10 +37,10 @@ def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: �
 		A 3D NumPy array with shape (`totalDimensions`, `totalLeaves`+1, `totalLeaves`+1) with the
 		specified `datatype`, representing all possible connections between leaves.
 	"""
-	connectionGraph: 形Array3DTotalLeaves = _makeConnectionGraph(mapShape, totalLeaves)
+	connectionGraph: 形ArrayTotalLeaves3D = _makeConnectionGraph(mapShape, totalLeaves)
 	return connectionGraph.astype(datatype)
 
-def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Array3DTotalLeaves:
+def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形ArrayTotalLeaves3D:
 	"""Implement connection graph generation for map folding.
 
 	Parameters
@@ -52,7 +52,7 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Arra
 
 	Returns
 	-------
-	connectionGraph : 形Array3DTotalLeaves
+	connectionGraph : 形ArrayTotalLeaves3D
 		A 3D NumPy array with shape (`totalDimensions`, `totalLeaves`+1, `totalLeaves`+1) where each
 		entry [d,i,j] represents the leaf that would be connected to leaf j when inserting leaf i in
 		dimension d.
@@ -66,14 +66,14 @@ def _makeConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int) -> 形Arra
 	rules, boundary conditions, and dimensional constraints.
 	"""
 	totalDimensions: int = len(mapShape)
-	cumulativeProduct: 形Array1DTotalLeaves = numpy.multiply.accumulate([1, *list(mapShape)], dtype=形NumPyTotalLeaves)
-	arrayDimensions: 形Array1DTotalLeaves = numpy.array(mapShape, dtype=形NumPyTotalLeaves)
-	coordinateSystem: 形Array2DTotalLeaves = numpy.zeros((totalDimensions, totalLeaves + 1), dtype=形NumPyTotalLeaves)
+	cumulativeProduct: 形ArrayTotalLeaves1D = numpy.multiply.accumulate([1, *list(mapShape)], dtype=形NumPyTotalLeaves)
+	arrayDimensions: 形ArrayTotalLeaves1D = numpy.array(mapShape, dtype=形NumPyTotalLeaves)
+	coordinateSystem: 形ArrayTotalLeaves2D = numpy.zeros((totalDimensions, totalLeaves + 1), dtype=形NumPyTotalLeaves)
 	for 次Dimension in range(totalDimensions):
 		for leaf1ndex in range(1, totalLeaves + inclusive):
 			coordinateSystem[次Dimension, leaf1ndex] = (((leaf1ndex - 1) // cumulativeProduct[次Dimension]) % arrayDimensions[次Dimension] + 1)
 
-	connectionGraph: 形Array3DTotalLeaves = numpy.zeros((totalDimensions, totalLeaves + 1, totalLeaves + 1), dtype=形NumPyTotalLeaves)
+	connectionGraph: 形ArrayTotalLeaves3D = numpy.zeros((totalDimensions, totalLeaves + 1, totalLeaves + 1), dtype=形NumPyTotalLeaves)
 	for 次Dimension in range(totalDimensions):
 		for activeLeaf1ndex in range(1, totalLeaves + inclusive):
 			for connectee1ndex in range(1, activeLeaf1ndex + inclusive):

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import MutableMapping
 from numpy import dtype, int64 as numpy_int64, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
 from typing import TYPE_CHECKING, TypedDict, TypeVar
 
@@ -22,14 +23,16 @@ type Folding = tuple[Leaf, ...]
 
 type OEISid = LiteralString
 
+type 形Triangle = MutableMapping[int, tuple[int, ...]]
+
 #================== Generic NumPy =================================================================
 
-type Array1DBoolean = ndarray[tuple[int], dtype[numpy_bool]]
-type Array1DSelector = ndarray[tuple[int], dtype[numpy_intp]]
-type ArraySelector = ndarray[tuple[Any, ...], dtype[numpy_intp]]
-type ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
-type Array1Dint64 = ndarray[tuple[int], dtype[numpy_int64]]
-type Array2Dint64 = ndarray[tuple[int, int], dtype[numpy_int64]]
+type 形Array1Dint64 = ndarray[tuple[int], dtype[numpy_int64]]
+type 形Array2Dint64 = ndarray[tuple[int, int], dtype[numpy_int64]]
+type 形ArrayBoolean1D = ndarray[tuple[int], dtype[numpy_bool]]
+type 形ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
+type 形ArraySelector = ndarray[tuple[Any, ...], dtype[numpy_intp]]
+type 形ArraySelector1D = ndarray[tuple[int], dtype[numpy_intp]]
 
 # TODO Change to generic class? "The preferred way to construct a type variable is via the dedicated
 # syntax for generic functions, classes, and type aliases." <- type aliases? really?
@@ -45,8 +48,8 @@ type Array2Dint64 = ndarray[tuple[int, int], dtype[numpy_int64]]
 形Meanders: TypeAlias = numpy_uint64
 """The fixed-size integer type used to store `meanders`."""
 
-type Array1DArcCode = ndarray[tuple[int], dtype[形ArcCode]]
-type ArrayArcCode = ndarray[tuple[Any, ...], dtype[形ArcCode]]
+type 形ArrayArcCode = ndarray[tuple[Any, ...], dtype[形ArcCode]]
+type 形ArrayArcCode1D = ndarray[tuple[int], dtype[形ArcCode]]
 
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
 
@@ -91,20 +94,20 @@ different data type."""
 
 # Reminder: you can override the types with anything you want, not just `ndarray`. See, e.g., `makeJobTheorem2Numba`.
 
-形Array3DTotalLeaves: TypeAlias = ndarray[tuple[int, int, int], dtype[形NumPyTotalLeaves]]
-"""A `numpy.ndarray` with three axes and elements of type `形NumPyTotalLeaves`."""
-
-形Array2DTotalLeaves: TypeAlias = ndarray[tuple[int, int], dtype[形NumPyTotalLeaves]]
-"""A `numpy.ndarray` with two axes and elements of type `形NumPyTotalLeaves`."""
-
-形Array1DTotalLeaves: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalLeaves]]
-"""A `numpy.ndarray` with one axis and elements of type `形NumPyTotalLeaves`."""
-
-形Array1DElephino: TypeAlias = ndarray[tuple[int], dtype[形NumPyElephino]]
+形ArrayElephino1D: TypeAlias = ndarray[tuple[int], dtype[形NumPyElephino]]
 """A `numpy.ndarray` with one axis and elements of type `形NumPyElephino`."""
 
-形Array1DTotalFolds: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalFolds]]
+形ArrayTotalFolds1D: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalFolds]]
 """A `numpy.ndarray` with one axis and elements of type `形NumPyTotalFolds`."""
+
+形ArrayTotalLeaves1D: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalLeaves]]
+"""A `numpy.ndarray` with one axis and elements of type `形NumPyTotalLeaves`."""
+
+形ArrayTotalLeaves2D: TypeAlias = ndarray[tuple[int, int], dtype[形NumPyTotalLeaves]]
+"""A `numpy.ndarray` with two axes and elements of type `形NumPyTotalLeaves`."""
+
+形ArrayTotalLeaves3D: TypeAlias = ndarray[tuple[int, int, int], dtype[形NumPyTotalLeaves]]
+"""A `numpy.ndarray` with three axes and elements of type `形NumPyTotalLeaves`."""
 
 #================== Function signatures ===========================================================
 
