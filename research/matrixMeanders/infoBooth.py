@@ -16,7 +16,7 @@ pathArchiveTriangle: Path = pathResearchMatrixMeanders / 'archiveTriangle'
 
 filenameTriangleSemiText: str = 'triangleSemi.txt'
 filenameTriangleSemiCommaSeparatedValues: str = 'triangleSemi.csv'
-filenameTriangleSemiSubmissionOEIS: str = 'triangle semi-meanders OEIS submission.txt'
+filenameTriangleSemiSubmissionOEIS: str = 'data/A400429_draft.txt'
 filenameFormulaA005315: str = '_A005315.py'
 filenameFormulaA005315PolynomialCyclic: str = 'A005315PolynomialCyclic.py'
 filenameArchiveA005315Binomial: str = 'A005315Binomial.py'

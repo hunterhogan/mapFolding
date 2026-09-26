@@ -22,8 +22,9 @@ if __name__ == '__main__':
 
 	boxOf_n: list[int] = []
 	boxOf_n.extend(range(2, 24))
-	# boxOf_n.extend(range(24, 28))
+	boxOf_n.extend(range(24, 28))
 	# boxOf_n.extend(range(28, 33))
+	# boxOf_n.extend(range(33, 38))
 
 	for n in boxOf_n:
 		gc.collect()
@@ -45,7 +46,6 @@ if __name__ == '__main__':
 		if n <= 2:
 			countTotal = A005315of0(n)
 		else:
-			# TODO Are these diagnostics correct?
 			countTotal += sum(map(call, boxOfDiagonals[0:totalDiagonals], repeat(n)))  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 
 		printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
