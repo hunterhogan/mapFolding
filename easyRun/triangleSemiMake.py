@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from hunterMakesPy import oneIndexed
 from itertools import repeat
-from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
+from mapFolding.algorithms.matrixMeanders import doTheNeedful
 from mapFolding.algorithms.matrixMeandersTriangle import countDiagonal
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import appendStringToHere, writeDiagonal
@@ -41,8 +41,8 @@ def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None
 			appendStringToHere(formatBFile({nT: aOFn下k}), pathFilenameTriangleSemiText)
 
 if __name__ == '__main__':
-	flow: str = 'diagonal'
 	flow = 'rows'
+	flow: str = 'diagonal'
 	if flow == 'rows':
 		nT: int = 491
 		nStart: int = 45

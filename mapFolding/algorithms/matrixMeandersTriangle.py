@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from functools import reduce
+from mapFolding.algorithms.matrixMeanders import walkDyckPath
 from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders, shortcut
 from mapFolding.dataBaskets import StateMeanders
-from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
 from research.matrixMeanders.formulasTriangle import A005315of0, boxOfDiagonals
 
 def count(state: StateMeanders) -> StateMeanders:
