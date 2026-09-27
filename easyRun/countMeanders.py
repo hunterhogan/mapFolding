@@ -27,6 +27,7 @@ if __name__ == '__main__':
 	flow = 'matrixNumPy'
 	flow = 'prunePandas'
 	flow = 'pruneNumPy'
+	flow = 'matrixPolars'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			# ('A005315', 'closed'),
@@ -37,12 +38,12 @@ if __name__ == '__main__':
 	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
 		printEasyRunHeader(oeisID, flow)
 
-		boxOf_n: list[int] = [28]
+		boxOf_n: list[int] = []
 		# boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
 		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
-		# boxOf_n.extend(range(38, 43))
+		boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))
 		# boxOf_n.extend(range(46, 47))
 		# boxOf_n.extend(range(47, 48))

@@ -65,9 +65,10 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
   "pytest-cov",
   "setuptools",
   "sympy",
-], ortools = ["ortools"], pandas = ["pandas", "pyarrow"], testing = [
+], ortools = ["ortools"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
   "ortools",
   "pandas",
+  "polars>=1.44.2",
   "pyarrow",
   "pytest-env",
   "pytest-xdist",

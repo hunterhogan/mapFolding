@@ -94,10 +94,11 @@ def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> No
 
 @pytest.mark.parametrize('n, flow, kind', (
 	*[pytest.param(n, flow, kind, id=f'{flow}-{kind}-{n}') for flow, kind, n in CartesianProduct(
-			('matrixMeanders', 'matrixPandas', 'matrixNumPy')
+			('matrixMeanders', 'matrixPandas', 'matrixNumPy', 'matrixPolars')
 			, ('semi', 'meanders')
 			, (1, 2, 3, 11, 20, 30))
 	]
+	, pytest.param(34, 'matrixPolars', 'semi', id='matrixPolars-semi-34')
 	, *[pytest.param(n, flow, kind, id=f'{flow}-{kind}-{n}') for flow, kind, n in CartesianProduct(
 			('prune', 'pruneNumPy', 'prunePandas')
 			, ('semi',)

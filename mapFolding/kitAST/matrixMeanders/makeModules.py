@@ -311,6 +311,85 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
+def makePolarsTransitions(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	identifiers = identifiers or defaultMatrixMeanders
+	名Module: str = override.get('名Module') or identifiers['module'].get('polarsTransitions') or 'polarsTransitions'
+	名CallableAddLoop: str = override.get('名CallableAddLoop') or 'addLoop'
+	名CallableDragUp: str = override.get('名CallableDragUp') or 'dragUp'
+	名CallableDragDown: str = override.get('名CallableDragDown') or 'dragDown'
+	名CallableConnectArcs: str = override.get('名CallableConnectArcs') or 'connectArcs'
+
+	list_ast_exprArcCodeAnalysisInitial: list[ast.expr] = []
+	NodeTourist(Be.AnnAssign.targetIs(IfThis.isNameIdentifier('arcCodeAnalysis'))
+		, Grab.valueAttribute(Then.appendTo(list_ast_exprArcCodeAnalysisInitial))).visit(astModule)
+	list_ast_exprArcCodeAnalysis: list[ast.expr] = []
+	NodeTourist(Be.Assign.targetsIs(Be.at(0, IfThis.isNameIdentifier('arcCodeAnalysis')))
+		, Grab.valueAttribute(Then.appendTo(list_ast_exprArcCodeAnalysis))).visit(astModule)
+	ast_exprAddLoop: ast.expr = list_ast_exprArcCodeAnalysisInitial[0]
+	ast_exprDragUp, ast_exprDragDown, ast_exprConnectArcs = list_ast_exprArcCodeAnalysis
+
+	def captureAssignmentExpression(identifier: str) -> ast.expr:
+		return raiseIfNone(NodeTourist[ast.AnnAssign, ast.expr](
+			Be.AnnAssign.targetIs(IfThis.isNameIdentifier(identifier))
+			, Then.extractIt(DOT.value)
+		).captureLastMatch(astModule))
+
+	ast_exprBitsAlfaIsEven: ast.expr = captureAssignmentExpression('bitsAlfaIsEven')
+	ast_exprBitsZuluIsEven: ast.expr = captureAssignmentExpression('bitsZuluIsEven')
+
+	def powersOfTwo(ast_expr: ast.expr) -> ast.expr:
+		return Make.Pow.join([Make.Constant(2), ast_expr])
+
+	def replacePolarsBitShifts(ast_expr: ast.expr) -> ast.expr:
+		def replaceShiftLeft(astBinOp: ast.BinOp) -> ast.BinOp:
+			NodeChanger(Be.BinOp.opIs(Be.LShift), replaceShiftLeft).generic_visit(astBinOp)
+			Grab.rightAttribute(powersOfTwo)(astBinOp)
+			Grab.opAttribute(Then.replaceWith(Make.Mult()))(astBinOp)
+			return astBinOp
+
+		def replaceShiftRight(astBinOp: ast.BinOp) -> ast.BinOp:
+			NodeChanger(Be.BinOp.opIs(Be.RShift), replaceShiftRight).generic_visit(astBinOp)
+			Grab.rightAttribute(powersOfTwo)(astBinOp)
+			Grab.opAttribute(Then.replaceWith(Make.FloorDiv()))(astBinOp)
+			return astBinOp
+
+		NodeChanger(Be.BinOp.opIs(Be.LShift), replaceShiftLeft).visit(ast_expr)
+		NodeChanger(Be.BinOp.opIs(Be.RShift), replaceShiftRight).visit(ast_expr)
+		return ast_expr
+
+	ast_exprAddLoop = replacePolarsBitShifts(ast_exprAddLoop)
+	ast_exprDragUp = replacePolarsBitShifts(ast_exprDragUp)
+	ast_exprDragDown = replacePolarsBitShifts(ast_exprDragDown)
+	ast_exprConnectArcs = replacePolarsBitShifts(ast_exprConnectArcs)
+	NodeChanger(IfThis.isNameIdentifier('bitsAlfaIsEven')
+		, Then.replaceWith(ast_exprBitsAlfaIsEven)).visit(ast_exprDragUp)
+	NodeChanger(IfThis.isNameIdentifier('bitsZuluIsEven')
+		, Then.replaceWith(ast_exprBitsZuluIsEven)).visit(ast_exprDragDown)
+	NodeChanger(IfThis.isNameIdentifier('bitsAlfaIsEven')
+		, Then.replaceWith(ast_exprBitsAlfaIsEven)).visit(ast_exprConnectArcs)
+	NodeChanger(IfThis.isNameIdentifier('bitsZuluIsEven')
+		, Then.replaceWith(ast_exprBitsZuluIsEven)).visit(ast_exprConnectArcs)
+
+	def makePolarsTransition(identifier: str, ast_expr: ast.expr) -> ast.FunctionDef:
+		return Make.FunctionDef(identifier
+			, argumentSpecification=Make.arguments(list_arg=[
+				Make.arg('bitsAlfa', Make.Attribute(Make.Name('polars'), 'Expr'))
+				, Make.arg('bitsZulu', Make.Attribute(Make.Name('polars'), 'Expr'))
+			])
+			, body=[Make.Return(ast_expr)]
+			, returns=Make.Attribute(Make.Name('polars'), 'Expr'))
+
+	ingredientsModule = IngredientsModule(
+		imports=LedgerOfImports(), epilogue=Make.Module([
+			makePolarsTransition(名CallableAddLoop, ast_exprAddLoop)
+			, makePolarsTransition(名CallableDragUp, ast_exprDragUp)
+			, makePolarsTransition(名CallableDragDown, ast_exprDragDown)
+			, makePolarsTransition(名CallableConnectArcs, ast_exprConnectArcs)
+		])
+	)
+	ingredientsModule.imports.addImport_asStr('polars')
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
+
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
@@ -320,6 +399,7 @@ def makeModulesMeanders() -> None:
 	makePruneNumPy(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makePrunePandas(getModule(defaultMatrixMeanders['module']['pandas'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makePolarsTransitions(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':
 	makeModulesMeanders()

@@ -16,7 +16,7 @@ from research.matrixMeanders.infoBooth import makePathFilenameDiagonal, pathFile
 from tqdm.auto import tqdm
 
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
-	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
+	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal), flow='matrixPolars')
 	writeDiagonal({n: sum(state.lookupMeanders.values()) + state.countAddend}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:
