@@ -51,7 +51,40 @@ def count(state: StateMeanders) -> StateMeanders:
 			nonlocal dataframeAnalyzed
 			dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.次Target].groupby('analyzed', sort=False)['meanders'].aggregate('sum').reset_index()
 
-		def analyzeArcCodesAligned(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
+		def addLoop(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
+			"""Compute arcCode with the 'simple' formula.
+
+			Formula
+			-------
+			```python
+				arcCode = ((bitsAlfa | (bitsZulu << 1)) << 2) | 3
+			```
+
+			Notes
+			-----
+			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the
+			last bits are '0b00'. '0 + 3' is '0b11', and '0b00 | 0b11' is also '0b11'.
+			"""
+			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
+			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
+
+			bitsZulu: pandas.Series = dataframeMeanders['arcCode'].copy()
+			bitsZulu //= 2**1
+			bitsZulu &= state.bitsLocator 									# `bitsZulu`
+
+			bitsZulu *= 2**1 												# (bitsZulu << 1)
+
+			dataframeMeanders.loc[:, 'analyzed'] |= bitsZulu 				# ((bitsAlfa | (bitsZulu ...))
+
+			del bitsZulu
+
+			dataframeMeanders.loc[:, 'analyzed'] *= 2**2 					# (... << 2)
+			dataframeMeanders.loc[:, 'analyzed'] += 3 						# (...) | 3
+			dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+
+			return dataframeMeanders
+
+		def connectAcrossLine(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
 			"""Compute `arcCode` from `bitsAlfa` and `bitsZulu` if at least one is an even number.
 
 			Before computing `arcCode`, some values of `bitsAlfa` and `bitsZulu` are modified.
@@ -130,40 +163,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
 			return dataframeMeanders
 
-		def analyzeArcCodesSimple(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
-			"""Compute arcCode with the 'simple' formula.
-
-			Formula
-			-------
-			```python
-				arcCode = ((bitsAlfa | (bitsZulu << 1)) << 2) | 3
-			```
-
-			Notes
-			-----
-			Using `+= 3` instead of `|= 3` is valid in this specific case. Left shift by two means the
-			last bits are '0b00'. '0 + 3' is '0b11', and '0b00 | 0b11' is also '0b11'.
-			"""
-			dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
-			dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
-
-			bitsZulu: pandas.Series = dataframeMeanders['arcCode'].copy()
-			bitsZulu //= 2**1
-			bitsZulu &= state.bitsLocator 									# `bitsZulu`
-
-			bitsZulu *= 2**1 												# (bitsZulu << 1)
-
-			dataframeMeanders.loc[:, 'analyzed'] |= bitsZulu 				# ((bitsAlfa | (bitsZulu ...))
-
-			del bitsZulu
-
-			dataframeMeanders.loc[:, 'analyzed'] *= 2**2 					# (... << 2)
-			dataframeMeanders.loc[:, 'analyzed'] += 3 						# (...) | 3
-			dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
-
-			return dataframeMeanders
-
-		def analyzeBitsAlfa(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
+		def dragUp(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
 			"""Compute `arcCode` from `bitsAlfa`.
 
 			Formula
@@ -214,7 +214,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
 			return dataframeMeanders
 
-		def analyzeBitsZulu(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
+		def dragDown(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
 			"""Compute `arcCode` from `bitsZulu`.
 
 			Formula
@@ -282,7 +282,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
 			return dataframeMeanders
 
-		dataframeMeanders = pandas.DataFrame({
+		dataframeMeanders: pandas.DataFrame = pandas.DataFrame({
 			'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=形ArcCode)
 			, 'analyzed': pandas.Series(name='analyzed', data=0, dtype=形ArcCode)
 			, 'meanders': pandas.Series(name='meanders', data=dataframeAnalyzed['meanders'], copy=False, dtype=形Meanders)
@@ -306,16 +306,16 @@ def count(state: StateMeanders) -> StateMeanders:
 
 		state.次Target = 0
 
-		dataframeMeanders: pandas.DataFrame = analyzeArcCodesSimple(dataframeMeanders)
+		dataframeMeanders = addLoop(dataframeMeanders)
 		dataframeMeanders = recordArcCodes(dataframeMeanders)
 
-		dataframeMeanders = analyzeBitsAlfa(dataframeMeanders)
+		dataframeMeanders = dragUp(dataframeMeanders)
 		dataframeMeanders = recordArcCodes(dataframeMeanders)
 
-		dataframeMeanders = analyzeBitsZulu(dataframeMeanders)
+		dataframeMeanders = dragDown(dataframeMeanders)
 		dataframeMeanders = recordArcCodes(dataframeMeanders)
 
-		dataframeMeanders = analyzeArcCodesAligned(dataframeMeanders)
+		dataframeMeanders = connectAcrossLine(dataframeMeanders)
 		dataframeMeanders = recordArcCodes(dataframeMeanders)
 		del dataframeMeanders
 		goByeBye()

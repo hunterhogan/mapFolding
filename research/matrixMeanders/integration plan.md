@@ -2,6 +2,24 @@
 
 This inventory covers code that walks Dyck paths, advances noncrossing boundary states, or counts those states. The semi-meander triangle is [OEIS A400429](https://oeis.org/A400429); `triangleSemi` remains in some filenames and identifiers. The long-term goal is to integrate the useful research code into the main `mapFolding` package.
 
+## Immediate goals
+
+- Change basecamp.countMeanders to optionally accept StateMeanders and always return StateMeanders.
+- Change all relevant doTheNeedful to return StateMeanders.
+- New field in StateMeanders: countAddend: int.
+- Merge `countSemiMeandersWithPruning` and `shortcut` because they are essentially the same function, put in matrixMeandersShare. Receive `StateMeanders`, find `arcCode` in `lookupMeanders` for which a diagonal function can calculate the value as a function of `n`, remove from the dictionary, compute the value for one `n`, multiply by the totalMeanders, return `StateMeanders`.
+- Redesign the functionality of `countDiagonal`. Have a function that takes the same arguments and returns `StateMeanders`. Then that state can be passed to basecamp.countMeanders.
+
+## Soon
+
+- kitAST to create a flow that uses the new `shortcut` function during the count.
+- add it to basecamp.
+- update pandas with latest optimization ideas.
+- Create functions and transformations to add `shortcut` functionality to numpy and pandas versions.
+- Add basecamp flows to pytest test functions.
+- Read official A400429 data with functions from the oeis directory.
+- If a module in mapFolding imports from C:\apps\mapFolding\research\matrixMeanders\infoBooth.py, move the information from infoBooth to a more appropriate place in mapFolding.
+
 ## Meander transfer engines
 
 - [matrixMeanders.py](../../mapFolding/algorithms/matrixMeanders.py) is the hand-written dictionary transfer. It provides the Dyck bit walk and four boundary transitions.
