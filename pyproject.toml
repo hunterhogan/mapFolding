@@ -89,12 +89,15 @@ build-backend = "setuptools.build_meta"
 [tool.coverage]
 report = { exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "numba.jit_module"], ignore_errors = false }
 run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFolding/tests/coverage/.coverage", omit = [
+  "**/archive/**",
+  "**/development/**",
   "**/easyRun/**",
-  "**/tests/*",
+  "**/*research/**",
+  "**/tests/**",
   "getLLVMforNoReason.py",
   "mapFolding/algorithms/foldsSymmetric.py",
-  "Z0Z_*",
-  "zCuzDocStoopid*.py",
+  "**/Z0Z_*",
+  "**/zCuzDocStoopid*",
 ], parallel = true, source = ["."] }
 
 [tool.pytest]
@@ -103,9 +106,8 @@ log_auto_indent = "On"
 testpaths = ["**/tests"]
 
 [tool.pytest_env]
-# https://github.com/hunterhogan/mapFolding/issues/20
 # Re-confirmed: numba Version: 0.63.1 2025 December 30
-# NUMBA_JIT_COVERAGE = "1" # This does not work, whether it is 0 or 1.
+NUMBA_JIT_COVERAGE = "1" # This does not work, whether it is 0 or 1.
 # NUMBA_DISABLE_JIT = "1" # This is the only way to get coverage data
 
 [tool.setuptools]
