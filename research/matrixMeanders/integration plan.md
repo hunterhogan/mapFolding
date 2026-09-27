@@ -14,6 +14,7 @@ This inventory covers code that walks Dyck paths, advances noncrossing boundary 
 
 - [triangleSemiCheck.py](../../easyRun/triangleSemiCheck.py) is the verification module for modules in transition. Run it from the repository root after activating `.venv` with `python easyRun/triangleSemiCheck.py`.
 - Use pytest for stable modules. Expand its coverage when transition modules become stable.
+- Do not create a new directory for pytest cache. Fix the problem.
 
 ## Meander transfer engines
 

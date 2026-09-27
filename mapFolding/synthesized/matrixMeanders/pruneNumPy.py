@@ -47,9 +47,9 @@ def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[St
         return subtotalMeanders
     state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
     selectorRemaining: 形ArraySelector1D = numpy.flatnonzero(arrayMeanders[slicerMeanders])
-    arrayMeanders[slicerArcCode][:len(selectorRemaining)] = arrayMeanders[slicerArcCode][selectorRemaining]
-    arrayMeanders[slicerMeanders][:len(selectorRemaining)] = arrayMeanders[slicerMeanders][selectorRemaining]
-    arrayMeanders = arrayMeanders[:len(selectorRemaining)]
+    arrayMeanders[slicerArcCode][0:len(selectorRemaining)] = arrayMeanders[slicerArcCode][selectorRemaining]
+    arrayMeanders[slicerMeanders][0:len(selectorRemaining)] = arrayMeanders[slicerMeanders][selectorRemaining]
+    arrayMeanders = arrayMeanders[0:len(selectorRemaining)]
     if not len(selectorRemaining):
         state.boundary = 0
     return (state, arrayMeanders)
@@ -235,20 +235,6 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形Ar
     arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
     arrayAnalyzed[slicerMeandersAnalysis] = arrayMeanders[slicerMeanders][selectorAnalysis]
     return 次Stop
-
-def consolidateAnalyzed(arrayAnalyzed: 形ArrayArcCode, 次Stop: int) -> tuple[形ArrayArcCode, int]:
-    indexAnalyzed: int = 0
-    indexConsolidated: int = 0
-    while indexAnalyzed < 次Stop:
-        arcCode: int = arrayAnalyzed[indexAnalyzed, 次ArcCode]
-        meanders: int = 0
-        while indexAnalyzed < 次Stop and arrayAnalyzed[indexAnalyzed, 次ArcCode] == arcCode:
-            meanders += arrayAnalyzed[indexAnalyzed, 次Meanders]
-            indexAnalyzed += 1
-        arrayAnalyzed[indexConsolidated, 次ArcCode] = arcCode
-        arrayAnalyzed[indexConsolidated, 次Meanders] = meanders
-        indexConsolidated += 1
-    return (arrayAnalyzed, indexConsolidated)
 
 def doTheNeedful(state: StateMeanders) -> StateMeanders:
     """Compute `meanders` with a transfer matrix algorithm implemented in NumPy.

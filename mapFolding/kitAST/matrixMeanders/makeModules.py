@@ -114,6 +114,7 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
@@ -130,6 +131,7 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	名ModulePruneBigInt: str = override.get('名ModulePruneBigInt') or identifiers['module']['pruneBigInt']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
 	名Package: str = override.get('package') or identifiers['module']['package']
+
 	astAssign_shortcutNumPy: ast.Assign = Make.Assign([
 		Make.Tuple([Make.Name(名DataclassInstance, Make.Store()), Make.Name(名ArrayMeanders, Make.Store())], Make.Store())]
 		, value=Make.Call(Make.Name(名CallablePruneArray), [Make.Name(名DataclassInstance), Make.Name(名ArrayMeanders)]))
@@ -144,15 +146,15 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleBigInt)))
 		, Grab.moduleAttribute(Then.replaceWith(getLogicalPath(名Package, logicalPathInfix, 名ModulePruneBigInt)))).visit(astModule)
-	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('__future__'))
-		, Then.insertThisBelow([Make.ImportFrom(
-			getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare)
-			, list_alias=[Make.alias(名CallablePrune)])])).visit(astModule)
-	ingredientsModule = IngredientsModule()
-	ingredientsModule.appendEpilogue(astModule)
+
+	ledger = LedgerOfImports()
+	ledger.addImportFrom_asStr(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePrune)
+
+	ingredientsModule = IngredientsModule(imports=ledger, epilogue=astModule)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
@@ -168,6 +170,7 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	名ModulePruneBigInt: str = override.get('名ModulePruneBigInt') or identifiers['module']['pruneBigInt']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
 	名Package: str = override.get('package') or identifiers['module']['package']
+
 	astAssign_shortcutPandas: ast.Assign = Make.Assign([
 		Make.Tuple([Make.Name(名DataclassInstance, Make.Store()), Make.Name(名DataframeAnalyzed, Make.Store())], Make.Store())]
 		, value=Make.Call(Make.Name(名CallablePruneDataFrame), [Make.Name(名DataclassInstance), Make.Name(名DataframeAnalyzed)]))
@@ -175,17 +178,19 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 		, NodeChanger(Be.Nonlocal, Then.replaceWith(Make.Nonlocal([名DataframeAnalyzed, 名DataclassInstance]))).visit).visit(astModule)
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableAggregateArcCodes))
 		, NodeChanger(Be.Assign, Then.insertThisBelow([astAssign_shortcutPandas])).visit).visit(astModule)
+
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher))
 		, NodeChanger(Be.While, Then.insertThisAbove([Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
 			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
+
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleBigInt)))
 		, Grab.moduleAttribute(Then.replaceWith(getLogicalPath(名Package, logicalPathInfix, 名ModulePruneBigInt)))).visit(astModule)
-	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('__future__'))
-		, Then.insertThisBelow([Make.ImportFrom(
-			getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare)
-			, list_alias=[Make.alias(名CallablePrune)])])).visit(astModule)
-	ingredientsModule = IngredientsModule()
-	ingredientsModule.appendEpilogue(astModule)
+
+	ledger = LedgerOfImports()
+	ledger.addImportFrom_asStr(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePrune)
+	ledger.addImportFrom_asStr(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePruneDataFrame)
+
+	ingredientsModule = IngredientsModule(imports=ledger, epilogue=astModule)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:

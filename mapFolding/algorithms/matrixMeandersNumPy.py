@@ -37,8 +37,8 @@ slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., axis=次PrepArea)
 slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
 
+# TODO Create a real vectorized numpy function, not a shoehorned python function.
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
-    # DOCUMENT
     boundary: int = state.boundary + 1
 
     def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
@@ -52,9 +52,9 @@ def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[St
 
     state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
     selectorRemaining: 形ArraySelector1D = numpy.flatnonzero(arrayMeanders[slicerMeanders])
-    arrayMeanders[slicerArcCode][:len(selectorRemaining)] = arrayMeanders[slicerArcCode][selectorRemaining]
-    arrayMeanders[slicerMeanders][:len(selectorRemaining)] = arrayMeanders[slicerMeanders][selectorRemaining]
-    arrayMeanders = arrayMeanders[:len(selectorRemaining)]
+    arrayMeanders[slicerArcCode][0:len(selectorRemaining)] = arrayMeanders[slicerArcCode][selectorRemaining]
+    arrayMeanders[slicerMeanders][0:len(selectorRemaining)] = arrayMeanders[slicerMeanders][selectorRemaining]
+    arrayMeanders = arrayMeanders[0:len(selectorRemaining)]
     if not len(selectorRemaining):
         state.boundary = 0
     return state, arrayMeanders
@@ -253,13 +253,6 @@ def count(state: StateMeanders) -> StateMeanders:
         numpy.add.at(arrayMeanders[slicerMeanders], unique.inverse_indices, arrayAnalyzed[slicerMeanders])
         del unique
 
-        # ruff: ignore[commented-out-code]
-        # arrayAnalyzed, state.次Target = consolidateAnalyzed(arrayAnalyzed, state.次Target)
-        # shape = ShapeArray(length=state.次Target, indexes=indexesAnalyzed)
-        # arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
-        # del shape
-        # arrayMeanders[:] = arrayAnalyzed[0:state.次Target]
-
         del arrayAnalyzed
 
         tqdmBoundary.update()
@@ -317,21 +310,28 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形Ar
 
     return 次Stop
 
-def consolidateAnalyzed(arrayAnalyzed: 形ArrayArcCode, 次Stop: int) -> tuple[形ArrayArcCode, int]:
-    # PAINFULLY slow.
-    indexAnalyzed: int = 0
-    indexConsolidated: int = 0
-    #Custom compaction avoids the full-size index arrays required by NumPy's `unique`.
-    while indexAnalyzed < 次Stop:
-        arcCode: int = arrayAnalyzed[indexAnalyzed, 次ArcCode]
-        meanders: int = 0
-        while indexAnalyzed < 次Stop and arrayAnalyzed[indexAnalyzed, 次ArcCode] == arcCode:
-            meanders += arrayAnalyzed[indexAnalyzed, 次Meanders]
-            indexAnalyzed += 1
-        arrayAnalyzed[indexConsolidated, 次ArcCode] = arcCode
-        arrayAnalyzed[indexConsolidated, 次Meanders] = meanders
-        indexConsolidated += 1
-    return arrayAnalyzed, indexConsolidated
+# ruff: ignore[commented-out-code]
+# def consolidateAnalyzed(arrayAnalyzed: 形ArrayArcCode, 次Stop: int) -> tuple[形ArrayArcCode, int]:
+#     # PAINFULLY slow.
+#     indexAnalyzed: int = 0
+#     indexConsolidated: int = 0
+#     #Custom compaction avoids the full-size index arrays required by NumPy's `unique`.
+#     while indexAnalyzed < 次Stop:
+#         arcCode: int = arrayAnalyzed[indexAnalyzed, 次ArcCode]
+#         meanders: int = 0
+#         while indexAnalyzed < 次Stop and arrayAnalyzed[indexAnalyzed, 次ArcCode] == arcCode:
+#             meanders += arrayAnalyzed[indexAnalyzed, 次Meanders]
+#             indexAnalyzed += 1
+#         arrayAnalyzed[indexConsolidated, 次ArcCode] = arcCode
+#         arrayAnalyzed[indexConsolidated, 次Meanders] = meanders
+#         indexConsolidated += 1
+#     return arrayAnalyzed, indexConsolidated
+#         arrayAnalyzed, state.次Target = consolidateAnalyzed(arrayAnalyzed, state.次Target)
+#         shape = ShapeArray(length=state.次Target, indexes=indexesAnalyzed)
+#         arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+#         del shape
+#         arrayMeanders[:] = arrayAnalyzed[0:state.次Target]
+
 
 def doTheNeedful(state: StateMeanders) -> StateMeanders:
     """Compute `meanders` with a transfer matrix algorithm implemented in NumPy.

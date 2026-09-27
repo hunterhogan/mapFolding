@@ -250,3 +250,20 @@ def prune(state: StateMeanders) -> StateMeanders:
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
 	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
+
+def pruneDataFrame(state: StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> tuple[StateMeanders, pandas.DataFrame]:
+	# DOCUMENT
+	boundary: int = state.boundary + 1
+
+	def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
+		nonlocal dataframeAnalyzed
+		arcCode: int = (1 << (2 * (boundary - 2 * 次diagonal) + 2)) - 1
+		selectorKnown: pandas.Series[bool] = dataframeAnalyzed['analyzed'].eq(arcCode)
+		subtotalMeanders: int = sum(map(int, dataframeAnalyzed.loc[selectorKnown, 'meanders']))
+		dataframeAnalyzed = dataframeAnalyzed.loc[~selectorKnown]
+		return 工(boundary) * subtotalMeanders
+
+	state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
+	if not len(dataframeAnalyzed.index):
+		state.boundary = 0
+	return state, dataframeAnalyzed.reset_index(drop=True)

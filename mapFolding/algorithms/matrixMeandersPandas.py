@@ -1,48 +1,15 @@
-"""Transfer matrix algorithm implementations in NumPy (*Num*erical *Py*thon) and pandas.
-
-Citations
----------
-- https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib
-- https://github.com/hunterhogan/mapFolding/blob/main/citations/Howroyd.bib
-
-See Also
---------
-`matrixMeanders`: transfer matrix algorithm implementation in pure Python with `int` (*int*eger) contained in a `dict` (*dict*ionary).
-https://oeis.org/A000682
-https://oeis.org/A005316
-https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
-"""
 from __future__ import annotations
 
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Meanders
-from research.matrixMeanders.formulasTriangle import boxOfDiagonals
 from typing import TYPE_CHECKING
 from warnings import warn
 import pandas
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from mapFolding.dataBaskets import StateMeanders
-
-def pruneDataFrame(state: StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> tuple[StateMeanders, pandas.DataFrame]:
-    # DOCUMENT
-    boundary: int = state.boundary + 1
-
-    def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
-        nonlocal dataframeAnalyzed
-        arcCode: int = (1 << (2 * (boundary - 2 * 次diagonal) + 2)) - 1
-        selectorKnown: pandas.Series[bool] = dataframeAnalyzed['analyzed'].eq(arcCode)
-        subtotalMeanders: int = sum(map(int, dataframeAnalyzed.loc[selectorKnown, 'meanders']))
-        dataframeAnalyzed = dataframeAnalyzed.loc[~selectorKnown]
-        return 工(boundary) * subtotalMeanders
-
-    state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
-    if not len(dataframeAnalyzed.index):
-        state.boundary = 0
-    return state, dataframeAnalyzed.reset_index(drop=True)
 
 def count(state: StateMeanders) -> StateMeanders:
     """Count meanders with matrix transfer algorithm using pandas DataFrame.
