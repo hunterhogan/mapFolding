@@ -107,8 +107,12 @@ defaultMatrixMeanders['function'].update({
     'bigInt': 'countBigInt'
     , 'bigIntTest': 'integersWide吗'
     , 'Dyck': 'walkDyckPath'
-    , 'shortcut': 'shortcut'
+    , 'aggregateArcCodes': 'aggregateArcCodes'
+    , 'prune': 'prune'
 })
+sherpa: str = defaultMatrixMeanders['function']['prune']
+suffix: tuple[str, ...] = tuple(map(sherpa.__add__, ('Array', 'DataFrame')))
+defaultMatrixMeanders['function'].update(dict(zip(suffix, suffix, strict=True)))
 defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
 defaultMatrixMeanders['module'].update({
     'algorithm': 'matrixMeanders'
@@ -116,9 +120,18 @@ defaultMatrixMeanders['module'].update({
     , 'chop': 'chop'
     , 'prune': 'prune'
 })
+sherpa: str = defaultMatrixMeanders['module']['prune']
+suffix = tuple(map(sherpa.__add__, ('BigInt', 'NumPy', 'Pandas')))
+defaultMatrixMeanders['module'].update(dict(zip(suffix, suffix, strict=True)))
 defaultMatrixMeanders['module']['numpy'] = defaultMatrixMeanders['module']['algorithm'] + 'NumPy'
+defaultMatrixMeanders['module']['pandas'] = defaultMatrixMeanders['module']['algorithm'] + 'Pandas'
 defaultMatrixMeanders['module']['share'] = defaultMatrixMeanders['module']['algorithm'] + 'Share'
 defaultMatrixMeanders['module']['bigIntTest'] = defaultMatrixMeanders['module']['share']
+defaultMatrixMeanders['variable'].update({
+    'arrayMeanders': 'arrayMeanders'
+    , 'dataframeAnalyzed': 'dataframeAnalyzed'
+    , 'tqdmBoundary': 'tqdmBoundary'
+})
 defaultMatrixMeanders['logicalPath']['default'] = defaultMatrixMeanders['logicalPath']['algorithm']
 defaultMatrixMeanders['module']['default'] = defaultMatrixMeanders['module']['algorithm']
 

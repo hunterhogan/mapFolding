@@ -15,8 +15,8 @@ https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044
 from __future__ import annotations
 
 from gc import collect as goByeBye
-from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
-from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
+from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗, prune
+from mapFolding.synthesized.matrixMeanders.pruneBigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode, 形Meanders
 from research.matrixMeanders.formulasTriangle import boxOfDiagonals
 from typing import TYPE_CHECKING
@@ -28,21 +28,19 @@ if TYPE_CHECKING:
     from mapFolding.dataBaskets import StateMeanders
 
 def pruneDataFrame(state: StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> tuple[StateMeanders, pandas.DataFrame]:
-    # DOCUMENT
     boundary: int = state.boundary + 1
 
     def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
         nonlocal dataframeAnalyzed
-        arcCode: int = (1 << (2 * (boundary - 2 * 次diagonal) + 2)) - 1
+        arcCode: int = (1 << 2 * (boundary - 2 * 次diagonal) + 2) - 1
         selectorKnown: pandas.Series[bool] = dataframeAnalyzed['analyzed'].eq(arcCode)
         subtotalMeanders: int = sum(map(int, dataframeAnalyzed.loc[selectorKnown, 'meanders']))
         dataframeAnalyzed = dataframeAnalyzed.loc[~selectorKnown]
         return 工(boundary) * subtotalMeanders
-
     state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
     if not len(dataframeAnalyzed.index):
         state.boundary = 0
-    return state, dataframeAnalyzed.reset_index(drop=True)
+    return (state, dataframeAnalyzed.reset_index(drop=True))
 
 def count(state: StateMeanders) -> StateMeanders:
     """Count meanders with matrix transfer algorithm using pandas DataFrame.
@@ -57,18 +55,14 @@ def count(state: StateMeanders) -> StateMeanders:
     state : StateMeanders
         Updated state with new `boundary` and `lookupMeanders`.
     """
-    dataframeAnalyzed = pandas.DataFrame({
-        'analyzed': pandas.Series(name='analyzed', data=state.lookupMeanders.keys(), copy=False, dtype=形ArcCode)
-        , 'meanders': pandas.Series(name='meanders', data=state.lookupMeanders.values(), copy=False, dtype=形Meanders)
-        }
-    )
+    dataframeAnalyzed = pandas.DataFrame({'analyzed': pandas.Series(name='analyzed', data=state.lookupMeanders.keys(), copy=False, dtype=形ArcCode), 'meanders': pandas.Series(name='meanders', data=state.lookupMeanders.values(), copy=False, dtype=形Meanders)})
     state.lookupMeanders.clear()
+    while 0 < state.boundary and (not integersWide吗(state, dataframe=dataframeAnalyzed)):
 
-    while 0 < state.boundary and not integersWide吗(state, dataframe=dataframeAnalyzed):
-
-        def aggregateArcCodes()  -> None:
-            nonlocal dataframeAnalyzed
+        def aggregateArcCodes() -> None:
+            nonlocal dataframeAnalyzed, state
             dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.次Target].groupby('analyzed', sort=False)['meanders'].aggregate('sum').reset_index()
+            state, dataframeAnalyzed = pruneDataFrame(state, dataframeAnalyzed)
 
         def addLoop(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
             """Compute arcCode with the 'simple' formula.
@@ -86,21 +80,15 @@ def count(state: StateMeanders) -> StateMeanders:
             """
             dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
             dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
-
             bitsZulu: pandas.Series = dataframeMeanders['arcCode'].copy()
-            bitsZulu //= 2**1
-            bitsZulu &= state.bitsLocator 									# `bitsZulu`
-
-            bitsZulu *= 2**1 												# (bitsZulu << 1)
-
-            dataframeMeanders.loc[:, 'analyzed'] |= bitsZulu 				# ((bitsAlfa | (bitsZulu ...))
-
+            bitsZulu //= 2 ** 1
+            bitsZulu &= state.bitsLocator
+            bitsZulu *= 2 ** 1
+            dataframeMeanders.loc[:, 'analyzed'] |= bitsZulu
             del bitsZulu
-
-            dataframeMeanders.loc[:, 'analyzed'] *= 2**2 					# (... << 2)
-            dataframeMeanders.loc[:, 'analyzed'] += 3 						# (...) | 3
+            dataframeMeanders.loc[:, 'analyzed'] *= 2 ** 2
+            dataframeMeanders.loc[:, 'analyzed'] += 3
             dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
-
             return dataframeMeanders
 
         def connectAcrossLine(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -119,67 +107,41 @@ def count(state: StateMeanders) -> StateMeanders:
                     arcCode = (bitsAlfa >> 2) | ((bitsZulu >> 2) << 1)
             ```
             """
-            #--------- Step 1 drop unqualified rows ---------------------------
             dataframeMeanders['analyzed'] = dataframeMeanders['arcCode'].copy()
-            dataframeMeanders['analyzed'] &= state.bitsLocator       				# `bitsAlfa`
-
-            dataframeMeanders['analyzed'] = dataframeMeanders['analyzed'].gt(1)		# `if bitsAlfaHasArcs`
-
+            dataframeMeanders['analyzed'] &= state.bitsLocator
+            dataframeMeanders['analyzed'] = dataframeMeanders['analyzed'].gt(1)
             bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()
-            bitsTarget //= 2**1
-            bitsTarget &= state.bitsLocator											# `bitsZulu`
-
+            bitsTarget //= 2 ** 1
+            bitsTarget &= state.bitsLocator
             dataframeMeanders['analyzed'] *= bitsTarget
             del bitsTarget
-            dataframeMeanders = dataframeMeanders.loc[(1 < dataframeMeanders['analyzed'])]  # `if (bitsAlfaHasArcs and bitsZuluHasArcs)`
-
+            dataframeMeanders = dataframeMeanders.loc[1 < dataframeMeanders['analyzed']]
             dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
-            dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator				# `bitsAlfa`
-
-            dataframeMeanders.loc[:, 'analyzed'] &= 1								# One step of `bitsAlfaAtEven`.
-
+            dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
+            dataframeMeanders.loc[:, 'analyzed'] &= 1
             bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()
-            bitsTarget //= 2**1
-            bitsTarget &= state.bitsLocator											# `bitsZulu`
-
-            dataframeMeanders.loc[:, 'analyzed'] &= bitsTarget						# One step of `bitsZuluAtEven`.
+            bitsTarget //= 2 ** 1
+            bitsTarget &= state.bitsLocator
+            dataframeMeanders.loc[:, 'analyzed'] &= bitsTarget
             del bitsTarget
-            dataframeMeanders.loc[:, 'analyzed'] ^= 1								# Combined second step for `bitsAlfaAtEven` and `bitsZuluAtEven`.
-
-            dataframeMeanders = dataframeMeanders.loc[(0 < dataframeMeanders['analyzed'])]  # `if (bitsAlfaIsEven or bitsZuluIsEven)`
-
-            #-------- Step 2 modify rows --------------------------------------
-            # Make a selector for bitsZuluAtOdd, so you can modify bitsAlfa
+            dataframeMeanders.loc[:, 'analyzed'] ^= 1
+            dataframeMeanders = dataframeMeanders.loc[0 < dataframeMeanders['analyzed']]
             dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**1        					# Truncated conversion to `bitsZulu`
-            dataframeMeanders.loc[:, 'analyzed'] &= 1         						# `selectorBitsZuluAtOdd`
-
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 1
+            dataframeMeanders.loc[:, 'analyzed'] &= 1
             bitsTarget = dataframeMeanders['arcCode'].copy()
-            bitsTarget &= state.bitsLocator            								# `bitsAlfa`
-
-            # `if bitsAlfaAtEven and not bitsZuluAtEven`, modify `bitsAlfaPairedToOdd`
-            bitsTarget.loc[(0 < dataframeMeanders['analyzed'])] = (
-                flipTheExtra_0b1(bitsTarget.loc[(0 < dataframeMeanders['analyzed'])]).astype(形ArcCode)
-            )
-
+            bitsTarget &= state.bitsLocator
+            bitsTarget.loc[0 < dataframeMeanders['analyzed']] = flipTheExtra_0b1(bitsTarget.loc[0 < dataframeMeanders['analyzed']]).astype(形ArcCode)
             dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode'].copy()
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**1
-            dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator     			# `bitsZulu`
-
-            # `if bitsZuluAtEven and not bitsAlfaAtEven`, modify `bitsZuluPairedToOdd`
-            dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed'] = (
-                flipTheExtra_0b1(dataframeMeanders.loc[(0 < (dataframeMeanders.loc[:, 'arcCode'] & 1)), 'analyzed']).astype(形ArcCode)
-            )
-
-            #--------- Step 3 compute `arcCode` -------------------------------
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# (bitsZulu >> 2)
-            dataframeMeanders.loc[:, 'analyzed'] *= 2**3 							# (... << 3)
-            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget						# (... | bitsAlfa)
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 1
+            dataframeMeanders.loc[:, 'analyzed'] &= state.bitsLocator
+            dataframeMeanders.loc[0 < dataframeMeanders.loc[:, 'arcCode'] & 1, 'analyzed'] = flipTheExtra_0b1(dataframeMeanders.loc[0 < dataframeMeanders.loc[:, 'arcCode'] & 1, 'analyzed']).astype(形ArcCode)
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 2
+            dataframeMeanders.loc[:, 'analyzed'] *= 2 ** 3
+            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget
             del bitsTarget
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# ... >> 2
-
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 2
             dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
-
             return dataframeMeanders
 
         def dragUp(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -193,44 +155,25 @@ def count(state: StateMeanders) -> StateMeanders:
                 # `(1 - (bitsAlfa & 1)` is an evenness test.
             ```
             """
-            dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']					# Truncated creation of `bitsAlfa`
-            dataframeMeanders.loc[:, 'analyzed'] &= 1 										# (bitsAlfa & 1)
-            dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']  # (1 - (bitsAlfa ...))
-
-            dataframeMeanders.loc[:, 'analyzed'] *= 2**1 									# ((bitsAlfa ...) << 1)
-
+            dataframeMeanders['analyzed'] = dataframeMeanders['arcCode']
+            dataframeMeanders.loc[:, 'analyzed'] &= 1
+            dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']
+            dataframeMeanders.loc[:, 'analyzed'] *= 2 ** 1
             bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()
-            bitsTarget //= 2**1
-            bitsTarget &= state.bitsLocator 												# `bitsZulu`
-
-            bitsTarget *= 2**3																# (bitsZulu << 3)
-            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsZulu ...)
-
+            bitsTarget //= 2 ** 1
+            bitsTarget &= state.bitsLocator
+            bitsTarget *= 2 ** 3
+            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget
             del bitsTarget
-            """NOTE In this code block, I rearranged the "formula" to use `bitsTarget` for two goals.
-            1. `(bitsAlfa >> 2)`.
-            2. `if 1 < bitsAlfa`. The trick is in the equivalence of v1 and v2.
-
-            v1: BITScow | (BITSwalk >> 2)
-            v2: ((BITScow << 2) | BITSwalk) >> 2
-
-            The "formula" calls for v1, but by using v2, `bitsTarget` is not changed. Therefore, because `bitsTarget` is
-            `bitsAlfa`, I can use `bitsTarget` for goal 2, `if 1 < bitsAlfa`.
-            """
-            dataframeMeanders.loc[:, 'analyzed'] *= 2**2									# ... | (bitsAlfa >> 2)
-
+            'NOTE In this code block, I rearranged the "formula" to use `bitsTarget` for two goals.\n            1. `(bitsAlfa >> 2)`.\n            2. `if 1 < bitsAlfa`. The trick is in the equivalence of v1 and v2.\n\n            v1: BITScow | (BITSwalk >> 2)\n            v2: ((BITScow << 2) | BITSwalk) >> 2\n\n            The "formula" calls for v1, but by using v2, `bitsTarget` is not changed. Therefore, because `bitsTarget` is\n            `bitsAlfa`, I can use `bitsTarget` for goal 2, `if 1 < bitsAlfa`.\n            '
+            dataframeMeanders.loc[:, 'analyzed'] *= 2 ** 2
             bitsTarget = dataframeMeanders['arcCode'].copy()
-            bitsTarget &= state.bitsLocator 												# `bitsAlfa`
-
-            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsAlfa)
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**2 									# (... >> 2)
-
-            dataframeMeanders.loc[(bitsTarget <= 1), 'analyzed'] = 0 						# if 1 < bitsAlfa
-
+            bitsTarget &= state.bitsLocator
+            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 2
+            dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0
             del bitsTarget
-
             dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
-
             return dataframeMeanders
 
         def dragDown(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -243,104 +186,61 @@ def count(state: StateMeanders) -> StateMeanders:
                     arcCode = (1 - (bitsZulu & 1)) | (bitsAlfa << 2) | (bitsZulu >> 1)
             ```
             """
-            # `(1 - (bitsZulu & 1))` is an evenness test: we want a single bit as the answer.
             dataframeMeanders.loc[:, 'analyzed'] = dataframeMeanders['arcCode']
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**1
-            dataframeMeanders.loc[:, 'analyzed'] &= 1 										# Truncated creation of `bitsZulu`.
-            dataframeMeanders.loc[:, 'analyzed'] &= 1 										# (bitsZulu & 1)
-            dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']  # (1 - (bitsZulu ...))
-
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 1
+            dataframeMeanders.loc[:, 'analyzed'] &= 1
+            dataframeMeanders.loc[:, 'analyzed'] &= 1
+            dataframeMeanders.loc[:, 'analyzed'] = 1 - dataframeMeanders.loc[:, 'analyzed']
             bitsTarget: pandas.Series = dataframeMeanders['arcCode'].copy()
-            bitsTarget &= state.bitsLocator 												# `bitsAlfa`
-
-            bitsTarget *= 2**2 																# (bitsAlfa << 2)
-            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsAlfa ...)
+            bitsTarget &= state.bitsLocator
+            bitsTarget *= 2 ** 2
+            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget
             del bitsTarget
-
-            # Same trick as in `analyzeBitsAlfa`.
-            dataframeMeanders.loc[:, 'analyzed'] *= 2**1 									# (... << 1)
-
+            dataframeMeanders.loc[:, 'analyzed'] *= 2 ** 1
             bitsTarget = dataframeMeanders['arcCode'].copy()
-            bitsTarget //= 2**1
-            bitsTarget &= state.bitsLocator 												# `bitsZulu`
-
-            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget 								# ... | (bitsZulu)
-            dataframeMeanders.loc[:, 'analyzed'] //= 2**1 									# (... >> 1)
-
-            dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0 							# if 1 < bitsZulu
+            bitsTarget //= 2 ** 1
+            bitsTarget &= state.bitsLocator
+            dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget
+            dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 1
+            dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0
             del bitsTarget
-
             dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
-
             return dataframeMeanders
 
         def recordArcCodes(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
             """Abstraction makes it easier to do things such as write to disk."""
             nonlocal dataframeAnalyzed
-
             次StopAnalyzed: int = state.次Target + int((0 < dataframeMeanders['analyzed']).sum())
-
             if state.次Target < 次StopAnalyzed:
                 if len(dataframeAnalyzed.index) < 次StopAnalyzed:
-                    warn(f"Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to {次StopAnalyzed=}; n={state.n}, {state.boundary=}.", stacklevel=2)
+                    warn(f'Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to 次StopAnalyzed={次StopAnalyzed!r}; n={state.n}, state.boundary={state.boundary!r}.', stacklevel=2)
                     dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(次StopAnalyzed), fill_value=0)
-
-                dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['analyzed']] = (
-                    dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['analyzed']
-                                ].to_numpy(dtype=形ArcCode, copy=False)
-                )
-
-                dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['meanders']] = (
-                    dataframeMeanders.loc[(0 < dataframeMeanders['analyzed']), ['meanders']
-                                ].to_numpy(dtype=形Meanders, copy=False)
-                )
-
+                dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['analyzed']] = dataframeMeanders.loc[0 < dataframeMeanders['analyzed'], ['analyzed']].to_numpy(dtype=形ArcCode, copy=False)
+                dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['meanders']] = dataframeMeanders.loc[0 < dataframeMeanders['analyzed'], ['meanders']].to_numpy(dtype=形Meanders, copy=False)
                 state.次Target = 次StopAnalyzed
-
             del 次StopAnalyzed
-
             return dataframeMeanders
-
-        dataframeMeanders: pandas.DataFrame = pandas.DataFrame({
-            'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=形ArcCode)
-            , 'analyzed': pandas.Series(name='analyzed', data=0, dtype=形ArcCode)
-            , 'meanders': pandas.Series(name='meanders', data=dataframeAnalyzed['meanders'], copy=False, dtype=形Meanders)
-            }
-        )
-
+        dataframeMeanders: pandas.DataFrame = pandas.DataFrame({'arcCode': pandas.Series(name='arcCode', data=dataframeAnalyzed['analyzed'], copy=False, dtype=形ArcCode), 'analyzed': pandas.Series(name='analyzed', data=0, dtype=形ArcCode), 'meanders': pandas.Series(name='meanders', data=dataframeAnalyzed['meanders'], copy=False, dtype=形Meanders)})
         del dataframeAnalyzed
         goByeBye()
-
         state.bitWidth = int(dataframeMeanders['arcCode'].max()).bit_length()
         state.setBitsLocator()
         length: int = getTotalBuckets(state, len(dataframeMeanders.index))
-        dataframeAnalyzed = pandas.DataFrame({
-            'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=形ArcCode)
-            , 'meanders': pandas.Series(name='meanders', data=0, index=pandas.RangeIndex(length), dtype=形Meanders)
-            }, index=pandas.RangeIndex(length)
-        )
-
+        dataframeAnalyzed = pandas.DataFrame({'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=形ArcCode), 'meanders': pandas.Series(name='meanders', data=0, index=pandas.RangeIndex(length), dtype=形Meanders)}, index=pandas.RangeIndex(length))
         state.boundary -= 1
         state.set_arcCodeMAXIMUM()
-
         state.次Target = 0
-
         dataframeMeanders = addLoop(dataframeMeanders)
         dataframeMeanders = recordArcCodes(dataframeMeanders)
-
         dataframeMeanders = dragUp(dataframeMeanders)
         dataframeMeanders = recordArcCodes(dataframeMeanders)
-
         dataframeMeanders = dragDown(dataframeMeanders)
         dataframeMeanders = recordArcCodes(dataframeMeanders)
-
         dataframeMeanders = connectAcrossLine(dataframeMeanders)
         dataframeMeanders = recordArcCodes(dataframeMeanders)
         del dataframeMeanders
         goByeBye()
-
         aggregateArcCodes()
-
     state.lookupMeanders = dataframeAnalyzed.set_index('analyzed')['meanders'].to_dict()
     del dataframeAnalyzed
     return state
@@ -358,6 +258,7 @@ def doTheNeedful(state: StateMeanders) -> StateMeanders:
     state : StateMeanders
         The completed meander transfer state.
     """
+    state = prune(state)
     while 0 < state.boundary:
         if integersWide吗(state):
             state = countBigInt(state)

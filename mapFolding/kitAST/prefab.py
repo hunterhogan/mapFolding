@@ -1,35 +1,18 @@
-"""Rewrite selected identifier-bearing nodes in a Python AST.
-
-(AI generated docstring)
-
-You can use this module to apply a small set of recurring AST rewrites inside the map-folding
-code-generation modules. The module wraps `astToolkit` [1] `NodeChanger` patterns that remove a
-`FunctionDef`, rename a `FunctionDef`, or rename a `Name` node when the node identifier matches the
-requested predicate from `mapFolding.kitAST.IfThis` [2].
-
-Contents
---------
-Functions
-	removeFunctionDef
-		Remove a function definition from an AST when the function name matches `identifier`.
-	renameFunctionDef
-		Rename a function definition in an AST when the function name matches `identifier`.
-	renameName
-		Rename `Name` nodes in an AST when the identifier matches `identifier`.
-
-References
-----------
-[1] astToolkit - Context7
-	https://context7.com/hunterhogan/asttoolkit
-[2] `mapFolding.kitAST.IfThis`
-"""
+"""Oft used transformations."""
 from __future__ import annotations
 
 from astToolkit import Be, Grab, NodeChanger, Then
 from mapFolding.kitAST import IfThis
+from mapFolding.kitAST.paths import getPathFilename
+from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from astToolkit.containers import IngredientsModule
+	from hunterMakesPy import identifierDotAttribute
+	from mapFolding.theTypes import Any, Default
+	from os import PathLike
+	from pathlib import PurePath
 	import ast
 
 def removeFunctionDef(identifier: str, node: ast.AST) -> None:
@@ -160,3 +143,37 @@ def renameName(identifier: str, identifierNew: str, node: ast.AST) -> None:
 	[3] `mapFolding.kitAST.matrixMeanders.makeModules.makeShare`
 	"""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(identifier)), Grab.idAttribute(Then.replaceWith(identifierNew))).visit(node)
+
+def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords: dict[str, Any], identifierModule: str, **override: Any) -> PurePath:
+	"""Write a generated module to its configured output path.
+
+	(AI generated docstring)
+
+	You can use this function to resolve the output location for `ingredientsModule` from
+	`identifiers`, `keywords`, and `override`, then write the generated module to disk. The
+	function applies explicit overrides before identifier defaults and returns the final path.
+
+	Parameters
+	----------
+	ingredientsModule : IngredientsModule
+		Generated module wrapper that knows how to write the assembled module.
+	identifiers : Default
+		Default identifier mapping that provides package, path, and logical-path fallbacks.
+	keywords : dict[str, Any]
+		Keyword overrides forwarded from the caller.
+	identifierModule : str
+		Module identifier used when constructing the destination filename.
+	**override : Any
+		Explicit override values that take precedence over `keywords` and `identifiers`.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the written module file.
+	"""
+	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or keywords.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	pathRoot: PathLike[str] = override.get('pathRoot') or keywords.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	identifierPackage: str = override.get('package') or keywords.get('package') or identifiers['module']['package']
+	fileExtension: str = override.get('fileExtension') or settingsPackage.fileExtension
+	pathFilename: PurePath = override.get('pathFilename') or getPathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension)
+	return ingredientsModule.write_astModule(pathFilename, identifierPackage)

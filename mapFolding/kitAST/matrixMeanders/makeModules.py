@@ -6,11 +6,9 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-# TODO move to otc?
-from mapFolding.kitAST.mapFolding._count import toDisk
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
-from mapFolding.kitAST.otc import removeFunctionDef, renameFunctionDef
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
+from mapFolding.kitAST.prefab import removeFunctionDef, renameFunctionDef, toDisk
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from mapFolding.theTypes import 形ArcCode
 from operator import getitem
@@ -29,6 +27,7 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	名Callable: str = override.get('名Callable') or identifiers['function']['bigInt']
+	名CallableCounting: str = override.get('名CallableCounting') or identifiers['function']['counting']
 	名CallableBigIntTest: str = override.get('名CallableBigIntTest') or identifiers['function']['bigIntTest']
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
 	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
@@ -36,7 +35,7 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	名ModuleBigIntTest: str = override.get('名ModuleBigIntTest') or identifiers['module']['bigIntTest']
 	名Package: str = override.get('package') or identifiers['module']['package']
 
-	renameFunctionDef(defaultMatrixMeanders['function']['counting'], 名Callable, astModule)
+	renameFunctionDef(名CallableCounting, 名Callable, astModule)
 
 	removeFunctionDef(名CallableDispatcher, astModule)
 
@@ -92,22 +91,102 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
+	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
+	名CallableCounting: str = override.get('名CallableCounting') or identifiers['function']['counting']
+	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['prune']
 	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
+	名Module: str = override.get('名Module') or identifiers['module']['prune']
+	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
+	名Package: str = override.get('package') or identifiers['module']['package']
 
 	astAssign_shortcut: ast.Assign = Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
-		, value=Make.Call(Make.Name(identifiers['function']['shortcut']), [Make.Name(名DataclassInstance)]))
+		, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))
 
 	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
 		, Then.insertThisAbove([astAssign_shortcut])).visit(astModule)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(identifiers['function']['counting']))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableCounting))
 		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(astModule)
 
 	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
 	ingredientsModule.imports.addImportFrom_asStr(
-		getLogicalPath(identifiers['module']['package'], identifiers['logicalPath']['algorithm'], identifiers['module']['share'])
-		, identifiers['function']['shortcut'])
+		getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePrune)
 	ingredientsModule.appendEpilogue(astModule)
-	return toDisk(ingredientsModule, identifiers, override, override.get('名Module', identifiers['module']['prune']))
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
+
+def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	if identifiers is None:
+		identifiers = defaultMatrixMeanders
+	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
+	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名CallableCounting: str = override.get('名CallableCounting') or identifiers['function']['counting']
+	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
+	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['prune']
+	名CallablePruneArray: str = override.get('名CallablePruneArray') or identifiers['function']['pruneArray']
+	名ArrayMeanders: str = override.get('名ArrayMeanders') or identifiers['variable']['arrayMeanders']
+	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
+	名TqdmBoundary: str = override.get('名TqdmBoundary') or identifiers['variable']['tqdmBoundary']
+	名Module: str = override.get('名Module') or identifiers['module']['pruneNumPy']
+	名ModuleBigInt: str = override.get('名ModuleBigInt') or identifiers['module']['bigInt']
+	名ModulePruneBigInt: str = override.get('名ModulePruneBigInt') or identifiers['module']['pruneBigInt']
+	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
+	名Package: str = override.get('package') or identifiers['module']['package']
+	astAssign_shortcutNumPy: ast.Assign = Make.Assign([
+		Make.Tuple([Make.Name(名DataclassInstance, Make.Store()), Make.Name(名ArrayMeanders, Make.Store())], Make.Store())]
+		, value=Make.Call(Make.Name(名CallablePruneArray), [Make.Name(名DataclassInstance), Make.Name(名ArrayMeanders)]))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableCounting))
+		, NodeChanger(Be.Expr.valueIs(Be.Call.funcIs(IfThis.isAttributeNamespaceIdentifier(名TqdmBoundary, 'update')))
+			, Then.insertThisAbove([astAssign_shortcutNumPy])).visit).visit(astModule)
+	NodeChanger(Be.Call.funcIs(IfThis.isAttributeNamespaceIdentifier(名TqdmBoundary, 'set_postfix'))
+		, Then.replaceWith(Make.Call(Make.Attribute(Make.Name(名TqdmBoundary), 'set_postfix_str'), [
+			Make.JoinedStr([Make.Constant('boundary='), Make.FormattedValue(Make.Attribute(Make.Name(名DataclassInstance), 'boundary'), conversion=-1)])]))).visit(astModule)
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher))
+		, NodeChanger(Be.While, Then.insertThisAbove([Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
+			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleBigInt)))
+		, Grab.moduleAttribute(Then.replaceWith(getLogicalPath(名Package, logicalPathInfix, 名ModulePruneBigInt)))).visit(astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('__future__'))
+		, Then.insertThisBelow([Make.ImportFrom(
+			getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare)
+			, list_alias=[Make.alias(名CallablePrune)])])).visit(astModule)
+	ingredientsModule = IngredientsModule()
+	ingredientsModule.appendEpilogue(astModule)
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
+
+def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	if identifiers is None:
+		identifiers = defaultMatrixMeanders
+	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
+	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	名CallableAggregateArcCodes: str = override.get('名CallableAggregateArcCodes') or identifiers['function']['aggregateArcCodes']
+	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
+	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['prune']
+	名CallablePruneDataFrame: str = override.get('名CallablePruneDataFrame') or identifiers['function']['pruneDataFrame']
+	名DataframeAnalyzed: str = override.get('名DataframeAnalyzed') or identifiers['variable']['dataframeAnalyzed']
+	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
+	名Module: str = override.get('名Module') or identifiers['module']['prunePandas']
+	名ModuleBigInt: str = override.get('名ModuleBigInt') or identifiers['module']['bigInt']
+	名ModulePruneBigInt: str = override.get('名ModulePruneBigInt') or identifiers['module']['pruneBigInt']
+	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
+	名Package: str = override.get('package') or identifiers['module']['package']
+	astAssign_shortcutPandas: ast.Assign = Make.Assign([
+		Make.Tuple([Make.Name(名DataclassInstance, Make.Store()), Make.Name(名DataframeAnalyzed, Make.Store())], Make.Store())]
+		, value=Make.Call(Make.Name(名CallablePruneDataFrame), [Make.Name(名DataclassInstance), Make.Name(名DataframeAnalyzed)]))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableAggregateArcCodes))
+		, NodeChanger(Be.Nonlocal, Then.replaceWith(Make.Nonlocal([名DataframeAnalyzed, 名DataclassInstance]))).visit).visit(astModule)
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableAggregateArcCodes))
+		, NodeChanger(Be.Assign, Then.insertThisBelow([astAssign_shortcutPandas])).visit).visit(astModule)
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher))
+		, NodeChanger(Be.While, Then.insertThisAbove([Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
+			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleBigInt)))
+		, Grab.moduleAttribute(Then.replaceWith(getLogicalPath(名Package, logicalPathInfix, 名ModulePruneBigInt)))).visit(astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('__future__'))
+		, Then.insertThisBelow([Make.ImportFrom(
+			getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare)
+			, list_alias=[Make.alias(名CallablePrune)])])).visit(astModule)
+	ingredientsModule = IngredientsModule()
+	ingredientsModule.appendEpilogue(astModule)
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Abandoned idea."""
@@ -231,6 +310,10 @@ def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makePrune(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makeCountBigInt(getModule(defaultMatrixMeanders['module']['prune'], defaultMatrixMeanders['logicalPath']['synthetic']
+		, identifiers=defaultMatrixMeanders), defaultMatrixMeanders, 名Module=defaultMatrixMeanders['module']['pruneBigInt'])
+	makePruneNumPy(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makePrunePandas(getModule(defaultMatrixMeanders['module']['pandas'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':

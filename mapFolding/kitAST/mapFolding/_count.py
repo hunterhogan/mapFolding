@@ -15,9 +15,9 @@ from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import (
 	DeReConstructField2ast, findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass)
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
-from mapFolding.kitAST.paths import getLogicalPath, getPathFilename
+from mapFolding.kitAST.prefab import toDisk
+from mapFolding.kitAST.paths import getLogicalPath
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
-from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 import ast
 import dataclasses
@@ -26,7 +26,6 @@ import operator
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from mapFolding.theTypes import Default
-	from os import PathLike
 	from pathlib import PurePath
 	from typing import Any
 
@@ -389,37 +388,3 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	名Module: str = override.get('名Module') or identifiers['module']['countParallelNumba']
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
-
-def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords: dict[str, Any], identifierModule: str, **override: Any) -> PurePath:
-	"""Write a generated module to its configured output path.
-
-	(AI generated docstring)
-
-	You can use this function to resolve the output location for `ingredientsModule` from
-	`identifiers`, `keywords`, and `override`, then write the generated module to disk. The
-	function applies explicit overrides before identifier defaults and returns the final path.
-
-	Parameters
-	----------
-	ingredientsModule : IngredientsModule
-		Generated module wrapper that knows how to write the assembled module.
-	identifiers : Default
-		Default identifier mapping that provides package, path, and logical-path fallbacks.
-	keywords : dict[str, Any]
-		Keyword overrides forwarded from the caller.
-	identifierModule : str
-		Module identifier used when constructing the destination filename.
-	**override : Any
-		Explicit override values that take precedence over `keywords` and `identifiers`.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Path to the written module file.
-	"""
-	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or keywords.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
-	pathRoot: PathLike[str] = override.get('pathRoot') or keywords.get('pathRoot') or identifiers['filesystem']['pathRoot']
-	identifierPackage: str = override.get('package') or keywords.get('package') or identifiers['module']['package']
-	fileExtension: str = override.get('fileExtension') or settingsPackage.fileExtension
-	pathFilename: PurePath = override.get('pathFilename') or getPathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension)
-	return ingredientsModule.write_astModule(pathFilename, identifierPackage)

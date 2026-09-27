@@ -1,4 +1,4 @@
-"""Resolve logical module names and output paths for AST-generated modules.
+"""Resolve logical module paths and physical disk paths for AST-generated modules.
 
 (AI generated docstring)
 

@@ -233,7 +233,8 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 
 	return max(totalBuckets, 3000000)
 
-def shortcut(state: StateMeanders) -> StateMeanders:
+def prune(state: StateMeanders) -> StateMeanders:
+	# DOCUMENT
 	boundary: int = state.boundary + 1
 
 	def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
@@ -245,7 +246,6 @@ def shortcut(state: StateMeanders) -> StateMeanders:
 	if not state.lookupMeanders:
 		state.boundary = 0
 	return state
-
 
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1

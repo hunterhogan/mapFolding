@@ -11,3 +11,6 @@ ignore = [
   "unnecessary-assign",
   "unnecessary-cast-to-int",
 ]
+
+[lint.per-file-ignores]
+"matrixMeanders/pruneNumPy.py" = ["extraneous-parentheses"]

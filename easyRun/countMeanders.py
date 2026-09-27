@@ -23,8 +23,10 @@ if __name__ == '__main__':
 	pathLikeWrite = None
 	flow = 'matrixPandas'
 	flow = 'matrixMeanders'
-	flow = 'matrixNumPy'
 	flow = 'prune'
+	flow = 'matrixNumPy'
+	flow = 'prunePandas'
+	flow = 'pruneNumPy'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			# ('A005315', 'closed'),
@@ -35,17 +37,9 @@ if __name__ == '__main__':
 	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
 		printEasyRunHeader(oeisID, flow)
 
-		"""# Identifiers. improve
-		"generate up to four targets."
-		1. Adding a new loop. Simple analysis.
-		2. Dragging up a loop end.
-		3. Dragging down a loop end.
-		4. Connect ends across the line.
-		"""
-
-		boxOf_n: list[int] = []
-		boxOf_n.extend(range(2, 10))
-		boxOf_n.extend(range(10, 28))
+		boxOf_n: list[int] = [28]
+		# boxOf_n.extend(range(2, 10))
+		# boxOf_n.extend(range(10, 28))
 		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
