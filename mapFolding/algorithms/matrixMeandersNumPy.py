@@ -9,8 +9,8 @@ from mapFolding.dataStructures import make_memmap
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
 from numpy import (
-    array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
-    bool as numpy_bool, greater as moreThan, less_equal as lessThanEqual, memmap, multiply, subtract)
+	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
+	bool as numpy_bool, greater as moreThan, less_equal as lessThanEqual, memmap, multiply, subtract)
 from research.matrixMeanders.formulasTriangle import boxOfDiagonals
 from tqdm.auto import tqdm
 from typing import cast, TYPE_CHECKING
