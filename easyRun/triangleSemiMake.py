@@ -6,6 +6,7 @@ from hunterMakesPy import oneIndexed
 from itertools import repeat
 from mapFolding.algorithms.matrixMeanders import doTheNeedful
 from mapFolding.algorithms.matrixMeandersTriangle import countDiagonal
+from mapFolding.basecamp import countMeanders
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import appendStringToHere, writeDiagonal
 from mapFolding.oeis import formatBFile
@@ -15,7 +16,8 @@ from research.matrixMeanders.infoBooth import makePathFilenameDiagonal, pathFile
 from tqdm.auto import tqdm
 
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
-	writeDiagonal({n: countDiagonal(n, 次diagonal)}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
+	state = countMeanders(state=countDiagonal(n, 次diagonal))
+	writeDiagonal({n: sum(state.lookupMeanders.values()) + state.countAddend}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:
 	pathFilenameTriangleSemiText.parent.mkdir(parents=True, exist_ok=True)
@@ -37,7 +39,8 @@ def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None
 				arcCode = (arcCode << (4 * k)) - 1
 				lookupMeanders: dict[int, int] = {arcCode: 1}
 				state: StateMeanders = StateMeanders(n, 'semi', lookupMeanders=lookupMeanders)
-				aOFn下k = doTheNeedful(state)
+				state = doTheNeedful(state)
+				aOFn下k = sum(state.lookupMeanders.values()) + state.countAddend
 			appendStringToHere(formatBFile({nT: aOFn下k}), pathFilenameTriangleSemiText)
 
 if __name__ == '__main__':

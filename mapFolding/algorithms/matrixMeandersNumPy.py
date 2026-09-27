@@ -309,7 +309,7 @@ def consolidateAnalyzed(arrayAnalyzed: 形ArrayArcCode, 次Stop: int) -> tuple[�
 		indexConsolidated += 1
 	return arrayAnalyzed, indexConsolidated
 
-def doTheNeedful(state: StateMeanders) -> int:
+def doTheNeedful(state: StateMeanders) -> StateMeanders:
 	"""Compute `meanders` with a transfer matrix algorithm implemented in NumPy.
 
 	Parameters
@@ -319,12 +319,12 @@ def doTheNeedful(state: StateMeanders) -> int:
 
 	Returns
 	-------
-	meanders : int
-		The computed value of `meanders`.
+	state : StateMeanders
+		The completed meander transfer state.
 	"""
 	while 0 < state.boundary:
 		if integersWide吗(state):
 			state = countBigInt(state)
 		else:
 			state = count(state)
-	return sum(state.lookupMeanders.values())
+	return state

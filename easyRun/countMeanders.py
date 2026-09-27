@@ -58,7 +58,8 @@ if __name__ == '__main__':
 		for n in boxOf_n:
 			gc.collect()
 			timeStart: float = time.perf_counter()
-			countTotal: int = countMeanders(kind, n, flow, pathLikeWrite)
+			state = countMeanders(kind, n, flow, pathLikeWrite)
+			countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 

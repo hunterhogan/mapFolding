@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-from functools import reduce
 from mapFolding.algorithms.matrixMeanders import walkDyckPath
-from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders, shortcut
+from mapFolding.algorithms.matrixMeandersShare import shortcut
 from mapFolding.dataBaskets import StateMeanders
-from research.matrixMeanders.formulasTriangle import A005315of0, boxOfDiagonals
 
 def count(state: StateMeanders) -> StateMeanders:
+	state = shortcut(state)
 	while 0 < state.boundary:
 		def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders = state) -> None:
 			bitsAlfa: int = arcCode & state.bitsLocator
@@ -53,27 +52,9 @@ def count(state: StateMeanders) -> StateMeanders:
 
 	return state
 
-def doTheNeedful(state: StateMeanders) -> int:
-	state.n = 0
-	return sum(count(state).lookupMeanders.values()) + state.n
+def doTheNeedful(state: StateMeanders) -> StateMeanders:
+	return count(state)
 
-def countDiagonal(n: int, 次diagonal: int) -> int:
+def countDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
-	state: StateMeanders = StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
-	return doTheNeedful(state)
-
-def countSemiMeandersWithPruning(n: int) -> int:
-	diagonals: int = len(boxOfDiagonals)
-	totalDiagonals: int = n // 2
-	countTotal: int = 0
-	if diagonals < totalDiagonals:
-		lookupMeanders: dict[int, int] = dict(tuple(makeLookupMeanders('semi', n).items())[:-diagonals])
-		state: StateMeanders = StateMeanders(n, 'semi', lookupMeanders=lookupMeanders)
-		countTotal = doTheNeedful(state)
-
-	if n <= 2:
-		countTotal = A005315of0(n)
-	else:
-		countTotal += reduce(lambda subtotal, diagonal: subtotal + diagonal(n), boxOfDiagonals[0:totalDiagonals], 0)
-
-	return countTotal
+	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})

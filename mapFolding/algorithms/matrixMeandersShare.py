@@ -241,7 +241,7 @@ def shortcut(state: StateMeanders) -> StateMeanders:
 		subtotalMeanders: int = state.lookupMeanders.pop(arcCode, 0)
 		return 工(boundary) * subtotalMeanders
 
-	state.n += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
+	state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
 	if not state.lookupMeanders:
 		state.boundary = 0
 	return state

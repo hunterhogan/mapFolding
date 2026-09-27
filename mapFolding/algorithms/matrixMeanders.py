@@ -129,12 +129,12 @@ def count(state: StateMeanders) -> StateMeanders:
 
     return state
 
-def doTheNeedful(state: StateMeanders) -> int:
+def doTheNeedful(state: StateMeanders) -> StateMeanders:
     """Compute the total meander count encoded in `state.lookupMeanders`.
 
     You can use `doTheNeedful` as the meander transfer-matrix entry point for the `matrixMeanders`
-    flow selected by `mapFolding.oeis.countingMeanders` [1]. The function runs `count(state)` and
-    returns the sum of final state multiplicities for the semi-meander and meandric counting context
+    flow selected by `mapFolding.basecamp.countMeanders` [1]. The function runs `count(state)` and
+    returns the final state for the semi-meander and meandric counting context
     documented in OEIS entries A000682 and A005316 [2][3], the Jensen transfer-matrix method [4],
     and implementation lineages by Howroyd and Irvine [5][6].
 
@@ -145,8 +145,8 @@ def doTheNeedful(state: StateMeanders) -> int:
 
     Returns
     -------
-    meanders : int
-        The computed value of `meanders`.
+    state : StateMeanders
+        The completed meander transfer state.
 
     References
     ----------
@@ -164,4 +164,4 @@ def doTheNeedful(state: StateMeanders) -> int:
     [6] Irvine, S. A. (Java port). `A005316.java` in `archmageirvine/joeis`.
         https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
     """
-    return sum(count(state).lookupMeanders.values())
+    return count(state)

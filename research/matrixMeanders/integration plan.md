@@ -4,11 +4,7 @@ This inventory covers code that walks Dyck paths, advances noncrossing boundary 
 
 ## Immediate goals
 
-- Change basecamp.countMeanders to optionally accept StateMeanders and always return StateMeanders.
-- Change all relevant doTheNeedful to return StateMeanders.
-- New field in StateMeanders: countAddend: int.
-- Merge `countSemiMeandersWithPruning` and `shortcut` because they are essentially the same function, put in matrixMeandersShare. Receive `StateMeanders`, find `arcCode` in `lookupMeanders` for which a diagonal function can calculate the value as a function of `n`, remove from the dictionary, compute the value for one `n`, multiply by the totalMeanders, return `StateMeanders`.
-- Redesign the functionality of `countDiagonal`. Have a function that takes the same arguments and returns `StateMeanders`. Then that state can be passed to basecamp.countMeanders.
+- [x] `basecamp.countMeanders` accepts an optional `state: StateMeanders | None` separately from `kind` and `n`, and always returns `StateMeanders`.
 
 ## Soon
 
@@ -16,9 +12,16 @@ This inventory covers code that walks Dyck paths, advances noncrossing boundary 
 - add it to basecamp.
 - update pandas with latest optimization ideas.
 - Create functions and transformations to add `shortcut` functionality to numpy and pandas versions.
-- Add basecamp flows to pytest test functions.
-- Read official A400429 data with functions from the oeis directory.
+- add to basecamp.
+
+## Ongoing
+
 - If a module in mapFolding imports from C:\apps\mapFolding\research\matrixMeanders\infoBooth.py, move the information from infoBooth to a more appropriate place in mapFolding.
+
+## Verification during transition
+
+- [triangleSemiCheck.py](../../easyRun/triangleSemiCheck.py) is the verification module for modules in transition. It checks A000682 row totals, the A400429 draft against `triangleSemi.csv` and `b400429.txt`, and the triangle and diagonal formulas. Its formula checker uses `mapFolding.oeis.getValuesKnown`, `readBFileTriangle`, and `readBFileDiagonal` for the official A400429 data. Run it from the repository root after activating `.venv` with `python easyRun/triangleSemiCheck.py`.
+- Use pytest for stable modules. Expand its coverage when transition modules become stable.
 
 ## Meander transfer engines
 
@@ -30,9 +33,9 @@ This inventory covers code that walks Dyck paths, advances noncrossing boundary 
 
 ## Semi-meander triangle: A400429
 
-- [matrixMeandersTriangle.py](../../mapFolding/algorithms/matrixMeandersTriangle.py) has a separate hand-written transfer body with the four boundary transitions. It calls the shared `shortcut` after each layer and offers `countDiagonal` for individual A400429 cells.
+- [matrixMeandersTriangle.py](../../mapFolding/algorithms/matrixMeandersTriangle.py) has a separate hand-written transfer body with the four boundary transitions. It calls the shared `shortcut` before and after boundary transfers; `countDiagonal` builds a `StateMeanders` seed for an individual A400429 cell that can be passed as `state` to `basecamp.countMeanders`.
 - [formulasTriangle/](formulasTriangle/) supplies the known diagonal formulas used for pruning and row construction. The transfer depends on these research formulas.
-- [triangleSemiCheck.py](../../easyRun/triangleSemiCheck.py) checks pruned A000682 semi-meander row totals and the triangle formulas. [triangleSemiMake.py](../../easyRun/triangleSemiMake.py) makes selected A400429 rows or diagonals through values edited in the script. Its row mode uses formulas or individual-cell transfer; its diagonal mode calls `countDiagonal`. [infoBooth.py](infoBooth.py) and [factsBucketsSignatures.py](factsBucketsSignatures.py) supply output paths and measured state data.
+- [triangleSemiMake.py](../../easyRun/triangleSemiMake.py) makes selected A400429 rows or diagonals through values edited in the script. Its row mode uses formulas or individual-cell transfer; its diagonal mode passes the state from `countDiagonal` to `basecamp.countMeanders`. [infoBooth.py](infoBooth.py) and [factsBucketsSignatures.py](factsBucketsSignatures.py) supply output paths and measured state data.
 - [countMeanders.py](../../easyRun/countMeanders.py) runs the package meander flows. [reduceArches.py](../../easyRun/reduceArches.py) runs direct arch reduction and writes A287548 rows. These scripts select work through code edited in the IDE; they have no CLI selector.
 
 ## Other arch code

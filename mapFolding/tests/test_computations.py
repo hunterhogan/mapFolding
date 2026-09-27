@@ -100,7 +100,8 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values."""
 	fml = {'semi': 'A000682', 'meanders': 'A005316'}
 	expected: int = getValuesKnown(fml[kind])[n]
-	actual: int = countMeanders(kind, n, flow, None)
+	state = countMeanders(kind, n, flow, None)
+	actual: int = sum(state.lookupMeanders.values()) + state.countAddend
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
 @pytest.mark.parametrize('mapShape', [pytest.param((2, 4), id='p2x4')])

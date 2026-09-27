@@ -391,6 +391,8 @@ class StateMeanders:
 
 	次Target: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
+	countAddend: int = 0
+	# DOCUMENT
 
 	def reduceBoundary(self) -> None:
 		"""Prepare for the next iteration of the transfer matrix algorithm by reducing `boundary` by 1 and updating related fields."""

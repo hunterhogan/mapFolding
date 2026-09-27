@@ -326,7 +326,7 @@ def count(state: StateMeanders) -> StateMeanders:
 	del dataframeAnalyzed
 	return state
 
-def doTheNeedful(state: StateMeanders) -> int:
+def doTheNeedful(state: StateMeanders) -> StateMeanders:
 	"""Compute `meanders` with a transfer matrix algorithm implemented in pandas.
 
 	Parameters
@@ -336,12 +336,12 @@ def doTheNeedful(state: StateMeanders) -> int:
 
 	Returns
 	-------
-	meanders : int
-		The computed value of `meanders`.
+	state : StateMeanders
+		The completed meander transfer state.
 	"""
 	while 0 < state.boundary:
 		if integersWide吗(state):
 			state = countBigInt(state)
 		else:
 			state = count(state)
-	return sum(state.lookupMeanders.values())
+	return state

@@ -1085,10 +1085,12 @@ def _A000136(n: int) -> int:
     return countFolds(makeMapShape('A000136', n))
 
 def _A000682(n: int) -> int:
-    return countMeanders('semi', n)
+    state = countMeanders('semi', n)
+    return sum(state.lookupMeanders.values()) + state.countAddend
 
 def _A007822(n: int) -> int:
     return countFoldsSymmetric(makeMapShape('A007822', n))
 
 def _A005316(n: int) -> int:
-    return countMeanders('meanders', n)
+    state = countMeanders('meanders', n)
+    return sum(state.lookupMeanders.values()) + state.countAddend

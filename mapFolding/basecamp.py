@@ -278,35 +278,50 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 #ruff: ignore[unused-function-argument]
 def countMeanders(
-	kind: Literal['closed', 'meanders', 'semi'] | LiteralString
-	, n: int
+	kind: Literal['closed', 'meanders', 'semi'] | LiteralString | None = None
+	, n: int | None = None
 	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
+	, state: StateMeanders | None = None
 	, CPUlimit: Limitation = None
 	, suffix: str = ".countTotal"
-) -> int:
+) -> StateMeanders:
 	"""Compute a native meander sequence term.
 
 	Parameters
 	----------
-	kind : Literal['closed', 'semi', 'meanders']
-		Whether to compute closed meanders, semi-meanders, or meanders.
-	n : int
-		Sequence index.
+	kind : Literal['closed', 'semi', 'meanders'] | None = None
+		The meander family when `state` is not provided.
+	n : int | None = None
+		Sequence index when `state` is not provided.
 	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
 		Algorithm selection.
 	pathLikeWrite : PathLike[str] | None = None
 		Optional output path for the computed total.
+	state : StateMeanders | None = None
+		An initialized transfer state; takes precedence over `kind` and `n`.
 	CPUlimit : bool | float | int | None = None
 		Unused.
 
 	Returns
 	-------
-	countTotal : int
-		The number of semi-meanders or meanders for the given index.
+	state : StateMeanders
+		The completed transfer state. Its total is `sum(state.lookupMeanders.values()) + state.countAddend`.
 	"""
 #-------- memorialization instructions ---------------------------------------------
+
+	if state is not None:
+		kind = state.kind
+		n = state.n
+	else:
+		if kind is None or n is None:
+			message: str = 'kind and n are required when state is None.'
+			raise TypeError(message)
+		if kind == 'closed':
+			state = StateMeanders(2 * n - 1, 'meanders')
+		else:
+			state = StateMeanders(n, kind)
 
 	if pathLikeWrite is None:
 		pathFilenameCountTotal: Path | None = None
@@ -315,12 +330,7 @@ def countMeanders(
 
 #-------- Algorithm selection and execution ---------------------------------------------
 
-	if kind == 'semi' and n == 1:
-		countTotal: int = 1
-	else:
-		if kind == 'closed':
-			kind = 'meanders'
-			n = 2 * n - 1
+	if kind != 'semi' or n != 1:
 		match flow:
 			case 'matrixNumPy':
 				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
@@ -329,12 +339,12 @@ def countMeanders(
 			case 'matrixMeanders' | _:
 				from mapFolding.algorithms.matrixMeanders import doTheNeedful
 
-		state: StateMeanders = StateMeanders(n, kind)
-		countTotal: int = doTheNeedful(state)
+		state = doTheNeedful(state)
+	countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
 
 #-------- Follow memorialization instructions ---------------------------------------------
 
 	if pathFilenameCountTotal is not None:
 		saveTotal(pathFilenameCountTotal, countTotal)
 
-	return countTotal
+	return state
