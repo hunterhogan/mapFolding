@@ -402,15 +402,17 @@ class StateMeanders:
 	def setBitsLocator(self) -> None:
 		"""Compute an odd-parity bit-mask with `bitWidth` bits.
 
-		Notes
-		-----
-		In binary, `locatorBitsAlfa` has alternating 0s and 1s and ends with a 1, such as '101', '0101', and '10101'. The last
-		digit is in the 1's column, but programmers usually call it the "least significant bit" (LSB). If we count the columns
-		from the right, the 1's column is column 1, the 2's column is column 2, the 4's column is column 3, and so on. When
-		counting this way, `locatorBitsAlfa` has 1s in the columns with odd index numbers. Mathematicians and programmers,
-		therefore, tend to call `locatorBitsAlfa` something like the "odd bit-mask", the "odd-parity numbers", or simply "odd
-		mask" or "odd numbers". In addition to "odd" being inherently ambiguous in this context, this algorithm also segregates
-		odd numbers from even numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+		Semiotics
+		---------
+		In binary, `locatorBitsAlfa` has alternating 0s and 1s and ends with a 1, such as '101',
+		'0101', and '10101'. The last digit is in the 1's column, but programmers usually call it the
+		"least significant bit" (LSB). If we count the columns from the right, the 1's column is
+		column 1, the 2's column is column 2, the 4's column is column 3, and so on. When counting
+		this way, `locatorBitsAlfa` has 1s in the columns with odd index numbers. Mathematicians and
+		programmers, therefore, tend to call `locatorBitsAlfa` something like the "odd bit-mask", the
+		"odd-parity numbers", or simply "odd mask" or "odd numbers". In addition to "odd" being
+		inherently ambiguous in this context, this algorithm also segregates odd numbers from even
+		numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 
 		"""
 		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
