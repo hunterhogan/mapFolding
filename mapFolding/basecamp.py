@@ -280,7 +280,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 def countMeanders(
 	kind: Literal['closed', 'meanders', 'semi'] | LiteralString | None = None
 	, n: int | None = None
-	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
+	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune'] | LiteralString | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, state: StateMeanders | None = None
@@ -295,8 +295,8 @@ def countMeanders(
 		The meander family when `state` is not provided.
 	n : int | None = None
 		Sequence index when `state` is not provided.
-	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas'] | LiteralString | None = None
-		Algorithm selection.
+	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune'] | LiteralString | None = None
+		Algorithm selection. 'prune' uses known diagonal formulas before and during the count.
 	pathLikeWrite : PathLike[str] | None = None
 		Optional output path for the computed total.
 	state : StateMeanders | None = None
@@ -332,6 +332,8 @@ def countMeanders(
 
 	if kind != 'semi' or n != 1:
 		match flow:
+			case 'prune':
+				from mapFolding.synthesized.matrixMeanders.prune import doTheNeedful
 			case 'matrixNumPy':
 				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
 			case 'matrixPandas':

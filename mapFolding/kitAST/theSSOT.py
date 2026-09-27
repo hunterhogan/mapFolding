@@ -107,12 +107,14 @@ defaultMatrixMeanders['function'].update({
     'bigInt': 'countBigInt'
     , 'bigIntTest': 'integersWide吗'
     , 'Dyck': 'walkDyckPath'
+    , 'shortcut': 'shortcut'
 })
 defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
 defaultMatrixMeanders['module'].update({
     'algorithm': 'matrixMeanders'
     , 'bigInt': 'bigInt'
     , 'chop': 'chop'
+    , 'prune': 'prune'
 })
 defaultMatrixMeanders['module']['numpy'] = defaultMatrixMeanders['module']['algorithm'] + 'NumPy'
 defaultMatrixMeanders['module']['share'] = defaultMatrixMeanders['module']['algorithm'] + 'Share'

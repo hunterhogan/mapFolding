@@ -86,7 +86,7 @@ def count(state: StateMeanders) -> StateMeanders:
     [2] `walkDyckPath`
     """
     while 0 < state.boundary:
-        def analyzeArcCode(arcCode: int, meanders: int) -> None:
+        def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders = state) -> None:
             bitsAlfa: int = arcCode & state.bitsLocator
             bitsAlfaHasArcs: bool = 1 < bitsAlfa
             bitsAlfaIsEven: int = bitsAlfa & 1 ^ 1

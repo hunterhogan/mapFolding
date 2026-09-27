@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
-from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
+from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
@@ -57,6 +57,57 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=名Module)
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
+
+def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+	"""Generate a meander counting module with formula pruning.
+
+	(AI generated docstring)
+
+	You can use this function to derive the `prune` flow from the complete baseline `astModule`.
+	The generated count assigns the state returned by `shortcut` [1] before counting and after
+	each boundary transfer. The generated module retains the baseline Dyck walk and imports.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Complete source module to transform and write.
+	identifiers : Default | None = None
+		Source and generated names. `None` selects `defaultMatrixMeanders` [2].
+	**override : Any
+		State identifier, generated module name, package, and output path settings [3].
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated module.
+
+	References
+	----------
+	[1] `mapFolding.algorithms.matrixMeandersShare.shortcut`
+
+	[2] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
+
+	[3] `mapFolding.kitAST.mapFolding._count.toDisk`
+
+	"""
+	if identifiers is None:
+		identifiers = defaultMatrixMeanders
+	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
+
+	astAssign_shortcut: ast.Assign = Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
+		, value=Make.Call(Make.Name(identifiers['function']['shortcut']), [Make.Name(名DataclassInstance)]))
+
+	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
+		, Then.insertThisAbove([astAssign_shortcut])).visit(astModule)
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(identifiers['function']['counting']))
+		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(astModule)
+
+	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
+	ingredientsModule.imports.addImportFrom_asStr(
+		getLogicalPath(identifiers['module']['package'], identifiers['logicalPath']['algorithm'], identifiers['module']['share'])
+		, identifiers['function']['shortcut'])
+	ingredientsModule.appendEpilogue(astModule)
+	return toDisk(ingredientsModule, identifiers, override, override.get('名Module', identifiers['module']['prune']))
 
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Abandoned idea."""
@@ -179,6 +230,7 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 def makeModulesMeanders() -> None:
 	"""Make meanders modules."""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	makePrune(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cache
-from mapFolding.algorithms.matrixMeandersShare import integersWide吗
+from mapFolding.algorithms.matrixMeandersShare import shortcut
 from mapFolding.dataBaskets import StateMeanders
 from operator import neg
 
@@ -57,7 +57,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
             findTheExtra_0b1 += neg(1)
     return flipExtra_0b1_Here
 
-def countBigInt(state: StateMeanders) -> StateMeanders:
+def count(state: StateMeanders) -> StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
@@ -86,7 +86,8 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
 
     [2] `walkDyckPath`
     """
-    while 0 < state.boundary and integersWide吗(state):
+    state = shortcut(state)
+    while 0 < state.boundary:
 
         def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders=state) -> None:
             bitsAlfa: int = arcCode & state.bitsLocator
@@ -118,4 +119,42 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
         lookupArcCodeMeanders: dict[int, int] = state.lookupMeanders.copy()
         state.lookupMeanders = {}
         tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values()))
+        state = shortcut(state)
     return state
+
+def doTheNeedful(state: StateMeanders) -> StateMeanders:
+    """Compute the total meander count encoded in `state.lookupMeanders`.
+
+    You can use `doTheNeedful` as the meander transfer-matrix entry point for the `matrixMeanders`
+    flow selected by `mapFolding.basecamp.countMeanders` [1]. The function runs `count(state)` and
+    returns the final state for the semi-meander and meandric counting context
+    documented in OEIS entries A000682 and A005316 [2][3], the Jensen transfer-matrix method [4],
+    and implementation lineages by Howroyd and Irvine [5][6].
+
+    Parameters
+    ----------
+    state : StateMeanders
+        The algorithm state.
+
+    Returns
+    -------
+    state : StateMeanders
+        The completed meander transfer state.
+
+    References
+    ----------
+    [1] `mapFolding.oeis.countingMeanders`
+
+    [2] OEIS A000682, Semi-meanders.
+        https://oeis.org/A000682
+    [3] OEIS A005316, Meandric numbers.
+        https://oeis.org/A005316
+    [4] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
+        Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
+        https://dx.doi.org/10.1088/0305-4470/33/34/301
+    [5] Howroyd, A. (2015). C# Software for the Enumeration of Meanders.
+        https://oeis.org/A005316/a005316.cs.txt
+    [6] Irvine, S. A. (Java port). `A005316.java` in `archmageirvine/joeis`.
+        https://github.com/archmageirvine/joeis/blob/5dc2148344bff42182e2128a6c99df78044558c5/src/irvine/oeis/a005/A005316.java
+    """
+    return count(state)

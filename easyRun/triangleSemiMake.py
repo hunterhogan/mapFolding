@@ -5,7 +5,7 @@ from __future__ import annotations
 from hunterMakesPy import oneIndexed
 from itertools import repeat
 from mapFolding.algorithms.matrixMeanders import doTheNeedful
-from mapFolding.algorithms.matrixMeandersTriangle import countDiagonal
+from mapFolding.algorithms.matrixMeandersShare import makeLookupDiagonal
 from mapFolding.basecamp import countMeanders
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import appendStringToHere, writeDiagonal
@@ -16,7 +16,7 @@ from research.matrixMeanders.infoBooth import makePathFilenameDiagonal, pathFile
 from tqdm.auto import tqdm
 
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
-	state = countMeanders(state=countDiagonal(n, 次diagonal))
+	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
 	writeDiagonal({n: sum(state.lookupMeanders.values()) + state.countAddend}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:

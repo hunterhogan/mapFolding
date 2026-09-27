@@ -165,6 +165,7 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 		dictionary[oeisID] = MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 
 	dictionary['A259689'].update(rowLength=lambda nRow: nRow // 2, rowStart=2)
+	dictionary['A400429'].update(rowLength=lambda nRow: nRow // 2, rowStart=2)
 
 	return dictionary
 

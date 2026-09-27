@@ -3,15 +3,11 @@ from __future__ import annotations
 from fractions import Fraction
 from functools import partial
 from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
-from itertools import chain, count, filterfalse, groupby, islice, repeat
-from mapFolding.dataStructures import makeLookupTriangle
-from mapFolding.kitFilesystem import readDiagonal, readTriangle
-from mapFolding.oeis import getValuesKnown, readBFileDiagonal, readBFileTriangle
+from itertools import chain, filterfalse, groupby, repeat
+from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
 from operator import add, itemgetter
 from research.matrixMeanders.formulasTriangle import A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, boxOfDiagonals
 from research.matrixMeanders.formulasTriangle._fromTriangleCells import calculateDiagonal2, calculateDiagonal3
-from research.matrixMeanders.infoBooth import (
-	makeFilenameDiagonal, pathData, pathFilenameTriangleSemiCommaSeparatedValues, pathFilenameTriangleSemiSubmissionOEIS)
 from textwrap import wrap
 from typing import TYPE_CHECKING
 import sys
@@ -19,7 +15,6 @@ import sys
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Mapping
 	from mapFolding.theTypes import 形Triangle
-	from pathlib import Path
 
 type Report = tuple[bool, str]
 type FormulaValue = int | Fraction | tuple[int, ...]
@@ -61,42 +56,14 @@ def getTerm(triangle: 形Triangle, column: int, n: int) -> int:
 def selectColumn(triangle: 形Triangle, column: int, domain: range) -> dict[int, int]:
 	return dict(zip(domain, map(partial(getTerm, triangle, column), domain), strict=True))
 
-def readSubmissionTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
-	rowsFlatList: list[int] = []
-	for line in pathFilename.read_text(encoding='utf-8').splitlines():
-		if not line.startswith(('%S ', '%T ', '%U ')):
-			continue
-		rowsFlatList.extend(map(int, filter(None, line.split(maxsplit=2)[-1].split(','))))
-	rowsFlat: tuple[int, ...] = tuple(rowsFlatList)
-	triangleSubmission: dict[int, list[int]] = makeLookupTriangle(rowsFlat, (n // 2 for n in count(2)), rowStart=2)
-	return dict(zip(triangleSubmission, map(tuple, triangleSubmission.values()), strict=True))
-
-def readSubmissionExamples(pathFilename: Path) -> dict[int, tuple[int, ...]]:
-	def parseExample(line: str) -> tuple[int, tuple[int, ...]]:
-		content: str = line.partition(' ')[2].strip()
-		if content.startswith('A400429 '):
-			content = content.partition(' ')[2]
-		row, _, values = content.rstrip('.;').partition(':')
-		return int(row), tuple(map(int, values.split(',')))
-
-	return dict(map(parseExample, filter(lambda line: (line.startswith('%E A400429 ') and line[11].isdigit())
-		or (line.startswith('%e ') and line.partition(' ')[2].lstrip()[:1].isdigit())
-		, pathFilename.read_text(encoding='utf-8').splitlines())))
-
 def checkA005315(triangle: 形Triangle) -> tuple[Report, ...]:
 	return checkOEISFormula('A005315', partial(A005315, triangle=triangle)
 		, range(1, min(max(triangle) // 2, max(getValuesKnown('A005315'))) + 1))
 
-def checkDiagonal(次diagonal: int, 工diagonal: Callable[[int], int], *, triangle: 形Triangle, pathData: Path) -> tuple[Report, ...]:
-	return tuple(chain(
-		checkFormula(f"D_{次diagonal}", 工diagonal, selectColumn(triangle, -次diagonal, range(2 * 次diagonal, max(triangle) + 1)))
-		, checkFormula(f"D_{次diagonal} / b400429.txt", 工diagonal
-			, readBFileDiagonal(pathData / 'b400429.txt', 次diagonal, rowStart=2, rowLength=lambda n: n // 2))
-		, checkFormula(f"D_{次diagonal} / {makeFilenameDiagonal(次diagonal)}", 工diagonal
-			, readDiagonal(pathData / makeFilenameDiagonal(次diagonal), 次diagonal, formatData='diagonalCSV'))
-	))
+def checkDiagonal(次diagonal: int, 工diagonal: Callable[[int], int]) -> tuple[Report, ...]:
+	return checkFormula(f"D_{次diagonal} / A400429", 工diagonal, getTriangleDiagonal('A400429', 次diagonal))
 
-def checkSubmission(triangle: 形Triangle, triangleSubmission: 形Triangle) -> tuple[Report, ...]:
+def checkTriangle(triangle: 形Triangle) -> tuple[Report, ...]:
 	def calculateFirstColumn(n: int) -> int:
 		return getKnownValue('A005315', (n + 1) // 2)
 
@@ -112,21 +79,15 @@ def checkSubmission(triangle: 形Triangle, triangleSubmission: 形Triangle) -> t
 	calculateA006661: Callable[[int], Fraction] = partial(A006661, triangle=triangleWithZeros)
 	calculateA077054: Callable[[int], Fraction] = partial(A077054, triangle=triangleWithZeros)
 	calculateA077460: Callable[[int], Fraction] = partial(A077460, triangle=triangleWithZeros)
-	offsetLines: list[str] = pathFilenameTriangleSemiSubmissionOEIS.read_text(encoding='utf-8').splitlines()
 
 	reports: tuple[Report, ...] = (
-		*checkFormula('A400429 DATA', triangle.__getitem__, triangleSubmission)
-		, *checkFormula('A400429 DATA row length', lambda n: len(triangleSubmission[n])
-			, dict(zip(triangleSubmission, map(int.__floordiv__, triangleSubmission, repeat(2)), strict=True)))
-		, ('%O 2,2' in offsetLines or '%O A400429 2,2' in offsetLines, 'A400429 OFFSET 2,2')
-		, *checkFormula('A400429 EXAMPLE', triangle.__getitem__, readSubmissionExamples(pathFilenameTriangleSemiSubmissionOEIS))
-		, *checkOEISFormula('A000136', calculateA000136, range(2, max(triangle) + 1))
+		*checkOEISFormula('A000136', calculateA000136, range(2, max(triangle) + 1))
 		, *checkOEISFormula('A000682', calculateA000682, range(2, max(triangle) + 1))
 		, *checkFormula('T(n,1)', calculateFirstColumn, selectColumn(triangle, 0, range(2, max(triangle) + 1)))
 		, *checkFormula('D_1 = 2 - 0^(n-2)', lambda n: 2 - 0**(n - 2)
 			, selectColumn(triangle, -1, range(2, max(triangle) + 1)))
-		, *checkFormula('D_2 draft formula', calculateDiagonal2, selectColumn(triangle, -2, range(4, max(triangle) + 1)))
-		, *checkFormula('D_3 draft formula', calculateDiagonal3, selectColumn(triangle, -3, range(6, max(triangle) + 1)))
+		, *checkFormula('D_2 formula / A400429', calculateDiagonal2, getTriangleDiagonal('A400429', 2))
+		, *checkFormula('D_3 formula / A400429', calculateDiagonal3, getTriangleDiagonal('A400429', 3))
 	)
 	return (
 		*reports
@@ -141,25 +102,19 @@ def checkSubmission(triangle: 形Triangle, triangleSubmission: 形Triangle) -> t
 	)
 
 def checkFormulas() -> None:
-	triangle: dict[int, tuple[int, ...]] = readTriangle(pathFilenameTriangleSemiCommaSeparatedValues)
-	triangleSubmission: dict[int, tuple[int, ...]] = readSubmissionTriangle(pathFilenameTriangleSemiSubmissionOEIS)
-	triangleFlat: dict[int, int] = dict(enumerate(chain.from_iterable(triangle.values()), 2))
-	triangleBFile: dict[int, list[int]] = readBFileTriangle(pathData / 'b400429.txt', map(int.__floordiv__, count(2), repeat(2)), 2)
-	triangleBFileFlat: dict[int, int] = dict(enumerate(chain.from_iterable(triangleBFile.values()), 2))
+	triangleRows: dict[int, list[int]] = getTriangleRows('A400429')
+	triangle: dict[int, tuple[int, ...]] = dict(zip(triangleRows, map(tuple, triangleRows.values()), strict=True))
+	triangle = dict(filter(lambda row: len(row[1]) == row[0] // 2, triangle.items()))
 	triangleOfficial: dict[int, int] = getValuesKnown('A400429')
 	reports: tuple[Report, ...] = tuple(chain(
-		((tuple(triangle) == tuple(range(2, max(triangle) + 1)), 'triangleSemi.csv consecutive rows')
+		((tuple(triangle) == tuple(range(2, max(triangle) + 1)), 'A400429 consecutive complete rows')
 			, (tuple(triangleOfficial) == tuple(range(2, len(triangleOfficial) + 2)), 'A400429 official consecutive indices')
-			, (len(triangleOfficial) >= len(triangleFlat), f'A400429 official extra partial-row terms: {len(triangleOfficial) - len(triangleFlat)}'))
-		, checkFormula('triangleSemi.csv row length', lambda n: len(triangle[n])
+			, (tuple(chain.from_iterable(triangleRows.values())) == tuple(triangleOfficial.values()), 'A400429 rows preserve all official terms'))
+		, checkFormula('A400429 complete row length', lambda n: len(triangle[n])
 			, dict(zip(triangle, map(int.__floordiv__, triangle, repeat(2)), strict=True)))
-		, checkFormula('triangleSemi.csv / b400429.txt rows', lambda n: tuple(triangleBFile[n]), triangle)
-		, checkFormula('triangleSemi.csv / A400429 official values', lambda n: triangleFlat.get(n, -errorL33T)
-			, dict(islice(triangleOfficial.items(), len(triangleFlat))))
-		, checkFormula('b400429.txt / A400429 official values', triangleBFileFlat.__getitem__, triangleOfficial)
-		, checkSubmission(triangle, triangleSubmission)
+		, checkTriangle(triangle)
 		, checkA005315(triangle)
-		, chain.from_iterable(map(partial(checkDiagonal, triangle=triangle, pathData=pathData), range(1, len(boxOfDiagonals) + 1), boxOfDiagonals))
+		, chain.from_iterable(map(checkDiagonal, range(1, len(boxOfDiagonals) + 1), boxOfDiagonals))
 	))
 	printReports(reports)
 	if not all(map(itemgetter(0), reports)):

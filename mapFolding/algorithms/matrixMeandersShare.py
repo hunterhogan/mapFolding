@@ -245,3 +245,8 @@ def shortcut(state: StateMeanders) -> StateMeanders:
 	if not state.lookupMeanders:
 		state.boundary = 0
 	return state
+
+
+def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
+	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
+	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})

@@ -95,6 +95,18 @@ def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> No
 # TODO Run the numpy/pandas tests in series because they cause namespace problems.
 @pytest.mark.parametrize('n, flow, kind', (
 	(30, 'matrixNumPy', 'semi'), (3, 'matrixMeanders', 'meanders'), (20, 'matrixPandas', 'meanders'), (10, 'matrixMeanders', 'semi')
+	, pytest.param(1, 'prune', 'semi', id='prune-semi-single-crossing')
+	, pytest.param(2, 'prune', 'semi', id='prune-semi-even-formulas')
+	, pytest.param(3, 'prune', 'semi', id='prune-semi-odd-formulas')
+	, pytest.param(20, 'prune', 'semi', id='prune-semi-last-full-formula-row')
+	, pytest.param(21, 'prune', 'semi', id='prune-semi-odd-full-formula-row')
+	, pytest.param(22, 'prune', 'semi', id='prune-semi-even-transfers')
+	, pytest.param(23, 'prune', 'semi', id='prune-semi-odd-transfers')
+	, pytest.param(1, 'prune', 'meanders', id='prune-meanders-single-crossing')
+	, pytest.param(2, 'prune', 'meanders', id='prune-meanders-even-transfers')
+	, pytest.param(3, 'prune', 'meanders', id='prune-meanders-odd-formulas')
+	, pytest.param(22, 'prune', 'meanders', id='prune-meanders-even-pruning')
+	, pytest.param(23, 'prune', 'meanders', id='prune-meanders-odd-pruning')
 ))
 def test_meanders(kind: LiteralString, n: int, flow: LiteralString) -> None:
 	"""Verify Meanders OEIS sequence value calculations against known reference values."""

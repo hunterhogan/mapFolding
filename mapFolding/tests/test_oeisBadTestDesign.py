@@ -67,6 +67,8 @@ def test_getTotalFoldsKnown(mapShape: tuple[int, ...], expected: int | None) -> 
 		, pytest.param('A195646', 2, '', {'flow': 'daoOfMapFolding'}, id='A195646,countFolds')
 		, pytest.param('A000682', 3, '', {'flow': 'matrixMeanders'}, id='A000682,countMeanders')
 		, pytest.param('A005316', 3, '', {'flow': 'matrixMeanders'}, id='A005316,countMeanders')
+		, pytest.param('A000682', 23, '', {'flow': 'prune'}, id='A000682,prune')
+		, pytest.param('A005316', 22, '', {'flow': 'prune'}, id='A005316,prune')
 		, pytest.param('A007822', 3, '', {'flow': 'algorithm'}, id='foldsSymmetric,countFoldsSymmetric')
 	]
 )
