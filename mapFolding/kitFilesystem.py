@@ -32,7 +32,7 @@ astToolkit
 """
 from __future__ import annotations
 
-from contextlib import suppress
+from contextlib import contextmanager, suppress
 from csv import writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
@@ -46,12 +46,13 @@ from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
 from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
+from uuid import uuid4
 import os
 import sys
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Callable, Iterable, Mapping, Sequence
+	from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding.theTypes import Folding
@@ -59,6 +60,31 @@ if TYPE_CHECKING:
 	from pandas import DataFrame
 	from typing import Any, Literal
 	from urllib3.response import BaseHTTPResponse
+	import polars
+
+@contextmanager
+def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
+	import polars  # ruff: ignore[import-outside-top-level]
+
+	pathFilenameLedger: list[Path] = []
+
+	def materializeMeandersPolars(dataframe: polars.LazyFrame, n: int, boundary: int) -> polars.LazyFrame:
+		pathFilename: Path = Path.cwd() / f'matrixMeandersPolars_n{n}_boundary{boundary}_{uuid4().hex}.arrow'
+		pathFilenameLedger.append(pathFilename)
+		dataframe.sink_ipc(pathFilename, maintain_order=False, engine='streaming'
+			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
+		dataframeMaterialized: polars.LazyFrame = polars.scan_ipc(pathFilename, memory_map=False)
+		if 1 < len(pathFilenameLedger):
+			pathFilenameLedger[0].unlink()
+			del pathFilenameLedger[0]
+		return dataframeMaterialized
+
+	try:
+		yield materializeMeandersPolars
+	finally:
+		while pathFilenameLedger:
+			pathFilenameLedger.pop().unlink(missing_ok=True)
 
 #================== Create appropriate paths and filenames =========================================
 

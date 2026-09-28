@@ -14,19 +14,25 @@ import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Mapping, Sequence
-	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger
+	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger, 形PolarsInteger
 	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
-	from pathlib import Path
 	from typing import Any, Literal
-	import polars
 
-def makeDataContainerPolars(dataframe: polars.LazyFrame, pathFilename: Path) -> polars.LazyFrame:  # ruff: ignore[undocumented-public-function]
+def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocumented-public-function]
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
-	dataframe.sink_ipc(pathFilename, maintain_order=False, engine='streaming'
-		, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-	return polars.scan_ipc(pathFilename, memory_map=False)
+	if bitWidth <= 8:
+		datatype = polars.UInt8
+	elif bitWidth <= 16:
+		datatype = polars.UInt16
+	elif bitWidth <= 32:
+		datatype = polars.UInt32
+	elif bitWidth <= 64:
+		datatype = polars.UInt64
+	else:
+		datatype = polars.UInt128
+	return datatype
 
 def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Create a properly typed connection graph for the map folding algorithm.

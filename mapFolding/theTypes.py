@@ -54,22 +54,6 @@ type 形ArrayArcCode1D = ndarray[tuple[int], dtype[形ArcCode]]
 
 type 形PolarsInteger = type[polars.UInt8 | polars.UInt16 | polars.UInt32 | polars.UInt64 | polars.UInt128]
 
-def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocumented-public-function]
-	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
-	import polars  # ruff: ignore[import-outside-top-level]
-
-	if bitWidth <= 8:
-		datatype = polars.UInt8
-	elif bitWidth <= 16:
-		datatype = polars.UInt16
-	elif bitWidth <= 32:
-		datatype = polars.UInt32
-	elif bitWidth <= 64:
-		datatype = polars.UInt64
-	else:
-		datatype = polars.UInt128
-	return datatype
-
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
 
 形TotalLeaves: TypeAlias = int

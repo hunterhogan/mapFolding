@@ -54,7 +54,7 @@ if __name__ == '__main__':
 		writeTriangleRows(nT, nStart, nStop, kStart)
 	else:
 		次diagonal: int = 11
-		nStart = 337
+		nStart = 343
 		nStop = 406
 		tuple(map(writeDiagonalCount, tqdm(range(nStart, nStop)), repeat(次diagonal)))
 """

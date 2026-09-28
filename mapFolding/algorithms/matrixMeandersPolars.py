@@ -1,16 +1,26 @@
 from __future__ import annotations
 
-from mapFolding.algorithms.matrixMeanders import count as countUnbounded
-from mapFolding.dataStructures import makeDataContainerPolars
-from mapFolding.synthesized.matrixMeanders.polarsTransitions import addLoop, connectArcs, dragDown, dragUp
-from mapFolding.theTypes import getDatatypePolars
-from pathlib import Path
-from tempfile import TemporaryDirectory
+from mapFolding.dataStructures import getDatatypePolars
+from mapFolding.kitFilesystem import storeMeandersPolars
+from mapFolding.synthesized.matrixMeanders.bigIntPolars import countBigInt
+from mapFolding.synthesized.matrixMeanders.polarsWide import integersWidePolars吗
 from typing import TYPE_CHECKING
 import polars
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
+
+def addLoop(bitsAlfa: polars.Expr, bitsZulu: polars.Expr) -> polars.Expr:
+    return (bitsZulu * 2 ** 1 | bitsAlfa) * 2 ** 2 | 3
+
+def dragUp(bitsAlfa: polars.Expr, bitsZulu: polars.Expr) -> polars.Expr:
+    return (bitsAlfa & 1 ^ 1) * 2 ** 1 | bitsAlfa // 2 ** 2 | bitsZulu * 2 ** 3
+
+def dragDown(bitsAlfa: polars.Expr, bitsZulu: polars.Expr) -> polars.Expr:
+    return bitsZulu & 1 ^ 1 | bitsAlfa * 2 ** 2 | bitsZulu // 2 ** 1
+
+def connectArcs(bitsAlfa: polars.Expr, bitsZulu: polars.Expr) -> polars.Expr:
+    return (bitsZulu // 2 ** 2 * 2 ** 3 | bitsAlfa) // 2 ** 2
 
 def alignArcs(dataframeMeanders: polars.LazyFrame, bitWidth: int, datatypeArcCode: polars.DataType) -> polars.LazyFrame:
 	dataframeMeanders = dataframeMeanders.with_columns(
@@ -30,7 +40,7 @@ def alignArcs(dataframeMeanders: polars.LazyFrame, bitWidth: int, datatypeArcCod
 		flipExtra_0b1_Here <<= 2
 	return dataframeMeanders.drop('findTheExtra_0b1')
 
-def count(dataframeMeanders: polars.LazyFrame, bitsLocator: int, arcCodeMAXIMUM: int, bitWidth: int) -> polars.LazyFrame:
+def transition(dataframeMeanders: polars.LazyFrame, bitsLocator: int, arcCodeMAXIMUM: int, bitWidth: int) -> polars.LazyFrame:
 	schemaMeanders: polars.Schema = dataframeMeanders.collect_schema()
 	bitsAlfa: polars.Expr = polars.col('arcCode') & polars.lit(bitsLocator, dtype=schemaMeanders['arcCode'])
 	bitsZulu: polars.Expr = polars.col('arcCode') // 2 & polars.lit(bitsLocator, dtype=schemaMeanders['arcCode'])
@@ -45,31 +55,32 @@ def count(dataframeMeanders: polars.LazyFrame, bitsLocator: int, arcCodeMAXIMUM:
 	).filter(polars.col('arcCode') <= polars.lit(arcCodeMAXIMUM - 1, dtype=polars.UInt128)
 	).group_by('arcCode').agg(polars.col('meanders').sum().cast(schemaMeanders['meanders']))
 
-def doTheNeedful(state: StateMeanders) -> StateMeanders:
+def count(state: StateMeanders) -> StateMeanders:
 	meandersMaximum: int = max(state.lookupMeanders.values())
-	if max(state.bitWidth + 3, (meandersMaximum * (state.bitWidth + 4)).bit_length()) <= 128:
-		dataframeMeanders: polars.LazyFrame = polars.LazyFrame({
-			'arcCode': polars.Series(state.lookupMeanders.keys(), dtype=getDatatypePolars(state.bitWidth))
-			, 'meanders': polars.Series(state.lookupMeanders.values(), dtype=getDatatypePolars(meandersMaximum.bit_length()))})
-		state.lookupMeanders.clear()
-		with TemporaryDirectory(prefix='matrixMeandersPolars') as pathScratch:
-			pathFilenamePrevious: Path | None = None
-			while 0 < state.boundary and max(state.bitWidth + 3, (meandersMaximum * (state.bitWidth + 4)).bit_length()) <= 128:
-				dataframeMeanders = dataframeMeanders.cast({
-					'arcCode': getDatatypePolars(state.bitWidth + 3)
-					, 'meanders': getDatatypePolars((meandersMaximum * (state.bitWidth + 4)).bit_length())})
-				state.boundary -= 1
-				state.set_arcCodeMAXIMUM()
-				pathFilename: Path = Path(pathScratch, f'{state.boundary}.arrow')
-				dataframeMeanders = makeDataContainerPolars(
-					count(dataframeMeanders, state.bitsLocator, min(state.arcCodeMAXIMUM, 1 << 128), state.bitWidth), pathFilename)
-				if pathFilenamePrevious is not None:
-					pathFilenamePrevious.unlink()
-				pathFilenamePrevious = pathFilename
-				arcCodeMaximum, meandersMaximum = dataframeMeanders.select(polars.all().max()).collect(engine='streaming').row(0)
-				state.bitWidth = arcCodeMaximum.bit_length()
-				state.setBitsLocator()
-			state.lookupMeanders = dict(dataframeMeanders.collect(engine='streaming').iter_rows())
-	if 0 < state.boundary:
-		state = countUnbounded(state)
+	dataframeMeanders: polars.LazyFrame = polars.LazyFrame({
+		'arcCode': polars.Series(state.lookupMeanders.keys(), dtype=getDatatypePolars(state.bitWidth))
+		, 'meanders': polars.Series(state.lookupMeanders.values(), dtype=getDatatypePolars(meandersMaximum.bit_length()))})
+	state.lookupMeanders.clear()
+	with storeMeandersPolars() as materializeMeandersPolars:
+		while 0 < state.boundary and not integersWidePolars吗(state, meandersMaximum):
+			dataframeMeanders = dataframeMeanders.cast({
+				'arcCode': getDatatypePolars(state.bitWidth + 3)
+				, 'meanders': getDatatypePolars((meandersMaximum * (state.bitWidth + 4)).bit_length())})
+			state.boundary -= 1
+			state.set_arcCodeMAXIMUM()
+			dataframeMeanders = materializeMeandersPolars(
+				transition(dataframeMeanders, state.bitsLocator, min(state.arcCodeMAXIMUM, 1 << 128), state.bitWidth)
+				, state.n, state.boundary)
+			arcCodeMaximum, meandersMaximum = dataframeMeanders.select(polars.all().max()).collect(engine='streaming').row(0)
+			state.bitWidth = arcCodeMaximum.bit_length()
+			state.setBitsLocator()
+		state.lookupMeanders = dict(dataframeMeanders.collect(engine='streaming').iter_rows())
+	return state
+
+def doTheNeedful(state: StateMeanders) -> StateMeanders:
+	while 0 < state.boundary:
+		if integersWidePolars吗(state):
+			state = countBigInt(state)
+		else:
+			state = count(state)
 	return state

@@ -118,6 +118,8 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString, monkeypatch:
 	state = countMeanders(kind, n, flow, None)
 	actual: int = sum(state.lookupMeanders.values()) + state.countAddend
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
+	if flow == 'matrixPolars':
+		assert not any(tmp_path.glob('matrixMeandersPolars_n*_boundary*_*.arrow'))
 
 @pytest.mark.parametrize('mapShape', [pytest.param((2, 4), id='p2x4')])
 def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Path) -> None:
