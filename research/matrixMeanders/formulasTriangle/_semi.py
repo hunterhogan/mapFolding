@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from research.matrixMeanders.formulasTriangle._A005315 import (
-	A005315of1, A005315of2, A005315of3, A005315of4, A005315of5, A005315of6, A005315of7, A005315of8, A005315of9, A005315of10)
+	A005315of1, A005315of2, A005315of3, A005315of4, A005315of5, A005315of6, A005315of7, A005315of8, A005315of9, A005315of10, A005315of11)
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -37,7 +37,10 @@ def 工diagonal9(n: int) -> int:
 def 工diagonal10(n: int) -> int:
 	return A005315of10(n)
 
+def 工diagonal11(n: int) -> int:
+	return A005315of11(n)
+
 boxOfDiagonals: list[Callable[[int], int]] = [
 	工diagonal1, 工diagonal2, 工diagonal3, 工diagonal4, 工diagonal5
-	, 工diagonal6, 工diagonal7, 工diagonal8, 工diagonal9, 工diagonal10
+	, 工diagonal6, 工diagonal7, 工diagonal8, 工diagonal9, 工diagonal10, 工diagonal11
 ]

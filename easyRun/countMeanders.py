@@ -18,16 +18,16 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
-	pathLikeWrite = Path(settingsPackage.pathPackage, 'jobs')
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
+	pathLikeWrite = Path(settingsPackage.pathPackage, 'jobs')
 	flow = 'matrixPandas'
 	flow = 'matrixMeanders'
 	flow = 'prune'
 	flow = 'matrixNumPy'
 	flow = 'prunePandas'
-	flow = 'pruneNumPy'
 	flow = 'matrixPolars'
+	flow = 'pruneNumPy'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			# ('A005315', 'closed'),
@@ -39,13 +39,13 @@ if __name__ == '__main__':
 		printEasyRunHeader(oeisID, flow)
 
 		boxOf_n: list[int] = []
-		boxOf_n.extend(range(2, 10))
+		# boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
 		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))
-		# boxOf_n.extend(range(46, 47))
+		boxOf_n.extend(range(46, 47))
 		# boxOf_n.extend(range(47, 48))
 
 		# boxOf_n.extend(range(10, 43, 2))
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
 r"""
 
-title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\_countMeanders.py & title I'm done
+title running && start "meanders" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\countMeanders.py & title I'm done
 
-sudo nice -n -10 /home/hunte/mapFolding/.venv/bin/python -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on /home/hunte/mapFolding/easyRun/_countMeanders.py
+sudo nice -n -10 /home/hunte/mapFolding/.venv/bin/python -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on /home/hunte/mapFolding/easyRun/countMeanders.py
 """
