@@ -40,7 +40,14 @@ def alignArcs(dataframeMeanders: polars.LazyFrame, bitWidth: int, datatypeArcCod
 		flipExtra_0b1_Here <<= 2
 	return dataframeMeanders.drop('findTheExtra_0b1')
 
-def transition(dataframeMeanders: polars.LazyFrame, bitsLocator: int, arcCodeMAXIMUM: int, bitWidth: int) -> polars.LazyFrame:
+def canonicalizeArcs(dataframeMeanders: polars.LazyFrame, bitsLocator: int) -> polars.LazyFrame:
+	schemaMeanders: polars.Schema = dataframeMeanders.collect_schema()
+	bitsAlfa: polars.Expr = polars.col('arcCode') & polars.lit(bitsLocator, dtype=schemaMeanders['arcCode'])
+	bitsZulu: polars.Expr = polars.col('arcCode') // 2 & polars.lit(bitsLocator, dtype=schemaMeanders['arcCode'])
+	return dataframeMeanders.with_columns(
+		polars.when(bitsAlfa < bitsZulu).then(bitsAlfa * 2 | bitsZulu).otherwise(polars.col('arcCode')).alias('arcCode'))
+
+def transfer(dataframeMeanders: polars.LazyFrame, bitsLocator: int, bitWidth: int) -> polars.LazyFrame:
 	schemaMeanders: polars.Schema = dataframeMeanders.collect_schema()
 	bitsAlfa: polars.Expr = polars.col('arcCode') & polars.lit(bitsLocator, dtype=schemaMeanders['arcCode'])
 	bitsZulu: polars.Expr = polars.col('arcCode') // 2 & polars.lit(bitsLocator, dtype=schemaMeanders['arcCode'])
@@ -51,7 +58,11 @@ def transition(dataframeMeanders: polars.LazyFrame, bitsLocator: int, arcCodeMAX
 		, dataframeMeanders.filter(1 < bitsAlfa, 1 < bitsZulu, (polars.col('arcCode') & 3) != 3)
 			.pipe(alignArcs, bitWidth, schemaMeanders['arcCode'])
 			.select(connectArcs(bitsAlfa, bitsZulu).alias('arcCode'), 'meanders')
-		), parallel=False, rechunk=False
+		), parallel=False, rechunk=False)
+
+def transition(dataframeMeanders: polars.LazyFrame, bitsLocator: int, arcCodeMAXIMUM: int, bitWidth: int) -> polars.LazyFrame:
+	schemaMeanders: polars.Schema = dataframeMeanders.collect_schema()
+	return transfer(dataframeMeanders, bitsLocator, bitWidth
 	).filter(polars.col('arcCode') <= polars.lit(arcCodeMAXIMUM - 1, dtype=polars.UInt128)
 	).group_by('arcCode').agg(polars.col('meanders').sum().cast(schemaMeanders['meanders']))
 

@@ -58,21 +58,22 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Folding
 	from os import PathLike
 	from pandas import DataFrame
+	from polars.io.partition import FileProviderArgs
 	from typing import Any, Literal
 	from urllib3.response import BaseHTTPResponse
 	import polars
 
 @contextmanager
-def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+def storePolars() -> Generator[Callable[[polars.LazyFrame], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
 	pathFilenameLedger: list[Path] = []
 
-	def materializeMeandersPolars(dataframe: polars.LazyFrame, n: int, boundary: int) -> polars.LazyFrame:
-		pathFilename: Path = Path.cwd() / f'matrixMeandersPolars_n{n}_boundary{boundary}_{uuid4().hex}.arrow'
+	def materializePolars(dataframe: polars.LazyFrame) -> polars.LazyFrame:
+		pathFilename: Path = Path.cwd() / f'polars_{uuid4().hex}.arrow'
 		pathFilenameLedger.append(pathFilename)
-		dataframe.sink_ipc(pathFilename, maintain_order=False, engine='streaming'
+		dataframe.sink_ipc(pathFilename, compression='zstd', maintain_order=False, engine='streaming'
 			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
 		dataframeMaterialized: polars.LazyFrame = polars.scan_ipc(pathFilename, memory_map=False)
 		if 1 < len(pathFilenameLedger):
@@ -81,10 +82,69 @@ def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], po
 		return dataframeMaterialized
 
 	try:
-		yield materializeMeandersPolars
+		yield materializePolars
 	finally:
 		while pathFilenameLedger:
 			pathFilenameLedger.pop().unlink(missing_ok=True)
+
+@contextmanager
+def storePolarsGroups(by: str, partitions: int = 64) -> Generator[Callable[[polars.LazyFrame, polars.Expr], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
+	import polars  # ruff: ignore[import-outside-top-level]
+
+	if partitions < 1:
+		message: str = f"I received `{partitions = }`, but I need at least one partition."
+		raise ValueError(message)
+	pathWorking: Path = Path.cwd() / f'polarsGroups_{uuid4().hex}'
+	pathWorking.mkdir()
+	listPathFilenamesCompleted: list[Path] = []
+
+	def materializePolarsGroups(dataframe: polars.LazyFrame, aggregation: polars.Expr) -> polars.LazyFrame:
+		identifierGeneration: str = uuid4().hex
+		schema: polars.Schema = dataframe.collect_schema()
+
+		def makeFilenamePartition(partition: FileProviderArgs) -> str:
+			return f'{identifierGeneration}_{partition.partition_keys.item()}_{partition.index_in_partition}.arrow'
+
+		dataframe.sink_ipc(polars.PartitionBy(pathWorking, file_path_provider=makeFilenamePartition
+			, key={f'partition_{identifierGeneration}': polars.col(by).hash() % partitions}, include_key=False)
+			, compression='zstd', maintain_order=False, engine='streaming'
+			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
+		while listPathFilenamesCompleted:
+			listPathFilenamesCompleted.pop().unlink()
+
+		partitionIndex: int = 0
+		while partitionIndex < partitions:
+			listPathFilenamesPartition: list[Path] = list(pathWorking.glob(f'{identifierGeneration}_{partitionIndex}_*.arrow'))
+			if listPathFilenamesPartition:
+				pathFilename: Path = pathWorking / f'grouped_{identifierGeneration}_{partitionIndex}.arrow'
+				polars.scan_ipc(listPathFilenamesPartition, memory_map=False).group_by(by).agg(aggregation).sink_ipc(
+					pathFilename, compression='zstd', maintain_order=False, engine='streaming'
+					, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
+				listPathFilenamesCompleted.append(pathFilename)
+				while listPathFilenamesPartition:
+					listPathFilenamesPartition.pop().unlink()
+			partitionIndex += 1
+		if listPathFilenamesCompleted:
+			return polars.scan_ipc(listPathFilenamesCompleted, memory_map=False)
+		return polars.LazyFrame(schema=schema).group_by(by).agg(aggregation)
+
+	try:
+		yield materializePolarsGroups
+	finally:
+		listPathFilenamesRemaining: list[Path] = list(pathWorking.iterdir())
+		while listPathFilenamesRemaining:
+			listPathFilenamesRemaining.pop().unlink()
+		pathWorking.rmdir()
+
+@contextmanager
+def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+	with storePolars() as materializePolars:
+		#=SIN= Unused parameters preserve the existing storage callable's three-argument contract.
+		def materializeMeandersPolars(dataframe: polars.LazyFrame, n: int, boundary: int) -> polars.LazyFrame:  # ruff: ignore[unused-function-argument]
+			return materializePolars(dataframe)
+
+		yield materializeMeandersPolars
 
 #================== Create appropriate paths and filenames =========================================
 
