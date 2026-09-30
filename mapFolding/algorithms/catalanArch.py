@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from numba import int64, jit_module, types, uint8
+from numba import int64, jit_module, uint8
+from numba.core import types
 from operator import neg
 
 def count(n: int) -> list[int]:
@@ -12,7 +13,7 @@ def count(n: int) -> list[int]:
 	while archCode <= archCodeMaximum:  # C(n) iterations.
 		histogram[generations(archCode, bitEndpointFirst)] += 1
 		archCode = advanceDyck(archCode, Z0Z_calibrator)
-	return histogram[1:]
+	return histogram[1:None]
 
 def generations(archCode: int, bitEndpointFirst: int) -> int:
 	generationsSurvived: int = 1

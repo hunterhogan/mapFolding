@@ -6,12 +6,12 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗, prune
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.dataStructures import make_memmap
+from mapFolding.oeis.A400429 import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.pruneBigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
 from numpy import (
 	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
 	bool as numpy_bool, greater as moreThan, less_equal as lessThanEqual, memmap, multiply, subtract)
-from research.matrixMeanders.formulasTriangle import boxOfDiagonals
 from tqdm.auto import tqdm
 from typing import cast, TYPE_CHECKING
 import numpy

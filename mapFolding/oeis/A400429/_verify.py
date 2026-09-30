@@ -7,8 +7,8 @@ from itertools import chain, filterfalse, groupby, repeat
 from mapFolding.kitFilesystem import readDiagonal
 from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
 from operator import add, itemgetter
-from research.matrixMeanders.formulasTriangle import A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, boxOfDiagonals
-from research.matrixMeanders.formulasTriangle._fromTriangleCells import calculateDiagonal2, calculateDiagonal3
+from mapFolding.oeis.A400429 import A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, boxOfDiagonals
+from mapFolding.oeis.A400429._fromTriangleCells import calculateDiagonal2, calculateDiagonal3
 from research.matrixMeanders.infoBooth import makePathFilenameDiagonal
 from textwrap import wrap
 from typing import TYPE_CHECKING

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from research.matrixMeanders.formulasTriangle._A005315 import (
+from mapFolding.oeis.A400429._A005315 import (
 	A005315of1, A005315of2, A005315of3, A005315of4, A005315of5, A005315of6, A005315of7, A005315of8, A005315of9, A005315of10, A005315of11)
 from typing import TYPE_CHECKING
 

@@ -6,7 +6,7 @@ from __future__ import annotations
 from functools import partial, reduce
 from itertools import chain
 from mapFolding.kitFilesystem import readDiagonal
-from research.matrixMeanders.formulasTriangle._A005315 import _crunchDenominator, _crunchNumerator
+from mapFolding.oeis.A400429._A005315 import _crunchDenominator, _crunchNumerator
 from research.matrixMeanders.infoBooth import pathFilenameTriangleSemiCommaSeparatedValues
 from sympy import mobius
 from typing import TYPE_CHECKING

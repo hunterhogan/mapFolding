@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from mapFolding.basecamp import countMeanders
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
-from research.matrixMeanders.formulasTriangle import checkFormulas
+from mapFolding.oeis.A400429 import checkFormulas
 from typing import TYPE_CHECKING
 import gc
 import time

@@ -11,7 +11,7 @@ from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import appendStringToHere, writeDiagonal
 from mapFolding.oeis import formatBFile
 from mapFolding.oeis._byFormulaLookup import _A005315, _A005316
-from research.matrixMeanders.formulasTriangle import boxOfDiagonals
+from mapFolding.oeis.A400429 import boxOfDiagonals
 from research.matrixMeanders.infoBooth import makePathFilenameDiagonal, pathFilenameTriangleSemiText
 from tqdm.auto import tqdm
 
