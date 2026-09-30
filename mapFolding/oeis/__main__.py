@@ -138,8 +138,66 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 		raise ValueError(message)
 	return mapShape
 
-def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:
+	"""Group known values for `oeisID` into numbered triangle rows.
+
+	(AI generated docstring)
+
+	You can use this function to access a supported sequence as rows for further analysis. This
+	function obtains the sequence metadata through `mapFolding.oeis.getMetadata` [1] and returns
+	a new dictionary mapping row numbers to lists of known values.
+
+	Row Boundaries
+	--------------
+	`mapFolding.oeis._dataBaskets.MetadataOEISid` [2] supplies the starting row through `rowStart`,
+	falling back to `offset`. When metadata supplies `rowLength`, the function evaluates `rowLength`
+	for successive row numbers. Otherwise, requested row lengths begin at one and increase by one,
+	regardless of the starting row number.
+
+	`mapFolding.dataStructures.makeLookupTriangle` [3] groups `valuesKnown.values()` in dictionary
+	insertion order. Sequence index keys do not determine row boundaries and are not sorted. A
+	partially known final row is retained. Grouping stops at the first empty row, including an empty
+	row caused by a requested length of zero. The function does not check whether the sequence
+	represents a triangle.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Identifier of a sequence present in the package metadata. Lookup ignores letter case and
+		leading or trailing whitespace.
+
+	Returns
+	-------
+	triangleRows : dict[int, list[int]]
+		Consecutive row numbers mapped to newly allocated lists of known sequence values.
+
+	Unknown Sequences
+	-----------------
+	This function propagates `KeyError` from the metadata lookup if the normalized `oeisID` is
+	absent from the package metadata.
+
+	Examples
+	--------
+	`getTriangleDiagonal` [4] obtains rows with the following call before selecting a diagonal,
+	using the caller's `oeisID`.
+
+		```python
+		from mapFolding.oeis import getTriangleRows
+
+		getTriangleRows(oeisID)
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis.getMetadata`
+
+	[2] `mapFolding.oeis._dataBaskets.MetadataOEISid`
+
+	[3] `mapFolding.dataStructures.makeLookupTriangle`
+
+	[4] `getTriangleDiagonal`
+
+	"""
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None

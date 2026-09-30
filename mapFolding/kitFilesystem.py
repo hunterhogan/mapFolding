@@ -493,8 +493,59 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	"""
 	return _iterableToCSV(album, pathFilename)
 
-def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> Path:
+	"""Save numbered integer rows from `triangle` to a CSV file.
+
+	(AI generated docstring)
+
+	You can use this function to persist a triangle for later loading with `readTriangle` [1].
+	This function writes the rows to `pathFilename` and returns `pathFilename` after closing the file.
+
+	CSV Layout
+	----------
+	Each record contains the row number followed by that row's values, without a header. Records
+	appear in ascending row-number order. Values within each row retain their supplied order, and
+	an empty row contains only the row number. The file uses UTF-8 and the default `csv.writer`
+	dialect [2]. `_iterableToCSV` [3] creates missing parent directories and replaces existing file
+	contents. An empty `triangle` produces an empty file. Row lengths are not validated.
+
+	Parameters
+	----------
+	triangle : Mapping[int, Sequence[int]]
+		Row numbers mapped to ordered integer values.
+	pathFilename : Path
+		Destination file. Existing contents are overwritten.
+
+	Returns
+	-------
+	pathFilenameWritten : Path
+		The supplied `pathFilename` after writing completes.
+
+	Writing Failures
+	----------------
+	This function propagates `OSError` if creating parent directories or opening or writing the
+	file fails.
+
+	Examples
+	--------
+	The writer in `easyRun/reduceArches.py` saves accumulated rows using its existing `triangle`
+	and destination directory `pathWrite`.
+
+		```python
+		from mapFolding.kitFilesystem import writeTriangle
+
+		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
+		```
+
+	References
+	----------
+	[1] `readTriangle`
+
+	[2] csv.writer - Python standard library.
+		https://docs.python.org/3/library/csv.html#csv.writer
+	[3] `_iterableToCSV`
+
+	"""
 	return _iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
 
 # Improve
@@ -675,8 +726,66 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	import pandas  # ruff: ignore[import-outside-top-level]
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))
 
-def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
+	"""Load numbered integer rows from a triangle CSV file.
+
+	(AI generated docstring)
+
+	You can use this function to load rows previously saved by `writeTriangle` [1]. This function
+	reads all of `pathFilename` into memory and returns a dictionary mapping row numbers to tuples
+	of values.
+
+	CSV Layout
+	----------
+	The file must contain UTF-8 text with no header. Each CSV record [2] begins with an integer row
+	number followed by integer values. `mapFolding.dataStructures.parseTriangle` [3] ignores empty
+	records and preserves the supplied row order. A record containing only a row number produces an
+	empty tuple. Repeated row numbers keep the last values at the first occurrence's dictionary
+	position [4]. An empty file produces an empty dictionary. Row lengths and consecutive numbering
+	are not validated.
+
+	Parameters
+	----------
+	pathFilename : Path
+		Triangle file to read.
+
+	Returns
+	-------
+	triangle : dict[int, tuple[int, ...]]
+		Row numbers mapped to all values after each row number.
+
+	Reading Failures
+	----------------
+	This function propagates `OSError` if opening or reading `pathFilename` fails, and
+	`UnicodeDecodeError` if the file does not contain valid UTF-8 text. A field that cannot be
+	converted to an integer, including a header or empty field, propagates `ValueError` from
+	the parser.
+
+	Examples
+	--------
+	The coefficient analysis in `Z0Z_research/catalanArches/sub_kCoefficientFormulas.py` loads
+	stored rows before inspecting columns. From the repository root, the same input can be read
+	with the following code.
+
+		```python
+		from mapFolding.kitFilesystem import readTriangle
+		from pathlib import Path
+
+		pathFilenameCSV: Path = Path('Z0Z_research/catalanArches/A287548.csv')
+		triangle: dict[int, tuple[int, ...]] = readTriangle(pathFilenameCSV)
+		```
+
+	References
+	----------
+	[1] `writeTriangle`
+
+	[2] csv.reader - Python standard library.
+		https://docs.python.org/3/library/csv.html#csv.reader
+	[3] `mapFolding.dataStructures.parseTriangle`
+
+	[4] Dictionary insertion order - Python standard library.
+		https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
+	"""
 	return parseTriangle(readText(pathFilename))
 
 def streamAlbum(pathFilename: Path) -> Iterable[Folding]:

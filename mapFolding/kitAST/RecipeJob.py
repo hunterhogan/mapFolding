@@ -298,8 +298,69 @@ def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheor
 	ast.fix_missing_locations(ingredientsFunction.astFunctionDef)
 	return ingredientsFunction
 
-def moveStaticArrays(job: RecipeJobTheorem2, ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule) -> tuple[IngredientsFunction, IngredientsModule]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def moveStaticArrays(job: RecipeJobTheorem2, ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule) -> tuple[IngredientsFunction, IngredientsModule]:
+	"""Move static array initialization from a generated function to its module.
+
+	(AI generated docstring)
+
+	This function relocates array assignments identified by `job.shatteredDataclass` [1]
+	from `ingredientsFunction` into the epilogue of `ingredientsModule`. The generated
+	module initializes these arrays at module scope so function calls can reuse the arrays.
+	Both containers are modified in place and returned together.
+
+	Assignment Selection
+	--------------------
+	The traversal selects `ast.Assign` nodes by the first target only [2]. Annotated
+	assignments and assignments with the identifier only in a later target do not match.
+	For each identifier, the last match in traversal order is appended without copying,
+	then all matching assignments are removed from the function. A required-value check
+	raises `ValueError` if `job.shatteredDataclass` is `None` or a static array has no
+	matching assignment. A failure for a later identifier leaves earlier relocations in place.
+
+	Parameters
+	----------
+	job : RecipeJobTheorem2
+		Recipe with initialized shattered-dataclass metadata. `boxOfStaticArrays` [1]
+		identifies array fields whose dataclass initialization setting is `init=False`.
+	ingredientsFunction : IngredientsFunction
+		Function container from `astToolkit` [3] containing a plain assignment for every
+		static array identifier. Each matching assignment must name the array as its first
+		assignment target.
+	ingredientsModule : IngredientsModule
+		Module container from `astToolkit` [3] that receives the relocated assignments in
+		the order given by `boxOfStaticArrays` [1].
+
+	Returns
+	-------
+	ingredientsFunction : IngredientsFunction
+		The original function container with all matching static array assignments removed.
+	ingredientsModule : IngredientsModule
+		The original module container with the final matching assignment for each array
+		appended to its epilogue.
+
+	Examples
+	--------
+	The computation job generator calls this function after moving arguments into the
+	function body [4].
+
+		```python
+		ingredientsFunction = move_argToBody(ingredientsFunction, job)
+		ingredientsFunction, ingredientsModule = moveStaticArrays(
+			job, ingredientsFunction, ingredientsModule)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.dataclasses.ShatteredDataclass`
+
+	[2] `mapFolding.kitAST.IfThis.isAssignAndTargets0Is`
+
+	[3] astToolkit containers and tree visitors.
+		https://context7.com/hunterhogan/asttoolkit
+
+	[4] `mapFolding.kitAST.numba.makeJob.makeJobNumba`
+
+	"""
 	for identifier in raiseIfNone(job.shatteredDataclass).boxOfStaticArrays:
 		findThis: Callable[[ast.AST], TypeIs[ast.Assign]] = IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifier))
 		ingredientsModule.appendEpilogue(

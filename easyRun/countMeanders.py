@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from mapFolding.algorithms.matrixMeandersShare import prune
 from mapFolding.basecamp import countMeanders
+from mapFolding.dataBaskets import StateMeanders
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
@@ -26,8 +28,8 @@ if __name__ == '__main__':
 	flow = 'prune'
 	flow = 'matrixNumPy'
 	flow = 'prunePandas'
-	flow = 'matrixPolars'
 	flow = 'pruneNumPy'
+	flow = 'matrixPolars'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
 			# ('A005315', 'closed'),
@@ -39,13 +41,13 @@ if __name__ == '__main__':
 		printEasyRunHeader(oeisID, flow)
 
 		boxOf_n: list[int] = []
-		boxOf_n.extend(range(2, 10))
+		# boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
 		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))
-		# boxOf_n.extend(range(46, 47))
+		boxOf_n.extend(range(46, 47))
 		# boxOf_n.extend(range(47, 48))
 
 		# boxOf_n.extend(range(10, 43, 2))
@@ -53,8 +55,10 @@ if __name__ == '__main__':
 
 		for n in boxOf_n:
 			gc.collect()
+			state = StateMeanders(n, kind)
+			state = prune(state)
 			timeStart: float = time.perf_counter()
-			state = countMeanders(kind, n, flow, pathLikeWrite)
+			state: StateMeanders = countMeanders(kind, n, flow, pathLikeWrite, state=state)
 			countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)

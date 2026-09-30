@@ -47,3 +47,20 @@ Furthermore, now that the package includes OEIS A000136, 1 x N stamps/maps, sort
 ## TypeAlias
 
 Use `type` by default. Switch to `TypeAlias` whenever it promotes self-documenting code, especially through semiotics. Examples, I prefer `isinstance(x, ChoicesLeaf)` to `isinstance(x, mpz)`; `dimension = DimensionIndex(2)` is more self-documenting than `dimension = int(2)`.
+
+## unambiguousInput
+
+Be nice to callers at the input boundary. When a value has one clear interpretation but arrives in
+the wrong Python type, normalize the representation before validating the value. An integer written
+as a `str`, such as `'7'`, or supplied as an integral `float`, such as `7.0`, should not halt a
+computation solely because of the representation. Do not guess an intended value or round a
+fractional value to make the input acceptable.
+
+In [`oeisIDfor_n`](../mapFolding/oeis/_byID.py), values that are not already an `int` pass through
+`hunterMakesPy.parseParameters.intInnit`. The function adopts the converted value when the result
+contains exactly one integer, then requires a non-negative index and checks the sequence's offset.
+Normalization preserves these domain checks; it does not replace them. Unsupported input still
+raises an error.
+
+Use the existing conversion and normalization functions in `hunterMakesPy.parseParameters` and
+`hunterMakesPy.dataStructures` where applicable instead of implementing another parser.

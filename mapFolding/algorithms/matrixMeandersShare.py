@@ -233,8 +233,66 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 
 	return max(totalBuckets, 3000000)
 
+def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
+	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
+	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
+
 def prune(state: StateMeanders) -> StateMeanders:
-	# DOCUMENT
+	"""Accumulate final contributions for dictionary states with known completion counts.
+
+	(AI generated docstring)
+
+	You can use this function between counting iterations to remove entries whose remaining work
+	can be evaluated by `mapFolding.oeis.A400429.boxOfDiagonals` [1]. The function preserves each
+	removed entry's final contribution in `state.countAddend` [2] and returns the updated state.
+
+	Parameters
+	----------
+	state : StateMeanders
+		Current computation state with arc codes and their subtotals in `state.lookupMeanders`.
+
+	Returns
+	-------
+	state : StateMeanders
+		The same state, with recognized entries removed and their final contributions accumulated.
+
+	See Also
+	--------
+	`pruneDataFrame`
+		Prune an active table stored as a dataframe instead of a dictionary [3].
+
+	Diagonal Selection
+	------------------
+	The local `boundary` is `state.boundary + 1`. Successive functions in `boxOfDiagonals` match
+	diagonals numbered from one through `boundary // 2`, stopping when the formula list ends.
+	For diagonal `次diagonal`, the selected key is
+	`(1 << (2 * (boundary - 2 * 次diagonal) + 2)) - 1`.
+
+	The function removes the selected key, multiplies the removed subtotal by the diagonal formula
+	evaluated at `boundary`, and adds the product to `state.countAddend`. A missing key contributes
+	zero. If no dictionary entries remain, the function sets `state.boundary` to zero so iteration
+	can stop. Other boundary-derived fields are not refreshed.
+
+	Examples
+	--------
+	`mapFolding.synthesized.matrixMeanders.prune.count` [4] prunes before iteration and after each
+	transfer step.
+
+		```python
+		state = prune(state)
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis.A400429.boxOfDiagonals`
+
+	[2] `mapFolding.dataBaskets.StateMeanders.countAddend`
+
+	[3] `pruneDataFrame`
+
+	[4] `mapFolding.synthesized.matrixMeanders.prune.count`
+
+	"""
 	boundary: int = state.boundary + 1
 
 	def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
@@ -247,12 +305,72 @@ def prune(state: StateMeanders) -> StateMeanders:
 		state.boundary = 0
 	return state
 
-def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
-	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
-	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
-
 def pruneDataFrame(state: StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> tuple[StateMeanders, pandas.DataFrame]:
-	# DOCUMENT
+	"""Accumulate final contributions for dataframe rows with known completion counts.
+
+	(AI generated docstring)
+
+	You can use this function after a counting step to remove rows whose remaining contribution
+	can be evaluated by `mapFolding.oeis.A400429.boxOfDiagonals` [1]. The function adds those final
+	contributions to `state.countAddend` [2] and returns the state with the remaining dataframe.
+
+	Parameters
+	----------
+	state : StateMeanders
+		Current computation state supplying the boundary and accumulating completed contributions.
+	dataframeAnalyzed : pandas.DataFrame
+		Active rows with an `'analyzed'` column of arc codes and a `'meanders'` column of integer
+		subtotals. Repeated arc codes are allowed and their subtotals are combined when removed.
+
+	Returns
+	-------
+	state : StateMeanders
+		The same state with completed contributions added to `state.countAddend` and
+		`state.boundary` set to zero if no rows remain.
+	dataframeRemaining : pandas.DataFrame
+		Unrecognized rows in their original order, with a fresh consecutive index starting at zero.
+
+	See Also
+	--------
+	`prune`
+		Prune active entries stored in `state.lookupMeanders` instead of a dataframe [3].
+
+	Row Removal
+	-----------
+	The function uses the same diagonal selection as `prune` [3], evaluated at
+	`state.boundary + 1`. For each selected arc code, the function converts matching subtotals to
+	Python `int`, sums the subtotals, and multiplies the sum by the corresponding diagonal formula.
+	A missing arc code contributes zero.
+
+	Boolean selection through `pandas.DataFrame.loc` [4] creates the filtered dataframe. The
+	function returns that dataframe after `reset_index(drop=True)` [5], so callers must retain the
+	returned dataframe. The function mutates `state.countAddend` and, when empty, `state.boundary`;
+	`state.lookupMeanders` and the other boundary-derived fields retain their existing values.
+
+	Examples
+	--------
+	`mapFolding.synthesized.matrixMeanders.prunePandas.count` [6] retains both returned objects
+	after aggregating a transfer step.
+
+		```python
+		state, dataframeAnalyzed = pruneDataFrame(state, dataframeAnalyzed)
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis.A400429.boxOfDiagonals`
+
+	[2] `mapFolding.dataBaskets.StateMeanders.countAddend`
+
+	[3] `prune`
+
+	[4] pandas `DataFrame.loc`.
+		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.loc.html
+	[5] pandas `DataFrame.reset_index`.
+		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.reset_index.html
+	[6] `mapFolding.synthesized.matrixMeanders.prunePandas.count`
+
+	"""
 	boundary: int = state.boundary + 1
 
 	def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:

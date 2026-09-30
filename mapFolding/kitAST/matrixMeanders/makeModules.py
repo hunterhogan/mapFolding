@@ -147,8 +147,87 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	ingredientsModule.appendEpilogue(astModule)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+	"""Generate an array meander module with formula pruning.
+
+	(AI generated docstring)
+
+	This function transforms a complete NumPy [1] meander-counting source tree into a module
+	that removes states with known counts before further counting. The function modifies
+	`astModule` in place, writes the generated module, and returns the output path.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Complete source tree with the counting and dispatcher functions, the array-pruning
+		function, and the progress-update calls expected by the configured identifiers.
+	identifiers : Default | None = None
+		Mapping of source names, generated names, and paths. `None` selects
+		`defaultMatrixMeanders` [2].
+	**override : Any
+		Replacements for the counting, dispatcher, pruning, array, state, progress, and
+		module identifiers. Package and logical-path settings also control generated imports
+		and the destination resolved by `toDisk` [3].
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the written module, named `pruneNumPy` with the default configuration [2].
+
+	Pruning Insertion Points
+	------------------------
+	With the default identifiers, the counting function assigns both return values from
+	`pruneArray(state, arrayMeanders)` [4] immediately before each `tqdmBoundary.update()`
+	expression. In the source implementation, this point follows aggregation of duplicate
+	arc codes. The array-pruning function remains in the complete source module.
+
+	Each `tqdmBoundary.set_postfix(...)` call becomes
+	`tqdmBoundary.set_postfix_str(f'boundary={state.boundary}')` [5]. This replacement scans
+	the whole module and discards the original call arguments.
+
+	The dispatcher assigns `state = prune(state)` [6] before each matched `while` statement.
+	The generated module imports this state-pruning function and redirects imports of the
+	configured `bigInt` module to `pruneBigInt` [7], preserving imported names and aliases.
+
+	Source Requirements
+	-------------------
+	The transformations match names and statement shapes without checking that every
+	expected insertion point exists. Use an unmodified source tree for each generation;
+	applying the function again inserts additional pruning calls into `astModule`.
+	Writing the output does not run the generated counting functions.
+
+	Examples
+	--------
+	`makeModulesMeanders` [8] reads the complete array implementation with `getModule` [9]
+	before generating the pruning variant.
+
+		```python
+		makePruneNumPy(
+			getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders),
+			defaultMatrixMeanders)
+		```
+
+	References
+	----------
+	[1] NumPy reference.
+		https://numpy.org/doc/stable/reference/index.html
+	[2] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
+
+	[3] `mapFolding.kitAST.prefab.toDisk`
+
+	[4] `mapFolding.algorithms.matrixMeandersNumPy.pruneArray`
+
+	[5] tqdm progress updates and postfix display.
+		https://tqdm.github.io/docs/tqdm/
+	[6] `mapFolding.algorithms.matrixMeandersShare.prune`
+
+	[7] `mapFolding.synthesized.matrixMeanders.pruneBigInt`
+
+	[8] `makeModulesMeanders`
+
+	[9] `mapFolding.kitAST.paths.getModule`
+
+	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
@@ -187,8 +266,89 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	ingredientsModule = IngredientsModule(imports=ledger, epilogue=astModule)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+	"""Generate a dataframe meander module with formula pruning.
+
+	(AI generated docstring)
+
+	This function transforms a complete pandas [1] meander-counting source tree into a module
+	that removes states with known counts after aggregation. The function modifies
+	`astModule` in place, writes the generated module, and returns the output path.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Complete source tree containing the nested aggregation function, its enclosing
+		counting function, and the dispatcher expected by the configured identifiers.
+	identifiers : Default | None = None
+		Mapping of source names, generated names, and paths. `None` selects
+		`defaultMatrixMeanders` [2].
+	**override : Any
+		Replacements for the aggregation, dispatcher, pruning, dataframe, state, and module
+		identifiers. Package and logical-path settings also control generated imports and
+		the destination resolved by `toDisk` [3].
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the written module, named `prunePandas` with the default configuration [2].
+
+	Aggregation and State Rebinding
+	------------------------------
+	With the default identifiers, the function inserts
+	`state, dataframeAnalyzed = pruneDataFrame(state, dataframeAnalyzed)` [4] after every
+	plain assignment in `aggregateArcCodes`. The source aggregation function has one such
+	assignment, which combines counts for equal arc codes.
+
+	Each existing `nonlocal` declaration in the aggregation function is replaced with
+	`nonlocal dataframeAnalyzed, state`. This replacement allows the inserted assignment to
+	rebind both objects in the enclosing counting function [5]. The transformation neither
+	adds a missing declaration nor preserves other names in an existing declaration.
+
+	The dispatcher assigns `state = prune(state)` [6] before each matched `while` statement.
+	The generated module imports both pruning functions and redirects imports of the
+	configured `bigInt` module to `pruneBigInt` [7], preserving imported names and aliases.
+
+	Source Requirements
+	-------------------
+	The transformations match names and statement shapes without checking that every
+	expected insertion point exists. The aggregation function must already declare its
+	enclosing dataframe binding with `nonlocal`. Use an unmodified source tree for each
+	generation; applying the function again inserts additional pruning calls into
+	`astModule`. Writing the output does not run the generated counting functions.
+
+	Examples
+	--------
+	`makeModulesMeanders` [8] reads the complete dataframe implementation with `getModule` [9]
+	before generating the pruning variant.
+
+		```python
+		makePrunePandas(
+			getModule(defaultMatrixMeanders['module']['pandas'], identifiers=defaultMatrixMeanders),
+			defaultMatrixMeanders)
+		```
+
+	References
+	----------
+	[1] pandas reference.
+		https://pandas.pydata.org/docs/reference/index.html
+	[2] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
+
+	[3] `mapFolding.kitAST.prefab.toDisk`
+
+	[4] `mapFolding.algorithms.matrixMeandersShare.pruneDataFrame`
+
+	[5] Python `nonlocal` statement and enclosing bindings.
+		https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement
+	[6] `mapFolding.algorithms.matrixMeandersShare.prune`
+
+	[7] `mapFolding.synthesized.matrixMeanders.pruneBigInt`
+
+	[8] `makeModulesMeanders`
+
+	[9] `mapFolding.kitAST.paths.getModule`
+
+	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']

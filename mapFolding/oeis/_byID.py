@@ -66,10 +66,8 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 	"""
 	oeisID = formatOEISid(oeisID)
 
-	# DOCUMENT =EndNotes= unambiguous but technically malformed user input: Be nice. Try to deal with
-	# _unambiguous_ input that is malformed, such as an integer value passed as a `str` or `float`
-	# type, instead of halting execution. `hunterMakesPy.parseParameters` and `datastructures` have
-	# easy-to-implement, robust functions to do the hard work.
+	#=EndNotes##unambiguousInput=
+	# Normalize a clear integer value supplied as another type, then validate the index.
 	if not isinstance(n, int):
 		qq: list[int] = intInnit([n], 'n', int)
 		if len(qq) == 1:
