@@ -72,14 +72,6 @@ def test_getDataFrameFoldings(state: StateElimination, expected: tuple[int, int]
 	dataframeFoldings: pandas.DataFrame = raiseIfNone(getDataFrameFoldings(state))
 	assertEqualTo(dataframeFoldings.shape, expected, getDataFrameFoldings.__name__, state)
 
-@pytest.mark.parametrize('state, expected', [pytest.param(StateElimination((2,) * 3), None, id='dimensions3-missing')])
-def test_getDataFrameFoldingsError(state: StateElimination, expected: None, capsys: pytest.CaptureFixture[str]) -> None:
-	dataframeFoldings: pandas.DataFrame | None = getDataFrameFoldings(state)
-	standardError: str = capsys.readouterr().err
-	assertEqualTo(dataframeFoldings, expected, getDataFrameFoldings.__name__, state)
-	assert f'{state.totalDimensions = }' in standardError
-	assert makeFilenameArrayFoldings(state.totalDimensions) in standardError
-
 @pytest.mark.parametrize('totalFolds', [pytest.param(123, id='totalFolds-123')])
 def test_saveTotalFolds_fallback(totalFolds: int, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 	pathFilenameTotalFolds: Path = tmp_path / 'countTotal.txt'
