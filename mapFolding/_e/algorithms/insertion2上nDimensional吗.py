@@ -25,9 +25,7 @@ if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from concurrent.futures import Future
 	from mapFolding._e.theTypes import ChoicesLeaf
-	from mapFolding.theTypes import Leaf, Pile
-
-	from mapFolding.theTypes import Folding
+	from mapFolding.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
 
 def makeDescendants(folding: Folding, state: StateElimination, position: int) -> StateElimination:
@@ -73,7 +71,7 @@ def makeDescendants(folding: Folding, state: StateElimination, position: int) ->
 	state.boxOfPermutationSpace.extend(boxOfPermutationSpace)
 	return state
 
-def makeAlbum2上nDimensional吗(state: StateElimination, workersMaximum: int) -> StateElimination:
+def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> StateElimination:
 	"""Construct album `n`."""
 	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.totalDimensions - 1), pathAlbum, suffix='.album'))
 
@@ -94,7 +92,7 @@ def makeAlbum2上nDimensional吗(state: StateElimination, workersMaximum: int) -
 
 	return state
 
-def recordAlbum2上nDimensional吗(state: StateElimination) -> Path:
+def recordAlbum2上nDimensional(state: StateElimination) -> Path:
 	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, pathAlbum, suffix='.album')
 	writeAlbum(sorted(state.boxOfFolding), pathFilenameAlbum)
 	return pathFilenameAlbum

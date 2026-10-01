@@ -40,6 +40,7 @@ baat
 baseswap
 bfile
 bidirected
+Bigg
 bigl
 bignum
 bigr
@@ -108,6 +109,7 @@ dissoc
 distclean
 Docstrings
 DOTHARDCODED
+downgress
 Doye
 dtypes
 dumbass
@@ -117,6 +119,7 @@ Dyck
 Ecompacted
 Eick
 Elephino
+elim
 ÉLISE
 elts
 Embedder
@@ -164,6 +167,7 @@ GOUJARD
 grâce
 Graphes
 graycode
+Gress
 groebner
 groupby
 Guitter
@@ -329,6 +333,7 @@ Oswin
 otypes
 Oughta
 ount
+outgressed
 ower
 Pade
 Paltrowitz
@@ -432,6 +437,8 @@ stratifiable
 structref
 subclasshook
 subexponential
+subexpr
+subplan
 succ
 Summinator
 swopping
@@ -481,6 +488,7 @@ Unroller
 unshifted
 unsignedinteger
 untenably
+upgress
 urldate
 urllib
 usegmt

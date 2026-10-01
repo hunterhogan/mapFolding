@@ -4,13 +4,15 @@
 """Find `groupsOfFolds` based on Sade's 1949 insertion algorithm."""
 from __future__ import annotations
 
+from contextlib import ExitStack
 from functools import partial
-from hunterMakesPy import decreasing, inclusive, zeroIndexed
+from hunterMakesPy import decreasing
 from itertools import chain
 from mapFolding import leafOrigin, pileOrigin
-from mapFolding._e.algorithms.iff import creaseViolation吗
-from mapFolding.beDRY import defineProcessorLimit
-from mapFolding.kitFilesystem import makePathFilenameFolds, streamAlbum, writeAlbum
+from mapFolding._e import getMapShapeProducts
+from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
+from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves, validateMapShape
+from mapFolding.kitFilesystem import makePathFilenameFolds, writeAlbum
 from mapFolding.oeis import getValuesKnown
 from mapFolding.theSSOT import settingsPackage
 from multiprocessing.pool import Pool
@@ -23,93 +25,84 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
 
-pathAlbum: Path = settingsPackage.pathPackage / '_e' / '_research' / 'albums'
+pathAlbum: Path = settingsPackage.pathPackage / '_e' / 'research' / 'albums'
 
-def makeAlbums1xn(n: int, nFinal: int, workersMaximum: int) -> Path:
-	"""Construct every album through `nFinal`."""
-	pathFilename: Path = makePathFilenameFolds((1, n), pathAlbum, suffix='.album')
-	album: Iterable[Folding] = streamAlbum(pathFilename)
-
-	processManager: Pool = Pool(workersMaximum)
-	while n < nFinal:
-		n += 1
-		pathFilename = makePathFilenameFolds((1, n), pathFilename.parent, suffix='.album')
-
-		if pathFilename.exists():
-			album = streamAlbum(pathFilename)
-		else:
-			album = tuple(chain.from_iterable(processManager.imap_unordered(_makeDescendants, album, chunksize=2**10)))
-			writeAlbum(album, pathFilename)
-
-	return pathFilename
-
-def _makeDescendants(folding: Folding) -> tuple[Folding, ...]:
+def _makeDescendants(folding: Folding, mapShape: tuple[int, ...]) -> tuple[Folding, ...]:
 	inserting: Iterable[Folding] = map(partial(_insertLeafAtPile, folding, len(folding)), range(len(folding), pileOrigin, decreasing))
-	return tuple(filter(_foldingValid吗, inserting))
+	return tuple(filter(partial(_foldingValid吗, mapShape=mapShape), inserting))
 
 def _insertLeafAtPile(folding: Folding, leaf: Leaf, pile: Pile) -> Folding:
 	return (*folding[:pile], leaf, *folding[pile:])
 
-def _foldingValid吗(folding: Folding) -> bool:
-	def tt(leafComparandCrease: Leaf) -> tuple[Pile, Pile]:
-		return (lookupLeafPile[leafComparandCrease], lookupLeafPile[leafComparandCrease + 1])
+def _foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	lookupLeafPile: dict[Leaf, Pile] = dict(zip(folding, range(len(folding)), strict=True))
-	leafCrease: Leaf = len(folding) - zeroIndexed - 1
-	pileCreasePile: tuple[Pile, Pile] = (lookupLeafPile[leafCrease], lookupLeafPile[leafCrease + 1])
-	qq = partial(_creaseViolation吗, pileCreasePile)
-	ww = map(tt, range(leafCrease - 2, leafOrigin - inclusive, 2 * decreasing))
-	return not any(map(qq, ww))
+	leafInserted: Leaf = len(folding) - 1
+	mapShapeProducts: tuple[int, ...] = getMapShapeProducts(mapShape)
+
+	def dimensionValid吗(dimension: int) -> bool:
+		leafCrease: Leaf = leafInserted - mapShapeProducts[dimension]
+		if leafCrease < leafOrigin or getCreasePost(mapShape, leafCrease, dimension) != leafInserted:
+			return True
+
+		pileCreasePile: tuple[Pile, Pile] = (lookupLeafPile[leafCrease], lookupLeafPile[leafInserted])
+		parityCrease: int = oddLeaf吗(mapShape, leafCrease, dimension)
+
+		def comparandViolates吗(leafComparand: Leaf) -> bool:
+			leafComparandCrease: Leaf | None = getCreasePost(mapShape, leafComparand, dimension)
+			if leafComparandCrease is None or leafComparandCrease >= leafInserted:
+				return False
+			if oddLeaf吗(mapShape, leafComparand, dimension) != parityCrease:
+				return False
+			pileComparandCreasePile: tuple[Pile, Pile] = (lookupLeafPile[leafComparand], lookupLeafPile[leafComparandCrease])
+			return _creaseViolation吗(pileCreasePile, pileComparandCreasePile)
+
+		return not any(map(comparandViolates吗, range(leafInserted)))
+
+	return all(map(dimensionValid吗, range(len(mapShape))))
 
 def _creaseViolation吗(pileCreasePile: tuple[Pile, Pile], pileComparandCreasePileComparand: tuple[Pile, Pile]) -> bool:
 	creasesPileSorted: list[tuple[Pile, Pile]] = sorted((pileCreasePile, pileComparandCreasePileComparand))
 	return creaseViolation吗(creasesPileSorted[0][0], creasesPileSorted[1][0], creasesPileSorted[0][1], creasesPileSorted[1][1])
 
-def doTheNeedful(n: int, nFinal: int, CPUlimit: Limitation = None) -> Path:
-	def preemptiveTheorem2(folding: Folding) -> bool:
-		# Because all albums descend from this album, enforcing k before r is preserved in later
-		# albums without repeating this check. Net result: all albums will be half the size.
-		leaf_k: Leaf = 1
-		leaf_r: Leaf = 2
-		return folding.index(leaf_k) < folding.index(leaf_r)
+def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: Limitation = None) -> Path:
+	mapShape = validateMapShape(mapShape)
+	totalLeaves: int = getTotalLeaves(mapShape)
+	if totalLeaves == 0:
+		message: str = f'`mapShape` must have at least one leaf: {mapShape!r}.'
+		raise ValueError(message)
 
-	if (n < 2) or (nFinal <= n):
-		raise ValueError
-
-	album: Iterable[Folding] = ((leafOrigin, 1),)
-	pathFilename: Path = makePathFilenameFolds((1, 2), pathAlbum, suffix='.album')
-
-	if pathFilename.exists():
-		album = streamAlbum(pathFilename)
-	else:
-		writeAlbum(album, pathFilename)
-
-	pathFilename = makePathFilenameFolds((1, 3), pathFilename.parent, suffix='.album')
-
-	if pathFilename.exists():
-		pass
-	else:
-		album = tuple(filter(preemptiveTheorem2, chain.from_iterable(map(_makeDescendants, album))))
-		writeAlbum(album, pathFilename)
-
-	pathFilename = makePathFilenameFolds((1, n), pathFilename.parent, suffix='.album')
-
-	if pathFilename.exists():
-		pass
-	else:
-		# start lower
-		raise ValueError
-
+	leavesInserted: int = 1
+	foldingsAtDepth: Iterable[Folding] = ((leafOrigin,),)
+	pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, pathAlbum, suffix='.album')
+	if pathFilenameAlbum.exists():
+		message = f'Album already exists: {pathFilenameAlbum}.'
+		raise FileExistsError(message)
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
-	return makeAlbums1xn(n, nFinal, workersMaximum)
+
+	with ExitStack() as resourceManager:
+		processManager: Pool | None = None
+		if workersMaximum > 1:
+			processManager = resourceManager.enter_context(Pool(workersMaximum))
+		while leavesInserted < totalLeaves:
+			leavesInserted += 1
+			if processManager is None:
+				foldingsAtDepth = chain.from_iterable(map(partial(_makeDescendants, mapShape=mapShape), foldingsAtDepth))
+			else:
+				foldingsAtDepth = chain.from_iterable(processManager.imap_unordered(partial(_makeDescendants, mapShape=mapShape), foldingsAtDepth, chunksize=2**10))
+			if leavesInserted == 3:
+				foldingsAtDepth = filter(lambda folding: folding.index(1) < folding.index(2), foldingsAtDepth)
+		writeAlbum(foldingsAtDepth, pathFilenameAlbum)
+
+	return pathFilenameAlbum
 
 if __name__ == '__main__':
-	nFinal: int = 7
+	mapShape: tuple[int, ...] = (2, 3)
 	start: float = perf_counter()
-	aa = doTheNeedful(2, nFinal, -2)
+	pathFilenameAlbum: Path = doTheNeedful(mapShape, -2)
 	print(f"{perf_counter() - start:.2f}")
-	cc = len(aa.read_text(encoding="utf-8").splitlines()) * 2
-	vv = getValuesKnown('A000682')
-	print(cc == vv[nFinal], cc, vv[nFinal])
+	countTotal: int = len(pathFilenameAlbum.read_text(encoding='utf-8').splitlines()) * 2 * getTotalLeaves(mapShape)
+	valuesKnown: dict[int, int] = getValuesKnown('A001415')
+	print(countTotal == valuesKnown[3], countTotal, valuesKnown[3])
 
 # DEVELOPMENT Changes:
 # TODO to make the files smaller, use a truncated notation. The graph notation I created is very

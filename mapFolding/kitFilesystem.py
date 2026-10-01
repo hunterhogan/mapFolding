@@ -36,10 +36,11 @@ from contextlib import contextmanager, suppress
 from csv import writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
-from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
+from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding.dataStructures import parseCSVtoIntegers, parseDiagonal, parseTriangle
 from mapFolding.theSSOT import settingsPackage
+from pandas.core.frame import DataFrame
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
@@ -48,7 +49,6 @@ from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
 from uuid import uuid4
 import os
-import sys
 
 if TYPE_CHECKING:
 	from _csv import Writer
@@ -64,7 +64,7 @@ if TYPE_CHECKING:
 	import polars
 
 @contextmanager
-def storePolars() -> Generator[Callable[[polars.LazyFrame], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+def storePolars() -> Generator[Callable[[polars.LazyFrame], polars.LazyFrame]]:
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
@@ -88,7 +88,7 @@ def storePolars() -> Generator[Callable[[polars.LazyFrame], polars.LazyFrame]]: 
 			pathFilenameLedger.pop().unlink(missing_ok=True)
 
 @contextmanager
-def storePolarsGroups(by: str, partitions: int = 64) -> Generator[Callable[[polars.LazyFrame, polars.Expr], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+def storePolarsGroups(by: str, partitions: int = 64) -> Generator[Callable[[polars.LazyFrame, polars.Expr], polars.LazyFrame]]:
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
@@ -138,7 +138,7 @@ def storePolarsGroups(by: str, partitions: int = 64) -> Generator[Callable[[pola
 		pathWorking.rmdir()
 
 @contextmanager
-def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], polars.LazyFrame]]:  # ruff: ignore[undocumented-public-function]
+def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], polars.LazyFrame]]:
 	with storePolars() as materializePolars:
 		#=SIN= Unused parameters preserve the existing storage callable's three-argument contract.
 		def materializeMeandersPolars(dataframe: polars.LazyFrame, n: int, boundary: int) -> polars.LazyFrame:  # ruff: ignore[unused-function-argument]
@@ -549,11 +549,28 @@ def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> 
 	return _iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
 
 # Improve
-def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:  # ruff: ignore[undocumented-public-function]
+def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:
 	return _iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)
 
+def writeTriangleValue(pathFilename: Path, rowNumber: int, columnNumber: int, value: int) -> Path:
+	triangle: dict[int, tuple[int, ...]] = readTriangle(pathFilename)
+	rowValues: tuple[int, ...] = triangle.get(rowNumber, ())
+	if not 0 <= columnNumber <= len(rowValues):
+		raise IndexError(columnNumber)
+	if columnNumber == len(rowValues):
+		triangle[rowNumber] = (*rowValues, value)
+	else:
+		triangle[rowNumber] = (*rowValues[:columnNumber], value, *rowValues[columnNumber + 1:])
+	pathFilenameTemporary: Path = pathFilename.with_name(f'{pathFilename.name}.{uuid4().hex}.tmp')
+	try:
+		writeTriangle(triangle, pathFilenameTemporary)
+		pathFilenameTemporary.replace(pathFilename)
+	finally:
+		pathFilenameTemporary.unlink(missing_ok=True)
+	return pathFilename
+
 # Improve. Possibly make something in hunterMakesPy.
-def appendStringToHere(this: str, pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+def appendStringToHere(this: str, pathFilename: Path) -> Path:
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	with pathFilename.open(encoding='utf-8', mode='a', newline='') as streamWrite:
 		writeStringToHere(this, streamWrite)
@@ -625,14 +642,19 @@ def _csvTo_int(pathFilename: Path) -> Iterable[tuple[int, ...]]:
 	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
 		yield from parseCSVtoIntegers(streamRead)
 
-def readText(pathFilename: Path) -> str:  # ruff: ignore[undocumented-public-function]
+def readText(pathFilename: Path) -> str:
 	return pathFilename.read_text(encoding='utf-8')
 
-def readDiagonal(pathFilename: Path, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV',  # ruff: ignore[undocumented-public-function]
+def readDiagonal(pathFilename: Path, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV',
 	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
 	return parseDiagonal(readText(pathFilename), 次diagonal, formatData=formatData, rowLength=rowLength, fromRight=fromRight)
 
-def getDataFrameFoldings(state: StateElimination) -> DataFrame | None:
+def readTriangleValue(pathFilename: Path, rowNumber: int, columnNumber: int) -> int:
+	if columnNumber < 0:
+		raise IndexError(columnNumber)
+	return readTriangle(pathFilename)[rowNumber][columnNumber]
+
+def getDataFrameFoldings(state: StateElimination) -> DataFrame:
 	"""Load array-foldings data for `state.totalDimensions`.
 
 	(AI generated docstring)
@@ -657,14 +679,7 @@ def getDataFrameFoldings(state: StateElimination) -> DataFrame | None:
 	[1] pandas.DataFrame
 		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 	"""
-	pathFilename: Path = makePathFilenameArrayFoldings(state.totalDimensions)
-	dataframeFoldings: DataFrame | None = None
-	if pathFilename.exists():
-		dataframeFoldings = readDataFrame(pathFilename)
-	else:
-		message: str = f"{ansiColor.YellowOnBlack}I received {state.totalDimensions = }, but I could not find the data at:\n\t{pathFilename!r}.{ansiColorReset}"
-		sys.stderr.write(message + '\n')
-	return dataframeFoldings
+	return readDataFrame(makePathFilenameArrayFoldings(state.totalDimensions))
 
 def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
 	"""Read an entire album of foldings from a CSV file into memory.
@@ -760,20 +775,6 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 	`UnicodeDecodeError` if the file does not contain valid UTF-8 text. A field that cannot be
 	converted to an integer, including a header or empty field, propagates `ValueError` from
 	the parser.
-
-	Examples
-	--------
-	The coefficient analysis in `Z0Z_research/catalanArches/sub_kCoefficientFormulas.py` loads
-	stored rows before inspecting columns. From the repository root, the same input can be read
-	with the following code.
-
-		```python
-		from mapFolding.kitFilesystem import readTriangle
-		from pathlib import Path
-
-		pathFilenameCSV: Path = Path('Z0Z_research/catalanArches/A287548.csv')
-		triangle: dict[int, tuple[int, ...]] = readTriangle(pathFilenameCSV)
-		```
 
 	References
 	----------

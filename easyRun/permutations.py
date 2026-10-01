@@ -34,7 +34,7 @@ if __name__ == '__main__':
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(17, 20):
+		for n in range(2, 20):
 
 			timeStart: float = time.perf_counter()
 			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
@@ -43,11 +43,15 @@ if __name__ == '__main__':
 			if flow == 'bilateralConcurrent':
 				if oeisID == 'A000560' and 2 <= n:
 					total: int = bilateralConcurrent(n, symmetric=True)
+				elif oeisID == 'A000682' and 3 <= n:
+					total = 2 * bilateralConcurrent(n - 1, symmetric=True)
 				else:
 					total = bilateralConcurrent(n - 1, symmetric=False)
 			elif flow == 'bilateral':
 				if oeisID == 'A000560' and 2 <= n:
 					total = bilateral(n, symmetric=True)
+				elif oeisID == 'A000682' and 3 <= n:
+					total = 2 * bilateralConcurrent(n - 1, symmetric=True)
 				else:
 					total = bilateral(n - 1, symmetric=False)
 			else:

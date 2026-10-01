@@ -14,7 +14,8 @@ from __future__ import annotations
 from hunterMakesPy import ansiColor, ansiColorReset, CallableFunction, errorL33T
 from mapFolding.oeis import getValuesKnown
 from mapFolding.oeis._byFormulaLookup import (
-	A000682, A060206, A077014, A077460, A085973, A208357, A217310, A217318, A223093, A223094, A223095, A259702, A333971, A334615, A337581)
+	A000136, A000560, A000682, A001011, A060206, A077014, A077460, A085973, A208357, A217310, A217318, A223093, A223094, A223095, A227167,
+	A259702, A301620, A333971, A334615, A337581)
 from mapFolding.oeis._theSSOT import pathCache
 from typing import TYPE_CHECKING
 import sys
@@ -53,21 +54,28 @@ if __name__ == '__main__':
 	qq: list[tuple[CallableFunction[..., int], int, LiteralString]] = [
 	# *((A077014, n, 'A005316') for n in range(56, 57)),
 	# *((A077014, n, 'A000682 and A223093') for n in range(46, 47)),
-	# *((A077014, n, 'A223095, A000136, and A000682') for n in range(46, 47)),
+	# *((A077014, n, 'A223095, A000136, and A000682') for n in range(47, 48)),
 	# *((A077460, n, 'A005315, A005316, and A060206') for n in range(29, 30)),
 	# *((A085973, n, 'A077054 and A005315') for n in range(28, 29)),
 	# *((A208357, n, 'A005315') for n in range(28, 29)),
-	# *((A259702, n, 'A000682') for n in range(46, 47)),
-	# *((A333971, n, 'A000682') for n in range(47, 48)),
-	# *((A334615, n, 'A000682') for n in range(46, 47)),
+	# *((A259702, n, 'A000682') for n in range(47, 48)),
+	# *((A333971, n, 'A000682') for n in range(48, 49)),
+	# *((A334615, n, 'A000682') for n in range(47, 48)),
 	# *((A334615, n, 'A301620') for n in range(46, 47)),
-	# *((A223093, n, 'A000682 and A077014') for n in range(45, 46)),
-	# *((A223095, n, 'A000136, A077014, and A000682') for n in range(45, 46)),
-	# *((A217318, n, 'A223095 and A000034') for n in range(45, 50)),
-	# *((A217310, n, 'A223093') for n in range(45, 50)),
+	# *((A223093, n, 'A000682 and A077014') for n in range(46, 47)),
+	# *((A223095, n, 'A000136, A077014, and A000682') for n in range(46, 47)),
+	# *((A217318, n, 'A223095 and A000034') for n in range(46, 50)),
+	# *((A217310, n, 'A223093') for n in range(46, 50)),
 	# *((A077460, n, 'A005316, A005315, and A060206') for n in range(30, 60)),
 	# *((A000682, n, 'A077460, A005316, and A000560') for n in range(47, 60)),
-	*((A000682, n, 'A259689') for n in range(28, 60)),
+	# *((A000682, n, 'A259689') for n in range(28, 60)),
+	# *((A000560, n, 'A000682') for n in range(47, 60)),
+	# *((A001011, n, 'A001010 and A000682') for n in range(47, 60)),
+	# *((A301620, n, 'A000682') for n in range(45, 60)),
+	# *((A337581, n, 'A000682') for n in range(49, 60)),
+	# *((A000136, n, 'A000682') for n in range(47, 60)),
+	# *((A223094, n, 'A000682') for n in range(46, 60)),
+	# *((A227167, n, 'A000136') for n in range(47, 60)),
 	# *( for n in range(20, 60)),
 ]
 

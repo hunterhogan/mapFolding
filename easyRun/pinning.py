@@ -5,7 +5,7 @@ from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
 from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves, lengthChoicesLeaf
 from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
-from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional吗, recordAlbum2上nDimensional吗
+from mapFolding._e.algorithms.insertion2上nDimensional吗 import makeAlbum2上nDimensional, recordAlbum2上nDimensional
 from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.p2上nDimensional import getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
 from mapFolding._e.p2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 	if printThis:
 		timeStart: float = time.perf_counter()
 		# Developing the Sade-insertion algorithm for 2上nDimensional.
-		state = makeAlbum2上nDimensional吗(state, 14)
+		state = makeAlbum2上nDimensional(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
 		from mapFolding._e.research.toolkit import verifyPinning2Dn
@@ -50,7 +50,7 @@ if __name__ == '__main__':
 			state = doTheNeedful(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
-		recordAlbum2上nDimensional吗(state)
+		recordAlbum2上nDimensional(state)
 
 	elif printThis:
 		# Primary reason for this module: testing pinning functions.
