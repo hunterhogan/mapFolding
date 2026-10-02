@@ -8,7 +8,6 @@ The argument x is the encoded input, not the suffix n.
 For n >= 1 the same formula is additionally used at larger x to populate
 T(x, x//2 - n + 1). This triangle application does not define the function's
 identity. The infinite extensions are conjectural where no proof is recorded.
-See RESEARCH_STATUS.md for evidence and the distinction between the two uses.
 """
 from __future__ import annotations
 

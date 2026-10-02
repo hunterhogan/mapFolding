@@ -1,0 +1,23 @@
+%S 8,42,100,200,340,546,810,1170,1610,2180,2856,3702,4682,5878
+%T 7240,8868,10698,12850,15242,18018,21076,24584,28420,32778,37512,42846,48608
+%U 55052,61980,69678,77918,87022,96730,107400,118740,131146,144290,158610,173740,190160
+%N Number of semi-meanders with n crossings and winding number n-6, for n >= 6.
+%C A semi-meander is a semi-infinite, self-avoiding, directed curve that crosses a line one or more times.
+%C The winding number of a semi-meander is the hypothetical minimum number of self-crossings that would be created if a ray were to start at the source of the semi-infinite directed curve and extend to infinity without crossing the line.
+%C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 4 less than the maximum.
+%C Equivalent to a closed curve (a loop) transversely crossing a ray, considered up to continuous deformation fixing the ray, with a winding number equal to the number of crossings that would be created if the fixed end of the ray were extended to form a line.
+%C Analogized to a river (a semi-meander, meander, or loop) crossing a road (a ray, line, or line segment).
+%C The third diagonal of A400429, reading diagonals from the maximal-winding edge.
+%H P. Di Francesco, O. Golinelli and E. Guitter, <a href="https://arxiv.org/abs/hep-th/9607039">Meanders: A Direct Enumeration Approach</a>, arXiv:hep-th/9607039, 1996.
+%H Hunter Hogan, <a href="https://github.com/hunterhogan/mapFolding">mapFolding: Create, alter, and optimize algorithms to count meanders, stamp foldings, and map foldings</a>, GitHub repository, 2026.
+%H Joe Sawada and Roy Li, <a href="https://doi.org/10.37236/2404">Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms</a>, The Electronic Journal of Combinatorics, Volume 19 No. 2 (2012), P#43 (16 pages).
+%F a(n) = T(n,floor(n/2)-2), where T is the triangle A400429.
+%F (Start) More generally, if D_j is the j-th diagonal of A400429, then 2*j is its least index. For this sequence, j = 3 and 2*j = 6.
+%F D_j(2*j) = a(6) = A005315(j) = A005316(2*j-1).
+%F D_j(2*j+1) = a(7) = A005315(j+1) = A005316(2*j+1) = D_{j+1}(2*j+2) = A400632(8). (End)
+%F Conjecture: a(n) = [13*n^4 + 24*n^3 - 284*n^2 - 4560*n + 17920 + (n mod 2)*(18*n^2 - 72*n + 189) - 64*0^(n mod 3)]/288, for n >= 6.
+%e Row n=10 of A400429 is 262,752,340,50,2, corresponding to winding numbers 0,2,4,6,8. Since n-6=4, a(10)=340, which is the third-to-last value.
+%Y Third diagonal of A400429.
+%K nonn,new
+%O 6,1
+%A _Hunter Hogan_, Oct 01 2026
