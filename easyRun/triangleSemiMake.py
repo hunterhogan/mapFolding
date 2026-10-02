@@ -53,9 +53,9 @@ if __name__ == '__main__':
 		kStart: int = 6
 		writeTriangleRows(nT, nStart, nStop, kStart)
 	else:
-		次diagonal: int = 11
-		nStart = 343
-		nStop = 406
+		次diagonal: int = 12
+		nStart = 47
+		nStop = 500
 		tuple(map(writeDiagonalCount, tqdm(range(nStart, nStop)), repeat(次diagonal)))
 """
 source /home/hunte/mapFolding/.venv/bin/activate && cd mapFolding

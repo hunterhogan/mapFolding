@@ -58,6 +58,7 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
 def makePolarsWide(identifiers: Default | None = None) -> PurePath:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	identifiers = identifiers or defaultMatrixMeanders
 	名Package: str = identifiers['module']['package']
 	名Module: str = 'polarsWide'

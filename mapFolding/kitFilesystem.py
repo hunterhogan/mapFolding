@@ -59,92 +59,85 @@ if TYPE_CHECKING:
 	from os import PathLike
 	from pandas import DataFrame
 	from polars.io.partition import FileProviderArgs
-	from typing import Any, Literal
+	from typing import Any, Literal, Protocol
 	from urllib3.response import BaseHTTPResponse
 	import polars
 
-@contextmanager
-def storePolars() -> Generator[Callable[[polars.LazyFrame], polars.LazyFrame]]:
-	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
-	import polars  # ruff: ignore[import-outside-top-level]
+	class _PolarsMaterializer(Protocol):
+		def __call__(self, dataframe: polars.LazyFrame, aggregation: polars.Expr | None = None) -> polars.LazyFrame: ...
 
-	pathFilenameLedger: list[Path] = []
+pathPolarsDataFrame: Path = Path.cwd()
 
-	def materializePolars(dataframe: polars.LazyFrame) -> polars.LazyFrame:
-		pathFilename: Path = Path.cwd() / f'polars_{uuid4().hex}.arrow'
-		pathFilenameLedger.append(pathFilename)
-		dataframe.sink_ipc(pathFilename, compression='zstd', maintain_order=False, engine='streaming'
-			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-		dataframeMaterialized: polars.LazyFrame = polars.scan_ipc(pathFilename, memory_map=False)
-		if 1 < len(pathFilenameLedger):
-			pathFilenameLedger[0].unlink()
-			del pathFilenameLedger[0]
-		return dataframeMaterialized
-
-	try:
-		yield materializePolars
-	finally:
-		while pathFilenameLedger:
-			pathFilenameLedger.pop().unlink(missing_ok=True)
+# import hunterMakesPy.
+def appendStringToHere(this: str, pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
+	pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	with pathFilename.open(encoding='utf-8', mode='a', newline='') as streamWrite:
+		writeStringToHere(this, streamWrite)
+	return pathFilename
 
 @contextmanager
-def storePolarsGroups(by: str, partitions: int = 64) -> Generator[Callable[[polars.LazyFrame, polars.Expr], polars.LazyFrame]]:
-	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
-	import polars  # ruff: ignore[import-outside-top-level]
+def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[_PolarsMaterializer]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
+	import polars
 
-	if partitions < 1:
-		message: str = f"I received `{partitions = }`, but I need at least one partition."
-		raise ValueError(message)
-	pathWorking: Path = Path.cwd() / f'polarsGroups_{uuid4().hex}'
-	pathWorking.mkdir()
-	listPathFilenamesCompleted: list[Path] = []
+	boxOfPathFilenames: list[Path] = []
+	pathGroupBy: Path = pathPolarsDataFrame / f'polarsGroupBy_{uuid4().hex}'
+	boxOfPathFilenamesCompleted: list[Path] = []
+	if group_by is not None:
+		pathGroupBy.mkdir()
 
-	def materializePolarsGroups(dataframe: polars.LazyFrame, aggregation: polars.Expr) -> polars.LazyFrame:
+	def materializePolars(dataframe: polars.LazyFrame, aggregation: polars.Expr | None = None) -> polars.LazyFrame:
+		if group_by is None:
+			pathFilename: Path = pathPolarsDataFrame / f'polars_{uuid4().hex}.arrow'
+			boxOfPathFilenames.append(pathFilename)
+			dataframe.sink_ipc(pathFilename, compression='zstd', maintain_order=False, engine='streaming'
+				, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
+			dataframeMaterialized: polars.LazyFrame = polars.scan_ipc(pathFilename, memory_map=False)
+			if 1 < len(boxOfPathFilenames):
+				boxOfPathFilenames[0].unlink()
+				del boxOfPathFilenames[0]
+			return dataframeMaterialized
+
 		identifierGeneration: str = uuid4().hex
 		schema: polars.Schema = dataframe.collect_schema()
 
 		def makeFilenamePartition(partition: FileProviderArgs) -> str:
 			return f'{identifierGeneration}_{partition.partition_keys.item()}_{partition.index_in_partition}.arrow'
 
-		dataframe.sink_ipc(polars.PartitionBy(pathWorking, file_path_provider=makeFilenamePartition
-			, key={f'partition_{identifierGeneration}': polars.col(by).hash() % partitions}, include_key=False)
+		dataframe.sink_ipc(polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenamePartition
+			, key={f'partition_{identifierGeneration}': polars.col(group_by).hash() % partitions}, include_key=False)
 			, compression='zstd', maintain_order=False, engine='streaming'
 			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-		while listPathFilenamesCompleted:
-			listPathFilenamesCompleted.pop().unlink()
+		while boxOfPathFilenamesCompleted:
+			boxOfPathFilenamesCompleted.pop().unlink()
 
 		partitionIndex: int = 0
 		while partitionIndex < partitions:
-			listPathFilenamesPartition: list[Path] = list(pathWorking.glob(f'{identifierGeneration}_{partitionIndex}_*.arrow'))
+			listPathFilenamesPartition: list[Path] = list(pathGroupBy.glob(f'{identifierGeneration}_{partitionIndex}_*.arrow'))
 			if listPathFilenamesPartition:
-				pathFilename: Path = pathWorking / f'grouped_{identifierGeneration}_{partitionIndex}.arrow'
-				polars.scan_ipc(listPathFilenamesPartition, memory_map=False).group_by(by).agg(aggregation).sink_ipc(
+				pathFilename: Path = pathGroupBy / f'grouped_{identifierGeneration}_{partitionIndex}.arrow'
+				polars.scan_ipc(listPathFilenamesPartition, memory_map=False).group_by(group_by).agg(aggregation).sink_ipc(
 					pathFilename, compression='zstd', maintain_order=False, engine='streaming'
 					, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-				listPathFilenamesCompleted.append(pathFilename)
+				boxOfPathFilenamesCompleted.append(pathFilename)
 				while listPathFilenamesPartition:
 					listPathFilenamesPartition.pop().unlink()
 			partitionIndex += 1
-		if listPathFilenamesCompleted:
-			return polars.scan_ipc(listPathFilenamesCompleted, memory_map=False)
-		return polars.LazyFrame(schema=schema).group_by(by).agg(aggregation)
+		if boxOfPathFilenamesCompleted:
+			return polars.scan_ipc(boxOfPathFilenamesCompleted, memory_map=False)
+		return polars.LazyFrame(schema=schema).group_by(group_by).agg(aggregation)
 
 	try:
-		yield materializePolarsGroups
+		yield materializePolars
 	finally:
-		listPathFilenamesRemaining: list[Path] = list(pathWorking.iterdir())
-		while listPathFilenamesRemaining:
-			listPathFilenamesRemaining.pop().unlink()
-		pathWorking.rmdir()
-
-@contextmanager
-def storeMeandersPolars() -> Generator[Callable[[polars.LazyFrame, int, int], polars.LazyFrame]]:
-	with storePolars() as materializePolars:
-		#=SIN= Unused parameters preserve the existing storage callable's three-argument contract.
-		def materializeMeandersPolars(dataframe: polars.LazyFrame, n: int, boundary: int) -> polars.LazyFrame:  # ruff: ignore[unused-function-argument]
-			return materializePolars(dataframe)
-
-		yield materializeMeandersPolars
+		while boxOfPathFilenames:
+			boxOfPathFilenames.pop().unlink(missing_ok=True)
+		if group_by is not None:
+			listPathFilenamesRemaining: list[Path] = list(pathGroupBy.iterdir())
+			while listPathFilenamesRemaining:
+				listPathFilenamesRemaining.pop().unlink()
+			pathGroupBy.rmdir()
 
 #================== Create appropriate paths and filenames =========================================
 
@@ -548,33 +541,9 @@ def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> 
 	"""
 	return _iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
 
-# Improve
-def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:
+def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	return _iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)
-
-def writeTriangleValue(pathFilename: Path, rowNumber: int, columnNumber: int, value: int) -> Path:
-	triangle: dict[int, tuple[int, ...]] = readTriangle(pathFilename)
-	rowValues: tuple[int, ...] = triangle.get(rowNumber, ())
-	if not 0 <= columnNumber <= len(rowValues):
-		raise IndexError(columnNumber)
-	if columnNumber == len(rowValues):
-		triangle[rowNumber] = (*rowValues, value)
-	else:
-		triangle[rowNumber] = (*rowValues[:columnNumber], value, *rowValues[columnNumber + 1:])
-	pathFilenameTemporary: Path = pathFilename.with_name(f'{pathFilename.name}.{uuid4().hex}.tmp')
-	try:
-		writeTriangle(triangle, pathFilenameTemporary)
-		pathFilenameTemporary.replace(pathFilename)
-	finally:
-		pathFilenameTemporary.unlink(missing_ok=True)
-	return pathFilename
-
-# Improve. Possibly make something in hunterMakesPy.
-def appendStringToHere(this: str, pathFilename: Path) -> Path:
-	pathFilename.parent.mkdir(parents=True, exist_ok=True)
-	with pathFilename.open(encoding='utf-8', mode='a', newline='') as streamWrite:
-		writeStringToHere(this, streamWrite)
-	return pathFilename
 
 #================== Read and write ================================================================
 
@@ -641,18 +610,6 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 def _csvTo_int(pathFilename: Path) -> Iterable[tuple[int, ...]]:
 	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
 		yield from parseCSVtoIntegers(streamRead)
-
-def readText(pathFilename: Path) -> str:
-	return pathFilename.read_text(encoding='utf-8')
-
-def readDiagonal(pathFilename: Path, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV',
-	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
-	return parseDiagonal(readText(pathFilename), 次diagonal, formatData=formatData, rowLength=rowLength, fromRight=fromRight)
-
-def readTriangleValue(pathFilename: Path, rowNumber: int, columnNumber: int) -> int:
-	if columnNumber < 0:
-		raise IndexError(columnNumber)
-	return readTriangle(pathFilename)[rowNumber][columnNumber]
 
 def getDataFrameFoldings(state: StateElimination) -> DataFrame:
 	"""Load array-foldings data for `state.totalDimensions`.
@@ -738,8 +695,17 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 	"""
 	#=Sin= `pandas` is optional.
-	import pandas  # ruff: ignore[import-outside-top-level]
+	#ruff: ignore[import-outside-top-level]
+	import pandas
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))
+
+def readDiagonal(pathFilename: Path, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV', rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return parseDiagonal(readText(pathFilename), 次diagonal, formatData=formatData, rowLength=rowLength, fromRight=fromRight)
+
+def readText(pathFilename: Path) -> str:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return pathFilename.read_text(encoding='utf-8')
 
 def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 	"""Load numbered integer rows from a triangle CSV file.
@@ -789,6 +755,10 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 	"""
 	return parseTriangle(readText(pathFilename))
 
+def readTriangleValue(pathFilename: Path, rowNumber: int, columnNumber: int) -> int:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return readTriangle(pathFilename)[rowNumber][columnNumber]
+
 def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	"""Lazily iterate over foldings in a CSV file, yielding one at a time.
 
@@ -822,6 +792,3 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	writeAlbum : Write an album of foldings to a CSV file.
 	"""
 	yield from _csvTo_int(pathFilename)
-
-# Perhaps:
-#================== Find or enumerate files based on their purpose, not filename or path ==========

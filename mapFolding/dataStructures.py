@@ -62,7 +62,8 @@ if TYPE_CHECKING:
 	from typing import Any, Literal
 	import polars
 
-def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocumented-public-function]
+def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:
+	# DOCUMENT
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
@@ -78,7 +79,8 @@ def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocu
 		datatype = polars.UInt128
 	return datatype
 
-def compressBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:  # ruff: ignore[undocumented-public-function]
+def compressBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:
+	# DOCUMENT
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
@@ -91,7 +93,8 @@ def compressBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:  # ruff
 		distance *= 2
 	return bits
 
-def reverseBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:  # ruff: ignore[undocumented-public-function]
+def reverseBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:
+	# DOCUMENT
 	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
 	import polars  # ruff: ignore[import-outside-top-level]
 
