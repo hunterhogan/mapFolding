@@ -93,7 +93,7 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 			boxOfPathFilenames.append(pathFilename)
 			dataframe.sink_parquet(pathFilename, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
 				, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-			dataframeMaterialized: polars.LazyFrame = polars.scan_parquet(pathFilename, parallel='none', low_memory=True, cache=False)
+			dataframeMaterialized: polars.LazyFrame = polars.scan_parquet(pathFilename, parallel='none', use_statistics=False, low_memory=True, cache=False)
 			if 1 < len(boxOfPathFilenames):
 				boxOfPathFilenames[0].unlink()
 				del boxOfPathFilenames[0]
@@ -119,7 +119,7 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 		while partitionIndex < partitions:
 			listPathFilenamesPartition: list[Path] = list(pathGroupBy.glob(f'{identifierGeneration}_{partitionIndex}_*.parquet'))
 			if listPathFilenamesPartition:
-				polars.scan_parquet(listPathFilenamesPartition, parallel='none', low_memory=True, cache=False).group_by(group_by).agg(aggregation).sink_parquet(
+				polars.scan_parquet(listPathFilenamesPartition, parallel='none', use_statistics=False, low_memory=True, cache=False).group_by(group_by).agg(aggregation).sink_parquet(
 					polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenameGrouped, max_rows_per_file=65536)
 					, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
 					, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
@@ -128,7 +128,7 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 					listPathFilenamesPartition.pop().unlink()
 			partitionIndex += 1
 		if boxOfPathFilenamesCompleted:
-			return polars.scan_parquet(boxOfPathFilenamesCompleted, parallel='none', low_memory=True, cache=False)
+			return polars.scan_parquet(boxOfPathFilenamesCompleted, parallel='none', use_statistics=False, low_memory=True, cache=False)
 		return polars.LazyFrame(schema=schema).group_by(group_by).agg(aggregation)
 
 	try:

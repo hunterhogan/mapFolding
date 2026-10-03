@@ -5,7 +5,7 @@ from mapFolding.dataBaskets import StateMeanders
 from mapFolding.oeis.A400429 import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
 from mapFolding.theTypes import 形ArcCode
-from numba import int64, vectorize
+from numba import int64, vectorize  # pyright: ignore[reportUnknownVariableType]
 from typing import overload, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -157,8 +157,8 @@ def flipTheExtra_0b1(intWithExtra_0b1: 形ArrayArcCode) -> 形ArrayArcCode: ...
 def flipTheExtra_0b1(intWithExtra_0b1: 形ArrayInteger) -> 形ArrayInteger: ...
 @overload
 def flipTheExtra_0b1(intWithExtra_0b1: pandas.Series[Any]) -> pandas.Series[Any]: ...
-@vectorize([int64(int64), f"{形ArcCode.__name__}({形ArcCode.__name__})"], cache=True, nopython=True, fastmath=True)
-def flipTheExtra_0b1(intWithExtra_0b1: int) -> int:
+@vectorize([int64(int64), f"{形ArcCode.__name__}({形ArcCode.__name__})"], cache=True, nopython=True, fastmath=True)  # pyright: ignore[reportUntypedFunctionDecorator]
+def flipTheExtra_0b1(intWithExtra_0b1: int) -> int:  # pyright: ignore[reportInconsistentOverload]
 	"""Flip a bit based on Dyck path with a Numba-generated universal function [1].
 
 	You can call `flipTheExtra_0b1` with a `numpy.uint64`, a `numpy.ndarray` [2], or a

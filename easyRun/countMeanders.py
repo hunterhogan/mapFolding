@@ -20,6 +20,7 @@ if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
 
+	state: StateMeanders | None = None
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
 	pathLikeWrite = None
 	pathLikeWrite = Path(settingsPackage.pathPackage, 'jobs')
@@ -43,22 +44,20 @@ if __name__ == '__main__':
 		boxOf_n: list[int] = []
 		# boxOf_n.extend(range(2, 10))
 		# boxOf_n.extend(range(10, 28))
-		boxOf_n.extend(range(28, 33))
+		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))
 		# boxOf_n.extend(range(46, 47))
-		# boxOf_n.extend(range(47, 48))
-
-		# boxOf_n.extend(range(10, 43, 2))
-		# boxOf_n.extend(range(11, 43, 2))
+		boxOf_n.extend(range(47, 48))
 
 		for n in boxOf_n:
-			gc.collect()
-			state = StateMeanders(n, kind)
-			state = prune(state)
 			timeStart: float = time.perf_counter()
-			state: StateMeanders = countMeanders(kind, n, flow, pathLikeWrite, state=state)
+			if flow == 'matrixPolars':
+				state = StateMeanders(n, kind)
+				state = prune(state)
+			state = countMeanders(kind, n, flow, pathLikeWrite, state=state)
+			gc.collect()
 			countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
