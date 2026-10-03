@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
 
@@ -64,7 +64,7 @@ def _creaseViolation吗(pileCreasePile: tuple[Pile, Pile], pileComparandCreasePi
 	creasesPileSorted: list[tuple[Pile, Pile]] = sorted((pileCreasePile, pileComparandCreasePileComparand))
 	return creaseViolation吗(creasesPileSorted[0][0], creasesPileSorted[1][0], creasesPileSorted[0][1], creasesPileSorted[1][1])
 
-def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: Limitation = None) -> Path:
+def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -> Path:
 	mapShape = validateMapShape(mapShape)
 	totalLeaves: int = getTotalLeaves(mapShape)
 	if totalLeaves == 0:

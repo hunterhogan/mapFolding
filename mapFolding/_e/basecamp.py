@@ -9,7 +9,7 @@ from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from os import PathLike
 	from pathlib import Path
 
@@ -18,7 +18,7 @@ def eliminateFolds(
 	, state: StateElimination | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
-	, CPUlimit: Limitation = None
+	, CPUlimit: ConcurrencyLimit = None
 	, flow: str | None = None
 	, suffix: str = '.totalFolds'
 ) -> int:

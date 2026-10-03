@@ -34,7 +34,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from os import PathLike
 	from typing import LiteralString
 
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A001417', 5), id='A001417::n5')])
 @pytest.mark.parametrize('flow', ('',))
-def test_countFolds_computationDivisionsMaximum(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: Limitation, computationDivisions: int | str | None) -> None:
+def test_countFolds_computationDivisionsMaximum(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: ConcurrencyLimit, computationDivisions: int | str | None) -> None:
 	expected: int = getTotalFoldsKnown(mapShape) or 0
 	actual: int = countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 	assertEqualTo(actual, expected, countFolds.__name__, mapShape, computationDivisions=computationDivisions, flow=flow)
@@ -54,7 +54,7 @@ def test_countFolds_computationDivisionsMaximum(mapShape: tuple[int, ...], flow:
 @pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')])
 @pytest.mark.parametrize('flow', ('',))
 @pytest.mark.parametrize('expected', (ValueError,))
-def test_countFolds_computationDivisionsError(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: Limitation, computationDivisions: int | str | None, expected: type[Exception]) -> None:
+def test_countFolds_computationDivisionsError(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: ConcurrencyLimit, computationDivisions: int | str | None, expected: type[Exception]) -> None:
 	with pytest.raises(expected) as exceptionInfo:
 		countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, mapShape, computationDivisions, flow=flow)
@@ -65,18 +65,18 @@ def test_countFolds_computationDivisionsError(mapShape: tuple[int, ...], flow: L
 @pytest.mark.parametrize('mapShape', [pytest.param(makeMapShape('A000136', 3), id='A000136::n3'), pytest.param(makeMapShape('A001415', 3), id='A001415::n3')])
 @pytest.mark.parametrize('flow', ('',))
 @pytest.mark.parametrize('expected', (TypeError,))
-def test_countFolds_CPUlimitError(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: Limitation, computationDivisions: int | str | None, expected: type[Exception]) -> None:
+def test_countFolds_CPUlimitError(mapShape: tuple[int, ...], flow: LiteralString, pathLikeWrite: PathLike[str] | None, CPUlimit: ConcurrencyLimit, computationDivisions: int | str | None, expected: type[Exception]) -> None:
 	with pytest.raises(expected) as exceptionInfo:
 		countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 		assertEqualTo(type(exceptionInfo.value), expected, countFolds.__name__, CPUlimit=CPUlimit, mapShape=mapShape, flow=flow)
 
 @pytest.mark.parametrize('concurrencyPackage', (None, 'multiprocessing', 'numba', 'unknown-package'))
 @pytest.mark.parametrize('CPUlimit,expected', [(None, 8), (False, 8), (True, 1), (4, 4), (0.5, 4), (-0.5, 4), (-2, 6), (0, 8), (1, 1)])
-def test_defineProcessorLimit(CPUlimit: Limitation, expected: int, concurrencyPackage: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_defineProcessorLimit(CPUlimit: ConcurrencyLimit, expected: int, concurrencyPackage: str | None, monkeypatch: pytest.MonkeyPatch) -> None:
 	cpuTotalStatic: int = 8
 	numbaThreadCount: int = cpuTotalStatic
 
-	def deterministicConcurrency(*, limit: Limitation, cpuTotal: int | None = None) -> int:
+	def deterministicConcurrency(*, limit: ConcurrencyLimit, cpuTotal: int | None = None) -> int:
 		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic if cpuTotal is None else cpuTotal)
 
 	def deterministicGetNumThreads() -> int:
@@ -99,7 +99,7 @@ def test_defineProcessorLimitError(CPUlimit: list[int] | tuple[int, ...] | set[i
 	cpuTotalStatic: int = 8
 	numbaThreadCount: int = cpuTotalStatic
 
-	def deterministicConcurrency(*, limit: Limitation, cpuTotal: int | None = None) -> int:
+	def deterministicConcurrency(*, limit: ConcurrencyLimit, cpuTotal: int | None = None) -> int:
 		return defineConcurrencyLimit(limit=limit, cpuTotal=cpuTotalStatic if cpuTotal is None else cpuTotal)
 
 	def deterministicGetNumThreads() -> int:
@@ -114,7 +114,7 @@ def test_defineProcessorLimitError(CPUlimit: list[int] | tuple[int, ...] | set[i
 	monkeypatch.setattr(beDRY, 'set_num_threads', deterministicSetNumThreads)
 
 	with pytest.raises(expected) as exceptionInfo:
-		#=SIN= Invalid argument type: the test verifies rejection of values outside `Limitation`.
+		#=SIN= Invalid argument type: the test verifies rejection of values outside `ConcurrencyLimit`.
 		defineProcessorLimit(CPUlimit, concurrencyPackage)  # pyright: ignore[reportArgumentType] # ty: ignore[invalid-argument-type]
 	assertEqualTo(type(exceptionInfo.value), expected, defineProcessorLimit.__name__, CPUlimit, concurrencyPackage)
 

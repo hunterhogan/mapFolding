@@ -35,7 +35,7 @@ def expectedFromMapShape(mapShape: tuple[int, ...]) -> int:
 # 	"""Validate `eliminateFolds` and different flows produce valid results."""
 # 	state: StateElimination | None = None
 # 	pathLikeWrite: None = None
-# 	CPUlimit: Limitation = None
+# 	CPUlimit: ConcurrencyLimit = None
 # 	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow), expectedFromMapShape, 'eliminateFolds', mapShape, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [

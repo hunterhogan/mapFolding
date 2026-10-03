@@ -10,11 +10,11 @@ from sys import maxsize as sysMaxsize
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 
 #======== Parse parameters ======================================
 
-def defineProcessorLimit(CPUlimit: Limitation, concurrencyPackage: str | None = None) -> int:
+def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | None = None) -> int:
 	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
 
 	Parameters

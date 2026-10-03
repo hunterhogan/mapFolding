@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import CallableFunction
+	from hunterMakesPy import CallableFunction
 
 @pytest.mark.parametrize('mapShape, integerNonnegative, expectedResult', dataTotalDimensionsTail)
 def test_工totalDimensionsTail(mapShape: tuple[int, ...], integerNonnegative: int, expectedResult: int) -> None:

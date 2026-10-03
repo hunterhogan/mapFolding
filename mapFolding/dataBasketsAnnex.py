@@ -142,8 +142,8 @@ class 形DataclassNumba(numba_types.StructRef):
 
 形StateMapFoldingNumba = 形DataclassNumba
 
-@typeof_impl.register(StateMapFoldingSymmetric)
-@typeof_impl.register(StateMapFolding)
+@typeof_impl.register(StateMapFoldingSymmetric)  # pyright: ignore[reportFunctionMemberAccess]
+@typeof_impl.register(StateMapFolding)  # pyright: ignore[reportFunctionMemberAccess]
 def _typeofDataclass(value: StateMapFolding | StateMapFoldingSymmetric, _context: Any) -> 形DataclassNumba:
 	def typeofField(field: dataclasses.Field[Any]) -> tuple[str, numba_types.Type]:
 		return field.name, typeof(getattr(value, field.name))

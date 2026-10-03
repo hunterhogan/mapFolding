@@ -7,14 +7,14 @@ from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import OEISid
 	from os import PathLike
 
 if __name__ == '__main__':
 	oeisID: OEISid = 'A007822'
 	pathLikeWrite: PathLike[str] | None = None
-	CPUlimit: Limitation = None
+	CPUlimit: ConcurrencyLimit = None
 	flow = 'asynchronous'
 	flow = 'theorem2'
 	flow = 'theorem2Trimmed'

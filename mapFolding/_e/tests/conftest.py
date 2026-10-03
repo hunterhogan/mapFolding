@@ -7,7 +7,7 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from numpy.typing import NDArray
 	from pathlib import Path
 	from pytest import FixtureRequest
@@ -45,7 +45,7 @@ def arrayAlbum(totalDimensions: int) -> NDArray[numpy.uint8]:
 	return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
 
 @pytest.fixture(params=(0.75,))
-def CPUlimit(request: pytest.FixtureRequest) -> Limitation:
+def CPUlimit(request: pytest.FixtureRequest) -> ConcurrencyLimit:
 	return request.param
 
 @pytest.fixture()

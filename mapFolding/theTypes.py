@@ -1,5 +1,4 @@
 """Types for defensive coding and for computation optimization."""
-
 from __future__ import annotations
 
 from collections.abc import MutableMapping
@@ -7,8 +6,7 @@ from numpy import dtype, int64 as numpy_int64, integer, ndarray, uint8 as numpy_
 from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 if TYPE_CHECKING:
-	from hunterMakesPy import identifierDotAttribute
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit, identifierDotAttribute
 	from numpy import bool as numpy_bool, intp as numpy_intp
 	from os import PathLike
 	from pathlib import PurePosixPath
@@ -133,7 +131,7 @@ class 形KeywordArgumentsCount(TypedDict, total=False):
 
 	flow: LiteralString
 	pathLikeWrite: PathLike[str] | None
-	CPUlimit: Limitation
+	CPUlimit: ConcurrencyLimit
 	suffix: str
 
 #================== Managing values with defaults. ================================================

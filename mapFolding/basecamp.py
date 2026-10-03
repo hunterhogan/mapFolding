@@ -59,7 +59,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from os import PathLike
 	from pathlib import Path
 	from typing import Literal, LiteralString
@@ -68,7 +68,7 @@ def countFolds(mapShape: Sequence[int]
 				, flow: Literal['daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 				, pathLikeWrite: PathLike[str] | None = None
 				, *
-				, CPUlimit: Limitation = None
+				, CPUlimit: ConcurrencyLimit = None
 				, computationDivisions: int | str | None = None
 				, suffix: str = ".totalFolds"
 				) -> int:
@@ -200,7 +200,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return totalFolds
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: Limitation = None, suffix: str = ".totalFolds") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: ConcurrencyLimit = None, suffix: str = ".totalFolds") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -219,7 +219,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	pathLikeWrite : PathLike[str] | None = None
 		An optional file or directory path for saving the count. A directory path receives a filename
 		based on `mapShape`.
-	CPUlimit : Limitation = None
+	CPUlimit : ConcurrencyLimit = None
 		The processor limit for the `'asynchronous'` method. `None`, `False`, and `0` allow all
 		available processors; `True` limits the calculation to one processor. An `int` sets or reserves
 		a number of processors, and a `float` sets or reserves a fraction of available processors.
@@ -284,7 +284,7 @@ def countMeanders(
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, state: StateMeanders | None = None
-	, CPUlimit: Limitation = None
+	, CPUlimit: ConcurrencyLimit = None
 	, suffix: str = ".countTotal"
 ) -> StateMeanders:
 	"""Compute a native meander sequence term.

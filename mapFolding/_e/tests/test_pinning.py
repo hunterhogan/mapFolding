@@ -14,8 +14,7 @@ import numpy
 import pytest
 
 if TYPE_CHECKING:
-	from hunterMakesPy import CallableFunction
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import CallableFunction, ConcurrencyLimit
 	from mapFolding._e.dataBaskets import PermutationSpace
 	from numpy.typing import NDArray
 
@@ -26,7 +25,7 @@ def beansWithoutCornbread(state: StateElimination, permutationSpace: Permutation
 @pytest.mark.parametrize("function", (pinPilesAtEnds, pinPile零Ante首零, pinLeavesDimension0, pinLeaf首零Plus零, pinLeavesDimension零
 	, pinLeavesDimension一, pinLeavesDimensions0零一, pinLeavesDimension二, pinLeavesDimension首二, pin3beans2, pin首beans))
 @pytest.mark.parametrize("totalDimensions", [5, 6], ids=lambda totalDimensions: f"2^{totalDimensions}-dimensional")
-def test_pinningFunctions(function: CallableFunction[..., StateElimination], totalDimensions: int, CPUlimit: Limitation, arrayAlbum: NDArray[uint8]) -> None:
+def test_pinningFunctions(function: CallableFunction[..., StateElimination], totalDimensions: int, CPUlimit: ConcurrencyLimit, arrayAlbum: NDArray[uint8]) -> None:
 	state: StateElimination = StateElimination((2,) * totalDimensions)
 
 	state = function(state, CPUlimit=CPUlimit)

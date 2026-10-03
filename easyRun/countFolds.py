@@ -12,14 +12,14 @@ from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from os import PathLike
 
 if __name__ == '__main__':
 
 	pathLikeWrite: PathLike[str] | None = None
 	computationDivisions: int | str | None = None
-	CPUlimit: Limitation = None
+	CPUlimit: ConcurrencyLimit = None
 	flow = 'numba'
 	flow = 'theorem2'
 	flow = 'daoOfMapFolding'

@@ -89,11 +89,11 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 
 	def materializePolars(dataframe: polars.LazyFrame, aggregation: polars.Expr | None = None) -> polars.LazyFrame:
 		if group_by is None:
-			pathFilename: Path = pathPolarsDataFrame / f'polars_{uuid4().hex}.arrow'
+			pathFilename: Path = pathPolarsDataFrame / f'polars_{uuid4().hex}.parquet'
 			boxOfPathFilenames.append(pathFilename)
-			dataframe.sink_ipc(pathFilename, compression='zstd', maintain_order=False, engine='streaming'
+			dataframe.sink_parquet(pathFilename, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
 				, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-			dataframeMaterialized: polars.LazyFrame = polars.scan_ipc(pathFilename, memory_map=False)
+			dataframeMaterialized: polars.LazyFrame = polars.scan_parquet(pathFilename, parallel='none', low_memory=True, cache=False)
 			if 1 < len(boxOfPathFilenames):
 				boxOfPathFilenames[0].unlink()
 				del boxOfPathFilenames[0]
@@ -103,29 +103,32 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 		schema: polars.Schema = dataframe.collect_schema()
 
 		def makeFilenamePartition(partition: FileProviderArgs) -> str:
-			return f'{identifierGeneration}_{partition.partition_keys.item()}_{partition.index_in_partition}.arrow'
+			return f'{identifierGeneration}_{partition.partition_keys.item()}_{partition.index_in_partition}.parquet'
 
-		dataframe.sink_ipc(polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenamePartition
-			, key={f'partition_{identifierGeneration}': polars.col(group_by).hash() % partitions}, include_key=False)
-			, compression='zstd', maintain_order=True, engine='streaming'
+		def makeFilenameGrouped(partition: FileProviderArgs) -> str:
+			return f'grouped_{identifierGeneration}_{partitionIndex}_{partition.index_in_partition}.parquet'
+
+		dataframe.sink_parquet(polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenamePartition
+			, key={f'partition_{identifierGeneration}': polars.col(group_by).hash() % partitions}, include_key=False, max_rows_per_file=65536)
+			, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
 			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
 		while boxOfPathFilenamesCompleted:
 			boxOfPathFilenamesCompleted.pop().unlink()
 
 		partitionIndex: int = 0
 		while partitionIndex < partitions:
-			listPathFilenamesPartition: list[Path] = list(pathGroupBy.glob(f'{identifierGeneration}_{partitionIndex}_*.arrow'))
+			listPathFilenamesPartition: list[Path] = list(pathGroupBy.glob(f'{identifierGeneration}_{partitionIndex}_*.parquet'))
 			if listPathFilenamesPartition:
-				pathFilename: Path = pathGroupBy / f'grouped_{identifierGeneration}_{partitionIndex}.arrow'
-				polars.concat(tuple(map(polars.scan_ipc, listPathFilenamesPartition)), parallel=False, rechunk=False).group_by(group_by).agg(aggregation).sink_ipc(
-					pathFilename, compression='zstd', maintain_order=False, engine='streaming'
+				polars.scan_parquet(listPathFilenamesPartition, parallel='none', low_memory=True, cache=False).group_by(group_by).agg(aggregation).sink_parquet(
+					polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenameGrouped, max_rows_per_file=65536)
+					, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
 					, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-				boxOfPathFilenamesCompleted.append(pathFilename)
+				boxOfPathFilenamesCompleted.extend(pathGroupBy.glob(f'grouped_{identifierGeneration}_{partitionIndex}_*.parquet'))
 				while listPathFilenamesPartition:
 					listPathFilenamesPartition.pop().unlink()
 			partitionIndex += 1
 		if boxOfPathFilenamesCompleted:
-			return polars.concat(tuple(map(polars.scan_ipc, boxOfPathFilenamesCompleted)), parallel=False, rechunk=False)
+			return polars.scan_parquet(boxOfPathFilenamesCompleted, parallel='none', low_memory=True, cache=False)
 		return polars.LazyFrame(schema=schema).group_by(group_by).agg(aggregation)
 
 	try:

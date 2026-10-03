@@ -76,14 +76,14 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from concurrent.futures import Future
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import Leaf, Pile
 
 #======== Pin by `pile` ===========================================
 
 #-------- Shared logic ---------------------------------------
 
-def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pileProcessingOrder: list[Pile], *, CPUlimit: Limitation = None) -> StateElimination:
+def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pileProcessingOrder: list[Pile], *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin each `pile` in `pileProcessingOrder` by deconstructing open `PermutationSpace` dictionaries.
 
 	(AI generated docstring)
@@ -233,7 +233,7 @@ def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 
 #-------- Plebian functions -----------------------------------------
 
-def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin piles near both ends of the pile sequence for (2,) * n map shapes.
 
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)` fails [1].
@@ -299,7 +299,7 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 
 	return _pinPiles(state, maximumSizeBoxOfPermutationSpace, pileProcessingOrder, CPUlimit=CPUlimit)
 
-def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin `pile` `neg(零) + 首零(state.totalDimensions)` for (2,) * n map shapes.
 
 	This function returns `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape)`
@@ -370,7 +370,7 @@ def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpa
 #======== Pin by `leaf` ======================================================
 
 #-------- Shared logic ---------------------------------------------
-def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> StateElimination:
+def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin multiple `leaf` values by deconstructing each `PermutationSpace` using combined leaf domains.
 
 	(AI generated docstring)
@@ -477,7 +477,7 @@ def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[L
 
 #--- Logic that wants to join the shared logic ---
 
-def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[Pile], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: Limitation = None) -> StateElimination:
+def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[Pile], *, youMustBeDimensionsTallToRideThis: int = 3, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin one `leaf` value by deconstructing each `PermutationSpace` using a computed leaf domain.
 
 	(AI generated docstring)
@@ -587,7 +587,7 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 
 #-------- Plebian functions -----------------------------------------
 
-def pinLeavesDimension0(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin `leafOrigin` and `首零(state.totalDimensions)` using a fixed two-pile domain.
 
 	This function calls `_pinLeavesByDomain` [1] with `leaves=(leafOrigin, 首零(state.totalDimensions))`
@@ -613,7 +613,7 @@ def pinLeavesDimension0(state: StateElimination, *, CPUlimit: Limitation = None)
 	leaves: tuple[Leaf, Leaf] = (leafOrigin, 首零(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
 
-def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin `leaf` `首零(state.totalDimensions) + 零` using `getDomainLeaf首零Plus零`.
 
 	(AI generated docstring)
@@ -642,7 +642,7 @@ def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: Limitation = None
 	leaf: Leaf = (零) + 首零(state.totalDimensions)
 	return _pinLeafByDomain(state, leaf, getDomainLeaf首零Plus零(state, leaf), CPUlimit=CPUlimit)
 
-def pinLeavesDimension零(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeavesDimension零(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin the dimension-零 leaves by pinning `leaf` `首零(state.totalDimensions) + 零`.
 
 	This function ensures the end-pile seed state by calling `pinPilesAtEnds(state, 0)` [1],
@@ -669,7 +669,7 @@ def pinLeavesDimension零(state: StateElimination, *, CPUlimit: Limitation = Non
 	state = pinPilesAtEnds(state, 0)
 	return pinLeaf首零Plus零(state, CPUlimit=CPUlimit)
 
-def pinLeavesDimension一(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin the dimension-一 leaves using `getDomainDimension一`.
 
 	This function pins `leaf` values `(一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))`
@@ -696,7 +696,7 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: Limitation = Non
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension一(state), CPUlimit=CPUlimit)
 
-def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin the dimension-0, dimension-零, and dimension-一 leaves using a combined call sequence.
 
 	This function calls `pinLeavesDimension一` [1] and then calls `pinLeavesDimension零` [2].
@@ -732,7 +732,7 @@ def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Limitation 
 	state = pinLeavesDimension一(state, CPUlimit=CPUlimit)
 	return pinLeavesDimension零(state, CPUlimit=CPUlimit)
 
-def pinLeavesDimension二(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin the dimension-二 leaves using `getDomainDimension二`.
 
 	This function pins `leaf` values `(二 + 一, 二 + 一 + 零, 二 + 零, 二)` by calling
@@ -768,7 +768,7 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: Limitation = Non
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二 + 一, 二 + 一 + 零, 二 + 零, 二)
 	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
 
-def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""You can pin the head-二 leaves using `getDomainDimension首二`.
 
 	This function pins `leaf` values `(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))`
@@ -805,8 +805,8 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: Limitation = 
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
 
-def pin3beans2(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	return _pinLeavesByDomain(state, (一 + 零, 一), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 一 + 零)), CPUlimit=CPUlimit)
 
-def pin首beans(state: StateElimination, *, CPUlimit: Limitation = None) -> StateElimination:
+def pin首beans(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	return _pinLeavesByDomain(state, (首一(state.totalDimensions), 首零一(state.totalDimensions)), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 首一(state.totalDimensions))), CPUlimit=CPUlimit)

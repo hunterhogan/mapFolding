@@ -5,16 +5,14 @@ from mapFolding._e import getLookupChoicesLeaf
 from mapFolding._e.algorithms.elimination import theorem2b
 from mapFolding._e.basecamp import eliminateFolds
 from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-from mapFolding._e.p2上nDimensional import pinIt  # pyright: ignore[reportUnusedImport]
 from mapFolding._e.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
-from mapFolding._e.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
-from mapFolding.oeis._byFormulaLookup import _A000136, _A000682
+from mapFolding.oeis._byFormulaLookup import _A000682
 from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
-	from hunterMakesPy.theTypes import Limitation
+	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import OEISid
 	from os import PathLike
 
@@ -23,7 +21,7 @@ if __name__ == "__main__":
 	pathLikeWrite: PathLike[str] | None = None
 	oeisID: OEISid = ""
 	flow: str = ""
-	CPUlimit: Limitation = -2
+	CPUlimit: ConcurrencyLimit = -2
 	state: StateElimination | None = None
 
 	flow = "crease"
