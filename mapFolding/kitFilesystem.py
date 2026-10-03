@@ -107,7 +107,7 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 
 		dataframe.sink_ipc(polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenamePartition
 			, key={f'partition_{identifierGeneration}': polars.col(group_by).hash() % partitions}, include_key=False)
-			, compression='zstd', maintain_order=False, engine='streaming'
+			, compression='zstd', maintain_order=True, engine='streaming'
 			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
 		while boxOfPathFilenamesCompleted:
 			boxOfPathFilenamesCompleted.pop().unlink()
@@ -117,7 +117,7 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 			listPathFilenamesPartition: list[Path] = list(pathGroupBy.glob(f'{identifierGeneration}_{partitionIndex}_*.arrow'))
 			if listPathFilenamesPartition:
 				pathFilename: Path = pathGroupBy / f'grouped_{identifierGeneration}_{partitionIndex}.arrow'
-				polars.scan_ipc(listPathFilenamesPartition, memory_map=False).group_by(group_by).agg(aggregation).sink_ipc(
+				polars.concat(tuple(map(polars.scan_ipc, listPathFilenamesPartition)), parallel=False, rechunk=False).group_by(group_by).agg(aggregation).sink_ipc(
 					pathFilename, compression='zstd', maintain_order=False, engine='streaming'
 					, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
 				boxOfPathFilenamesCompleted.append(pathFilename)
@@ -125,7 +125,7 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 					listPathFilenamesPartition.pop().unlink()
 			partitionIndex += 1
 		if boxOfPathFilenamesCompleted:
-			return polars.scan_ipc(boxOfPathFilenamesCompleted, memory_map=False)
+			return polars.concat(tuple(map(polars.scan_ipc, boxOfPathFilenamesCompleted)), parallel=False, rechunk=False)
 		return polars.LazyFrame(schema=schema).group_by(group_by).agg(aggregation)
 
 	try:

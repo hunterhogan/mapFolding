@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from mapFolding import kitFilesystem
+from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
 from mapFolding.oeis import getMetadata, oeisIDsImplemented
 from typing import TYPE_CHECKING
@@ -41,6 +42,11 @@ def rtol(request: FixtureRequest) -> float:
 	return 1e-05
 
 #======== Filesystem isolation =====================================
+
+@pytest.fixture
+def state(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> StateMeanders:
+	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
+	return StateMeanders(request.param[0], request.param[1], lookupMeanders=request.param[2].copy())
 
 @pytest.fixture
 def pathRootJobDEFAULTTesting(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:

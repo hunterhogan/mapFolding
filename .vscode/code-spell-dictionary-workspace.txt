@@ -297,6 +297,7 @@ nilpotent
 niversal
 njit
 nogil
+nomnom
 nonconstant
 noncrossing
 nonisomorphic
@@ -393,6 +394,7 @@ pythonapi
 PYTHONIOENCODING
 Quizas
 randint
+rechunk
 RECIPEPREFIX
 recurser
 redef

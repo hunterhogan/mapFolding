@@ -69,9 +69,9 @@ def makePolarsWide(identifiers: Default | None = None) -> PurePath:  # ruff: ign
 	astBitWidth: ast.expr = Make.Attribute(astState, 'bitWidth')
 	astLookupValues: ast.expr = Make.Call(Make.Attribute(Make.Attribute(astState, 'lookupMeanders'), 'values'))
 	astProjectedMeanders: ast.expr = Make.Mult.join([
-		astMeandersMaximum, Make.Add.join([astBitWidth, Make.Constant(4)])])
+		astMeandersMaximum, Make.Add.join([astBitWidth, Make.Constant(2)])])
 	astMaximumBitWidth: ast.expr = Make.Call(Make.Name('max'), [
-		Make.Add.join([astBitWidth, Make.Constant(3)])
+		Make.Add.join([astBitWidth, Make.Constant(2)])
 		, Make.Call(Make.Attribute(astProjectedMeanders, 'bit_length'))])
 	astFunctionDef: ast.FunctionDef = Make.FunctionDef('integersWidePolars吗'
 		, argumentSpecification=Make.arguments(list_arg=[

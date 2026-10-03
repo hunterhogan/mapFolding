@@ -60,12 +60,11 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger, 形PolarsInteger
 	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
 	from typing import Any, Literal
-	import polars
 
-def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:
+def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT
-	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
-	import polars  # ruff: ignore[import-outside-top-level]
+	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
+	import polars
 
 	if bitWidth <= 8:
 		datatype = polars.UInt8
@@ -78,34 +77,6 @@ def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:
 	else:
 		datatype = polars.UInt128
 	return datatype
-
-def compressBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:
-	# DOCUMENT
-	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
-	import polars  # ruff: ignore[import-outside-top-level]
-
-	datatype: 形PolarsInteger = getDatatypePolars(bitWidth)
-	bits &= polars.lit(((1 << bitWidth) - 1) // 3, dtype=datatype)
-	distance: int = 1
-	while distance < bitWidth // 2:
-		bits = (bits * polars.lit((1 << distance) + 1, dtype=datatype) // polars.lit(1 << distance, dtype=datatype)
-			& polars.lit(((1 << bitWidth) - 1) // ((1 << (2 * distance)) + 1), dtype=datatype))
-		distance *= 2
-	return bits
-
-def reverseBitsPolars(bits: polars.Expr, bitWidth: int) -> polars.Expr:
-	# DOCUMENT
-	#=SIN= A local import keeps the optional Polars dependency out of other algorithm flows.
-	import polars  # ruff: ignore[import-outside-top-level]
-
-	datatype: 形PolarsInteger = getDatatypePolars(bitWidth)
-	distance: int = 1
-	while distance < bitWidth:
-		bitsLocator: polars.Expr = polars.lit(((1 << bitWidth) - 1) // ((1 << distance) + 1), dtype=datatype)
-		bits = ((bits & bitsLocator) * polars.lit(1 << distance, dtype=datatype)
-			| (bits // polars.lit(1 << distance, dtype=datatype) & bitsLocator))
-		distance *= 2
-	return bits
 
 def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Create a properly typed connection graph for the map folding algorithm.
