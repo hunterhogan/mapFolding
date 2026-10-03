@@ -74,6 +74,7 @@ cmap
 cmpop
 coefs
 Combin
+combinatorially
 comjnl
 comparand
 Comparand
@@ -196,6 +197,7 @@ ilcm
 imensional
 inequivalent
 infile
+infty
 Initializable
 inspectable
 integest
@@ -379,6 +381,7 @@ Prufer
 pslq
 PSLQ
 ptount
+pushdown
 pyapi
 pyarrow
 pydocstyle
@@ -437,6 +440,7 @@ standardised
 Stéphane
 Stoopid
 stratifiable
+streamable
 structref
 subclasshook
 subexponential

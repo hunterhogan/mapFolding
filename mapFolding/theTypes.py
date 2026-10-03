@@ -1,7 +1,7 @@
 """Types for defensive coding and for computation optimization."""
 from __future__ import annotations
 
-from collections.abc import MutableMapping
+from collections.abc import Mapping, Sequence
 from numpy import dtype, int64 as numpy_int64, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
 from typing import TYPE_CHECKING, TypedDict, TypeVar
 
@@ -22,7 +22,7 @@ type Folding = tuple[Leaf, ...]
 
 type OEISid = LiteralString
 
-type 形Triangle = MutableMapping[int, tuple[int, ...]]
+type 形Triangle = Mapping[int, Sequence[int]]
 
 #================== Generic NumPy =================================================================
 
