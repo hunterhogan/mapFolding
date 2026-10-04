@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from hunterMakesPy import oneIndexed
+from hunterMakesPy.filesystemToolkit import appendStringToHere
 from itertools import repeat
 from mapFolding.algorithms.matrixMeanders import doTheNeedful
 from mapFolding.algorithms.matrixMeandersShare import makeLookupDiagonal
 from mapFolding.basecamp import countMeanders
 from mapFolding.dataBaskets import StateMeanders
-from mapFolding.kitFilesystem import appendStringToHere, writeDiagonal
+from mapFolding.kitFilesystem import writeDiagonal
 from mapFolding.oeis import formatBFile
 from mapFolding.oeis._byFormulaLookup import _A005315, _A005316
 from mapFolding.oeis.A400429 import boxOfDiagonals

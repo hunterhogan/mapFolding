@@ -23,6 +23,7 @@ type Folding = tuple[Leaf, ...]
 type OEISid = LiteralString
 
 type 形Triangle = Mapping[int, Sequence[int]]
+type 形TriangleTerms = Mapping[int, Mapping[int, int]]
 
 #================== Generic NumPy =================================================================
 

@@ -52,10 +52,10 @@ import os
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Callable, Generator, Iterable, Mapping, Sequence
+	from collections.abc import Callable, Generator, Iterable, Mapping
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding.theTypes import Folding
+	from mapFolding.theTypes import Folding, 形Triangle
 	from os import PathLike
 	from pandas import DataFrame
 	from polars.io.partition import FileProviderArgs
@@ -67,13 +67,6 @@ if TYPE_CHECKING:
 		def __call__(self, dataframe: polars.LazyFrame, aggregation: polars.Expr | None = None) -> polars.LazyFrame: ...
 
 pathPolarsDataFrame: Path = Path.cwd()
-
-# import hunterMakesPy.
-def appendStringToHere(this: str, pathFilename: Path) -> Path:  # ruff: ignore[undocumented-public-function]
-	pathFilename.parent.mkdir(parents=True, exist_ok=True)
-	with pathFilename.open(encoding='utf-8', mode='a', newline='') as streamWrite:
-		writeStringToHere(this, streamWrite)
-	return pathFilename
 
 @contextmanager
 def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[_PolarsMaterializer]:  # ruff: ignore[undocumented-public-function]
@@ -397,7 +390,8 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 
 #================== Write =========================================================================
 
-def _iterableToCSV(iterable: Iterable[Any], pathFilename: Path, *, append: bool = False) -> Path:
+def iterableToCSV(iterable: Iterable[Any], pathFilename: Path, *, append: bool = False) -> Path:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	with pathFilename.open(encoding="utf-8", mode="a" if append else "w", newline="") as streamWrite:
 		csvWriter: Writer = csv_writer(streamWrite)
@@ -487,9 +481,9 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	which is safe because `Leaf` values are integers. The large buffer size
 	(`2**16` bytes) reduces the number of system calls when writing many rows.
 	"""
-	return _iterableToCSV(album, pathFilename)
+	return iterableToCSV(album, pathFilename)
 
-def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> Path:
+def writeTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
 	"""Save numbered integer rows from `triangle` to a CSV file.
 
 	(AI generated docstring)
@@ -507,7 +501,7 @@ def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> 
 
 	Parameters
 	----------
-	triangle : Mapping[int, Sequence[int]]
+	triangle : 形Triangle
 		Row numbers mapped to ordered integer values.
 	pathFilename : Path
 		Destination file. Existing contents are overwritten.
@@ -542,11 +536,11 @@ def writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path) -> 
 	[3] `_iterableToCSV`
 
 	"""
-	return _iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
+	return iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
 
 def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT
-	return _iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)
+	return iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)
 
 #================== Read and write ================================================================
 
@@ -710,7 +704,7 @@ def readText(pathFilename: Path) -> str:  # ruff: ignore[undocumented-public-fun
 	# DOCUMENT
 	return pathFilename.read_text(encoding='utf-8')
 
-def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
+def readTriangle(pathFilename: Path) -> 形Triangle:
 	"""Load numbered integer rows from a triangle CSV file.
 
 	(AI generated docstring)
@@ -735,7 +729,7 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 
 	Returns
 	-------
-	triangle : dict[int, tuple[int, ...]]
+	triangle : 形Triangle
 		Row numbers mapped to all values after each row number.
 
 	Reading Failures
