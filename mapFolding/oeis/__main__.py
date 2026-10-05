@@ -38,7 +38,7 @@ import time
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
 	from mapFolding.oeis._dataBaskets import MetadataOEISid
-	from mapFolding.theTypes import OEISid
+	from mapFolding.theTypes import OEISid, 形Triangle
 	from pathlib import Path
 	from typing import Literal, LiteralString
 
@@ -138,7 +138,7 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 		raise ValueError(message)
 	return mapShape
 
-def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:
+def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 	"""Group known values for `oeisID` into numbered triangle rows.
 
 	(AI generated docstring)
@@ -168,7 +168,7 @@ def getTriangleRows(oeisID: OEISid) -> dict[int, list[int]]:
 
 	Returns
 	-------
-	triangleRows : dict[int, list[int]]
+	triangleRows : 形Triangle
 		Consecutive row numbers mapped to newly allocated lists of known sequence values.
 
 	Unknown Sequences
@@ -212,7 +212,7 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = T
 		rowLength=metadata.get('rowLength', lambda rowNumber: rowNumber - metadata.get('rowStart', metadata['offset']) + 1))
 
 # TODO remove
-def readBFileTriangle(pathFilename: Path, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:  # ruff: ignore[undocumented-public-function]
+def readBFileTriangle(pathFilename: Path, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> 形Triangle:  # ruff: ignore[undocumented-public-function]
 	return parseTriangleBFile(readText(pathFilename), rowLengths, rowStart)
 
 # TODO remove

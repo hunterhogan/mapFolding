@@ -104,6 +104,7 @@ Demaine
 Dickau
 dicttoolz
 Didcot
+differenced
 Dimino
 Dispatchees
 dissoc
@@ -408,6 +409,7 @@ relators
 rels
 rmuln
 Rplus
+rref
 rtol
 Ruskey
 Saakov
