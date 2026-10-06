@@ -57,7 +57,7 @@ import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Mapping, Sequence
-	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger, 形PolarsInteger, 形Triangle
+	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger, 形PolarsInteger
 	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
 	from typing import Any, Literal
 
@@ -355,7 +355,7 @@ def parseCSVtoIntegers(lines: Iterable[str]) -> Iterable[tuple[int, ...]]:  # ru
 	return (tuple(map(int, row)) for row in filter(bool, csv_reader(lines)))
 
 # Improve
-def parseTriangle(contents: str) -> 形Triangle:  # ruff: ignore[undocumented-public-function]
+def parseTriangle(contents: str) -> dict[int, tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
 	return dict(map(itemgetter(0, slice(1, None)), parseCSVtoIntegers(contents.splitlines())))
 
 # Improve

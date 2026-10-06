@@ -704,7 +704,7 @@ def readText(pathFilename: Path) -> str:  # ruff: ignore[undocumented-public-fun
 	# DOCUMENT
 	return pathFilename.read_text(encoding='utf-8')
 
-def readTriangle(pathFilename: Path) -> 形Triangle:
+def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 	"""Load numbered integer rows from a triangle CSV file.
 
 	(AI generated docstring)

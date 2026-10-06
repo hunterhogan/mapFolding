@@ -6,8 +6,8 @@ from __future__ import annotations
 from fractions import Fraction
 from functools import reduce
 from itertools import batched, starmap
-from math import comb, lcm
 from mapFolding.oeis.A400429._A005315 import A005315of10
+from math import comb, lcm
 from research.matrixMeanders.infoBooth import pathFilenameFormulaA005315
 from sympy import Matrix
 import json

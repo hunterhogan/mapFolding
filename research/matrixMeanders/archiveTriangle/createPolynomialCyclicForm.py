@@ -1,4 +1,4 @@
-# DEVELOPMENT
+# DEVELOPMENT  # ruff: ignore[implicit-namespace-package]
 # ruff: file-ignore[undocumented-public-module, undocumented-public-function]
 # pyright: reportUnknownVariableType=false, reportOperatorIssue=false, reportUnknownArgumentType=false
 # pyright: reportUnknownMemberType=false, reportArgumentType=false, reportCallIssue=false, reportAssignmentType=false
