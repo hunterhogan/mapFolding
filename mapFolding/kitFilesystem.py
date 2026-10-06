@@ -40,7 +40,6 @@ from hunterMakesPy import errorL33T
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding.dataStructures import parseCSVtoIntegers, parseDiagonal, parseTriangle
 from mapFolding.theSSOT import settingsPackage
-from pandas.core.frame import DataFrame
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
