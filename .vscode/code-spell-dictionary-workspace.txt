@@ -72,6 +72,7 @@ chunksize
 Claudes
 cmap
 cmpop
+coeffs
 coefs
 Combin
 combinatorially
@@ -132,6 +133,7 @@ erical
 excepthandler
 Excludee
 Excludees
+exquo
 factordb
 factorint
 factorisation
@@ -163,6 +165,7 @@ functoolz
 Fython
 gapter
 generalised
+getpid
 gmpy
 Golinelli
 GOUJARD
@@ -177,6 +180,7 @@ Guttmann
 hachi
 hahaha
 halfsies
+Haobo
 HARDWS
 hedron
 holonomicity
@@ -247,6 +251,7 @@ linh
 Liskov
 LLLVVV
 loadgroup
+Lobb
 loopless
 looplift
 lpthread
@@ -299,10 +304,12 @@ Niemeyer
 nilpotent
 niversal
 njit
+nmax
 nogil
 nomnom
 nonconstant
 noncrossing
+nonic
 nonisomorphic
 nonn
 noob
@@ -324,6 +331,7 @@ NZER
 objmode
 objs
 OBJS
+octic
 oeis
 olute
 onefile
@@ -396,6 +404,7 @@ pyproject
 pytastic
 pythonapi
 PYTHONIOENCODING
+quasipolynomiality
 Quizas
 randint
 rechunk
@@ -514,6 +523,7 @@ Vlamos
 voidptr
 vtail
 Weisstein's
+Wenlin
 Wextra
 withitem
 wocky

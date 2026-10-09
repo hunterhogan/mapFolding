@@ -49,7 +49,7 @@ if __name__ == '__main__':
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))
 		# boxOf_n.extend(range(46, 47))
-		boxOf_n.extend(range(48, 49))
+		boxOf_n.extend(range(50, 51))
 
 		for n in boxOf_n:
 			timeStart: float = time.perf_counter()

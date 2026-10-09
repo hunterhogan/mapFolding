@@ -4,9 +4,12 @@
 from __future__ import annotations
 
 from functools import partial, reduce
-from itertools import chain
+from humpy_cytoolz import take
+from hunterMakesPy import zeroIndexed, zip_longest
+from itertools import accumulate, chain
 from mapFolding.kitFilesystem import readDiagonal
-from mapFolding.oeis.A400429._A005315 import _crunchDenominator, _crunchNumerator
+from more_itertools import distribute, split_into
+from operator import sub
 from research.matrixMeanders.infoBooth import pathFilenameTriangleSemiCommaSeparatedValues
 from sympy import mobius
 from typing import TYPE_CHECKING
@@ -47,6 +50,15 @@ def makeA005315Steps(次function: int) -> tuple[tuple[int, ...], tuple[int, ...]
 		return order, multiplicity
 
 	return cyclotomicMultiplicitiesToSteps(dict(map(calculateCyclotomicMultiplicity, range(1, 2 * 次function + 1))))
+
+
+def _crunchNumerator(coefficients: tuple[int, ...], step: int) -> tuple[int, ...]:
+	unmodified, minuend = tuple(split_into(coefficients, (min(step, len(coefficients)), None)))
+	return (*unmodified, *map(sub, minuend, coefficients[0:-step]))
+
+
+def _crunchDenominator(coefficients: tuple[int, ...], step: int, *, 次coefficient: int) -> tuple[int, ...]:
+	return tuple(take(次coefficient + zeroIndexed, chain.from_iterable(zip_longest(*map(accumulate, distribute(step, coefficients)), fillvalue=0))))
 
 def makeNumerator(sequence: Sequence[int], stepsNumerator: tuple[int, ...], stepsDenominator: tuple[int, ...], *,
 	multiplier: int = 1, numeratorLength: int | None = None) -> tuple[int, ...]:

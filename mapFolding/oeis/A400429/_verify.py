@@ -6,9 +6,9 @@ from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import chain, filterfalse, groupby, repeat
 from mapFolding.kitFilesystem import readDiagonal
 from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
-from operator import add, itemgetter
 from mapFolding.oeis.A400429 import A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, boxOfDiagonals
 from mapFolding.oeis.A400429._fromTriangleCells import calculateDiagonal2, calculateDiagonal3
+from operator import add, itemgetter
 from research.matrixMeanders.infoBooth import makePathFilenameDiagonal
 from textwrap import wrap
 from typing import TYPE_CHECKING
@@ -76,7 +76,7 @@ def checkTriangle(triangle: 形Triangle) -> tuple[Report, ...]:
 	def calculateSecondColumn(n: int) -> int:
 		return getKnownValue('A005315', n + 1) - 2 * getKnownValue('A005316', 2 * n)
 
-	triangleWithZeros: dict[int, tuple[int, ...]] = {1: (0, 0, 0)} | dict(zip(triangle, map(add, triangle.values(), repeat((0, 0))), strict=True))
+	triangleWithZeros: 形Triangle = {1: (0, 0, 0)} | dict(zip(triangle, map(add, triangle.values(), repeat((0, 0))), strict=True))  # pyright: ignore[reportAssignmentType, reportArgumentType] # ty: ignore[invalid-argument-type]
 
 	calculateA000136: Callable[[int], int] = partial(A000136, triangle=triangle)
 	calculateA000682: Callable[[int], int] = partial(A000682, triangle=triangle)
@@ -108,7 +108,7 @@ def checkTriangle(triangle: 形Triangle) -> tuple[Report, ...]:
 	)
 
 def checkFormulas() -> None:
-	triangleRows: dict[int, list[int]] = getTriangleRows('A400429')
+	triangleRows: 形Triangle = getTriangleRows('A400429')
 	triangle: dict[int, tuple[int, ...]] = dict(zip(triangleRows, map(tuple, triangleRows.values()), strict=True))
 	triangle = dict(filter(lambda row: len(row[1]) == row[0] // 2, triangle.items()))
 	triangleOfficial: dict[int, int] = getValuesKnown('A400429')
