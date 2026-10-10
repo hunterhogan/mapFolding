@@ -74,6 +74,7 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
   "pytest-env",
   "pytest-xdist",
   "pytest",
+  "sympy",
 ] }
 
 [project.urls]
