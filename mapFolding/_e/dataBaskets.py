@@ -1,7 +1,4 @@
-# TODO idk enough to choose between `UserDict` and subclassing `dict`.
-# ruff: file-ignore[subclass-builtin]
 """Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
-
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -418,11 +415,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		pilesToInsert: Iterator[Pile] = DOTkeys(self.undeterminedPiles())
 		#=SIN= `cast` because the type checkers cannot possible know that the prior logic leads to all int.
-		# TODO Think about: I _feel_ like this logic could be more efficient. This
-		# `tuple(DOTvalues(dict(sorted(DOTitems` has THREE constructors (`sorted` is a stealth `list`
-		# constructor) or FIVE constructors if `Iterator` is a constructor (`DOTitems` and
-		# `DOTvalues`), so I _feel_ it would be faster if I could change the values without
-		# ping-ponging from `dict` to `list` to `dict` to `tuple`.
 		return tuple(DOTvalues(dict(sorted(DOTitems(cast('PinnedLeaves', merge(self, dict(zip(pilesToInsert, leavesToInsert, strict=True)), factory=PermutationSpace)))))))
 
 	def pilePinned吗(self, pile: Pile) -> bool:

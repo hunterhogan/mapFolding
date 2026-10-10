@@ -66,8 +66,8 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
   "pytest-cov",
   "setuptools",
   "sympy",
-], ortools = ["ortools"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
-  "ortools",
+], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
+  "ortools; python_version < '3.15'",
   "pandas",
   "polars>=1.44.2",
   "pyarrow",
@@ -109,7 +109,7 @@ testpaths = ["**/tests"]
 
 [tool.pytest_env]
 # Re-confirmed: numba Version: 0.63.1 2025 December 30
-NUMBA_JIT_COVERAGE = "1" # This does not work, whether it is 0 or 1.
+NUMBA_JIT_COVERAGE = "1"  # This does not work, whether it is 0 or 1.
 # NUMBA_DISABLE_JIT = "1" # This is the only way to get coverage data
 
 [tool.setuptools]

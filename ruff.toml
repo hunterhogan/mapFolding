@@ -63,6 +63,7 @@ ignore = [
   "self-or-cls-assignment",
   "snake-case-type-alias",
   "static-join-to-f-string",
+  "subclass-builtin",
   "subprocess-without-shell-equals-true",
   "superfluous-else-continue",
   "superfluous-else-return",
@@ -78,11 +79,11 @@ ignore = [
   "too-many-statements",
   "type-name-incorrect-variance",
   "typed-argument-default-in-stub",
+  "unnecessary-literal-dict",
   "unused-import",
   "unused-variable",
   "useless-else-on-loop",
   "useless-import-alias",
-  "unnecessary-literal-dict",
   "yoda-conditions",
 ]
 select = ["ALL"]

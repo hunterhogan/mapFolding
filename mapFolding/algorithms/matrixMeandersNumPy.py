@@ -37,7 +37,7 @@ slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., axis=次PrepArea)
 slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
 
-# TODO Create a real vectorized numpy function, not a shoehorned python function.
+# Improvement: refactor everything about this: `boxOfDiagonals`, not vectorized.
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
     boundary: int = state.boundary + 1
 
