@@ -1,0 +1,11 @@
+# Greetings from The On-Line Encyclopedia of Integer Sequences! http://oeis.org/
+
+Search: id:a400631
+Showing 1-1 of 1
+
+%I A400631 #1 Oct 01 2026 20:31:36
+%S A400631 
+%N A400631 allocated for Hunter Hogan
+%K A400631 allocated
+
+# Content is available under The OEIS End-User License Agreement: http://oeis.org/LICENSE
