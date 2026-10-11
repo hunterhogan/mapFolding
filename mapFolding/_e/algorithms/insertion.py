@@ -1,7 +1,21 @@
+"""Generate and save folding representatives by inserting leaves.
+
+You can build complete leaf arrangements incrementally and save surviving arrangements as an album.
+You check the creases of each newly inserted leaf.
+
+Contents
+--------
+Functions
+	doTheNeedful
+		Generate a map's folding representatives and write an album.
+Output paths
+	pathAlbum
+		Locate the default directory for generated folding albums.
+"""
+
 # DEVELOPMENT module.
 # pyright: reportUnusedVariable=false, reportUnusedImport=false
 # ruff: file-ignore[print]
-"""Find `groupsOfFolds` based on Sade's 1949 insertion algorithm."""
 from __future__ import annotations
 
 from contextlib import ExitStack
@@ -26,6 +40,12 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / 'research' / 'albums'
+"""Locate the default directory for generated folding albums.
+
+(AI generated docstring)
+
+You can locate the research album directory within the package. Use the insertion entry point to
+derive album filenames from the map shape."""
 
 def _makeDescendants(folding: Folding, mapShape: tuple[int, ...]) -> tuple[Folding, ...]:
 	inserting: Iterable[Folding] = map(partial(_insertLeafAtPile, folding, len(folding)), range(len(folding), pileOrigin, decreasing))
@@ -65,6 +85,58 @@ def _creaseViolation吗(pileCreasePile: tuple[Pile, Pile], pileComparandCreasePi
 	return creaseViolation吗(creasesPileSorted[0][0], creasesPileSorted[1][0], creasesPileSorted[0][1], creasesPileSorted[1][1])
 
 def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -> Path:
+	"""Generate a map's folding representatives and write an album.
+
+	(AI generated docstring)
+
+	You can insert leaves in index order, retain arrangements whose new creases do not cross existing
+	creases, and save the final arrangements with `mapFolding.kitFilesystem.writeAlbum` [1]. You use the
+	module's `pathAlbum` [2] as the output directory.
+
+	Representative selection
+	------------------------
+	You keep the origin leaf at pile zero. At insertion depth three, you retain arrangements where leaf
+	one precedes leaf two. You receive an album containing representatives subject to those restrictions,
+	without a returned count or recorded symmetry multipliers.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		Nonempty tuple of nonnegative dimension lengths with at least one leaf.
+	CPUlimit : ConcurrencyLimit = None
+		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit` [3]. `None`, `False`, and `0`
+		use available processors; `True` selects one. Positive values limit usage and negative values reserve
+		processors.
+
+	Returns
+	-------
+	pathFilenameAlbum : Path
+		Path of the album written for `mapShape`.
+
+	Raises
+	------
+	ValueError
+		If shape validation fails or the map contains zero leaves.
+	FileExistsError
+		If the destination album already exists.
+
+	Examples
+	--------
+	The module's execution block generates an album for a rectangular map.
+
+		```python
+		mapShape = (2, 3)
+		pathFilenameAlbum = doTheNeedful(mapShape, -2)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitFilesystem.writeAlbum`
+
+	[2] `pathAlbum`
+
+	[3] `mapFolding.beDRY.defineProcessorLimit`
+	"""
 	mapShape = validateMapShape(mapShape)
 	totalLeaves: int = getTotalLeaves(mapShape)
 	if totalLeaves == 0:

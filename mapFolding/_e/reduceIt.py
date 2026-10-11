@@ -1,3 +1,27 @@
+"""Reduce leaf sets in elimination permutation spaces.
+
+(AI generated docstring)
+
+You can propagate pinned leaves, restrict repeated leaf sets, and detect leaves with no remaining pile
+or only one remaining pile. Use the default reduction sequence to also restrict leaf choices using
+crease crossings.
+
+Contents
+--------
+Functions
+	reduceLeafSpace
+		Restrict specified pile domains with an allowed-leaf mask.
+	reducePermutationSpace_LeafIsPinned
+		Remove pinned leaves from the remaining pile leaf sets.
+	reducePermutationSpace_leafDomainOf0or1
+		Pin leaves with one remaining pile and invalidate leaves with no pile.
+	reducePermutationSpace_nakedSubset
+		Reserve identical leaf sets for matching groups of piles.
+Reduction sequences
+	boxOfFunctionsReductionDEFAULT
+		Access the default sequence of permutation-space reductions.
+"""
+
 from __future__ import annotations
 
 from collections import Counter
@@ -21,68 +45,34 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Pile
 
 def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, ChoicesLeaf]], antiChoicesLeaf: ChoicesLeaf) -> PermutationSpace:
-	"""Update permutation space by removing forbidden leaves from specified piles.
+	"""Restrict specified pile domains with an allowed-leaf mask.
 
 	(AI generated docstring)
 
-	You can use this shared subroutine to update a `PermutationSpace` by applying leaf exclusion
-	constraints to specified piles. The function intersects each pile's domain with the complement
-	of forbidden leaves, normalizes the result to a single leaf when possible, and invalidates the
-	entire permutation space if any pile's domain becomes empty.
+	You can intersect each supplied leaf set with `antiChoicesLeaf` and write the normalized result into
+	`permutationSpace`. You pin a leaf when only one remains. With an empty result, you set the validity
+	flag to `False` and return immediately.
 
-	This function implements the mechanical update logic used by all constraint-propagation
-	functions in the reduction system. Constraint encoders should call this function rather than
-	modifying `permutationSpace` directly to ensure consistent domain updates, proper normalization
-	via `choicesLeafLeafNone` [1], and early detection of unsatisfiable constraints.
-
-	The `pilesToUpdate` parameter contains explicit `(pile, choicesLeaf)` tuples because constraint
-	encoders may need to restrict a different domain than the current `permutationSpace[pile]` value.
-	For example, when enforcing crease adjacency, the encoder provides the specific crease-neighbor
-	options to intersect with `antiChoicesLeaf`, not the broader current domain at that pile.
+	Domain preservation
+	-------------------
+	You must supply a bitset that appropriately restricts each pile. Check membership in the existing
+	dictionary value yourself; your supplied bitset is not intersected with that value.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-		Dictionary mapping pile indices to leaf indices or `ChoicesLeaf`. The function
-		mutates this dictionary in place.
+		Permutation space to mutate.
 	pilesToUpdate : Iterable[tuple[Pile, ChoicesLeaf]]
-		Pile indices to update and their corresponding leaf domains to restrict. Each tuple contains
-		a pile index and the `ChoicesLeaf` bitset representing the domain to intersect with
-		`antiChoicesLeaf`. The provided `ChoicesLeaf` may differ from `permutationSpace[pile]` when
-		the constraint encoder needs to restrict against a computed subset.
+		Pile indices and bitsets to intersect with the mask. The supplied bitsets, rather than the
+		current dictionary values, determine the new choices.
 	antiChoicesLeaf : ChoicesLeaf
-		Bitset representing forbidden leaves to exclude from all updated piles. The function computes
-		the intersection of each pile's domain with the complement of this bitset.
+		Allowed-leaf mask including the sentinel. Cleared bits identify excluded leaves.
 
 	Returns
 	-------
-	updatedPermutationSpace : PermutationSpace
-		The mutated `permutationSpace` with updated pile domains, or an empty dictionary if any pile's
-		domain becomes empty after applying the constraints.
-
-	Constraint Propagation Architecture
-	------------------------------------
-	This function is the shared update subroutine for the constraint-propagation system orchestrated
-	by `reduceAllPermutationSpace` [2]. All constraint encoders (`reducePermutationSpace_*` functions)
-	call this function to perform domain updates. Constraint encoders should not modify
-	`permutationSpace` directly; they should identify forbidden leaves, construct `antiChoicesLeaf`,
-	and delegate the actual update to this function.
-
-	The function enforces two critical invariants:
-	1. Domain reduction: Every update shrinks or maintains pile domains; domains never expand.
-	2. Early failure: If any domain becomes empty, the function immediately returns an empty
-		dictionary, signaling that the permutation space is unsatisfiable.
-
-	References
-	----------
-	[1] mapFolding._e.choicesLeafLeafNone
-
-	[2] mapFolding._e.pinIt.reduceAllPermutationSpace
-
-	[3] mapFolding._e.choicesLeafAND
-
-	[4] gmpy2 - Integer arithmetic
-		https://gmpy2.readthedocs.io/en/latest/
+	permutationSpace : PermutationSpace
+		The same object with updated pile domains or a false validity flag. Earlier updates remain applied on
+		failure.
 	"""
 	for pile, choicesLeaf in pilesToUpdate:
 		leafSpace: LeafSpace | None = _e.choicesLeafLeafNone(_e.choicesLeafAND(antiChoicesLeaf, choicesLeaf))
@@ -100,13 +90,12 @@ def _odd吗(mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile, 
 	return workhorse
 
 def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to detect and eliminate crossed creases.
+	"""Detect and eliminate crossed creases.
 
-	I use this constraint encoder to detect configurations where two creases would cross physically
-	and either invalidate `permutationSpace` or restrict forbidden pile positions for unpinned crease
-	leaves. For each dimension, I partition pinned leaves by parity (even/odd coordinate in that
-	dimension), identify crease pairs where one leaf is pinned and the other is not, and compute
-	forbidden pile positions where the unpinned leaf cannot appear without causing a crease crossing.
+	You can detect configurations where two creases would cross and either invalidate `permutationSpace`
+	or restrict forbidden pile positions for unpinned crease leaves. For each dimension, you partition
+	pinned leaves by coordinate parity, identify crease pairs with one pinned and one unpinned leaf, and
+	compute forbidden pile positions where the unpinned leaf would cause a crossing.
 
 	Parameters
 	----------
@@ -196,25 +185,23 @@ def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace)
 	return permutationSpace
 
 def reducePermutationSpace_LeafIsPinned(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to propagate leaf pinning constraints.
+	"""Remove pinned leaves from the remaining pile leaf sets.
 
-	I use this constraint encoder to enforce that every pinned leaf can appear at only one pile. For
-	every leaf pinned at a pile, I remove that leaf from `ChoicesLeaf` at all other piles. When
-	`ChoicesLeaf` at a pile reduces to a single leaf, I convert `pile: choicesLeaf` to `pile: leaf`
-	(pinning the leaf).
+	You can enforce one pile per pinned leaf by removing pinned leaf indices from undetermined piles. You
+	repeat when an exclusion pins another leaf and stop when no additional leaf is pinned or the
+	permutation space becomes invalid.
 
 	Parameters
 	----------
 	state : StateElimination
-		A data basket to facilitate computations and actions.
+		Elimination state providing the total leaf count.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: choicesLeaf`.
+		Permutation space to mutate.
 
 	Returns
 	-------
-	updatedPermutationSpace : PermutationSpace
-		The updated `permutationSpace`.
-
+	permutationSpace : PermutationSpace
+		The same object with propagated assignments or a false validity flag.
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 
@@ -228,38 +215,32 @@ def reducePermutationSpace_LeafIsPinned(state: StateElimination, permutationSpac
 	return permutationSpace
 
 def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to detect and exploit naked subset constraints.
+	"""Reserve identical leaf sets for matching groups of piles.
 
-	I use this constraint encoder to detect naked subsets in the permutation space and remove
-	subset leaves from all other piles. A naked subset occurs when `n` piles share the same
-	`ChoicesLeaf` containing exactly `n` leaves. Those `n` leaves can only appear in those `n`
-	piles, so I remove those leaves from `ChoicesLeaf` at all other piles using `_reduceLeafSpace`.
+	You can find groups of at least two piles with the same leaf bitset. When the leaf count equals the
+	pile count, you exclude those leaves from every other undetermined pile.
 
-	Algorithm Details
-	-----------------
-	The function implements a specialized naked subset detector optimized for high throughput:
-
-	1. Extract `UndeterminedPiles` (piles with `ChoicesLeaf`).
-	2. Group piles by their `ChoicesLeaf` values.
-	3. Filter groups where the number of leaves in `ChoicesLeaf` equals the number of piles sharing that `ChoicesLeaf` (the naked subset criterion).
-	4. For each naked subset, remove subset leaves from all other piles.
-
-	The function iterates until no new leaves are pinned. The function is not a comprehensive
-	naked subset solver; the function prioritizes high throughput for a strong return on
-	investment.
+	Subset coverage
+	---------------
+	You compare identical bitsets rather than arbitrary unions of leaf sets. The current repeat condition
+	requires the pinned-leaf count to decrease, so use the state's repeated reduction method [1] for
+	further propagation.
 
 	Parameters
 	----------
 	state : StateElimination
-		A data basket to facilitate computations and actions.
+		Elimination state providing the total leaf count.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
+		Permutation space to mutate.
 
 	Returns
 	-------
-	updatedPermutationSpace : PermutationSpace | None
-		The updated `permutationSpace` if valid; otherwise `None`.
+	permutationSpace : PermutationSpace
+		The same object with reduced leaf sets or a false validity flag.
 
+	References
+	----------
+	[1] `mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace`
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
@@ -285,19 +266,24 @@ def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace
 	return permutationSpace
 
 def reducePermutationSpace_leafDomainOf0or1(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""Detect leaves with domain size of one or no domain.
+	"""Pin leaves with one remaining pile and invalidate leaves with no pile.
+
+	You can count each leaf's occurrences across pinned assignments and leaf sets. You invalidate the
+	permutation space for a missing leaf, or pin an unpinned leaf with one possible pile and propagate
+	pinned-leaf exclusions before counting again.
 
 	Parameters
 	----------
 	state : StateElimination
-		A data basket to facilitate computations and actions.
+		Elimination state providing the total leaf count.
 	permutationSpace : PermutationSpace
-		A dictionary of `pile: leaf` and/or `pile: choicesLeaf`.
+		Permutation space to reduce. Pinning can create a replacement object.
 
 	Returns
 	-------
-	updatedPermutationSpace : PermutationSpace
-		The updated `permutationSpace` if valid; otherwise with `valid` set to `False`.
+	permutationSpace : PermutationSpace
+		Reduced permutation space, possibly a replacement object, with a false validity flag if any leaf has
+		no pile.
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
@@ -322,3 +308,15 @@ boxOfFunctionsReductionDEFAULT: Sequence[Callable[[StateElimination, Permutation
 	, _crossedCreases
 	, reducePermutationSpace_LeafIsPinned
 )
+"""Access the default sequence of permutation-space reductions.
+
+(AI generated docstring)
+
+You can restrict matching leaf sets, pin leaves with a single pile domain, remove crease crossings,
+and propagate pinned leaves. With the state reduction method [1], you apply the sequence in reverse
+order and restart when dictionary values change.
+
+References
+----------
+[1] `mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace`
+"""

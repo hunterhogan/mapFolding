@@ -1,3 +1,24 @@
+"""Enumerate folding representatives with a constraint solver.
+
+(AI generated docstring)
+
+You can model pile assignments, leaf ordering, and forbidden crease crossings with the OR-Tools CP-SAT
+solver [1]. Use the entry point to distribute disjoint permutation spaces across worker processes.
+
+Contents
+--------
+Functions
+	count
+		Solve one permutation space and collect its folding representatives.
+	doTheNeedful
+		Count folding representatives across concurrently solved permutation spaces.
+
+References
+----------
+[1] Google OR-Tools CP-SAT solver and solution enumeration.
+	https://developers.google.com/optimization/cp/cp_solver
+"""
+
 from __future__ import annotations
 
 from concurrent.futures import as_completed, ProcessPoolExecutor
@@ -25,6 +46,41 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 def count(state: StateElimination) -> StateElimination:
+	"""Solve one permutation space and collect its folding representatives.
+
+	(AI generated docstring)
+
+	You can enumerate solutions of `state.permutationSpace` with the OR-Tools CP-SAT solver [1]. You
+	receive the same `state` with its representative count and folding collection replaced by the solver
+	results and its symmetry multipliers recorded.
+
+	Search restrictions
+	-------------------
+	You pin the origin leaf at the origin pile, order leaves for repeated dimension lengths, and forbid
+	crease crossings. For maps whose dimension lengths are all two, you apply additional domain and
+	adjacency constraints. You can apply a factor-of-two symmetry restriction for a dimension longer than
+	two when the dimension symmetry multiplier remains one.
+
+	Solver completion
+	-----------------
+	You can enumerate solutions without a configured time limit. You receive no solver status, and no
+	status check is performed.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state whose workbench permutation space supplies pinned leaves and leaf sets.
+
+	Returns
+	-------
+	state : StateElimination
+		The same state with `groupsOfFolds`, `boxOfFolding`, and symmetry multipliers updated.
+
+	References
+	----------
+	[1] Google OR-Tools CP-SAT solver and solution enumeration.
+		https://developers.google.com/optimization/cp/cp_solver
+	"""
 	model = cp_model.CpModel()
 
 	boxOfLeavesInPileOrder: list[cp_model.IntVar] = [model.new_int_var(pileOrigin, state.pileLast, f"leafInPile[{pile}]") for pile in range(state.totalLeaves)]
@@ -165,7 +221,47 @@ def count(state: StateElimination) -> StateElimination:
 	return state
 
 def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
-	"""Do the things necessary so that `count` operates efficiently."""
+	"""Count folding representatives across concurrently solved permutation spaces.
+
+	You can submit each active permutation space to `count` [1] in a separate task and accumulate task
+	counts in `state.groupsOfFolds`. When you supply no active spaces, you start with origin pinning and
+	default reductions [2].
+
+	Result collection
+	-----------------
+	You receive a reset workbench permutation space, with worker folding collections excluded from
+	`state.boxOfFolding`. For seven dimensions, you also save nonempty task results to temporary research
+	CSV files with `mapFolding.kitFilesystem.writeAlbum` [3].
+
+	Concurrency
+	-----------
+	You run tasks through `concurrent.futures.ProcessPoolExecutor` [4] and wait for every task to finish.
+	You receive any task failure as an exception.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state containing the map shape and optional disjoint search spaces.
+	workersMaximum : int
+		Positive maximum number of worker processes.
+
+	Returns
+	-------
+	state : StateElimination
+		The same state with task counts accumulated, multipliers copied from task results, and active spaces
+		cleared.
+
+	References
+	----------
+	[1] `count`
+
+	[2] `mapFolding._e.reduceIt.boxOfFunctionsReductionDEFAULT`
+
+	[3] `mapFolding.kitFilesystem.writeAlbum`
+
+	[4] Python concurrent.futures.ProcessPoolExecutor.
+		https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor
+	"""
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""
 		state.boxOfPermutationSpace.append(PermutationSpace({pileOrigin: leafOrigin}).updatePilesMissing(getLookupChoicesLeaf(state)))

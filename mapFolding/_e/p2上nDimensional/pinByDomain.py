@@ -1,3 +1,16 @@
+"""Select interior-pile leaves using pinned end-pile restrictions.
+
+(AI generated docstring)
+
+You can narrow the possible leaves for a specific interior pile after pinning the required piles near
+both ends. Use this selection in the public pinning functions.
+
+Contents
+--------
+Functions
+	pinPile零Ante首零AfterDepth4
+		Select possible leaves for the pile before the head-origin position.
+"""
 from __future__ import annotations
 
 from gmpy2 import bit_flip, bit_mask, bit_test as isBit1吗, is_even as isEven吗, is_odd as isOdd吗
@@ -20,41 +33,42 @@ if TYPE_CHECKING:
 #======== Domain-based subroutines for analyzing a specific `pile`. =======
 
 def pinPile零Ante首零AfterDepth4(state: StateElimination) -> list[int]:
-	"""All fourth-order piles must be pinned or you will get an error.
+	"""Select possible leaves for the pile before the head-origin position.
 
-	Unless I've made a mistake:
+	You can narrow the leaves available at the target pile using leaves already pinned near both ends of
+	the pile order. You receive the remaining leaves without pinning a leaf or modifying `state`.
 
-	I have made a rule to exclude a leaf from pile 零Ante首零
-		for all piles in the first four orders (pile <= 4 or pile >= 首 - 4),
-			for all leaves in each pile's pile-range
-				that exclude a leaf from pile 零Ante首零.
-
-	If I were to figure out the last few cases, it would remove 23 surplus dictionaries.
-		10 of 23 dictionaries
-			if leafAt二 == 15:
-				boxOfRemoveLeaves.extend([38])
-		2 of 23 dictionaries
-			if leafAt二 == 9:
-				boxOfRemoveLeaves.extend([19])
-		2 of 23 dictionaries
-				boxOfRemoveLeaves.extend([59])
-		3 of 23 dictionaries
-			if leafAt二 == 23:
-				boxOfRemoveLeaves.extend([50])
-		4 of 23 dictionaries
-			if leafAt二 == 29:
-				boxOfRemoveLeaves.extend([7])
-		2 of 23 dictionaries
-				boxOfRemoveLeaves.extend([35])
-
-	But I would still have 1312 surplus dictionaries.
-
-	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to the
+		target pile and provide the required pinned leaves in `state.permutationSpace`.
 
 	Returns
 	-------
-	boxOfRemoveLeaves : list[int]
-		A list of leaves to exclude from pile 零Ante首零.
+	leavesToPin : list[int]
+		Sorted unique leaf indices after removing forbidden leaves from the
+		initial pile choices.
+
+	Pinned Piles
+	------------
+	The target pile is `首零(state.totalDimensions) - 零`,
+	using the coordinate vocabulary [1]. Piles `2`, `3`, `4`, `state.首 - 2`, `state.首 - 3`,
+	and `state.首 - 4` must contain pinned leaves. The public orchestration function
+	`mapFolding._e.p2上nDimensional.pinIt.pinPile零Ante首零` [2] prepares these piles.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	Initial leaf choices come from `mapFolding._e.pileOptions.getLookupChoicesLeaf` [3].
+	The exclusions are experimental and do not establish a complete folding.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPile零Ante首零`
+
+	[3] `mapFolding._e.pileOptions.getLookupChoicesLeaf`
 	"""
 	leafAt一:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(一))
 	leafAt一Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(一) + state.首))

@@ -1,70 +1,18 @@
-"""Reduce permutation spaces through iterative constraint propagation.
+"""Provide the ordered coordinate-based reduction sequence.
 
-You can use this module to shrink the search space for map-folding computations by applying
-multiple constraint-propagation strategies in a unified reduction loop. The module implements
-a single large constraint-satisfaction algorithm expressed as a collection of specialized
-reduction functions that reinforce each other. Each function encodes one constraint type
-(crease adjacency, conditional predecessors, crossed creases, naked subsets, etc.), and the
-module orchestrates iterative application of these constraints until no further reduction
-occurs.
+You can select the reduction functions used to refine possible foldings for maps
+whose axis lengths are `2`. The public sequence works with
+`mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace` [1].
 
-Architecture
-------------
-The module is organized as one conceptual algorithm split across multiple functions for
-readability and maintainability:
-
-1. `reduceAllPermutationSpace` is the orchestrator that applies each
-	reduction function in sequence until the permutation space stabilizes.
-
-2. The `_reducePermutationSpace_*` functions are specialized constraint encoders that each
-	implement one type of constraint. These functions are curried to accept `state` first,
-	then `permutationSpace`, enabling use with `filter_map` [1].
-
-3. `_reduceLeafSpace` is the shared subroutine that handles the mechanical work of updating
-	`ChoicesLeaf` at specified piles and propagating newly pinned leaves. All constraint
-	encoders call `_reduceLeafSpace` to perform the actual updates.
-
-The functions are not independent algorithms; the functions are interdependent components of
-a constraint-propagation system. Each function assumes other functions will run afterward to
-propagate the consequences of newly pinned leaves or reduced domains.
-
-Functions
----------
-Public
-	reduceAllPermutationSpace
-		Reduce permutation space by iteratively applying constraint propagation.
-
-Private (Constraint Encoders)
-	_reducePermutationSpace_byCrease
-		I use this to enforce crease adjacency constraints.
-	_reducePermutationSpace_ConditionalPredecessors
-		I use this to enforce conditional predecessor constraints.
-	_reducePermutationSpace_CrossedCreases
-		I use this to detect and eliminate crossed creases.
-	_reducePermutationSpace_HeadsBeforeTails
-		I use this to enforce head-before-tail ordering constraints.
-	_reducePermutationSpace_LeafIsPinned
-		I use this to propagate leaf pinning constraints.
-	_reducePermutationSpace_nakedSubset
-		I use this to detect and exploit naked subset constraints.
-	_reducePermutationSpace_noConsecutiveDimensions
-		I use this to enforce non-consecutive dimension constraints.
-	_reducePermutationSpace_leafDomainOf1
-		I use this to detect and pin leaves with domain size one.
-
-Private (Shared Subroutine)
-	_reduceLeafSpace
-		I use this to update permutation space by removing forbidden leaves from piles.
-
-Private (Utilities)
-	ImaOddLeaf2上nDimensional
-		I use this to check parity for 2^n-dimensional maps using bit operations.
+Contents
+--------
+Variables
+	boxOfFunctionsReduction2上nDimensional
+		Select the ordered reduction functions for maps whose axis lengths are two.
 
 References
 ----------
-[1] more_itertools.filter_map
-	https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.filter_map
-
+[1] `mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace`
 """
 from __future__ import annotations
 
@@ -95,12 +43,11 @@ if TYPE_CHECKING:
 #======== Reducing `ChoicesLeaf` ===============================
 
 def _byCrease2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to enforce crease adjacency constraints.
+	"""Enforce crease adjacency constraints.
 
-	I use this constraint encoder to enforce that when a leaf is pinned at a pile and the
-	adjacent pile has undetermined `ChoicesLeaf`, the adjacent pile can only contain leaves
-	that are crease neighbors of the pinned leaf. I identify pinned-leaf-adjacent-to-undetermined
-	configurations and restrict the undetermined pile to crease neighbors using `_reduceLeafSpace`.
+	You can restrict an undetermined pile adjacent to a pinned leaf to that leaf's crease neighbors. You
+	identify pinned leaves next to undetermined `ChoicesLeaf` assignments and restrict those assignments
+	with `_reduceLeafSpace`.
 
 	Parameters
 	----------
@@ -145,14 +92,14 @@ def _byCrease2上nDimensional(state: StateElimination, permutationSpace: Permuta
 	return permutationSpace
 
 def _conditionalPredecessors2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to enforce conditional predecessor constraints.
+	"""Enforce conditional predecessor constraints.
 
-	I use this constraint encoder to enforce that when a `Leaf` is pinned at a `Pile` and the `Leaf`
-	has conditional `Leaf` predecessors at that `Pile`, then those `Leaf` predecessors cannot appear
-	after that `Pile`.
+	You can exclude conditional `Leaf` predecessors from piles after a pinned `Leaf`. You apply the
+	restriction when the pinned `Leaf` has conditional predecessors at its `Pile`.
 
-	My formulas for computing conditional `Leaf` predecessors are inefficient, so I precompute them
-	for 2ⁿ-dimensional maps with `n ≥ 6` and store them in `dictionaryConditionalLeafPredecessors`.
+	You can reuse precomputed conditional `Leaf` predecessors for 2ⁿ-dimensional maps with `n ≥ 6`
+	through `dictionaryConditionalLeafPredecessors`, avoiding repeated evaluation of the inefficient
+	formulas.
 
 	Parameters
 	----------
@@ -202,13 +149,12 @@ def _odd吗(_mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile,
 	return workhorse
 
 def _crossedCreases2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to detect and eliminate crossed creases.
+	"""Detect and eliminate crossed creases.
 
-	I use this constraint encoder to detect configurations where two creases would cross physically
-	and either invalidate `permutationSpace` or restrict forbidden pile positions for unpinned crease
-	leaves. For each dimension, I partition pinned leaves by parity (even/odd coordinate in that
-	dimension), identify crease pairs where one leaf is pinned and the other is not, and compute
-	forbidden pile positions where the unpinned leaf cannot appear without causing a crease crossing.
+	You can detect configurations where two creases would cross and either invalidate `permutationSpace`
+	or restrict forbidden pile positions for unpinned crease leaves. For each dimension, you partition
+	pinned leaves by coordinate parity, identify crease pairs with one pinned and one unpinned leaf, and
+	compute forbidden pile positions where the unpinned leaf would cause a crossing.
 
 	Parameters
 	----------
@@ -294,14 +240,13 @@ def _crossedCreases2上nDimensional(state: StateElimination, permutationSpace: P
 	return permutationSpace
 
 def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to enforce head-before-tail ordering constraints.
+	"""Enforce head-before-tail ordering constraints.
 
-	I use this constraint encoder to enforce that leaves with large coordinates in a dimension (tail)
-	can only appear after all leaves with small coordinates in that dimension (head) have appeared.
-	When a leaf with nonzero nearest head dimension is pinned, I remove all leaves with larger
-	coordinates in that dimension from preceding piles. When a leaf with nonzero nearest tail
-	dimension is pinned, I remove all leaves with smaller coordinates in that dimension from
-	subsequent piles.
+	You can require leaves with large coordinates in a dimension (tail) to follow all leaves with small
+	coordinates in that dimension (head). When a leaf with nonzero nearest head dimension is pinned, you
+	remove leaves with larger coordinates in that dimension from preceding piles. When a leaf with
+	nonzero nearest tail dimension is pinned, you remove leaves with smaller coordinates in that
+	dimension from subsequent piles.
 
 	Algorithm Details
 	-----------------
@@ -369,20 +314,19 @@ def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace:
 	return permutationSpace
 
 def _noConsecutiveDimensions2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
-	"""I use this to enforce non-consecutive dimension constraints.
+	"""Enforce non-consecutive dimension constraints.
 
-	I use this constraint encoder to detect arithmetic progressions in pinned leaves and forbid
-	the next term in the progression from appearing at the adjacent pile. When three consecutive
-	piles contain leaves forming an arithmetic progression (leaf_k, leaf, leaf_r where
-	`leaf - leaf_k == leaf_r - leaf`), the next term in the progression cannot appear at the
-	next pile because map foldings cannot have four consecutive leaves in arithmetic progression.
+	You can detect arithmetic progressions in pinned leaves and exclude the next term from an adjacent
+	pile. When three consecutive piles contain an arithmetic progression (leaf_k, leaf, leaf_r where
+	`leaf - leaf_k == leaf_r - leaf`), you exclude the next term from the next pile because map foldings
+	cannot have four consecutive leaves in arithmetic progression.
 
-	The function examines all triples of consecutive piles and identifies configurations where:
+	You examine all triples of consecutive piles for the following configurations.
 	1. Two adjacent piles have pinned leaves and the third has `ChoicesLeaf`, or
 	2. The middle pile has `ChoicesLeaf` and the outer two have pinned leaves.
 
-	For each pattern, I compute the forbidden leaf (the next term in the arithmetic progression)
-	and remove that leaf from the undetermined pile using `_reduceLeafSpace`.
+	For each pattern, you compute the forbidden leaf (the next term in the arithmetic progression) and
+	remove it from the undetermined pile with `_reduceLeafSpace`.
 
 	Parameters
 	----------
@@ -438,3 +382,38 @@ boxOfFunctionsReduction2上nDimensional: Sequence[Callable[[StateElimination, Pe
 	_byCrease2上nDimensional,
 	reducePermutationSpace_LeafIsPinned,
 )
+"""Select the ordered reduction functions for maps whose axis lengths are two.
+
+(AI generated docstring)
+
+You can pass this sequence to
+`mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace` [1] to refine choice
+foldings. Each function accepts an elimination state and one permutation space and returns the
+resulting permutation space.
+
+Reduction Order
+---------------
+The sequence checks consecutive dimensions, crossed creases, conditional predecessors, and
+head-before-tail order, then applies naked-subset reduction [2], empty or singleton leaf domains
+[3], crease constraints, and pinned-leaf propagation [4]. The order affects current results.
+
+Examples
+--------
+From `easyRun/pinning.py`.
+
+	```python
+	state: StateElimination = StateElimination(
+		(2,) * 5, boxOfFunctionsReduction=boxOfFunctionsReduction2上nDimensional
+	)
+	```
+
+References
+----------
+[1] `mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace`
+
+[2] `mapFolding._e.reduceIt.reducePermutationSpace_nakedSubset`
+
+[3] `mapFolding._e.reduceIt.reducePermutationSpace_leafDomainOf0or1`
+
+[4] `mapFolding._e.reduceIt.reducePermutationSpace_LeafIsPinned`
+"""

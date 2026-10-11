@@ -1,3 +1,6 @@
+#=SIN= Pyright unknown-type suppressions: SymPy provides no type stubs for its exact polynomial operations.
+# pyright: reportMissingTypeStubs=false, reportUnknownVariableType=false, reportUnknownMemberType=false
+# pyright: reportUnknownArgumentType=false, reportUnknownLambdaType=false
 from __future__ import annotations
 
 from functools import reduce
@@ -5,14 +8,8 @@ from itertools import chain, tee
 from operator import mul
 from sympy import cyclotomic_poly, divisors, mobius, Poly, Symbol
 
-#=SIN= Ruff unnecessary-map suppression: the Python generation instructions prohibit generator comprehensions.
-# ruff: file-ignore[unnecessary-map]
-#=SIN= Pyright unknown-type suppressions: SymPy provides no type stubs for its exact polynomial operations.
-# pyright: reportMissingTypeStubs=false, reportUnknownVariableType=false, reportUnknownMemberType=false
-# pyright: reportUnknownArgumentType=false, reportUnknownLambdaType=false
-
 def reduceFraction(numerator: tuple[int, ...], stepsNumerator: tuple[int, ...], stepsDenominator: tuple[int, ...]) -> tuple[tuple[int, ...], tuple[int, ...]]:
-	if any(map(lambda step: step < 1, chain(stepsNumerator, stepsDenominator))):
+	if any(step < 1 for step in chain(stepsNumerator, stepsDenominator)):
 		message: str = f"I received `{stepsNumerator = }` and `{stepsDenominator = }`, but I need positive integer steps."
 		raise ValueError(message)
 
@@ -45,14 +42,11 @@ def reduceSteps(numerator: tuple[int, ...], stepsNumerator: tuple[int, ...], ste
 	multiplicities: dict[int, int] = dict(map(orderFactors, Poly.from_list(denominator[::-1], variable, domain='ZZ').factor_list()[1]))
 
 	def getSign(step: int) -> tuple[int, int]:
-		return step, sum(map(lambda order: multiplicities[order] * int(mobius(order // step)),  # pyright: ignore[reportArgumentType]
-			filter(lambda order: order % step == 0, multiplicities)))
+		return step, sum(multiplicities[order] * int(mobius(order // step)) for order in filter(lambda order: order % step == 0, multiplicities))  # pyright: ignore[reportArgumentType]
 
 	stepsForNumerator, stepsForDenominator = tee(map(getSign, range(1, max(multiplicities, default=0) + 1)))
 	return (
 		numerator
-		, tuple(chain.from_iterable(map(lambda stepMultiplicity: (stepMultiplicity[0],) * (-stepMultiplicity[1]),
-			filter(lambda stepMultiplicity: stepMultiplicity[1] < 0, stepsForNumerator))))
-		, tuple(chain.from_iterable(map(lambda stepMultiplicity: (stepMultiplicity[0],) * stepMultiplicity[1],
-			filter(lambda stepMultiplicity: 0 < stepMultiplicity[1], stepsForDenominator))))
+		, tuple(chain.from_iterable((stepMultiplicity[0],) * (-stepMultiplicity[1]) for stepMultiplicity in filter(lambda stepMultiplicity: stepMultiplicity[1] < 0, stepsForNumerator)))
+		, tuple(chain.from_iterable((stepMultiplicity[0],) * stepMultiplicity[1] for stepMultiplicity in filter(lambda stepMultiplicity: 0 < stepMultiplicity[1], stepsForDenominator)))
 	)

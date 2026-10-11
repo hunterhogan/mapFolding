@@ -1,54 +1,31 @@
-"""You can use this module to share elimination-algorithm utilities that avoid `StateElimination` imports.
+"""Access shared bitset operations and map-shape arithmetic without state imports.
 
-This module is a workbench utility layer for `mapFolding._e` algorithms. The module primarily contains utilities that are intended
-to work beyond the $2^n$-dimensional special case.
-
-You should avoid putting functions in this module that only work on $2^n$-dimensional maps. You cannot import `StateElimination`
-into this module without causing circular import problems. This constraint exists as of 2026-01-26.
+You can construct and inspect leaf sets and compute dimension products and sums. Pass values directly
+to use these operations in modules that define elimination state without introducing circular imports.
 
 Contents
 --------
-Disaggregation and deconstruction functions
-	DOTitems
-		You can iterate over `(key, value)` pairs in a `Mapping`.
-	DOTkeys
-		You can iterate over keys in a `Mapping`.
-	DOTvalues
-		You can iterate over values in a `Mapping`.
-	getIteratorOfLeaves
-		You can iterate over each `Leaf` bit that is set in a `ChoicesLeaf`.
-
-`ChoicesLeaf` functions
-	getAntiChoicesLeaf
-		You can build a complement `ChoicesLeaf` by clearing each `leaf` bit.
-	makeChoicesLeaf
-		You can build a `ChoicesLeaf` by setting each `leaf` bit.
-	choicesLeafLeafNone
-		You can normalize a `ChoicesLeaf` into a `Leaf` or `None` when the range is degenerate.
+ChoicesLeaf functions
 	choicesLeafAND
-		You can AND a `ChoicesLeaf` with a disposable mask.
-
+		Intersect two leaf bitsets.
+	choicesLeafLeafNone
+		Normalize a bitset to a leaf, an empty result, or a bitset.
+	lengthChoicesLeaf
+		Count leaves in a sentinel-bearing bitset.
+	makeAntiChoicesLeaf
+		Build a leaf bitset by excluding the specified leaf indices.
+	makeChoicesLeaf
+		Build a bitset from the specified leaf indices.
 Be DRY functions
 	getMapShapeProducts
-		You can compute prefix products of `mapShape` dimension lengths.
+		Compute cumulative products of the dimension lengths in a map shape.
 	getMapShapeProductsSums
-		You can compute prefix sums of `getMapShapeProducts(mapShape)`.
+		Compute cumulative sums of a map shape's dimension products.
 	getMapShape首ProductsSums
-		You can compute prefix sums of reversed dimension products for head-first coordinate arithmetic.
-	reverseLookup
-		You can find a key in a `dict` by matching a value.
-
+		Compute cumulative dimension-product sums from the head of a map.
 Flow control
-	indicesMapShapeDimensionLengthsAreEqual
-		You can group dimension indices by repeated dimension lengths.
-	mapShapeIs2上nDimensions
-		You can test whether `mapShape` is a $2^n$-dimensional map, optionally with a minimum dimension count.
-
-References
-----------
-[1] mapFolding._e.dataBaskets.StateElimination
-	Internal package reference
-
+	mapShapeLengthsAreEqual
+		Group dimension indices that share a repeated length greater than one.
 """
 from __future__ import annotations
 
@@ -70,149 +47,133 @@ if TYPE_CHECKING:
 #======== `ChoicesLeaf` functions ================================================
 
 def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
-	"""Count the number of `Leaf` indices encoded in a `ChoicesLeaf` bitset.
+	"""Count leaves in a sentinel-bearing bitset.
 
-	You can use this function to determine the cardinality of the domain represented by
-	`choicesLeaf`. The function counts the number of set bits in `choicesLeaf` minus one
-	(the sentinel bit) [1]. The result represents how many distinct `Leaf` indices are
-	present in `choicesLeaf`.
+	You can count the leaf indices represented by `choicesLeaf`, excluding the sentinel from the set-bit
+	count provided by `gmpy2.mpz.bit_count` [1].
 
 	Parameters
 	----------
 	choicesLeaf : ChoicesLeaf
-		Bitset encoding a set of `Leaf` indices.
+		Leaf bitset with one sentinel bit above all leaf bits.
 
 	Returns
 	-------
 	leavesCount : int
-		The number of `Leaf` indices with set bits in `choicesLeaf`, excluding the sentinel bit.
+		Number of possible leaves, excluding the sentinel.
 
 	Examples
 	--------
-	The function is used to identify groups of piles sharing the same domain cardinality.
+	The subset reducer compares leaf count with the number of matching piles.
 
-		itemfilter(lambda groupBy: (lengthChoicesLeaf(groupBy[choicesLeafKey])) == len(groupBy[piles]), groupByChoicesLeaf)
+		```python
+		if _e.lengthChoicesLeaf(choicesLeaf) == len(boxOfPiles):
+			permutationSpace = reduceLeafSpace(
+				permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles)),
+				_e.makeAntiChoicesLeaf(state.totalLeaves, _e.getIteratorOfLeaves(choicesLeaf))
+			)
+		```
 
 	References
 	----------
-	[1] gmpy2.mpz.bit_count - gmpy2 documentation
-		https://gmpy2.readthedocs.io/en/latest/mpz.html#gmpy2.mpz.bit_count
-
+	[1] gmpy2 integer operations and the mpz type.
+		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return choicesLeaf.bit_count() - 1
 
 def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
-	"""You can build a complement `ChoicesLeaf` by clearing each `Leaf` bit in `leaves`.
+	"""Build a leaf bitset by excluding the specified leaf indices.
 
-	The returned `ChoicesLeaf` contains a bit for every `Leaf` in `range(totalLeaves)` except each `Leaf` in `leaves`.
-	The returned `ChoicesLeaf` also preserves the sentinel bit that indicates the value is a `ChoicesLeaf`.
+	You can obtain a bitset containing every leaf index below `totalLeaves` except the indices in
+	`leaves`. You retain the sentinel while clearing excluded bits with `gmpy2.bit_clear` [1].
 
 	Parameters
 	----------
 	totalLeaves : int
-		Total number of leaves in the map.
+		Total number of leaves and index of the sentinel bit.
 	leaves : Iterable[Leaf]
-		Iterable of `Leaf` indices to exclude from the returned `ChoicesLeaf`.
+		Leaf indices to exclude. Each index must be below `totalLeaves`.
 
 	Returns
 	-------
 	antiChoicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` bitset containing each allowed `Leaf` plus the `ChoicesLeaf` sentinel bit.
+		Bitset containing the remaining leaves and the sentinel.
 
 	Examples
 	--------
-	The function is used to start from the full domain.
+	State normalization excludes leaves already pinned in the permutation space.
 
-		antiChoicesLeaf: ChoicesLeaf = getAntiChoicesLeaf(state.totalLeaves, frozenset())
-
-	The function is used to exclude every `Leaf` not in a crease relation.
-
-		antiChoicesLeaf = getAntiChoicesLeaf(state.totalLeaves, set(range(state.totalLeaves)).difference(leavesCrease))
+		```python
+		antiChoicesLeaf = _e.makeAntiChoicesLeaf(len(self), leavesPinned.values())
+		```
 
 	References
 	----------
-	[1] gmpy2 - Integer arithmetic
-		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding.inclusive
+	[1] gmpy2 integer operations and the mpz type.
+		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return reduce(bit_clear, leaves, bit_mask(totalLeaves + inclusive))
 
 def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
-	"""You can build a `ChoicesLeaf` by setting each `Leaf` bit in `leaves`.
+	"""Build a bitset from the specified leaf indices.
 
-	The returned `ChoicesLeaf` contains the sentinel bit that indicates the value is a `ChoicesLeaf`. The returned
-	`ChoicesLeaf` also contains a bit for each `Leaf` in `leaves`.
+	You can encode `leaves` as a bitset with a sentinel at `totalLeaves`. You set the leaf bits with
+	`gmpy2.bit_set` [1].
 
 	Parameters
 	----------
 	totalLeaves : int
-		Total number of leaves in the map.
+		Total number of leaves and index of the sentinel bit.
 	leaves : Iterable[Leaf]
-		Iterable of `Leaf` indices to include in the returned `ChoicesLeaf`.
+		Leaf indices to include. Each index must be below `totalLeaves`.
 
 	Returns
 	-------
 	choicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` bitset containing each `Leaf` in `leaves` plus the `ChoicesLeaf` sentinel bit.
+		Bitset containing the requested leaves and the sentinel.
 
 	Examples
 	--------
-	The function is used to create a domain bitset before normalizing with `choicesLeafLeafNone`.
+	The pile-options implementation encodes the leaves that pass its filters.
 
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.totalLeaves, choicesLeaf)))
-											for pile, choicesLeaf in getDictionaryChoicesLeaf(state).items()}
+		```python
+		return makeChoicesLeaf(totalLeaves, choicesLeaf)
+		```
 
 	References
 	----------
-	[1] gmpy2 - Integer arithmetic
-		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding._e._beDRY.choicesLeafLeafNone
+	[1] gmpy2 integer operations and the mpz type.
+		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return reduce(bit_set, leaves, bit_set(0, totalLeaves))
 
 # SEMIOTICS
 def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
-	"""You can normalize a `ChoicesLeaf` into a `Leaf`, `ChoicesLeaf`, or `None` when the range is degenerate.
+	"""Normalize a bitset to a leaf, an empty result, or a bitset.
 
-	When `choicesLeaf` is a `ChoicesLeaf`, `choicesLeaf` contains one sentinel bit that indicates the value is a `ChoicesLeaf`.
-	This function interprets the total set-bit count as a compact encoding of domain cardinality.
+	You can distinguish an empty leaf set from a forced leaf assignment. You receive a bitset when
+	several leaves remain, or the unchanged input when its value is not an instance of the bitset type.
 
-	- When `choicesLeaf.bit_count() == 1`, `choicesLeaf` is an empty domain. The only set bit is the sentinel bit, so the function returns `None`.
-	- When `choicesLeaf.bit_count() == 2`, `choicesLeaf` contains exactly one `Leaf` plus the sentinel bit. The function converts the range to a
-		`Leaf` by returning `raiseIfNone(choicesLeaf.bit_scan1())`.
-	- Otherwise, the function returns `choicesLeaf` unchanged.
+	Bitset normalization
+	--------------------
+	You can inspect the set-bit count and first set bit with `gmpy2.mpz.bit_count` and
+	`gmpy2.mpz.bit_scan1` [1]. Two set bits identify one leaf plus the sentinel. One set bit identifies
+	the sentinel alone.
 
 	Parameters
 	----------
 	choicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` to inspect.
+		Bitset with a sentinel above all leaf bits.
 
 	Returns
 	-------
-	leafSpaceOrNone : Leaf | ChoicesLeaf | None
-		A `Leaf` when `choicesLeaf` encodes exactly one leaf, `None` when `choicesLeaf` encodes an empty domain, or `choicesLeaf` otherwise.
-
-	Examples
-	--------
-	The function is used to normalize a masked domain.
-
-		if (ImaLeafSpaceNotAWalrusSubscript := choicesLeafLeafNone(choicesLeafAND(antiChoicesLeaf, choicesLeaf))) is None:
-			return {}
-
-	The function is used to normalize per-pile domains into pinned leaves when possible.
-
-		permutationSpace2上nDomainDefaults: PermutationSpace = {pile: raiseIfNone(choicesLeafLeafNone(makeChoicesLeaf(state.totalLeaves, choicesLeaf)))
-											for pile, choicesLeaf in getDictionaryChoicesLeaf(state).items()}
+	leafSpaceOrNone : ChoicesLeaf | Leaf | None
+		The only remaining leaf, `None` for a sentinel-only bitset, or the unchanged value.
 
 	References
 	----------
-	[1] gmpy2 - Integer arithmetic
-		https://gmpy2.readthedocs.io/en/latest/
-	[2] mapFolding._e.filters.thisIsAChoicesLeaf
-
-	[3] hunterMakesPy - Context7
-		https://context7.com/hunterhogan/huntermakespy
-
+	[1] gmpy2 integer operations and the mpz type.
+		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	whoAmI: ChoicesLeaf | Leaf | None = choicesLeaf
 	if choicesLeaf吗(choicesLeaf):
@@ -223,144 +184,110 @@ def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | Non
 	return whoAmI
 
 def choicesLeafAND(choicesLeafDISPOSABLE: ChoicesLeaf, choicesLeaf: ChoicesLeaf) -> ChoicesLeaf:
-	"""Compute the bitwise AND of two `ChoicesLeaf`.
+	"""Intersect two leaf bitsets.
 
-	You can use this function to mask `choicesLeaf` with `choicesLeafDISPOSABLE` [1]. The
-	function performs bitwise AND and returns the intersection of the two leaf sets.
+	You can keep leaf indices present in both `choicesLeafDISPOSABLE` and `choicesLeaf`. You receive a
+	new bitset with both arguments unchanged.
 
 	Parameters
 	----------
 	choicesLeafDISPOSABLE : ChoicesLeaf
-		Bitset mask applied to `choicesLeaf`.
+		Leaf mask containing allowed leaf bits and the sentinel.
 	choicesLeaf : ChoicesLeaf
-		Bitset to be masked by `choicesLeafDISPOSABLE`.
+		Leaf set to restrict.
 
 	Returns
 	-------
 	maskedChoicesLeaf : ChoicesLeaf
-		Bitwise AND of `choicesLeaf` and `choicesLeafDISPOSABLE`.
+		Intersection retaining the sentinel when both inputs contain the sentinel.
 	"""
 	return choicesLeaf & choicesLeafDISPOSABLE
 
 #======== Be DRY functions ================================================
 
 def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
-	"""You can compute prefix products of each dimension length in `mapShape`.
+	"""Compute cumulative products of the dimension lengths in a map shape.
 
-	The returned tuple starts with the product of zero dimensions, which is `1`. Each subsequent element multiplies the next
-	dimension length in `mapShape`.
+	You can convert `mapShape` into the strides used to identify leaves across dimensions. You receive a
+	tuple that includes the initial empty product and the final product of every dimension.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		Map shape as a tuple of dimension lengths.
+		Dimension lengths in their original order.
 
 	Returns
 	-------
 	mapShapeProducts : tuple[int, ...]
-		Tuple of prefix products with `mapShapeProducts[0] == 1`.
+		Cumulative products beginning with `1`, with length `len(mapShape) + 1`.
 
 	Examples
 	--------
-	The function is used during `StateElimination` initialization.
+	Elimination-state initialization stores the products.
 
-		self.mapShapeProducts = getMapShapeProducts(self.mapShape)
-
-	References
-	----------
-	[1] itertools.accumulate
-		https://docs.python.org/3/library/itertools.html#itertools.accumulate
-	[2] operator.mul
-		https://docs.python.org/3/library/operator.html#operator.mul
-	[3] mapFolding._e.dataBaskets.StateElimination
+		```python
+		self.mapShapeProducts = _e.getMapShapeProducts(self.mapShape)
+		```
 	"""
 	return tuple(accumulate(mapShape, mul, initial=1))
 
 def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
-	"""You can compute prefix sums of `getMapShapeProducts(mapShape)`.
+	"""Compute cumulative sums of a map shape's dimension products.
 
-	The returned tuple starts with the sum of zero products, which is `0`. Each subsequent element adds the next product from
-	`getMapShapeProducts(mapShape)`.
+	You can sum the cumulative products from `getMapShapeProducts` [1]. You receive a tuple that includes
+	the initial empty sum and the sum including the total leaf count.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		Map shape as a tuple of dimension lengths.
+		Dimension lengths in their original order.
 
 	Returns
 	-------
 	mapShapeProductsSums : tuple[int, ...]
-		Tuple of prefix sums with `mapShapeProductsSums[0] == 0`.
-
-	Examples
-	--------
-	The function is used during `StateElimination` initialization.
-
-		self.mapShapeProductsSums = getMapShapeProductsSums(self.mapShape)
+		Cumulative sums beginning with `0`, with length `len(mapShape) + 2`.
 
 	References
 	----------
-	[1] itertools.accumulate
-		https://docs.python.org/3/library/itertools.html#itertools.accumulate
-	[2] operator.add
-		https://docs.python.org/3/library/operator.html#operator.add
-	[3] mapFolding._e._beDRY.getMapShapeProducts
-
-	[4] mapFolding._e.dataBaskets.StateElimination
+	[1] `getMapShapeProducts`
 	"""
 	return tuple(accumulate(getMapShapeProducts(mapShape), add, initial=0))
 
 def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], totalDimensions: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
-	"""Compute prefix sums of reversed dimension products for head-first coordinate arithmetic.
+	"""Compute cumulative dimension-product sums from the head of a map.
 
-	You can use this function to obtain a tuple of cumulative sums computed from reversed
-	dimension products. This tuple is useful when you are using integers as proxies for
-	Cartesian coordinates in multidimensional space [1] and you need to compute offsets
-	from the "anti-origin" (the maximum coordinate) rather than from the origin.
+	You can use `mapShapeProducts` to compute bounds measured from the largest dimension stride toward
+	the smallest dimension stride. You receive a tuple beginning with the empty sum.
 
-	The function reverses the first `dimensionFrom首` dimension products from `mapShapeProducts`,
-	then computes prefix sums [2] of the reversed products. This provides a complementary
-	perspective to `getMapShapeProductsSums` [3] by ordering dimension products in
-	descending order before summation.
+	Product selection
+	-----------------
+	The slice endpoint is `dimensionFrom首 - (totalDimensions + 1)`. With the default dimension count, the
+	slice retains `mapShapeProducts[:dimensionFrom首]`. The total leaf-count product is excluded at the
+	default endpoint.
 
 	Parameters
 	----------
 	mapShapeProducts : tuple[int, ...]
-		Prefix products of dimension lengths, typically from `getMapShapeProducts` [4].
+		Cumulative dimension products, including the initial empty product and total leaf count.
 	totalDimensions : int | None = None
-		Total number of dimensions in the map. When `None`, inferred as
-		`len(mapShapeProducts) - 1`.
+		Dimension count. A false-valued value infers `len(mapShapeProducts) - 1`.
 	dimensionFrom首 : int | None = None
-		Dimension index defining which products to include in the sum computation. When `None`,
-		defaults to `totalDimensions`. This parameter controls how many dimension products are
-		reversed and summed.
+		Number of leading dimension products to retain. `None` uses `totalDimensions`.
 
 	Returns
 	-------
 	mapShape首ProductsSums : tuple[int, ...]
-		Tuple of prefix sums computed from reversed dimension products. Element `[i]` contains
-		the sum of the first `i` elements of the reversed product sequence.
+		Cumulative sums of the retained products in reverse order, beginning with `0`.
 
 	Examples
 	--------
-	The function is used during state initialization to compute head-first sums.
+	Elimination-state initialization requests all dimension strides.
 
-		self.mapShape首ProductsSums = getMapShape首ProductsSums(self.mapShapeProducts, self.totalDimensions, self.totalDimensions)
-
-	The function is used to compute offset bounds in sub-hyperplane computations.
-
-		mapShape首ProductsSumsInSubHyperplane: tuple[int, ...] = getMapShape首ProductsSums(state.mapShapeProducts, state.totalDimensions, state.totalDimensions - 1)
-
-	References
-	----------
-	[1] Integer encoding of multidimensional coordinates
-		Internal implementation detail
-	[2] itertools.accumulate
-		https://docs.python.org/3/library/itertools.html#itertools.accumulate
-	[3] mapFolding._e._beDRY.getMapShapeProductsSums
-
-	[4] mapFolding._e._beDRY.getMapShapeProducts
-
+		```python
+		self.mapShape首ProductsSums = _e.getMapShape首ProductsSums(
+			self.mapShapeProducts, self.totalDimensions, self.totalDimensions
+		)
+		```
 	"""
 	totalDimensions = totalDimensions or len(mapShapeProducts) - 1
 
@@ -378,36 +305,28 @@ def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], totalDimension
 #======== Flow control ================================================
 
 def mapShapeLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
-	"""You can group dimension indices in `mapShape` by repeated dimension lengths.
+	"""Group dimension indices that share a repeated length greater than one.
 
-	The returned `Iterator` yields one `tuple` per distinct dimension length in `mapShape` where the dimension length occurs more
-	than once. Each yielded `tuple` contains each index where `mapShape[index]` equals the repeated dimension length.
+	You can identify dimension groups that can share an ordering restriction. You receive groups in the
+	order of the first occurrence of each length in `mapShape`, excluding dimension lengths of one.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		Map shape as a tuple of dimension lengths.
+		Dimension lengths in their original order.
 
 	Returns
 	-------
-	iteratorIndicesSameDimensionLength : Iterator[tuple[int, ...]]
-		Iterator of index tuples. Each tuple has length at least 2.
+	indicesSameDimensionLength : Iterator[tuple[int, ...]]
+		Iterator of ascending index tuples, each containing at least two indices.
 
 	Examples
 	--------
-	The function is used to iterate repeated dimension magnitudes during elimination.
+	The elimination algorithm applies symmetry restrictions to repeated dimension lengths.
 
+		```python
 		for indicesSameDimensionLength in mapShapeLengthsAreEqual(state.mapShape):
 			state.Theorem4Multiplier *= factorial(len(indicesSameDimensionLength))
-			for 次k, 次r in pairwise(indicesSameDimensionLength):
-				state = excludeLeaf_rBeforeLeaf_k(state, state.mapShapeProducts[次k], state.mapShapeProducts[次r])
-
-	References
-	----------
-	[1] cytoolz.itertoolz.unique
-		https://toolz.readthedocs.io/en/latest/api.html#toolz.itertoolz.unique
-	[2] more_itertools.iter_index
-		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.iter_index
-	[3] mapFolding._e.algorithms.elimination.theorem4
+		```
 	"""
 	return filter(lambda indices: 1 < len(indices), map(tuple, map(partial(iter_index, mapShape), unique(filter((1).__lt__, mapShape)))))

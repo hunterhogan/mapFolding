@@ -1,3 +1,16 @@
+"""Enumerate the leaf indices stored in bitsets.
+
+(AI generated docstring)
+
+You can convert leaf sets into ascending leaf indices for enumeration and pinning.
+
+Contents
+--------
+Functions
+	getIteratorOfLeaves
+		Enumerate leaf indices from a sentinel-bearing bitset.
+"""
+
 from __future__ import annotations
 
 from gmpy2 import xmpz
@@ -9,44 +22,36 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Leaf
 
 def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
-	"""Convert a `ChoicesLeaf` bitset into an `Iterator` of individual `Leaf` indices.
+	"""Enumerate leaf indices from a sentinel-bearing bitset.
 
-	You can use this function to enumerate each `Leaf` represented in `choicesLeaf`. The
-	function interprets `choicesLeaf` as a bitset where each set bit (except the sentinel bit)
-	corresponds to a `Leaf` index [1]. The returned `Iterator` yields each `Leaf` index in
-	ascending order.
+	You can enumerate the leaves represented by `choicesLeaf` in ascending order without changing the
+	input bitset. You iterate over the remaining set bits after copying `choicesLeaf` to `gmpy2.xmpz` [1]
+	and clearing the highest bit as the sentinel.
 
 	Parameters
 	----------
 	choicesLeaf : ChoicesLeaf
-		Bitset encoding a set of `Leaf` indices. One bit represents each `Leaf`, plus one
-		sentinel bit at the highest position that identifies `choicesLeaf` as a domain rather
-		than a `Leaf`.
+		Nonnegative leaf bitset whose highest set bit is the sentinel.
 
 	Returns
 	-------
 	iteratorOfLeaves : Iterator[Leaf]
-		`Iterator` yielding each `Leaf` index that has a set bit in `choicesLeaf`.
+		Iterator of leaf indices, excluding the sentinel.
 
 	Examples
 	--------
-	The function is used to enumerate leaves when building anti-options.
+	The constraint solver builds allowed assignments from a leaf set.
 
-		antiChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, getIteratorOfLeaves(choicesLeaf))
-
-	The function is used to enumerate candidate leaves for constraint propagation.
-
-		model.add_allowed_assignments([boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(aLeaf))))
-
-	The function is used to enumerate leaves for pinning attempts.
-
-		sherpa.boxOfPermutationSpace.extend(DOTvalues(sherpa.permutationSpace.deconstructPermutationSpaceAtPile(sherpa.pile, filterfalse(disqualifyPinningLeafAtPile(sherpa), getIteratorOfLeaves(choicesLeaf)))))
+		```python
+		model.add_allowed_assignments(
+			[boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(choicesLeaf)))
+		)
+		```
 
 	References
 	----------
-	[1] gmpy2.xmpz.iter_set - gmpy2 documentation
-		https://gmpy2.readthedocs.io/en/latest/advmpz.html#gmpy2.xmpz.iter_set
-
+	[1] gmpy2 mutable integers and set-bit iteration.
+		https://gmpy2.readthedocs.io/en/latest/advmpz.html
 	"""
 	iteratorOfLeaves: xmpz = xmpz(choicesLeaf)
 	iteratorOfLeaves[-1] = 0

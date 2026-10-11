@@ -1,9 +1,8 @@
 """Verify that a folding sequence is possible.
 
-You can use this module to validate stamp-folding sequences by detecting forbidden crease crossings.
-The module implements the forbidden inequality constraints established by Koehler (1968) [1] and
-simplified by Legendre (2014) [2]. The module provides both complete folding validators and
-permutation-space elimination functions.
+You can validate stamp-folding sequences by detecting forbidden crease crossings with the inequality
+constraints established by Koehler (1968) [1] and simplified by Legendre (2014) [2]. You can validate
+complete foldings or eliminate assignments from permutation spaces.
 
 Mathematics
 -----------
@@ -32,8 +31,8 @@ facts: (1) a pile is a folding if and only if no crease crosses any other crease
 non-crease-crossing if and only if all its one-dimensional sections are non-crease-crossing. This
 reduction allows multidimensional validation to be performed by checking each dimension independently.
 
-This module implements Lunnon's theorem by projecting each dimension axis and testing crease pairs for
-forbidden orderings using the pile-position predicates `creaseViolation吗` and
+You can apply Lunnon's theorem by projecting each dimension axis and testing crease pairs for
+forbidden orderings with the pile-position predicates `creaseViolation吗` and
 `creaseViolationComplicated吗`.
 
 Forbidden inequalities
@@ -47,18 +46,13 @@ Four forbidden inequalities of matching parity k and r *à la* Legendre (2014), 
 
 References
 ----------
-[1] John E. Koehler, Folding a strip of stamps, Journal of Combinatorial Theory, Volume 5,
-	Issue 2, 1968, Pages 135-152, ISSN 0021-9800. https://doi.org/10.1016/S0021-9800(68)80048-1
-[2] Stéphane Legendre, Foldings and meanders, The Australasian Journal of Combinatorics,
-	Volume 58, Part 2, 2014, Pages 275-291, ISSN 2202-3518.
+[1] John E. Koehler (1968). Folding a strip of stamps. Journal of Combinatorial Theory, 5(2), 135–152.
+	https://doi.org/10.1016/S0021-9800(68)80048-1
+[2] Stéphane Legendre (2014). Foldings and meanders. The Australasian Journal of Combinatorics, 58(2),
+	275–291.
 	https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf
-[3] W. F. Lunnon, Multi-dimensional map-folding, The Computer Journal, Volume 14,
-	Issue 1, 1971, Pages 75-80. https://doi.org/10.1093/comjnl/14.1.75
-
-See Also
---------
-Annotated, corrected, scanned copy of Koehler (1968) at https://oeis.org/A001011.
-Citations in BibTeX format at [mapFolding/citations](../../citations).
+[3] W. F. Lunnon (1971). Multi-dimensional map-folding. The Computer Journal, 14(1), 75–80.
+	https://doi.org/10.1093/comjnl/14.1.75
 """
 from __future__ import annotations
 
@@ -92,7 +86,7 @@ if TYPE_CHECKING:
 
 @cache
 def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileComparandCrease: Pile) -> bool:
-	"""Validate that two creases do not cross by checking forbidden pile orderings.
+	"""Detect crossings between two creases from their pile positions.
 
 	Returns
 	-------
@@ -102,12 +96,11 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 	Mathematics
 	-----------
 	Let creases (k, k+1) and (r, r+1) have pile positions π(k), π(k+1), π(r), π(r+1) respectively. The
-	creases cross when the four pile positions violate one of the eight forbidden orderings enumerated
-	by Koehler (1968). This function evaluates the four simplified orderings given the pile positions
-	and crease-computation thunks.
+	creases cross when the four pile positions violate one of the eight forbidden orderings enumerated by
+	Koehler (1968). You can evaluate the four simplified orderings from the supplied pile positions.
 
-	Mathematical reasons for the design of this function
-	----------------------------------------------------
+	Crease Comparison Order
+	-----------------------
 
 		1. To confirm that a multidimensional folding is valid, confirm that each of the constituent
 			one-dimensional¹ foldings is valid.
@@ -116,23 +109,21 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 
 	A "crease" is a convenient lie: it is a shorthand description of two leaves that are physically
 	connected to each other. Leaves in a one-dimensional folding are physically connected to at most
-	two other leaves: the leaf before and the leaf after. When talking about a one-dimensional section
-	of a multidimensional folding, we ignore the other dimensions and still reference the leaves
-	before and after. To check whether two creases cross, we must compare the four leaves of the two
-	creases.
+	two other leaves: the leaf before and the leaf after. When examining a one-dimensional section of a
+	multidimensional folding, you ignore the other dimensions and still reference the leaves before and
+	after. To check whether two creases cross, you must compare the four leaves of the two creases.
 
 	¹ A so-called one-dimensional folding, map, or strip of stamps has two dimensions, but one of the
 	dimensions has a width of 1.
 
-	Idiosyncratic reasons for the design of this function
-	-----------------------------------------------------
+	Crease Identifier Vocabulary
+	----------------------------
 
-	I name the first `Leaf` of the first crease "`leaf`". I name the `Leaf` to which I am comparing
-	`leaf` "`comparand`". A crease² is a connection between a `Leaf` and the `Leaf` after it,
-	therefore, the crease of "`leaf`" connects it to "`leafCrease`". The crease of "`comparand`"
-	connects it to "`comparandCrease`".
+	You can read `leaf` as the first `Leaf` of the first crease and `comparand` as the `Leaf` being
+	compared with it. A crease² connects a `Leaf` to the `Leaf` after it. You therefore compare the
+	crease from `leaf` to `leafCrease` with the crease from `comparand` to `comparandCrease`.
 
-	I name the `Pile` of `leaf` as "`pile`". I name the `Pile` of `comparand` as "`pileComparand`".
+	You can read `pile` as the `Pile` of `leaf` and `pileComparand` as the `Pile` of `comparand`.
 
 	Nearly everyone else names the leaves with letters, such as k, k+1, r, and r+1. (Which stand for
 	Kahlo and Rivera, of course.)
@@ -154,40 +145,37 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 #======== Functions for a `Folding` =============================
 
 def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
-	"""You can validate a concrete `Folding` by checking for crease crossings in every dimension.
+	"""Validate a concrete `Folding` by checking for crease crossings in every dimension.
 
-	This function is the leaf-level validator used after a candidate `Folding` is constructed.
-	For example, `mapFolding._e.algorithms.eliminationCrease` uses `foldingValid吗` [1]
-	to post-filter candidate foldings that already satisfy arithmetic invariants such as
-	`state.foldingCheckSum`.
+	You can validate a constructed `Folding` at the leaf level. In
+	`mapFolding._e.algorithms.eliminationCrease` [1], you can filter possible foldings that already
+	satisfy arithmetic invariants such as `state.foldingCheckSum`.
 
 	Mathematics
 	-----------
-	This function implements Lunnon's Theorem 1: a pile is a folding if and only if all its
-	one-dimensional sections are proper foldings. For a p₁ × p₂ × ⋯ × pₐ map, the function
-	extracts d one-dimensional sections (one per dimension) and validates each section by
-	checking that no crease pair violates the forbidden inequalities. The multidimensional
-	folding is valid when all d sections are valid.
+	You can apply Lunnon's Theorem 1. A pile is a folding if and only if all its one-dimensional sections
+	are proper foldings. For a p₁ × p₂ × ⋯ × pₐ map, you check d one-dimensional sections, one per
+	dimension, for crease pairs that violate the forbidden inequalities. You obtain a valid
+	multidimensional folding when all d sections are valid.
 
 	Algorithm Details
 	-----------------
-	`foldingValid吗` treats each dimension of `mapShape` as a one-dimensional strip
-	projection and checks that no pair of potentially-crossing creases violates the forbidden
-	inequalities encoded by `creaseViolationComplicated吗` [3].
+	You can treat each dimension of `mapShape` as a one-dimensional strip projection and check that no
+	pair of potentially crossing creases violates the forbidden inequalities encoded by
+	`creaseViolationComplicated吗` [3].
 
 	The leaf-boundary filter in `foldingValid吗` uses a cached leaf count derived from
 	`mapFolding.getTotalLeaves` [2].
 
-	`foldingValid吗` enumerates each pair of `(pile, leaf)` positions from `folding`
-	and combines each pair with each `dimension` index. The parity filter from
-	`matchingParityLeaf` reduces work by skipping pairs that cannot cross in the selected
-	`dimension`.
+	You enumerate each pair of `(pile, leaf)` positions from `folding` and combine each pair with each
+	`dimension` index. With the parity filter from `matchingParityLeaf`, you skip pairs that cannot cross
+	in the selected `dimension`.
 
 	Performance Considerations
 	--------------------------
-	`foldingValid吗` defers crease computation by passing thunk functions returned by
-	`callGetCreasePost` into `creaseViolationComplicated吗`. This design avoids computing
-	`Leaf` creases for pairs that are rejected by earlier comparisons.
+	You defer crease computation by passing thunk functions returned by `callGetCreasePost` into
+	`creaseViolationComplicated吗`. You avoid computing `Leaf` creases for pairs rejected by earlier
+	comparisons.
 
 	Parameters
 	----------
@@ -212,40 +200,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	return leavesPinnedValid吗(dict(enumerate(folding)), mapShape)
 
 def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) -> bool:
-	"""You can validate a concrete `Folding` by checking for crease crossings in every dimension.
-
-	This function is the leaf-level validator used after a candidate `Folding` is constructed.
-	For example, `mapFolding._e.algorithms.eliminationCrease` uses `foldingValid吗` [1]
-	to post-filter candidate foldings that already satisfy arithmetic invariants such as
-	`state.foldingCheckSum`.
-
-	Mathematics
-	-----------
-	This function implements Lunnon's Theorem 1: a pile is a folding if and only if all its
-	one-dimensional sections are proper foldings. For a p₁ × p₂ × ⋯ × pₐ map, the function
-	extracts d one-dimensional sections (one per dimension) and validates each section by
-	checking that no crease pair violates the forbidden inequalities. The multidimensional
-	folding is valid when all d sections are valid.
-
-	Algorithm Details
-	-----------------
-	`foldingValid吗` treats each dimension of `mapShape` as a one-dimensional strip
-	projection and checks that no pair of potentially-crossing creases violates the forbidden
-	inequalities encoded by `creaseViolationComplicated吗` [3].
-
-	The leaf-boundary filter in `foldingValid吗` uses a cached leaf count derived from
-	`mapFolding.getTotalLeaves` [2].
-
-	`foldingValid吗` enumerates each pair of `(pile, leaf)` positions from `folding`
-	and combines each pair with each `dimension` index. The parity filter from
-	`matchingParityLeaf` reduces work by skipping pairs that cannot cross in the selected
-	`dimension`.
-
-	Performance Considerations
-	--------------------------
-	`foldingValid吗` defers crease computation by passing thunk functions returned by
-	`callGetCreasePost` into `creaseViolationComplicated吗`. This design avoids computing
-	`Leaf` creases for pairs that are rejected by earlier comparisons.
+	"""Validate a concrete `Folding` by checking for crease crossings in every dimension.
 
 	Parameters
 	----------
@@ -257,15 +212,12 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 	Returns
 	-------
 	isValid : bool
-		`True` when `leavesPinned` contains no crease crossing in any `dimension`.
+		`True` when no tested crease pair crosses.
 
-	References
-	----------
-	[1] mapFolding._e.algorithms.eliminationCrease
-
-	[2] mapFolding.getTotalLeaves
-
-	[3] mapFolding._e.algorithms.iff.creaseViolationComplicated吗
+	See Also
+	--------
+	`foldingValid吗`
+		Check a complete arrangement supplied as a tuple in pile order.
 	"""
 	lookupPile: dict[Leaf, Pile] = dict(zip(leavesPinned.values(), leavesPinned, strict=True))
 
@@ -284,12 +236,11 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 
 @cache
 def _totalDimensions(mapShape: tuple[int, ...]) -> int:
-	"""You can compute the number of dimensions encoded by `mapShape`.
+	"""Compute the number of dimensions encoded by `mapShape`.
 
 	(AI generated docstring)
 
-	`_totalDimensions` exists as a small, named adapter for code that iterates over each
-	dimension of `mapShape` [1].
+	You can obtain the dimension count for code that iterates over each dimension of `mapShape` [1].
 
 	Parameters
 	----------
@@ -309,13 +260,13 @@ def _totalDimensions(mapShape: tuple[int, ...]) -> int:
 
 @cache
 def _totalLeaves(mapShape: tuple[int, ...]) -> int:
-	"""You can compute and memoize the total number of leaves for `mapShape`.
+	"""Compute and memoize the total number of leaves for `mapShape`.
 
 	(AI generated docstring)
 
-	`_totalLeaves` exists to centralize leaf-count computation for hot validation paths such as
-	`foldingValid吗`. The `functools.cache` decorator memoizes the result per
-	`mapShape` value [1]. The leaf-count computation uses `mapFolding.getTotalLeaves` [2].
+	You can reuse leaf counts in frequent validation paths such as `foldingValid吗`. With
+	`functools.cache` [1], you receive a result memoized per `mapShape` value from
+	`mapFolding.getTotalLeaves` [2].
 
 	Parameters
 	----------
@@ -344,9 +295,9 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 	mapShape : tuple[int, ...]
 		A shape tuple.
 	leaf : Leaf
-		A leaf index.
+		Valid leaf index.
 	dimension : int
-		A dimension index.
+		Valid zero-based dimension index into `mapShape`.
 
 	Returns
 	-------
@@ -360,34 +311,24 @@ def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf
 
 @cache
 def oddLeaf吗(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
-	r"""Compute and memoize the parity bit of `leaf` in `dimension`.
+	"""Compute the parity of a leaf's coordinate in a selected dimension.
 
 	(AI generated docstring)
 
-	You can use this function to determine whether `leaf` has an even or odd coordinate in
-	`dimension`. The function extracts the mixed-radix coordinate of `leaf` along `dimension`
-	and returns the least-significant bit (0 for even, 1 for odd). The function uses the
-	`functools.cache` decorator [1] for memoization.
-
-	Mathematical Basis
-	------------------
-	The parity constraint k ≡ r (mod 2) determines which crease pairs can cross. Only creases
-	whose constituent leaves have matching parity in `dimension` can physically cross in that
-	`dimension`. This function computes the parity by extracting the coordinate and returning
-	the least-significant bit.
-
-	Let `leaf` be a leaf index in a map with shape `mapShape`. The coordinate of `leaf` in
-	`dimension` is:
-
-		⌊leaf ÷ ∏(mapShape[0:dimension])⌋ mod mapShape[dimension]
-
-	where ∏(mapShape[0:dimension]) is the stride computed by `productOfDimensions` [2]. The
-	parity bit is the least-significant bit of the coordinate, obtained using bitwise AND with 1.
+	Mathematics
+	-----------
+	coordinate parity : equation
+	```math
+		Let ℓ ≜ `leaf`, j ≜ `dimension`, p ≜ `mapShape`
+		sⱼ = ∏ᵢ₌₀ʲ⁻¹ pᵢ
+		xⱼ = ⌊ℓ ÷ sⱼ⌋ mod pⱼ
+		parityBit = xⱼ mod 2
+	```
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		A shape tuple that defines the mixed-radix coordinate system.
+		Positive dimension lengths in the leaf-coordinate order.
 	leaf : Leaf
 		A leaf index.
 	dimension : int
@@ -396,34 +337,22 @@ def oddLeaf吗(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> int:
 	Returns
 	-------
 	parityBit : int
-		A parity bit where `0` indicates even coordinate and `1` indicates odd coordinate.
-
-	References
-	----------
-	[1] functools.cache
-		https://docs.python.org/3/library/functools.html#functools.cache
-	[2] mapFolding._e.algorithms.iff.productOfDimensions
+		`0` for an even coordinate and `1` for an odd coordinate.
 	"""
 	return ((leaf // productOfDimensions(mapShape, dimension)) % mapShape[dimension]) & 1
 
 @cache
 def productOfDimensions(mapShape: tuple[int, ...], dimension: int) -> int:
-	"""You can compute the mixed-radix stride for the prefix of `mapShape`.
+	"""Compute the leaf-index stride for a selected dimension.
 
 	(AI generated docstring)
-
-	`productOfDimensions` computes the product of `mapShape[0:dimension]`. The return value acts as
-	the stride that converts a coordinate step in `dimension` into a `Leaf` index increment.
-
-	The return value is consumed by `getCreasePost` when converting a coordinate step into a `Leaf`
-	increment.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
 		A shape tuple.
 	dimension : int
-		A dimension index that selects the exclusive prefix length.
+		Dimension index selecting the exclusive prefix of `mapShape`.
 
 	Returns
 	-------

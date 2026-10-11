@@ -1,6 +1,17 @@
-"""Generalized pinning functions in the "Elimination" algorithm for any `mapShape`.
+"""Restrict leaf order and exclude leaf assignments for arbitrary map shapes.
 
-Functions for 2^n-dimensional maps must go in other modules.
+You can partition permutation spaces to impose leaf ordering and remove specified leaf choices from
+pile positions. You update the supplied elimination state or permutation spaces in place.
+
+Contents
+--------
+Functions
+	atPileExcludeLeaf
+		Exclude a leaf at one pile in every supplied permutation space.
+	excludeLeaf_rBeforeLeaf_k
+		Restrict permutation spaces so a selected leaf precedes another leaf.
+	excludeLeaf_rBeforeLeaf_kAtPile_k
+		Exclude an earlier leaf when another leaf is pinned at a selected pile.
 """
 from __future__ import annotations
 
@@ -15,29 +26,39 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Leaf, Pile
 
 def excludeLeaf_rBeforeLeaf_k(state: StateElimination, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> StateElimination:
-	"""Exclude `leaf_r` from appearing before `leaf_k` in every `pile` in the domain of `leaf_k`.
+	"""Restrict permutation spaces so a selected leaf precedes another leaf.
+
+	You can require `leaf_k` to occur before `leaf_r` across the supplied pile domains. You replace the
+	state's active permutation-space list with branches satisfying the restriction. Omit a domain to use
+	`mapFolding._e.leafDomains.getDomainLeaf` [1].
+
+	Domain coverage
+	---------------
+	The ordering restriction covers the supplied domains. Restricting a domain limits which pile positions
+	are examined; an empty iterable applies no exclusions for that domain.
 
 	Parameters
 	----------
 	state : StateElimination
-		Data basket, state of the local context, and state of the global context.
-	leaf_k : int
-		`leaf` that must be in a `pile` preceding the `pile` of `leaf_r`.
-	leaf_r : int
-		`leaf` that must be in a `pile` succeeding the `pile` of `leaf_k`.
-	domain_k : Iterable[int] | None = None
-		The domain of each `pile` at which `leaf_k` can be pinned. If `None`, every `pile` is in the domain.
-	domain_r : Iterable[int] | None = None
-		The domain of each `pile` at which `leaf_r` can be pinned. If `None`, every `pile` is in the domain.
+		Elimination state whose active permutation spaces will be partitioned and reduced.
+	leaf_k : Leaf
+		Leaf that must occur earlier in the pile order.
+	leaf_r : Leaf
+		Leaf that must occur later in the pile order.
+	domain_k : Iterable[Pile] | None = None
+		Pile domain to examine for `leaf_k`. `None` computes the shape-based domain.
+	domain_r : Iterable[Pile] | None = None
+		Pile domain to examine for `leaf_r`. `None` computes the shape-based domain. A reusable iterable is
+		required because the domain is examined for each pile in `domain_k`.
 
 	Returns
 	-------
-	StateElimination
-		Same state instance, mutated with updated `boxOfPermutationSpace`.
+	state : StateElimination
+		The same state with updated permutation-space branches.
 
-	See Also
-	--------
-	_excludeLeafRBeforeLeafK, theorem4, theorem2b
+	References
+	----------
+	[1] `mapFolding._e.leafDomains.getDomainLeaf`
 	"""
 	if domain_k is None:
 		domain_k = _e.getDomainLeaf(state, leaf_k)
@@ -52,6 +73,36 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	, pile_k: Pile
 	, domainOf_leaf_r: Iterable[Pile] | None = None
 ) -> StateElimination:
+	"""Exclude an earlier leaf when another leaf is pinned at a selected pile.
+
+	(AI generated docstring)
+
+	You can isolate branches that pin `leaf_k` at `pile_k` and exclude `leaf_r` from earlier piles in
+	those branches. You retain branches in which `leaf_k` does not occupy `pile_k`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state whose active branches will be partitioned, pruned, and reduced.
+	leaf_k : Leaf
+		Leaf to pin at `pile_k` in the restricted branches.
+	leaf_r : Leaf
+		Leaf to exclude from piles earlier than `pile_k`.
+	pile_k : Pile
+		Pile at which the ordering restriction is conditioned.
+	domainOf_leaf_r : Iterable[Pile] | None = None
+		Pile positions to examine for `leaf_r`. `None` computes the shape-based domain [1]; an empty iterable
+		applies no leaf exclusions.
+
+	Returns
+	-------
+	state : StateElimination
+		The same state containing restricted branches and retained alternatives.
+
+	References
+	----------
+	[1] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	boxOfPermutationSpace: list[PermutationSpace] = state.boxOfPermutationSpace
 	state.boxOfPermutationSpace = []
 
@@ -93,26 +144,25 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	return state
 
 def atPileExcludeLeaf(boxOfPermutationSpace: list[PermutationSpace], pile: Pile, leaf: Leaf) -> list[PermutationSpace]:
-	"""Return a new list of `PermutationSpace` without `leaf` at `pile`.
+	"""Exclude a leaf at one pile in every supplied permutation space.
+
+	You can exclude a leaf from each permutation space in `boxOfPermutationSpace` and receive the
+	original list with its spaces modified in place. You can invalidate a branch when the excluded leaf
+	is pinned at `pile` or the exclusion empties the leaf set. Remove invalid branches separately.
 
 	Parameters
 	----------
-	boxOfPermutationSpace : Iterable[PermutationSpace]
-		Collection of partial pinning dictionaries to transform.
-	leaf : int
-		`leaf` to exclude from `pile`.
-	pile : int
-		`pile` at which `leaf` must not be found.
+	boxOfPermutationSpace : list[PermutationSpace]
+		List of permutation spaces to modify.
+	pile : Pile
+		Pile from which to exclude `leaf`.
+	leaf : Leaf
+		Leaf index to remove from the pile's leaf set.
 
 	Returns
 	-------
 	boxOfPermutationSpace : list[PermutationSpace]
-		Expanded / filtered list respecting the exclusion constraint.
-
-	See Also
-	--------
-	requireLeafPinnedAtPile
-		Complementary operation that forces a `leaf` at a `pile`.
+		The same list containing the modified permutation spaces.
 	"""
 	for permutationSpace in boxOfPermutationSpace:
 		permutationSpace.atPileExcludeLeaf(pile, leaf)

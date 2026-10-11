@@ -1,3 +1,42 @@
+"""Access coordinate tools for maps whose axis lengths are two.
+
+(AI generated docstring)
+
+You can inspect coordinate values, measure leaf indices, enumerate crease neighbors, and obtain joint
+pile domains for experimental elimination algorithms. Access the coordinate vocabulary and public
+measurement, crease, domain, and ordering functions through this package. Use the modules below for
+pinning and reduction, or `mapFolding._e.leafDomains.getLookupDomainsLeaves` [1] for individual leaf
+domains.
+
+Modules
+-------
+conditionalOrdering
+	Compute conditional predecessor and successor requirements.
+creases
+	Enumerate directional crease neighbors for a leaf.
+filters
+	Test leaf indices and individual dimension coordinates.
+leafDomains
+	Compute joint pile domains and restrictions from pinned leaves.
+measure
+	Measure coordinate features of leaf and pile integers.
+pileOptions
+	Test possible pile positions against coordinate domain restrictions.
+pinByCrease
+	Select leaves for end piles using crease restrictions.
+pinByDomain
+	Select interior-pile leaves using pinned end-pile restrictions.
+pinIt
+	Pin possible leaf assignments for maps whose axis lengths are two.
+reduceIt
+	Provide the ordered coordinate-based reduction sequence.
+semiotics
+	Encode dimension coordinates with index ideographs.
+
+References
+----------
+[1] `mapFolding._e.leafDomains.getLookupDomainsLeaves`
+"""
 # isort: split
 from __future__ import annotations
 

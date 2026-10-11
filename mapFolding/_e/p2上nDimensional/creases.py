@@ -1,3 +1,18 @@
+"""Enumerate directional crease neighbors for a leaf.
+
+(AI generated docstring)
+
+You can inspect crease-connected leaves compatible with an earlier or later position in the pile
+order. You obtain these leaves from the map dimensions and the coordinate value of the queried leaf.
+
+Contents
+--------
+Functions
+	getLeavesCreaseAnte
+		Iterate over crease-connected leaves that can appear before `leaf`.
+	getLeavesCreasePost
+		Iterate over crease-connected leaves that can appear after `leaf`.
+"""
 from __future__ import annotations
 
 from functools import cache
@@ -12,20 +27,82 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Leaf
 
 def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
-	"""1) `leaf` has at most `totalDimensions - 1` many creases.
+	"""Iterate over crease-connected leaves that can appear before `leaf`.
 
-	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in `leaf` number.
+	You can retrieve an iterator over neighboring leaves compatible with placing a crease-connected
+	neighbor before `leaf` in the pile order. You obtain these leaves from the map dimensions without
+	inspecting pinned piles.
 
-	3) The list of creases *might* be a list of Gray codes.
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state that provides the map shape and dimension count.
+	leaf : Leaf
+		Leaf index whose crease neighbors are requested.
+
+	Returns
+	-------
+	leavesCrease : Iterator[Leaf]
+		Iterator over leaf indices in increasing order of the flipped dimension
+		index. An origin leaf has no predecessor choice.
+
+	Coordinate Order
+	----------------
+	The binary coordinate vocabulary [1] assigns one
+	dimension to each bit. Possible leaves differ from `leaf` by one bit. Leaf labels
+	need not increase with the flipped dimension index.
+
+	Examples
+	--------
+	From `easyRun/pinning.py`, with `state` for a map whose axis lengths are `2`.
+
+		```python
+		print(*getLeavesCreaseAnte(state, 53))
+		```
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
 	"""
 	return iter(_getCreases(state, leaf, increase=False))
 
 def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
-	"""1) `leaf` has at most `totalDimensions - 1` many creases.
+	"""Iterate over crease-connected leaves that can appear after `leaf`.
 
-	2) The list is ordered by increasing dimension number, which corresponds to an increasing absolute magnitude of _change_ in `leaf` number.
+	You can retrieve an iterator over neighboring leaves compatible with placing a crease-connected
+	neighbor after `leaf` in the pile order. You obtain these leaves from the map dimensions without
+	inspecting pinned piles.
 
-	3) The list of creases *might* be a list of Gray codes.
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state that provides the map shape and dimension count.
+	leaf : Leaf
+		Leaf index whose crease neighbors are requested.
+
+	Returns
+	-------
+	leavesCrease : Iterator[Leaf]
+		Iterator over leaf indices in increasing order of the flipped dimension
+		index. An origin leaf has only leaf `1` as a successor choice.
+
+	Coordinate Order
+	----------------
+	The binary coordinate vocabulary [1] assigns one
+	dimension to each bit. Possible leaves differ from `leaf` by one bit. Leaf labels
+	need not increase with the flipped dimension index.
+
+	Examples
+	--------
+	From `easyRun/pinning.py`, with `state` for a map whose axis lengths are `2`.
+
+		```python
+		print(*getLeavesCreasePost(state, 22))
+		```
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
 	"""
 	return iter(_getCreases(state, leaf, increase=True))
 

@@ -1,3 +1,29 @@
+"""Select leaves for end piles using crease restrictions.
+
+(AI generated docstring)
+
+You can retrieve possible leaves for a target pile after pinning the required neighboring piles. You
+inspect the workbench permutation space and receive leaf choices without assigning a leaf to a pile.
+
+Contents
+--------
+Functions
+	Depth 2
+		pinPile一Ante首ByCrease
+			Iterate over crease neighbors for pile two positions before the end.
+		pinPile一ByCrease
+			Iterate over crease neighbors for pile two.
+	Depth 3
+		pinPile一零ByCrease
+			Iterate over crease neighbors for pile three.
+		pinPile零一Ante首ByCrease
+			Iterate over crease neighbors for pile three positions before the end.
+	Depth 4
+		pinPile二Ante首ByCrease
+			Iterate over crease neighbors for pile four positions before the end.
+		pinPile二ByCrease
+			Iterate over crease neighbors for pile four.
+"""
 # ruff: file-ignore[collapsible-if, too-many-boolean-expressions]
 from __future__ import annotations
 
@@ -24,6 +50,42 @@ def _getLeavesCrease(state: StateElimination, leaf: Leaf) -> tuple[Leaf, ...]:
 
 #-------- Depth 2 ------------------------------------
 def pinPile一ByCrease(state: StateElimination) -> Iterator[Leaf]:
+	"""Iterate over crease neighbors for pile two.
+
+	(AI generated docstring)
+
+	You can obtain possible leaves for the target pile on the workbench by excluding crease neighbors
+	using leaves already pinned near the ends of the pile order. You receive leaf choices without
+	modifying `state`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to
+		the target pile and provide the pinned leaves in `state.permutationSpace`.
+
+	Returns
+	-------
+	leavesToPin : Iterator[Leaf]
+		Iterator over leaf indices after exclusions, in the original
+		crease order.
+
+	Pinned Piles
+	------------
+	Pile `state.pile - 1` must contain a pinned leaf.
+	No additional pinned pile is required; pile `state.首 - 2` supplies an optional restriction.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	You select leaves with `mapFolding._e.p2上nDimensional.creases.getLeavesCreasePost` [1]. Follow the
+	pinning order used by `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.creases.getLeavesCreasePost`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds`
+	"""
 	direction: CallableFunction[[int, int], int] = sub
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -37,6 +99,42 @@ def pinPile一ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 def pinPile一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
+	"""Iterate over crease neighbors for pile two positions before the end.
+
+	(AI generated docstring)
+
+	You can obtain possible leaves for the target pile on the workbench by excluding crease neighbors
+	using leaves already pinned near the ends of the pile order. You receive leaf choices without
+	modifying `state`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to
+		the target pile and provide the pinned leaves in `state.permutationSpace`.
+
+	Returns
+	-------
+	leavesToPin : Iterator[Leaf]
+		Iterator over leaf indices after exclusions, in the original
+		crease order.
+
+	Pinned Piles
+	------------
+	Pile `state.pile + 1` must contain a pinned leaf.
+	No additional pinned pile is required; pile `2` supplies an optional restriction.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	You select leaves with `mapFolding._e.p2上nDimensional.creases.getLeavesCreaseAnte` [1]. Follow the
+	pinning order used by `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.creases.getLeavesCreaseAnte`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds`
+	"""
 	direction: CallableFunction[[int, int], int] = add
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -51,6 +149,42 @@ def pinPile一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 #-------- Depth 3 ------------------------------------
 def pinPile一零ByCrease(state: StateElimination) -> Iterator[Leaf]:
+	"""Iterate over crease neighbors for pile three.
+
+	(AI generated docstring)
+
+	You can obtain possible leaves for the target pile on the workbench by excluding crease neighbors
+	using leaves already pinned near the ends of the pile order. You receive leaf choices without
+	modifying `state`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to
+		the target pile and provide the pinned leaves in `state.permutationSpace`.
+
+	Returns
+	-------
+	leavesToPin : Iterator[Leaf]
+		Iterator over leaf indices after exclusions, in the original
+		crease order.
+
+	Pinned Piles
+	------------
+	Pile `state.pile - 1` must contain a pinned leaf.
+	Piles `2` and `state.首 - 2` must also be pinned.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	You select leaves with `mapFolding._e.p2上nDimensional.creases.getLeavesCreasePost` [1]. Follow the
+	pinning order used by `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.creases.getLeavesCreasePost`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds`
+	"""
 	direction: CallableFunction[[int, int], int] = sub
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -67,6 +201,42 @@ def pinPile一零ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 def pinPile零一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
+	"""Iterate over crease neighbors for pile three positions before the end.
+
+	(AI generated docstring)
+
+	You can obtain possible leaves for the target pile on the workbench by excluding crease neighbors
+	using leaves already pinned near the ends of the pile order. You receive leaf choices without
+	modifying `state`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to
+		the target pile and provide the pinned leaves in `state.permutationSpace`.
+
+	Returns
+	-------
+	leavesToPin : Iterator[Leaf]
+		Iterator over leaf indices after exclusions, in the original
+		crease order.
+
+	Pinned Piles
+	------------
+	Pile `state.pile + 1` must contain a pinned leaf.
+	Piles `2` and `state.首 - 2` must also be pinned.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	You select leaves with `mapFolding._e.p2上nDimensional.creases.getLeavesCreaseAnte` [1]. Follow the
+	pinning order used by `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.creases.getLeavesCreaseAnte`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds`
+	"""
 	direction: CallableFunction[[int, int], int] = add
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -84,6 +254,42 @@ def pinPile零一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 #-------- Depth 4 ------------------------------------
 def pinPile二ByCrease(state: StateElimination) -> Iterator[Leaf]:
+	"""Iterate over crease neighbors for pile four.
+
+	(AI generated docstring)
+
+	You can obtain possible leaves for the target pile on the workbench by excluding crease neighbors
+	using leaves already pinned near the ends of the pile order. You receive leaf choices without
+	modifying `state`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to
+		the target pile and provide the pinned leaves in `state.permutationSpace`.
+
+	Returns
+	-------
+	leavesToPin : Iterator[Leaf]
+		Iterator over leaf indices after exclusions, in the original
+		crease order.
+
+	Pinned Piles
+	------------
+	Pile `state.pile - 1` must contain a pinned leaf.
+	Piles `2`, `3`, `state.首 - 2`, and `state.首 - 3` must also be pinned.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	You select leaves with `mapFolding._e.p2上nDimensional.creases.getLeavesCreasePost` [1]. Follow the
+	pinning order used by `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.creases.getLeavesCreasePost`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds`
+	"""
 	direction: CallableFunction[[int, int], int] = sub
 
 	boxOfCreaseIndicesExcluded: list[int] = []
@@ -111,6 +317,42 @@ def pinPile二ByCrease(state: StateElimination) -> Iterator[Leaf]:
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
 def pinPile二Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
+	"""Iterate over crease neighbors for pile four positions before the end.
+
+	(AI generated docstring)
+
+	You can obtain possible leaves for the target pile on the workbench by excluding crease neighbors
+	using leaves already pinned near the ends of the pile order. You receive leaf choices without
+	modifying `state`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Workbench state for a map whose axis lengths are all `2`. Set `state.pile` to
+		the target pile and provide the pinned leaves in `state.permutationSpace`.
+
+	Returns
+	-------
+	leavesToPin : Iterator[Leaf]
+		Iterator over leaf indices after exclusions, in the original
+		crease order.
+
+	Pinned Piles
+	------------
+	Pile `state.pile + 1` must contain a pinned leaf.
+	Piles `2`, `3`, `4`, `state.首 - 2`, and `state.首 - 3` must also be pinned.
+
+	A required pile without a pinned leaf causes `ValueError`.
+
+	You select leaves with `mapFolding._e.p2上nDimensional.creases.getLeavesCreaseAnte` [1]. Follow the
+	pinning order used by `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.creases.getLeavesCreaseAnte`
+
+	[2] `mapFolding._e.p2上nDimensional.pinIt.pinPilesAtEnds`
+	"""
 	direction: CallableFunction[[int, int], int] = add
 
 	boxOfCreaseIndicesExcluded: list[int] = []

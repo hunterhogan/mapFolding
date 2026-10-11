@@ -1,3 +1,24 @@
+"""Enumerate foldings of maps whose dimension lengths are all two.
+
+(AI generated docstring)
+
+You can reduce permutation spaces with specialized crease rules and expand unresolved piles using
+worker processes. Use the entry point to retain completed folding representatives and record the
+dimension symmetry multiplier.
+
+Contents
+--------
+Functions
+	consumeQueue
+		Apply specialized crease reductions to queued permutation spaces.
+	deconstructPermutationSpaces
+		Expand each permutation space at its first undetermined pile.
+	doTheNeedful
+		Enumerate folding representatives with concurrent crease reduction.
+	pinByCrease
+		Reduce a permutation space with specialized crease rules.
+"""
+
 from __future__ import annotations
 
 from functools import partial
@@ -18,17 +39,74 @@ if TYPE_CHECKING:
 	from multiprocessing.queues import Queue
 
 def pinByCrease(mapShape: tuple[int, ...], permutationSpace: PermutationSpace) -> StateElimination:
+	"""Reduce a permutation space with specialized crease rules.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		Map shape with every dimension length equal to two.
+	permutationSpace : PermutationSpace
+		Complete pile mapping to reduce.
+
+	Returns
+	-------
+	state : StateElimination
+		New state containing unresolved spaces and completed folding representatives.
+	"""
 	return StateElimination(mapShape, boxOfPermutationSpace=[permutationSpace]
 		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional).moveToBoxOfFolding()
 
 def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpace]) -> Iterator[PermutationSpace]:
+	"""Expand each permutation space at its first undetermined pile.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	boxOfPermutationSpace : Iterable[PermutationSpace]
+		Permutation spaces to expand.
+
+	Returns
+	-------
+	deconstructedPermutationSpaces : Iterator[PermutationSpace]
+		Iterator over branches from all supplied permutation spaces.
+	"""
 	return chain.from_iterable(map(PermutationSpace.deconstructPile, boxOfPermutationSpace))
 
 def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[PermutationSpace], queueStates: Queue[StateElimination]) -> None:
+	"""Apply specialized crease reductions to queued permutation spaces.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...]
+		Map shape with every dimension length equal to two.
+	queuePermutationSpace : Queue[PermutationSpace]
+		Input queue terminated by an empty permutation space.
+	queueStates : Queue[StateElimination]
+		Output queue receiving reduced elimination states.
+	"""
 	tuple(map(queueStates.put, map(partial(pinByCrease, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
 def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
-	"""Do the things necessary so that `pinByCrease` operates efficiently."""
+	"""Enumerate folding representatives with concurrent crease reduction.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state containing the map shape and optional initial branches.
+	workersMaximum : int
+		Positive number of worker processes to start.
+
+	Returns
+	-------
+	state : StateElimination
+		The same state with completed representatives retained, their count updated, and active spaces
+		exhausted.
+	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
 
@@ -60,7 +138,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		state.boxOfFolding.extend(sherpa.boxOfFolding)
 		boxOfPermutationSpace = list(deconstructPermutationSpaces(sherpa.boxOfPermutationSpace))
 		queuePermutationSpacesLength += -1 + len(boxOfPermutationSpace)
-		tqdmQueue.total += len(boxOfPermutationSpace)  # ty: ignore[unsupported-operator]
+		tqdmQueue.total += len(boxOfPermutationSpace)  # pyright: ignore[reportOperatorIssue] # ty: ignore[unsupported-operator]
 		tqdmQueue.update(1)
 	tqdmQueue.close()
 

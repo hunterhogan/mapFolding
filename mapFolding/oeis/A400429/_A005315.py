@@ -7,7 +7,7 @@ The argument x is the encoded input, not the suffix n.
 
 For n >= 1 the same formula is additionally used at larger x to populate
 T(x, x//2 - n + 1). This triangle application does not define the function's
-identity. The infinite extensions are conjectural where no proof is recorded.
+identity.
 """
 from __future__ import annotations
 
@@ -16,23 +16,18 @@ from math import comb
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Iterator
 	from hunterMakesPy import CallableFunction
 
 #================== Sausage making =========================================================
 
 def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...]) -> int:
 	# DOCUMENT
-	if 次coefficient < 0:
-		message: str = f"I received {次coefficient = }, but the coefficient index must be nonnegative."
-		raise ValueError(message)
-	numeratorCoefficients: Iterator[int] = chain(numerator, repeat(0))
-	coefficients: list[int] = []
-	while len(coefficients) <= 次coefficient:
-		coefficients.append(next(numeratorCoefficients) - sum(
-			denominator[degree] * coefficients[-degree] for degree in range(1, min(len(denominator), len(coefficients) + 1))
+	boxOfCoefficients: list[int] = []
+	while len(boxOfCoefficients) <= 次coefficient:
+		boxOfCoefficients.append(next(chain(numerator, repeat(0))) - sum(
+			denominator[degree] * boxOfCoefficients[-degree] for degree in range(1, min(len(denominator), len(boxOfCoefficients) + 1))
 		))
-	return coefficients[-1]
+	return boxOfCoefficients[-1]
 
 #================== Closed-form functions for A005315 =========================================================
 

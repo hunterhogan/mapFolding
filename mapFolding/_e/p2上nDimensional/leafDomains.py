@@ -1,3 +1,31 @@
+"""Compute joint pile domains and restrictions from pinned leaves.
+
+(AI generated docstring)
+
+You can enumerate possible pile assignments for specific leaf groups in maps whose
+axis lengths are `2`. Combined domains describe joint assignments; the special
+head-plus-one domain can also use pinned leaves from the workbench state.
+
+Contents
+--------
+Functions
+	getDomainDimension一
+		Compute combined pile choices for the dimension-one leaves.
+	getDomainDimension二
+		Compute combined pile choices for the dimension-two leaves.
+	getDomainDimension首二
+		Compute combined pile choices for the head-relative dimension-two leaves.
+	getDomainLeaf首零Plus零
+		Compute pile choices for the head-plus-one leaf using pinned neighbors.
+	getDomain二一零and二一
+		Compute combined pile choices for the leaves seven and six.
+	getDomain二零and二
+		Compute combined pile choices for the leaves five and four.
+	getDomain首零一二and首一二
+		Compute combined pile choices for the head-relative zero-one-two and one-two leaves.
+	getDomain首零二and首二
+		Compute combined pile choices for the head-relative zero-two and two leaves.
+"""
 from __future__ import annotations
 
 from functools import cache
@@ -119,10 +147,41 @@ def getDomainLeaf(state: StateElimination, leaf: int) -> range:
 """
 
 def getDomainDimension一(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
-	"""The beans and cornbread and beans and cornbread dimension.
+	"""Compute combined pile choices for the dimension-one leaves.
 
-	(leaf一零, leaf一, leaf首一, leaf首零一)
-	^^^ Can you see the symmetry? ^^^
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int, int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
 	"""
 	domain一零: tuple[int, ...] = tuple(getDomainLeaf(state, 一 + 零))
 	domain首一: tuple[int, ...] = tuple(getDomainLeaf(state, 首一(state.totalDimensions)))
@@ -162,7 +221,42 @@ def _getDomainDimension一(domain一零: tuple[int, ...], domain首一: tuple[in
 	return tuple(filter(allUnique吗, domainCombined))
 
 def getDomainDimension二(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
-	"""(leaf二一, leaf二一零, leaf二零, leaf二)."""
+	"""Compute combined pile choices for the dimension-two leaves.
+
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int, int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(二 + 一, 二 + 一 + 零, 二 + 零, 二)
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	domain二零and二: tuple[tuple[int, int], ...] = getDomain二零and二(state)
 	domain二一零and二一: tuple[tuple[int, int], ...] = getDomain二一零and二一(state)
 	return _getDomainDimension二(domain二零and二, domain二一零and二一, state.totalDimensions)
@@ -268,7 +362,42 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 	return tuple(sorted(filter(allUnique吗, set(domainCombined))))
 
 def getDomainDimension首二(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
-	"""(leaf首二, leaf首零二, leaf首零一二, leaf首一二)."""
+	"""Compute combined pile choices for the head-relative dimension-two leaves.
+
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int, int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	domain首零二and首二: tuple[tuple[int, int], ...] = getDomain首零二and首二(state)
 	domain首零一二and首一二: tuple[tuple[int, int], ...] = getDomain首零一二and首一二(state)
 	return _getDomainDimension首二(state.totalDimensions, domain首零二and首二, domain首零一二and首一二)
@@ -351,14 +480,84 @@ def _getDomainDimension首二(totalDimensions: int, domain首零二and首二: tu
 	return tuple(sorted(filter(allUnique吗, set(domainCombined))))
 
 def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...]:
-	"""Combined domain of leaf二零 and leaf二."""
+	"""Compute combined pile choices for the leaves five and four.
+
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(二 + 零, 二)
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	domain二零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 零))
 	domain二: tuple[int, ...] = tuple(getDomainLeaf(state, 二))
 	direction: CallableFunction[[int, int], int] = add
 	return _getDomains二Or二一(domain二零, domain二, direction, state.totalDimensions, state.mapShapeProductsSums)
 
 def getDomain二一零and二一(state: StateElimination) -> tuple[tuple[int, int], ...]:
-	"""Combined domain of leaf二一零 and leaf二一."""
+	"""Compute combined pile choices for the leaves seven and six.
+
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(二 + 一 + 零, 二 + 一)
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	domain二一零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一 + 零))
 	domain二一: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一))
 	direction: CallableFunction[[int, int], int] = sub
@@ -489,7 +688,42 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 	return tuple(sorted(set(domainCombined)))
 
 def getDomain首零二and首二(state: StateElimination) -> tuple[tuple[int, int], ...]:
-	"""Combined domain of leaf首零二 and leaf首二."""
+	"""Compute combined pile choices for the head-relative zero-two and two leaves.
+
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(首零二(state.totalDimensions), 首二(state.totalDimensions))
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	domain首零二: tuple[int, ...] = tuple(getDomainLeaf(state, 首零二(state.totalDimensions)))
 	domain首二: tuple[int, ...] = tuple(getDomainLeaf(state, 首二(state.totalDimensions)))
 	return _getDomain首零二and首二(domain首零二, domain首二, state.totalDimensions)
@@ -571,7 +805,42 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 	return tuple(sorted(set(domainCombined)))
 
 def getDomain首零一二and首一二(state: StateElimination) -> tuple[tuple[int, int], ...]:
-	"""Combined domain of leaf首零一二 and leaf首一二."""
+	"""Compute combined pile choices for the head-relative zero-one-two and one-two leaves.
+
+	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
+	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
+	without inspecting `state.permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state for a map whose axis lengths are all `2`. Supply enough dimensions for the
+		selected leaves and validate the map shape yourself.
+
+	Returns
+	-------
+	domainCombined : tuple[tuple[int, int], ...]
+		Possible pile assignments in the leaf order described below. Each assignment
+		contains a pile index for each selected leaf.
+
+	Leaf Order
+	----------
+	The coordinate vocabulary [1] identifies the leaves
+	in the following order.
+
+		```python
+		(首零一二(state.totalDimensions), 首一二(state.totalDimensions))
+		```
+
+	You obtain individual pile ranges from `mapFolding._e.leafDomains.getDomainLeaf` [2]. Check the
+	combined assignments against other folding constraints.
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	domain首零一二: tuple[int, ...] = tuple(getDomainLeaf(state, 首零一二(state.totalDimensions)))
 	domain首一二: tuple[int, ...] = tuple(getDomainLeaf(state, 首一二(state.totalDimensions)))
 	direction: CallableFunction[[int, int], int] = add
@@ -653,7 +922,8 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 @cache
 def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], totalLeaves: int) -> range:
-	"""The subroutines assume `dimensionLength == 2`, but I think the concept could be extended to other `mapShape`."""
+	"""Supply `dimensionLength == 2` for these subroutines. You may be able to extend the concept to other
+`mapShape` values."""
 	state: StateElimination = StateElimination(mapShape)
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
@@ -672,7 +942,38 @@ def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], 
 	return range(totalLeaves)
 
 def getDomainLeaf首零Plus零(state: StateElimination, leaf: Leaf | None = None) -> tuple[Pile, ...]:
-	"""Get the full domain of `leaf首零Plus零` that is valid in all cases, or if `leaf一零` and `leaf首零一` are pinned in `state.permutationSpace`, get a domain of `leaf首零Plus零` customized to `pileOfLeaf一零` and `pileOfLeaf首零一`."""
+	"""Compute pile choices for the head-plus-one leaf using pinned neighbors.
+
+	You can retrieve the pile domain of the special head-plus-one leaf in `state`. When both neighboring
+	reference leaves are pinned in `state.permutationSpace`, you receive a domain narrowed by their
+	pinned pile positions. Otherwise, you receive the complete individual domain.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state that provides the map shape and dimension count.
+	leaf : Leaf | None = None
+		Leaf index to query. `None` selects the special head-plus-one leaf. Supply that same leaf
+		when using the restrictions based on pinned neighbors.
+
+	Returns
+	-------
+	domain首零Plus零 : tuple[Pile, ...]
+		Possible pile indices, with conditional exclusions when both reference leaves are
+		pinned. You leave `state` unchanged.
+
+	Reference Leaves
+	----------------
+	The default leaf is `零 + 首零(state.totalDimensions)`.
+	The reference leaves are `一 + 零` and `首零一(state.totalDimensions)`, using the coordinate
+	vocabulary [1]. The initial domain comes from `mapFolding._e.leafDomains.getDomainLeaf` [2].
+
+	References
+	----------
+	[1] `mapFolding._e.p2上nDimensional.semiotics`
+
+	[2] `mapFolding._e.leafDomains.getDomainLeaf`
+	"""
 	if leaf is None:
 		leaf = (零) + 首零(state.totalDimensions)
 	domain首零Plus零: tuple[Pile, ...] = tuple(getDomainLeaf(state, leaf))

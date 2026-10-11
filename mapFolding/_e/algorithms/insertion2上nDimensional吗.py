@@ -1,6 +1,22 @@
+"""Expand smaller-map albums into constrained higher-dimensional search spaces.
+
+You can read an album for a map with one fewer dimension and build constrained elimination branches
+for a map whose dimension lengths are all two. You can also record the folding collection already
+present in state.
+
+Contents
+--------
+Functions
+	makeAlbum2上nDimensional
+		Build target-map search spaces from an album with one fewer dimension.
+	makeDescendants
+		Build constrained target-map branches from one smaller-map folding.
+	recordAlbum2上nDimensional
+		Write the state's collected folding representatives to an album.
+"""
+
 # DEVELOPMENT module.
 # pyright: reportUnusedVariable=false
-"""Find `groupsOfFolds` based on Sade's 1949 insertion algorithm."""
 from __future__ import annotations
 
 from concurrent.futures import as_completed, ProcessPoolExecutor
@@ -29,7 +45,28 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 def makeDescendants(folding: Folding, state: StateElimination, position: int) -> StateElimination:
-	"""Process a single folding and return resulting state."""
+	"""Build constrained target-map branches from one smaller-map folding.
+
+	You can use the leaf ordering in `folding` to restrict the target map in `state`. You try possible
+	piles for the final leaf in `folding`, pin end piles, and reduce the resulting branches. You update
+	`state` in place and receive progress output.
+
+	Parameters
+	----------
+	folding : Folding
+		Source folding from the album for a map with one fewer dimension.
+	state : StateElimination
+		Target elimination state with every dimension length equal to two and appropriate reductions
+		configured.
+	position : int
+		Progress-display row assigned to this worker.
+
+	Returns
+	-------
+	state : StateElimination
+		The same state with accumulated constrained permutation spaces. You do not obtain a count of all
+		descendants.
+	"""
 	leaf一: Leaf = folding[-1]
 	domain一: Iterable[Pile] = getDomainLeaf(state, leaf一)
 	leaves: tuple[Leaf, ...] = tuple(reversed(folding[2:-1]))
@@ -72,7 +109,47 @@ def makeDescendants(folding: Folding, state: StateElimination, position: int) ->
 	return state
 
 def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> StateElimination:
-	"""Construct album `n`."""
+	"""Build target-map search spaces from an album with one fewer dimension.
+
+	You can read the previous-dimension album from `mapFolding._e.algorithms.insertion.pathAlbum` [1],
+	process each source folding with `makeDescendants` [2], and gather worker permutation spaces and
+	folding collections.
+
+	Concurrency
+	-----------
+	Tasks run through `concurrent.futures.ProcessPoolExecutor` [3]. Each task receives a new elimination
+	state initialized with a shallow copy of the supplied permutation-space list.
+
+	Parameters
+	----------
+	state : StateElimination
+		Target elimination state with every dimension length equal to two. The previous-dimension album must
+		exist.
+	workersMaximum : int
+		Positive maximum number of worker processes.
+
+	Returns
+	-------
+	state : StateElimination
+		The same state with active spaces replaced by worker results and worker folding collections appended.
+
+	Examples
+	--------
+	The pinning script prepares target-map search spaces from the preceding album.
+
+		```python
+		state = makeAlbum2上nDimensional(state, 14)
+		```
+
+	References
+	----------
+	[1] `mapFolding._e.algorithms.insertion.pathAlbum`
+
+	[2] `makeDescendants`
+
+	[3] Python concurrent.futures.ProcessPoolExecutor.
+		https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor
+	"""
 	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.totalDimensions - 1), pathAlbum, suffix='.album'))
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
@@ -93,6 +170,38 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 	return state
 
 def recordAlbum2上nDimensional(state: StateElimination) -> Path:
+	"""Write the state's collected folding representatives to an album.
+
+	(AI generated docstring)
+
+	You can sort `state.boxOfFolding` and save the collection with `mapFolding.kitFilesystem.writeAlbum`
+	[1] to the album directory [2]. You save only collected foldings, without enumerating unresolved
+	permutation spaces.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state providing the map shape and folding collection to write.
+
+	Returns
+	-------
+	pathFilenameAlbum : Path
+		Path of the album written for the state's map shape.
+
+	Examples
+	--------
+	The pinning script records its collected foldings.
+
+		```python
+		recordAlbum2上nDimensional(state)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitFilesystem.writeAlbum`
+
+	[2] `mapFolding._e.algorithms.insertion.pathAlbum`
+	"""
 	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, pathAlbum, suffix='.album')
 	writeAlbum(sorted(state.boxOfFolding), pathFilenameAlbum)
 	return pathFilenameAlbum
