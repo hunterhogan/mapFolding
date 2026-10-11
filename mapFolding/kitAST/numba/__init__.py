@@ -1,26 +1,19 @@
-"""Access AST transformation modules for Numba compilation.
+"""Generate compilation calls and specialized Numba counting jobs.
 
 (AI generated docstring)
 
-You can use this package to turn generated map-folding AST modules into Numba-compiled job
-modules [1]. This package groups the code that applies `jit` decorators, stores reusable Numba
-parameter sets, and writes specialized computation modules for specific map shapes. Proceed to
-`mapFolding.kitAST.numba.kitNumba` [2] for decorator assembly and to
-`mapFolding.kitAST.numba.makeJob` [3] for end-to-end job generation.
+You can use this package to configure and emit Numba compilation [1] for counting functions
+and modules. The package also assembles standalone jobs from initialized computation state.
 
 Modules
 -------
 kitNumba
-	Apply Numba decorators and define reusable Numba compilation settings.
+	Define compiler options and construct function or module compilation calls.
 makeJob
-	Generate specialized Numba job modules for specific map shapes.
+	Write specialized counting jobs with optional progress reporting.
 
 References
 ----------
-[1] Numba documentation.
-	https://numba.readthedocs.io/en/stable/
-
-[2] `mapFolding.kitAST.numba.kitNumba`
-
-[3] `mapFolding.kitAST.numba.makeJob`
+[1] Numba compilation options and signatures.
+	https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 """

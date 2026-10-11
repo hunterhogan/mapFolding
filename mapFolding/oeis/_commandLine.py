@@ -7,18 +7,22 @@ import sys
 import time
 
 def _CLIHelpText() -> str:
-	"""Format comprehensive help text for both command-line and interactive use.
+	"""I use this to share sequence listings and usage examples between console commands.
 
 	(AI generated docstring)
 
-	This function generates standardized help documentation that includes all available OEIS sequences
-	with their descriptions and provides usage examples for both command-line and programmatic
-	interfaces.
+	This function combines the registered sequence descriptions with examples of the `OEIS_for_n`
+	command and `mapFolding.oeis.oeisIDfor_n` [1].
 
 	Returns
 	-------
 	helpText : str
 		A formatted string containing complete usage information and examples.
+
+	References
+	----------
+	[1] `mapFolding.oeis.oeisIDfor_n`
+
 	"""
 	exampleOEISid: str = 'A001415'
 	exampleN: int = 6
@@ -35,17 +39,22 @@ def _CLIHelpText() -> str:
 	)
 
 def _getOEISDescriptions() -> str:
-	"""Format information about available OEIS sequences for display in help messages and error output.
+	"""I use this to insert registered sequence descriptions into shared help text.
 
 	(AI generated docstring)
 
-	This function creates a standardized listing of all implemented OEIS sequences with their
-	mathematical descriptions, suitable for inclusion in help text and error messages.
+	This function formats identifiers and descriptions from `mapFolding.oeis._metadata.dictionaryOEIS`
+	[1] in registry insertion order.
 
 	Returns
 	-------
 	sequenceInfo : str
 		A formatted string listing each OEIS sequence ID with its description.
+
+	References
+	----------
+	[1] `mapFolding.oeis._metadata.dictionaryOEIS`
+
 	"""
 	return "\n".join(
 		f"  {oeisID}: {dictionaryOEIS[oeisID]['description']}"
@@ -53,21 +62,42 @@ def _getOEISDescriptions() -> str:
 	)
 
 def OEIS_for_n() -> None:
-	"""Command-line interface for calculating OEIS sequence values.
+	"""Calculate a sequence term from a command-line identifier and index.
 
 	(AI generated docstring)
 
-	This function provides a command-line interface to the `oeisIDfor_n` function, enabling users to
-	calculate specific values of implemented OEIS sequences from the terminal. It includes argument
-	parsing, error handling, and performance timing to provide a complete user experience.
+	You can run the `OEIS_for_n` console command to evaluate one term with
+	`mapFolding.oeis.oeisIDfor_n` [1]. This function reads a sequence identifier and integer index
+	from command-line arguments, writes the result to standard output with the literal label
+	`distinct folding patterns.`, and writes elapsed time on the next line.
 
-	The function accepts two command-line arguments: an OEIS sequence identifier and an integer index,
-	then outputs the calculated sequence value along with execution time. Error messages are directed
-	to stderr with appropriate exit codes for shell scripting integration.
+	Command Arguments
+	-----------------
+	oeisID : str
+		Identifier of the sequence to evaluate.
+	n : int
+		Index of the sequence term to evaluate.
 
-	Usage
-	-----
-	python -m mapFolding.oeis OEIS_for_n A001415 10
+	Exit Status
+	-----------
+	Calculation errors of type `KeyError`, `ValueError`, or `ArithmeticError` produce an error
+	message on standard error and exit status one. `argparse` [2] handles invalid arguments and
+	`--help` before calculation; invalid arguments exit with status two, and help exits with zero.
+
+	Examples
+	--------
+	The shared console help uses this calculation command.
+
+		```console
+		OEIS_for_n A001415 6
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis.oeisIDfor_n`
+
+	[2] argparse - Python standard library.
+		https://docs.python.org/3/library/argparse.html
 	"""
 	parserCLI: argparse.ArgumentParser = argparse.ArgumentParser(
 		description="Calculate a(n) for an OEIS sequence.",
@@ -91,17 +121,18 @@ def OEIS_for_n() -> None:
 	sys.stdout.write(f"Time elapsed: {timeElapsed:.3f} seconds\n")
 
 def getOEISids() -> None:
-	"""Display comprehensive information about all implemented OEIS sequences.
+	"""Display registered OEIS sequence descriptions and usage examples.
 
 	(AI generated docstring)
 
-	This function serves as the primary help interface for the module, displaying detailed information
-	about all directly implemented OEIS sequences along with usage examples for both command-line and
-	programmatic interfaces. It provides users with a complete overview of available sequences and
-	their mathematical meanings.
+	You can call this function or run the `getOEISids` console command to inspect the sequences
+	registered in `mapFolding.oeis._metadata.dictionaryOEIS` [1]. This function writes identifiers,
+	descriptions, and command-line and Python usage examples to standard output.
 
-	The output includes sequence identifiers, mathematical descriptions, and practical usage examples
-	to help users understand how to access and utilize the OEIS interface functionality.
+	References
+	----------
+	[1] `mapFolding.oeis._metadata.dictionaryOEIS`
+
 
 	"""
 	sys.stdout.write(_CLIHelpText())

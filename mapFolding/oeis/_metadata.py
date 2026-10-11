@@ -23,19 +23,41 @@ def getMetadata(oeisID: OEISid) -> MetadataOEISid:
 
 	(AI generated docstring)
 
-	This function fetches the description, offset, known values, and the next unknown index for an
-	OEIS sequence. It utilizes cached data when available or retrieves fresh data from the OEIS
-	website. The metadata is structured in a `MetadataOEISid` dictionary.
+	You can use this function to inspect a registered sequence's description, starting index, and
+	known values. This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` [1]
+	and returns the corresponding entry from `dictionaryOEIS` [2].
 
 	Parameters
 	----------
-	oeisID : str
-		The identifier of the OEIS sequence to retrieve.
+	oeisID : OEISid
+		Registered sequence identifier. Lookup ignores letter case and surrounding whitespace.
 
 	Returns
 	-------
 	metadata : MetadataOEISid
-		A dictionary containing the sequence's description, offset, known values, and next unknown index.
+		Shared metadata dictionary described by `mapFolding.oeis._dataBaskets.MetadataOEISid` [3].
+		The result is not copied.
+
+	Unknown Sequences
+	-----------------
+	This function propagates `KeyError` when the normalized `oeisID` is absent from
+	`dictionaryOEIS`.
+
+	Caching
+	-------
+	Metadata is loaded during module import. `functools.cache` [4] retains lookup results for each
+	argument; this function does not refresh cached files or request new sequence data.
+
+	References
+	----------
+	[1] `mapFolding.oeis._beDRY.formatOEISid`
+
+	[2] `dictionaryOEIS`
+
+	[3] `mapFolding.oeis._dataBaskets.MetadataOEISid`
+
+	[4] functools.cache - Python standard library.
+		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
 	return dictionaryOEIS[formatOEISid(oeisID)]
 
@@ -45,20 +67,42 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 
 	(AI generated docstring)
 
-	This function fetches the complete set of known values for an OEIS sequence by accessing cached
-	data when available or retrieving fresh data from the OEIS website. The data is parsed from the
-	standard OEIS b-file format.
+	You can use this function to look up the values loaded for `oeisID` during module import. This
+	function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` [1] and accesses
+	`dictionaryOEIS` [2] without fetching new data.
 
 	Parameters
 	----------
-	oeisID : str
-		The identifier of the OEIS sequence to retrieve.
+	oeisID : OEISid
+		Sequence identifier. Lookup ignores letter case and surrounding whitespace.
 
 	Returns
 	-------
-	OEISsequence : dict[int, int]
-		A dictionary mapping sequence indices to their corresponding values, or a fallback dictionary
-		containing {-1: -1} if retrieval fails.
+	valuesKnown : dict[int, int]
+		Shared index-to-value dictionary, or `{-errorL33T: -errorL33T}` when the metadata entry or
+		its `valuesKnown` field is absent. The sentinel uses `hunterMakesPy.errorL33T` [3]. A stored
+		empty dictionary remains empty.
+
+	See Also
+	--------
+	`getMetadata`
+		Retrieve the description, offset, and row settings as well as known values.
+
+	Caching
+	-------
+	`functools.cache` [4] retains lookup results for each argument. Returned dictionaries are not
+	copied; mutations remain visible to later lookups using the same stored result.
+
+	References
+	----------
+	[1] `mapFolding.oeis._beDRY.formatOEISid`
+
+	[2] `dictionaryOEIS`
+
+	[3] hunterMakesPy - Official repository.
+		https://github.com/hunterhogan/hunterMakesPy
+	[4] functools.cache - Python standard library.
+		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
 	# TODO Z0Z_tools, fix humpy_cytoolz.get_in overloads.
 	return get_in((str(formatOEISid(oeisID)), 'valuesKnown'), dictionaryOEIS, dict[int, int]([(-errorL33T, -errorL33T)]))  # pyright: ignore[reportReturnType]
@@ -66,24 +110,36 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 #================== Meat grinders =================================================================
 
 def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
-	"""Retrieve known sequence values for a specified OEIS sequence.
+	"""I use this to load b-file values while constructing the metadata registry.
 
 	(AI generated docstring)
 
-	This function fetches the complete set of known values for an OEIS sequence by accessing cached
-	data when available or retrieving fresh data from the OEIS website. The data is parsed from the
-	standard OEIS b-file format.
+	This function obtains OEIS b-file text [1] through `mapFolding.kitFilesystem.getCacheOrURL` [2]
+	and parses the text with `mapFolding.oeis._beDRY.parse_bFile` [3].
 
 	Parameters
 	----------
-	oeisID : str
-		The identifier of the OEIS sequence to retrieve.
+	oeisID : OEISid
+		Sequence identifier supplied by the metadata construction routine.
 
 	Returns
 	-------
-	OEISsequence : dict[int, int]
-		A dictionary mapping sequence indices to their corresponding values, or a fallback dictionary
-		containing {-1: -1} if retrieval fails.
+	valuesKnown : dict[int, int]
+		Parsed sequence values. Empty text produces the parser's sentinel dictionary.
+
+	Warns
+	-----
+	UserWarning
+		If retrieval returns empty text.
+
+	References
+	----------
+	[1] B-files - OEIS Wiki.
+		https://oeis.org/wiki/B-files
+	[2] `mapFolding.kitFilesystem.getCacheOrURL`
+
+	[3] `mapFolding.oeis._beDRY.parse_bFile`
+
 	"""
 	filename: str = oeis_bfile(oeisID)
 	pathFilenameCache: Path = pathCache / filename
@@ -98,31 +154,47 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 	return parse_bFile(oeisData)
 
 def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
-	"""Retrieve the description and offset metadata for an OEIS sequence.
+	"""I use this to load descriptions and starting indices for the metadata registry.
 
 	(AI generated docstring)
 
-	This function extracts the mathematical description and starting index offset from OEIS sequence
-	metadata using the machine-readable text format. It employs the same caching mechanism as other
-	retrieval functions to minimize network requests.
+	This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` [1] and retrieves
+	the sequence's text record through `mapFolding.kitFilesystem.getCacheOrURL` [2]. The result
+	contains the sequence description and starting index.
 
 	Parameters
 	----------
-	oeisID : str
+	oeisID : OEISid
 		The identifier of the OEIS sequence to retrieve.
 
 	Returns
 	-------
 	description : str
-		A human-readable string describing the sequence's mathematical meaning.
+		Sequence description, or a diagnostic message when no description is found.
 	offset : int
-		The starting index of the sequence, typically 0 or 1 depending on mathematical context.
+		Starting sequence index, or `hunterMakesPy.errorL33T` [3] when no offset is found.
 
-	Parsing Details
-	---------------
-	Descriptions are parsed from OEIS %N entries and offsets from %O entries in the machine-readable
-	text format. If metadata cannot be retrieved, the function issues warning messages and returns
-	fallback values.
+	Warns
+	-----
+	UserWarning
+		If retrieval returns empty text, a description is missing, or an offset is missing.
+
+	Text Fields
+	-----------
+	The parser reads `%N` descriptions and the first comma-separated `%O` offset from matching
+	sequence records in the OEIS internal format [4]. Later matching fields replace earlier values.
+	Invalid offset text propagates `ValueError` from integer conversion.
+
+	References
+	----------
+	[1] `mapFolding.oeis._beDRY.formatOEISid`
+
+	[2] `mapFolding.kitFilesystem.getCacheOrURL`
+
+	[3] hunterMakesPy - Official repository.
+		https://github.com/hunterhogan/hunterMakesPy
+	[4] Internal Format Used in the OEIS.
+		https://oeis.org/eishelp1.html
 	"""
 	oeisID = formatOEISid(oeisID)
 	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
@@ -157,7 +229,29 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	return description, offset
 
 def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
-	"""Construct metadata for every implemented OEIS sequence."""
+	"""I use this to assemble the metadata registry during module import.
+
+	This function loads descriptions, offsets, and b-file values for each identifier in
+	`mapFolding.oeis._theSSOT.oeisIDsImplemented` [1]. The result also supplies row settings for
+	`A259689` and `A400429`, with rows starting at two and complete lengths equal to half the row
+	number rounded down.
+
+	Returns
+	-------
+	dictionary : dict[str, MetadataOEISid]
+		New metadata registry. Each `valueUnknown` is one greater than the largest key in
+		`valuesKnown`, without checking for gaps or excluding fallback sentinels.
+
+	Empty Values
+	------------
+	An empty `valuesKnown` dictionary propagates `ValueError` from `max` and prevents completion
+	of the registry.
+
+	References
+	----------
+	[1] `mapFolding.oeis._theSSOT.oeisIDsImplemented`
+
+	"""
 	dictionary: dict[str, MetadataOEISid] = {}
 	for oeisID in oeisIDsImplemented:
 		valuesKnown: dict[int, int] = _getMetadata_bFile(oeisID)
@@ -170,4 +264,4 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	return dictionary
 
 dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
-"""Metadata for every implemented OEIS sequence."""
+"""Access the mutable metadata registry loaded during module import."""

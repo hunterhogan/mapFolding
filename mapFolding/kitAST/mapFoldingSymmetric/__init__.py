@@ -1,18 +1,16 @@
-"""Generate synchronous and asynchronous symmetric-fold modules.
+"""Generate synchronous and asynchronous symmetric counting modules.
 
 (AI generated docstring)
 
-You can use this package to generate map-folding modules that count only symmetric folding
-patterns. The package combines reusable syntax nodes with synchronous and asynchronous module
-generators. The synchronous generator inserts symmetry filtering into generated algorithms, and
-the asynchronous generator runs filtering concurrently with fold discovery.
+You can use this package to add symmetry filtering to map-folding source, derive counting
+variants, and move filtering into queued workers. The raw syntax module provides reusable nodes.
 
 Modules
 -------
-makeModulesFoldsSymmetric
-    Generate synchronous symmetric-fold modules by transforming map-folding source modules.
-makeModulesFoldsSymmetricAsynchronous
-    Generate asynchronous symmetric-fold modules with concurrent symmetry filtering.
-rawMaterialsFoldsSymmetric
-    Provide reusable syntax nodes for generated symmetric-fold modules.
+makeModules
+	Generate synchronous symmetric counting and Theorem 2 modules.
+makeModulesAsynchronous
+	Generate queued background symmetry filtering.
+rawMaterials
+	Expose symmetry-filter call and count-adjustment syntax.
 """

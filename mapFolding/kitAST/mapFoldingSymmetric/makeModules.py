@@ -1,4 +1,16 @@
-"""addSymmetryCheck."""
+"""Generate synchronous symmetric counting and Theorem 2 variants.
+
+You can use this module to insert symmetry filtering into map-folding source and coordinate
+generation of compilation, initialization, and Theorem 2 variants.
+
+Contents
+--------
+Functions
+	addSymmetryCheck
+		Write a counting module that filters discovered fold groups for symmetry.
+	makeModulesFoldsSymmetric
+		Regenerate synchronous symmetric counting and Theorem 2 modules.
+"""
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
@@ -23,7 +35,43 @@ if TYPE_CHECKING:
 	import ast
 
 def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
-	"""Modify the multidimensional map folding algorithm by checking for symmetry in each folding pattern in a group of folds."""
+	"""Write a counting module that filters discovered fold groups for symmetry.
+
+	You can use this function to adapt a map-folding source module to symmetric state and insert
+	the filter from `mapFolding.algorithms.foldsSymmetric` [1]. Count increments become assigned
+	filter calls. Before each return, the generated count is adjusted by adding one and dividing
+	by two with integer division. The supplied module syntax is modified and written.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects symmetric-fold defaults.
+	**keywordArguments : Any
+		Source and target identifiers for state, counting, dispatching, filtering, indices, modules,
+		package, and output path.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModules` uses this call [2].
+
+		```python
+		addSymmetryCheck(astModule, defaultMapFoldingSymmetric)
+		```
+
+	References
+	----------
+	[1] `mapFolding.algorithms.foldsSymmetric`
+
+	[2] `mapFolding.kitAST.mapFoldingSymmetric.makeModules`
+	"""
 	identifiers = identifiers or defaultMapFoldingSymmetric
 	名DataclassSource: str = keywordArguments.get('名DataclassSource') or identifiers['variable'].get('stateDataclassSource') or defaultMapFolding['variable']['stateDataclass']
 	名Dataclass: str = keywordArguments.get('名Dataclass') or identifiers['variable']['stateDataclass']
@@ -136,7 +184,27 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 	return pathFilename
 
 def makeModulesFoldsSymmetric() -> None:
-	"""Make."""
+	"""Regenerate synchronous symmetric counting and Theorem 2 modules.
+
+	You can use this function to generate symmetry filtering, module-level compilation,
+	state initialization, and the Theorem 2 variants using
+	`mapFolding.kitAST.theSSOT.defaultMapFoldingSymmetric` [1]. The function reads generated
+	files between dependent transformations and overwrites configured output modules.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModules` uses this call [2].
+
+		```python
+		makeModulesFoldsSymmetric()
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.theSSOT.defaultMapFoldingSymmetric`
+
+	[2] `mapFolding.kitAST.mapFoldingSymmetric.makeModules`
+	"""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultMapFolding['logicalPath']['algorithm'], identifierModule=defaultMapFolding['module']['algorithm'])
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultMapFoldingSymmetric)
 

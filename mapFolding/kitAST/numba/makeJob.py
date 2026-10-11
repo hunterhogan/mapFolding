@@ -1,11 +1,21 @@
-"""
-Map folding AST transformation system: Specialized job generation and optimization implementation.
+"""Write specialized counting jobs with Numba compilation and progress reporting.
 
-Each generated module targets a specific map shape and calculation mode.
+You can use this module to specialize source for one initialized map shape, embed field values,
+and add a launcher with timing and result-file output. Generated functions use Numba [1].
 
-The optimization process executes systematic transformations including static value embedding, dead code elimination, parameter
-internalization to convert function parameters into embedded variables, Numba decoration with appropriate compilation directives,
-progress integration for long-running calculations, and launcher generation for standalone execution entry points.
+Contents
+--------
+Functions
+	makeJobNumba
+		Write a specialized Numba counting job for an initialized map shape.
+Variables
+	boxOfSettings形
+		Access the fixed datatype substitutions used during job compilation.
+
+References
+----------
+[1] Numba compilation options and signatures.
+	https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 """
 from __future__ import annotations
 
@@ -35,36 +45,57 @@ boxOfSettings形: list[Settings形] = [
 	Settings形(datatypeIdentifier='形ArrayElephino1D', typeModule='numpy', typeIdentifier='uint16', type_asname='形ArrayElephino1D'),
 	Settings形(datatypeIdentifier='形ArrayTotalLeaves3D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayTotalLeaves3D'),
 ]
+"""Access the fixed datatype substitutions used during job compilation.
+
+(AI generated docstring)
+
+This list records imported scalar types and array element types while preserving abstract
+aliases used by the source algorithm.
+"""
 
 def makeJobNumba(job: RecipeJobTheorem2, spices: SpicesJobNumba) -> Path:
-	"""Generate an optimized Numba-compiled computation module for map folding calculations.
+	"""Write a specialized Numba counting job for an initialized map shape.
 
 	(AI generated docstring)
 
-	This function orchestrates the complete code transformation assembly line to convert
-	a generic map folding algorithm into a highly optimized, specialized computation
-	module. The transformation process includes:
+	You can use this function to turn the source function and state in `job` into a standalone
+	counting module with Numba compilation [1]. The function embeds field values, moves static
+	arrays to module scope, replaces datatype imports, and adds reporting and result-file output.
+	The function writes source and returns the writer path.
 
-	1. Extract and modify the source function from the generic algorithm
-	2. Replace static-valued identifiers with their concrete values
-	3. Convert function parameters to embedded initialized variables
-	4. Remove unused code paths and variables for optimization
-	5. Configure appropriate Numba decorators for JIT compilation
-	6. Add progress tracking capabilities for long-running computations
-	7. Generate standalone launcher code for direct execution
-	8. Write the complete optimized module to the filesystem
-
-	The resulting module is a self-contained Python script that can execute
-	map folding calculations for the specific map dimensions with maximum
-	performance through just-in-time compilation.
+	Configuration Mutation
+	----------------------
+	Progress tracking sets `spices.parametersNumba['nogil']` to `True`.
+	The function also replaces `spices.parametersNumba['locals']` with generated type syntax.
+	Datatype substitutions use `boxOfSettings形` [2].
 
 	Parameters
 	----------
-	job : RecipeJobTheorem2Numba
-		Configuration recipe containing source locations, target paths, and state.
+	job : RecipeJobTheorem2
+		Initialized recipe with source syntax, decomposed fields, and output paths.
 	spices : SpicesJobNumba
-		Optimization settings including Numba parameters and progress options.
+		Progress and compiler configuration, modified during job generation.
 
+	Returns
+	-------
+	pathFilename : Path
+		Path to the generated Python job module.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.numba.makeJob` uses this call [3].
+
+		```python
+		makeJobNumba(fromMapShape(mapShape, initializationConstructor=False), spices)
+		```
+
+	References
+	----------
+	[1] Numba compilation options and signatures.
+		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
+	[2] `boxOfSettings形`
+
+	[3] `mapFolding.kitAST.numba.makeJob`
 	"""
 	ingredientsFunction: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 

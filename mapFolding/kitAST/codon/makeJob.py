@@ -1,4 +1,23 @@
-"""mapFolding job."""
+"""Write specialized counting jobs and compile source on Linux.
+
+You can use this module to embed state values and insert datatype conversions for generated
+counting jobs. On Linux, generation also calls `mapFolding.kitAST.linux.toCodon` [1].
+
+Contents
+--------
+Functions
+	makeJob
+		Write a specialized counting job and compile the source on Linux.
+	variableCompatibility
+		Insert datatype conversions around selected field operations.
+Variables
+	boxOfSettings形
+		Access the fixed datatype substitutions used during source preparation.
+
+References
+----------
+[1] `mapFolding.kitAST.linux.toCodon`
+"""
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, Then
@@ -23,18 +42,46 @@ boxOfSettings形: list[Settings形] = [
 	Settings形(datatypeIdentifier='形ArrayElephino1D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayElephino1D'),
 	Settings形(datatypeIdentifier='形ArrayTotalLeaves3D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayTotalLeaves3D'),
 ]
+"""Access the fixed datatype substitutions used during source preparation.
+
+(AI generated docstring)
+
+This list records imported scalar types and array element types while preserving abstract
+aliases used by the source algorithm.
+"""
 
 def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
-	"""Generate an optimized module for map folding calculations.
+	"""Write a specialized counting job and compile the source on Linux.
 
-	This function orchestrates the complete code transformation assembly line to convert a generic map folding algorithm into a
-	highly optimized, specialized computation module.
+	You can use this function to specialize `job` by embedding state values, inserting datatype
+	conversions, replacing datatype imports, and adding a standalone launcher.
+	The function writes the Python source. On Linux, the function also calls
+	`mapFolding.kitAST.linux.toCodon` [1], which rewrites that source and builds an executable.
+	The function returns the configured source path on every platform.
 
 	Parameters
 	----------
 	job : RecipeJobTheorem2
-		Configuration recipe containing source locations, target paths, raw materials, and state.
+		Initialized recipe with source syntax, field metadata, and job output paths.
 
+	Returns
+	-------
+	pathFilenameModule : PurePosixPath
+		Configured Python source path; the Linux executable has the source suffix removed.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.codon.makeJob` uses this call [2].
+
+		```python
+		makeJob(fromMapShape(mapShape))
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.linux.toCodon`
+
+	[2] `mapFolding.kitAST.codon.makeJob`
 	"""
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 	ingredientsCount.astFunctionDef.decorator_list = []
@@ -59,24 +106,43 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 	return job.pathFilenameModule
 
 def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
-	"""Ensure the variable is compiled to the correct type.
+	"""Insert datatype conversions around selected field operations.
 
-	Add a type constructor to `identifier` to ensure compatibility if
-	- an incompatible type might be assigned to it,
-	- it might be compared with an incompatible type,
-	- it is used as an indexer but its type is not a valid indexer type.
+	You can use this function to adapt `ingredientsFunction` for compiled execution by using
+	field annotations from `job`. The function inserts conversions in selected assignments,
+	arithmetic operands, comparisons, and indices. The original function container is modified
+	in place and returned.
+
+	Conversion Selection
+	--------------------
+	Matching augmented assignments and constant-valued assignments wrap the assigned value in
+	the field annotation constructor. Binary operations with a matching left operand wrap the
+	right operand. Matching comparisons retain one converted comparator. Matching subscripts
+	convert one index, or each tuple index, with `int`.
 
 	Parameters
 	----------
 	ingredientsFunction : IngredientsFunction
-		Function to modify.
+		Function container whose field operations will receive conversions.
 	job : RecipeJobTheorem2
-		Configuration settings with identifiers and their type annotations.
+		Recipe containing annotated field arguments in decomposed dataclass metadata.
 
 	Returns
 	-------
 	ingredientsFunction : IngredientsFunction
-		Modified function.
+		The original container holding the transformed function syntax.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.codon.makeJob` uses this call [1].
+
+		```python
+		variableCompatibility(ingredientsCount, job)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.codon.makeJob`
 	"""
 	for ast_arg in raiseIfNone(job.shatteredDataclass).boxOf_argAnnotated:
 		identifier: str = ast_arg.arg

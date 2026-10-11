@@ -89,23 +89,99 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 	return n_aOFn
 
 def parseTriangleBFile(contents: str, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:
+	"""Group OEIS b-file values into consecutively numbered rows.
+
+	(AI generated docstring)
+
+	You can use this function to recover rows from b-file text. This function parses `contents`
+	with `parse_bFile` [1] and groups the parsed values with
+	`mapFolding.dataStructures.makeLookupTriangle` [2].
+
+	Parameters
+	----------
+	contents : str
+		B-file text containing sequence indices and values.
+	rowLengths : Iterable[int] | None = None
+		Requested lengths for successive rows. `None` or an empty container selects lengths
+		starting at one and increasing by one; an empty iterator produces no rows.
+	rowStart : int = 1
+		Number assigned to the first row. This number does not change default row lengths.
+
+	Returns
+	-------
+	triangle : dict[int, list[int]]
+		Nonempty rows, including a partially known final row. Values follow parsed dictionary
+		insertion order; sequence index keys do not determine row boundaries.
+
+	Row Consumption
+	---------------
+	Grouping stops at the first empty row or when requested row lengths are exhausted. Empty
+	`contents` retains the sentinel value produced by `parse_bFile` in the first default row.
+
+	References
+	----------
+	[1] `parse_bFile`
+
+	[2] `mapFolding.dataStructures.makeLookupTriangle`
+
+	"""
 	sequence: dict[int, int] = parse_bFile(contents)
 	return makeLookupTriangle(sequence.values(), rowLengths, rowStart)
 
 def parseDiagonalBFile(contents: str, 次diagonal: int, *, rowStart: int = 1,
 	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
+	"""Select a diagonal from OEIS b-file values grouped into rows.
+
+	(AI generated docstring)
+
+	You can use this function to read one diagonal from b-file text. This function groups values
+	with `parseTriangleBFile` [1], then selects available columns with
+	`mapFolding.dataStructures.makeLookupDiagonal` [2].
+
+	Parameters
+	----------
+	contents : str
+		B-file text containing sequence indices and values in row order.
+	次diagonal : int
+		Distance from the selected row edge, normally starting at one. Zero is accepted.
+	rowStart : int = 1
+		Number assigned to the first row.
+	rowLength : Callable[[int], int] | None = None
+		Expected complete row length from a row number. `None` selects lengths starting at one
+		and increasing by one. The callable controls grouping for either edge and supplies the
+		right edge when `fromRight=True`.
+	fromRight : bool = True
+		Select from the right edge when `True`, or the left edge when `False`.
+
+	Returns
+	-------
+	diagonal : dict[int, int]
+		Available diagonal values keyed by ascending row number. Rows without the requested
+		column are omitted; a partial row uses the expected length to locate its right edge.
+
+	Invalid Requests
+	----------------
+	This function propagates `ValueError` if `次diagonal` is negative or retained b-file fields
+	cannot be parsed as integer pairs.
+
+	References
+	----------
+	[1] `parseTriangleBFile`
+
+	[2] `mapFolding.dataStructures.makeLookupDiagonal`
+
+	"""
 	if rowLength is None:
 		rowLength = partial(add, 1 - rowStart)
 	return makeLookupDiagonal(parseTriangleBFile(contents, map(rowLength, count(rowStart)), rowStart),
 		次diagonal, fromRight=fromRight, rowLength=rowLength)
 
 def formatOEISid(oeisID: OEISid) -> OEISid:
-	"""I use this to normalize OEIS sequence identifiers to a canonical form.
+	"""Uppercase an OEIS sequence identifier and strip surrounding whitespace.
 
-	This shared normalization function ensures consistent OEIS sequence ID formatting across all
-	retrieval, lookup, and computation operations throughout the module. The function converts the
-	identifier to uppercase and removes leading and trailing whitespace to ensure reliable dictionary
-	lookups and cache key formation.
+	You can use this function to standardize an identifier before a sequence lookup. This function
+	converts `oeisID` to text, uppercases the text, and removes leading and trailing whitespace.
+	This function does not remove internal whitespace or validate the identifier's syntax.
 
 	Parameters
 	----------
@@ -115,7 +191,7 @@ def formatOEISid(oeisID: OEISid) -> OEISid:
 	Returns
 	-------
 	oeisIDstandardized : OEISid
-		Uppercase, alphanumeric OEIS ID with no whitespace.
+		Uppercase text with no surrounding whitespace.
 
 	"""
 	return ILiterallyPromiseLiteralLiterallyMeansLiteral("LiteralString", str(oeisID).upper().strip())

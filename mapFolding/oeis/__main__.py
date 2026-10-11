@@ -1,21 +1,42 @@
-"""Display available OEIS sequence information when executed as a module.
+"""Inspect known OEIS values, map shapes, and triangle data.
 
 (AI generated docstring)
 
-You can execute this module with `python -m mapFolding.oeis` to display the identifiers,
-descriptions, and usage examples for implemented OEIS sequences. The module delegates output
-generation to `getOEISids` [1].
+You can use this module's functions to look up known folding totals, convert sequence indices
+to map shapes, inspect triangle rows and diagonals, and print benchmark comparisons.
 
 Contents
 --------
 Functions
-	getOEISids
-		Display comprehensive information about all implemented OEIS sequences.
+	getTotalFoldsKnown
+		Retrieve a known folding total for an exact map shape.
+	getTriangleDiagonal
+		Select a diagonal using the sequence's row layout.
+	getTriangleRows
+		Group known sequence values into numbered rows.
+	makeLookupTotalFoldsKnown
+		Build a map-shape lookup from registered map-folding sequences.
+	makeMapShape
+		Convert a supported sequence identifier and index to map dimensions.
+	printEasyRunBenchmark
+		Print computed and known values with elapsed time and optional ratio.
+	printEasyRunHeader
+		Print two labels with reproducible terminal colors.
+	readBFileDiagonal
+		Read a local b-file and select a diagonal.
+	readBFileTriangle
+		Read a local b-file and group its values into rows.
+
+Module Execution
+----------------
+Executing this module displays sequence identifiers, descriptions, and usage examples through
+`mapFolding.oeis.getOEISids` [1]. The installed `getOEISids` console command provides the same
+listing.
 
 References
 ----------
 [1] `mapFolding.oeis.getOEISids`
-	Internal package reference for the OEIS sequence information display function.
+
 """
 from __future__ import annotations
 
@@ -44,76 +65,137 @@ if TYPE_CHECKING:
 
 @cache
 def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
-	"""You can retrieve the known total number of distinct folding patterns for a given map shape.
+	"""Retrieve the known folding total for an exact map shape.
 
 	(AI generated docstring)
 
-	This function queries the comprehensive dictionary of known folding totals constructed from OEIS
-	sequence data. The function returns the total if the map shape matches a known value, or None if
-	the shape is not found in the OEIS sequences.
+	You can use this function to compare a map shape with the known totals assembled by
+	`makeLookupTotalFoldsKnown` [1]. This function returns the stored total for `mapShape`, or
+	`None` when the lookup contains no matching shape.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		A tuple of integers representing the dimensions of the map.
+		Map dimensions in the order used by the sequence's shape conversion. Dimensions are not
+		sorted and dimensions of length one are not removed.
 
 	Returns
 	-------
 	foldingsTotal : int | None
-		The known total number of distinct folding patterns for the given map shape, or None if the
-		map shape does not match any known values in the OEIS sequences.
-
-	Examples
-	--------
-	>>> from mapFolding.oeis import getTotalFoldsKnown
-	>>> getTotalFoldsKnown((2, 3))
-	10
-
-	Implementation Details
-	----------------------
-	Map shapes are matched exactly as provided without internal sorting or normalization. The function
-	uses `functools.cache` [1] for memoization to avoid reconstructing the lookup dictionary on
-	repeated calls.
+		Known folding total for `mapShape`, or `None` when the shape is absent from the lookup.
 
 	See Also
 	--------
-	mapFolding.oeis.makeLookupTotalFoldsKnown
-		Construct the underlying lookup dictionary.
+	`makeLookupTotalFoldsKnown`
+		Retrieve the complete shape-to-total lookup instead of one total.
+
+	Caching
+	-------
+	`functools.cache` [2] retains results for previously requested shapes. Each uncached call
+	rebuilds the complete lookup before selecting the total for `mapShape`.
+
+	Examples
+	--------
+	`mapFolding.kitAST.RecipeJob.fromMapShape` [3] queries the known total before estimating a
+	job's size.
+
+		```python
+		from mapFolding.oeis import getTotalFoldsKnown
+
+		getTotalFoldsKnown(state.mapShape)
+		```
 
 	References
 	----------
-	[1] functools.cache - Python standard library
+	[1] `makeLookupTotalFoldsKnown`
+
+	[2] functools.cache - Python standard library.
 		https://docs.python.org/3/library/functools.html#functools.cache
+	[3] `mapFolding.kitAST.RecipeJob.fromMapShape`
+
 	"""
 	lookupTotalFolds: dict[tuple[int, ...], int] = makeLookupTotalFoldsKnown()
 	return lookupTotalFolds.get(tuple(mapShape))
 
 def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
-	"""You can create a dictionary mapping map shapes to known folding totals from all OEIS sequences.
+	"""Build a map-shape lookup from known map-folding sequence values.
 
 	(AI generated docstring)
 
-	This function constructs a comprehensive lookup dictionary by extracting and transforming data
-	from all map-folding OEIS sequences in `dictionaryOEIS`. The function applies `makeMapShape` to
-	each sequence's known indices to generate the corresponding map shapes,
-	then pairs each shape with its folding total.
+	You can use this function to inspect known folding totals for every map shape represented by
+	`mapFolding.oeis._theSSOT.oeisIDsMapFoldingImplemented` [1]. This function retrieves known
+	values with `mapFolding.oeis.getValuesKnown` [2] and converts sequence indices to dimensions
+	with `makeMapShape` [3].
 
 	Returns
 	-------
-	dictionaryTotalFoldsKnown : dict[tuple[int, ...], int]
-		A dictionary where keys are tuple `mapShape` and values are the total number of distinct
-		folding patterns for `mapShape`.
+	lookupTotalFolds : dict[tuple[int, ...], int]
+		New dictionary mapping exact dimension tuples to known folding totals. When sequences
+		produce the same shape, the later sequence in the registered tuple supplies the value.
 
 	Exclusions
 	----------
-	A007822 (symmetric foldings) is excluded from the dictionary because A007822 represents a
-	constrained subset rather than the total count for each `mapShape`.
+	Only registered map-folding sequences contribute values. `A007822`, which counts symmetric
+	foldings, is excluded. This function does not filter retrieval sentinels before shape conversion.
+
+	References
+	----------
+	[1] `mapFolding.oeis._theSSOT.oeisIDsMapFoldingImplemented`
+
+	[2] `mapFolding.oeis.getValuesKnown`
+
+	[3] `makeMapShape`
+
 
 	"""
 	return merge(*[keymap(partial(makeMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in oeisIDsMapFoldingImplemented])
 
 def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418', 'A007822'], n: int) -> tuple[int, ...]:
-	"""Get the map shape for a given OEIS ID and index n."""
+	"""Convert a supported OEIS sequence identifier and index to map dimensions.
+
+	You can use this function to obtain the map shape corresponding to `n` for one of the supported
+	folding sequences. This function checks the offset in `mapFolding.oeis._metadata.dictionaryOEIS`
+	[1], then returns the sequence's dimension tuple.
+
+	Shape Conversion
+	----------------
+	`A000136` produces `(1, n)`, `A001415` produces `(2, n)`, and `A001416` produces `(3, n)`.
+	`A001417` produces `n` dimensions of length two, and `A195646` produces `n` dimensions of
+	length three. `A001418` produces `(n, n)`, and `A007822` produces `(1, 2 * n)`.
+
+	Parameters
+	----------
+	oeisID : LiteralString | Literal['A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418', 'A007822']
+		Sequence identifier as written above. This function does not normalize letter case or
+		surrounding whitespace. An identifier absent from the registry propagates `KeyError`.
+	n : int
+		Sequence index at or above the stored offset.
+
+	Returns
+	-------
+	mapShape : tuple[int, ...]
+		Dimensions of the map associated with the requested sequence term.
+
+	Raises
+	------
+	ValueError
+		If `n` is below the stored offset or a registered identifier has no shape conversion.
+
+	Examples
+	--------
+	`easyRun/countFolds.py` obtains dimensions before counting the folds for a sequence term.
+
+		```python
+		from mapFolding.oeis import makeMapShape
+
+		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis._metadata.dictionaryOEIS`
+
+	"""
 	if dictionaryOEIS[oeisID]['offset'] <= n:
 		match oeisID:
 			case 'A000136':
@@ -223,27 +305,48 @@ def readBFileDiagonal(pathFilename: Path, 次diagonal: int, *, rowStart: int = 1
 def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
 	"""Print a benchmark comparison line for an OEIS sequence value.
 
-	Outputs a tab-separated line showing whether the computed value matches the known OEIS value, the
-	index, both values, optionally their ratio, and elapsed time.
+	You can use this function to compare `computed` with the stored value at index `n` from
+	`mapFolding.oeis.getValuesKnown` [1]. This function writes the index, a colored match flag,
+	elapsed seconds, computed value, known value, and optional ratio to standard output.
 
 	Parameters
 	----------
 	oeisID : str
-		The OEIS sequence identifier (e.g., 'A000136').
+		Sequence identifier, normalized by the known-value lookup.
 	n : int
-		The index/term number in the sequence.
+		Index of the sequence term to compare.
 	computed : int
 		The computed value to compare against the known OEIS value.
 	timeStart : float
-		The start time from `time.perf_counter()` for elapsed time calculation.
+		Start time from `time.perf_counter` [2] for elapsed time calculation.
 	ratio : bool = False
-		If True and `computed` is non-zero, also print the ratio `known / computed`.
+		Print the known-to-computed ratio when `True` and `computed` is nonzero.
 
-	Notes
-	-----
-	The output uses ANSI color codes: green for match, red for mismatch. The known value is retrieved
-	from the OEIS data via `getValuesKnown`. If the sequence or term is not found, `known` will be a
-	large negative sentinel value.
+	Output Fields
+	-------------
+	The index precedes a space; subsequent fields are separated by tabs. Matching values use
+	`hunterMakesPy.ansiColor.GreenOnBlack` [3], and mismatches use `YellowOnRed`. An absent term
+	uses `-errorL33T` as the known value. When requested, the ratio uses the match color if the
+	float result is an integer and the mismatch color otherwise.
+
+	Examples
+	--------
+	`easyRun/countFolds.py` prints a comparison after counting folds for a sequence term.
+
+		```python
+		from mapFolding.oeis import printEasyRunBenchmark
+
+		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=False)
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis.getValuesKnown`
+
+	[2] time.perf_counter - Python standard library.
+		https://docs.python.org/3/library/time.html#time.perf_counter
+	[3] hunterMakesPy - Official repository.
+		https://github.com/hunterhogan/hunterMakesPy
 	"""
 	known: int = getValuesKnown(oeisID).get(n, -errorL33T)
 	match: bool = computed == known
@@ -259,22 +362,48 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
-	"""Print a colored header line: limited to [a-Z,0-9] without spaces.
+	"""Print a title and subtitle with reproducible terminal colors.
 
-	Outputs the OEIS ID and flow identifier in distinct colors based on their hash values, followed by
-	a color reset.
+	You can use this function to label a benchmark run with `title` and `subtitle`. This function
+	writes the original labels to standard output and selects each color from the corresponding
+	ASCII transliteration supplied by `anyascii` [1].
 
 	Parameters
 	----------
 	title : str | int
-		The title string (e.g., 'A000136').
+		First label. Its ASCII transliteration must be accepted as a base-36 integer.
 	subtitle : str | int
-		A subtitle string (e.g., the flow, `n`, 'benchmark').
+		Second label, subject to the same base-36 conversion requirement as `title`.
 
-	Notes
-	-----
-	Colors are selected by converting the string to a base-36 integer and modulo the number of
-	available ANSI colors. This provides consistent coloring for the same identifiers across runs.
+	Label Conversion
+	----------------
+	This function propagates `ValueError` if either label's ASCII transliteration cannot be
+	converted to a base-36 integer.
+
+	Color Selection
+	---------------
+	Each transliterated label is converted with `int` using base 36 [2]. The result modulo the
+	number of entries in `hunterMakesPy.ansiColor` [3] selects the color. Labels can select the same
+	color. This function resets terminal colors after printing both labels and a newline.
+
+	Examples
+	--------
+	`easyRun/countFolds.py` labels each run with the sequence identifier and algorithm selector.
+
+		```python
+		from mapFolding.oeis import printEasyRunHeader
+
+		printEasyRunHeader(oeisID, flow)
+		```
+
+	References
+	----------
+	[1] AnyAscii - Official repository.
+		https://github.com/anyascii/anyascii
+	[2] int - Python standard library.
+		https://docs.python.org/3/library/functions.html#int
+	[3] hunterMakesPy - Official repository.
+		https://github.com/hunterhogan/hunterMakesPy
 	"""
 	sys.stdout.write(f"{ansiColor[int(anyascii.anyascii(str(title)), 36) % len(ansiColor)]}{title} ")
 	sys.stdout.write(f"{ansiColor[int(anyascii.anyascii(str(subtitle)), 36) % len(ansiColor)]} {subtitle} ")

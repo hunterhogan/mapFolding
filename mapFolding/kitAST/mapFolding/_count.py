@@ -1,7 +1,26 @@
-"""Make the `count` function for an algorithm.
+"""I use this module to derive counting variants from map-folding source.
 
-These transformation functions will work on at least two different algorithms. If a transformation
-function only works on a specific type of algorithm, it will be in a subdirectory.
+This module generates sequential, parallel, and Theorem 2 counting variants. The transforms
+expect the source structures and state metadata configured by
+`mapFolding.kitAST.theSSOT.defaultMapFolding` [1].
+
+Contents
+--------
+Functions
+	makeInlineNumba
+		Write a sequential counting module with field parameters and Numba compilation.
+	makeInlineParallelNumba
+		Write a counting module with compiled workers and a process dispatcher.
+	makeTheorem2
+		Write a counting module restricted to the initial fold-group search.
+	numbaOnTheorem2
+		Write a Numba counting module from a Theorem 2 source variant.
+	trimTheorem2
+		Write a Theorem 2 variant with unconstrained-dimension branches removed.
+
+References
+----------
+[1] `mapFolding.kitAST.theSSOT.defaultMapFolding`
 """
 from __future__ import annotations
 
@@ -30,7 +49,43 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate Numba-optimized sequential implementation of an algorithm."""
+	"""Write a sequential counting module with field parameters and Numba compilation.
+
+	You can use this function to inline the source counting function, replace dataclass state
+	with individual field parameters, and attach Numba compilation [1]. A configured dispatcher
+	is adapted to extract fields, call the generated function, and reconstruct the state.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects the defaults used by this
+		generator.
+	**override : Any
+		Overrides for source and target callable identifiers, dispatcher source, compiler options,
+		module name, and writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+
+		```python
+		makeInlineNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+		```
+
+	References
+	----------
+	[1] Numba compilation options and signatures.
+		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
+	[2] `mapFolding.kitAST.mapFolding.makeModules`
+	"""
 	identifiers = identifiers or default
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('inlineNumba') or 名CallableSource
@@ -75,7 +130,49 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate module by applying optimization predicted by Theorem 2."""
+	"""Write a counting module restricted to the initial fold-group search.
+
+	You can use this function to derive the Theorem 2 counting variant from `astModule`.
+	The function inlines counting, changes the active-leaf loop threshold to four, doubles
+	the count after that loop, and adjusts matching control flow. A configured dispatcher
+	calls a generated state initializer before counting.
+
+	Source Pattern
+	--------------
+	The transformation rewrites the active-leaf comparisons and loop structure used by
+	`mapFolding.algorithms.daoOfMapFolding` [1].
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects the defaults used by this
+		generator.
+	**override : Any
+		Overrides for callable and counting identifiers, dispatcher, initializer names, module name,
+		package, and writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+
+		```python
+		makeTheorem2(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+		```
+
+	References
+	----------
+	[1] `mapFolding.algorithms.daoOfMapFolding`
+
+	[2] `mapFolding.kitAST.mapFolding.makeModules`
+	"""
 	identifiers = identifiers or default
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('counting') or 名CallableSource
@@ -167,7 +264,43 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 # SEMIOTICS
 def numbaOnTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate Numba-accelerated Theorem 2 implementation with dataclass decomposition."""
+	"""Write a Numba counting module from a Theorem 2 source variant.
+
+	You can use this function to inline a Theorem 2 counting function, replace the state object
+	with individual field parameters, remove unused parameters, and add Numba compilation [1].
+	A configured dispatcher is adapted to the field argument and return contract.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects the defaults used by this
+		generator.
+	**override : Any
+		Overrides for source and target callable identifiers, dispatcher source, compiler options,
+		module name, and writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+
+		```python
+		numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
+		```
+
+	References
+	----------
+	[1] Numba compilation options and signatures.
+		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
+	[2] `mapFolding.kitAST.mapFolding.makeModules`
+	"""
 	identifiers = identifiers or default
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('theorem2Trimmed') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('theorem2Numba') or 名CallableSource
@@ -215,7 +348,41 @@ def numbaOnTheorem2(astModule: ast.Module, identifiers: Default | None = None, *
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate constrained Theorem 2 implementation by removing unnecessary logic."""
+	"""Write a Theorem 2 variant with unconstrained-dimension branches removed.
+
+	You can use this function to derive a counting variant that assumes dimension constraints
+	already hold. The function removes conditionals testing the negation of the state
+	`dimensionsUnconstrained` attribute and updates a configured dispatcher to the target name.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects the defaults used by this
+		generator.
+	**override : Any
+		Overrides for source and target callable identifiers, dispatcher source, module name, and
+		writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [1].
+
+		```python
+		trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.mapFolding.makeModules`
+	"""
 	identifiers = identifiers or default
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('theorem2Trimmed') or 名CallableSource
@@ -251,7 +418,53 @@ def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate parallel implementation with concurrent execution and task division."""
+	"""Write a counting module with compiled workers and a process dispatcher.
+
+	You can use this function to derive counting workers that accept individual fields and
+	compile through Numba [1]. The generated dispatcher creates one state per task division,
+	submits each state to a process executor [2], gathers results, and returns the total fold
+	count with the completed states.
+
+	Parallel State
+	--------------
+	The companion state class appends `Parallel` to the source dataclass identifier.
+	The transformation adds fields declared only by that class, then partitions work using
+	`taskDivisions` and `task次`. Generation expects the source gap-counting loop and
+	a dispatcher whose assigned counting calls can be adapted.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects the defaults used by this
+		generator.
+	**override : Any
+		Overrides for source and target counting and dispatcher identifiers, counting field, compiler
+		options, module name, and writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [3].
+
+		```python
+		makeInlineParallelNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+		```
+
+	References
+	----------
+	[1] Numba compilation options and signatures.
+		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
+	[2] Python process executor.
+		https://docs.python.org/3/library/concurrent.futures.html#processpoolexecutor
+	[3] `mapFolding.kitAST.mapFolding.makeModules`
+	"""
 	identifiers = identifiers or defaultMapFolding
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('inlineParallelNumba') or 名CallableSource

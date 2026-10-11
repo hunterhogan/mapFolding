@@ -1,4 +1,16 @@
-"""addSymmetryCheckAsynchronous."""
+"""Generate symmetric counting with queued background filtering.
+
+You can use this module to combine synchronous counting source with a worker template,
+rewrite filter calls as queued submissions, and collect accumulated symmetric counts.
+
+Contents
+--------
+Functions
+	addSymmetryCheckAsynchronous
+		Write a symmetric counting module with queued background filtering.
+	makeModulesFoldsSymmetricAsynchronous
+		Regenerate the configured asynchronous symmetric counting module.
+"""
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
@@ -21,19 +33,38 @@ if TYPE_CHECKING:
 # TODO figure out asynchronous + numba.
 
 def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
-	"""Make the check for symmetry in each folding pattern in a group of folds asynchronous to the rest of the symmetric map folding algorithm.
+	"""Write a symmetric counting module with queued background filtering.
 
-	To do asynchronous filtering, a few things must happen.
-	1. When the algorithm finds a `groupOfFolds`, the call to `filterAsymmetricFolds` must be non-blocking.
-	2. Filtering the `groupOfFolds` into symmetric folds must start immediately, and run concurrently.
-	3. When filtering, the module must immediately discard `leafBelow` and sum the filtered folds into a global total.
-	4. Of course, the filtering must be complete before `getAsymmetricTotalFolds` fulfills the request for the total.
+	You can use this function to adapt synchronous symmetric counting so discovered states are
+	copied to a queue for background filtering. The transformation adds worker initialization
+	to the dispatcher, combines the worker template [1] with the source module, and collects
+	the accumulated count after the selected counting loop. The function modifies and writes
+	the supplied syntax.
 
-	Why _must_ those things happen?
-	1. Filtering takes as long as finding the `groupOfFolds`, so we can't block.
-	2. Filtering must start immediately to keep up with the finding process.
-	3. To discover the foldsSymmetric count for n=27, which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
-	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
+	Worker Template
+	---------------
+	The generated module replaces the template filter with the source filtering implementation.
+	The dispatcher gains a required worker-count argument. The transformation selects assigned filter calls and the active-leaf loop condition.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects symmetric-fold defaults.
+	**keywordArguments : Any
+		Source, target, and worker-template identifiers for state, filtering, counting, dispatching,
+		workers, package, and output path.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	References
+	----------
+	[1] `mapFolding.kitAST.mapFoldingSymmetric._asynchronousAnnex`
 	"""
 	identifiers = identifiers or defaultMapFoldingSymmetric
 	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
@@ -218,7 +249,31 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	return pathFilename
 
 def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
-	"""Make asynchronous modules for foldsSymmetric."""
+	"""Regenerate the configured asynchronous symmetric counting module.
+
+	You can use this function to load the configured symmetric source module and pass that module
+	to `addSymmetryCheckAsynchronous` [1]. The generated file uses the configured worker template
+	and output identifiers. An existing output file is overwritten.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated asynchronous module.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous` uses this call [2].
+
+		```python
+		makeModulesFoldsSymmetricAsynchronous()
+		```
+
+	References
+	----------
+	[1] `addSymmetryCheckAsynchronous`
+
+	[2] `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous`
+	"""
 	return addSymmetryCheckAsynchronous(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':

@@ -1,16 +1,15 @@
-"""Generate lookup modules from OEIS formula functions.
+"""Generate known-value lookup variants of sequence-formula source.
 
 (AI generated docstring)
 
-You can use this module to derive an OEIS lookup module from a source module that computes
-sequence values with formulas. The module creates lookup helpers for public OEIS functions and
-writes literal-selector values for generated-module test data.
+You can use this module to redirect formula calls to known sequence values and write selector
+samples for generated-module checks. The generator writes a lookup module beside the source.
 
 Contents
 --------
 Functions
 	makeOEISidByFormulaLookup
-		Generate an OEIS lookup module and literal-selector test data.
+		Write a formula-source variant that uses known OEIS sequence values.
 """
 from __future__ import annotations
 
@@ -29,30 +28,46 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
-	"""Generate an OEIS lookup module from a formula-source module.
+	"""Write a formula-source variant that uses known OEIS sequence values.
 
 	(AI generated docstring)
 
-	You can use this function to transform the module at `pathFilenameSource` into a sibling module
-	whose public OEIS functions read known values from `dictionaryOEIS` [1]. The function removes
-	private source functions, redirects calls between public OEIS functions through lookup helpers,
-	and writes literal-selector values to the generated-module test-data directory [2].
+	You can use this function to transform the module at `pathFilenameSource` into a sibling lookup
+	module. The generated lookup functions use `mapFolding.oeis.getValuesKnown` [1]. The function
+	also writes literal-selector data under the configured sample-data path [2].
+
+	Function Transformation
+	-----------------------
+	Source decorators are cleared. Private function definitions are removed. Each public function
+	gets a private known-value lookup function, and direct calls to the public identifier are
+	redirected to that lookup. The public function identifiers supply the sequence identifiers.
+	Parsing with optimization removes source docstrings.
 
 	Parameters
 	----------
 	pathFilenameSource : Path
-		Path to the source module whose public function names are OEIS identifiers.
+		Source module whose public functions are expected to have OEIS sequence identifiers.
 
 	Returns
 	-------
 	pathFilename : Path
-		Path to the generated OEIS lookup module.
+		Path to the written lookup module; selector data is written separately.
+
+	Examples
+	--------
+	The module `easyRun.synthesizeModules` uses this call [3].
+
+		```python
+		makeOEISidByFormulaLookup(pathFilenameSource)
+		```
 
 	References
 	----------
-	[1] `mapFolding.oeis._metadata.dictionaryOEIS`
+	[1] `mapFolding.oeis.getValuesKnown`
 
-	[2] `mapFolding.tests.conftest.pathDataSamples`
+	[2] `mapFolding.theSSOT.settingsPackage`
+
+	[3] `easyRun.synthesizeModules`
 	"""
 	pathFilenameWrite: Path = pathFilenameSource.with_stem('_' + pathFilenameSource.stem + 'Lookup')
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)

@@ -86,57 +86,49 @@ def getModule(
 	, identifierPackage: str | None = None
 	, identifiers: Default | None = None
 ) -> ast.Module:
-	"""Parse a resolved logical module path into an `ast.Module`.
+	"""Parse the source module resolved from explicit or default identifiers.
 
-	You can use this function to load a source module AST from explicit identifiers or from the
-	nested `identifiers` mapping when explicit values are omitted. The function resolves
-	`identifierPackage`, `logicalPathInfix`, and `identifierModule`, then parses the resulting
-	logical path into an `ast.Module`.
+	You can use this function to resolve a dotted source path from `identifierPackage`,
+	`logicalPathInfix`, and `identifierModule`, then parse the source with `astToolkit` [1].
+	The function returns module syntax for subsequent inspection or transformation.
+
+	Fallback Order
+	--------------
+	Each component uses its explicit argument first, then the matching entry in `identifiers`,
+	then `mapFolding.kitAST.theSSOT.default` [2]. Selection uses truthiness, so an empty string
+	cannot suppress a nonempty fallback. The resolved module identifier must not be `None`.
 
 	Parameters
 	----------
 	identifierModule : str | None = None
-		Module identifier placed at the end of the logical path.
+		Module identifier; a falsy value uses the mapping fallback.
 	logicalPathInfix : identifierDotAttribute | None = None
-		Dot-separated middle segment between `identifierPackage` and `identifierModule`.
+		Dotted middle segment; a falsy value uses the mapping fallback.
 	identifierPackage : str | None = None
-		Package identifier placed at the beginning of the logical path.
+		Package identifier; a falsy value uses the mapping fallback.
 	identifiers : Default | None = None
-		Nested default mapping used when explicit arguments are omitted.
+		Optional nested mapping of package, default logical path, and default module identifiers.
 
 	Returns
 	-------
 	astModule : ast.Module
-		Parsed module AST for the resolved logical path.
-
-	See Also
-	--------
-	`getLogicalPath`
-		Assemble the dotted logical path that this function parses.
-	`getPathFilename`
-		Build a filesystem path when a generated module needs a destination filename.
-
-	Fallback order
-	--------------
-	component resolution : behavior
-		Each logical-path component is resolved from the explicit argument first, then from
-		`identifiers`, then from `mapFolding.kitAST.theSSOT.default` [1]. `identifierModule` must
-		resolve to a non-`None` value before parsing begins.
+		Parsed source module for the resolved dotted path.
 
 	Examples
 	--------
-	In `mapFolding.kitAST.mapFolding.makeModules.makeModulesMapFolding`, the default map-folding
-	algorithm module is loaded with the following call [2].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [3].
 
 		```python
-		make_jit_module(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+		getModule(identifiers=defaultMapFolding)
 		```
 
 	References
 	----------
-	[1] `mapFolding.kitAST.theSSOT.default`
+	[1] astToolkit tree visitors and source containers.
+		https://context7.com/hunterhogan/asttoolkit
+	[2] `mapFolding.kitAST.theSSOT.default`
 
-	[2] `mapFolding.kitAST.mapFolding.makeModules.makeModulesMapFolding`
+	[3] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifierPackage = identifierPackage or get_in(('module', 'package'), identifiers or {}) or default['module']['package']
 	logicalPathInfix = logicalPathInfix or get_in(('logicalPath', 'default'), identifiers or {}) or default['logicalPath']['default']

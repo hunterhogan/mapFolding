@@ -1,3 +1,20 @@
+"""I use this module to carry datatype-import replacement settings.
+
+(AI generated docstring)
+
+This module defines the `Settings形` tuple exported by `mapFolding.kitAST` [1].
+Job generation uses these records to replace abstract datatype imports.
+
+Contents
+--------
+Classes
+	Settings形
+		Specify a replacement import for an abstract datatype.
+
+References
+----------
+[1] `mapFolding.kitAST`
+"""
 from __future__ import annotations
 
 from typing import NamedTuple, TYPE_CHECKING
@@ -6,25 +23,45 @@ if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
 
 class Settings形(NamedTuple):
-	"""Configuration for mapping framework datatypes to compiled datatypes.
+	"""Specify a replacement import for an abstract datatype.
 
-	This configuration class defines how abstract datatypes used in the map folding framework should
-	be replaced with compiled datatypes during code generation. Each configuration specifies the
-	source module, target type name, and optional import alias for the transformation.
+	You can use this tuple to map a datatype identifier in generated source to an imported type.
+	The configuration records the original identifier, replacement module, type, and import alias.
+	`mapFolding.kitAST.RecipeJob.setDatatypeViaImport` applies the configuration [1].
 
 	Attributes
 	----------
 	datatypeIdentifier : str
-		Framework datatype identifier to be replaced.
+		Original abstract datatype identifier whose import alias will be replaced.
 	typeModule : identifierDotAttribute
-		Module containing the target datatype (e.g., 'codon', 'numpy').
+		Dotted module path supplying the replacement datatype.
 	typeIdentifier : str
-		Concrete type name in the target module.
+		Datatype identifier imported from the replacement module.
 	type_asname : str | None = None
-		Optional import alias for the type.
+		Optional alias written on the replacement import.
+
+	References
+	----------
+	[1] `mapFolding.kitAST.RecipeJob.setDatatypeViaImport`
 	"""
 
 	datatypeIdentifier: str
+	"""Inspect the original abstract datatype identifier whose import alias will be replaced.
+
+	(AI generated docstring)
+	"""
 	typeModule: identifierDotAttribute
+	"""Inspect the dotted module path supplying the replacement datatype.
+
+	(AI generated docstring)
+	"""
 	typeIdentifier: str
+	"""Inspect the datatype identifier imported from the replacement module.
+
+	(AI generated docstring)
+	"""
 	type_asname: str | None = None
+	"""Inspect the optional alias written on the replacement import.
+
+	(AI generated docstring)
+	"""

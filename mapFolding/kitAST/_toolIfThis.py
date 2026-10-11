@@ -1,27 +1,20 @@
-"""
-Map folding AST transformation system: Foundation pattern matching and filtering predicates.
+"""I use this module to extend state-pattern predicates for source generation.
 
-This module establishes the foundational layer of the map folding AST transformation system by
-providing specialized predicate functions for identifying specific code patterns in Abstract
-Syntax Trees. The transformation system converts high-level dataclass-based map folding algorithms
-into optimized computational modules through systematic AST manipulation, beginning with precise
-pattern recognition capabilities defined here.
+This module defines comparison and control-flow predicates on Python syntax [1].
+The exported class extends `astToolkit.IfThis` [2] with state-attribute patterns.
 
-The predicates extend `astToolkit.IfThis` with domain-specific functions that recognize conditional
-expressions and control flow structures essential to map folding computations. These patterns include
-attribute comparisons against specific values, loop termination conditions based on counting variables,
-and bounds checking operations that characterize map folding algorithm structures.
+Contents
+--------
+Classes
+	IfThis
+		Build predicates for state comparisons and control-flow syntax.
 
-Pattern recognition serves as the entry point for the broader transformation system that decomposes
-dataclass-dependent algorithms, applies performance optimizations, and generates specialized modules
-optimized for Numba just-in-time compilation. The precise identification of these structural patterns
-enables subsequent transformation stages to apply targeted optimizations while preserving mathematical
-correctness.
-
-Classes:
-	IfThis: Extended predicate class with specialized methods for matching attribute comparisons
-			and control flow patterns involving namespaced identifiers essential to map folding
-			algorithm transformations.
+References
+----------
+[1] Python abstract syntax tree node definitions.
+	https://docs.python.org/3/library/ast.html
+[2] astToolkit tree visitors and source containers.
+	https://context7.com/hunterhogan/asttoolkit
 """
 from __future__ import annotations
 
@@ -33,39 +26,58 @@ if TYPE_CHECKING:
 	import ast
 
 class IfThis(astToolkit_IfThis):
-	"""Provide predicate functions for matching and filtering AST nodes based on various criteria.
+	"""Build predicates for state comparisons and control-flow syntax.
 
 	(AI generated docstring)
 
-	The `IfThis` `class` contains static methods that generate predicate functions used to test
-	whether AST nodes match specific criteria. These predicates can be used with `NodeChanger` and
-	`NodeTourist` to identify and process specific patterns in the AST.
+	You can use these static methods to recognize comparisons involving a named state attribute,
+	or conditional and loop statements using those comparisons. The class extends the predicates
+	in `astToolkit.IfThis` [1] with patterns used by the module generators.
 
-	The `class` provides predicates for matching various node types, attributes, identifiers, and
-	structural patterns, enabling precise targeting of AST elements for analysis or transformation.
+	References
+	----------
+	[1] astToolkit tree visitors and source containers.
+		https://context7.com/hunterhogan/asttoolkit
 	"""
 
 	@staticmethod
 	def is0LessThanAttributeNamespaceIdentifier(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare]]:
-		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is greater than 0.
+		"""Build a predicate for `0 < namespace.identifier` syntax.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing comparisons of the
-		form `namespace.identifier > 0`. It's commonly used to identify conditional expressions that
-		test positive values of counting variables or similar constructs.
+		You can use this method to recognize an `ast.Compare` node [1] with the literal
+		comparison orientation shown in the summary.
+
+		Comparison Selection
+		--------------------
+		The predicate checks the first operator and first comparator of the comparison.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
-			A predicate function that returns `True` for `Compare` nodes matching the pattern.
+			Callable returning `True` when the inspected node matches the required syntax.
+
+		Examples
+		--------
+		The module `mapFolding.kitAST._toolIfThis` uses this call [2].
+
+			```python
+			IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier)
+			```
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
+		[2] `mapFolding.kitAST._toolIfThis`
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isConstant_value(0))
 					, Be.Compare.opsIs(Be.at(0, Be.Lt))
@@ -74,25 +86,29 @@ class IfThis(astToolkit_IfThis):
 
 	@staticmethod
 	def isAttributeNamespaceIdentifierLessThanOrEqual0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare]]:
-		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is less than or equal to 0.
+		"""Build a predicate for an attribute comparison beginning with `<=`.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing comparisons of the
-		form `namespace.identifier <= 0`. It's used to identify conditional expressions that test
-		non-positive values of counting variables or similar constructs.
+		You can use this method to recognize an `ast.Compare` node [1] whose left operand is the named
+		attribute and whose first operator is `<=`.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
-			A predicate function that returns `True` for `Compare` nodes matching the pattern.
+			Callable returning `True` for the required left operand and first operator.
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))
 					, Be.Compare.opsIs(Be.at(0, Be.LtE))
@@ -100,25 +116,42 @@ class IfThis(astToolkit_IfThis):
 
 	@staticmethod
 	def isAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.Compare]]:
-		"""Generate a predicate that matches comparison expressions testing if a namespaced attribute is greater than 0.
+		"""Build a predicate for `namespace.identifier > 0` syntax.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing comparisons of the
-		form `namespace.identifier > 0`. It's commonly used to identify conditional expressions that
-		test positive values of counting variables or similar constructs.
+		You can use this method to recognize an `ast.Compare` node [1] with the literal
+		comparison orientation shown in the summary.
+
+		Comparison Selection
+		--------------------
+		The predicate checks the first operator and first comparator of the comparison.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
-			A predicate function that returns `True` for `Compare` nodes matching the pattern.
+			Callable returning `True` when the inspected node matches the required syntax.
+
+		Examples
+		--------
+		The module `mapFolding.kitAST._toolIfThis` uses this call [2].
+
+			```python
+			IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier)
+			```
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
+		[2] `mapFolding.kitAST._toolIfThis`
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))
 					, Be.Compare.opsIs(Be.at(0, Be.Gt))
@@ -127,98 +160,155 @@ class IfThis(astToolkit_IfThis):
 
 	@staticmethod
 	def isIf0LessThanAttributeNamespaceIdentifier(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.If]]:
-		"""Generate a predicate that matches If statements testing if a namespaced attribute is greater than 0.
+		"""Build a predicate for `if 0 < namespace.identifier` syntax.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing conditional
-		statements of the form `if namespace.identifier > 0:`. It's used to find control flow
-		structures that depend on positive values of specific attributes.
+		You can use this method to recognize an `ast.If` node [1] with the literal
+		comparison orientation shown in the summary.
+
+		Comparison Selection
+		--------------------
+		The predicate checks the first operator and first comparator of the comparison.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
-			A predicate function that returns `True` for `If` nodes with the specified test condition.
+			Callable returning `True` when the inspected node matches the required syntax.
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
 		"""
 		return Be.If.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isIfAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.If]]:
-		"""Generate a predicate that matches If statements testing if a namespaced attribute is greater than 0.
+		"""Build a predicate for `if namespace.identifier > 0` syntax.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing conditional
-		statements of the form `if namespace.identifier > 0:`. It's used to find control flow
-		structures that depend on positive values of specific attributes.
+		You can use this method to recognize an `ast.If` node [1] with the literal
+		comparison orientation shown in the summary.
+
+		Comparison Selection
+		--------------------
+		The predicate checks the first operator and first comparator of the comparison.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
-			A predicate function that returns `True` for `If` nodes with the specified test condition.
+			Callable returning `True` when the inspected node matches the required syntax.
+
+		Examples
+		--------
+		The module `mapFolding.kitAST.mapFolding._count` uses this call [2].
+
+			```python
+			IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(名dataclassInstance, 'leaf1ndex')
+			```
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
+		[2] `mapFolding.kitAST.mapFolding._count`
 		"""
 		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isWhile0LessThanAttributeNamespaceIdentifier(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.While]]:
-		"""Generate a predicate that matches While loops testing if a namespaced attribute is greater than 0.
+		"""Build a predicate for `while 0 < namespace.identifier` syntax.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing loop statements of
-		the form `while namespace.identifier > 0:`. It's used to find iteration constructs that
-		continue while specific attributes remain positive.
+		You can use this method to recognize an `ast.While` node [1] with the literal
+		comparison orientation shown in the summary.
+
+		Comparison Selection
+		--------------------
+		The predicate checks the first operator and first comparator of the comparison.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.While]]
-			A predicate function that returns `True` for `While` nodes with the specified test
-			condition.
+			Callable returning `True` when the inspected node matches the required syntax.
+
+		Examples
+		--------
+		The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
+
+			```python
+			IfThis.isWhile0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
+			```
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
+		[2] `mapFolding.kitAST.matrixMeanders.makeModules`
 		"""
 		return Be.While.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty: ignore[invalid-return-type]
 
 	@staticmethod
 	def isWhileAttributeNamespaceIdentifierGreaterThan0(namespace: str, identifier: str) -> CallableFunction[[ast.AST], TypeIs[ast.While]]:
-		"""Generate a predicate that matches While loops testing if a namespaced attribute is greater than 0.
+		"""Build a predicate for `while namespace.identifier > 0` syntax.
 
 		(AI generated docstring)
 
-		This function creates a predicate that identifies AST nodes representing loop statements of
-		the form `while namespace.identifier > 0:`. It's used to find iteration constructs that
-		continue while specific attributes remain positive.
+		You can use this method to recognize an `ast.While` node [1] with the literal
+		comparison orientation shown in the summary.
+
+		Comparison Selection
+		--------------------
+		The predicate checks the first operator and first comparator of the comparison.
 
 		Parameters
 		----------
 		namespace : str
-			The namespace or object name containing the attribute.
+			Plain object name on the left of the attribute access.
 		identifier : str
-			The attribute name to test.
+			Attribute identifier to match on the named object.
 
 		Returns
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.While]]
-			A predicate function that returns `True` for `While` nodes with the specified test
-			condition.
+			Callable returning `True` when the inspected node matches the required syntax.
+
+		Examples
+		--------
+		The module `mapFolding.kitAST.mapFolding._count` uses this call [2].
+
+			```python
+			IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(名dataclassInstance, 'leaf1ndex')
+			```
+
+		References
+		----------
+		[1] Python abstract syntax tree node definitions.
+			https://docs.python.org/3/library/ast.html
+		[2] `mapFolding.kitAST.mapFolding._count`
 		"""
 		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty: ignore[invalid-return-type]

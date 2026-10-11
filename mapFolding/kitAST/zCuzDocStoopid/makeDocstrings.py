@@ -1,4 +1,24 @@
-"""Make docstrings."""
+"""Generate formula-source docstrings and selector annotations from metadata.
+
+You can use this module to enrich sequence-formula source with descriptions and literal
+selector values from `mapFolding.oeis.getMetadata` [1]. The generator writes source to a
+filename derived by removing the configured prefix.
+
+Contents
+--------
+Functions
+	transformOEISidByFormula
+		Write formula-source functions with metadata descriptions and selector annotations.
+Variables
+	moduleWarning
+		Access the generated-file notice appended to the output module docstring.
+	sourcePrefix
+		Inspect the filename prefix removed when writing documented formula source.
+
+References
+----------
+[1] `mapFolding.oeis.getMetadata`
+"""
 from __future__ import annotations
 
 from astToolkit import Be, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
@@ -17,11 +37,59 @@ if TYPE_CHECKING:
 
 #------------------ General Settings ----------------------------------------------------------------------------------
 sourcePrefix: str = 'zCuzDocStoopid'
+"""Inspect the filename prefix removed when writing documented formula source.
+
+(AI generated docstring)
+"""
 
 moduleWarning = "This is a generated file; edit the source file.\n"
+"""Access the generated-file notice appended to the output module docstring.
+
+(AI generated docstring)
+"""
 
 def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
-    """Transform the docstrings of functions corresponding to OEIS sequences."""
+    """Write formula-source functions with metadata descriptions and selector annotations.
+
+    You can use this function to read formula source, obtain sequence metadata through
+    `mapFolding.oeis.getMetadata` [1], insert function docstrings, and expand selector annotations
+    with discovered literal values. The output filename removes `sourcePrefix` [2] from the stem.
+    The function appends `moduleWarning` [3] to the module docstring and writes the resulting source.
+
+    Sequence Function Selection
+    ---------------------------
+    The transformation selects seven-character names beginning with `A` and followed by six digits.
+    The transformation expects a second positional parameter named `f` and collects match-value
+    patterns as literal selectors. A new description is inserted before the existing body.
+
+    Parameters
+    ----------
+    pathFilenameSource : Path
+        Formula-source file containing documented sequence functions and a module docstring.
+
+    Returns
+    -------
+    pathFilename : Path
+        Path returned by the source writer after removing the configured filename prefix.
+
+    Examples
+    --------
+    The module `easyRun.synthesizeModules` uses this call [4].
+
+        ```python
+        transformOEISidByFormula(pathFilenameSource)
+        ```
+
+    References
+    ----------
+    [1] `mapFolding.oeis.getMetadata`
+
+    [2] `sourcePrefix`
+
+    [3] `moduleWarning`
+
+    [4] `easyRun.synthesizeModules`
+    """
     pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
     astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
     dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)

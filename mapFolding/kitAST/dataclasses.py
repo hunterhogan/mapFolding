@@ -1,29 +1,29 @@
-"""
-Map folding AST transformation system: Core dataclass decomposition and function optimization tools.
+"""Decompose state dataclasses and adapt generated field-based functions.
 
-This module implements the essential transformation capabilities that form the operational core of
-the map folding AST transformation system. Working with the pattern recognition foundation and
-decomposition containers established in the foundational layers, these tools execute the critical
-transformations that convert dataclass-based functions into optimized implementations suitable
-for Numba just-in-time compilation.
+You can use this module to extract field syntax from Python dataclasses [1], replace
+state-object parameters with field parameters, and reconstruct state after generated calls.
 
-The transformation process addresses the fundamental incompatibility between dataclass-dependent
-map folding algorithms and Numba's compilation requirements. While dataclass instances provide
-clean, maintainable interfaces for complex mathematical state, Numba cannot directly process
-these objects but excels at optimizing operations on primitive values and tuples. The tools
-bridge this architectural gap through systematic function signature transformation and calling
-convention adaptation.
+Contents
+--------
+Classes
+	DeReConstructField2ast
+		Represent one dataclass field as reusable syntax nodes.
+	ShatteredDataclass
+		Store field syntax for removing and reconstructing a dataclass.
+Functions
+	findDataclass
+		Extract the source module, type, and instance name of a function parameter.
+	removeDataclass
+		Replace a dataclass parameter with individual field parameters.
+	shatterDataclass
+		Decompose a source dataclass into field and reconstruction syntax.
+	toFieldsToCallToDataclass
+		Adapt assigned calls to unpack fields and reconstruct a dataclass.
 
-The three-stage transformation pattern implemented here follows a precise sequence: dataclass
-decomposition breaks down dataclass definitions into constituent AST components while extracting
-field definitions and type annotations; function transformation converts functions accepting
-dataclass parameters to functions accepting individual field parameters with updated signatures
-and return types; caller adaptation modifies calling code to unpack dataclass instances, invoke
-transformed functions, and repack results back into dataclass instances.
-
-This approach enables seamless integration between high-level dataclass-based interfaces and
-low-level optimized implementations, maintaining code clarity while achieving performance gains
-through specialized compilation paths essential for computationally intensive map folding research.
+References
+----------
+[1] Python dataclass fields and initialization.
+	https://docs.python.org/3/library/dataclasses.html
 """
 from __future__ import annotations
 
@@ -53,170 +53,256 @@ if TYPE_CHECKING:
 # because a change can break the ast transformations.
 @dataclasses.dataclass(slots=True)
 class ShatteredDataclass:
-	"""Container for decomposed dataclass components organized as AST nodes for code generation.
+	"""Store field syntax for removing and reconstructing a dataclass.
 
-	This class holds the decomposed representation of a dataclass, breaking it down into individual
-	AST components that can be manipulated and recombined for different code generation contexts.
-	It is particularly essential for transforming dataclass-based algorithms into Numba-compatible
-	functions where dataclass instances cannot be directly used.
+	You can use this container to carry the field declarations, imports, and reconstruction syntax
+	produced by `shatterDataclass` [1]. Transformations reuse these nodes to replace a state object
+	with individual parameters and a tuple of returned field values.
 
-	The decomposition enables individual field access, type annotation extraction, and parameter
-	specification generation while maintaining the structural relationships needed to reconstruct
-	equivalent functionality using primitive values and tuples.
+	Attributes
+	----------
+	countingVariableAnnotation : ast.expr
+		Type annotation for the counting variable extracted from the dataclass.
+	countingVariableName : ast.Name
+		AST name node representing the counting variable identifier.
+	lookupAnnAssignWithConstructor : dict[str, ast.AnnAssign | ast.Assign]
+		Maps field names to their corresponding AST assignment expressions for initialization.
+	Z0Z_field2AnnAssign : dict[str, tuple[ast.AnnAssign | ast.Assign, str]]
+		Field identifiers mapped to initialization syntax and constructor classification.
+	fragments4AssignmentOrParameters : ast.Tuple
+		Ordered field tuple reused in result expressions and tuple assignment targets.
+	imports : LedgerOfImports
+		Import records for the dataclass and its constituent field types.
+	boxOf_argAnnotated : list[ast.arg]
+		Function argument nodes with type annotations for parameter specification.
+	boxOf_keyword_field__field4init : list[ast.keyword]
+		Keyword arguments for dataclass initialization using field=field format.
+	boxOfStaticArrays : list[str]
+		Array field identifiers classified as static because their constructor setting is
+		`init=False`.
+	boxOfStaticScalars : list[str]
+		Scalar field identifiers classified as static because their constructor setting is
+		`init=False`.
+	boxOfAnnotations : list[ast.expr]
+		Type annotations for each dataclass field in declaration order.
+	boxOfName4Parameters : list[ast.Name]
+		Name nodes for each dataclass field used as function parameters.
+	boxOfUnpack : list[ast.AnnAssign]
+		Annotated assignment statements to extract individual fields from dataclass instances.
+	map_stateDOTfield2Name : dict[ast.AST, ast.Name]
+		Attribute-access nodes mapped to replacement field-name nodes.
+	repack : ast.Assign
+		AST assignment statement that reconstructs the original dataclass instance from individual
+		fields.
+	signatureReturnAnnotation : ast.Subscript
+		Tuple-based return type annotation for functions returning decomposed field values.
 
-	All AST components are organized to support both function parameter specification (unpacking
-	dataclass fields into individual parameters) and result reconstruction (packing individual
-	values back into dataclass instances).
+	References
+	----------
+	[1] `shatterDataclass`
 	"""
 
 	countingVariableAnnotation: ast.expr
-	"""Type annotation for the counting variable extracted from the dataclass."""
+	"""Inspect the type annotation for the counting variable extracted from the dataclass."""
 
 	countingVariableName: ast.Name
-	"""AST name node representing the counting variable identifier."""
+	"""Inspect the AST name node representing the counting variable identifier."""
 
 	lookupAnnAssignWithConstructor: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict[str, ast.AnnAssign | ast.Assign])
-	"""Maps field names to their corresponding AST assignment expressions for initialization."""
+	"""Inspect the mapping that maps field names to their corresponding AST assignment expressions for initialization."""
 
 	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict[str, tuple[ast.AnnAssign | ast.Assign, str]])
-	"""Temporary mapping for field assignments with constructor type information."""
+	"""Inspect the field identifiers mapped to initialization syntax and constructor classification."""
 
 	fragments4AssignmentOrParameters: ast.Tuple = dataclasses.field(default_factory=lambda: Make.Tuple([Make.Name("dummyElement")]))
-	"""AST tuple used as target for assignment to capture returned field values."""
+	"""Inspect the ordered field tuple reused in result expressions and tuple assignment targets."""
 
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-	"""Import records for the dataclass and its constituent field types."""
+	"""Inspect the import records for the dataclass and its constituent field types."""
 
 	boxOf_argAnnotated: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
-	"""Function argument nodes with type annotations for parameter specification."""
+	"""Inspect the function argument nodes with type annotations for parameter specification."""
 
 	boxOf_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
-	"""Keyword arguments for dataclass initialization using field=field format."""
+	"""Inspect the keyword arguments for dataclass initialization using field=field format."""
 
 	boxOfStaticArrays: list[str] = dataclasses.field(default_factory=list[str])
-	"""Identifiers of unchanging array fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
+	"""Inspect the array field identifiers classified as static because their constructor setting is `init=False`."""
 
 	boxOfStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
-	"""Identifiers of unchanging scalar fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
+	"""Inspect the scalar field identifiers classified as static because their constructor setting is `init=False`."""
 
 	boxOfAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
-	"""Type annotations for each dataclass field in declaration order."""
+	"""Inspect the type annotations for each dataclass field in declaration order."""
 
 	boxOfName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list[ast.Name])
-	"""Name nodes for each dataclass field used as function parameters."""
+	"""Inspect the name nodes for each dataclass field used as function parameters."""
 
 	boxOfUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list[ast.AnnAssign])
-	"""Annotated assignment statements to extract individual fields from dataclass instances."""
+	"""Inspect the annotated assignment statements to extract individual fields from dataclass instances."""
 
 	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict[ast.AST, ast.Name])
-	"""Maps dataclass attribute access expressions to field name nodes for find-replace operations."""
+	"""Inspect the attribute-access nodes mapped to replacement field-name nodes."""
 
 	repack: ast.Assign = dataclasses.field(default_factory=lambda: Make.Assign([Make.Name("dummyTarget")], Make.Constant(None)))
-	"""AST assignment statement that reconstructs the original dataclass instance from individual fields."""
+	"""Inspect the AST assignment statement that reconstructs the original dataclass instance from individual fields."""
 
 	signatureReturnAnnotation: ast.Subscript = dataclasses.field(default_factory=lambda: Make.Subscript(Make.Name("dummy"), Make.Name("slice")))
-	"""Tuple-based return type annotation for functions returning decomposed field values."""
+	"""Inspect the tuple-based return type annotation for functions returning decomposed field values."""
 
 @dataclasses.dataclass(slots=True)
 class DeReConstructField2ast:
-	"""
-	Transform a dataclass field into AST node representations for code generation.
+	"""Represent one dataclass field as reusable syntax nodes.
 
-	This class extracts and transforms a dataclass Field object into various AST node representations
-	needed for code generation. It handles the conversion of field attributes, type annotations, and
-	metadata into AST constructs that can be used to reconstruct the field in generated code. The
-	class is particularly important for decomposing dataclass fields (like those in ComputationState)
-	to enable their use in specialized contexts like Numba-optimized functions, where the full
-	dataclass cannot be directly used but its contents need to be accessible.
+	You can use this container to inspect one source field and obtain declarations, parameters,
+	attribute access, and constructor syntax for generated functions. The container copies field
+	settings from Python dataclass metadata [1] and retains required imports.
 
-	Each field is processed according to its type and metadata to create appropriate variable
-	declarations, type annotations, and initialization code as AST nodes.
+	Construction
+	------------
+	The generated initializer accepts `dataclassesDOTdataclassLogicalPathModule`, `dataclassClassDef`,
+	`dataclassesDOTdataclassInstanceIdentifier`, and `field` as initialization-only values [1].
+	The source annotation is read from the assignment for `field.name`.
+
+	Constructor Selection
+	---------------------
+	Truthy `dtype` metadata selects array construction. A simple name annotation selects scalar
+	construction. A subscript annotation selects tuple syntax with an optional `elementConstructor`.
+
+	Attributes
+	----------
+	ledger : LedgerOfImports
+		Import tracking for types and modules required by this field.
+	name : str
+		Field name extracted from the dataclass field definition.
+	typeBuffalo : type[Any] | str | Any
+		Type annotation of the field as specified in the dataclass.
+	default : Any | None
+		Declared field default, or `None` when no default is declared.
+	default_factory : Callable[..., Any] | None
+		Declared default factory, or `None` when no factory is declared.
+	repr : bool
+		Whether the field should be included in the string representation.
+	hash : bool | None
+		Whether the field should be included in hash computation.
+	init : bool
+		Whether the source field participates in the generated dataclass initializer.
+	compare : bool
+		Whether the field should be included in comparison operations.
+	metadata : dict[Any, Any]
+		Field metadata dictionary containing additional configuration information.
+	kw_only : bool
+		Whether the field must be specified as a keyword-only argument.
+	astName : ast.Name
+		AST name node representing the field identifier.
+	ast_keyword_field__field : ast.keyword
+		AST keyword argument for dataclass initialization using field=field pattern.
+	ast_nameDOTname : ast.Attribute
+		AST attribute access expression for accessing the field from an instance.
+	astAnnotation : ast.expr
+		Source annotation syntax extracted for the field.
+	ast_argAnnotated : ast.arg
+		AST function argument with type annotation for parameter specification.
+	astAnnAssignConstructor : ast.AnnAssign | ast.Assign
+		Field initialization syntax selected from annotation shape and metadata.
+	Z0Z_hack : tuple[ast.AnnAssign | ast.Assign, str]
+		Initialization syntax paired with its scalar, array, or element-constructor classification.
+
+	References
+	----------
+	[1] Python dataclass fields and initialization.
+		https://docs.python.org/3/library/dataclasses.html
 	"""
 
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[identifierDotAttribute]
-	"""Logical path to the module containing the source dataclass definition."""
+	"""Inspect the logical path to the module containing the source dataclass definition."""
 
 	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
-	"""AST class definition node for the source dataclass."""
+	"""Inspect the AST class definition node for the source dataclass."""
 
 	dataclassesDOTdataclassInstanceIdentifier: dataclasses.InitVar[str]
-	"""Variable identifier for the dataclass instance in generated code."""
+	"""Inspect the variable identifier for the dataclass instance in generated code."""
 
 	field: dataclasses.InitVar[dataclasses.Field[Any]]
-	"""Dataclass field object to be transformed into AST components."""
+	"""Inspect the dataclass field object to be transformed into AST components."""
 
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-	"""Import tracking for types and modules required by this field."""
+	"""Inspect the import tracking for types and modules required by this field."""
 
 	name: str = dataclasses.field(init=False)
-	"""Field name extracted from the dataclass field definition."""
+	"""Inspect the field name extracted from the dataclass field definition."""
 
 	typeBuffalo: type[Any] | str | Any = dataclasses.field(init=False)
-	"""Type annotation of the field as specified in the dataclass."""
+	"""Inspect the type annotation of the field as specified in the dataclass."""
 
 	default: Any | None = dataclasses.field(init=False)
-	"""Default value for the field, or None if no default is specified."""
+	"""Inspect the declared field default, or `None` when no default is declared."""
 
 	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
-	"""Default factory function for the field, or None if not specified."""
+	"""Inspect the declared default factory, or `None` when no factory is declared."""
 
 	repr: bool = dataclasses.field(init=False)
-	"""Whether the field should be included in the string representation."""
+	"""Inspect whether the field should be included in the string representation."""
 
 	hash: bool | None = dataclasses.field(init=False)
-	"""Whether the field should be included in hash computation."""
+	"""Inspect whether the field should be included in hash computation."""
 
 	init: bool = dataclasses.field(init=False)
-	"""Whether the field should be included in the generated __init__ method."""
+	"""Inspect whether the source field participates in the generated dataclass initializer."""
 
 	compare: bool = dataclasses.field(init=False)
-	"""Whether the field should be included in comparison operations."""
+	"""Inspect whether the field should be included in comparison operations."""
 
 	metadata: dict[Any, Any] = dataclasses.field(init=False)
-	"""Field metadata dictionary containing additional configuration information."""
+	"""Inspect the field metadata dictionary containing additional configuration information."""
 
 	kw_only: bool = dataclasses.field(init=False)
-	"""Whether the field must be specified as a keyword-only argument."""
+	"""Inspect whether the field must be specified as a keyword-only argument."""
 
 	astName: ast.Name = dataclasses.field(init=False)
-	"""AST name node representing the field identifier."""
+	"""Inspect the AST name node representing the field identifier."""
 
 	ast_keyword_field__field: ast.keyword = dataclasses.field(init=False)
-	"""AST keyword argument for dataclass initialization using field=field pattern."""
+	"""Inspect the AST keyword argument for dataclass initialization using field=field pattern."""
 
 	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
-	"""AST attribute access expression for accessing the field from an instance."""
+	"""Inspect the AST attribute access expression for accessing the field from an instance."""
 
 	astAnnotation: ast.expr = dataclasses.field(init=False)
-	"""AST expression representing the field's type annotation."""
+	"""Inspect the source annotation syntax extracted for the field."""
 
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
-	"""AST function argument with type annotation for parameter specification."""
+	"""Inspect the AST function argument with type annotation for parameter specification."""
 
 	astAnnAssignConstructor: ast.AnnAssign | ast.Assign = dataclasses.field(init=False)
-	"""AST assignment statement for field initialization with appropriate constructor."""
+	"""Inspect the field initialization syntax selected from annotation shape and metadata."""
 
 	Z0Z_hack: tuple[ast.AnnAssign | ast.Assign, str] = dataclasses.field(init=False)
-	"""Temporary tuple containing assignment statement and constructor type information."""
+	"""Inspect the initialization syntax paired with its scalar, array, or element-constructor classification."""
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: identifierDotAttribute, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
-		"""
-		Initialize AST components based on the provided dataclass field.
+		"""I use this to prepare field syntax during dataclass decomposition.
 
-		This method extracts field attributes and constructs corresponding AST nodes for various code
-		generation contexts. It handles special cases for array types, scalar types, and complex type
-		annotations, creating appropriate constructor calls and import requirements.
+		This method records settings from `field`, locates the source annotation in
+		`dataclassClassDef`,
+		and initializes the reusable syntax and import ledger. Array construction uses NumPy [1]
+		when `field.metadata` supplies a truthy `dtype`.
 
 		Parameters
 		----------
 		dataclassesDOTdataclassLogicalPathModule : identifierDotAttribute
-			Module path containing the dataclass
+			Dotted source module path used to import field types and element constructors.
 		dataclassClassDef : ast.ClassDef
-			AST class definition for type annotation extraction
+			Source class syntax containing an annotated assignment for the field.
 		dataclassesDOTdataclassInstanceIdentifier : str
-			Instance variable name for attribute access
+			Instance identifier used in generated attribute access.
 		field : dataclasses.Field[Any]
-			Dataclass field to transform
+			Dataclass field supplying its name, settings, defaults, and construction metadata.
+
+		References
+		----------
+		[1] NumPy array construction.
+			https://numpy.org/doc/stable/reference/generated/numpy.array.html
 		"""
 		self.compare = field.compare
 		self.default = field.default if field.default is not dataclasses.MISSING else None
@@ -274,44 +360,55 @@ class DeReConstructField2ast:
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
 
 def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDataclass: str, identifierDataclassInstance: str) -> ShatteredDataclass:
-	"""Decompose a dataclass definition into AST components for manipulation and code generation.
+	"""Decompose a source dataclass into field and reconstruction syntax.
 
 	(AI generated docstring)
 
-	This function breaks down a complete dataclass (like ComputationState) into its constituent parts
-	as AST nodes, enabling fine-grained manipulation of its fields for code generation. It extracts
-	all field definitions, annotations, and metadata, organizing them into a ShatteredDataclass that
-	provides convenient access to AST representations needed for different code generation contexts.
+	You can use this function to import the dataclass identified by `logicalPathDataclass` and
+	`identifierDataclass`, then obtain syntax for each field in declaration order. The result
+	supports replacing access through `identifierDataclassInstance` with individual field names.
+	The returned container is a `ShatteredDataclass` [1].
 
-	The function identifies a special "counting variable" (marked with 'theCountingIdentifier'
-	metadata) which is crucial for map folding algorithms, ensuring it's properly accessible in the
-	generated code.
-
-	This decomposition is particularly important when generating optimized code (e.g., for Numba)
-	where dataclass instances can't be directly used but their fields need to be individually
-	manipulated and passed to computational functions.
+	Field Metadata
+	--------------
+	The last field with truthy `theCountingIdentifier` metadata supplies the counting identifier.
+	Array fields use `dtype` metadata, and tuple fields may
+	use `elementConstructor`. Fields with `init=False` are excluded from constructor keywords [2].
 
 	Parameters
 	----------
 	logicalPathDataclass : identifierDotAttribute
-		The fully qualified module path containing the dataclass definition.
+		Dotted path to the source module containing the dataclass.
 	identifierDataclass : str
-		The name of the dataclass to decompose.
+		Class identifier to locate in source and import at runtime.
 	identifierDataclassInstance : str
-		The variable name to use for the dataclass instance in generated code.
+		Instance identifier to use in generated attribute access.
 
 	Returns
 	-------
-	ShatteredDataclass
-		A ShatteredDataclass containing AST representations of all dataclass components, with imports,
-		field definitions, annotations, and repackaging code.
+	shatteredDataclass : ShatteredDataclass
+		Field syntax, import records, counting-field metadata, and reconstruction statements.
 
 	Raises
 	------
 	ValueError
-		If the dataclass cannot be found in the specified module or if no counting variable is
-		identified in the dataclass.
+		If the source class, counting field, or a required field annotation cannot be found.
 
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding._count` uses this call [3].
+
+		```python
+		shatterDataclass(*findDataclass(ingredientsFunction))
+		```
+
+	References
+	----------
+	[1] `ShatteredDataclass`
+
+	[2] Python dataclass fields and initialization.
+		https://docs.python.org/3/library/dataclasses.html
+	[3] `mapFolding.kitAST.mapFolding._count`
 	"""
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
@@ -355,34 +452,42 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	return shatteredDataclass
 
 def removeDataclass(ingredients: IngredientsFunction, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
-	"""Transform a function that operates on dataclass instances to work with individual field parameters.
+	"""Replace a dataclass parameter with individual field parameters.
 
 	(AI generated docstring)
 
-	This function performs the core transformation required for Numba compatibility by removing dataclass
-	dependencies from function signatures and implementations. It modifies the target function to:
+	You can use this function to change `ingredients` into a function receiving each field from
+	`shatteredDataclass`. The function replaces the complete argument specification and every
+	return statement, then rewrites instance attribute access as field names.
+	The function updates `ingredients` and returns the original container.
 
-	1. Replace the single dataclass parameter with individual field parameters.
-	2. Update the return type annotation to return a tuple of field values.
-	3. Transform return statements to return the tuple of fields.
-	4. Replace all dataclass attribute access with direct field variable access.
-
-	This transformation is essential for creating Numba-compatible functions from dataclass-based
-	implementations, as Numba cannot handle dataclass instances directly but can efficiently
-	process individual primitive values and tuples.
+	Return Replacement
+	------------------
+	Each return becomes the ordered field tuple from `shatteredDataclass`.
 
 	Parameters
 	----------
 	ingredients : IngredientsFunction
-		The function definition and its dependencies to be transformed.
+		Function container to transform in place.
 	shatteredDataclass : ShatteredDataclass
-		The decomposed dataclass components providing AST mappings and transformations.
+		Ordered field parameters, return annotation, and attribute replacement mapping.
 
 	Returns
 	-------
-	IngredientsFunction
-		The modified function ingredients with dataclass dependencies removed.
+	ingredients : IngredientsFunction
+		The original container holding the transformed function definition.
 
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding._count` uses this call [1].
+
+		```python
+		removeDataclass(ingredientsFunction, shatteredDataclass)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.mapFolding._count`
 	"""
 	ingredients.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated)
 	ingredients.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
@@ -391,38 +496,45 @@ def removeDataclass(ingredients: IngredientsFunction, shatteredDataclass: Shatte
 	return ingredients
 
 def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee: str, shatteredDataclass: ShatteredDataclass) -> IngredientsFunction:
-	"""Transform a caller function to interface with a dataclass-free target function.
+	"""Adapt assigned calls to unpack fields and reconstruct a dataclass.
 
 	(AI generated docstring)
 
-	This function complements `removeDataclass` by modifying calling code to work with
-	the transformed target function. It implements the unpacking and repacking pattern required
-	when a dataclass-based caller needs to invoke a function that has been converted to accept
-	individual field parameters instead of dataclass instances.
+	You can use this function to update a caller in `ingredients` after `identifierCallee` starts
+	accepting individual field values. Each matching assignment receives field extraction before
+	the call, tuple assignment for the result, and dataclass reconstruction after the call.
+	The function updates `ingredients` in place and returns the original container.
 
-	The transformation creates a three-step pattern around the target function call:
-	1. Unpack the dataclass instance into individual field variables.
-	2. Call the target function with the unpacked field values.
-	3. Repack the returned field values back into a dataclass instance.
-
-	This enables seamless integration between dataclass-based high-level code and optimized
-	field-based implementations, maintaining the original interface while enabling performance
-	optimizations in the target function.
+	Call Selection
+	--------------
+	The transformation selects assignments whose value is a direct call to `identifierCallee`.
+	The replacement uses the field order and constructor keywords from `shatteredDataclass`.
 
 	Parameters
 	----------
 	ingredients : IngredientsFunction
-		The calling function definition and its dependencies to be transformed.
+		Caller function container to transform in place.
 	identifierCallee : str
-		The name of the target function being called.
+		Function identifier whose assigned calls receive field extraction and state reconstruction.
 	shatteredDataclass : ShatteredDataclass
-		The decomposed dataclass components providing unpacking and repacking logic.
+		Ordered argument names and syntax for extracting and reconstructing state.
 
 	Returns
 	-------
-	IngredientsFunction
-		The modified caller function with appropriate unpacking and repacking around the target call.
+	ingredients : IngredientsFunction
+		The original caller container with matching assigned calls adapted.
 
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding._count` uses this call [1].
+
+		```python
+		toFieldsToCallToDataclass(unRepackDataclass, 名CallableTarget, shatteredDataclassParallel)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.mapFolding._count`
 	"""
 	AssignAndCall: ast.Assign = Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=Make.Call(Make.Name(identifierCallee), shatteredDataclass.boxOfName4Parameters))
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.replaceWith(AssignAndCall)).visit(ingredients.astFunctionDef)
@@ -431,33 +543,33 @@ def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee
 	return ingredients
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
-	"""Dynamically extract information about a `dataclass`: the instance identifier, the identifier, and the logical path module.
+	"""Extract the source module, type, and instance name of a function parameter.
 
-	Like many things in the "IngredientsFunction/IngredientsModule" ecosystem, this has specific
-	requirements. `ingredientsFunction` must have the dataclass as its first parameter. The
-	`LedgerOfImports` in `ingredientsFunction` must have the import information for the dataclass. If
-	you are not using `IngredientsFunction`, you can still use this function to get the information
-	you want.
-
-	```python
-	from astToolkit import astModuleToIngredientsFunction
-
-	tupleInformation = findDataclass(astModuleToIngredientsFunction(astAST, identifier))
-	```
+	You can use this function to identify the state dataclass assumed by a function container.
+	The function inspects the last argument annotation, finds the last name inside that annotation,
+	and resolves the name through the import ledger. The result also includes the last argument name.
 
 	Parameters
 	----------
 	ingredientsFunction : IngredientsFunction
-		Function container with AST and import information.
+		Function container with an annotated state argument and a matching import record.
 
 	Returns
 	-------
-	logicalPathDataclass : identifierDotAttribute
-		Logical path from which the `dataclass` is imported, which might not be the real source of the `dataclass`.
-	identifierDataclass : str
-		Identifier of the `dataclass`.
-	identifierDataclassInstance : str
-		Identifier of the `dataclass` instance.
+	dataclassIdentifiers : tuple[identifierDotAttribute, str, str]
+		Dotted source module path, class identifier, and instance parameter identifier, in that order.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding._count` uses this call [1].
+
+		```python
+		findDataclass(ingredientsFunction)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.mapFolding._count`
 	"""
 	dataclassName: ast.expr = raiseIfNone(NodeTourist[ast.arg, ast.expr](Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
 	identifierDataclass: str = raiseIfNone(NodeTourist[ast.Name, str](Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))

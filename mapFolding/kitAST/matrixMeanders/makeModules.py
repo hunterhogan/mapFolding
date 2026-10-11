@@ -1,4 +1,28 @@
-"""makeMeandersModules."""
+"""Generate width tests, counting variants, and pruning variants for meanders.
+
+You can use this module to derive matrix-meander variants from complete source modules and
+write the configured output modules.
+
+Contents
+--------
+Functions
+	makeCountBigInt
+		Write a meander counting variant guarded by the configured integer-width test.
+	makeModulesMeanders
+		Regenerate the configured matrix-meander counting variants and shared modules.
+	makeNumPyChopItUp
+		Write a NumPy counting variant with selected control flow removed.
+	makePolarsWide
+		Write an integer-width predicate for the Polars meander implementation.
+	makePrune
+		Write a meander counting variant with state-pruning assignments.
+	makePruneNumPy
+		Generate an array meander module with formula pruning.
+	makePrunePandas
+		Generate a dataframe meander module with formula pruning.
+	makeShare
+		Write the extracted Dyck-path function with explicit Numba signatures.
+"""
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
@@ -22,7 +46,50 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Make `countBigInt` module for meanders using `StateMeanders` dataclass."""
+	"""Write a meander counting variant guarded by the configured integer-width test.
+
+	You can use this function to rename the source counting function, remove the dispatcher,
+	and add the configured width test to the active-boundary loop. The generated function
+	continues counting only while that test returns a truthy value. The function modifies
+	`astModule`, writes the module, and returns the writer path.
+
+	Loop Guard
+	----------
+	The transformation matches the literal `0 < state.boundary` comparison using the configured
+	state identifier. The generated width-test import uses the configured algorithm path.
+	The physical output root remains the default used by `mapFolding.kitAST.paths.getPathFilename`
+	[1].
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and output defaults; a falsy value selects matrix-meander defaults.
+	**override : Any
+		Overrides for source counting and dispatcher identifiers, target callable, width test, state,
+		modules, logical paths, and package.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
+
+		```python
+		makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.paths.getPathFilename`
+
+	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
+	"""
 	identifiers = identifiers or defaultMatrixMeanders
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
@@ -57,8 +124,47 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
-def makePolarsWide(identifiers: Default | None = None) -> PurePath:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def makePolarsWide(identifiers: Default | None = None) -> PurePath:
+	"""Write an integer-width predicate for the Polars meander implementation.
+
+	(AI generated docstring)
+
+	You can use this function to generate a predicate that checks whether projected meander
+	counts need more than 128 bits for Polars [1]. The generated function uses the state bit width
+	and either an explicit maximum count or the maximum value in the state lookup.
+	The generator writes a Python module and returns the writer path.
+
+	Generated Predicate
+	-------------------
+	The predicate compares 128 with the greater of the state bit width plus two and the bit
+	length of the maximum count multiplied by the state bit width plus two. The comparison is
+	strict. An empty lookup needs an explicit maximum count because `max` has no fallback value.
+
+	Parameters
+	----------
+	identifiers : Default | None = None
+		Package, state-identifier, and logical-path defaults; a falsy value selects matrix-meander
+		defaults.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated `polarsWide` module.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
+
+		```python
+		makePolarsWide(defaultMatrixMeanders)
+		```
+
+	References
+	----------
+	[1] Polars integer datatypes.
+		https://docs.pola.rs/api/python/stable/reference/datatypes.html
+	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
+	"""
 	identifiers = identifiers or defaultMatrixMeanders
 	名Package: str = identifiers['module']['package']
 	名Module: str = 'polarsWide'
@@ -93,36 +199,42 @@ def makePolarsWide(identifiers: Default | None = None) -> PurePath:  # ruff: ign
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
 def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate a meander counting module with formula pruning.
+	"""Write a meander counting variant with state-pruning assignments.
 
 	(AI generated docstring)
 
-	You can use this function to derive the `prune` flow from the complete baseline `astModule`.
-	The generated count assigns the state returned by `shortcut` [1] before counting and after
-	each boundary transfer. The generated module retains the baseline Dyck walk and imports.
+	You can use this function to insert calls to the configured state-pruning function before
+	matching active-boundary loops and after selected tuple expressions in the counting function.
+	Each generated call assigns the returned state back to the state identifier. The pruning
+	implementation is imported from the configured shared algorithm module.
 
 	Parameters
 	----------
 	astModule : ast.Module
-		Complete source module to transform and write.
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
 	identifiers : Default | None = None
-		Source and generated names. `None` selects `defaultMatrixMeanders` [2].
+		Identifier and output defaults; `None` selects matrix-meander defaults.
 	**override : Any
-		State identifier, generated module name, package, and output path settings [3].
+		Overrides for counting, pruning, state and module identifiers, algorithm path, package, and
+		writer settings.
 
 	Returns
 	-------
 	pathFilename : PurePath
-		Path to the generated module.
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [1].
+
+		```python
+		makePrune(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+		```
 
 	References
 	----------
-	[1] `mapFolding.algorithms.matrixMeandersShare.shortcut`
-
-	[2] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
-
-	[3] `mapFolding.kitAST.mapFolding._count.toDisk`
-
+	[1] `mapFolding.kitAST.matrixMeanders.makeModules`
 	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
@@ -184,18 +296,11 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 
 	Each `tqdmBoundary.set_postfix(...)` call becomes
 	`tqdmBoundary.set_postfix_str(f'boundary={state.boundary}')` [5]. This replacement scans
-	the whole module and discards the original call arguments.
+	the whole module and supplies the boundary display as the replacement argument.
 
 	The dispatcher assigns `state = prune(state)` [6] before each matched `while` statement.
 	The generated module imports this state-pruning function and redirects imports of the
 	configured `bigInt` module to `pruneBigInt` [7], preserving imported names and aliases.
-
-	Source Requirements
-	-------------------
-	The transformations match names and statement shapes without checking that every
-	expected insertion point exists. Use an unmodified source tree for each generation;
-	applying the function again inserts additional pruning calls into `astModule`.
-	Writing the output does not run the generated counting functions.
 
 	Examples
 	--------
@@ -227,7 +332,6 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	[8] `makeModulesMeanders`
 
 	[9] `mapFolding.kitAST.paths.getModule`
-
 	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
@@ -310,14 +414,6 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	The generated module imports both pruning functions and redirects imports of the
 	configured `bigInt` module to `pruneBigInt` [7], preserving imported names and aliases.
 
-	Source Requirements
-	-------------------
-	The transformations match names and statement shapes without checking that every
-	expected insertion point exists. The aggregation function must already declare its
-	enclosing dataframe binding with `nonlocal`. Use an unmodified source tree for each
-	generation; applying the function again inserts additional pruning calls into
-	`astModule`. Writing the output does not run the generated counting functions.
-
 	Examples
 	--------
 	`makeModulesMeanders` [8] reads the complete dataframe implementation with `getModule` [9]
@@ -348,7 +444,6 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	[8] `makeModulesMeanders`
 
 	[9] `mapFolding.kitAST.paths.getModule`
-
 	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
@@ -389,7 +484,32 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Abandoned idea."""
+	"""Write a NumPy counting variant with selected control flow removed.
+
+	You can use this generator to replace data-container allocation with
+	NumPy zeros [1], extract selected loop contents, remove matching control-flow and progress
+	statements, and assemble a counting function with a dispatcher.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and output defaults; a falsy value selects matrix-meander defaults.
+	**override : Any
+		Overrides for counting, dispatcher, state, and module identifiers plus writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	References
+	----------
+	[1] NumPy zero-filled array allocation.
+		https://numpy.org/doc/stable/reference/generated/numpy.zeros.html
+	"""
 	identifiers = identifiers or defaultMatrixMeanders
 
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, 'makeDataContainer')
@@ -435,46 +555,38 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate the shared Dyck-path module from `astModule` for matrix meander algorithms.
+	"""Write the extracted Dyck-path function with explicit Numba signatures.
 
 	(AI generated docstring)
 
-	You can use this function to build the generated share module from the Dyck-path callable stored
-	in `astModule`. The function extracts the callable with `astToolkit` [1], removes source
-	decorators, applies a light `numba` compilation decorator [2], rewrites `int` references to
-	`形ArcCode` [3], and writes the assembled module to disk through `toDisk` [4].
+	You can use this function to extract the configured Dyck-path callable from `astModule`,
+	remove source decorators, and attach Numba compilation [1] with explicit signed-integer
+	and arc-code signatures. The generated module retains the callable body and adds datatype
+	imports. The writer resolves the output filename and returns the written path.
+
+	Shared Compiler Configuration
+	-----------------------------
+	The function assigns `signature_or_function` on the shared `parametersNumbaLight` mapping [2].
+	The signatures use `int64` and `mapFolding.theTypes.形ArcCode` [3].
 
 	Parameters
 	----------
 	astModule : ast.Module
-		Parsed source module that contains the Dyck-path callable to extract and transform.
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
 	identifiers : Default | None = None
-		Identifier mapping that provides the source callable name, output module name, and package
-		defaults. When `identifiers` is `None`, `makeShare` uses `defaultMatrixMeanders` [5].
+		Identifier and output defaults; a falsy value selects matrix-meander defaults.
 	**override : Any
-		Explicit override values that can replace the output module name and path-resolution settings
-		forwarded to `toDisk` [4].
+		Overrides for the output module identifier and settings forwarded to the module writer.
 
 	Returns
 	-------
 	pathFilename : PurePath
-		Path to the written generated share module.
-
-	See Also
-	--------
-	`makeCountBigInt`
-		Generate the big-integer meander counting module from the same source `astModule`.
-
-	Transformations
-	---------------
-	The generated module contains only the extracted Dyck-path callable. `makeShare` clears the
-	original decorator list before the function adds the repository's light JIT settings [2].
-	`makeShare` also imports `形ArcCode` and wraps the final `return` expression in
-	`形ArcCode(...)` so the written module returns the fixed-width arc-code type [3].
+		Path to the generated Python module written by the transformation.
 
 	Examples
 	--------
-	In this module, `makeModulesMeanders` generates the share module with the following call.
+	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [4].
 
 		```python
 		makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
@@ -482,15 +594,13 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 
 	References
 	----------
-	[1] astToolkit - Context7
-		https://context7.com/hunterhogan/asttoolkit
-	[2] Numba documentation.
-		https://numba.readthedocs.io/en/stable/
+	[1] Numba compilation options and signatures.
+		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
+	[2] `mapFolding.kitAST.numba.kitNumba.parametersNumbaLight`
+
 	[3] `mapFolding.theTypes.形ArcCode`
 
-	[4] `mapFolding.kitAST.mapFolding._count.toDisk`
-
-	[5] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
+	[4] `mapFolding.kitAST.matrixMeanders.makeModules`
 	"""
 	identifiers = identifiers or defaultMatrixMeanders
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
@@ -507,7 +617,27 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeModulesMeanders() -> None:
-	"""Make meanders modules."""
+	"""Regenerate the configured matrix-meander counting variants and shared modules.
+
+	You can use this function to write width-guarded counting, the Polars width predicate,
+	state pruning, array pruning, dataframe pruning, and the compiled shared Dyck-path function.
+	Generation uses `mapFolding.kitAST.theSSOT.defaultMatrixMeanders` [1]. Dependent variants
+	load preceding generated files. The function writes the configured output modules.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
+
+		```python
+		makeModulesMeanders()
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
+
+	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
+	"""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makePolarsWide(defaultMatrixMeanders)
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders

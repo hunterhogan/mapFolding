@@ -1,4 +1,14 @@
-"""Make functions that are complementary to the `count` function and are often called by `doTheNeedful`."""
+"""I use this module to derive state initialization from counting source.
+
+This module extracts and rewrites source counting so initialization stops after the first
+counted group, then writes the derived function to a configured module.
+
+Contents
+--------
+Functions
+	makeInitializeState
+		Write a state initializer that stops after the first counted fold group.
+"""
 from __future__ import annotations
 
 from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
@@ -17,7 +27,45 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Generate initialization module."""
+	"""Write a state initializer that stops after the first counted fold group.
+
+	You can use this function to inline source counting and derive a state-initialization function.
+	The transformation replaces the selected active-leaf loop condition with a comparison of the
+	counting field against zero, renames the function, and writes the resulting module.
+
+	Loop Selection
+	--------------
+	The visitor searches only the first statement in the inlined function body. Generation
+	expects the source counting loop to be reachable within that statement.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module syntax expected by this transformation; generation may modify the supplied
+		nodes.
+	identifiers : Default | None = None
+		Identifier and destination defaults; a falsy value selects the base default mapping.
+	**override : Any
+		Overrides for source callable, target `identifierCallable`, counting field, module name, and
+		writer settings.
+
+	Returns
+	-------
+	pathFilename : PurePath
+		Path to the generated Python module written by the transformation.
+
+	Examples
+	--------
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [1].
+
+		```python
+		makeInitializeState(getModule(identifiers=defaultMapFolding), defaultMapFolding)
+		```
+
+	References
+	----------
+	[1] `mapFolding.kitAST.mapFolding.makeModules`
+	"""
 	identifiers = identifiers or default
 	名CallableSource: identifierDotAttribute = override.get('名CallableSource') or identifiers['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))

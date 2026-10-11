@@ -1,23 +1,28 @@
-"""Store shared naming defaults for AST-generated map-folding modules.
+"""Access shared identifier mappings and estimated counts for source generation.
 
 (AI generated docstring)
 
-You can use this module to retrieve canonical identifier mappings, logical paths,
-filesystem roots, and selected estimate data for AST-driven code generation. The module
-centralizes the default naming schemes for generic algorithms, map-folding algorithms,
-and symmetry-aware map-folding algorithms.
+You can use this module to inspect package roots, source and generated module identifiers,
+state names, and selected progress estimates. The specialized mappings are independent
+copies of the base mapping, while each mapping remains mutable.
 
 Contents
 --------
 Variables
 	default
-		Baseline identifier and path mapping for generated algorithm modules.
-	defaultFoldsSymmetric
-		Identifier and path mapping specialized for symmetric-fold counting modules.
+		Access the base identifier and filesystem defaults for module generation.
 	defaultMapFolding
-		Identifier and path mapping specialized for multidimensional map-folding modules.
-	dictionaryEstimatesMapFolding
-		Selected estimated `totalFolds` values for expensive multidimensional shapes.
+		Access identifier and output defaults for multidimensional folding modules.
+	defaultMapFoldingSymmetric
+		Access identifier and output defaults for symmetric folding modules.
+	defaultMatrixMeanders
+		Access identifier and output defaults for matrix-meander modules.
+	lookupMapFoldingEstimates
+		Look up selected fold-count estimates for expensive map shapes.
+	sherpa
+		Inspect the temporary pruning-name prefix used to build identifier defaults.
+	suffix
+		Inspect derived pruning identifiers used to extend the default mapping.
 """
 from __future__ import annotations
 
@@ -54,8 +59,30 @@ default = Default(
 		, 'stateInstance': 'state'
 	}
 )
+"""Access the base identifier and filesystem defaults for module generation.
+
+(AI generated docstring)
+
+This mapping supplies package roots, source and generated logical paths, state names,
+and base counting and dispatcher names. The specialized defaults copy this mapping [1].
+
+References
+----------
+[1] `mapFolding.theTypes.Default`
+"""
 
 defaultMapFolding: Default = deepcopy(default)
+"""Access identifier and output defaults for multidimensional folding modules.
+
+(AI generated docstring)
+
+This mapping extends the base defaults with state initialization, Theorem 2 variants,
+compilation variants, and the source algorithm identifiers [1].
+
+References
+----------
+[1] `mapFolding.theTypes.Default`
+"""
 defaultMapFolding['function'].update({
 	'initializeState': 'transitionOnGroupsOfFolds'
 })
@@ -76,6 +103,17 @@ defaultMapFolding['logicalPath']['default'] = defaultMapFolding['logicalPath']['
 defaultMapFolding['module']['default'] = defaultMapFolding['module']['algorithm']
 
 defaultMapFoldingSymmetric: Default = deepcopy(defaultMapFolding)
+"""Access identifier and output defaults for symmetric folding modules.
+
+(AI generated docstring)
+
+This mapping extends the map-folding defaults with symmetric state, filtering, worker
+management, and synchronous and asynchronous generation identifiers [1].
+
+References
+----------
+[1] `mapFolding.theTypes.Default`
+"""
 defaultMapFoldingSymmetric['function'].update({
 	'_processCompletedFutures': '_processCompletedFutures'
 	, 'activeLeafGreaterThan0': 'activeLeafGreaterThan0'
@@ -103,6 +141,17 @@ defaultMapFoldingSymmetric['logicalPath']['default'] = defaultMapFoldingSymmetri
 defaultMapFoldingSymmetric['module']['default'] = defaultMapFoldingSymmetric['module']['algorithm']
 
 defaultMatrixMeanders: Default = deepcopy(default)
+"""Access identifier and output defaults for matrix-meander modules.
+
+(AI generated docstring)
+
+This mapping extends the base defaults with shared counting, width tests, pruning
+variants, data containers, and generated matrix-meander paths [1].
+
+References
+----------
+[1] `mapFolding.theTypes.Default`
+"""
 defaultMatrixMeanders['function'].update({
     'bigInt': 'countBigInt'
     , 'bigIntTest': 'integersWide吗'
@@ -111,7 +160,15 @@ defaultMatrixMeanders['function'].update({
     , 'prune': 'prune'
 })
 sherpa: str = defaultMatrixMeanders['function']['prune']
+"""Inspect the temporary pruning-name prefix used to build identifier defaults.
+
+(AI generated docstring)
+"""
 suffix: tuple[str, ...] = tuple(map(sherpa.__add__, ('Array', 'DataFrame')))
+"""Inspect derived pruning identifiers used to extend the default mapping.
+
+(AI generated docstring)
+"""
 defaultMatrixMeanders['function'].update(dict(zip(suffix, suffix, strict=True)))
 defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
 defaultMatrixMeanders['module'].update({
@@ -121,7 +178,15 @@ defaultMatrixMeanders['module'].update({
     , 'prune': 'prune'
 })
 sherpa: str = defaultMatrixMeanders['module']['prune']
+"""Inspect the temporary pruning-name prefix used to build identifier defaults.
+
+(AI generated docstring)
+"""
 suffix = tuple(map(sherpa.__add__, ('BigInt', 'NumPy', 'Pandas')))
+"""Inspect derived pruning identifiers used to extend the default mapping.
+
+(AI generated docstring)
+"""
 defaultMatrixMeanders['module'].update(dict(zip(suffix, suffix, strict=True)))
 defaultMatrixMeanders['module']['numpy'] = defaultMatrixMeanders['module']['algorithm'] + 'NumPy'
 defaultMatrixMeanders['module']['pandas'] = defaultMatrixMeanders['module']['algorithm'] + 'Pandas'
@@ -143,4 +208,13 @@ lookupMapFoldingEstimates: Final[dict[tuple[int, ...], int]] = {
 	, (3, 3, 3, 3): 85109616000000000000000000000000
 	, (8, 8): 791274195985524900  # Two tests, months apart, estimated 300,000 hours to compute.
 }
-"""Estimates of multidimensional map folding `totalFolds`."""
+"""Look up selected fold-count estimates for expensive map shapes.
+
+This mapping supplies estimated total-fold counts for progress reporting when a known value
+is unavailable.
+`mapFolding.kitAST.RecipeJob.fromMapShape` consumes this mapping [1].
+
+References
+----------
+[1] `mapFolding.kitAST.RecipeJob.fromMapShape`
+"""

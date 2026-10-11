@@ -39,12 +39,7 @@ def binaryStrip(pathFilename: Path) -> Path:
 	(AI generated docstring)
 
 	This function asks LIEF [1] to parse and strip the supplied binary, then writes the
-	modified binary over `pathFilename`. The function does not create a backup.
-
-	Parser Failure
-	--------------
-	If the binary parser returns `None`, the required-value check raises `ValueError`
-	before the function attempts to strip or write the binary.
+	modified binary over `pathFilename`.
 
 	Parameters
 	----------
@@ -70,7 +65,6 @@ def binaryStrip(pathFilename: Path) -> Path:
 	[1] LIEF binary parsing, stripping, and rewriting API.
 		https://lief.re/doc/latest/formats/elf/python.html
 	[2] `toCodon`
-
 	"""
 	binary: lief.OAT.Binary | lief.ELF.Binary = raiseIfNone(lief.parse(pathFilename))
 	binary.strip()
@@ -84,41 +78,34 @@ def toCodon(pathFilenamePython: Path) -> Path:
 
 	This function prepares a generated computation job for Codon [1], compiles the job,
 	and strips the executable with `binaryStrip` [2]. The function returns the executable
-	path and prints two suggested launch commands without executing either command.
+	path and prints two launch commands.
 
 	Source Rewriting
 	----------------
-	The function removes the first 36 decoded characters without checking their contents,
-	transliterates the entire remainder with `anyascii` [3], and overwrites the source using
-	ASCII encoding. Repeating the call removes another 36 characters. The rewrite occurs
-	before the platform check, and no backup or rollback is provided.
+	The function removes the first 36 decoded characters, transliterates the remainder with
+	`anyascii` [3], and writes the source using ASCII encoding.
 
 	Compilation and Launch Output
 	-----------------------------
-	The `codon` command must be available through the process search path. The build requests
+	The function invokes `codon` through the process search path. The build requests
 	an executable in release mode, targets the native CPU, enables fast and unsafe floating
 	point optimization, and disables exceptions [1]. `subprocess.run` uses `check=False` [4].
-	A nonzero compiler exit status therefore does not stop the subsequent attempt to strip
-	the output path; an existing executable at that path can be stripped after a failed build.
 
 	Parameters
 	----------
 	pathFilenamePython : Path
-		Writable UTF-8 source file with a disposable 36-character prefix. The remaining
-		source must be suitable for compilation after transliteration. The executable
-		uses the same path with the final suffix removed.
+		UTF-8 source file whose first 36 characters are removed before transliteration.
+		The executable uses the same path with the final suffix removed.
 
 	Returns
 	-------
 	pathFilenameBinary : Path
-		Path of the executable after stripping. Returning does not independently verify
-		that this invocation of the compiler produced the executable.
+		Path of the executable after stripping.
 
 	Raises
 	------
 	OSError
-		If the platform is not Linux, after the source file has already been rewritten.
-		Process startup and file access failures also propagate.
+		If the platform is not Linux.
 
 	Examples
 	--------
@@ -139,7 +126,6 @@ def toCodon(pathFilenamePython: Path) -> Path:
 	[4] Python `subprocess.run` and exit status handling.
 		https://docs.python.org/3/library/subprocess.html#subprocess.run
 	[5] `mapFolding.kitAST.codon.makeJob.makeJob`
-
 	"""
 	pathFilenamePython.write_text(anyascii.anyascii(pathFilenamePython.read_text(encoding='utf-8')[36:None]), encoding='ascii')
 	if sys.platform == 'linux':

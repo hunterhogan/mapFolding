@@ -1,36 +1,32 @@
-"""Obtain reusable syntax nodes for generating symmetric-fold modules.
+"""Access reusable filter-call and count-adjustment syntax.
 
 (AI generated docstring)
 
-You can use this module's Python abstract syntax tree nodes [1] when assembling synchronous and
-asynchronous symmetric-fold modules. The module uses `astToolkit` [2] to extract
-`mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds` [3] and create the call and assignment
-nodes required by the module generators.
+You can use this module to obtain reusable Python syntax nodes [1]. Importing the module
+loads and extracts `mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds` [2]
+and creates call and assignment nodes using the configured state identifiers.
 
 Contents
 --------
 Variables
-    adjustTotalFolds
-        Halve the generated symmetric-fold total with upward rounding.
-    ExprCallFilterAsymmetricFolds_leafBelow
-        Call the symmetry filter with the generated `leafBelow` name.
-    ExprCallFilterAsymmetricFoldsState
-        Call the symmetry filter with the generated state name.
-    ExprCallFilterAsymmetricFoldsStateDot_leafBelow
-        Call the symmetry filter with `leafBelow` from the generated state name.
-    foldsSymmetricIncrementCount
-        Replace a generated count increment with a symmetry-filter assignment.
-    FunctionDef_filterAsymmetricFolds
-        Insert the extracted symmetry-filter function into generated modules.
+	adjustTotalFolds
+		Access a statement that halves the symmetric count with upward rounding.
+	ExprCallFilterAsymmetricFolds_leafBelow
+		Access a filter call with the generated `leafBelow` name.
+	ExprCallFilterAsymmetricFoldsState
+		Access a filter call with the configured state name.
+	ExprCallFilterAsymmetricFoldsStateDot_leafBelow
+		Access a filter call with the state `leafBelow` attribute.
+	foldsSymmetricIncrementCount
+		Access an assignment that updates state through the symmetry filter.
+	FunctionDef_filterAsymmetricFolds
+		Access the extracted symmetry-filter function definition.
 
 References
 ----------
-[1] `ast` — Abstract syntax trees — Python documentation
-    https://docs.python.org/3/library/ast.html
-[2] astToolkit — Context7
-    https://context7.com/hunterhogan/asttoolkit
-[3] `mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds`
-
+[1] Python abstract syntax tree node definitions.
+	https://docs.python.org/3/library/ast.html
+[2] `mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds`
 """
 from __future__ import annotations
 
@@ -42,21 +38,21 @@ from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 import ast
 
 FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(defaultMapFoldingSymmetric['module']['algorithmSource'], defaultMapFoldingSymmetric['logicalPath']['algorithm']), defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']))
-"""Insert the extracted symmetry-filter function into generated modules."""
+"""Access the extracted symmetry-filter function definition."""
 
 ImaString: str = f"{defaultMapFoldingSymmetric['variable']['stateInstance']} = {defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']}({defaultMapFoldingSymmetric['variable']['stateInstance']})"
 foldsSymmetricIncrementCount: ast.stmt = ast.parse(ImaString).body[0]
-"""Replace a generated count increment with a symmetry-filter assignment."""
+"""Access an assignment that updates state through the symmetry filter."""
 del ImaString
 
 ImaString = f'{defaultMapFoldingSymmetric['variable']['stateInstance']}.{defaultMapFoldingSymmetric['variable']['counting']} = ({defaultMapFoldingSymmetric['variable']['stateInstance']}.{defaultMapFoldingSymmetric['variable']['counting']} + 1) // 2'
 adjustTotalFolds: ast.stmt = ast.parse(ImaString).body[0]
-"""Halve the generated symmetric-fold total with upward rounding."""
+"""Access a statement that halves the symmetric count with upward rounding."""
 del ImaString
 
 ExprCallFilterAsymmetricFolds_leafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Name('leafBelow')]))
-"""Call the symmetry filter with the generated `leafBelow` name."""
+"""Access a filter call with the generated `leafBelow` name."""
 ExprCallFilterAsymmetricFoldsState: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Name(defaultMapFoldingSymmetric['variable']['stateInstance'])]))
-"""Call the symmetry filter with the generated state name."""
+"""Access a filter call with the configured state name."""
 ExprCallFilterAsymmetricFoldsStateDot_leafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Attribute(Make.Name(defaultMapFoldingSymmetric['variable']['stateInstance']), 'leafBelow')]))
-"""Call the symmetry filter with `leafBelow` from the generated state name."""
+"""Access a filter call with the state `leafBelow` attribute."""
