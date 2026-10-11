@@ -1,4 +1,17 @@
-"""Access and configure package settings."""
+"""Access shared package settings and bundled sample-data paths.
+
+You can use this module to inspect package metadata and the default concurrency backend through
+a shared settings instance.
+
+Contents
+--------
+Classes
+	mapFoldingPackageSettings
+		Extend package settings with concurrency and sample-data locations.
+Shared settings
+	settingsPackage
+		Access the initialized settings shared by package modules.
+"""
 from __future__ import annotations
 
 from hunterMakesPy import PackageSettings
@@ -7,27 +20,50 @@ import dataclasses
 
 @dataclasses.dataclass
 class mapFoldingPackageSettings(PackageSettings):
-	"""Widely used settings that are especially useful for map folding algorithms.
+	"""Store package metadata, concurrency preferences, and sample-data locations.
+
+	You can use this class to extend `hunterMakesPy.PackageSettings` [1] with settings required by
+	folding computations. Construction resolves package metadata through the inherited initializer
+	and derives the bundled sample-data directory.
 
 	Attributes
 	----------
-	identifierPackageFALLBACK : str = ''
-		Fallback package identifier used only during initialization when automatic discovery fails.
-	pathPackage : Path = Path()
-		Absolute path to the installed package directory. Automatically resolved from `identifierPackage` if not provided.
+	identifierPackageFALLBACK : dataclasses.InitVar[str] = ''
+		Constructor-only fallback package identifier; no instance field is retained for this value.
+	pathPackage : Path
+		Package directory resolved by the inherited initialization when the default path is supplied.
 	identifierPackage : str = ''
-		Canonical name of the package. Automatically extracted from `pyproject.toml`.
+		Package name resolved by the inherited initialization when a fallback is supplied.
 	fileExtension : str = '.py'
-		Default file extension.
-
+		Default extension for package source files.
 	concurrencyPackage : str = 'multiprocessing'
-		Package identifier for concurrent execution operations.
+		Default backend label for processor-limit resolution.
+	pathDataSamples : Path
+		Derived directory `pathPackage / 'tests' / 'dataSamples'`. Initialization does not create
+		the directory.
+
+	Examples
+	--------
+	This module constructs the shared settings instance.
+
+		```python
+		settingsPackage = mapFoldingPackageSettings('mapFolding')
+		```
+
+	References
+	----------
+	[1] hunterMakesPy `PackageSettings`.
+		https://context7.com/hunterhogan/huntermakespy
 	"""
 
 	concurrencyPackage: str = 'multiprocessing'
-	"""Package identifier for concurrent execution operations."""
+	"""Select the default concurrency backend for processor-limit resolution."""
 
 	pathDataSamples: Path = dataclasses.field(init=False, default=Path())
+	"""Locate bundled sample data under `pathPackage / 'tests' / 'dataSamples'`.
+
+	(AI generated docstring)
+	"""
 
 	def __post_init__(self, identifierPackageFALLBACK: str) -> None:
 		"""Finish package initialization from `identifierPackageFALLBACK` and derive `pathDataSamples`.
@@ -49,4 +85,12 @@ class mapFoldingPackageSettings(PackageSettings):
 		self.pathDataSamples = self.pathPackage / 'tests' / 'dataSamples'
 
 settingsPackage = mapFoldingPackageSettings('mapFolding')
-"""Global package settings."""
+"""Access the package settings shared by folding and filesystem operations.
+
+This instance uses `mapFoldingPackageSettings` [1] with the fallback identifier `'mapFolding'`.
+
+References
+----------
+[1] `mapFoldingPackageSettings`
+
+"""

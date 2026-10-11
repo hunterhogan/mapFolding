@@ -1,45 +1,41 @@
-"""Construct array storage, bit expressions, and row-indexed integer lookups.
+"""Construct array storage and row-indexed integer lookups.
 
 (AI generated docstring)
 
-You can use this module to allocate NumPy arrays [1], prepare connection graphs for folding,
-transform Polars bit expressions [2], and organize integer sequences into rows or diagonals.
-The parsing functions read comma-separated records through the Python `csv` module [3].
+You can use this module to allocate NumPy arrays [1], construct folding connection graphs, select
+Polars integer datatypes [2], and organize integer sequences into rows or diagonals. Parsing
+functions read comma-separated records through the Python `csv` module [3].
 
 Contents
 --------
 Functions
-	compressBitsPolars
-		Pack the selected alternating bits into consecutive low-order positions.
 	getConnectionGraph
 		Construct a connection graph with the requested integer datatype.
 	getDatatypePolars
 		Select an unsigned Polars datatype for a requested bit width.
 	makeDataContainer
-		Allocate zero-filled storage through a replaceable allocation interface.
+		Allocate storage through a replaceable allocation interface.
 	makeLookupDiagonal
 		Select a column offset from each available row of an integer table.
 	makeLookupTriangle
 		Split consecutive sequence values into numbered rows.
 	make_memmap
-		Allocate an array backed by a named file.
+		Request an array backed by a named file.
 	make_zeros
 		Allocate a zero-filled array with the common container signature.
 	parseCSVtoIntegers
 		Read nonempty comma-separated records as tuples of integers.
 	parseDiagonal
-		Read one diagonal from triangle records or explicit diagonal records.
+		Read a diagonal from triangle records or explicit diagonal records.
 	parseTriangle
 		Map the first integer of each record to the remaining row values.
-	reverseBitsPolars
-		Reverse bit positions within the requested expression width.
 
 References
 ----------
 [1] NumPy reference.
 	https://numpy.org/doc/stable/reference/index.html
-[2] Polars expressions reference.
-	https://docs.pola.rs/api/python/stable/reference/expressions/index.html
+[2] Polars datatype reference.
+	https://docs.pola.rs/api/python/stable/reference/datatypes.html
 [3] Python `csv` module.
 	https://docs.python.org/3/library/csv.html
 """
@@ -61,8 +57,46 @@ if TYPE_CHECKING:
 	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
 	from typing import Any, Literal
 
-def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:
+	"""Select an unsigned integer datatype from the requested `bitWidth`.
+
+	(AI generated docstring)
+
+	You can use this function to choose a Polars datatype class [1] for fixed-width unsigned storage.
+	This function selects the smallest supported width up to 64 bits and selects 128 bits for every
+	larger request.
+
+	Width Limits
+	------------
+	Requests greater than 128 still return `UInt128`. This function does not check whether the
+	selected datatype can represent the requested width.
+
+	Parameters
+	----------
+	bitWidth : int
+		Requested number of bits. Requests no greater than eight, including nonpositive requests,
+		select the 8-bit datatype.
+
+	Returns
+	-------
+	datatype : 形PolarsInteger
+		`UInt8`, `UInt16`, `UInt32`, `UInt64`, or `UInt128` at successive width thresholds.
+
+	Examples
+	--------
+	`mapFolding.algorithms.matrixMeandersPolars` [2] selects storage from the state bit width.
+
+		```python
+		getDatatypePolars(state.bitWidth)
+		```
+
+	References
+	----------
+	[1] Polars datatype reference.
+		https://docs.pola.rs/api/python/stable/reference/datatypes.html
+	[2] `mapFolding.algorithms.matrixMeandersPolars`
+
+	"""
 	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
 	import polars
 
@@ -79,23 +113,52 @@ def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:  # ruff: ignore[undocu
 	return datatype
 
 def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
-	"""Create a properly typed connection graph for the map folding algorithm.
+	"""Construct the map connection graph and cast its elements to `datatype`.
+
+	You can use this function to obtain the leaf-connection lookup required by folding algorithms.
+	This function builds the lookup from `mapShape` and `totalLeaves` and returns a NumPy array [1]
+	with the requested integer datatype.
+
+	Graph Storage
+	-------------
+	The shape is `(len(mapShape), totalLeaves + 1, totalLeaves + 1)`. Leaf labels start at one.
+	Unused entries remain zero. Construction first uses `mapFolding.theTypes.形NumPyTotalLeaves` [2],
+	currently an unsigned 8-bit datatype, before casting to `datatype`. A wider output datatype
+	does not widen intermediate graph construction.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		A tuple of integers representing the dimensions of the map.
+		Positive dimension lengths in their algorithmic order.
 	totalLeaves : int
-		The total number of leaves in the map.
-	datatype : type[形NumPyInteger]
-		The NumPy integer type to use for the array elements, ensuring proper memory usage and
-		compatibility with the computation state.
+		Product of the dimension lengths; must agree with `mapShape`.
+	datatype : 形NumPyInteger | numpy_dtype[形NumPyInteger]
+		Integer datatype supplied to the array conversion.
 
 	Returns
 	-------
 	connectionGraph : ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]
-		A 3D NumPy array with shape (`totalDimensions`, `totalLeaves`+1, `totalLeaves`+1) with the
-		specified `datatype`, representing all possible connections between leaves.
+		Array with one dimension axis and two leaf axes, each leaf axis including a zero sentinel.
+		Each entry gives the connectee for a dimension, active leaf, and candidate connectee.
+
+	Examples
+	--------
+	`mapFolding.dataBaskets.StateMapFolding` [3] obtains the graph using field datatype metadata.
+
+		```python
+		self.connectionGraph = getConnectionGraph(
+			self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype']
+		)
+		```
+
+	References
+	----------
+	[1] NumPy array reference.
+		https://numpy.org/doc/stable/reference/index.html
+	[2] `mapFolding.theTypes.形NumPyTotalLeaves`
+
+	[3] `mapFolding.dataBaskets.StateMapFolding`
+
 	"""
 	connectionGraph: 形ArrayTotalLeaves3D = _makeConnectionGraph(mapShape, totalLeaves)
 	return connectionGraph.astype(datatype)
@@ -206,21 +269,46 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | 
 	return make_zeros(shape, datatype, name)
 
 def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
-	"""Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
+	"""Open file-backed array storage named from `name`.
+
+	You can use this function to request a NumPy memory-mapped array [1] with `shape` and `datatype`.
+	This function forwards the filename `f'{name}.mM'` and the literal mode `'write'` to the
+	NumPy constructor.
 
 	Parameters
 	----------
 	shape : tuple[Any, ...]
-		Shape of the `ndarray`.
+		Requested axis lengths.
 	datatype : type[形NumPyInteger]
-		Integer `dtype` used for each array element.
+		Integer element datatype.
 	name : str
-		Filename stem `f"{name}.mM"` for a file based `ndarray`.
+		Filename stem, relative to the working directory unless `name` includes a path.
 
 	Returns
 	-------
-	container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-		`numpy.ndarray` of `shape` with `datatype`.
+	container : memmap[tuple[Any, ...], dtype[形NumPyInteger]]
+		File-backed array if the constructor accepts the supplied arguments.
+
+	Validation Failures
+	-------------------
+	ValueError
+		If the NumPy constructor rejects the mode `'write'`. The documented NumPy modes are
+		`'r'`, `'r+'`, `'w+'`, and `'c'` [1].
+
+	Examples
+	--------
+	`mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer` [2] forwards allocation requests.
+
+		```python
+		return make_memmap(shape, datatype, raiseIfNone(name))
+		```
+
+	References
+	----------
+	[1] NumPy `numpy.memmap`.
+		https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
+	[2] `mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer`
+
 	"""
 	return numpy.memmap(f'{name}.mM', datatype, mode='write', shape=shape)
 

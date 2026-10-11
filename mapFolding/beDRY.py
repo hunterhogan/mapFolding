@@ -1,4 +1,23 @@
-"""Oft-needed computations or actions, especially for multi-dimensional map folding."""
+"""Validate dimensions and select resource limits for folding computations.
+
+You can use this module to normalize map dimensions, calculate the number of leaves, select
+processor limits, and divide counting work into tasks.
+
+Contents
+--------
+Parse parameters
+	defineProcessorLimit
+		Resolve a processor limit and optionally update the Numba thread limit.
+	getTaskDivisions
+		Resolve a requested number of computation tasks.
+	validateMapShape
+		Convert dimension values to a tuple while preserving dimension order.
+Map folding
+	getTotalLeaves
+		Multiply dimension lengths with a platform-size check.
+	mapShapeIs2上nDimensions
+		Check the minimum dimension count and require every dimension length to be two.
+"""
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -15,7 +34,17 @@ if TYPE_CHECKING:
 #======== Parse parameters ======================================
 
 def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | None = None) -> int:
-	"""Compute the CPU usage limit for concurrent operations; for `numba` managed concurrency, set the global limit.
+	"""Resolve the processor count from `CPUlimit` and the concurrency backend.
+
+	You can use this function to convert a processor-usage preference into a worker count. This
+	function delegates limit interpretation to `hunterMakesPy.parseParameters.defineConcurrencyLimit` [1]. Selecting `'numba'` also changes the active Numba thread limit [2].
+
+	Processor Bounds
+	----------------
+	The delegated resolver enforces at least one worker and at most 61 workers on Windows [1].
+	An explicit positive count can exceed the available processor count. With `'numba'`, an
+	unsupported thread count propagates `ValueError` from the Numba setter [2]. Repeated Numba
+	calls use the currently active thread count as the basis for fractions and reservations.
 
 	Parameters
 	----------
@@ -23,22 +52,30 @@ def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | N
 		Please see the documentation in `countFolds` for details. I know it is annoying, but I want to
 		be sure you have the most accurate information.
 	concurrencyPackage : str | None = None
-		Specifies which concurrency package to use. - `None` or `'multiprocessing'`: Uses standard
-		`multiprocessing`. - `'numba'`: Uses Numba's threading system.
+		`'numba'` uses the current Numba thread count and applies the result globally. Every other
+		value uses the default processor count without changing the Numba thread limit.
 
 	Returns
 	-------
 	concurrencyLimit : int
-		The actual concurrency limit that was set.
+		Resolved worker count, or the active thread count after applying the Numba limit.
 
-	Numba
-	-----
-	If using `'numba'` as the concurrency package, the maximum number of processors is retrieved from
-	`numba.get_num_threads()` rather than by polling the hardware. If Numba environment variables
-	limit available processors, that will affect this function.
+	Examples
+	--------
+	`mapFolding.basecamp.countFolds` [3] resolves resources before task division.
 
-	When using Numba, this function must be called before importing any Numba-jitted function for this
-	processor limit to affect the Numba-jitted function.
+		```python
+		concurrencyLimit = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
+		```
+
+	References
+	----------
+	[1] hunterMakesPy `defineConcurrencyLimit`.
+		https://context7.com/hunterhogan/huntermakespy
+	[2] Numba thread-count controls.
+		https://numba.readthedocs.io/en/stable/user/threading-layer.html
+	[3] `mapFolding.basecamp.countFolds`
+
 	"""
 	match concurrencyPackage:
 		case 'numba':
@@ -50,33 +87,43 @@ def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | N
 	return concurrencyLimit
 
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, totalLeaves: int) -> int:
-	"""Determine whether to divide the computation into tasks and how many divisions.
+	"""Resolve computation task divisions from `computationDivisions`.
+
+	You can use this function to translate a task-count preference into a nonnegative count bounded
+	by `totalLeaves`. A result of zero means the caller should run one undivided computation.
+
+	Task Counting
+	-------------
+	Counts greater than `totalLeaves` would count some foldings more than once.
+	`mapFolding.basecamp.countFolds` [1] uses parallel execution only when the resolved count exceeds
+	one.
 
 	Parameters
 	----------
 	computationDivisions : int | str | None
-		Specifies how to divide computations. Please see the documentation in `countFolds` for
-		details. I know it is annoying, but I want to be sure you have the most accurate information.
+		`None`, zero, and `False` select zero divisions. An `int` selects that count, with negative
+		values reduced to zero. `'maximum'` selects `totalLeaves`. `'cpu'` selects the smaller of
+		`concurrencyLimit` and `totalLeaves`. String matching ignores capitalization.
 	concurrencyLimit : int
-		Maximum number of concurrent tasks allowed.
+		Available worker count used by `'cpu'`.
 	totalLeaves : int
-		Total number of leaves in the map.
+		Maximum permitted number of tasks.
 
 	Returns
 	-------
 	taskDivisions : int
-		How many tasks must finish before the job can compute the total number of folds. `0` means no
-		tasks, only job.
+		Resolved nonnegative count. `True` resolves to one through the integer case.
 
 	Raises
 	------
 	ValueError
-		If `computationDivisions` is an unsupported type or if resulting task divisions exceed total
-		leaves.
+		If `computationDivisions` has an unsupported value or type, or the selected count exceeds
+		`totalLeaves`.
 
-	Notes
-	-----
-	Task divisions should not exceed total leaves or the folds will be over-counted.
+	References
+	----------
+	[1] `mapFolding.basecamp.countFolds`
+
 	"""
 	taskDivisions = 0
 	match computationDivisions:
@@ -107,28 +154,49 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	return int(max(0, taskDivisions))
 
 def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
-	"""Validate and normalize a map shape for a map-folding problem.
+	"""Convert `mapShape` to ordered, nonnegative integer dimensions.
 
 	(AI generated docstring)
 
-	This function serves as the gatekeeper for dimension inputs, ensuring that all map dimensions
-	provided to the package meet the requirements for valid computation. It performs multiple
-	validation steps and normalizes the dimensions into a consistent format.
+	You can use this function to normalize dimension values before counting foldings. This function
+	returns a nonempty tuple in the supplied order and rejects negative dimensions. Zero dimensions
+	are accepted for the special case handled by `mapFolding.basecamp.countFolds` [1].
+
+	Dimension Order
+	---------------
+	This function does not sort the dimensions. Algorithms can depend on the original dimension
+	order.
 
 	Parameters
 	----------
 	mapShape : Sequence[int]
-		A sequence of integers representing the dimensions of the map.
+		Dimension lengths. Integer-compatible values are converted by
+		`hunterMakesPy.parseParameters.intInnit` [2]; boolean elements are rejected.
 
 	Returns
 	-------
-	mapShape : tuple[int, ...]
-		An _unsorted_ tuple of positive integers representing the validated dimensions.
+	mapShapeValidated : tuple[int, ...]
+		Converted dimensions in their original order, including any zero values.
 
 	Raises
 	------
 	ValueError
-		If the input is empty or contains non-positive values.
+		If `mapShape` is empty, contains negative dimensions, or cannot be converted to integers.
+
+	Examples
+	--------
+	`mapFolding.basecamp.countFolds` [1] validates the supplied dimensions before choosing an algorithm.
+
+		```python
+		mapShape = validateMapShape(mapShape)
+		```
+
+	References
+	----------
+	[1] `mapFolding.basecamp.countFolds`
+
+	[2] hunterMakesPy `intInnit`.
+		https://context7.com/hunterhogan/huntermakespy
 	"""
 	mapShapeAsList: list[int] = intInnit(mapShape, 'mapShape', Sequence[int])
 	if not mapShapeAsList or any(map((0).__gt__, mapShapeAsList)):
@@ -179,18 +247,34 @@ def getTotalLeaves(mapShape: tuple[int, ...]) -> int:
 	return productDimensions
 
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToRideThis: int = 3) -> bool:
-	"""Test whether `mapShape` is a sufficiently sized 2ⁿ-dimensional map.
+	"""Check that `mapShape` has enough dimensions and every length is two.
+
+	You can use this predicate to select algorithms that require at least a specified number of
+	dimensions, with exactly two leaves along every dimension.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		Map shape as a tuple of dimension lengths.
+		Dimension lengths to inspect.
 	youMustBeDimensionsTallToRideThis : int = 3
-		Minimum number of required dimensions.
+		Minimum number of dimensions required for a match.
 
 	Returns
 	-------
 	is2上nDimensions : bool
-		`True` when `mapShape` is a 2ⁿ-dimensional map with the required minimum dimension count.
+		`True` when the dimension count meets the minimum and every length equals two.
+
+	Examples
+	--------
+	`mapFolding.basecamp.countFolds` [1] uses a minimum of two dimensions during algorithm selection.
+
+		```python
+		mapShapeIs2上nDimensions(mapShape, youMustBeDimensionsTallToRideThis=2)
+		```
+
+	References
+	----------
+	[1] `mapFolding.basecamp.countFolds`
+
 	"""
 	return (youMustBeDimensionsTallToRideThis <= len(mapShape)) and all(map((2).__eq__, mapShape))
