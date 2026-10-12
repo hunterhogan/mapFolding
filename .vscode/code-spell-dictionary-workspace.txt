@@ -84,6 +84,7 @@ confusables
 Connectee
 Connectees
 consec
+coprime
 Coxeter
 cpython
 Crandall

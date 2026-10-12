@@ -79,7 +79,7 @@ def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, CPUlimit: float
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('n, flow'
 	, [
-		# *[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 7), ('numba', 'theorem2Numba', 'algorithmNumba'))],  # ruff: ignore[commented-out-code]
+		*[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 7), ('numba', 'theorem2Numba', 'algorithmNumba'))],
 		*[pytest.param(n, flow, id=f'{flow}, {n}') for n, flow in CartesianProduct((2, 5), ('algorithm', 'theorem2', 'theorem2Trimmed')
 )]])
 def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> None:
@@ -98,16 +98,10 @@ def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> No
 			, ('semi', 'meanders')
 			, (1, 2, 3, 11, 20, 30))
 	]
-	, pytest.param(34, 'matrixPolars', 'semi', id='matrixPolars-semi-34')
-	, *[pytest.param(n, flow, kind, id=f'{flow}-{kind}-{n}') for flow, kind, n in CartesianProduct(
-			('prune', 'pruneNumPy', 'prunePandas')
-			, ('semi',)
-			, (20, 21, 30))
-	]
 	, *[pytest.param(n, flow, kind, id=f'{flow}-{kind}-{n}') for flow, kind, n in CartesianProduct(
 			('prune', 'pruneNumPy', 'prunePandas')
 			, ('semi', 'meanders')
-			, (1, 2, 3, 22, 23))
+			, (1, 2, 3, 22, 23, 30))
 	]
 ))
 def test_meanders(kind: LiteralString, n: int, flow: LiteralString, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
