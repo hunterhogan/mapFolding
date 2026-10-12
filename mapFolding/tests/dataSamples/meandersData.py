@@ -20,6 +20,7 @@ dataframeTransition128: polars.DataFrame = polars.DataFrame(
 	schema={'arcCode': polars.UInt128, 'meanders': polars.UInt8},
 )
 dataframeTransitionMixed6: polars.DataFrame = polars.DataFrame({'arcCode': [15, 15], 'meanders': [13, 11]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
+dataframeCountsMixed6: polars.DataFrame = polars.DataFrame({'arcCode': [15], 'meanders': [24]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
 dataframeUnsigned8Empty: polars.DataFrame = polars.DataFrame(schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
 
 tupleDataframesOverlapping8: tuple[polars.DataFrame, ...] = (

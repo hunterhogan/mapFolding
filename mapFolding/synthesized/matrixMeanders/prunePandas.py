@@ -57,7 +57,7 @@ def count(state: StateMeanders) -> StateMeanders:
             del bitsZulu
             dataframeMeanders.loc[:, 'analyzed'] *= 2 ** 2
             dataframeMeanders.loc[:, 'analyzed'] += 3
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
             return dataframeMeanders
 
         def connectAcrossLine(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -110,7 +110,7 @@ def count(state: StateMeanders) -> StateMeanders:
             dataframeMeanders.loc[:, 'analyzed'] |= bitsTarget
             del bitsTarget
             dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 2
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
             return dataframeMeanders
 
         def dragUp(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -142,7 +142,7 @@ def count(state: StateMeanders) -> StateMeanders:
             dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 2
             dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0
             del bitsTarget
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
             return dataframeMeanders
 
         def dragDown(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -173,7 +173,7 @@ def count(state: StateMeanders) -> StateMeanders:
             dataframeMeanders.loc[:, 'analyzed'] //= 2 ** 1
             dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0
             del bitsTarget
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
             return dataframeMeanders
 
         def recordArcCodes(dataframeMeanders: pandas.DataFrame) -> pandas.DataFrame:
@@ -197,7 +197,7 @@ def count(state: StateMeanders) -> StateMeanders:
         length: int = getTotalBuckets(state, len(dataframeMeanders.index))
         dataframeAnalyzed = pandas.DataFrame({'analyzed': pandas.Series(name='analyzed', data=0, index=pandas.RangeIndex(length), dtype=形ArcCode), 'meanders': pandas.Series(name='meanders', data=0, index=pandas.RangeIndex(length), dtype=形Meanders)}, index=pandas.RangeIndex(length))
         state.boundary -= 1
-        state.set_arcCodeMAXIMUM()
+        state.set_arcCodeMaximum()
         state.次Target = 0
         dataframeMeanders = addLoop(dataframeMeanders)
         dataframeMeanders = recordArcCodes(dataframeMeanders)

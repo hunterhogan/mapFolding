@@ -66,7 +66,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
             dataframeMeanders.loc[:, 'analyzed'] *= 2**2 					# (... << 2)
             dataframeMeanders.loc[:, 'analyzed'] += 3 						# (...) | 3
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
             return dataframeMeanders
 
@@ -145,7 +145,7 @@ def count(state: StateMeanders) -> StateMeanders:
             del bitsTarget
             dataframeMeanders.loc[:, 'analyzed'] //= 2**2 							# ... >> 2
 
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
             return dataframeMeanders
 
@@ -196,7 +196,7 @@ def count(state: StateMeanders) -> StateMeanders:
 
             del bitsTarget
 
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
             return dataframeMeanders
 
@@ -237,7 +237,7 @@ def count(state: StateMeanders) -> StateMeanders:
             dataframeMeanders.loc[bitsTarget <= 1, 'analyzed'] = 0 							# if 1 < bitsZulu
             del bitsTarget
 
-            dataframeMeanders.loc[state.arcCodeMAXIMUM <= dataframeMeanders['analyzed'], 'analyzed'] = 0
+            dataframeMeanders.loc[state.arcCodeMaximum <= dataframeMeanders['analyzed'], 'analyzed'] = 0
 
             return dataframeMeanders
 
@@ -288,7 +288,7 @@ def count(state: StateMeanders) -> StateMeanders:
         )
 
         state.boundary -= 1
-        state.set_arcCodeMAXIMUM()
+        state.set_arcCodeMaximum()
 
         state.次Target = 0
 

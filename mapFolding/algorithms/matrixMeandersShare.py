@@ -76,7 +76,7 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: 形ArrayArcCode | No
 
 	arcCodeMAXIMUM: int = 0
 	if fixedSizeMAXIMUMarcCode:
-		arcCodeMAXIMUM = state.arcCodeMAXIMUM
+		arcCodeMAXIMUM = state.arcCodeMaximum
 
 	return (raiseIfNone(state.bitWidthLimitArcCode) < arcCodeWidest
 		or raiseIfNone(state.bitWidthLimitMeanders) < meandersWidest
@@ -191,6 +191,9 @@ def flipTheExtra_0b1(intWithExtra_0b1: int) -> int:  # pyright: ignore[reportInc
 
 #================== Buckets =======================================================================
 
+totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254
+	, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
+
 def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	"""Return the allocation length for one transfer-matrix step.
 
@@ -226,12 +229,8 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 
 	Figure out an intelligent flow for so many factors.
 	"""
-	if state.boundary <= state.n * 2 // 3:
-		totalBuckets: int = (355 * totalArcCodes + 99) // 100
-	else:
-		totalBuckets = totalArcCodes * 2
-
-	return max(totalBuckets, 3000000)
+	totalBuckets: int = (355 * totalArcCodes + 99) // 100
+	return max(totalBuckets, totalBucketsMaximumBy_boundary.get(state.boundary, totalBuckets))
 
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1

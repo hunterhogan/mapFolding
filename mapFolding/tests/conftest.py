@@ -6,7 +6,6 @@ from mapFolding import kitFilesystem
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
 from mapFolding.oeis import byFormula, getValuesKnown, oeisIDsImplemented
-from operator import methodcaller
 from typing import TYPE_CHECKING
 import numpy
 import polars
@@ -14,9 +13,10 @@ import pytest
 import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterator
+	from collections.abc import Callable, Generator
 	from hunterMakesPy import CallableFunction
 	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
+	from mapFolding.kitFilesystem import _PolarsMaterializer
 	from numpy.typing import NDArray
 	from pathlib import Path
 	from pytest import FixtureRequest
@@ -47,12 +47,18 @@ def rtol(request: FixtureRequest) -> float:
 #======== Filesystem isolation =====================================
 
 @pytest.fixture
-def dataframe(request: pytest.FixtureRequest) -> polars.LazyFrame | Iterator[polars.LazyFrame]:
+def dataframe(request: pytest.FixtureRequest) -> polars.LazyFrame:
 	if isinstance(request.param, polars.LazyFrame):
-		dataframe: polars.LazyFrame | Iterator[polars.LazyFrame] = request.param
+		dataframe: polars.LazyFrame = request.param
 	else:
-		dataframe = map(methodcaller('lazy'), request.param)
+		dataframe = polars.concat(request.param).lazy()
 	return dataframe
+
+@pytest.fixture
+def materializePolars(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator[_PolarsMaterializer]:
+	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
+	with kitFilesystem.storePolars('arcCode') as materializePolars:
+		yield materializePolars
 
 @pytest.fixture
 def state(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> StateMeanders:

@@ -97,15 +97,15 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
             bitsZuluHasArcs: bool = 1 < bitsZulu
             bitsZuluIsEven: int = bitsZulu & 1 ^ 1
             arcCodeAnalysis: int = (bitsZulu << 1 | bitsAlfa) << 2 | 3
-            if arcCodeAnalysis < state.arcCodeMAXIMUM:
+            if arcCodeAnalysis < state.arcCodeMaximum:
                 state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsAlfaHasArcs:
                 arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3
-                if arcCodeAnalysis < state.arcCodeMAXIMUM:
+                if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsZuluHasArcs:
                 arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1
-                if arcCodeAnalysis < state.arcCodeMAXIMUM:
+                if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):
                 if bitsAlfaIsEven and (not bitsZuluIsEven):
@@ -113,7 +113,7 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
                 elif bitsZuluIsEven and (not bitsAlfaIsEven):
                     bitsZulu ^= walkDyckPath(bitsZulu)
                 arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2
-                if arcCodeAnalysis < state.arcCodeMAXIMUM:
+                if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
         state.reduceBoundary()
         lookupArcCodeMeanders: dict[int, int] = state.lookupMeanders.copy()

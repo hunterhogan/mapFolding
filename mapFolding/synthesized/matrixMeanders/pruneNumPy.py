@@ -6,6 +6,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗, prune
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.dataStructures import make_memmap
+from mapFolding.kitFilesystem import extendArray
 from mapFolding.oeis.A400429 import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.pruneBigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
@@ -100,7 +101,7 @@ def count(state: StateMeanders) -> StateMeanders:
         state.次Target = 0
         state.boundary -= 1
         tqdmBoundary.set_postfix_str(f'boundary={state.boundary}')
-        state.set_arcCodeMAXIMUM()
+        state.set_arcCodeMaximum()
         moreThan(bitsAlfa, 1, out=toPrepArea)
         multiply(bitsZulu, toPrepArea, out=toPrepArea)
         selectorGreaterThan1: 形ArrayBoolean1D = numpy.empty_like(toPrepArea, dtype=numpy_bool)
@@ -138,7 +139,7 @@ def count(state: StateMeanders) -> StateMeanders:
         XshiftRight(toPrepArea, 2, out=toPrepArea)
         toPrepArea[selectorDisqualified] = 0
         del selectorDisqualified
-        state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMAXIMUM)
+        arrayAnalyzed, state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMaximum)
         bitsAlfaStack: 形ArrayArcCode1D = numpy.empty_like(arrayMeanders[slicerArcCode])
         Xand(bitsAlfa, 1, out=bitsAlfaStack)
         subtract(1, bitsAlfaStack, out=bitsAlfaStack)
@@ -155,7 +156,7 @@ def count(state: StateMeanders) -> StateMeanders:
         del bitsAlfaStack
         toPrepArea[arraySelectors] = 0
         del arraySelectors
-        state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMAXIMUM)
+        arrayAnalyzed, state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMaximum)
         bitsZuluStack: 形ArrayArcCode1D = numpy.empty_like(arrayMeanders[slicerArcCode])
         Xand(bitsZulu, 1, out=bitsZuluStack)
         subtract(1, bitsZuluStack, out=bitsZuluStack)
@@ -171,12 +172,12 @@ def count(state: StateMeanders) -> StateMeanders:
         del bitsZuluStack
         toPrepArea[arraySelectors] = 0
         del arraySelectors
-        state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMAXIMUM)
+        arrayAnalyzed, state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMaximum)
         XshiftLeft(bitsZulu, 1, out=toPrepArea)
         X_or(bitsAlfa, toPrepArea, out=toPrepArea)
         XshiftLeft(toPrepArea, 2, out=toPrepArea)
         X_or(toPrepArea, 3, out=toPrepArea)
-        state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMAXIMUM)
+        arrayAnalyzed, state.次Target = recordAnalysis(arrayAnalyzed, state.次Target, toPrepArea, arrayMeanders, state.arcCodeMaximum)
         del bitsAlfa, bitsZulu, toPrepArea, arrayWorkbench
         del arrayMeanders
         if 2 ** 32 < arrayAnalyzed.nbytes:
@@ -223,18 +224,20 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
     """
     return make_memmap(shape, datatype, raiseIfNone(name))
 
-def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMAXIMUM: int) -> int:
+def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMAXIMUM: int) -> tuple[形ArrayArcCode, int]:
     """Record valid `arcCode` and corresponding `meanders` in `arrayAnalyzed`."""
     selectorOverLimit: 形ArrayBoolean1D = arcCodeMAXIMUM < arcCode
     arcCode[selectorOverLimit] = 0
     selectorAnalysis: 形ArraySelector1D = numpy.flatnonzero(arcCode)
     次Stop: int = 次start + len(selectorAnalysis)
+    if len(arrayAnalyzed) < 次Stop:
+        arrayAnalyzed = extendArray(arrayAnalyzed, 次Stop)
     sliceAnalysis: slice = slice(次start, 次Stop)
     slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次ArcCode)
     slicerMeandersAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次Meanders)
     arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
     arrayAnalyzed[slicerMeandersAnalysis] = arrayMeanders[slicerMeanders][selectorAnalysis]
-    return 次Stop
+    return (arrayAnalyzed, 次Stop)
 
 def doTheNeedful(state: StateMeanders) -> StateMeanders:
     """Compute `meanders` with a transfer matrix algorithm implemented in NumPy.

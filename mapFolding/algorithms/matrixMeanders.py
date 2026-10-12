@@ -96,17 +96,17 @@ def count(state: StateMeanders) -> StateMeanders:
             bitsZuluIsEven: int = bitsZulu & 1 ^ 1
 
             arcCodeAnalysis: int = (bitsZulu << 1 | bitsAlfa) << 2 | 3  # No stack required. Evaluate formula step-wise left to right: (parentheses) override precedence.
-            if arcCodeAnalysis < state.arcCodeMAXIMUM:
+            if arcCodeAnalysis < state.arcCodeMaximum:
                 state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsAlfaHasArcs:
                 arcCodeAnalysis = bitsAlfaIsEven << 1 | bitsAlfa >> 2 | bitsZulu << 3  # Stack of 1: `bitsAlfaIsEven` has `bitsAlfa` in it.
-                if arcCodeAnalysis < state.arcCodeMAXIMUM:
+                if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsZuluHasArcs:
                 arcCodeAnalysis = bitsZuluIsEven | bitsAlfa << 2 | bitsZulu >> 1  # Stack of 1: `bitsZuluIsEven` has `bitsZulu` in it.
-                if arcCodeAnalysis < state.arcCodeMAXIMUM:
+                if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
             if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):  # Stack of 1 if repeat bitsLocator operations. Lots of stacks to avoid duplicate work.
@@ -117,7 +117,7 @@ def count(state: StateMeanders) -> StateMeanders:
                     bitsZulu ^= walkDyckPath(bitsZulu)
 
                 arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2  # No stack required. Evaluate formula step-wise left to right: (parentheses) override precedence.
-                if arcCodeAnalysis < state.arcCodeMAXIMUM:
+                if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
 
         state.reduceBoundary()

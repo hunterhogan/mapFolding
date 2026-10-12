@@ -509,7 +509,7 @@ class StateMeanders:
 	"""Track the bit length of the largest active arch code."""
 	bitsLocator: int = 0
 	"""Select alternating bit positions below the current bit width."""
-	arcCodeMAXIMUM: int = 0
+	arcCodeMaximum: int = 0
 	"""Track the boundary-derived power-of-two threshold for arch codes."""
 
 	bitWidthLimitArcCode: int | None = None
@@ -537,7 +537,7 @@ class StateMeanders:
 		self.boundary -= 1
 		self.setBitWidth()
 		self.setBitsLocator()
-		self.set_arcCodeMAXIMUM()
+		self.set_arcCodeMaximum()
 
 	def setBitsLocator(self) -> None:
 		"""Set the locator mask from the stored arch-code bit width.
@@ -594,13 +594,13 @@ class StateMeanders:
 		"""
 		self.bitWidth = int(arrayMeanders.max()).bit_length()
 
-	def set_arcCodeMAXIMUM(self) -> None:
+	def set_arcCodeMaximum(self) -> None:
 		"""Set the arch-code threshold from the current transfer boundary.
 
 		This method stores `1 << (2 * self.boundary + 4)` in `self.arcCodeMAXIMUM` and returns `None`.
 		This method does not inspect or change the count lookup.
 		"""
-		self.arcCodeMAXIMUM = 1 << (2 * self.boundary + 4)
+		self.arcCodeMaximum = 1 << (2 * self.boundary + 4)
 
 	def __post_init__(self) -> None:
 		"""Post init."""
@@ -615,7 +615,7 @@ class StateMeanders:
 
 		self.setBitWidth()
 		self.setBitsLocator()
-		self.set_arcCodeMAXIMUM()
+		self.set_arcCodeMaximum()
 
 		if self.bitWidthLimitArcCode is None:
 			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * 8  # bits
