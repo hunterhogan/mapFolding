@@ -22,6 +22,23 @@ dataframeTransition128: polars.DataFrame = polars.DataFrame(
 dataframeTransitionMixed6: polars.DataFrame = polars.DataFrame({'arcCode': [15, 15], 'meanders': [13, 11]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
 dataframeUnsigned8Empty: polars.DataFrame = polars.DataFrame(schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
 
+tupleDataframesOverlapping8: tuple[polars.DataFrame, ...] = (
+	dataframePackedMixed6, dataframeTransitionMixed6, dataframeUnsigned8Empty, dataframePackedMixed6)
+dataframeCountsOverlapping8: polars.DataFrame = polars.DataFrame(
+	{'arcCode': [15, 22, 41, 63], 'meanders': [24, 26, 22, 14]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
+tupleDataframesOverlapping128: tuple[polars.DataFrame, ...] = (dataframePacked126, dataframeTransition128, dataframePacked126)
+dataframeCountsOverlapping128: polars.DataFrame = polars.DataFrame(
+	{'arcCode': [0x3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, 0x5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE,
+		0xAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD, 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF], 'meanders': [14, 7, 7, 7]},
+	schema={'arcCode': polars.UInt128, 'meanders': polars.UInt8})
+tupleDataframesEmpty8: tuple[polars.DataFrame, ...] = (dataframeUnsigned8Empty, dataframeUnsigned8Empty)
+dataframePackedCount149: polars.DataFrame = polars.DataFrame(
+	{'arcCode': [0x3F], 'meanders': [149]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
+tupleDataframesCount298: tuple[polars.DataFrame, ...] = (dataframePackedCount149, dataframePackedCount149)
+dataframeNegativeArcCode: polars.LazyFrame = polars.LazyFrame().select(
+	polars.lit(-1).cast(polars.UInt8).alias('arcCode'), polars.lit(7, dtype=polars.UInt8).alias('meanders'))
+tupleAnalysesNegativeArcCode: tuple[polars.LazyFrame, ...] = (dataframePacked6.lazy(), dataframeNegativeArcCode)
+
 dataframeClosures8: polars.DataFrame = polars.DataFrame({'arcCode': [38, 25, 114, 177], 'meanders': [7, 11, 13, 17]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
 dataframeAligned8: polars.DataFrame = polars.DataFrame({'arcCode': [34, 17, 50, 49], 'meanders': [7, 11, 13, 17]}, schema={'arcCode': polars.UInt8, 'meanders': polars.UInt8})
 dataframeClosures128: polars.DataFrame = polars.DataFrame(

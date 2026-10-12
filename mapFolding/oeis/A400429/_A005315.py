@@ -132,9 +132,10 @@ def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denomina
 	[1] `A005315of3`
 
 	"""
+	neverEndingNumerator: chain[int] = chain(numerator, repeat(0))
 	boxOfCoefficients: list[int] = []
 	while len(boxOfCoefficients) <= 次coefficient:
-		boxOfCoefficients.append(next(chain(numerator, repeat(0))) - sum(
+		boxOfCoefficients.append(next(neverEndingNumerator) - sum(
 			denominator[degree] * boxOfCoefficients[-degree] for degree in range(1, min(len(denominator), len(boxOfCoefficients) + 1))
 		))
 	return boxOfCoefficients[-1]

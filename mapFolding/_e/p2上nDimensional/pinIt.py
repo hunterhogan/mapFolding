@@ -436,8 +436,7 @@ def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDo
 	return state
 
 def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> StateElimination:
-	"""Deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into
-`state.boxOfPermutationSpace`.
+	"""Deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	You can build `state.boxOfPermutationSpace` with
 	`PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1], then normalize and filter the
@@ -545,8 +544,7 @@ def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[P
 	return state
 
 def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leavesDomain: Sequence[Pile]) -> StateElimination:
-	"""Deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into
-`state.boxOfPermutationSpace`.
+	"""Deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	(AI generated docstring)
 
@@ -575,6 +573,7 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 	[2] mapFolding._e.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
 
 	[3] mapFolding._e.algorithms.iff.removeIFFViolationsFromEliminationState.
+
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainOfLeaf(leaves, leavesDomain)
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)

@@ -1,37 +1,4 @@
-"""I use this module as the worker template for asynchronous symmetry filtering.
-
-(AI generated docstring)
-
-This module supplies a shared queue, worker lifecycle, and accumulated count. The template
-filter returns state unchanged. The generator supplies the real filter before writing the
-asynchronous module [1].
-
-Contents
---------
-Functions
-	filterAsymmetricFolds
-		Queue a copied state for background symmetry filtering.
-	getSymmetricTotalFolds
-		Stop initialized workers after queued work and return the accumulated symmetric count.
-	initializeConcurrencyManager
-		Initialize the shared queue, accumulated count, and background workers.
-Variables
-	boxOfThreads
-		Inspect the workers started for the current generated counting run.
-	LOCKsymmetricTotalFolds
-		Access the lock protecting background updates to the shared count.
-	queueFutures
-		Access the shared queue of copied folding states and stop objects.
-	STOPsignal
-		Access the identity marker that tells a queued worker to exit.
-	symmetricTotalFolds
-		Inspect the shared accumulated result of background filtering.
-
-References
-----------
-[1] `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous.addSymmetryCheckAsynchronous`
-"""
-# The real module is generated from this incomplete module. Comments are not preserved.
+# The real module is generated from this incomplete module. Comments are not preserved. Docstrings corrupt the file.
 # ruff: file-ignore[global-statement, typing-only-first-party-import]
 # ty: ignore[invalid-argument-type]
 from __future__ import annotations
@@ -43,31 +10,11 @@ from queue import Queue
 from threading import Lock, Thread
 
 boxOfThreads: list[Thread] = []
-"""Inspect the workers started for the current generated counting run.
-
-(AI generated docstring)
-"""
 queueFutures: Queue[StateMapFoldingSymmetric] = Queue()
-"""Access the shared queue of copied folding states and stop objects.
-
-(AI generated docstring)
-"""
 symmetricTotalFolds: int = 0
-"""Inspect the shared accumulated result of background filtering.
-
-(AI generated docstring)
-"""
 LOCKsymmetricTotalFolds = Lock()
-"""Access the lock protecting background updates to the shared count.
-
-(AI generated docstring)
-"""
 # TODO There isn't a better way to do this?
 STOPsignal = object()
-"""Access the identity marker that tells a queued worker to exit.
-
-(AI generated docstring)
-"""
 # pyright: reportArgumentType=false
 
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> None:

@@ -8,12 +8,18 @@ from mapFolding._e.p2上nDimensional.pinIt import (
 	pin首beans)
 from mapFolding._e.tests import assertEqualTo
 from mapFolding.oeis import getMetadata, getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
+from sys import version_info
 from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from mapFolding.theTypes import OEISid
+
+markSkipConstraintPropagationPython315 = pytest.mark.skipif(
+	version_info >= (3, 15),
+	reason="constraintPropagation requires ortools, which is not installed on Python 3.15",
+)
 
 def _getPinningFunctionName(pinningFunction: Callable[..., StateElimination]) -> str:
 	return getattr(pinningFunction, "__name__", pinningFunction.__class__.__name__)
@@ -40,11 +46,11 @@ def expectedFromMapShape(mapShape: tuple[int, ...]) -> int:
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
 	*[pytest.param(getValuesKnown(oeisID)[n], oeisID, n, "crease", 0.99) for oeisID, n in (('A001417', 4),)]  # , ('A001417', 5))]
-	, *[pytest.param(getValuesKnown(oeisID)[n], oeisID, n, "constraintPropagation", 0.99) for oeisID, n in (("A000136", 5), ("A001415", 5), ("A001416", 4), ("A001417", 4), ("A001418", 3), ("A195646", 2))]
+	, *[pytest.param(getValuesKnown(oeisID)[n], oeisID, n, "constraintPropagation", 0.99, marks=markSkipConstraintPropagationPython315) for oeisID, n in (("A000136", 5), ("A001415", 5), ("A001416", 4), ("A001417", 4), ("A001418", 3), ("A195646", 2))]
 	, *[pytest.param(getValuesKnown(oeisID)[n], oeisID, n, "elimination", 0.99)
 		for oeisID, n in (("A000136", 3), ("A001415", 3), ("A001416", 2), ("A001417", 3), ("A001418", 2), ("A195646", 1))]
-	, *[pytest.param(getValuesKnown(oeisID)[getMetadata(oeisID)["offset"]], oeisID, getMetadata(oeisID)["offset"], "constraintPropagation", 1) for oeisID in ('A000136', 'A001415', 'A001416', 'A001418')]
-	, *[pytest.param(getValuesKnown(oeisID)[getMetadata(oeisID)["offset"] + 1], oeisID, getMetadata(oeisID)["offset"] + 1, "constraintPropagation", 1) for oeisID in oeisIDsMapFoldingImplemented]
+	, *[pytest.param(getValuesKnown(oeisID)[getMetadata(oeisID)["offset"]], oeisID, getMetadata(oeisID)["offset"], "constraintPropagation", 1, marks=markSkipConstraintPropagationPython315) for oeisID in ('A000136', 'A001415', 'A001416', 'A001418')]
+	, *[pytest.param(getValuesKnown(oeisID)[getMetadata(oeisID)["offset"] + 1], oeisID, getMetadata(oeisID)["offset"] + 1, "constraintPropagation", 1, marks=markSkipConstraintPropagationPython315) for oeisID in oeisIDsMapFoldingImplemented]
 ])
 def test_eliminateFoldsMapShape(expected: int, oeisID: OEISid, n: int, flow: str, CPUlimit: float) -> None:
 	"""Validate `eliminateFolds` and different flows produce valid results.
@@ -66,7 +72,7 @@ def test_eliminateFoldsMapShape(expected: int, oeisID: OEISid, n: int, flow: str
 	assertEqualTo(eliminateFolds(mapShape, state, pathLikeWrite, CPUlimit=CPUlimit, flow=flow), expected, 'eliminateFolds', mapShape, flow)
 
 @pytest.mark.parametrize("expected, oeisID, n, flow, CPUlimit", [
-	*[pytest.param(ValueError, oeisID, getMetadata(oeisID)["offset"], "constraintPropagation", 1) for oeisID in ('A001417', 'A195646')],
+	*[pytest.param(ValueError, oeisID, getMetadata(oeisID)["offset"], "constraintPropagation", 1, marks=markSkipConstraintPropagationPython315) for oeisID in ('A001417', 'A195646')],
 ])
 def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: OEISid, n: int, flow: str, CPUlimit: float) -> None:
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)

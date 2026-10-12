@@ -17,7 +17,7 @@ def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A0
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136 is: "Number of ways of folding a strip of n labeled stamps."
 
     The domain of A000136 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 47.
+    has not yet been computed is 50.
 
     Parameters
     ----------
@@ -59,7 +59,7 @@ def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None = No
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is: "Number of symmetric ways of folding a strip of n labeled stamps."
 
     The domain of A000560 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 46.
+    has not yet been computed is 49.
 
     Parameters
     ----------
@@ -90,7 +90,7 @@ def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682 is: "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times."
 
     The domain of A000682 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 47.
+    has not yet been computed is 50.
 
     Parameters
     ----------
@@ -199,7 +199,7 @@ def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None = N
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001011 is: "Number of ways to fold a strip of n blank stamps."
 
     The domain of A001011 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 47.
+    has not yet been computed is 50.
 
     Parameters
     ----------
@@ -357,7 +357,7 @@ def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | Lit
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206 is: "Number of rotationally symmetric closed meanders of length 4n+2."
 
     The domain of A060206 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 23.
+    has not yet been computed is 25.
 
     Parameters
     ----------
@@ -635,7 +635,7 @@ def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310 is: "The number of meandering curves of order n with only one extremity covered by their arcs."
 
     The domain of A217310 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 46.
+    has not yet been computed is 49.
 
     Parameters
     ----------
@@ -668,7 +668,7 @@ def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318 is: "The number of meandering curves of order n with both extremities covered by their arcs."
 
     The domain of A217318 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 46.
+    has not yet been computed is 49.
 
     Parameters
     ----------
@@ -701,7 +701,7 @@ def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A0
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093 is: "Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards)."
 
     The domain of A223093 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 46.
+    has not yet been computed is 49.
 
     Parameters
     ----------
@@ -736,7 +736,7 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A0
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is: "Number of foldings of n labeled stamps in which leaf n is inwards."
 
     The domain of A223094 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 46.
+    has not yet been computed is 49.
 
     Parameters
     ----------
@@ -773,7 +773,7 @@ def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095 is: "Number of foldings of n labeled stamps in which both end leaves are inwards."
 
     The domain of A223095 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 46.
+    has not yet been computed is 49.
 
     Parameters
     ----------
@@ -808,7 +808,7 @@ def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | Lit
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A227167 is: "The number of meandering curves of order n."
 
     The domain of A227167 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 47.
+    has not yet been computed is 50.
 
     Parameters
     ----------
@@ -882,7 +882,7 @@ def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None = No
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702 is: "Row sums of A259701 except first column."
 
     The domain of A259702 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 47.
+    has not yet been computed is 50.
 
     Parameters
     ----------
@@ -916,7 +916,7 @@ def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620 is: "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches."
 
     The domain of A301620 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 45.
+    has not yet been computed is 48.
 
     Parameters
     ----------
@@ -954,7 +954,7 @@ def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A333971 is: "a(n) is the number of semi-meanders with n top arches that have at least one arch with length 1 adjacent to the center of the top arch configuration or at either end of the arch configuration."
 
     The domain of A333971 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 48.
+    has not yet been computed is 51.
 
     Parameters
     ----------
@@ -986,7 +986,7 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A334615 is: "a(n) is the number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch configuration and no arch of length 1 adjacent to the center of the top arch configuration."
 
     The domain of A334615 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 47.
+    has not yet been computed is 50.
 
     Parameters
     ----------
@@ -1010,9 +1010,15 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
             else:
                 countTotal = 2 * (A000560(n - 1) - 4 * A000560(n - 2) + 4 * A000560(n - 3))
         case 'A001010':
-            countTotal = (A001010(2 * n - 2) - 4 * A001010(2 * n - 4) + 4 * A001010(2 * n - 6)) // 2
+            if 2 <= n < 4:
+                countTotal = 0
+            else:
+                countTotal = (A001010(2 * n - 2) - 4 * A001010(2 * n - 4) + 4 * A001010(2 * n - 6)) // 2
         case 'A259702':
-            countTotal = 2 * (A259702(n) - 2 * A259702(n - 1))
+            if n == 2:
+                countTotal = 0
+            else:
+                countTotal = 2 * (A259702(n) - 2 * A259702(n - 1))
         case 'A337581':
             countTotal = (A337581(n + 2) - 4 * A337581(n + 1) + 4 * A337581(n)) // 4
         case 'A227167':
@@ -1039,9 +1045,15 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
             else:
                 countTotal = A301620(n - 2) - 2 * A301620(n - 3)
         case 'A005316 and A223093':
-            countTotal = A223093(n - 1) + (1 + n % 2) * _A005316(n - 1) - 4 * (A223093(n - 2) + (2 - n % 2) * _A005316(n - 2)) + 4 * (A223093(n - 3) + (1 + n % 2) * _A005316(n - 3))
+            if 2 <= n < 4:
+                countTotal = 0
+            else:
+                countTotal = A223093(n - 1) + (1 + n % 2) * _A005316(n - 1) - 4 * (A223093(n - 2) + (2 - n % 2) * _A005316(n - 2)) + 4 * (A223093(n - 3) + (1 + n % 2) * _A005316(n - 3))
         case 'A005316 and A217310':
-            countTotal = (A217310(n - 1) + 2 * _A005316(n - 1)) // (2 - n % 2) - 4 * (A217310(n - 2) + 2 * _A005316(n - 2)) // (1 + n % 2) + 4 * (A217310(n - 3) + 2 * _A005316(n - 3)) // (2 - n % 2)
+            if 2 <= n < 4:
+                countTotal = 0
+            else:
+                countTotal = (A217310(n - 1) + 2 * _A005316(n - 1)) // (2 - n % 2) - 4 * (A217310(n - 2) + 2 * _A005316(n - 2)) // (1 + n % 2) + 4 * (A217310(n - 3) + 2 * _A005316(n - 3)) // (2 - n % 2)
         case 'A000682' | _:
             if 2 <= n < 4:
                 countTotal = 0
@@ -1056,7 +1068,7 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A337581 is: "a(n) is the number of semi-meanders with n top arches that have both an arch of length 1 adjacent to the center of the top arch configuration and an arch of length 1 starting or ending the top arch configuration."
 
     The domain of A337581 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    has not yet been computed is 52.
 
     Parameters
     ----------

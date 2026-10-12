@@ -922,8 +922,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 @cache
 def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], totalLeaves: int) -> range:
-	"""Supply `dimensionLength == 2` for these subroutines. You may be able to extend the concept to other
-`mapShape` values."""
+	"""Supply `dimensionLength == 2` for these subroutines. You may be able to extend the concept to other `mapShape` values."""
 	state: StateElimination = StateElimination(mapShape)
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin
