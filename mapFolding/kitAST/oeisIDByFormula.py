@@ -2,8 +2,8 @@
 
 (AI generated docstring)
 
-You can use this module to redirect formula calls to known sequence values and write selector
-samples for generated-module checks. The generator writes a lookup module beside the source.
+You can use this module to redirect formula calls to known sequence values. The generator writes
+a lookup module beside the source.
 
 Contents
 --------
@@ -13,19 +13,15 @@ Functions
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, Grab, IfThis, Make, NodeChanger, Then
 from astToolkit.changeDef import makeDictionaryFunctionDef
-from astToolkit.containers import IngredientsModule
 from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
-from astToolkit.transformationTools import pythonCode2ast_expr
-from humpy_cytoolz import valmap
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
-import ast
 
 if TYPE_CHECKING:
 	from pathlib import Path
-	from typing import Any
+	import ast
 
 def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	"""Write a formula-source variant that uses known OEIS sequence values.
@@ -33,8 +29,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	(AI generated docstring)
 
 	You can use this function to transform the module at `pathFilenameSource` into a sibling lookup
-	module. The generated lookup functions use `mapFolding.oeis.getValuesKnown` [1]. The function
-	also writes literal-selector data under the configured sample-data path [2].
+	module. The generated lookup functions use `mapFolding.oeis.getValuesKnown` [1].
 
 	Function Transformation
 	-----------------------
@@ -51,7 +46,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	Returns
 	-------
 	pathFilename : Path
-		Path to the written lookup module; selector data is written separately.
+		Path to the written lookup module.
 
 	Examples
 	--------
@@ -73,8 +68,6 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)
 	dictionaryFunctionDef: dict[str, ast.FunctionDef] = makeDictionaryFunctionDef(astModule)
 
-	dictionaryLiterals: dict[str, Any] = {}
-
 	for oeisID, FunctionDef in dictionaryFunctionDef.items():
 		FunctionDef.decorator_list = []
 		if oeisID.startswith('_'):
@@ -85,25 +78,8 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 			astModule.body.append(Make.FunctionDef('_' + oeisID, Make.arguments(list_arg=[Make.arg('n', Make.Name('int'))])
 								, body=[Make.Return(Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=Make.Name('n')))]
 								, returns=Make.Name('int')))
-			NodeTourist(IfThis.isSubscriptIdentifier('Literal')
-				, Then.updateKeyValueIn(lambda _node: oeisID, Then.extractIt(DOT.slice), dictionaryLiterals)  # ruff: ignore[function-uses-loop-variable]
-			).visit(FunctionDef)
 
 	astModule.body.insert(0, Make.ImportFrom('mapFolding.oeis', list_alias=[Make.alias('getValuesKnown')]))
 	pathFilename: Path = write_astModule(astModule, pathFilenameWrite, identifierPackage=settingsPackage.identifierPackage)
-
-	pathFilenameDataSamples: Path = settingsPackage.pathDataSamples / f"OEISidByFormulaLookup{settingsPackage.fileExtension}"
-
-	dictionaryLiterals = valmap(ast.literal_eval, dictionaryLiterals)
-	moduleDataSamples = IngredientsModule()
-	moduleDataSamples.imports.addImportFrom_asStr('typing', 'LiteralString')
-	moduleDataSamples.appendPrologue(statement=Make.AnnAssign(Make.Name('dictionaryLiterals', Make.Store())
-		, Make.Subscript(Make.Name('dict'), slice=Make.Tuple([Make.Name('LiteralString')
-			, Make.BitOr.join([Make.Subscript(Make.Name('tuple')
-				, slice=Make.Tuple([Make.Name('LiteralString'), Make.Constant(Ellipsis)])), Make.Name('LiteralString')])]))
-		, value=pythonCode2ast_expr(repr(dictionaryLiterals))
-	))
-
-	moduleDataSamples.write_astModule(pathFilenameDataSamples)
 
 	return pathFilename

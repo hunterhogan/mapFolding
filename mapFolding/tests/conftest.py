@@ -5,19 +5,22 @@ from __future__ import annotations
 from mapFolding import kitFilesystem
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
-from mapFolding.oeis import getMetadata, oeisIDsImplemented
+from mapFolding.oeis import byFormula, getValuesKnown, oeisIDsImplemented
+from operator import methodcaller
 from typing import TYPE_CHECKING
 import numpy
+import polars
 import pytest
-import random
+import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Callable
-	from mapFolding.theTypes import OEISid
+	from collections.abc import Callable, Iterator
+	from hunterMakesPy import CallableFunction
+	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
 	from numpy.typing import NDArray
 	from pathlib import Path
 	from pytest import FixtureRequest
-	from typing import Any
+	from typing import Any, LiteralString
 
 #================== Test-function parameters ======================================================
 
@@ -44,6 +47,14 @@ def rtol(request: FixtureRequest) -> float:
 #======== Filesystem isolation =====================================
 
 @pytest.fixture
+def dataframe(request: pytest.FixtureRequest) -> polars.LazyFrame | Iterator[polars.LazyFrame]:
+	if isinstance(request.param, polars.LazyFrame):
+		dataframe: polars.LazyFrame | Iterator[polars.LazyFrame] = request.param
+	else:
+		dataframe = map(methodcaller('lazy'), request.param)
+	return dataframe
+
+@pytest.fixture
 def state(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> StateMeanders:
 	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
 	return StateMeanders(request.param[0], request.param[1], lookupMeanders=request.param[2].copy())
@@ -58,8 +69,21 @@ def pathRootJobDEFAULTTesting(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
 #======== OEIS ids =====================================
 
 @pytest.fixture
-def oeis_n(request: pytest.FixtureRequest, oeisID: OEISid) -> int:
-	return getMetadata(oeisID)['offset'] + request.param
+def callableA(oeisID: OEISid) -> CallableFunction[[int, LiteralString | None], int]:
+	return getattr(byFormula, oeisID)
+
+@pytest.fixture
+def expected(oeisID: OEISid, n: int) -> int:
+	return getValuesKnown(oeisID)[n]
+
+@pytest.fixture
+def keywordArguments(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 形KeywordArgumentsCount:
+	monkeypatch.chdir(tmp_path)
+	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
+	keywordArguments: 形KeywordArgumentsCount = {}
+	if request.param is not None:
+		keywordArguments['flow'] = request.param
+	return keywordArguments
 
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisID(request: pytest.FixtureRequest) -> Any:
@@ -77,18 +101,12 @@ def oeisID(request: pytest.FixtureRequest) -> Any:
 	"""
 	return request.param
 
-@pytest.fixture
-def oeisID_1random() -> str:
-	"""Return one random valid OEIS ID.
-
-	Returns
-	-------
-	randomSequenceIdentifier : str
-		Randomly selected OEIS sequence identifier from implemented sequences.
-	"""
-	return random.choice(list(oeisIDsImplemented))
-
 #======== Miscellaneous =====================================
+
+@pytest.fixture
+def argv(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> tuple[str, ...]:
+	monkeypatch.setattr(sys, 'argv', list(request.param))
+	return request.param
 
 @pytest.fixture
 def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:

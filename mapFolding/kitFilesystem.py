@@ -67,38 +67,39 @@ Functions
 """
 from __future__ import annotations
 
-from contextlib import contextmanager, suppress
+from contextlib import contextmanager, ExitStack, suppress
 from csv import writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
-from hunterMakesPy import errorL33T
+from hunterMakesPy import errorL33T, raiseIfNone
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from mapFolding.dataStructures import parseCSVtoIntegers, parseDiagonal, parseTriangle
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
+from polars import QueryOptFlags
 from sys import modules as sysModules, stdout
+from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
-from uuid import uuid4
 import os
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Callable, Generator, Iterable, Mapping
+	from collections.abc import Callable, Generator, Iterable, Iterator, Mapping
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding.theTypes import Folding, 形Triangle
 	from os import PathLike
 	from pandas import DataFrame
-	from polars.io.partition import FileProviderArgs
 	from typing import Any, Literal, Protocol
 	from urllib3.response import BaseHTTPResponse
 	import polars
 
 	class _PolarsMaterializer(Protocol):
-		def __call__(self, dataframe: polars.LazyFrame, aggregation: polars.Expr | None = None) -> polars.LazyFrame: ...
+		def __call__(self, dataframe: polars.LazyFrame | Iterator[polars.LazyFrame],
+			aggregation: polars.Expr | tuple[polars.Expr, ...] | None = None) -> polars.LazyFrame: ...
 
 pathPolarsDataFrame: Path = Path.cwd()
 """Select the root directory for temporary Polars materializations.
@@ -116,52 +117,49 @@ References
 """
 
 @contextmanager
-def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[_PolarsMaterializer]:
+def storePolars(group_by: str | None = None) -> Generator[_PolarsMaterializer]:
 	"""Materialize lazy computations within a temporary-storage context.
 
 	(AI generated docstring)
 
 	You can use this context manager to save successive Polars lazy computations [1] to temporary
-	files and receive a callable that returns a lazy scan of the saved result. The context removes
-	its temporary files when the context exits.
+	files and receive a callable that returns a lazy scan of the saved result. The context removes its
+	temporary files when the context exits.
 
 	Temporary Files
 	---------------
 	Files are written under `pathPolarsDataFrame` [2] in Parquet format [3]. The root directory must
-	already exist. Direct materialization deletes the preceding result after writing the next
-	result. Grouped materialization writes hash partitions, deletes the preceding grouped result,
-	aggregates each new partition, and deletes the raw partition files.
+	already exist. Polars controls file sizing and executes grouped materialization as a streaming
+	sort followed by a sorted group-by. Each returned scan covers the complete saved generation. The
+	preceding generation is removed after the next generation finishes writing.
 
-	Returned lazy scans depend on these files. Consume a returned scan before replacing the
-	result or leaving the context. Row order is not maintained. Cleanup also runs if the body of
-	the context raises an error.
+	Returned lazy scans depend on these files. Consume a returned scan before replacing the result or
+	leaving the context. Row order is not maintained. Cleanup also runs if the body of the context
+	raises an error.
 
 	Parameters
 	----------
 	group_by : str | None = None
-		Grouping column. `None` saves each supplied frame directly. A column name partitions
-		rows by a hash of the column and aggregates each partition by that column.
-	partitions : int = 64
-		Hash-partition count for grouped materialization. Use a positive count. Direct
-		materialization ignores `partitions`; this function does not validate the count.
+		Grouping column. A column name and aggregation expression combines rows. `None` saves each
+		supplied frame directly.
 
 	Yields
 	------
 	materializePolars : _PolarsMaterializer
-		Callable accepting a lazy frame and an optional aggregation expression, and returning a
-		lazy scan of the saved result. Supply an aggregation expression when `group_by` is set.
+		Callable accepting a lazy frame and optional aggregation expressions, and returning a lazy
+		scan of the saved result. Supply aggregation expressions when `group_by` is set.
 
 	Examples
 	--------
 	`mapFolding.algorithms.matrixMeandersPolars.count` [4] aggregates contributions by arch code.
 
-		```python
-		with storePolars(group_by='arcCode') as materializePolars:
-			dataframeMeanders = materializePolars(
-				transition(dataframeMeanders, state.bitsLocator, state.arcCodeMAXIMUM, state.bitWidth),
-				polars.col('meanders').cast(datatypeMeanders).sum().cast(datatypeMeanders)
-			)
-		```
+	```python
+	with storePolars(group_by='arcCode') as materializePolars:
+		dataframeMeanders = materializePolars(
+			transition(dataframeMeanders, state.bitsLocator, state.arcCodeMAXIMUM, state.bitWidth),
+			polars.col('meanders').cast(datatypeMeanders).sum().cast(datatypeMeanders)
+		)
+	```
 
 	The algorithm consumes each resulting frame within the context before cleanup.
 
@@ -179,66 +177,64 @@ def storePolars(group_by: str | None = None, partitions: int = 64) -> Generator[
 	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
 	import polars
 
-	boxOfPathFilenames: list[Path] = []
-	pathGroupBy: Path = pathPolarsDataFrame / f'polarsGroupBy_{uuid4().hex}'
-	boxOfPathFilenamesCompleted: list[Path] = []
-	if group_by is not None:
-		pathGroupBy.mkdir()
+	storagePolars: ExitStack | None = None
 
-	def materializePolars(dataframe: polars.LazyFrame, aggregation: polars.Expr | None = None) -> polars.LazyFrame:
-		if group_by is None:
-			pathFilename: Path = pathPolarsDataFrame / f'polars_{uuid4().hex}.parquet'
-			boxOfPathFilenames.append(pathFilename)
-			dataframe.sink_parquet(pathFilename, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
-				, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-			dataframeMaterialized: polars.LazyFrame = polars.scan_parquet(pathFilename, parallel='none', use_statistics=False, low_memory=True, cache=False)
-			if 1 < len(boxOfPathFilenames):
-				boxOfPathFilenames[0].unlink()
-				del boxOfPathFilenames[0]
-			return dataframeMaterialized
-
-		identifierGeneration: str = uuid4().hex
-		schema: polars.Schema = dataframe.collect_schema()
-
-		def makeFilenamePartition(partition: FileProviderArgs) -> str:
-			return f'{identifierGeneration}_{partition.partition_keys.item()}_{partition.index_in_partition}.parquet'
-
-		def makeFilenameGrouped(partition: FileProviderArgs) -> str:
-			return f'grouped_{identifierGeneration}_{partitionIndex}_{partition.index_in_partition}.parquet'
-
-		dataframe.sink_parquet(polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenamePartition
-			, key={f'partition_{identifierGeneration}': polars.col(group_by).hash() % partitions}, include_key=False, max_rows_per_file=65536)
-			, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
-			, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-		while boxOfPathFilenamesCompleted:
-			boxOfPathFilenamesCompleted.pop().unlink()
-
-		partitionIndex: int = 0
-		while partitionIndex < partitions:
-			listPathFilenamesPartition: list[Path] = list(pathGroupBy.glob(f'{identifierGeneration}_{partitionIndex}_*.parquet'))
-			if listPathFilenamesPartition:
-				polars.scan_parquet(listPathFilenamesPartition, parallel='none', use_statistics=False, low_memory=True, cache=False).group_by(group_by).agg(aggregation).sink_parquet(
-					polars.PartitionBy(pathGroupBy, file_path_provider=makeFilenameGrouped, max_rows_per_file=65536)
-					, compression='zstd', statistics=False, row_group_size=65536, maintain_order=False, engine='streaming'
-					, optimizations=polars.QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
-				boxOfPathFilenamesCompleted.extend(pathGroupBy.glob(f'grouped_{identifierGeneration}_{partitionIndex}_*.parquet'))
-				while listPathFilenamesPartition:
-					listPathFilenamesPartition.pop().unlink()
-			partitionIndex += 1
-		if boxOfPathFilenamesCompleted:
-			return polars.scan_parquet(boxOfPathFilenamesCompleted, parallel='none', use_statistics=False, low_memory=True, cache=False)
-		return polars.LazyFrame(schema=schema).group_by(group_by).agg(aggregation)
+	def materializePolars(dataframe: polars.LazyFrame | Iterator[polars.LazyFrame],
+		aggregation: polars.Expr | tuple[polars.Expr, ...] | None = None) -> polars.LazyFrame:
+		nonlocal storagePolars
+		if isinstance(dataframe, polars.LazyFrame):
+			if group_by is not None:
+				dataframe = dataframe.sort(group_by).group_by(group_by, maintain_order=True).agg(aggregation)
+			dataframe, storageSuccessor = _polarsWritesDataframe(dataframe, group_by)
+			if storagePolars is not None:
+				storagePolars.close()
+			storagePolars = storageSuccessor
+		else:
+			key: str = raiseIfNone(group_by)
+			with ExitStack() as storageAnalyses:
+				stackAnalyses: list[tuple[polars.LazyFrame, ExitStack]] = []
+				while (dataframeAnalysis := next(dataframe, None)) is not None:
+					stackAnalyses.append(_polarsWritesDataframe(
+						dataframeAnalysis.sort(key).group_by(key, maintain_order=True).agg(aggregation), key))
+					storageAnalyses.enter_context(stackAnalyses[-1][1])
+					del dataframeAnalysis
+				del dataframe
+				if storagePolars is not None:
+					storagePolars.close()
+					storagePolars = None
+				while 1 < len(stackAnalyses):
+					dataframeAlfa, storageAlfa = stackAnalyses.pop()
+					dataframeZulu, storageZulu = stackAnalyses.pop()
+					stackAnalyses.append(_polarsWritesDataframe(
+						dataframeAlfa.merge_sorted(dataframeZulu, key=key)
+							.group_by(key, maintain_order=True).agg(aggregation), key))
+					storageAnalyses.enter_context(stackAnalyses[-1][1])
+					del dataframeAlfa, dataframeZulu
+					storageAlfa.close()
+					storageZulu.close()
+				dataframe = stackAnalyses.pop()[0]
+				storagePolars = storageAnalyses.pop_all()
+		return dataframe
 
 	try:
 		yield materializePolars
 	finally:
-		while boxOfPathFilenames:
-			boxOfPathFilenames.pop().unlink(missing_ok=True)
+		if storagePolars is not None:
+			storagePolars.close()
+
+def _polarsWritesDataframe(dataframe: polars.LazyFrame, group_by: str | None) -> tuple[polars.LazyFrame, ExitStack]:
+	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
+	import polars
+
+	with ExitStack() as callbackManager:
+		pathManagedFiles: Path = Path(callbackManager.enter_context(TemporaryDirectory(prefix='polars_', dir=pathPolarsDataFrame)))
+		dataframe.sink_parquet(polars.PartitionBy(pathManagedFiles, approximate_bytes_per_file=500_000_000)
+			, compression='zstd', statistics=False, maintain_order=group_by is not None, engine='streaming'
+			, optimizations=QueryOptFlags(comm_subplan_elim=False, comm_subexpr_elim=False))
+		dataframe = polars.scan_parquet(pathManagedFiles / '*.parquet', parallel='auto', use_statistics=False, low_memory=True, cache=False)
 		if group_by is not None:
-			listPathFilenamesRemaining: list[Path] = list(pathGroupBy.iterdir())
-			while listPathFilenamesRemaining:
-				listPathFilenamesRemaining.pop().unlink()
-			pathGroupBy.rmdir()
+			dataframe = dataframe.set_sorted(group_by)
+		return dataframe, callbackManager.pop_all()
 
 #================== Create appropriate paths and filenames =========================================
 
