@@ -189,7 +189,7 @@ def storePolars(group_by: str | None = None) -> Generator[_PolarsMaterializer]:
 		aggregation: polars.Expr | tuple[polars.Expr, ...] | None = None, *, append: bool = False) -> polars.LazyFrame:
 		nonlocal dataframeStored, storagePolars, storagePredecessor
 		if group_by is not None:
-			dataframe = dataframe.group_by(group_by).agg(aggregation).sort(group_by)
+			dataframe = dataframe.sort(group_by, maintain_order=True).group_by(group_by, maintain_order=True).agg(aggregation)
 		if append:
 			key: str = raiseIfNone(group_by)
 			dataframe = raiseIfNone(dataframeStored).merge_sorted(dataframe, key=key).group_by(key, maintain_order=True).agg(aggregation)

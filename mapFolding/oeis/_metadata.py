@@ -104,8 +104,8 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 	[4] functools.cache - Python standard library.
 		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
-	# TODO Z0Z_tools, fix humpy_cytoolz.get_in overloads.
-	return get_in((str(formatOEISid(oeisID)), 'valuesKnown'), dictionaryOEIS, dict[int, int]([(-errorL33T, -errorL33T)]))  # pyright: ignore[reportReturnType]
+	return get_in((str(formatOEISid(oeisID)),), dictionaryOEIS, dict[str, dict[int, int]]()).get(
+		'valuesKnown', dict[int, int]([(-errorL33T, -errorL33T)]))
 
 #================== Meat grinders =================================================================
 

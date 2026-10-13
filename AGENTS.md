@@ -1,6 +1,6 @@
 # Tool execution
 
-- Run project commands from the repository root after activating `.venv`.
+- Run project commands from the repository root after activating `.venv` or another existing virtual environment.
 - In PowerShell, initialize UTF-8 before running Python-based tools:
 
   ```powershell

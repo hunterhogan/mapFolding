@@ -1,63 +1,68 @@
-"""Evaluate fixed-index expressions associated with A005315 and semi-meander diagonals.
+"""Evaluate the A005315 formula family and its semi-meander diagonal extensions.
 
-You can use this module to evaluate encoded inputs for fixed sequence indices from zero through
-eleven. The expressions are associated with OEIS A005315 [1] and are also called by the
-semi-meander diagonal functions in `mapFolding.oeis.A400429._semi` [2].
+(AI generated docstring)
 
-Input Encoding
---------------
-The suffix selects a fixed sequence index; `x` supplies the encoded input. The intended anchors
-are the A005315 value at the suffix index for the even input and the next value for the following
-odd input. Later inputs are used for the corresponding semi-meander diagonal. Changing
-`次n` shifts the input origin without selecting a different coefficient table.
+A005315 counts closed, one-component meanders. With the default value of `次n`,
+`boxOfA005315of[j]` supplies two consecutive A005315 values for each included
+suffix j = 1, ..., 11:
 
-Coefficient Evaluation
-----------------------
-The implementations from index three onward delegate to `crunchCoefficients`. The current
-evaluator repeats the first numerator coefficient at every recurrence step. Higher numerator
-coefficients are not consumed, so the intended sequence identities beyond the initial
-coefficient are not guaranteed by the current implementation.
+	boxOfA005315of[j](2*j)     = A005315(j)
+	boxOfA005315of[j](2*j + 1) = A005315(j + 1)
 
-Contents
---------
-Coefficient evaluation
-	crunchCoefficients
-		Evaluate the implemented coefficient recurrence through the requested index.
-Fixed-index expressions
-	A005315of0
-		Evaluate the index-zero expression at an encoded input.
-	A005315of1
-		Evaluate the index-one expression at an encoded input.
-	A005315of10
-		Evaluate the stored recurrence for index ten.
-	A005315of11
-		Evaluate the stored recurrence for index eleven.
-	A005315of2
-		Evaluate the index-two binomial expression.
-	A005315of3
-		Evaluate the stored recurrence for index three.
-	A005315of4
-		Evaluate the stored recurrence for index four.
-	A005315of5
-		Evaluate the stored recurrence for index five.
-	A005315of6
-		Evaluate the stored recurrence for index six.
-	A005315of7
-		Evaluate the stored recurrence for index seven.
-	A005315of8
-		Evaluate the stored recurrence for index eight.
-	A005315of9
-		Evaluate the stored recurrence for index nine.
-Function lookup
-	boxOfA005315of
-		Select a fixed-index evaluator by its suffix index.
+Thus, for 2 <= j <= 11, the two neighboring formulas agree at the shared value:
+
+	boxOfA005315of[j-1](2*j - 1) = boxOfA005315of[j](2*j) = A005315(j).
+
+These are mathematical equalities; A005315 denotes the OEIS sequence, not an
+additional callable in this module. For example, A005315of3(7) and A005315of4(8)
+both return A005315(4) = 42. `boxOfA005315of[j]` selects an existing function.
+The suffix-zero function is a separate base case, not a triangle diagonal.
+
+Diagonal interpretation and proof status
+---------------------------------------
+Write f_j(x) for the value of the fixed-j expression at its default offset, and
+D_j(n) = T(n, floor(n/2) - j + 1) for the actual A400429 counting diagonal.
+Its winding number is n - 2*j, and its domain is n >= 2*j.
+
+For j = 1, ..., 4, f_j(n) = D_j(n) is proved throughout that domain. The j = 1
+formula has the exceptional first value D_1(2) = 1, followed by the constant 2.
+The second diagonal has an independent cut proof. The third and fourth formulas
+are proved by the exact finite-transfer certificates of Zhang and Ma [3, 4].
+For j = 5, ..., 11, the A005315 anchor values agree with the known sequence,
+but equality with the entire counting diagonal remains conjectural. The general
+fixed-j theorem proves eventual quasipolynomiality; it does not certify every
+stored higher formula or eliminate possible initial exceptions.
+
+Input and representation
+------------------------
+`x` is the semi-meander row index at the default offset. The suffix selects the
+fixed formula; changing `次n` only translates its input origin. It does not
+select another diagonal or coefficient table. The A005315 identities and the
+diagonal interpretation above use the default `次n`.
+
+For j >= 3, let N_j(z) and Q_j(z) have the stored `numerator` and `denominator`
+coefficients in ascending order of degree. The implementation evaluates
+
+	f_j(2*j + t) = 2 * [z^t] N_j(z) / Q_j(z),    t >= 0.
+
+`crunchCoefficients` consumes every numerator coefficient in order, then zeros.
+The external factor 2 is part of the formula; in the status report's normalized
+numerator convention, P_j = 2*N_j. This is an exact recurrence implementation of
+the rational coefficient representation, not a compact formula uniform in j.
+All supplied denominators have constant coefficient one. Input preconditions
+are documented below; no additional validation is performed.
 
 References
 ----------
-[1] OEIS A005315, semi-meander counts.
+[1] OEIS A005315, closed meandric numbers.
 	https://oeis.org/A005315
-[2] `mapFolding.oeis.A400429._semi`
-
+[2] OEIS A400429, semi-meanders by crossings and winding number.
+	https://oeis.org/A400429
+[3] Wenlin Zhang and Haobo Ma, The second semi-meander diagonal: a cut proof,
+	manuscript dated 1 October 2026; supplied as A400429 diagonal 2 proof.pdf.
+[4] Wenlin Zhang and Haobo Ma, Semi-meanders with a fixed winding deficit:
+	the third and fourth diagonals of A400429, manuscript dated 6 October 2026;
+	supplied as A400429 diagonals 3 and 4 proof.pdf, Theorems 1 and 2.
 """
 from __future__ import annotations
 
@@ -71,66 +76,40 @@ if TYPE_CHECKING:
 #================== Sausage making =========================================================
 
 def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...]) -> int:
-	"""Evaluate the stored recurrence at coefficient index `次coefficient`.
+	"""Return [z^次coefficient] N(z)/Q(z), assuming Q(0) = 1.
 
 	(AI generated docstring)
 
-	You can use this function to compute the value selected by a zero-based coefficient index.
-	This function accumulates values from the first numerator entry and the denominator entries
-	after position zero. The function returns the last accumulated value.
+	The tuples give polynomial coefficients in ascending order of degree. With
+	N_i = numerator[i] while that entry exists and N_i = 0 afterward, the recurrence is
 
-	Coefficient Consumption
-	-----------------------
-	Every iteration constructs a new iterator over `numerator` followed by zeros and reads only
-	the first item. A nonempty numerator therefore contributes `numerator[0]` at every step;
-	an empty numerator contributes zero. Entries after the first numerator item are ignored.
-	The recurrence assumes a leading denominator coefficient of one without reading or validating
-	`denominator[0]`. An empty denominator leaves the contribution unchanged at every step.
+		a_i = N_i - sum(denominator[h] * a_(i-h),
+						h = 1, ..., min(i, len(denominator) - 1)).
 
-	Mathematics
-	-----------
-	implemented recurrence : equation
-
-	```math
-		Let N ≜ `numerator`, D ≜ `denominator`, k ≜ `次coefficient`
-			p ≜ N₀ for |N| > 0; p ≜ 0 for |N| = 0
-
-		Jᵢ ≜ {j ∈ ℕ : 1 ≤ j ≤ min(|D| − 1, i)}
-		aᵢ = p − ∑ⱼ∈Jᵢ Dⱼ aᵢ₋ⱼ    ∀ i ∈ {0, …, k}
-		`coefficient` ≜ aₖ
-	```
-
-	Index Preconditions
-	-------------------
-	A negative `次coefficient` skips accumulation and propagates `IndexError` when the function
-	selects the last value of the empty accumulator.
+	The single `neverEndingNumerator` iterator is created before the loop and
+	advanced once per coefficient. Every numerator entry is consumed in order;
+	later entries are not ignored and the first entry is not repeated.
 
 	Parameters
 	----------
 	次coefficient : int
-		Zero-based index through which to accumulate values. Use a nonnegative value.
+		Nonnegative, zero-based coefficient index.
 	numerator : tuple[int, ...]
-		Stored numerator coefficients; only the first coefficient is used by this implementation.
+		Numerator coefficients from constant term upward. An empty tuple means zero.
 	denominator : tuple[int, ...]
-		Stored denominator coefficients; only positions starting at one enter the recurrence.
+		Denominator coefficients from constant term upward, with denominator[0] == 1.
+		The constant coefficient is assumed, not validated or used as a divisor.
 
 	Returns
 	-------
-	coefficient : int
-		Value at `次coefficient` from the implemented recurrence.
+	int
+		The coefficient at the requested index, evaluated with exact integer arithmetic.
 
-	Examples
-	--------
-	`A005315of3` [1] evaluates its recurrence relative to the encoded input origin.
-
-		```python
-		return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
-		```
-
-	References
-	----------
-	[1] `A005315of3`
-
+	Notes
+	-----
+	A negative index leaves the accumulator empty and raises IndexError at the
+	return statement. An empty denominator is outside the stated Q(0) = 1 contract;
+	the unchanged implementation then subtracts no recurrence terms.
 	"""
 	neverEndingNumerator: chain[int] = chain(numerator, repeat(0))
 	boxOfCoefficients: list[int] = []
@@ -140,43 +119,20 @@ def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denomina
 		))
 	return boxOfCoefficients[-1]
 
-#================== Closed-form functions for A005315 =========================================================
+#================== A005315 formulas and diagonal extensions =========================================================
 
 def A005315of0(x: int, 次n: int = 0) -> int:
-	"""Evaluate the index-zero expression at encoded input `x`.
+	"""Return the special base value 1 when x >= 2*次n.
 
-	You can use this function to obtain the index-zero expression associated with A005315 [1].
-	The result is one whenever the shifted input is nonnegative.
+	(AI generated docstring)
 
-	Input Validation
-	----------------
-	A negative shifted input propagates `ValueError` from `math.comb` [2].
+	At the default offset, x = 0 and x = 1 give A005315(0) = A005315(1) = 1.
+	This is the separate base case; there is no D_0 diagonal in the stated triangle.
+	Later inputs still return 1 and do not extend the A005315 sequence.
 
-	Usage
-	-----
-	This function is exposed through `boxOfA005315of` [3]. No direct application invocation was
-	found in the codebase.
-
-	Parameters
-	----------
-	x : int
-		Encoded input, normally at least twice `次n`.
-	次n : int = 0
-		Input-origin offset. The default corresponds to the suffix index.
-
-	Returns
-	-------
-	countTotal : int
-		One for every nonnegative shifted input.
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] Python `math.comb`.
-		https://docs.python.org/3/library/math.html#math.comb
-	[3] `boxOfA005315of`
-
+	`次n` translates the input origin without changing the expression. The
+	nonnegative shifted-input precondition is not explicitly checked; a negative
+	shifted input raises ValueError through math.comb.
 	"""
 	return comb(x - 2 * 次n, 0)
 
@@ -196,190 +152,124 @@ def A005315of1(x: int, 次n: int = 1) -> int:
 	return 2 - 0**x
 
 def A005315of2(x: int, 次n: int = 2) -> int:
-	"""Evaluate the index-two binomial expression at encoded input `x`.
+	"""Return A005315(2) at x = 4 and A005315(3) at x = 5.
 
 	(AI generated docstring)
 
-	You can use this function to obtain the index-two expression associated with A005315 [1].
-	With the default offset, encoded inputs four and five produce two and eight, respectively.
-	The function also evaluates the same expression at later inputs.
+	With the default offset, this is the proved second diagonal for every x >= 4:
 
-	Input Validation
-	----------------
-	This function does not enforce the intended input range. Sufficiently small shifted inputs
-	propagate `ValueError` from `math.comb` [2].
+		D_2(x) = (x*x + 2*x + (x % 2) - 20) / 2.
 
-	Parameters
-	----------
-	x : int
-		Encoded input, normally at least twice `次n`.
-	次n : int = 2
-		Input-origin offset. Changing this value shifts the origin of the same expression.
+	The binomial expression below is exactly equivalent on that domain. The
+	quasipolynomial has degree 2 and minimal period 2; the independent cut proof
+	and its reported Lean formalization are described in reference [3].
 
-	Returns
-	-------
-	countTotal : int
-		Value of the stored binomial expression at the shifted input.
-
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal2` [3] forwards its row input to this expression.
-
-		```python
-		return A005315of2(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] Python `math.comb`.
-		https://docs.python.org/3/library/math.html#math.comb
-	[3] `mapFolding.oeis.A400429._semi.工diagonal2`
-
+	Use x >= 2*次n. Changing `次n` only translates the same expression.
+	The intended domain is not checked; some smaller inputs still evaluate, and
+	sufficiently small inputs raise ValueError through math.comb.
 	"""
 	x -= 2 * 次n
 	return 2 * ((comb((x + 6) // 2, 2) + comb((x + 7) // 2, 2)) - 5)
 
 def A005315of3(x: int, 次n: int = 3) -> int:
-	"""Evaluate the stored index-3 recurrence at encoded input `x`.
+	"""Return A005315(3) at x = 6 and A005315(4) at x = 7.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	3 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 3. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 8 and 42.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with D_3(x) is proved for every x >= 6 by Zhang and Ma,
+	Theorem 1. The stored rational function agrees exactly with certificate3.json.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 3
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal3` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of3(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal3`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (4, 17, 17, -5, -22, -13, 6, 9, 1, -1)
 	denominator: tuple[int, ...] = (1, -1, -3, 2, 4, 0, -4, -2, 3, 1, -1)
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of4(x: int, 次n: int = 4) -> int:
-	"""Evaluate the stored index-4 recurrence at encoded input `x`.
+	"""Return A005315(4) at x = 8 and A005315(5) at x = 9.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	4 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 4. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 42 and 262.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with D_4(x) is proved for every x >= 8 by Zhang and Ma,
+	Theorem 1. The stored rational function agrees exactly with certificate4.json.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 4
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal4` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of4(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal4`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (21, 131, 292, 320, 118, -102, -89, 107, 193, 37, -196, -226, -8, 217, 199, 5, -106, -58, 14, 19, -2, -4)
 	denominator: tuple[int, ...] = (1, 0, -4, -2, 6, 8, -3, -12, -4, 8, 10, 0, -10, -8, 4, 12, 3, -8, -6, 2, 4, 0, -1)
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of5(x: int, 次n: int = 5) -> int:
-	"""Evaluate the stored index-5 recurrence at encoded input `x`.
+	"""Return A005315(5) at x = 10 and A005315(6) at x = 11.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	5 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 5. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 262 and 1828.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with the whole counting diagonal D_5(x), x >= 10, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 5
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal5` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of5(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal5`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (131, 1045, 3505, 7365, 11088, 13643, 15743, 19375, 24467, 28832, 29618, 27221, 24022, 22856, 22893, 21943
 		, 18107, 12913, 8487, 6688, 6968, 7669, 6451, 3172, -106, -796, 830, 2166, 1217, -1102, -2348, -1422, 384, 1113, 472, -306, -329
@@ -389,48 +279,36 @@ def A005315of5(x: int, 次n: int = 5) -> int:
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of6(x: int, 次n: int = 6) -> int:
-	"""Evaluate the stored index-6 recurrence at encoded input `x`.
+	"""Return A005315(6) at x = 12 and A005315(7) at x = 13.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	6 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 6. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 1828 and 13820.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with the whole counting diagonal D_6(x), x >= 12, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 6
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal6` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of6(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal6`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (914, 7824, 28951, 70374, 131821, 219341, 348589, 543932, 809543, 1146019, 1543605, 2021443, 2573226
 		, 3209519, 3885355, 4599005, 5294304, 5989069, 6613316, 7187300, 7630393, 7984353, 8159826, 8212490, 8074707, 7845946, 7458601
@@ -443,48 +321,36 @@ def A005315of6(x: int, 次n: int = 6) -> int:
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of7(x: int, 次n: int = 7) -> int:
-	"""Evaluate the stored index-7 recurrence at encoded input `x`.
+	"""Return A005315(7) at x = 14 and A005315(8) at x = 15.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	7 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 7. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 13820 and 110954.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with the whole counting diagonal D_7(x), x >= 14, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 7
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal7` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of7(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal7`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (6910, 62387, 255447, 732514, 1697318, 3550062, 6912599, 12817723, 22487914, 37870341, 61194477, 96088195
 		, 146084579, 216942629, 313418857, 444004118, 614165342, 835414736, 1112495985, 1459877991, 1879091953, 2387205141, 2979068595
@@ -502,48 +368,36 @@ def A005315of7(x: int, 次n: int = 7) -> int:
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of8(x: int, 次n: int = 8) -> int:
-	"""Evaluate the stored index-8 recurrence at encoded input `x`.
+	"""Return A005315(8) at x = 16 and A005315(9) at x = 17.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	8 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 8. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 110954 and 933458.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with the whole counting diagonal D_8(x), x >= 16, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 8
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal8` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of8(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal8`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (55477, 522206, 2314852, 7471768, 19845175, 47664132, 105511467, 220734152, 435909251, 826407875
 		, 1502611971, 2651001737, 4524555184, 7537371103, 12217239841, 19411527238, 30128939445, 45976116630, 68737186239, 101266013711
@@ -570,48 +424,36 @@ def A005315of8(x: int, 次n: int = 8) -> int:
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of9(x: int, 次n: int = 9) -> int:
-	"""Evaluate the stored index-9 recurrence at encoded input `x`.
+	"""Return A005315(9) at x = 18 and A005315(10) at x = 19.
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	9 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	(AI generated docstring)
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 9. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	With the default offset, these values are 933458 and 8152860.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+
+	The identity with the whole counting diagonal D_9(x), x >= 18, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 9
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal9` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of9(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal9`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (466729, 4543159, 21484565, 75940876, 222762406, 590962139, 1438573545, 3302338533, 7150294834, 14855441170
 		, 29576159509, 57086577567, 106548386997, 194004349946, 343644747613, 596404693036, 1011166623296, 1684939833772, 2751303727007
@@ -653,50 +495,36 @@ def A005315of9(x: int, 次n: int = 9) -> int:
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of10(x: int, 次n: int = 10) -> int:
-	"""Evaluate the stored index-10 recurrence at encoded input `x`.
+	"""Return A005315(10) at x = 20 and A005315(11) at x = 21.
 
 	(AI generated docstring)
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	10 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	With the default offset, these values are 8152860 and 73424650.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 10. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	The identity with the whole counting diagonal D_10(x), x >= 20, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 10
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal10` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of10(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal10`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (4076430, 40788755, 199563993, 733511107, 2254614431, 6301650666, 16205451986, 39323450209, 90074370130
 		, 198066802176, 417681946742, 854051926721, 1689473341756, 3260494983770, 6124059026063, 11269907145876
@@ -772,50 +600,36 @@ def A005315of10(x: int, 次n: int = 10) -> int:
 	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of11(x: int, 次n: int = 11) -> int:
-	"""Evaluate the stored index-11 recurrence at encoded input `x`.
+	"""Return A005315(11) at x = 22 and A005315(12) at x = 23.
 
 	(AI generated docstring)
 
-	You can use this function to evaluate the coefficient table associated with A005315 index
-	11 [1]. This function returns twice the value selected by `crunchCoefficients` [2]
-	after shifting the input origin.
+	With the default offset, these values are 73424650 and 678390116.
+	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
+	stored `numerator` and `denominator` coefficients in ascending order of degree.
+	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
 
-	Coefficient Evaluation
-	----------------------
-	The coefficient table is fixed for suffix index 11. Changing `次n` shifts the input
-	origin without changing the table. The current evaluator repeats the first numerator
-	coefficient rather than consuming later numerator coefficients. Results beyond the initial
-	coefficient therefore do not necessarily match the intended A005315 anchors or diagonal values.
-	Negative shifted inputs propagate `IndexError` from the evaluator.
+	The identity with the whole counting diagonal D_11(x), x >= 22, remains
+	conjectural. Exact recurrence evaluation and verified anchor values do not
+	constitute an all-input counting proof. The general eventual theorem does
+	not identify this particular numerator with the counting sequence.
 
 	Parameters
 	----------
 	x : int
-		Encoded input, normally at least twice `次n`.
+		Row input at the default offset; use x >= 2*次n.
 	次n : int = 11
-		Input-origin offset. The default corresponds to the suffix index.
+		Input-origin offset. Changing it translates this fixed formula without
+		selecting another coefficient table. The identities above use the default.
 
 	Returns
 	-------
-	countTotal : int
-		Twice the recurrence value at the shifted input.
+	int
+		Twice the rational-series coefficient at x - 2*次n.
 
-	Examples
-	--------
-	`mapFolding.oeis.A400429._semi.工diagonal11` [3] forwards its row input to this evaluator.
-
-		```python
-		return A005315of11(n)
-		```
-
-	References
-	----------
-	[1] OEIS A005315.
-		https://oeis.org/A005315
-	[2] `crunchCoefficients`
-
-	[3] `mapFolding.oeis.A400429._semi.工diagonal11`
-
+	Notes
+	-----
+	A negative shifted input raises IndexError in `crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (36712325, 375907383, 1929414452, 7566598225
 		, 24920678269, 74693982045, 205600671062, 533738808678
@@ -936,16 +750,12 @@ def A005315of11(x: int, 次n: int = 11) -> int:
 boxOfA005315of: list[CallableFunction[[int], int]] = [
 	A005315of0, A005315of1, A005315of2, A005315of3, A005315of4, A005315of5
 	, A005315of6, A005315of7, A005315of8, A005315of9, A005315of10, A005315of11]
-"""Select an A005315 expression by its fixed suffix index.
+"""Select an existing A005315 formula by its suffix index, from 0 through 11.
 
 (AI generated docstring)
 
-This list contains the evaluators from `A005315of0` through `A005315of11` [1] in increasing
-suffix order. A list position selects the fixed expression; the selected function still expects
-an encoded input. No application invocation of this lookup was found in the codebase.
-
-References
-----------
-[1] `A005315of0` through `A005315of11`.
-
+For j = 1, ..., 11, use boxOfA005315of[j](2*j) for A005315(j), or
+boxOfA005315of[j](2*j + 1) for A005315(j + 1). Position zero is the separate
+base-case expression. Selection preserves each function's default `次n`.
+The diagonal proof status is documented above and in each selected function.
 """

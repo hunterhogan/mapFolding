@@ -247,6 +247,7 @@ libc
 LICEN
 Lieb
 Lindorfer
+linearization
 líng
 linh
 Liskov
@@ -324,6 +325,7 @@ Nucl
 nuitka
 numba
 numbinations
+numer
 NUMERICALPYTHON
 numma
 Numma
