@@ -18,7 +18,7 @@ from tqdm.auto import tqdm
 
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
 	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal), flow='matrixPolars')
-	writeDiagonal({n: sum(state.lookupMeanders.values()) + state.countAddend}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
+	writeDiagonal({n: state.totalMeanders}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:
 	pathFilenameTriangleSemiText.parent.mkdir(parents=True, exist_ok=True)
@@ -41,7 +41,7 @@ def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None
 				lookupMeanders: dict[int, int] = {arcCode: 1}
 				state: StateMeanders = StateMeanders(n, 'semi', lookupMeanders=lookupMeanders)
 				state = doTheNeedful(state)
-				aOFn下k = sum(state.lookupMeanders.values()) + state.countAddend
+				aOFn下k = state.totalMeanders
 			appendStringToHere(formatBFile({nT: aOFn下k}), pathFilenameTriangleSemiText)
 
 if __name__ == '__main__':

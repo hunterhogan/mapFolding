@@ -1,198 +1,220 @@
 # mapFolding
 
+`mapFolding` is a typed Python research package for exact enumeration of map foldings, stamp foldings, semi-meanders, and meanders. It provides counting algorithms, access to their computation states, and tools for transforming readable algorithm source into specialized implementations.
+
+[![Install](https://img.shields.io/badge/Install-mapFolding-2ea44f?style=for-the-badge)](#installation)
 [![PyPI](https://img.shields.io/pypi/v/mapFolding.svg)](https://pypi.org/project/mapFolding/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mapFolding.svg)](https://pypi.org/project/mapFolding/)
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml)
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-blue.svg)](https://github.com/hunterhogan/mapFolding/blob/main/LICENSE)
 
-Exact enumeration tools for map folding, stamp folding, semi-meanders, and meanders.
+A map-folding problem asks how many ways the labeled panels of a map can be stacked while preserving their connections. A strip of stamps is the one-dimensional case. Related meander problems count configurations of non-self-intersecting curves crossing a line or ray.
 
-`mapFolding` is a typed Python research package for counting distinct foldings of one- and multidimensional maps. It provides:
+Earlier versions of this project computed the terms for `2 × 19` and `2 × 20` stamp strips, extending [OEIS A001415](https://oeis.org/A001415).
 
-- stable dispatch functions for ordinary, rotationally symmetric, and divided computations;
-- native algorithms for map folding, semi-meanders, and meanders;
-- a unified interface to 33 implemented [OEIS](https://oeis.org/) sequences, including exact formula relationships;
-- readable source algorithms, generated optimized implementations, and optional NumPy, Numba, Pandas, and Codon routes; and
-- cross-implementation tests against known sequence values.
+## Research with mapFolding
 
-Earlier versions of this project were used to compute new terms for [OEIS A001415](https://oeis.org/A001415), the number of ways to fold a `2 × n` strip of stamps.
+You can use the package to calculate sequence terms, dissect an algorithm's state, develop a different counting method, or study the effects of source transformations. The main routes through the code are:
 
-This is exact combinatorial enumeration: running time and memory requirements grow quickly. Start with small inputs. The supported high-level interfaces are in `mapFolding.basecamp` and `mapFolding.oeis`; other modules include evolving research code.
+| Work | Where to begin |
+| --- | --- |
+| Count foldings or meanders | [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) selects an algorithm and prepares its state. |
+| Work with integer sequences | [`oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/) provides sequence dispatch, exact formula relationships, metadata, known values, and triangle utilities. |
+| Inspect or change a computation | [`dataBaskets.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataBaskets.py) describes the state containers; [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains source implementations. |
+| Transform or specialize an algorithm | [`kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST/) generates variants and jobs, with derived implementations in [`synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized/). |
+| Explore a different search strategy | [`_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/) contains elimination, constraint propagation, insertion, and search-space analysis. |
+| Validate a new implementation | [`test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py) compares implementations with known sequence values. |
 
-## Quick start
+The module, function, and class docstrings explain parameters, state layouts, mathematical relationships, and implementation details. Use them when choosing an experiment or following a computation through the package.
 
-Quick start your exploration of a new-to-you algorithm? Quick start your idea for improving an algorithm? Quick start your dissection of an algorithm's states?
+## Counting and sequence access
 
-Considering the versatility and sophistication of this package, you can accomplish many things quickly, but a "Quick start" section doesn't make sense.
+The main counting functions are in `mapFolding.basecamp`; sequence functions are in `mapFolding.oeis`.
 
-## Public interfaces
+| Task | Interface | Result |
+| --- | --- | --- |
+| Count foldings for supplied dimensions | `countFolds(mapShape, ...)` | Integer count |
+| Count rotationally symmetric stamp foldings | `countFoldsSymmetric(mapShape, ...)` | Integer count |
+| Count semi-meanders, open meanders, or closed meanders | `countMeanders(kind, n, ...)` | Completed `StateMeanders` |
+| Calculate a supported OEIS term | `oeisIDfor_n(oeisID, n, ...)` | Integer value of `a(n)` |
+| Convert a folding-sequence index to dimensions | `makeMapShape(oeisID, n)` | Dimension tuple |
+| Retrieve known sequence values | `getValuesKnown(oeisID)` | Dictionary of indices and values |
+| Inspect sequence metadata | `getMetadata(oeisID)` | Description, offset, known values, and row settings |
 
-| Goal                                           | Interface                                                |
-| ---------------------------------------------- | -------------------------------------------------------- |
-| Count all foldings of a map                    | `mapFolding.basecamp.countFolds(mapShape, ...)`          |
-| Count rotationally symmetric foldings          | `mapFolding.basecamp.countFoldsSymmetric(mapShape, ...)` |
-| Count semi-meanders or meanders                | `mapFolding.basecamp.countMeanders(kind, n, ...)`        |
-| Calculate any implemented OEIS term            | `mapFolding.oeis.oeisIDfor_n(oeisID, n, ...)`            |
-| Convert a map-folding OEIS index to dimensions | `mapFolding.oeis.makeMapShape(oeisID, n)`                |
-| Retrieve cached known values                   | `mapFolding.oeis.getValuesKnown(oeisID)`                 |
-| List implemented sequences                     | `getOEISids`                                             |
+For example, `(2, 6)` describes a `2 × 6` map, and `(2, 2, 2)` describes a three-dimensional map with eight panels. Dimensions count panels along each axis.
 
-`oeisIDfor_n` dispatches to the appropriate folding algorithm, meander algorithm, symmetric-folding algorithm, or exact formula. Run `getOEISids` for the current list and descriptions of all supported sequences.
+### Map dimensions and OEIS indices
 
-The map-folding sequence mappings are:
+| Sequence | Problem | `mapShape` at index `n` |
+| --- | --- | --- |
+| [A000136](https://oeis.org/A000136) | Strip of `n` labeled stamps | `(1, n)` |
+| [A001415](https://oeis.org/A001415) | `2 × n` strip | `(2, n)` |
+| [A001416](https://oeis.org/A001416) | `3 × n` strip | `(3, n)` |
+| [A001417](https://oeis.org/A001417) | `n`-dimensional map with every dimension of length two | `(2,) * n` |
+| [A195646](https://oeis.org/A195646) | `n`-dimensional map with every dimension of length three | `(3,) * n` |
+| [A001418](https://oeis.org/A001418) | `n × n` sheet | `(n, n)` |
+| [A007822](https://oeis.org/A007822) | Symmetric foldings of `2n + 1` stamps | `(1, 2 * n)` |
 
-| OEIS ID                             | Problem                               | `mapShape` for index `n` |
-| ----------------------------------- | ------------------------------------- | ------------------------ |
-| [A000136](https://oeis.org/A000136) | Strip of `n` labeled stamps           | `(1, n)`                 |
-| [A001415](https://oeis.org/A001415) | `2 × n` strip                         | `(2, n)`                 |
-| [A001416](https://oeis.org/A001416) | `3 × n` strip                         | `(3, n)`                 |
-| [A001417](https://oeis.org/A001417) | `n`-dimensional `2 × ⋯ × 2` map       | `(2,) * n`               |
-| [A195646](https://oeis.org/A195646) | `n`-dimensional `3 × ⋯ × 3` map       | `(3,) * n`               |
-| [A001418](https://oeis.org/A001418) | `n × n` sheet                         | `(n, n)`                 |
-| [A007822](https://oeis.org/A007822) | Symmetric foldings of `2n + 1` stamps | `(1, 2 * n)`             |
+For A007822, `countFoldsSymmetric` uses an even-length computational strip to count the symmetric foldings of the odd-length strip in the sequence description. `makeMapShape` supplies that computational shape.
 
-For A007822, pass `(1, 2 * n)` to `countFoldsSymmetric`; the function's computational shape differs from the `2n + 1` stamps in the sequence description.
+### Meanders and computation state
 
-OEIS metadata and b-files are cached locally for 30 days. Missing or stale entries are refreshed from `oeis.org`; stale cached data remains available if a refresh fails.
+`countMeanders('semi', n)` computes [A000682](https://oeis.org/A000682), and `countMeanders('meanders', n)` computes the open-meander sequence [A005316](https://oeis.org/A005316). The `'closed'` selector computes [A005315](https://oeis.org/A005315) using the corresponding odd-index open-meander term.
 
-## Algorithm selection and long computations
+The returned state retains the boundary position and transfer counts for inspection. Read the
+completed count from its `totalMeanders` property:
 
-Assume this is always out of date.
+```python
+state.totalMeanders
+```
 
-Leave `flow=''` for the default implementation. The alternate selectors exist for research, validation, and performance comparisons:
+`totalMeanders` sums the active lookup counts and `countAddend`, which retains completed
+contributions removed by pruning. The property reflects the current state; before counting finishes,
+its value represents intermediate counts rather than the final sequence term.
 
-| Interface             | Supported `flow` values                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------- |
-| `countFolds`          | `''`, `daoOfMapFolding`, `numba`, `theorem2`, `theorem2Codon`, `theorem2Numba`, `theorem2Trimmed` |
-| `countFoldsSymmetric` | `''`, `asynchronous`, `theorem2`, `theorem2Codon`, `theorem2Numba`, `theorem2Trimmed`             |
-| `countMeanders`       | `''`, `matrixMeanders`, `matrixNumPy`, `matrixPandas`                                             |
+You can also supply an existing `StateMeanders` through the `state` argument to continue that computation. See the state and counting-function docstrings for the relevant fields and behavior.
 
-The Numba, Pandas, and Codon selectors require their corresponding extras. For OEIS sequences with multiple exact identities, the `f` argument to `oeisIDfor_n` selects a formula; leaving it empty uses the default route.
+### Sequence formulas and reference data
 
-Pass `pathLikeWrite` to a counting function to preserve a result. An existing directory receives a generated filename such as `p2x6.totalFolds`; an explicit target file is also supported. The destination is write-tested before computation, and an existing target is not overwritten.
+`oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or to an exact formula connecting related sequences. For sequences with selectable identities, its `f` argument chooses a formula. The formulas and their docstrings are in [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py).
 
-`countFolds` can split work with an integer, `computationDivisions='cpu'`, or `computationDivisions='maximum'`. Dividing this algorithm repeats substantial work and is usually slower, so leave `computationDivisions=None` unless you are deliberately studying the parallel implementation.
+The `getOEISids` console command lists registered sequences and usage examples. The registry also includes related sequences used as reference data; consult `oeisIDfor_n` and `byFormula` for computation support. The `OEIS_for_n` command evaluates a supported term from its sequence identifier and index.
+
+OEIS metadata and b-files are loaded when the metadata module is imported. Local files have a 30-day freshness interval; missing or stale entries trigger a request to `oeis.org`, and stale data remains available if a refresh fails.
+
+## Algorithm experiments
+
+The package includes several approaches to the same combinatorial problems:
+
+- **Map folding:** insertion-search algorithms derived from Lunnon's work, including variants that apply symmetry restrictions from his theorems.
+- **Meanders:** transfer-matrix counting based on Jensen's approach, with dictionary, NumPy, Pandas, Polars, and pruning variants.
+- **Permutation generation:** stamp-folding and meander algorithms based on Sawada and Li's work, with experimental bilateral variants.
+- **Elimination:** possible leaf positions, pile assignments, and constraint propagation in `mapFolding._e`.
+
+Counting entry points accept a `flow` preference. Omit it to use the default route. Available variants and dispatch rules change as the research develops; [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) and the relevant `easyRun` runner show the current choices.
+
+The transformation pipeline in `kitAST` can inline functions, decompose state dataclasses, specialize initialized values for a map shape, and prepare Numba or Linux Codon jobs. [`RecipeJob.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitAST/RecipeJob.py) describes job configuration; [`easyRun/synthesizeModules.py`](https://github.com/hunterhogan/mapFolding/blob/main/easyRun/synthesizeModules.py) coordinates module regeneration. For changes that should survive regeneration, edit the source algorithm or its transformation.
+
+General-purpose transformation tools developed alongside this project live in [astToolkit](https://github.com/hunterhogan/astToolkit) and [astToolFactory](https://github.com/hunterhogan/astToolFactory). The transformations retained here serve `mapFolding` algorithms and jobs.
+
+### Computation cost and saved results
+
+Exact enumeration becomes expensive quickly. Running time, memory use, and the appropriate implementation depend on the problem and its size; measure smaller cases before committing to a long computation.
+
+Pass `pathLikeWrite` to a counting function to save the total. An existing directory receives a generated filename; an explicit filename is also supported. The destination is write-tested before counting, leaving a test value until the result replaces it. An existing target file is rejected. These output files save totals; they do not checkpoint a running search.
+
+`countFolds` can divide work using an integer, `computationDivisions='cpu'`, or `computationDivisions='maximum'`. Tasks repeat substantial preparatory work, so division can increase elapsed time. Leave `computationDivisions=None` unless task division is part of your experiment; see the function's docstring for the tradeoffs.
 
 ## Repository guide
 
-This is a little out of date.
+| Path | Contents |
+| --- | --- |
+| [`mapFolding/dataStructures.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataStructures.py), [`theTypes.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theTypes.py), and [`theSSOT.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theSSOT.py) | Array storage, domain types, and shared settings |
+| [`mapFolding/kitFilesystem.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitFilesystem.py) | Result files, caches, and computation-data storage |
+| [`mapFolding/jobs/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/jobs/) | Computation jobs specialized for particular map shapes |
+| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests/) and [`mapFolding/_e/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/tests/) | Correctness checks, dispatch and filesystem tests, and stored data samples |
+| [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun/) | Editable runners for computations, benchmarks, synthesis, and exploration |
+| [`mapFolding/_e/research/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/research/) and [`research/`](https://github.com/hunterhogan/mapFolding/tree/main/research/) | Analysis tools, folding data, and research materials |
+| [`archive/`](https://github.com/hunterhogan/mapFolding/tree/main/archive/) and [`development/`](https://github.com/hunterhogan/mapFolding/tree/main/development/) | Historical code, notes, and development materials |
+| [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations/) | Software citation metadata and BibTeX references |
 
-| Path                                                                                                    | Role                                                                         |
-| ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`mapFolding/basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py)  | Stable high-level dispatch for folding and meander computations              |
-| [`mapFolding/oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis)               | OEIS dispatch, formulas, metadata, and cached values                         |
-| [`mapFolding/algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms)   | Handwritten source algorithms                                                |
-| [`mapFolding/synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized) | Generated implementations; regenerate these instead of editing them directly |
-| [`mapFolding/kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST)           | Project-specific AST transformations and module generators                   |
-| [`mapFolding/_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e)                   | Experimental elimination-based algorithms and analysis                       |
-| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests)             | Main correctness, dispatch, filesystem, and parameter tests                  |
-| [`mapFolding/reference/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/reference)     | Historical implementations, completed jobs, notes, and research artifacts    |
-| [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun)                               | Benchmark and exploration harnesses                                          |
+## Citation and references
 
-General-purpose transformation primitives developed alongside this project now live in [astToolkit](https://github.com/hunterhogan/astToolkit) and [astToolFactory](https://github.com/hunterhogan/astToolFactory). The transformation pipeline retained here is specific to generating and validating `mapFolding` implementations.
+To cite this software, use [`CITATION.cff`](https://github.com/hunterhogan/mapFolding/blob/main/CITATION.cff). The mathematical and implementation references below have BibTeX entries in [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations/).
+
+### Folding and meander algorithms
+
+- **Albert Sadé (1949), _Sur les Chevauchements des Permutations_.** [PDF](https://oeis.org/A000108/a000108_17.pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sade1949.bib).
+- **John E. Koehler (1968), _Folding a strip of stamps_.** [DOI](https://doi.org/10.1016/S0021-9800(68)80048-1) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Koehler1968.bib).
+- **W. F. Lunnon (1968), _A map-folding problem_.** [DOI](https://doi.org/10.1090/S0025-5718-1968-0221957-8) · [PDF](https://pubs.ams.org/journals/mcom/1968-22-101/S0025-5718-1968-0221957-8/S0025-5718-1968-0221957-8.pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon1968.bib).
+- **W. F. Lunnon (1971), _Multi-dimensional map-folding_.** The basis for the multidimensional counting algorithms. [DOI](https://doi.org/10.1093/comjnl/14.1.75) · [PDF](https://academic.oup.com/comjnl/article-pdf/14/1/75/1020149/140075.pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon.bib).
+- **Iwan Jensen (2000), _A transfer matrix approach to the enumeration of plane meanders_.** The transfer-matrix method underlying the matrix-meander algorithms. [DOI](https://doi.org/10.1088/0305-4470/33/34/301) · [Preprint](https://arxiv.org/abs/cond-mat/0008178) · [TeX source](https://arxiv.org/src/cond-mat/0008178) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib).
+- **Joe Sawada and Roy Li (2012), _Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms_.** Permutation-based generation methods used in the experimental permutation algorithms. [DOI](https://doi.org/10.37236/2404) · [PDF](https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43/pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sawada2012.bib).
+- **Stéphane Legendre (2014), _Foldings and meanders_.** Relationships between folding and meander sequences, with folding-validity conditions. [PDF](https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf) · [Preprint](https://arxiv.org/abs/1302.2025) · [TeX source](https://arxiv.org/src/1302.2025) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Legendre2014.bib).
+
+### Related research
+
+- **Nathan Clisby and Iwan Jensen (2012), _A new transfer-matrix algorithm for exact enumerations: self-avoiding polygons on the square lattice_.** Further transfer-matrix techniques for exact counting, demonstrated on lattice polygons. [DOI](https://doi.org/10.1088/1751-8113/45/11/115202) · [Preprint](https://arxiv.org/abs/1111.5877) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/ClisbyJensen2012.bib).
+- **Yiyang Jia, Jun Mitani, and Ryuhei Uehara (2020), _Valid Orderings of Layers When Simple-Folding a Map_.** A linear-time test for whether a supplied layer ordering is valid under simple folding, providing context for the role of the folding model in validity tests. [DOI](https://doi.org/10.2197/ipsjjip.28.816) · [Article and PDF](https://www.jstage.jst.go.jp/article/ipsjjip/28/0/28_816/_article) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Jia2020.bib).
+
+### Sequence data and other implementations
+
+- **The On-Line Encyclopedia of Integer Sequences.** Sequence definitions, known values, formulas, and computation records. [OEIS](https://oeis.org/) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bib).
+- **jOEIS: Java Online Encyclopedia of Integer Sequences.** [Repository](https://github.com/archmageirvine/joeis) · [Sean A. Irvine's A001415 implementation](https://github.com/archmageirvine/joeis/blob/9e2bd5f6b5a51bc40833c19ca04555ec12044edc/src/irvine/oeis/a001/A001415.java) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/jOEIS.bib).
+- **Andrew Howroyd's meander implementation.** [C# source and description](https://oeis.org/A005316/a005316.cs.txt) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Howroyd.bib).
 
 ## Installation
 
-`mapFolding` requires Python 3.13 or newer.
+`mapFolding` requires Python 3.13 or newer. Install the published package from [PyPI](https://pypi.org/project/mapFolding/):
 
 ```console
 pip install mapFolding
 ```
 
-To avoid bloat, some packages are optional:
+NumPy and Numba are included in the base dependencies. Optional extras add other implementations and development tools:
 
-| Extra         | Purpose                                                             |
-| ------------- | ------------------------------------------------------------------- |
-| `pandas`      | Pandas and Arrow meander implementation                             |
-| `codon`       | [Codon](https://docs.exaloop.io/)-compiled implementations on Linux |
-| `ortools`     | Experimental constraint-propagation work                            |
-| `testing`     | Test dependencies                                                   |
-| `development` | Broader development and analysis dependencies                       |
+| Extra | Purpose |
+| --- | --- |
+| `pandas` | Pandas and Arrow meander implementations |
+| `polars` | Polars meander implementation |
+| `codon` | [Codon](https://docs.exaloop.io/)-compiled jobs on Linux |
+| `ortools` | Experimental constraint propagation; installed only on Python versions below 3.15 |
+| `testing` | Test dependencies and optional implementations exercised by the tests |
+| `development` | Profiling, notebooks, type stubs, and development tools |
 
 For example:
 
 ```console
-pip install "mapFolding[codon,pandas]"
+pip install "mapFolding[pandas,polars]"
 ```
 
-## Development, or to have the archives, notes, and other supplemental materials
+### Development and supplemental materials
 
-Create and activate a virtual environment, then install both development extras:
+Clone the repository to work on the algorithms or access its archives, notes, and research materials:
 
 ```console
 git clone https://github.com/hunterhogan/mapFolding.git
 cd mapFolding
 python -m venv .venv
+```
+
+Activate the environment before installing. On PowerShell:
+
+```powershell
+. .\.venv\Scripts\Activate.ps1
+$env:PYTHONUTF8 = '1'
+$env:PYTHONIOENCODING = 'utf-8'
+```
+
+On a POSIX shell:
+
+```sh
+. .venv/bin/activate
+```
+
+Then install the development and testing extras:
+
+```console
 pip install -e ".[development,testing]"
 ```
 
-The test suite compares independent implementations with known OEIS values and stored data samples. When adding an algorithm variant, begin with [`mapFolding/tests/test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py) and register the new flow beside the existing implementations.
+Run project commands from the repository root with the environment active. For example, to check the main counting implementations:
 
-## Citation
+```console
+pytest mapFolding/tests/test_computations.py
+```
 
-To cite this software, use the metadata in [`CITATION.cff`](https://github.com/hunterhogan/mapFolding/blob/main/CITATION.cff). BibTeX files for the mathematical literature are collected in [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations).
+The tests compare algorithm variants with known OEIS values and exercise generated jobs. When adding a counting implementation, extend the relevant test cases in [`test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py); supporting behavior has its own tests in `mapFolding/tests` and `mapFolding/_e/tests`.
 
-## Research references
+## Computation targets
 
-### Sur les Chevauchements des Permutations
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sade1949.bib)
-- PDF: [OEIS](https://oeis.org/A000108/a000108_17.pdf)
-
-### Folding a strip of stamps
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Koehler1968.bib)
-- DOI: [10.1016/S0021-9800(68)80048-1](https://doi.org/10.1016/S0021-9800(68)80048-1)
-
-### A map-folding problem
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon1968.bib)
-- DOI: [10.1090/S0025-5718-1968-0221957-8](https://doi.org/10.1090/S0025-5718-1968-0221957-8)
-- PDF: [American Mathematical Society](https://pubs.ams.org/journals/mcom/1968-22-101/S0025-5718-1968-0221957-8/S0025-5718-1968-0221957-8.pdf)
-
-### Multi-dimensional map-folding
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon.bib)
-- DOI: [10.1093/comjnl/14.1.75](https://doi.org/10.1093/comjnl/14.1.75)
-- PDF: [Oxford Academic](https://academic.oup.com/comjnl/article-pdf/14/1/75/1020149/140075.pdf)
-- [Java implementation](https://github.com/archmageirvine/joeis/blob/9e2bd5f6b5a51bc40833c19ca04555ec12044edc/src/irvine/oeis/a001/A001415.java) by Sean A. Irvine.
-
-### A transfer matrix approach to the enumeration of plane meanders
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Jensen.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/cond-mat/0008178)
-- DOI: [10.1088/0305-4470/33/34/301](https://doi.org/10.1088/0305-4470/33/34/301)
-- Free preprint: [arXiv:cond-mat/0008178](https://arxiv.org/abs/cond-mat/0008178)
-- [C# implementation described](https://oeis.org/A005316/a005316.cs.txt) by Andrew Howroyd. [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Howroyd.bib)
-
-### Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sawada2012.bib)
-- DOI: [10.37236/2404](https://doi.org/10.37236/2404)
-- PDF: [The Electronic Journal of Combinatorics](https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43/pdf)
-
-### Foldings and meanders
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/Legendre2014.bib) [TeX Source with precise formulas for AI agents.](https://arxiv.org/src/1302.2025)
-- PDF: [The Australasian Journal of Combinatorics](https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf)
-- Free preprint: [arXiv:1302.2025](https://arxiv.org/abs/1302.2025)
-
-### jOEIS: Java Online Encyclopedia of Integer Sequences
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/jOEIS.bib)
-- [Code repository.](https://github.com/archmageirvine/joeis)
-
-### The Online Encyclopedia of Integer Sequences
-
-- [BibTeX citation.](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bib)
-- [Available at oeis.org.](https://oeis.org)
-
-## Computing new values
+These are my computation plans and estimates for my hardware, including work with unpublished algorithms.
 
 - Folds of multidimensional map (2, 2, 2, 2, 2, 2, 2, 2), which is [A001417(8)](https://oeis.org/A001417): estimated 14 days with my current hardware and a non-published algorithm.
 - Folds of multidimensional map (2, 21), which is [A001415(21)](https://oeis.org/A001415): estimated 6 days with my current hardware and one of the compiled "Theorem 2" algorithm versions.
 - Folds of multidimensional map (2, 22), which is [A001415(22)](https://oeis.org/A001415): estimated 15 days with my current hardware and one of the compiled "Theorem 2" algorithm versions.
 - Folds of multidimensional map (3, 15), which is [A001416(15)](https://oeis.org/A001416): estimated 11 days with my current hardware and one of the compiled "Theorem 2" algorithm versions.
-- Semi-meanders with 46 crossings, which is [A000682(46)](https://oeis.org/A000682): estimated 1–2 hours if I had 64 GB of system memory.
+- Semi-meanders with 50 crossings, which is [A000682(50)](https://oeis.org/A000682): estimated 1–2 hours if I had 64 GB of system memory.
 
 Computation times assume:
 
@@ -202,11 +224,12 @@ Computation times assume:
 4. The core of single-core computations is regularly boosted.
 5. No heat issues.
 
-## Status reminders
+## Maintainer's working notes
+
+This is my ongoing to-do list across this package and related projects. It records experiments, unresolved problems, and reminders to myself.
 
 1. Acceleration
-    1. Building Py 3.14z (tail-call) is not working.
-    2. Codon: new release, new features.
+    1. Codon: new release, new features.
 2. Remote execution
     1. Google Colab: memmap causes everything to go to "disk" and the physical memory is unused.
     2. GitHub Codespaces: ignores memmap and terminates on OOM.
@@ -247,16 +270,8 @@ Computation times assume:
 
 Hunter, this list is incomplete: you quit writing after you got upset. Resume at mapFolding.kitAST.
 
-1. Research 1
-    1. Finish run D11.
-    2. Start partial runs in the R series.
-    3. Make NumPy version.
-    4. 2-sequence representation, 3-sequence representation, or something else?
-    5. Hypothesis: relationships are best described by the sum of n and hypothetical n, modulated by parity.
-
 ## My recovery
 
 [![2011 August: Homeless since](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
-[![YouTube channel subscribers](https://img.shields.io/youtube/channel/subscribers/UC3Gx7kz61009NbhpRtPP7tw)](https://www.youtube.com/@HunterHogan)
 
 [![CC-BY-NC-4.0](https://raw.githubusercontent.com/hunterhogan/mapFolding/refs/heads/main/.github/CC-BY-NC-4.0.png)](https://creativecommons.org/licenses/by-nc/4.0/)

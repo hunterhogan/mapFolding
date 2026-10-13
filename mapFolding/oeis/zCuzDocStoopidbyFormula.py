@@ -513,11 +513,11 @@ def _A000136(n: int) -> int:
 
 def _A000682(n: int) -> int:
 	state = countMeanders('semi', n)
-	return sum(state.lookupMeanders.values()) + state.countAddend
+	return state.totalMeanders
 
 def _A007822(n: int) -> int:
 	return countFoldsSymmetric(makeMapShape('A007822', n))
 
 def _A005316(n: int) -> int:
 	state = countMeanders('meanders', n)
-	return sum(state.lookupMeanders.values()) + state.countAddend
+	return state.totalMeanders

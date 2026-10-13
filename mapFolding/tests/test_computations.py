@@ -110,7 +110,7 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString, monkeypatch:
 	fml = {'semi': 'A000682', 'meanders': 'A005316'}
 	expected: int = getValuesKnown(fml[kind])[n]
 	state = countMeanders(kind, n, flow, None)
-	actual: int = sum(state.lookupMeanders.values()) + state.countAddend
+	actual: int = state.totalMeanders
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 	if flow == 'matrixPolars':
 		assert not any(tmp_path.glob('matrixMeandersPolars_n*_boundary*_*.arrow'))

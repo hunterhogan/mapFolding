@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
 			state = countMeanders(kind, n, flow, pathLikeWrite, state=state)
 			gc.collect()
-			countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
+			countTotal: int = state.totalMeanders
 
 			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 

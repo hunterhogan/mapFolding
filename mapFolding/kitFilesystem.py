@@ -750,11 +750,12 @@ def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: 
 
 	Examples
 	--------
-	The runner in `easyRun/triangleSemiMake.py` appends a completed count to a diagonal file.
+	The runner in `easyRun/triangleSemiMake.py` appends a completed count from
+	`mapFolding.dataBaskets.StateMeanders.totalMeanders` [3] to a diagonal file.
 
 		```python
 		writeDiagonal(
-			{n: sum(state.lookupMeanders.values()) + state.countAddend},
+			{n: state.totalMeanders},
 			makePathFilenameDiagonal(次diagonal), 次diagonal, append=True
 		)
 		```
@@ -764,6 +765,8 @@ def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: 
 	[1] `readDiagonal`
 
 	[2] `iterableToCSV`
+
+	[3] `mapFolding.dataBaskets.StateMeanders.totalMeanders`
 
 	"""
 	return iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)

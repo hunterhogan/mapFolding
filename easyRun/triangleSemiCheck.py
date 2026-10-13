@@ -27,7 +27,7 @@ if __name__ == '__main__':
 		gc.collect()
 		timeStart: float = time.perf_counter()
 		state: StateMeanders = countMeanders(kind, n, flow)
-		countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
+		countTotal: int = state.totalMeanders
 
 		printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
 

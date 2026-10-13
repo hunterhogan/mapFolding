@@ -288,8 +288,8 @@ def countMeanders(
 	"""Compute a meander sequence term for `kind` and `n`, or continue `state`.
 
 	You can use this function to count meanders or semi-meanders and inspect the completed computation
-	state. An existing `state` takes precedence over `kind` and `n`. This function returns the state;
-	the total combines the remaining lookup counts with previously completed contributions.
+	state. An existing `state` takes precedence over `kind` and `n`. This function returns
+	`mapFolding.dataBaskets.StateMeanders` [1]; read the completed count from `state.totalMeanders`.
 
 	State and Output
 	----------------
@@ -322,8 +322,7 @@ def countMeanders(
 	Returns
 	-------
 	stateCompleted : StateMeanders
-		Completed or updated state. The total is
-		`sum(stateCompleted.lookupMeanders.values()) + stateCompleted.countAddend`.
+		Completed or updated state. Read the total from `stateCompleted.totalMeanders`.
 
 	Raises
 	------
@@ -386,7 +385,7 @@ def countMeanders(
 				from mapFolding.algorithms.matrixMeanders import doTheNeedful
 
 		state = doTheNeedful(state)
-	countTotal: int = sum(state.lookupMeanders.values()) + state.countAddend
+	countTotal: int = state.totalMeanders
 
 #-------- Follow memorialization instructions ---------------------------------------------
 

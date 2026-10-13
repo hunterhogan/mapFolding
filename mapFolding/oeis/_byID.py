@@ -91,10 +91,10 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 		match oeisID:
 			case 'A000682' if not f:
 				state = countMeanders('semi', n, **keywordArguments)
-				totalFolds = sum(state.lookupMeanders.values()) + state.countAddend
+				totalFolds = state.totalMeanders
 			case 'A005316' if not f:
 				state = countMeanders('meanders', n, **keywordArguments)
-				totalFolds = sum(state.lookupMeanders.values()) + state.countAddend
+				totalFolds = state.totalMeanders
 			case 'A007822' if not f:
 				totalFolds = countFoldsSymmetric(makeMapShape(oeisID, n), **keywordArguments)
 			case 'A007822':

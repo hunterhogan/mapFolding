@@ -167,6 +167,7 @@ class StateMapFolding:
 	"""Inspect the dimension count derived from `mapShape`."""
 	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
 	"""Inspect the leaf count derived from `mapShape`."""
+
 	@property
 	def totalFolds(self) -> 形TotalFolds:
 		"""Compute the folding count represented by the current group count.
@@ -469,6 +470,8 @@ class StateMeanders:
 		Mutable target cursor whose interpretation depends on the algorithm.
 	countAddend : int = 0
 		Completed counting contributions removed from the active lookup.
+	totalMeanders : int
+		Sum of active counts and completed contributions; the sequence term after counting finishes.
 
 	Examples
 	--------
@@ -601,6 +604,37 @@ class StateMeanders:
 		This method does not inspect or change the count lookup.
 		"""
 		self.arcCodeMaximum = 1 << (2 * self.boundary + 4)
+
+	@property
+	def totalMeanders(self) -> int:
+		"""Inspect the total represented by the current meander state.
+
+		(AI generated docstring)
+
+		You can use this property to read the sequence term after counting finishes. Before completion,
+		`totalMeanders` combines active transfer counts with completed contributions and does not
+		represent the final sequence term. The property reflects changes to `self.lookupMeanders` and
+		`self.countAddend` whenever accessed.
+
+		Returns
+		-------
+		totalMeanders : int
+			Sum of `self.lookupMeanders.values()` and `self.countAddend`, using Python integers.
+
+		Examples
+		--------
+		`mapFolding.basecamp.countMeanders` [1] reads the completed total for saving.
+
+			```python
+			countTotal: int = state.totalMeanders
+			```
+
+		References
+		----------
+		[1] `mapFolding.basecamp.countMeanders`
+
+		"""
+		return sum(self.lookupMeanders.values()) + self.countAddend
 
 	def __post_init__(self) -> None:
 		"""Post init."""
