@@ -16,14 +16,14 @@ Earlier versions of this project computed the terms for `2 × 19` and `2 × 20` 
 
 You can use the package to calculate sequence terms, dissect an algorithm's state, develop a different counting method, or study the effects of source transformations. The main routes through the code are:
 
-| Work | Where to begin |
-| --- | --- |
-| Count foldings or meanders | [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) selects an algorithm and prepares its state. |
-| Work with integer sequences | [`oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/) provides sequence dispatch, exact formula relationships, metadata, known values, and triangle utilities. |
-| Inspect or change a computation | [`dataBaskets.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataBaskets.py) describes the state containers; [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains source implementations. |
-| Transform or specialize an algorithm | [`kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST/) generates variants and jobs, with derived implementations in [`synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized/). |
-| Explore a different search strategy | [`_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/) contains elimination, constraint propagation, insertion, and search-space analysis. |
-| Validate a new implementation | [`test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py) compares implementations with known sequence values. |
+| Work                                 | Where to begin                                                                                                                                                                                                                                                 |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Count foldings or meanders           | [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) selects an algorithm and prepares its state.                                                                                                                       |
+| Work with integer sequences          | [`oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/) provides sequence dispatch, exact formula relationships, metadata, known values, and triangle utilities.                                                                       |
+| Inspect or change a computation      | [`dataBaskets.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataBaskets.py) describes the state containers; [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains source implementations. |
+| Transform or specialize an algorithm | [`kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST/) generates variants and jobs, with derived implementations in [`synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized/).                |
+| Explore a different search strategy  | [`_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/) contains elimination, constraint propagation, insertion, and search-space analysis.                                                                                                |
+| Validate a new implementation        | [`test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py) compares implementations with known sequence values.                                                                                       |
 
 The module, function, and class docstrings explain parameters, state layouts, mathematical relationships, and implementation details. Use them when choosing an experiment or following a computation through the package.
 
@@ -31,29 +31,29 @@ The module, function, and class docstrings explain parameters, state layouts, ma
 
 The main counting functions are in `mapFolding.basecamp`; sequence functions are in `mapFolding.oeis`.
 
-| Task | Interface | Result |
-| --- | --- | --- |
-| Count foldings for supplied dimensions | `countFolds(mapShape, ...)` | Integer count |
-| Count rotationally symmetric stamp foldings | `countFoldsSymmetric(mapShape, ...)` | Integer count |
-| Count semi-meanders, open meanders, or closed meanders | `countMeanders(kind, n, ...)` | Completed `StateMeanders` |
-| Calculate a supported OEIS term | `oeisIDfor_n(oeisID, n, ...)` | Integer value of `a(n)` |
-| Convert a folding-sequence index to dimensions | `makeMapShape(oeisID, n)` | Dimension tuple |
-| Retrieve known sequence values | `getValuesKnown(oeisID)` | Dictionary of indices and values |
-| Inspect sequence metadata | `getMetadata(oeisID)` | Description, offset, known values, and row settings |
+| Task                                                   | Interface                            | Result                                              |
+| ------------------------------------------------------ | ------------------------------------ | --------------------------------------------------- |
+| Count foldings for supplied dimensions                 | `countFolds(mapShape, ...)`          | Integer count                                       |
+| Count rotationally symmetric stamp foldings            | `countFoldsSymmetric(mapShape, ...)` | Integer count                                       |
+| Count semi-meanders, open meanders, or closed meanders | `countMeanders(kind, n, ...)`        | Completed `StateMeanders`                           |
+| Calculate a supported OEIS term                        | `oeisIDfor_n(oeisID, n, ...)`        | Integer value of `a(n)`                             |
+| Convert a folding-sequence index to dimensions         | `makeMapShape(oeisID, n)`            | Dimension tuple                                     |
+| Retrieve known sequence values                         | `getValuesKnown(oeisID)`             | Dictionary of indices and values                    |
+| Inspect sequence metadata                              | `getMetadata(oeisID)`                | Description, offset, known values, and row settings |
 
 For example, `(2, 6)` describes a `2 × 6` map, and `(2, 2, 2)` describes a three-dimensional map with eight panels. Dimensions count panels along each axis.
 
 ### Map dimensions and OEIS indices
 
-| Sequence | Problem | `mapShape` at index `n` |
-| --- | --- | --- |
-| [A000136](https://oeis.org/A000136) | Strip of `n` labeled stamps | `(1, n)` |
-| [A001415](https://oeis.org/A001415) | `2 × n` strip | `(2, n)` |
-| [A001416](https://oeis.org/A001416) | `3 × n` strip | `(3, n)` |
-| [A001417](https://oeis.org/A001417) | `n`-dimensional map with every dimension of length two | `(2,) * n` |
-| [A195646](https://oeis.org/A195646) | `n`-dimensional map with every dimension of length three | `(3,) * n` |
-| [A001418](https://oeis.org/A001418) | `n × n` sheet | `(n, n)` |
-| [A007822](https://oeis.org/A007822) | Symmetric foldings of `2n + 1` stamps | `(1, 2 * n)` |
+| Sequence                            | Problem                                                  | `mapShape` at index `n` |
+| ----------------------------------- | -------------------------------------------------------- | ----------------------- |
+| [A000136](https://oeis.org/A000136) | Strip of `n` labeled stamps                              | `(1, n)`                |
+| [A001415](https://oeis.org/A001415) | `2 × n` strip                                            | `(2, n)`                |
+| [A001416](https://oeis.org/A001416) | `3 × n` strip                                            | `(3, n)`                |
+| [A001417](https://oeis.org/A001417) | `n`-dimensional map with every dimension of length two   | `(2,) * n`              |
+| [A195646](https://oeis.org/A195646) | `n`-dimensional map with every dimension of length three | `(3,) * n`              |
+| [A001418](https://oeis.org/A001418) | `n × n` sheet                                            | `(n, n)`                |
+| [A007822](https://oeis.org/A007822) | Symmetric foldings of `2n + 1` stamps                    | `(1, 2 * n)`            |
 
 For A007822, `countFoldsSymmetric` uses an even-length computational strip to count the symmetric foldings of the odd-length strip in the sequence description. `makeMapShape` supplies that computational shape.
 
@@ -107,16 +107,16 @@ Pass `pathLikeWrite` to a counting function to save the total. An existing direc
 
 ## Repository guide
 
-| Path | Contents |
-| --- | --- |
-| [`mapFolding/dataStructures.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataStructures.py), [`theTypes.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theTypes.py), and [`theSSOT.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theSSOT.py) | Array storage, domain types, and shared settings |
-| [`mapFolding/kitFilesystem.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitFilesystem.py) | Result files, caches, and computation-data storage |
-| [`mapFolding/jobs/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/jobs/) | Computation jobs specialized for particular map shapes |
-| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests/) and [`mapFolding/_e/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/tests/) | Correctness checks, dispatch and filesystem tests, and stored data samples |
-| [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun/) | Editable runners for computations, benchmarks, synthesis, and exploration |
-| [`mapFolding/_e/research/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/research/) and [`research/`](https://github.com/hunterhogan/mapFolding/tree/main/research/) | Analysis tools, folding data, and research materials |
-| [`archive/`](https://github.com/hunterhogan/mapFolding/tree/main/archive/) and [`development/`](https://github.com/hunterhogan/mapFolding/tree/main/development/) | Historical code, notes, and development materials |
-| [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations/) | Software citation metadata and BibTeX references |
+| Path                                                                                                                                                                                                                                                                                                           | Contents                                                                   |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [`mapFolding/dataStructures.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataStructures.py), [`theTypes.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theTypes.py), and [`theSSOT.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theSSOT.py) | Array storage, domain types, and shared settings                           |
+| [`mapFolding/kitFilesystem.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitFilesystem.py)                                                                                                                                                                                               | Result files, caches, and computation-data storage                         |
+| [`mapFolding/jobs/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/jobs/)                                                                                                                                                                                                                     | Computation jobs specialized for particular map shapes                     |
+| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests/) and [`mapFolding/_e/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/tests/)                                                                                                            | Correctness checks, dispatch and filesystem tests, and stored data samples |
+| [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun/)                                                                                                                                                                                                                                     | Editable runners for computations, benchmarks, synthesis, and exploration  |
+| [`mapFolding/_e/research/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/research/) and [`research/`](https://github.com/hunterhogan/mapFolding/tree/main/research/)                                                                                                                      | Analysis tools, folding data, and research materials                       |
+| [`archive/`](https://github.com/hunterhogan/mapFolding/tree/main/archive/) and [`development/`](https://github.com/hunterhogan/mapFolding/tree/main/development/)                                                                                                                                              | Historical code, notes, and development materials                          |
+| [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations/)                                                                                                                                                                                                                                 | Software citation metadata and BibTeX references                           |
 
 ## Citation and references
 
@@ -153,14 +153,14 @@ pip install mapFolding
 
 NumPy and Numba are included in the base dependencies. Optional extras add other implementations and development tools:
 
-| Extra | Purpose |
-| --- | --- |
-| `pandas` | Pandas and Arrow meander implementations |
-| `polars` | Polars meander implementation |
-| `codon` | [Codon](https://docs.exaloop.io/)-compiled jobs on Linux |
-| `ortools` | Experimental constraint propagation; installed only on Python versions below 3.15 |
-| `testing` | Test dependencies and optional implementations exercised by the tests |
-| `development` | Profiling, notebooks, type stubs, and development tools |
+| Extra         | Purpose                                                                           |
+| ------------- | --------------------------------------------------------------------------------- |
+| `pandas`      | Pandas and Arrow meander implementations                                          |
+| `polars`      | Polars meander implementation                                                     |
+| `codon`       | [Codon](https://docs.exaloop.io/)-compiled jobs on Linux                          |
+| `ortools`     | Experimental constraint propagation; installed only on Python versions below 3.15 |
+| `testing`     | Test dependencies and optional implementations exercised by the tests             |
+| `development` | Profiling, notebooks, type stubs, and development tools                           |
 
 For example:
 
