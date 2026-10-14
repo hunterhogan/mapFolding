@@ -1,6 +1,6 @@
-%S 8,42,100,200,340,546,810,1170,1610,2180,2856,3702,4682,5878,7240,8868,10698,12850,15242
-%T 18018,21076,24584,28420,32778,37512,42846,48608,55052,61980,69678,77918,87022,96730
-%U 107400,118740,131146,144290,158610,173740,190160,207466,226182,245862,267078,289340
+%S 42,262,752,1772,3516,6480,10948,17808,27434,41246,59736,85052,117744,160994,215332,
+%T 285252,371234,479426,610100,771552,963652,1197308,1471844,1801320,2184214,2638462,
+%U 3161344,3775360,4476296,5292002,6216272,7283312,8484370,9860962,11401300,13155280,15107344
 %N Number of semi-meanders with n crossings and winding number n-8, for n >= 8.
 %C A semi-meander is a semi-infinite, self-avoiding, directed curve that crosses a line one or more times.
 %C The winding number of a semi-meander is the hypothetical minimum number of self-crossings that would be created if a ray were to start at the source of the semi-infinite directed curve and extend to infinity without crossing the line.
@@ -8,17 +8,22 @@
 %C Equivalent to a closed curve (a loop) transversely crossing a ray, considered up to continuous deformation fixing the ray, with a winding number equal to the number of crossings that would be created if the fixed end of the ray were extended to form a line.
 %C Analogized to a river (a semi-meander, meander, or loop) crossing a road (a ray, line, or line segment).
 %C The fourth diagonal of A400429, reading diagonals from the maximal-winding edge.
-%H P. Di Francesco, O. Golinelli and E. Guitter, <a href="https://arxiv.org/abs/hep-th/9607039">Meanders: A Direct Enumeration Approach</a>, arXiv:hep-th/9607039, 1996.
-%H P. Di Francesco, O. Golinelli and E. Guitter, <a href="https://doi.org/10.1016/S0550-3213(96)00505-6">Meanders: A Direct Enumeration Approach</a>, Nuclear Physics B 482 (1996), no. 3, 497-535.
+%H Philippe Di Francesco, Olivier Golinelli and Emmanuel Guitter, <a href="https://arxiv.org/abs/hep-th/9607039">Meanders: A Direct Enumeration Approach</a>, arXiv:hep-th/9607039, 1996 (preprint).
+%H Philippe Di Francesco, Olivier Golinelli and Emmanuel Guitter, <a href="https://doi.org/10.1016/S0550-3213(96)00505-6">Meanders: A Direct Enumeration Approach</a>, Nuclear Physics B 482 (1996), no. 3, 497-535.
 %H Hunter Hogan, <a href="https://github.com/hunterhogan/mapFolding">mapFolding: Create, alter, and optimize algorithms to count meanders, stamp foldings, and map foldings</a>, GitHub repository, 2026.
 %H Joe Sawada and Roy Li, <a href="https://doi.org/10.37236/2404">Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms</a>, The Electronic Journal of Combinatorics, Volume 19 No. 2 (2012), #P43 (16 pages).
 %H Wenlin Zhang and Haobo Ma, <a href="/A400429/a400429.pdf">Semi-meanders with a fixed winding deficit: the third and fourth diagonals of A400429</a>, 2026.
-%F a(n) = T(n,floor(n/2)-2), where T is the triangle A400429.
+%F a(n) = T(n,floor(n/2)-3), where T is the triangle A400429.
 %F More generally, if D_j is the j-th diagonal of A400429, then 2*j is its least index.
-%F For this sequence, j = 3 and 2*j = 6.
-%F D_j(2*j) = a(6) = A005315(j) = A005316(2*j-1).
-%F D_j(2*j+1) = a(7) = A005315(j+1) = A005316(2*j+1) = D_{j+1}(2*j+2) = A400632(8).
+%F For this sequence, j = 4 and 2*j = 8.
+%F D_j(2*j) = a(8) = A005315(j) = A005316(2*j-1).
+%F D_j(2*j+1) = a(9) = A005315(j+1) = A005316(2*j+1) = D_{j+1}(2*j+2) = A400633(10).
+%F a(n) = P(n) + (-1)^n*E(n) + C_3(n) + R_8(n), for n >= 8.
+%F P(n) = (294*n^6 - 60*n^5 - 3895*n^4 - 232300*n^3 - 326739*n^2 + 16955410*n - 48570245)/138240; E(n) = (-5*n^4 + 44*n^3 - 289*n^2 + 358*n + 4473)/3072.
+%F C_3(n) = (4/27)*(n-2), 4/9, or -(4/27)*(n+1), according as n mod 3 is 0, 1, or 2.
+%F R_8(n) = r(n mod 8)/16, where r(0),...,r(7) = 3,-3,5,-1,-5,5,-3,-1.
+%e Row n=12 of A400429 is 1828,5968,3516,810,74,2, corresponding to winding numbers 0,2,4,6,8,10. Since n-8=4, a(12)=3516, which is the fourth-to-last value.
 %Y Fourth diagonal of A400429. Cf. A005315, A005316, A400630, A400631, A400633, A400634, A400635, A400636, A400637, A400638, A400639.
 %K nonn,new
-%O 6
-
+%O 8,1
+%A _Hunter Hogan_, Oct 14 2026
