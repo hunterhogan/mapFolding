@@ -87,7 +87,7 @@ OEIS metadata and b-files are loaded when the metadata module is imported. Local
 The package includes several approaches to the same combinatorial problems:
 
 - **Map folding:** insertion-search algorithms derived from Lunnon's work, including variants that apply symmetry restrictions from his theorems.
-- **Meanders:** transfer-matrix counting based on Jensen's approach, with dictionary, NumPy, Pandas, Polars, and pruning variants.
+- **Meanders:** transfer-matrix counting based on Jensen's approach, with dictionary, NumPy, Pandas, and pruning variants.
 - **Permutation generation:** stamp-folding and meander algorithms based on Sawada and Li's work, with experimental bilateral variants.
 - **Elimination:** possible leaf positions, pile assignments, and constraint propagation in `mapFolding._e`.
 
@@ -156,7 +156,6 @@ NumPy and Numba are included in the base dependencies. Optional extras add other
 | Extra         | Purpose                                                                           |
 | ------------- | --------------------------------------------------------------------------------- |
 | `pandas`      | Pandas and Arrow meander implementations                                          |
-| `polars`      | Polars meander implementation                                                     |
 | `codon`       | [Codon](https://docs.exaloop.io/)-compiled jobs on Linux                          |
 | `ortools`     | Experimental constraint propagation; installed only on Python versions below 3.15 |
 | `testing`     | Test dependencies and optional implementations exercised by the tests             |
@@ -165,7 +164,7 @@ NumPy and Numba are included in the base dependencies. Optional extras add other
 For example:
 
 ```console
-pip install "mapFolding[pandas,polars]"
+pip install "mapFolding[pandas]"
 ```
 
 ### Development and supplemental materials
@@ -239,14 +238,13 @@ This is my ongoing to-do list across this package and related projects. It recor
         1. StateMapFolding
         2. Shatter dataclass
         3. ast transformations
-    2. Run 2^8 without a crash or power outage.
-    3. Compute (2, 21), (2, 22), and (3, 15).
 5. Symmetric 1xn
     1. Symmetry algorithm is too slow.
     2. Asynchronous + accelerated doesn't work yet.
 6. Matrix Meanders
-    1. I need a lot more tools in kitAST.
-    2. I hate `getTotalBuckets` but it _should_ be a brilliant function.
+    1. Polars is completely broken. Start over.
+    2. I need a lot more tools in kitAST.
+    3. I hate `getTotalBuckets` but it _should_ be a brilliant function.
 7. Permutations
     1. The base algorithm is a dumpster fire.
     2. Bilateral concurrent can't produce a folding, but uses too much memory and is too slow to count folds.

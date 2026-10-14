@@ -278,7 +278,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 def countMeanders(
 	kind: Literal['closed', 'meanders', 'semi'] | LiteralString | None = None
 	, n: int | None = None
-	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'matrixPolars', 'prune', 'pruneNumPy', 'prunePandas'] | LiteralString | None = None
+	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'] | LiteralString | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, state: StateMeanders | None = None
@@ -306,7 +306,7 @@ def countMeanders(
 		transformed index `2 * n - 1`; other values are forwarded as the state family.
 	n : int | None = None
 		Sequence index when `state` is absent. This function does not validate the index range.
-	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'matrixPolars', 'prune', 'pruneNumPy', 'prunePandas'] | LiteralString | None = None
+	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'] | LiteralString | None = None
 		Counting implementation. Pruning variants use known diagonal contributions. `None`,
 		`'matrixMeanders'`, and unrecognized values select the source transfer algorithm.
 	pathLikeWrite : PathLike[str] | None = None
@@ -379,8 +379,6 @@ def countMeanders(
 				from mapFolding.algorithms.matrixMeandersNumPy import doTheNeedful
 			case 'matrixPandas':
 				from mapFolding.algorithms.matrixMeandersPandas import doTheNeedful
-			case 'matrixPolars':
-				from mapFolding.algorithms.matrixMeandersPolars import doTheNeedful
 			case 'matrixMeanders' | _:
 				from mapFolding.algorithms.matrixMeanders import doTheNeedful
 

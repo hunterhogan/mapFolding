@@ -94,7 +94,7 @@ def test_countFoldsSymmetric(n: int, flow: LiteralString, CPUlimit: float) -> No
 
 @pytest.mark.parametrize('n, flow, kind', (
 	*[pytest.param(n, flow, kind, id=f'{flow}-{kind}-{n}') for flow, kind, n in CartesianProduct(
-			('matrixMeanders', 'matrixPandas', 'matrixNumPy', 'matrixPolars')
+			('matrixMeanders', 'matrixPandas', 'matrixNumPy')
 			, ('semi', 'meanders')
 			, (1, 2, 3, 11, 20, 30))
 	]
@@ -112,8 +112,6 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString, monkeypatch:
 	state = countMeanders(kind, n, flow, None)
 	actual: int = state.totalMeanders
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
-	if flow == 'matrixPolars':
-		assert not any(tmp_path.glob('matrixMeandersPolars_n*_boundary*_*.arrow'))
 
 @pytest.mark.parametrize('mapShape', [pytest.param((2, 4), id='p2x4')])
 def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Path) -> None:

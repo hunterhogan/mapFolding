@@ -1,4 +1,3 @@
-#=SIN= Type-checker suppression: the IDE-selected flow remains a literal until the user edits it.
 # pyright: reportUnnecessaryComparison=false
 from __future__ import annotations
 
@@ -17,7 +16,7 @@ from research.matrixMeanders.infoBooth import makePathFilenameDiagonal, pathFile
 from tqdm.auto import tqdm
 
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
-	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal), flow='matrixPolars')
+	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
 	writeDiagonal({n: state.totalMeanders}, makePathFilenameDiagonal(次diagonal), 次diagonal, append=True)
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:

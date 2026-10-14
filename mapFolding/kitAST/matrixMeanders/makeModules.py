@@ -12,8 +12,6 @@ Functions
 		Regenerate the configured matrix-meander counting variants and shared modules.
 	makeNumPyChopItUp
 		Write a NumPy counting variant with selected control flow removed.
-	makePolarsWide
-		Write an integer-width predicate for the Polars meander implementation.
 	makePrune
 		Write a meander counting variant with state-pruning assignments.
 	makePruneNumPy
@@ -122,80 +120,6 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=名Module)
 
-	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
-
-def makePolarsWide(identifiers: Default | None = None) -> PurePath:
-	"""Write an integer-width predicate for the Polars meander implementation.
-
-	(AI generated docstring)
-
-	You can use this function to generate a predicate that checks whether projected meander
-	counts need more than 128 bits for Polars [1]. The generated function uses the state bit width
-	and either an explicit maximum count or the maximum value in the state lookup.
-	The generator writes a Python module and returns the writer path.
-
-	Generated Predicate
-	-------------------
-	The predicate compares 128 with the greater of the state bit width plus two and the bit
-	length of the maximum count multiplied by the state bit width plus two. The comparison is
-	strict. An empty lookup needs an explicit maximum count because `max` has no fallback value.
-
-	Parameters
-	----------
-	identifiers : Default | None = None
-		Package, state-identifier, and logical-path defaults; a falsy value selects matrix-meander
-		defaults.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Path to the generated `polarsWide` module.
-
-	Examples
-	--------
-	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
-
-		```python
-		makePolarsWide(defaultMatrixMeanders)
-		```
-
-	References
-	----------
-	[1] Polars integer datatypes.
-		https://docs.pola.rs/api/python/stable/reference/datatypes.html
-	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
-	"""
-	identifiers = identifiers or defaultMatrixMeanders
-	名Package: str = identifiers['module']['package']
-	名Module: str = 'polarsWide'
-	名DataclassInstance: str = identifiers['variable']['stateInstance']
-	名MeandersMaximum: str = 'meandersMaximum'
-	astState: ast.expr = Make.Name(名DataclassInstance)
-	astMeandersMaximum: ast.expr = Make.Name(名MeandersMaximum)
-	astBitWidth: ast.expr = Make.Attribute(astState, 'bitWidth')
-	astLookupValues: ast.expr = Make.Call(Make.Attribute(Make.Attribute(astState, 'lookupMeanders'), 'values'))
-	astProjectedMeanders: ast.expr = Make.Mult.join([
-		astMeandersMaximum, Make.Add.join([astBitWidth, Make.Constant(2)])])
-	astMaximumBitWidth: ast.expr = Make.Call(Make.Name('max'), [
-		Make.Add.join([astBitWidth, Make.Constant(2)])
-		, Make.Call(Make.Attribute(astProjectedMeanders, 'bit_length'))])
-	astFunctionDef: ast.FunctionDef = Make.FunctionDef('integersWidePolars吗'
-		, argumentSpecification=Make.arguments(list_arg=[
-			Make.arg(名DataclassInstance, Make.Name('StateMeanders'))
-			, Make.arg(名MeandersMaximum, Make.BitOr.join([Make.Name('int'), Make.Constant(None)]))
-		], defaults=[Make.Constant(None)])
-		, body=[
-			Make.If(Make.Compare(astMeandersMaximum, [Make.Is()], [Make.Constant(None)])
-				, [Make.Assign([Make.Name(名MeandersMaximum, Make.Store())]
-					, Make.Call(Make.Name('max'), [astLookupValues]))])
-			, Make.Return(Make.Compare(Make.Constant(128), [Make.Lt()], [astMaximumBitWidth]))
-		]
-		, returns=Make.Name('bool'))
-	astModule: ast.Module = Make.Module([
-		Make.ImportFrom('__future__', [Make.alias('annotations')])
-		, Make.ImportFrom('mapFolding.dataBaskets', [Make.alias('StateMeanders')])
-		, astFunctionDef])
-	pathFilename: PurePath = getPathFilename(logicalPathInfix=identifiers['logicalPath']['synthetic'], identifierModule=名Module)
 	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
 
 def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
@@ -619,8 +543,8 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 def makeModulesMeanders() -> None:
 	"""Regenerate the configured matrix-meander counting variants and shared modules.
 
-	You can use this function to write width-guarded counting, the Polars width predicate,
-	state pruning, array pruning, dataframe pruning, and the compiled shared Dyck-path function.
+	You can use this function to write width-guarded counting, state pruning, array pruning,
+	dataframe pruning, and the compiled shared Dyck-path function.
 	Generation uses `mapFolding.kitAST.theSSOT.defaultMatrixMeanders` [1]. Dependent variants
 	load preceding generated files. The function writes the configured output modules.
 
@@ -639,10 +563,6 @@ def makeModulesMeanders() -> None:
 	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
 	"""
 	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makePolarsWide(defaultMatrixMeanders)
-	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders
-		, 名Module='bigIntPolars', 名ModuleBigIntTest='polarsWide', 名CallableBigIntTest='integersWidePolars吗'
-		, logicalPathAlgorithm=defaultMatrixMeanders['logicalPath']['synthetic'])
 	makePrune(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
 	makeCountBigInt(getModule(defaultMatrixMeanders['module']['prune'], defaultMatrixMeanders['logicalPath']['synthetic']
 		, identifiers=defaultMatrixMeanders), defaultMatrixMeanders, 名Module=defaultMatrixMeanders['module']['pruneBigInt'])

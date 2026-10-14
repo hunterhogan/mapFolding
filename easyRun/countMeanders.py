@@ -1,9 +1,7 @@
 # pyright: reportUnnecessaryComparison=false
 from __future__ import annotations
 
-from mapFolding.algorithms.matrixMeandersShare import prune
 from mapFolding.basecamp import countMeanders
-from mapFolding.dataBaskets import StateMeanders
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
@@ -14,6 +12,7 @@ import time
 import warnings
 
 if TYPE_CHECKING:
+	from mapFolding.dataBaskets import StateMeanders
 	from os import PathLike
 	from typing import LiteralString
 
@@ -29,7 +28,6 @@ if __name__ == '__main__':
 	flow = 'matrixMeanders'
 	flow = 'prune'
 	flow = 'matrixNumPy'
-	flow = 'matrixPolars'
 	flow = 'prunePandas'
 	flow = 'pruneNumPy'
 
@@ -54,11 +52,7 @@ if __name__ == '__main__':
 
 		for n in boxOf_n:
 			timeStart: float = time.perf_counter()
-			if flow == 'matrixPolars':
-				state = StateMeanders(n, kind)
-				state = prune(state)
-			else:
-				state = None
+			state = None
 
 			state = countMeanders(kind, n, flow, pathLikeWrite, state=state)
 			gc.collect()

@@ -2,17 +2,15 @@
 
 (AI generated docstring)
 
-You can use this module to allocate NumPy arrays [1], construct folding connection graphs, select
-Polars integer datatypes [2], and organize integer sequences into rows or diagonals. Parsing
-functions read comma-separated records through the Python `csv` module [3].
+You can use this module to allocate NumPy arrays [1], construct folding connection graphs, and
+organize integer sequences into rows or diagonals. Parsing functions read comma-separated records
+through the Python `csv` module [2].
 
 Contents
 --------
 Functions
 	getConnectionGraph
 		Construct a connection graph with the requested integer datatype.
-	getDatatypePolars
-		Select an unsigned Polars datatype for a requested bit width.
 	makeDataContainer
 		Allocate storage through a replaceable allocation interface.
 	makeLookupDiagonal
@@ -34,9 +32,7 @@ References
 ----------
 [1] NumPy reference.
 	https://numpy.org/doc/stable/reference/index.html
-[2] Polars datatype reference.
-	https://docs.pola.rs/api/python/stable/reference/datatypes.html
-[3] Python `csv` module.
+[2] Python `csv` module.
 	https://docs.python.org/3/library/csv.html
 """
 from __future__ import annotations
@@ -53,64 +49,9 @@ import numpy
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Mapping, Sequence
-	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger, 形PolarsInteger
+	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger
 	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
 	from typing import Any, Literal
-
-def getDatatypePolars(bitWidth: int) -> 形PolarsInteger:
-	"""Select an unsigned integer datatype from the requested `bitWidth`.
-
-	(AI generated docstring)
-
-	You can use this function to choose a Polars datatype class [1] for fixed-width unsigned storage.
-	This function selects the smallest supported width up to 64 bits and selects 128 bits for every
-	larger request.
-
-	Width Limits
-	------------
-	Requests greater than 128 still return `UInt128`. This function does not check whether the
-	selected datatype can represent the requested width.
-
-	Parameters
-	----------
-	bitWidth : int
-		Requested number of bits. Requests no greater than eight, including nonpositive requests,
-		select the 8-bit datatype.
-
-	Returns
-	-------
-	datatype : 形PolarsInteger
-		`UInt8`, `UInt16`, `UInt32`, `UInt64`, or `UInt128` at successive width thresholds.
-
-	Examples
-	--------
-	`mapFolding.algorithms.matrixMeandersPolars` [2] selects storage from the state bit width.
-
-		```python
-		getDatatypePolars(state.bitWidth)
-		```
-
-	References
-	----------
-	[1] Polars datatype reference.
-		https://docs.pola.rs/api/python/stable/reference/datatypes.html
-	[2] `mapFolding.algorithms.matrixMeandersPolars`
-
-	"""
-	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
-	import polars
-
-	if bitWidth <= 8:
-		datatype = polars.UInt8
-	elif bitWidth <= 16:
-		datatype = polars.UInt16
-	elif bitWidth <= 32:
-		datatype = polars.UInt32
-	elif bitWidth <= 64:
-		datatype = polars.UInt64
-	else:
-		datatype = polars.UInt128
-	return datatype
 
 def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Construct the map connection graph and cast its elements to `datatype`.

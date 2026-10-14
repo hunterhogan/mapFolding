@@ -3,20 +3,17 @@
 from __future__ import annotations
 
 from mapFolding import kitFilesystem
-from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
 from mapFolding.oeis import byFormula, getValuesKnown, oeisIDsImplemented
 from typing import TYPE_CHECKING
 import numpy
-import polars
 import pytest
 import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Generator
+	from collections.abc import Callable
 	from hunterMakesPy import CallableFunction
 	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
-	from mapFolding.kitFilesystem import _PolarsMaterializer
 	from numpy.typing import NDArray
 	from pathlib import Path
 	from pytest import FixtureRequest
@@ -47,25 +44,6 @@ def rtol(request: FixtureRequest) -> float:
 #======== Filesystem isolation =====================================
 
 @pytest.fixture
-def dataframe(request: pytest.FixtureRequest) -> polars.LazyFrame:
-	if isinstance(request.param, polars.LazyFrame):
-		dataframe: polars.LazyFrame = request.param
-	else:
-		dataframe = polars.concat(request.param).lazy()
-	return dataframe
-
-@pytest.fixture
-def materializePolars(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Generator[_PolarsMaterializer]:
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
-	with kitFilesystem.storePolars('arcCode') as materializePolars:
-		yield materializePolars
-
-@pytest.fixture
-def state(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> StateMeanders:
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
-	return StateMeanders(request.param[0], request.param[1], lookupMeanders=request.param[2].copy())
-
-@pytest.fixture
 def pathRootJobDEFAULTTesting(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
 	pathRootJobDEFAULT: Path = tmp_path / 'jobs'
 	pathRootJobDEFAULT.mkdir()
@@ -85,7 +63,6 @@ def expected(oeisID: OEISid, n: int) -> int:
 @pytest.fixture
 def keywordArguments(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 形KeywordArgumentsCount:
 	monkeypatch.chdir(tmp_path)
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
 	keywordArguments: 形KeywordArgumentsCount = {}
 	if request.param is not None:
 		keywordArguments['flow'] = request.param

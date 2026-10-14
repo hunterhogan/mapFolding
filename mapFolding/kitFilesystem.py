@@ -4,17 +4,11 @@
 (AI generated docstring)
 
 You can use this module to persist counts, albums, integer triangles, and diagonals. This module
-also manages temporary storage for Polars computations and retrieves cached text from URLs.
+also retrieves cached text from URLs.
 
 Contents
 --------
-Storage root
-	pathPolarsDataFrame
-		Select the root for temporary Polars storage.
 Functions
-	Temporary Polars storage
-		storePolars
-			Materialize successive lazy computations within a temporary-storage context.
 	Create paths and filenames
 		getPathRootJobDEFAULT
 			Create the default job directory.
@@ -67,7 +61,7 @@ Functions
 """
 from __future__ import annotations
 
-from contextlib import contextmanager, ExitStack, suppress
+from contextlib import suppress
 from csv import writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
@@ -79,7 +73,6 @@ from mapFolding.theSSOT import settingsPackage
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
-from tempfile import TemporaryDirectory
 from typing import TYPE_CHECKING
 from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
@@ -88,135 +81,14 @@ import os
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Callable, Generator, Iterable, Mapping
+	from collections.abc import Callable, Iterable, Mapping
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
 	from mapFolding.theTypes import Folding, 形ArrayArcCode, 形Triangle
 	from os import PathLike
 	from pandas import DataFrame
-	from typing import Any, Literal, Protocol
+	from typing import Any, Literal
 	from urllib3.response import BaseHTTPResponse
-	import polars
-
-	class _PolarsMaterializer(Protocol):
-		def __call__(self, dataframe: polars.LazyFrame,
-			aggregation: polars.Expr | tuple[polars.Expr, ...] | None = None, *, append: bool = False) -> polars.LazyFrame: ...
-
-pathPolarsDataFrame: Path = Path.cwd()
-"""Select the root directory for temporary Polars materializations.
-
-(AI generated docstring)
-
-This value captures the working directory when the module is imported. `storePolars` [1] reads
-the current value when creating temporary files. Callers can replace this value with an existing
-directory before entering the context.
-
-References
-----------
-[1] `storePolars`
-
-"""
-
-@contextmanager
-def storePolars(group_by: str | None = None) -> Generator[_PolarsMaterializer]:
-	"""Materialize lazy computations within a temporary-storage context.
-
-	(AI generated docstring)
-
-	You can use this context manager to save successive Polars lazy computations [1] to temporary
-	files and receive a callable that returns a lazy scan of the saved result. The context removes its
-	temporary files when the context exits.
-
-	Temporary Files
-	---------------
-	Files are written under `pathPolarsDataFrame` [2] in Parquet format [3]. The root directory must
-	already exist. Polars aggregates and sorts each contribution. With `append=True`, Polars merges
-	the contribution into the sorted saved result and aggregates matching keys. Each call streams the
-	result to one Parquet file and returns a lazy scan.
-
-	A call with `append=False` starts a generation and retains the preceding generation as its source.
-	Calls with `append=True` replace only the accumulated result, preserving that source for further
-	contributions. Starting another generation removes the older source. Consume returned scans before
-	their generation is removed or the context exits. Grouped results are sorted by `group_by`.
-	Cleanup also runs if the body of the context raises an error.
-
-	Parameters
-	----------
-	group_by : str | None = None
-		Grouping column. A column name and aggregation expression combines rows. `None` saves each
-		supplied frame directly.
-
-	Yields
-	------
-	materializePolars : _PolarsMaterializer
-		Callable accepting a lazy frame and optional aggregation expressions, and returning a lazy
-		scan of the saved result. Supply aggregation expressions when `group_by` is set. Use `append=True`
-		to merge another contribution into the generation; this requires `group_by` and a saved result.
-
-	Examples
-	--------
-	`mapFolding.algorithms.matrixMeandersPolars.count` [4] aggregates contributions by arch code.
-
-	```python
-	with storePolars(group_by='arcCode') as materializePolars:
-		dataframeMeanders = transition(
-			dataframeMeanders, state.bitsLocator, state.arcCodeMAXIMUM, state.bitWidth, materializePolars,
-			polars.col('meanders').cast(datatypeMeanders).sum().cast(datatypeMeanders)
-		)
-	```
-
-	The algorithm consumes each resulting frame within the context before cleanup.
-
-	References
-	----------
-	[1] Polars lazy-frame reference.
-		https://docs.pola.rs/api/python/stable/reference/lazyframe/index.html
-	[2] `pathPolarsDataFrame`
-
-	[3] Apache Parquet file format.
-		https://parquet.apache.org/docs/file-format/
-	[4] `mapFolding.algorithms.matrixMeandersPolars.count`
-
-	"""
-	#ruff: ignore[import-outside-top-level] #=SIN= Polars is optional.
-	import polars
-
-	storagePolars: ExitStack | None = None
-	storagePredecessor: ExitStack | None = None
-	dataframeStored: polars.LazyFrame | None = None
-
-	def materializePolars(dataframe: polars.LazyFrame,
-		aggregation: polars.Expr | tuple[polars.Expr, ...] | None = None, *, append: bool = False) -> polars.LazyFrame:
-		nonlocal dataframeStored, storagePolars, storagePredecessor
-		if group_by is not None:
-			dataframe = dataframe.sort(group_by, maintain_order=True).group_by(group_by, maintain_order=True).agg(aggregation)
-		if append:
-			key: str = raiseIfNone(group_by)
-			dataframe = raiseIfNone(dataframeStored).merge_sorted(dataframe, key=key).group_by(key, maintain_order=True).agg(aggregation)
-			del key
-		with ExitStack() as storageSuccessor:
-			pathPolarsGeneration: Path = Path(storageSuccessor.enter_context(TemporaryDirectory(prefix='polars_', dir=pathPolarsDataFrame)))
-			dataframe.sink_parquet(pathPolarsGeneration / 'dataframe.parquet', engine='streaming')
-			dataframe = polars.scan_parquet(pathPolarsGeneration / 'dataframe.parquet')
-			if group_by is not None:
-				dataframe = dataframe.set_sorted(group_by)
-			if append:
-				raiseIfNone(storagePolars).close()
-			else:
-				if storagePredecessor is not None:
-					storagePredecessor.close()
-				storagePredecessor = storagePolars
-			storagePolars = storageSuccessor.pop_all()
-			dataframeStored = dataframe
-		return dataframe
-
-	try:
-		yield materializePolars
-	finally:
-		if storagePolars is not None:
-			storagePolars.close()
-		if storagePredecessor is not None:
-			storagePredecessor.close()
 
 # TODO This is not tenable. What is the shape?
 def extendArray(array: 形ArrayArcCode, length: int) -> 形ArrayArcCode:  # ruff: ignore[undocumented-public-function]

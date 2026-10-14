@@ -23,99 +23,19 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from hunterMakesPy import raiseIfNone
-from mapFolding import kitFilesystem
 from mapFolding._e.dataBaskets import StateElimination
-from mapFolding.algorithms.matrixMeandersPolars import alignArcs, doTheNeedful, transition
 from mapFolding.kitFilesystem import (
 	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
-	saveTotal, storePolars)
+	saveTotal)
 from mapFolding.oeis import makeMapShape
-from mapFolding.synthesized.matrixMeanders.polarsWide import integersWidePolars吗
 from mapFolding.tests import assertEqualTo
-from mapFolding.tests.dataSamples.meandersData import (
-	dataframeAligned8, dataframeAligned128, dataframeClosures8, dataframeClosures128, dataframeCountsOverlapping8,
-	dataframeCountsOverlapping128, dataframeCountsMixed6, dataframeNegativeArcCode, dataframePacked6, dataframePacked14, dataframePacked30, dataframePacked62, dataframePackedCount149,
-	dataframePacked126, dataframePackedMixed6, dataframeTransition8, dataframeTransition16, dataframeTransition32, dataframeTransition64,
-	dataframeTransition128, dataframeTransitionMixed6, dataframeUnsigned8Empty, tupleAnalysesNegativeArcCode, tupleDataframesCount298,
-	tupleDataframesEmpty8, tupleDataframesOverlapping8, tupleDataframesOverlapping128)
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
-from polars.testing import assert_frame_equal
-from typing import TYPE_CHECKING
 import io
 import numpy
 import pandas
-import polars
 import pytest
 import unittest.mock
-
-if TYPE_CHECKING:
-	from collections.abc import Callable
-	from mapFolding.dataBaskets import StateMeanders
-	from mapFolding.kitFilesystem import _PolarsMaterializer
-
-@pytest.mark.parametrize(
-	'dataframeMeanders, bitWidthArcCode, 形ArcCode, expected'
-	, (
-	pytest.param(dataframeClosures8.lazy(), 8, polars.UInt8(), dataframeAligned8, id='UInt8-prefixes')
-	, pytest.param(dataframeUnsigned8Empty.lazy(), 2, polars.UInt8(), dataframeUnsigned8Empty, id='two-bit-boundary')
-		, pytest.param(dataframeClosures128.lazy(), 128, polars.UInt128(), dataframeAligned128, id='UInt128-last-bit')
-		, pytest.param(dataframeUnsigned8Empty.lazy(), 8, polars.UInt8(), dataframeUnsigned8Empty, id='empty')
-	)
-)
-def test_alignArcs(dataframeMeanders: polars.LazyFrame, bitWidthArcCode: int, 形ArcCode: polars.DataType, expected: polars.DataFrame) -> None:
-	assert_frame_equal(alignArcs(dataframeMeanders, bitWidthArcCode, 形ArcCode).collect(engine='streaming'), expected)
-
-@pytest.mark.parametrize('aggregation', (polars.col('meanders').sum().cast(polars.UInt8),))
-@pytest.mark.parametrize('analysis', (polars.LazyFrame.clone,))
-@pytest.mark.parametrize(
-	'dataframe, selectorBits, arcCodeMAXIMUM, bitWidthArcCode, expected'
-	, (
-		pytest.param(dataframePacked6.lazy(), 0x15, 1 << 256, 6, dataframeTransition8, id='UInt8')
-		, pytest.param(dataframePacked14.lazy(), 0x1555, 1 << 256, 14, dataframeTransition16, id='UInt16')
-		, pytest.param(dataframePacked30.lazy(), 0x15555555, 1 << 256, 30, dataframeTransition32, id='UInt32')
-		, pytest.param(dataframePacked62.lazy(), 0x1555555555555555, 1 << 256, 62, dataframeTransition64, id='UInt64')
-		, pytest.param(dataframePacked126.lazy(), 0x15555555555555555555555555555555, 1 << 256, 126, dataframeTransition128, id='UInt128')
-		, pytest.param(dataframePacked6.lazy(), 0x15, 256, 6, dataframeTransition8, id='exclusive-dtype-bound')
-		, pytest.param(dataframePackedMixed6.lazy(), 0x15, 16, 6, dataframeCountsMixed6, id='prune-before-shift')
-		, pytest.param(dataframePacked6.lazy(), 0x15, 16, 6, dataframeUnsigned8Empty, id='no-completions')
-		, pytest.param(dataframeUnsigned8Empty.lazy(), 0x15, 256, 6, dataframeUnsigned8Empty, id='empty-source')
-	)
-)
-def test_transition(
-	dataframe: polars.LazyFrame, selectorBits: int, arcCodeMAXIMUM: int, bitWidthArcCode: int, materializePolars: _PolarsMaterializer,
-	aggregation: polars.Expr, analysis: Callable[[polars.LazyFrame], polars.LazyFrame], expected: polars.DataFrame
-) -> None:
-	assert_frame_equal(transition(dataframe, selectorBits, arcCodeMAXIMUM, bitWidthArcCode, materializePolars, aggregation
-		, analysis=analysis).collect(engine='streaming'), expected, check_row_order=False)
-
-@pytest.mark.parametrize(
-	'state, expected'
-	, (
-		pytest.param((3, 'meanders', {15: (1 << 8) - 1}), {15: 510}, id='UInt8-count')
-		, pytest.param((3, 'meanders', {15: (1 << 16) - 1}), {15: 131070}, id='UInt16-count')
-		, pytest.param((3, 'meanders', {15: (1 << 32) - 1}), {15: 8589934590}, id='UInt32-count')
-		, pytest.param((3, 'meanders', {15: (1 << 64) - 1}), {15: 36893488147419103230}, id='UInt64-count')
-		, pytest.param((3, 'meanders', {15: (1 << 128) - 1}), {15: 680564733841876926926749214863536422910}, id='big-integer-count')
-	)
-	, indirect=['state']
-)
-def test_doTheNeedful(state: StateMeanders, expected: dict[int, int], tmp_path: Path) -> None:
-	state = doTheNeedful(state)
-	assert state.boundary == 0, f'{state.boundary=}'
-	assert state.lookupMeanders == expected, f'{state.lookupMeanders=}, {expected=}'
-	assert tuple(tmp_path.iterdir()) == (), f'{tuple(tmp_path.iterdir())=}'
-
-@pytest.mark.parametrize('state, meandersMaximum, expected', (
-	pytest.param((3, 'meanders', {15: 7}), 1 << 125, False, id='128-bit-subtotal')
-	, pytest.param((3, 'meanders', {15: 7}), 1 << 126, True, id='129-bit-subtotal')
-	, pytest.param((65, 'semi', {(1 << 126) - 1: 7}), 7, False, id='128-bit-transition')
-	, pytest.param((65, 'semi', {(1 << 127) - 1: 7}), 7, True, id='129-bit-transition')
-	, pytest.param((3, 'meanders', {15: 7}), None, False, id='dictionary-subtotal')
-	, pytest.param((3, 'meanders', {15: 1 << 126}), None, True, id='dictionary-wide-subtotal')
-), indirect=['state'])
-def test_integersWidePolars吗(state: StateMeanders, meandersMaximum: int | None, expected: bool) -> None:
-	assert integersWidePolars吗(state, meandersMaximum) == expected, f'{meandersMaximum=}, {expected=}'
 
 @pytest.mark.parametrize(
 	'totalDimensions, suffix, expected'
@@ -189,82 +109,3 @@ def test_getPathFilenameTotalFolds_createsDirs(mapShape: tuple[int, ...], pathRo
 	pathFilenameTotalFolds: Path = makePathFilenameFolds(mapShape, pathLikeWrite=pathFilenameNested)
 	assertEqualTo(pathFilenameTotalFolds.parent.exists(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=pathFilenameNested)
 	assertEqualTo(pathFilenameTotalFolds.parent.is_dir(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=pathFilenameNested)
-
-@pytest.mark.parametrize('group_by, dataframe, expected', (
-	pytest.param(None, dataframePacked6.lazy(), dataframePacked6, id='UInt8-ungrouped')
-	, pytest.param('arcCode', dataframePacked6.lazy(), dataframePacked6, id='UInt8-grouped')
-	, pytest.param(None, dataframeTransition128.lazy(), dataframeTransition128, id='UInt128-ungrouped')
-	, pytest.param('arcCode', dataframeTransition128.lazy(), dataframeTransition128, id='UInt128-grouped')
-	, pytest.param(None, dataframeUnsigned8Empty.lazy(), dataframeUnsigned8Empty, id='empty-ungrouped')
-	, pytest.param('arcCode', dataframeUnsigned8Empty.lazy(), dataframeUnsigned8Empty, id='empty-grouped')
-	, pytest.param('arcCode', tupleDataframesOverlapping8, dataframeCountsOverlapping8, id='analyses-duplicates-and-empty')
-	, pytest.param('arcCode', tupleDataframesOverlapping128, dataframeCountsOverlapping128, id='analyses-UInt128')
-	, pytest.param('arcCode', tupleDataframesEmpty8, dataframeUnsigned8Empty, id='analyses-empty')
-), indirect=['dataframe'])
-def test_storePolars(group_by: str | None, dataframe: polars.LazyFrame, expected: polars.DataFrame,
-	monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
-	with storePolars(group_by) as materializePolars:
-		dataframeMaterialized: polars.LazyFrame = materializePolars(dataframe, polars.col('meanders').sum().cast(polars.UInt8))
-		dataframeFiltered: polars.LazyFrame = dataframeMaterialized.filter(polars.col('arcCode') > 3)
-		assert_frame_equal(dataframeFiltered.collect(engine='streaming'), expected, check_row_order=False)
-		assert len(tuple(tmp_path.iterdir())) == 1, f'{tuple(tmp_path.iterdir())=}'
-		if group_by is not None:
-			assert dataframeMaterialized.collect(engine='streaming').get_column(group_by).is_sorted(), f'{group_by=}'
-		dataframeMaterialized = materializePolars(dataframeFiltered, polars.col('meanders').sum().cast(polars.UInt8))
-		assert_frame_equal(dataframeMaterialized.filter(polars.col('arcCode') > 3).collect(engine='streaming'), expected, check_row_order=False)
-		assert len(tuple(tmp_path.iterdir())) == 2, f'{tuple(tmp_path.iterdir())=}'
-		assert_frame_equal(dataframeFiltered.collect(engine='streaming'), expected, check_row_order=False)
-	assert tuple(tmp_path.iterdir()) == (), f'{tuple(tmp_path.iterdir())=}'
-
-@pytest.mark.parametrize('append', (True,))
-@pytest.mark.parametrize('aggregation', (polars.col('meanders').sum().cast(polars.UInt8),))
-@pytest.mark.parametrize('dataframe, dataframeAnalysis, expected', (
-	pytest.param(dataframePackedMixed6.lazy(), dataframeTransitionMixed6.lazy(), dataframeCountsOverlapping8, id='overlapping-UInt8')
-	, pytest.param(dataframePacked126.lazy(), dataframeTransition128.lazy(), dataframeCountsOverlapping128, id='overlapping-UInt128')
-))
-def test_materializePolars(dataframe: polars.LazyFrame, aggregation: polars.Expr, append: bool, expected: polars.DataFrame,
-	dataframeAnalysis: polars.LazyFrame, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
-	with storePolars('arcCode') as materializePolars:
-		dataframeSource: polars.LazyFrame = materializePolars(dataframe, aggregation)
-		materializePolars(dataframeSource, aggregation)
-		materializePolars(dataframeAnalysis, aggregation, append=append)
-		dataframeMerged: polars.LazyFrame = materializePolars(dataframeSource, aggregation, append=append)
-		assert_frame_equal(dataframeMerged.collect(engine='streaming'), expected, check_row_order=False)
-		assert_frame_equal(dataframeSource.collect(engine='streaming'), dataframe.collect(engine='streaming'), check_row_order=False)
-		assert len(tuple(tmp_path.iterdir())) == 2, f'{tuple(tmp_path.iterdir())=}'
-	assert tuple(tmp_path.iterdir()) == (), f'{tuple(tmp_path.iterdir())=}'
-
-@pytest.mark.parametrize('append', (True,))
-@pytest.mark.parametrize('aggregation', (polars.col('meanders').sum().cast(polars.UInt8),))
-@pytest.mark.parametrize('dataframe, expected', (
-	pytest.param(dataframeNegativeArcCode, polars.exceptions.InvalidOperationError, id='contribution-cast')
-	, pytest.param(dataframePackedCount149.lazy(), polars.exceptions.InvalidOperationError, id='merged-count-overflow')
-))
-def test_materializePolarsError(dataframe: polars.LazyFrame, aggregation: polars.Expr, append: bool, expected: type[Exception],
-	monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
-	with storePolars('arcCode') as materializePolars:
-		dataframeSource: polars.LazyFrame = materializePolars(dataframePackedCount149.lazy(), aggregation)
-		dataframeStored: polars.LazyFrame = materializePolars(dataframeSource, aggregation)
-		with pytest.raises(expected):
-			materializePolars(dataframe, aggregation, append=append)
-		assert_frame_equal(dataframeSource.collect(engine='streaming'), dataframePackedCount149)
-		assert_frame_equal(dataframeStored.collect(engine='streaming'), dataframePackedCount149)
-		assert len(tuple(tmp_path.iterdir())) == 2, f'{tuple(tmp_path.iterdir())=}'
-	assert tuple(tmp_path.iterdir()) == (), f'{tuple(tmp_path.iterdir())=}'
-
-@pytest.mark.parametrize('group_by, dataframe, expected', (
-	pytest.param(None, dataframeNegativeArcCode, polars.exceptions.InvalidOperationError, id='ungrouped-cast')
-	, pytest.param('arcCode', dataframeNegativeArcCode, polars.exceptions.InvalidOperationError, id='grouped-cast')
-	, pytest.param('arcCode', tupleAnalysesNegativeArcCode, polars.exceptions.InvalidOperationError, id='analysis-cast')
-	, pytest.param('arcCode', tupleDataframesCount298, polars.exceptions.InvalidOperationError, id='merge-overflow')
-), indirect=['dataframe'])
-def test_storePolarsError(group_by: str | None, dataframe: polars.LazyFrame, expected: type[Exception],
-	monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-	monkeypatch.setattr(kitFilesystem, 'pathPolarsDataFrame', tmp_path)
-	with pytest.raises(expected), storePolars(group_by) as materializePolars:
-		materializePolars(dataframePacked6.lazy(), polars.col('meanders').sum().cast(polars.UInt8))
-		materializePolars(dataframe, polars.col('meanders').sum().cast(polars.UInt8))
-	assert tuple(tmp_path.iterdir()) == (), f'{tuple(tmp_path.iterdir())=}'

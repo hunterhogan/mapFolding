@@ -2,7 +2,7 @@
 
 You can use this module to annotate domain values and select integer storage for counting
 algorithms. Type aliases describe intended roles; type aliases do not validate values at runtime.
-Array aliases use NumPy [1], and the unsigned datatype-class alias uses Polars [2].
+Array aliases use NumPy [1].
 
 Contents
 --------
@@ -43,8 +43,6 @@ Matrix meanders
 		Describe a one-axis arch-code array.
 	形Meanders
 		Select unsigned 64-bit storage for meander counts.
-	形PolarsInteger
-		Describe supported unsigned Polars datatype classes.
 Domain integer aliases
 	形Elephino
 		Annotate intermediate offsets.
@@ -81,8 +79,6 @@ References
 ----------
 [1] NumPy reference.
 	https://numpy.org/doc/stable/reference/index.html
-[2] Polars datatype reference.
-	https://docs.pola.rs/api/python/stable/reference/datatypes.html
 """
 from __future__ import annotations
 
@@ -96,7 +92,6 @@ if TYPE_CHECKING:
 	from os import PathLike
 	from pathlib import PurePosixPath
 	from typing import Any, LiteralString, TypeAlias
-	import polars
 
 #=EndNotes##TypeAlias=
 Leaf: TypeAlias = int
@@ -307,20 +302,6 @@ References
 	https://numpy.org/doc/stable/reference/index.html
 [2] `形ArcCode`
 
-"""
-
-type 形PolarsInteger = type[polars.UInt8 | polars.UInt16 | polars.UInt32 | polars.UInt64 | polars.UInt128]
-"""Describe unsigned Polars integer datatype classes.
-
-(AI generated docstring)
-
-This alias includes `polars.UInt8`, `polars.UInt16`, `polars.UInt32`, `polars.UInt64`, and
-`polars.UInt128` [1]. Values of this type are datatype classes, rather than stored integers.
-
-References
-----------
-[1] Polars datatype reference.
-	https://docs.pola.rs/api/python/stable/reference/datatypes.html
 """
 
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
