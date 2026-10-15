@@ -2,6 +2,7 @@
 Abelian
 addopts
 Adham
+aefrvkyjbnbknjyerwfgvvbnjkyetwrsgjbynketwrg
 Afunction
 aggfunc
 Aichholzer
@@ -54,6 +55,7 @@ boolop
 boundscheck
 bsgs
 bsolute
+byugknykugnkuytnbvktvyubknutybvknutyvnkyutgvbnkyugvnuykbmv
 CAPSLOCK
 carmichaels
 Cassio
@@ -69,7 +71,10 @@ Chevauchements
 chil
 Chilton
 chunksize
+cjtrbycjrbtycrtbyvjbctbcjtyrvbcthrj
 Claudes
+clikuhnm
+clkuihfcmnlw
 cmap
 cmpop
 coeffs
@@ -121,6 +126,7 @@ Dunder
 dups
 Dyck
 Ecompacted
+egkrasquhnertv
 Eick
 Elephino
 elim
@@ -227,12 +233,16 @@ jitclass
 jitted
 joeis
 juxt
+jynvtjvyntbjtvyhnbjytvbnjbyntvjybvtnjytbvn
 Kaboozle
 Kahlo
 Kaseorg
+kbjngyknbjygkyjnbkynbujnykbjuyuknbkyunb
 keyfilter
+klbminyukmlbyuknubymnukybmknuybknubynhk
 Koehler
 Kplus
+kvbnutnkvutybnkutvbkntuvybkntuvtu
 kwarguments
 kwatatype
 kwonlyargs
@@ -307,6 +317,7 @@ nilpotent
 nishat
 niversal
 njit
+nkbuymknbuykbuynknbyuknbyukbnuyknuby
 nmax
 nogil
 nomnom
@@ -322,6 +333,7 @@ noqa
 Nout
 ntheory
 nthroot
+ntjyvghtvyhjnbmvhtjvthyhtyjvnbyvbjtnjytbnv
 Nucl
 nuitka
 numba
@@ -408,6 +420,7 @@ pyproject
 pytastic
 pythonapi
 PYTHONIOENCODING
+qlaefgrw
 quasipolynomiality
 Quizas
 randint
@@ -500,6 +513,7 @@ udivisors
 ufunc
 Ufunc
 uintp
+umby
 unaryop
 uncompiled
 unliteral
@@ -523,12 +537,17 @@ vararg
 VEECH
 Villars
 visualised
+vjtbnyjtvbnyjvtynjvtbynjtyvbnjvtybnj
 Vlamos
 voidptr
 vtail
+vytnbjytvjbnjvtybnjvbtnyhjbvytjvtbyrjtbyvb
+wanbku
 Weisstein's
 Wenlin
 Wextra
+wfikuhertgs
+wgkluhk
 withitem
 wocky
 Xand
@@ -540,6 +559,7 @@ Xxor
 yada
 yapf
 yeong
+yjtbnivvytbnjyvjtnbjvytnjyvntjyntv
 ylabel
 ZOGRAF
 ZORICH
