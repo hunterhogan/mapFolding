@@ -1,4 +1,4 @@
-"""Describe folding labels, integer storage, array shapes, and configuration records.
+"""Describe arch and folding labels, integer storage, array shapes, and configuration records.
 
 You can use this module to annotate domain values and select integer storage for counting
 algorithms. Type aliases describe intended roles; type aliases do not validate values at runtime.
@@ -7,6 +7,12 @@ Array aliases use NumPy [1].
 Contents
 --------
 Domain labels
+	ArchDiagram
+		Represent endpoint labels indexed by position along the axis.
+	Endpoint
+		Identify an endpoint label.
+	EndpointPosition
+		Identify a position along the diagram axis.
 	Folding
 		Represent leaf labels indexed by pile position.
 	Leaf
@@ -94,6 +100,15 @@ if TYPE_CHECKING:
 	from typing import Any, LiteralString, TypeAlias
 
 #=EndNotes##TypeAlias=
+type Endpoint = int
+"""Identify an endpoint label in an arch diagram."""
+
+type EndpointPosition = int
+"""Identify an endpoint's position along the diagram axis."""
+
+type ArchDiagram = tuple[Endpoint, ...]
+"""Represent an arch diagram as endpoint labels indexed by position along the axis."""
+
 Leaf: TypeAlias = int
 """Identify a leaf in a folding.
 

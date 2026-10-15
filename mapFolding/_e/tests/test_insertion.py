@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from mapFolding._e.algorithms import insertion
-from mapFolding._e.algorithms.iff import foldingValid吗
-from mapFolding.beDRY import getTotalLeaves
+from mapFolding._e.algorithms.iff import foldingValid吗 as diagramValid吗
+from mapFolding.beDRY import getTotalLeaves as getTotalEndpoints
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from typing import TYPE_CHECKING
 
@@ -32,9 +32,9 @@ def test_doTheNeedful(mapShape: tuple[int, ...], CPUlimit: int, expected: int, p
 
 	assert pathFilenameAlbum == makePathFilenameFolds(mapShape, path_tmpTesting, suffix='.album')
 	assert list(path_tmpTesting.iterdir()) == [pathFilenameAlbum]
-	assert len(album) * 2 * getTotalLeaves(mapShape) == expected
+	assert len(album) * 2 * getTotalEndpoints(mapShape) == expected
 	assert len(set(album)) == len(album)
-	assert next(filter(lambda folding: folding[0] != 0 or folding.index(1) >= folding.index(2) or not foldingValid吗(folding, mapShape), album), None) is None
+	assert next(filter(lambda diagram: diagram[0] != 0 or diagram.index(1) >= diagram.index(2) or not diagramValid吗(diagram, mapShape), album), None) is None
 
 
 @pytest.mark.parametrize('mapShape, expected', [

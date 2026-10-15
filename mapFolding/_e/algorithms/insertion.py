@@ -1,16 +1,16 @@
-"""Generate and save folding representatives by inserting leaves.
+"""Generate and save arch-diagram representatives by inserting endpoints.
 
-You can build complete leaf arrangements incrementally and save surviving arrangements as an album.
-You check the creases of each newly inserted leaf.
+You can build endpoint orders incrementally and save surviving diagrams as an album.
+You check the arches of each newly inserted endpoint in every dimension of the supplied map shape.
 
 Contents
 --------
 Functions
 	doTheNeedful
-		Generate a map's folding representatives and write an album.
+		Generate arch-diagram representatives and write an album.
 Output paths
 	pathAlbum
-		Locate the default directory for generated folding albums.
+		Locate the default directory for generated arch-diagram albums.
 """
 
 # DEVELOPMENT module.
@@ -22,10 +22,10 @@ from contextlib import ExitStack
 from functools import partial
 from hunterMakesPy import decreasing
 from itertools import chain
-from mapFolding import leafOrigin, pileOrigin
+from mapFolding import endpointOrigin, positionOrigin
 from mapFolding._e import getMapShapeProducts
-from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves, validateMapShape
+from mapFolding._e.algorithms.iff import creaseViolation吗 as archesCross吗, getCreasePost as getArchPost, oddLeaf吗 as endpointOdd吗
+from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves as getTotalEndpoints, validateMapShape
 from mapFolding.kitFilesystem import makePathFilenameFolds, writeAlbum
 from mapFolding.oeis import getValuesKnown
 from mapFolding.theSSOT import settingsPackage
@@ -36,73 +36,73 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import Folding, Leaf, Pile
+	from mapFolding.theTypes import ArchDiagram, Endpoint, EndpointPosition
 	from pathlib import Path
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / 'research' / 'albums'
-"""Locate the default directory for generated folding albums.
+"""Locate the default directory for generated arch-diagram albums.
 
 (AI generated docstring)
 
 You can locate the research album directory within the package. Use the insertion entry point to
 derive album filenames from the map shape."""
 
-def _makeDescendants(folding: Folding, mapShape: tuple[int, ...]) -> tuple[Folding, ...]:
-	inserting: Iterable[Folding] = map(partial(_insertLeafAtPile, folding, len(folding)), range(len(folding), pileOrigin, decreasing))
-	return tuple(filter(partial(_foldingValid吗, mapShape=mapShape), inserting))
+def _makeDescendants(diagram: ArchDiagram, mapShape: tuple[int, ...]) -> tuple[ArchDiagram, ...]:
+	inserting: Iterable[ArchDiagram] = map(partial(_insertEndpointAt, diagram, len(diagram)), range(len(diagram), positionOrigin, decreasing))
+	return tuple(filter(partial(_archDiagramValid吗, mapShape=mapShape), inserting))
 
-def _insertLeafAtPile(folding: Folding, leaf: Leaf, pile: Pile) -> Folding:
-	return (*folding[:pile], leaf, *folding[pile:])
+def _insertEndpointAt(diagram: ArchDiagram, endpoint: Endpoint, position: EndpointPosition) -> ArchDiagram:
+	return (*diagram[:position], endpoint, *diagram[position:])
 
-def _foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
-	lookupLeafPile: dict[Leaf, Pile] = dict(zip(folding, range(len(folding)), strict=True))
-	leafInserted: Leaf = len(folding) - 1
+def _archDiagramValid吗(diagram: ArchDiagram, mapShape: tuple[int, ...]) -> bool:
+	lookupPosition: dict[Endpoint, EndpointPosition] = dict(zip(diagram, range(len(diagram)), strict=True))
+	endpointInserted: Endpoint = len(diagram) - 1
 	mapShapeProducts: tuple[int, ...] = getMapShapeProducts(mapShape)
 
 	def dimensionValid吗(dimension: int) -> bool:
-		leafCrease: Leaf = leafInserted - mapShapeProducts[dimension]
-		if leafCrease < leafOrigin or getCreasePost(mapShape, leafCrease, dimension) != leafInserted:
+		endpointAnte: Endpoint = endpointInserted - mapShapeProducts[dimension]
+		if endpointAnte < endpointOrigin or getArchPost(mapShape, endpointAnte, dimension) != endpointInserted:
 			return True
 
-		pileCreasePile: tuple[Pile, Pile] = (lookupLeafPile[leafCrease], lookupLeafPile[leafInserted])
-		parityCrease: int = oddLeaf吗(mapShape, leafCrease, dimension)
+		positionsArch: tuple[EndpointPosition, EndpointPosition] = (lookupPosition[endpointAnte], lookupPosition[endpointInserted])
+		archParity: int = endpointOdd吗(mapShape, endpointAnte, dimension)
 
-		def comparandViolates吗(leafComparand: Leaf) -> bool:
-			leafComparandCrease: Leaf | None = getCreasePost(mapShape, leafComparand, dimension)
-			if leafComparandCrease is None or leafComparandCrease >= leafInserted:
+		def comparandViolates吗(endpointComparand: Endpoint) -> bool:
+			endpointPost: Endpoint | None = getArchPost(mapShape, endpointComparand, dimension)
+			if endpointPost is None or endpointPost >= endpointInserted:
 				return False
-			if oddLeaf吗(mapShape, leafComparand, dimension) != parityCrease:
+			if endpointOdd吗(mapShape, endpointComparand, dimension) != archParity:
 				return False
-			pileComparandCreasePile: tuple[Pile, Pile] = (lookupLeafPile[leafComparand], lookupLeafPile[leafComparandCrease])
-			return _creaseViolation吗(pileCreasePile, pileComparandCreasePile)
+			positionsComparand: tuple[EndpointPosition, EndpointPosition] = (lookupPosition[endpointComparand], lookupPosition[endpointPost])
+			return _archesCross吗(positionsArch, positionsComparand)
 
-		return not any(map(comparandViolates吗, range(leafInserted)))
+		return not any(map(comparandViolates吗, range(endpointInserted)))
 
 	return all(map(dimensionValid吗, range(len(mapShape))))
 
-def _creaseViolation吗(pileCreasePile: tuple[Pile, Pile], pileComparandCreasePileComparand: tuple[Pile, Pile]) -> bool:
-	creasesPileSorted: list[tuple[Pile, Pile]] = sorted((pileCreasePile, pileComparandCreasePileComparand))
-	return creaseViolation吗(creasesPileSorted[0][0], creasesPileSorted[1][0], creasesPileSorted[0][1], creasesPileSorted[1][1])
+def _archesCross吗(positionsArch: tuple[EndpointPosition, EndpointPosition], positionsComparand: tuple[EndpointPosition, EndpointPosition]) -> bool:
+	archesSorted: list[tuple[EndpointPosition, EndpointPosition]] = sorted((positionsArch, positionsComparand))
+	return archesCross吗(archesSorted[0][0], archesSorted[1][0], archesSorted[0][1], archesSorted[1][1])
 
 def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -> Path:
-	"""Generate a map's folding representatives and write an album.
+	"""Generate arch-diagram representatives and write an album.
 
 	(AI generated docstring)
 
-	You can insert leaves in index order, retain arrangements whose new creases do not cross existing
-	creases, and save the final arrangements with `mapFolding.kitFilesystem.writeAlbum` [1]. You use the
+	You can insert endpoints in label order, retain diagrams whose new arches do not cross existing
+	arches on the same side of the axis, and save them with `mapFolding.kitFilesystem.writeAlbum` [1]. You use the
 	module's `pathAlbum` [2] as the output directory.
 
 	Representative selection
 	------------------------
-	You keep the origin leaf at pile zero. At insertion depth three, you retain arrangements where leaf
-	one precedes leaf two. You receive an album containing representatives subject to those restrictions,
+	You keep the origin endpoint at position zero. At insertion depth three, you retain diagrams where endpoint
+	one precedes endpoint two. You receive an album containing representatives subject to those restrictions,
 	without a returned count or recorded symmetry multipliers.
 
 	Parameters
 	----------
 	mapShape : tuple[int, ...]
-		Nonempty tuple of nonnegative dimension lengths with at least one leaf.
+		Nonempty tuple of nonnegative dimension lengths defining endpoint connections, with at least one endpoint.
 	CPUlimit : ConcurrencyLimit = None
 		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit` [3]. `None`, `False`, and `0`
 		use available processors; `True` selects one. Positive values limit usage and negative values reserve
@@ -116,13 +116,13 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 	Raises
 	------
 	ValueError
-		If shape validation fails or the map contains zero leaves.
+		If shape validation fails or the diagram contains zero endpoints.
 	FileExistsError
 		If the destination album already exists.
 
 	Examples
 	--------
-	The module's execution block generates an album for a rectangular map.
+	The module's execution block generates an album for the connections of a rectangular map.
 
 		```python
 		mapShape = (2, 3)
@@ -138,13 +138,13 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 	[3] `mapFolding.beDRY.defineProcessorLimit`
 	"""
 	mapShape = validateMapShape(mapShape)
-	totalLeaves: int = getTotalLeaves(mapShape)
-	if totalLeaves == 0:
-		message: str = f'`mapShape` must have at least one leaf: {mapShape!r}.'
+	totalEndpoints: int = getTotalEndpoints(mapShape)
+	if totalEndpoints == 0:
+		message: str = f'`mapShape` must have at least one endpoint: {mapShape!r}.'
 		raise ValueError(message)
 
-	leavesInserted: int = 1
-	foldingsAtDepth: Iterable[Folding] = ((leafOrigin,),)
+	endpointsInserted: int = 1
+	diagramsAtDepth: Iterable[ArchDiagram] = ((endpointOrigin,),)
 	pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, pathAlbum, suffix='.album')
 	if pathFilenameAlbum.exists():
 		message = f'Album already exists: {pathFilenameAlbum}.'
@@ -155,15 +155,15 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 		processManager: Pool | None = None
 		if workersMaximum > 1:
 			processManager = resourceManager.enter_context(Pool(workersMaximum))
-		while leavesInserted < totalLeaves:
-			leavesInserted += 1
+		while endpointsInserted < totalEndpoints:
+			endpointsInserted += 1
 			if processManager is None:
-				foldingsAtDepth = chain.from_iterable(map(partial(_makeDescendants, mapShape=mapShape), foldingsAtDepth))
+				diagramsAtDepth = chain.from_iterable(map(partial(_makeDescendants, mapShape=mapShape), diagramsAtDepth))
 			else:
-				foldingsAtDepth = chain.from_iterable(processManager.imap_unordered(partial(_makeDescendants, mapShape=mapShape), foldingsAtDepth, chunksize=2**10))
-			if leavesInserted == 3:
-				foldingsAtDepth = filter(lambda folding: folding.index(1) < folding.index(2), foldingsAtDepth)
-		writeAlbum(foldingsAtDepth, pathFilenameAlbum)
+				diagramsAtDepth = chain.from_iterable(processManager.imap_unordered(partial(_makeDescendants, mapShape=mapShape), diagramsAtDepth, chunksize=2**10))
+			if endpointsInserted == 3:
+				diagramsAtDepth = filter(lambda diagram: diagram.index(1) < diagram.index(2), diagramsAtDepth)
+		writeAlbum(diagramsAtDepth, pathFilenameAlbum)
 
 	return pathFilenameAlbum
 
@@ -172,26 +172,26 @@ if __name__ == '__main__':
 	start: float = perf_counter()
 	pathFilenameAlbum: Path = doTheNeedful(mapShape, -2)
 	print(f"{perf_counter() - start:.2f}")
-	countTotal: int = len(pathFilenameAlbum.read_text(encoding='utf-8').splitlines()) * 2 * getTotalLeaves(mapShape)
+	countTotal: int = len(pathFilenameAlbum.read_text(encoding='utf-8').splitlines()) * 2 * getTotalEndpoints(mapShape)
 	valuesKnown: dict[int, int] = getValuesKnown('A001415')
 	print(countTotal == valuesKnown[3], countTotal, valuesKnown[3])
 
 # DEVELOPMENT Changes:
 # TODO to make the files smaller, use a truncated notation. The graph notation I created is very
-# compact: one delimiter and one `Leaf` represents one `Folding`, if the `Folding` are sorted. A
-# `Folding` is a permutation, and there is a special notation for permutations, but it's opaque to
+# compact: one delimiter and one `Endpoint` represents one `ArchDiagram`, if the diagrams are sorted. An
+# `ArchDiagram` is a permutation, and there is a special notation for permutations, but it's opaque to
 # me. However, there are packages that implement it, so that would likely be more robust, even if
 # it is not more compact.
 
 # On hold:
-# Check each crease as it is added: a violation will invalidate an entire branch. To do this, I would
+# Check each arch as it is added: a crossing will invalidate an entire branch. To do this, I would
 # need a new way of iterating(insert, check).
 
 # Completed:
-# Don't check every pair of creases because the existing folding is valid. Check the new crease
-# against same parity creases.
+# Don't check every pair of arches because the existing diagram is valid. Check the new arch
+# against same parity arches.
 
 # `streamAlbum` only read when requested: good for iterating past existing files.
 
-# No: `Folding` -> `PinnedLeaves`. This requires overwriting keys or reading/changing a ton of keys.
-# No: creaseAnte -> creasePost. ante makes it easier to count backwards from the last leaf.
+# No: `ArchDiagram` -> endpoint positions. This requires overwriting keys or reading/changing a ton of keys.
+# No: endpointAnte -> endpointPost. ante makes it easier to count backwards from the last endpoint.

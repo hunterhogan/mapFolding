@@ -14,7 +14,7 @@ eliminationCrease
 iff
 	Check crease crossings and compute leaf-coordinate connections.
 insertion
-	Insert leaves incrementally and save a folding album.
+	Insert endpoints incrementally and save an arch-diagram album.
 insertion2上nDimensional吗
 	Expand previous-dimension albums into constrained search spaces.
 """
