@@ -42,7 +42,8 @@ from typing import TYPE_CHECKING
 
 from hunterMakesPy import decreasing, inclusive
 from mapFolding import endpointOrigin, positionOrigin
-from mapFolding._e.algorithms.iff import creaseViolation吗 as archesCross吗, foldingValid吗 as diagramValid吗
+from mapFolding._e.algorithms.iff import creaseViolation吗 as archesCross吗
+from mapFolding._e.algorithms.iff import foldingValid吗 as diagramValid吗
 
 if TYPE_CHECKING:
 	from collections.abc import Collection
