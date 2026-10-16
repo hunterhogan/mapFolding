@@ -1,7 +1,6 @@
-#=SIN=
-# Example module.
-# ruff: file-ignore[undocumented-public-class, undocumented-magic-method, undocumented-public-method]
-# ruff: file-ignore[undocumented-public-function]
+#=SIN= Example module.
+#ruff: file-ignore[undocumented-public-class, undocumented-magic-method, undocumented-public-method]
+#ruff: file-ignore[undocumented-public-function]
 """I used `class HistogramAssignments` to collect a histogram of all variable values.
 
 In this case, I used the information to choose a value for the "sentinel", `empty`.

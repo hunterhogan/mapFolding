@@ -4,20 +4,18 @@ from __future__ import annotations
 
 from mapFolding import kitFilesystem
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, readDataFrame
-from mapFolding.oeis import _metadata, byFormula, getValuesKnown, oeisIDsImplemented
+from mapFolding.oeis import getValuesKnown, oeisIDsImplemented
 from typing import TYPE_CHECKING
 import numpy
 import pytest
-import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterator
-	from hunterMakesPy import CallableFunction
-	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
+	from collections.abc import Callable
+	from mapFolding.theTypes import OEISid
 	from numpy.typing import NDArray
 	from pathlib import Path
 	from pytest import FixtureRequest
-	from typing import Any, LiteralString
+	from typing import Any
 
 #================== Test-function parameters ======================================================
 
@@ -52,20 +50,6 @@ def pathRootJobDEFAULTTesting(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -
 
 #======== OEIS ids =====================================
 
-@pytest.fixture(params=((None, dict[int, int]()),))
-def oeisStorage(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Iterator[Path]:
-	metadata = _metadata.getMetadata('A400429').copy()
-	metadata['valuesKnown'] = dict(request.param[1])
-	monkeypatch.setitem(_metadata.dictionaryOEIS, 'A400429', metadata)
-	monkeypatch.setattr(_metadata, 'pathCache', tmp_path)
-	if request.param[0] is not None:
-		(tmp_path / 'b400429.txt').write_text(request.param[0], encoding='utf-8')
-	_metadata.getMetadata.cache_clear()
-	_metadata.getValuesKnown.cache_clear()
-	yield tmp_path
-	_metadata.getMetadata.cache_clear()
-	_metadata.getValuesKnown.cache_clear()
-
 @pytest.fixture(params=(None,))
 def pathFilename(request: pytest.FixtureRequest, tmp_path: Path) -> Path:
 	pathFilename: Path = tmp_path / 'nested/chicken.txt'
@@ -75,20 +59,8 @@ def pathFilename(request: pytest.FixtureRequest, tmp_path: Path) -> Path:
 	return pathFilename
 
 @pytest.fixture
-def callableA(oeisID: OEISid) -> CallableFunction[[int, LiteralString | None], int]:
-	return getattr(byFormula, oeisID)
-
-@pytest.fixture
 def expected(oeisID: OEISid, n: int) -> int:
 	return getValuesKnown(oeisID)[n]
-
-@pytest.fixture
-def keywordArguments(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 形KeywordArgumentsCount:
-	monkeypatch.chdir(tmp_path)
-	keywordArguments: 形KeywordArgumentsCount = {}
-	if request.param is not None:
-		keywordArguments['flow'] = request.param
-	return keywordArguments
 
 @pytest.fixture(params=oeisIDsImplemented)
 def oeisID(request: pytest.FixtureRequest) -> Any:
@@ -107,11 +79,6 @@ def oeisID(request: pytest.FixtureRequest) -> Any:
 	return request.param
 
 #======== Miscellaneous =====================================
-
-@pytest.fixture
-def argv(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> tuple[str, ...]:
-	monkeypatch.setattr(sys, 'argv', list(request.param))
-	return request.param
 
 @pytest.fixture
 def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:

@@ -4,8 +4,6 @@ from functools import cache, partial
 from humpy_cytoolz import dissoc, get_in, merge
 from hunterMakesPy import errorL33T
 from itertools import count, takewhile
-from mapFolding.dataStructures import (
-	getTriangleIndices as triangleIndices, makeLookupDiagonal, makeLookupTriangle, sequenceToTriangle, triangleToSequence)
 from mapFolding.kitFilesystem import getCacheOrURL, readText, writeText
 from mapFolding.oeis._beDRY import formatBFile, formatOEISid, parse_bFile
 from mapFolding.oeis._dataBaskets import MetadataOEISid
@@ -17,7 +15,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Mapping, Sequence
-	from mapFolding.theTypes import OEISid, 形Triangle, 形TriangleTerms
+	from mapFolding.theTypes import OEISid, 形Triangle, 形TriangleSparse
 	from pathlib import Path
 
 #================== Sausage =======================================================================
@@ -128,7 +126,7 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 	for successive row numbers. Otherwise, requested row lengths begin at one and increase by one,
 	regardless of the starting row number.
 
-	`mapFolding.dataStructures.makeLookupTriangle` [3] groups consecutive known indices starting at
+	`mapFolding.dataStructures.makeTriangle` [3] groups consecutive known indices starting at
 	`offset`. Grouping ends at the first missing sequence index. A
 	partially known final row is retained. Grouping stops at the first empty row, including an empty
 	row caused by a requested length of zero. The function does not check whether the sequence
@@ -167,36 +165,40 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 
 	[2] `mapFolding.oeis._dataBaskets.MetadataOEISid`
 
-	[3] `mapFolding.dataStructures.makeLookupTriangle`
+	[3] `mapFolding.dataStructures.makeTriangle`
 
 	[4] `getTriangleDiagonal`
 
 	"""
+	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None
 	if 'rowLength' in metadata:
 		rowLengths = map(metadata['rowLength'], count(rowStart))
-	return makeLookupTriangle(map(metadata['valuesKnown'].__getitem__,
+	return makeTriangle(map(metadata['valuesKnown'].__getitem__,
 		takewhile(metadata['valuesKnown'].__contains__, count(metadata['offset']))), rowLengths, rowStart)
 
-def getTriangleTerms(oeisID: OEISid) -> 形TriangleTerms:
+def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
+	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None
 	if 'rowLength' in metadata:
 		rowLengths = map(metadata['rowLength'], count(rowStart))
-	return sequenceToTriangle(metadata['valuesKnown'], rowLengths, rowStart, metadata['offset'])
+	return lookupToTriangle(metadata['valuesKnown'], rowLengths, rowStart, metadata['offset'])
 
 def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:
+	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
-	return makeLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
-		rowLength=metadata.get('rowLength', partial(add, 1 - metadata.get('rowStart', metadata['offset']))))
+	return getLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
+		getGroupLength=metadata.get('rowLength', partial(add, 1 - metadata.get('rowStart', metadata['offset']))))
 
 def getTriangleIndices(oeisID: OEISid, n: int) -> range:
+	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
-	return triangleIndices(n, rowStart=metadata.get('rowStart', metadata['offset']), offset=metadata['offset'],
-		rowLength=metadata.get('rowLength'))
+	return makeGroupKeys(n, keyGroupFirst=metadata.get('rowStart', metadata['offset']), keyFlatFirst=metadata['offset'],
+		getGroupLength=metadata.get('rowLength'))
 
 def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	oeisID = formatOEISid(oeisID)
@@ -217,9 +219,10 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	return pathFilename
 
 def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> Path:
+	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
-	return updateBFile(oeisID, triangleToSequence(triangle, rowStart=metadata.get('rowStart', metadata['offset']),
-		offset=metadata['offset'], rowLength=metadata.get('rowLength')))
+	return updateBFile(oeisID, triangleToLookup(triangle, keyGroupFirst=metadata.get('rowStart', metadata['offset']),
+		keyFlatFirst=metadata['offset'], getGroupLength=metadata.get('rowLength')))
 
 
 #================== Meat grinders =================================================================

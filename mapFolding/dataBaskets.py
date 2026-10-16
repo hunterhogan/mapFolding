@@ -43,7 +43,7 @@ References
 from __future__ import annotations
 
 from mapFolding.beDRY import getTotalLeaves
-from mapFolding.dataStructures import getConnectionGraph, makeDataContainer
+from mapFolding.dataStructures import makeConnectionGraph, makeDataContainer
 from mapFolding.theTypes import (
 	形ArcCode, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形Elephino, 形Meanders, 形TotalFolds, 形TotalLeaves)
 from typing import NamedTuple, TYPE_CHECKING
@@ -66,7 +66,7 @@ class StateMapFolding:
 	Array Initialization
 	--------------------
 	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
-	`mapFolding.dataStructures.getConnectionGraph` [2]. Construction does not validate dimension
+	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
 	signs. Positive dimensions are expected.
 
 	An array whose `shape` tuple is empty is replaced with storage allocated by
@@ -120,7 +120,7 @@ class StateMapFolding:
 	----------
 	[1] `mapFolding.beDRY.getTotalLeaves`
 
-	[2] `mapFolding.dataStructures.getConnectionGraph`
+	[2] `mapFolding.dataStructures.makeConnectionGraph`
 
 	[3] `mapFolding.dataStructures.makeDataContainer`
 
@@ -196,7 +196,7 @@ class StateMapFolding:
 
 		totalLeavesAsInt = int(self.totalLeaves)
 
-		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+		self.connectionGraph = makeConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
 		if self.dimensionsUnconstrained is None:
 			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
@@ -222,7 +222,7 @@ class StateMapFoldingSymmetric:
 	Array Initialization
 	--------------------
 	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
-	`mapFolding.dataStructures.getConnectionGraph` [2]. Construction does not validate dimension
+	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
 	signs. Positive dimensions are expected.
 
 	An array whose `shape` tuple is empty is replaced with storage allocated by
@@ -283,7 +283,7 @@ class StateMapFoldingSymmetric:
 	----------
 	[1] `mapFolding.beDRY.getTotalLeaves`
 
-	[2] `mapFolding.dataStructures.getConnectionGraph`
+	[2] `mapFolding.dataStructures.makeConnectionGraph`
 
 	[3] `mapFolding.dataStructures.makeDataContainer`
 
@@ -348,7 +348,7 @@ class StateMapFoldingSymmetric:
 		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
 
 		totalLeavesAsInt = int(self.totalLeaves)
-		self.connectionGraph = getConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+		self.connectionGraph = makeConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
 		arrayIndexCoordinates: 形ArraySelector = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2))
 		self.indices = numpy.stack(((arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1)

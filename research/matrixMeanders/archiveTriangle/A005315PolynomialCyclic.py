@@ -1,5 +1,5 @@
+#ruff: file-ignore[undocumented-public-module, undocumented-public-function, implicit-namespace-package]
 # DEVELOPMENT
-# ruff: file-ignore[undocumented-public-module, undocumented-public-function]
 # pyright: reportUnknownArgumentType=false, reportUnknownVariableType=false
 from __future__ import annotations
 

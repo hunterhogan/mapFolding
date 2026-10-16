@@ -7,7 +7,7 @@ from mapFolding._e.p2上nDimensional import (
 	dimensionIndex, 一, 七, 三, 九, 二, 五, 八, 六, 四, 零, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples.semioticsData import (
-	expectedDimensionIndex, expectedLeafOrigin, expectedPileOrigin, expected一, expected七, expected三, expected九, expected二, expected五,
+	expectedDimensionIndex, expected一, expected七, expected三, expected九, expected二, expected五,
 	expected八, expected六, expected四, expected零, expected首一, expected首一三, expected首一二, expected首一二三, expected首三, expected首二, expected首二三,
 	expected首零, expected首零一, expected首零一三, expected首零一二, expected首零一二三, expected首零三, expected首零二, expected首零二三)
 from typing import TYPE_CHECKING
@@ -19,8 +19,7 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize('actualValue, expectedValue, identifierName', [
 	(零, expected零, '零'), (一, expected一, '一'), (二, expected二, '二'), (三, expected三, '三')
 	, (四, expected四, '四'), (五, expected五, '五'), (六, expected六, '六'), (七, expected七, '七')
-	, (八, expected八, '八'), (九, expected九, '九'), (leafOrigin, expectedLeafOrigin, 'leafOrigin')
-	, (pileOrigin, expectedPileOrigin, 'pileOrigin')
+	, (八, expected八, '八'), (九, expected九, '九')
 ])
 def test_dimensionIndexConstantsMatchExpected(actualValue: int, expectedValue: int, identifierName: str) -> None:
 	assertEqualTo(actualValue, expectedValue, identifierName)

@@ -6,12 +6,13 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from research.matrixMeanders.infoBooth import pathFilenameArchiveA005315Binomial
+from inspect import getsource
+from research.matrixMeanders.archiveTriangle import A005315Binomial
 from typing import Any
 import ast
 import sympy
 
-src: str = pathFilenameArchiveA005315Binomial.read_text(encoding='utf-8')
+src: str = getsource(A005315Binomial)
 tr: ast.Module = ast.parse(src)
 z, u = sympy.symbols('z u')
 

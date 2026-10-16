@@ -29,15 +29,15 @@ Functions
 			Leave a test value at a new output path before counting.
 	Write
 		iterableToCSV
-			Write rows to CSV with optional appending.
+			Write groups to CSV with optional appending.
 		saveTotal
 			Save an integer with fallback output on failure.
 		writeAlbum
 			Write each folding as one CSV record.
 		writeDiagonal
-			Write sorted row, diagonal, and value records.
+			Write sorted group, diagonal, and value records.
 		writeTriangle
-			Write sorted row numbers followed by row values.
+			Write sorted group keys followed by group values.
 	Read and write
 		getCacheOrURL
 			Retrieve cached text or request updated text from a URL.
@@ -49,60 +49,45 @@ Functions
 		readDataFrame
 			Load serialized data as a dataframe.
 		readDiagonal
-			Read one diagonal from a triangle or diagonal file.
+			Read one diagonal from group, diagonal, and value records.
 		readText
 			Read UTF-8 text.
 		readTriangle
-			Read numbered integer rows.
-		readTriangleValue
-			Select a stored term by row number and positional column index.
+			Read numbered integer groups.
 		streamAlbum
 			Yield folding records as the file is read.
 """
 from __future__ import annotations
 
 from contextlib import suppress
-from csv import writer as csv_writer
+from csv import reader as csv_reader, writer as csv_writer
 from datetime import datetime, timedelta, UTC
 from email.utils import format_datetime
-from hunterMakesPy import errorL33T, raiseIfNone
+from hunterMakesPy import errorL33T, oneIndexed
 from hunterMakesPy.filesystemToolkit import writeStringToHere
-from mapFolding.dataBaskets import ShapeArray
-from mapFolding.dataStructures import parseCSVtoIntegers, parseDiagonal, parseTriangle
+from itertools import repeat, tee
 from mapFolding.theSSOT import settingsPackage
+from operator import itemgetter
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
 from urllib3 import PoolManager
 from urllib3.exceptions import HTTPError
-import numpy
 import os
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Callable, Iterable, Mapping
+	from collections.abc import Iterable, Mapping, Sequence
 	from io import TextIOWrapper
 	from mapFolding._e.dataBaskets import StateElimination
-	from mapFolding.theTypes import Folding, 形ArrayArcCode, 形Triangle
+	from mapFolding.theTypes import Folding, 形Triangle, 形TriangleSparse
 	from os import PathLike
 	from pandas import DataFrame
-	from typing import Any, Literal
+	from typing import Any
 	from urllib3.response import BaseHTTPResponse
 
-# TODO This is not tenable. What is the shape?
-def extendArray(array: 形ArrayArcCode, length: int) -> 形ArrayArcCode:  # ruff: ignore[undocumented-public-function]
-	if isinstance(array, numpy.memmap):
-		lengthPrevious: int = len(array)
-		array.flush()
-		array = numpy.memmap(raiseIfNone(array.filename), dtype=array.dtype, mode='r+', offset=array.offset,
-			shape=ShapeArray(length=length, indexes=array.shape[1]))
-		array[lengthPrevious:length] = 0
-	else:
-		array = numpy.pad(array, ((0, length - len(array)), (0, 0)))
-	return array
-
-#================== Create appropriate paths and filenames =========================================
+#======== Paths and filenames ======================================================================
 
 def getPathRootJobDEFAULT() -> Path:
 	"""Create and return the default directory for computation results.
@@ -223,7 +208,9 @@ def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') ->
 	"""
 	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
 
-def makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: PathLike[str] = settingsPackage.pathDataSamples, *, suffix: str = '.pkl') -> Path:
+def makePathFilenameArrayFoldings(
+	totalDimensions: int, pathRoot: PathLike[str] = settingsPackage.pathDataSamples, *, suffix: str = '.pkl'
+) -> Path:
 	"""Locate sampled-folding data for `totalDimensions` under `pathRoot`.
 
 	(AI generated docstring)
@@ -255,7 +242,10 @@ def makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: PathLike[str] 
 	"""
 	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
 
-def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = ".countTotal", **dash: str) -> Path:
+# TODO Create a truly generic, but useful, make path filename function.
+def makePathFilenameCount(
+	pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = '.countTotal', **dash: str
+) -> Path:
 	"""Resolve a count-output path and create missing parent directories.
 
 	(AI generated docstring)
@@ -309,7 +299,9 @@ def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscor
 		pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilename
 
-def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds') -> Path:
+def makePathFilenameFolds(
+	mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds'
+) -> Path:
 	"""Resolve a folding-count output path named from `mapShape`.
 
 	You can use this function to combine the filename from `makeFilenameFolds` [1] with an output
@@ -340,7 +332,7 @@ def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLik
 	filename: str = makeFilenameFolds(mapShape, suffix)
 	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
 
-#================== Confirm the ability to read or write ===========================================
+#======== Confirm persistence ======================================================================
 
 def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) -> 形PathLike:
 	"""Test a new output file before beginning a long computation.
@@ -401,21 +393,24 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 
 	return pathFilename
 
-#================== Write =========================================================================
+#======== Save =====================================================================================
 
-def iterableToCSV(iterable: Iterable[Any], pathFilename: Path, *, append: bool = False) -> Path:
-	"""Write the records in `iterable` to `pathFilename`.
+def appendTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
+	return writeTriangle(triangle, pathFilename, append=True)
+
+def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, append: bool = False) -> Path:
+	"""Write the records in `boxOfBoxes` to `pathFilename`.
 
 	(AI generated docstring)
 
-	You can use this function to save rows as UTF-8 comma-separated records using the default
+	You can use this function to save groups as UTF-8 comma-separated records using the default
 	Python `csv.writer` dialect [1]. This function creates missing parent directories and returns
 	the supplied path after closing the file.
 
 	Parameters
 	----------
-	iterable : Iterable[Any]
-		Iterable of row-like records accepted by the CSV writer.
+	boxOfBoxes : Iterable[Iterable[Any]]
+		Iterable of group-like records accepted by the CSV writer.
 	pathFilename : Path
 		Destination file.
 	append : bool = False
@@ -444,7 +439,7 @@ def iterableToCSV(iterable: Iterable[Any], pathFilename: Path, *, append: bool =
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	with pathFilename.open(encoding="utf-8", mode="a" if append else "w", newline="") as streamWrite:
 		csvWriter: Writer = csv_writer(streamWrite)
-		csvWriter.writerows(iterable)
+		csvWriter.writerows(boxOfBoxes)
 	return pathFilename
 
 def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
@@ -503,6 +498,11 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 			pathFilenameWritten = ''
 	return PurePosixPath(pathFilenameWritten)
 
+def saveTriangleGroup(
+	keyGroup: int, boxOfIntegers: Sequence[int], nameTriangle: str, pathLikeWrite: PathLike[str] | None = None
+) -> Path:
+	return writeTriangle({keyGroup: boxOfIntegers}, makePathFilenameCount(pathLikeWrite, nameTriangle, str(keyGroup), suffix='.csv'))
+
 def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	"""Write each folding in `album` as one CSV record.
 
@@ -535,28 +535,94 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	"""
 	return iterableToCSV(album, pathFilename)
 
-def writeTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
-	"""Save numbered integer rows from `triangle` to a CSV file.
+def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:
+	"""Write `lookupDiagonal` as sorted group, diagonal-offset, and value records.
+
+	(AI generated docstring)
+
+	You can use this function to save one diagonal in the three-column format accepted by
+	`readDiagonal` [1]. Writing uses `iterableToCSV` [2].
+
+	CSV Layout
+	----------
+	Records contain the group key, `次diagonal`, and value, in ascending group-key order with
+	no header. Appending duplicate group keys for the same diagonal produces a file that the
+	diagonal parser rejects.
+
+	Parameters
+	----------
+	lookupDiagonal : Mapping[int, int]
+		Group numbers mapped to the stored diagonal values.
+	pathFilename : Path
+		Destination CSV file.
+	次diagonal : int
+		Diagonal offset repeated in every output record. This function does not validate the value.
+	append : bool = False
+		Append records when `True`; otherwise replace existing file contents.
+
+	Returns
+	-------
+	pathFilenameWritten : Path
+		The supplied path after writing completes.
+
+	Examples
+	--------
+	The runner in `easyRun/triangleSemiMake.py` appends a completed count from
+	`mapFolding.dataBaskets.StateMeanders.totalMeanders` [3] to a diagonal file.
+
+		```python
+		writeDiagonal(
+			{n: state.totalMeanders},
+			makePathFilenameCount(settingsPackage.pathPackage / 'oeis' / 'A400429', 'diagonal', str(次diagonal), suffix='.csv'),
+			次diagonal, append=True
+		)
+		```
+
+	References
+	----------
+	[1] `readDiagonal`
+
+	[2] `iterableToCSV`
+
+	[3] `mapFolding.dataBaskets.StateMeanders.totalMeanders`
+
+	"""
+	keysGroups, keysContents = tee(sorted(lookupDiagonal))
+	return iterableToCSV(
+		zip(keysGroups, repeat(次diagonal, len(lookupDiagonal)), map(lookupDiagonal.__getitem__, keysContents), strict=True)
+		, pathFilename, append=append
+	)
+
+def writeText(contents: str, pathFilename: Path) -> Path:
+	# RTFM
+	pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	writeStringToHere(contents, pathFilename)
+	return pathFilename
+
+def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path, *, append: bool = False) -> Path:
+	"""Save numbered integer groups from `triangle` to a CSV file.
 
 	(AI generated docstring)
 
 	You can use this function to persist a triangle for later loading with `readTriangle` [1].
-	This function writes the rows to `pathFilename` and returns `pathFilename` after closing the file.
+	This function writes the groups to `pathFilename` and returns `pathFilename` after closing the file.
 
 	CSV Layout
 	----------
-	Each record contains the row number followed by that row's values, without a header. Records
-	appear in ascending row-number order. Values within each row retain their supplied order, and
-	an empty row contains only the row number. The file uses UTF-8 and the default `csv.writer`
+	Each record contains the group key followed by that group's values, without a header. Records
+	appear in ascending group-key order. Values within each group retain their supplied order, and
+	an empty group contains only the group key. The file uses UTF-8 and the default `csv.writer`
 	dialect [2]. `iterableToCSV` [3] creates missing parent directories and replaces existing file
-	contents. An empty `triangle` produces an empty file. Row lengths are not validated.
+	contents. An empty `triangle` produces an empty file. Group lengths are not validated.
 
 	Parameters
 	----------
-	triangle : dict[int, tuple[int, ...]]
-		Row numbers mapped to ordered integer values.
+	triangle : 形Triangle | 形TriangleSparse
+		Group keys mapped to dense integer collections or sparse integer lookups.
 	pathFilename : Path
-		Destination file. Existing contents are overwritten.
+		Destination file. Existing contents are overwritten unless `append=True`.
+	append : bool = False
+		Append numbered groups when `True`.
 
 	Returns
 	-------
@@ -570,7 +636,7 @@ def writeTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
 
 	Examples
 	--------
-	The writer in `easyRun/reduceArches.py` saves accumulated rows using its existing `triangle`
+	The writer in `easyRun/reduceArches.py` saves accumulated groups using its existing `triangle`
 	and destination directory `pathWrite`.
 
 		```python
@@ -588,62 +654,16 @@ def writeTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
 	[3] `iterableToCSV`
 
 	"""
-	return iterableToCSV(((rowNumber, *sequence_k) for rowNumber, sequence_k in sorted(triangle.items())), pathFilename)
+	from mapFolding.dataStructures import getBoxWithGaps, stringsToLookup
+	return iterableToCSV(
+		map(lambda keyGroup: (keyGroup, *getBoxWithGaps(triangle[keyGroup], keyGroup)), sorted(triangle))  # ruff: ignore[unnecessary-map]
+		, pathFilename, append=append
+	)
 
-def writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, *, append: bool = False) -> Path:
-	"""Write `diagonal` as sorted row, diagonal-position, and value records.
+def writeTriangleSparse(triangleSparse: 形TriangleSparse, pathFilename: Path) -> Path:
+	return writeTriangle(triangleSparse, pathFilename)
 
-	(AI generated docstring)
-
-	You can use this function to save one diagonal in the three-column format accepted by
-	`readDiagonal` [1] with `formatData='diagonalCSV'`. Writing uses `iterableToCSV` [2].
-
-	CSV Layout
-	----------
-	Records contain the row number, `次diagonal`, and value, in ascending row-number order with
-	no header. Appending duplicate row numbers for the same diagonal produces a file that the
-	diagonal parser rejects.
-
-	Parameters
-	----------
-	diagonal : Mapping[int, int]
-		Row numbers mapped to the stored diagonal values.
-	pathFilename : Path
-		Destination CSV file.
-	次diagonal : int
-		Diagonal position repeated in every output record. This function does not validate the value.
-	append : bool = False
-		Append records when `True`; otherwise replace existing file contents.
-
-	Returns
-	-------
-	pathFilenameWritten : Path
-		The supplied path after writing completes.
-
-	Examples
-	--------
-	The runner in `easyRun/triangleSemiMake.py` appends a completed count from
-	`mapFolding.dataBaskets.StateMeanders.totalMeanders` [3] to a diagonal file.
-
-		```python
-		writeDiagonal(
-			{n: state.totalMeanders},
-			makePathFilenameDiagonal(次diagonal), 次diagonal, append=True
-		)
-		```
-
-	References
-	----------
-	[1] `readDiagonal`
-
-	[2] `iterableToCSV`
-
-	[3] `mapFolding.dataBaskets.StateMeanders.totalMeanders`
-
-	"""
-	return iterableToCSV(((row[0], 次diagonal, row[1]) for row in sorted(diagonal.items())), pathFilename, append=append)
-
-#================== Read and write ================================================================
+#======== Read and save ===========================================================================
 
 def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	"""Read cached text or request updated text from `url`.
@@ -671,7 +691,7 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 
 	Returns
 	-------
-	data : str
+	contents : str
 		Cached or retrieved text. A missing cache and an unsuccessful request produce an empty string.
 
 	Raises
@@ -689,13 +709,13 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 		https://context7.com/hunterhogan/huntermakespy
 	"""
 	preferCache: bool = False
-	data: str = ''
+	contents: str = ''
 	cacheDatetime: datetime | None = None
 
 	if pathFilenameCache.exists():
 		cacheDatetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
 		preferCache = datetime.now(tz=UTC) - cacheDatetime < timedelta(days=cacheDays)
-		data = pathFilenameCache.read_text(encoding="utf-8")
+		contents = pathFilenameCache.read_text(encoding="utf-8")
 
 	if not preferCache:
 		if not url.startswith(("http:", "https:")):
@@ -712,16 +732,12 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 			if response.status == 304:  # Not Modified
 				pathFilenameCache.touch()  # Update cache file's modification time to local time.
 			elif response.status == 200:
-				writeStringToHere(data := response.data.decode("utf-8"), pathFilenameCache)
+				writeStringToHere(contents := response.data.decode("utf-8"), pathFilenameCache)
 		httpPoolManager.clear()
 
-	return data
+	return contents
 
-#================== Read ==========================================================================
-
-def _csvTo_int(pathFilename: Path) -> Iterable[tuple[int, ...]]:
-	with pathFilename.open(encoding="utf-8", mode="r", newline="") as streamRead:
-		yield from parseCSVtoIntegers(streamRead)
+#======== Read =====================================================================================
 
 def getDataFrameFoldings(state: StateElimination) -> DataFrame:
 	"""Load bundled array-folding data for the dimension count in `state`.
@@ -788,7 +804,7 @@ def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
 	[2] Python `csv.reader`.
 		https://docs.python.org/3/library/csv.html#csv.reader
 	"""
-	return tuple(_csvTo_int(pathFilename))
+	return tuple(streamAlbum(pathFilename))
 
 def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	"""Load serialized data from `pathFilename` as a dataframe.
@@ -826,52 +842,20 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	import pandas
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))
 
-def readDiagonal(pathFilename: Path, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV', rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
-	"""Load diagonal position `次diagonal` from `pathFilename`.
+def readDiagonal(pathFilename: Path, 次diagonal: int) -> dict[int, int]:
+	#=SIN= Intermediate tuple: duplicate-row validation needs the selected record count after dictionary construction.
+	boxOfBoxes: tuple[tuple[int, ...], ...] = tuple(streamCSVintegers(pathFilename))
+	if not all(map(lambda boxOfIntegers: len(boxOfIntegers) == 3, boxOfBoxes)):  # ruff: ignore[unnecessary-map]
+		message: str = 'I received a diagonal CSV entry without exactly three integers: a group key, a diagonal offset, and an integer.'
+		raise ValueError(message)
+	boxOfBoxes = tuple(filter(lambda boxOfIntegers: boxOfIntegers[1] == 次diagonal, boxOfBoxes))
+	lookupDiagonal: dict[int, int] = dict(map(itemgetter(0, 2), boxOfBoxes))
+	if len(lookupDiagonal) != len(boxOfBoxes):
+		message = f"I received duplicate group keys for `{次diagonal = }`."
+		raise ValueError(message)
+	return dict(sorted(lookupDiagonal.items()))
 
-	(AI generated docstring)
-
-	You can use this function to read one diagonal from a triangle file or a three-column diagonal
-	file. This function reads UTF-8 text with `readText` [1] and delegates row selection and
-	validation to `mapFolding.dataStructures.parseDiagonal` [2].
-
-	Parameters
-	----------
-	pathFilename : Path
-		File containing numbered integer records without a header.
-	次diagonal : int
-		Diagonal position to select. Triangle selection normally starts at one.
-	formatData : {'triangleCSV', 'diagonalCSV'} = 'triangleCSV'
-		Triangle records contain a row number followed by row values. Diagonal records contain
-		exactly a row number, diagonal position, and value.
-	rowLength : Callable[[int], int] | None = None
-		Complete row length from a row number for right-edge triangle selection. `None` uses
-		stored row lengths. Diagonal records ignore this argument.
-	fromRight : bool = True
-		Select relative to the right edge of triangle rows when `True`, or the left edge when
-		`False`. Diagonal records ignore this argument.
-
-	Returns
-	-------
-	diagonal : dict[int, int]
-		Selected values keyed by ascending row number.
-
-	Validation Failures
-	-------------------
-	ValueError
-		If the format is unsupported, a field is not an integer, triangle selection uses a
-		negative position, or diagonal records have the wrong length or duplicate selected rows.
-
-	References
-	----------
-	[1] `readText`
-
-	[2] `mapFolding.dataStructures.parseDiagonal`
-
-	"""
-	return parseDiagonal(readText(pathFilename), 次diagonal, formatData=formatData, rowLength=rowLength, fromRight=fromRight)
-
-def readText(pathFilename: Path) -> str:
+def readText(pathFilename: Path, *, default: str | None = None) -> str:
 	"""Read the contents of `pathFilename` as UTF-8 text.
 
 	(AI generated docstring)
@@ -883,6 +867,8 @@ def readText(pathFilename: Path) -> str:
 	----------
 	pathFilename : Path
 		Text file to read.
+	default : str | None = None
+		Return this text when the file is absent; `None` propagates `FileNotFoundError`.
 
 	Returns
 	-------
@@ -891,7 +877,7 @@ def readText(pathFilename: Path) -> str:
 
 	Examples
 	--------
-	`mapFolding.oeis.__main__.readBFileTriangle` [1] reads text before parsing stored sequence rows.
+	`getCacheOrURL` [1] reads cached text.
 
 		```python
 		readText(pathFilename)
@@ -899,27 +885,33 @@ def readText(pathFilename: Path) -> str:
 
 	References
 	----------
-	[1] `mapFolding.oeis.__main__.readBFileTriangle`
+	[1] `getCacheOrURL`
 
 	"""
-	return pathFilename.read_text(encoding='utf-8')
+	try:
+		return pathFilename.read_text(encoding='utf-8')
+	except FileNotFoundError:
+		if default is None:
+			# raise from for context?
+			raise
+		return default
 
 def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
-	"""Load numbered integer rows from a triangle CSV file.
+	"""Load numbered integer groups from a triangle CSV file.
 
 	(AI generated docstring)
 
-	You can use this function to load rows previously saved by `writeTriangle` [1]. This function
-	reads all of `pathFilename` into memory and returns a dictionary mapping row numbers to tuples
+	You can use this function to load groups previously saved by `writeTriangle` [1]. This function
+	streams the records from `pathFilename` and returns a dictionary mapping group keys to tuples
 	of values.
 
 	CSV Layout
 	----------
-	The file must contain UTF-8 text with no header. Each CSV record [2] begins with an integer row
-	number followed by integer values. `mapFolding.dataStructures.parseTriangle` [3] ignores empty
-	records and preserves the supplied row order. A record containing only a row number produces an
-	empty tuple. Repeated row numbers keep the last values at the first occurrence's dictionary
-	position [4]. An empty file produces an empty dictionary. Row lengths and consecutive numbering
+	The file must contain UTF-8 text with no header. Each CSV record [2] begins with an integer group
+	number followed by integer values. `streamCSVintegers` [3] ignores empty
+	records and preserves the supplied group order. A record containing only a group key produces an
+	empty tuple. Repeated group keys keep the last values at the first occurrence's dictionary
+	position [4]. An empty file produces an empty dictionary. Group lengths and consecutive numbering
 	are not validated.
 
 	Parameters
@@ -930,7 +922,7 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 	Returns
 	-------
 	triangle : dict[int, tuple[int, ...]]
-		Row numbers mapped to all values after each row number.
+		Group numbers mapped to all values after each group key.
 
 	Reading Failures
 	----------------
@@ -945,52 +937,23 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 
 	[2] csv.reader - Python standard library.
 		https://docs.python.org/3/library/csv.html#csv.reader
-	[3] `mapFolding.dataStructures.parseTriangle`
+	[3] `streamCSVintegers`
 
 	[4] Dictionary insertion order - Python standard library.
 		https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
 	"""
-	return parseTriangle(readText(pathFilename))
+	return dict(map(itemgetter(0, slice(oneIndexed, None)), streamCSVintegers(pathFilename)))
 
-def readTriangleValue(pathFilename: Path, rowNumber: int, columnNumber: int) -> int:
-	"""Read one term by `rowNumber` and positional `columnNumber`.
+def readTriangleSparse(pathFilename: Path) -> dict[int, dict[int, int]]:
+	from mapFolding.dataStructures import getBoxWithGaps, stringsToLookup
+	streamKeys, streamGroups = tee(streamCSV(pathFilename))
+	return dict(zip(
+		map(int, map(itemgetter(0), streamKeys))
+		, map(stringsToLookup, map(itemgetter(slice(oneIndexed, None)), streamGroups))
+		, strict=True
+	))
 
-	(AI generated docstring)
-
-	You can use this function to select a value from a stored integer triangle. This function loads
-	the entire file with `readTriangle` [1], then indexes the requested row tuple.
-
-	Usage
-	-----
-	No application invocation was found in the codebase.
-
-	Parameters
-	----------
-	pathFilename : Path
-		Triangle CSV file to load.
-	rowNumber : int
-		Stored row label, rather than a positional row index.
-	columnNumber : int
-		Zero-based tuple index within the row. Negative indices select from the row end.
-
-	Returns
-	-------
-	term : int
-		Value at the requested row label and tuple position.
-
-	Validation Failures
-	-------------------
-	KeyError
-		If the stored triangle has no row labeled `rowNumber`.
-	IndexError
-		If `columnNumber` is outside the selected row tuple.
-
-	References
-	----------
-	[1] `readTriangle`
-
-	"""
-	return readTriangle(pathFilename)[rowNumber][columnNumber]
+#======== Stream ===================================================================================
 
 def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	"""Yield foldings from `pathFilename` as the records are read.
@@ -1027,4 +990,11 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	[2] Python `csv.reader`.
 		https://docs.python.org/3/library/csv.html#csv.reader
 	"""
-	yield from _csvTo_int(pathFilename)
+	yield from streamCSVintegers(pathFilename)
+
+def streamCSV(pathFilename: Path) -> Iterable[list[str]]:
+	with pathFilename.open(encoding='utf-8', mode='r', newline='') as streamRead:
+		yield from filter(bool, csv_reader(streamRead))
+
+def streamCSVintegers(pathFilename: Path) -> Iterable[tuple[int, ...]]:
+	yield from map(lambda boxOfStrings: tuple(map(int, boxOfStrings)), streamCSV(pathFilename))  # ruff: ignore[unnecessary-map]

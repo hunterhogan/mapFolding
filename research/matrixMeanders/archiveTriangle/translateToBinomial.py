@@ -5,10 +5,11 @@ from __future__ import annotations
 
 from fractions import Fraction
 from functools import reduce
+from inspect import getsource
 from itertools import batched, starmap
+from mapFolding.oeis.A400429 import _A005315
 from mapFolding.oeis.A400429._A005315 import A005315of10
 from math import comb, lcm
-from research.matrixMeanders.infoBooth import pathFilenameFormulaA005315
 from sympy import Matrix
 import json
 
@@ -58,7 +59,7 @@ lines.extend('\t\t' + ' '.join(starmap(render_term, pair)) for pair in batched(n
 lines.extend((f'\t) // {denominator}', '""'))
 new_block = '\n'.join(lines)
 
-source = pathFilenameFormulaA005315.read_text(encoding='utf-8')
+source = getsource(_A005315)
 start = source.index(f'def {function_name}')
 end = source.index(f'\ndef {next_function_name}', start)
 old_block = source[start:end]

@@ -1,4 +1,5 @@
-# ruff: ignore[undocumented-public-module]
+#ruff: ignore[undocumented-public-module]
+# Effectively abandoned module.
 # TODO https://github.com/python/typing/discussions/2092
 # pyright: reportAttributeAccessIssue=false, reportUnknownMemberType=false
 # ty: ignore[unresolved-attribute,redundant-condition]

@@ -26,7 +26,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import (
 	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
-	readDiagonal, readTriangle, readTriangleIncomplete, saveTotal, writeDiagonal, writeTriangle, writeTriangleIncomplete)
+	readDiagonal, readTriangle, readTriangleSparse, saveTotal, writeDiagonal, writeTriangle, writeTriangleSparse)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.triangleData import (
@@ -128,25 +128,25 @@ def test_writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path
 	writeTriangle(triangle, pathFilename, append=append)
 	assertEqualTo(readTriangle(pathFilename), expected, writeTriangle.__name__, triangle)
 
-@pytest.mark.parametrize('triangleTerms, expected', (
+@pytest.mark.parametrize('triangleSparse, expected', (
 	pytest.param(triangleSparse, triangleSparse, id='sparse-primes'),
 	pytest.param({2: {1: 0, 4: 2 ** 100}}, {2: {1: 0, 4: 2 ** 100}}, id='zero-and-missing-cells'),
 	pytest.param(triangleSparseEdges, triangleSparseEdges, id='uint64-1025-bit-values'),
 	pytest.param({}, {}, id='empty'),
 ))
-def test_writeTriangleIncomplete(triangleTerms: Mapping[int, Mapping[int, int]], pathFilename: Path,
+def test_writeTriangleSparse(triangleSparse: Mapping[int, Mapping[int, int]], pathFilename: Path,
 	expected: dict[int, dict[int, int]]) -> None:
-	writeTriangleIncomplete(triangleTerms, pathFilename)
-	assertEqualTo(readTriangleIncomplete(pathFilename), expected, writeTriangleIncomplete.__name__, triangleTerms)
+	writeTriangleSparse(triangleSparse, pathFilename)
+	assertEqualTo(readTriangleSparse(pathFilename), expected, writeTriangleSparse.__name__, triangleSparse)
 
-@pytest.mark.parametrize('diagonal, 次diagonal, append, expected', (
+@pytest.mark.parametrize('lookupDiagonal, 次diagonal, append, expected', (
 	pytest.param({3: 11, 5: 2 ** 100}, 2, False, {3: 11, 5: 2 ** 100}, id='replace'),
 	pytest.param({3: 11, 5: 2 ** 100}, 2, True, {3: 11, 5: 2 ** 100, 7: 37}, id='append'),
 ))
-def test_writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, append: bool, expected: dict[int, int]) -> None:
+def test_writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, append: bool, expected: dict[int, int]) -> None:
 	writeDiagonal({7: 37}, pathFilename, 次diagonal)
-	writeDiagonal(diagonal, pathFilename, 次diagonal, append=append)
-	assertEqualTo(readDiagonal(pathFilename, 次diagonal), expected, writeDiagonal.__name__, diagonal)
+	writeDiagonal(lookupDiagonal, pathFilename, 次diagonal, append=append)
+	assertEqualTo(readDiagonal(pathFilename, 次diagonal), expected, writeDiagonal.__name__, lookupDiagonal)
 
 @pytest.mark.parametrize('pathFilename, 次diagonal, expected', (
 	pytest.param('3,2,11\n3,2,13\n', 2, ValueError, id='duplicate-row'),

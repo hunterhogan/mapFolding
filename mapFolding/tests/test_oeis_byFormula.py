@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from itertools import chain, product as CartesianProduct, starmap
-from mapFolding.oeis import getMetadata
+from mapFolding.oeis import byFormula, getMetadata
 from mapFolding.tests import assertEqualTo
 from operator import itemgetter
 from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-	from hunterMakesPy import CallableFunction
+	from mapFolding.theTypes import OEISid
 	from typing import LiteralString
 
 # TODO There isn't a better way to do this?
@@ -111,7 +111,7 @@ parametrizeOEISidByFormula: pytest.MarkDecorator = pytest.mark.parametrize('oeis
 	, pytest.param('A337581', 'A000682')
 ))
 
-parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n, f, keywordArguments', tuple(chain(
+parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n, f, flow', tuple(chain(
 	chain.from_iterable(
 		CartesianProduct((parameterRow.values[0],)
 			, (getMetadata(parameterRow.values[0])['offset'], 3)
@@ -129,10 +129,10 @@ parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n,
 		, (('A005316',), (getMetadata('A005316')['offset'], 3), (None,), ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'))
 		, (('A007822',), (getMetadata('A007822')['offset'], 3), (None,), ('algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
 	)))
-)), indirect=('keywordArguments',))
+)))
 
 @pytest.mark.parametrize('oeisID, n, f', tuple(filter(
 	itemgetter(2), map(itemgetter(0, 1, 2), parametrizeOEISfor_n.args[1])
 )))
-def test_byFormula(callableA: CallableFunction[[int, LiteralString | None], int], n: int, f: LiteralString | None, expected: int) -> None:
-	assertEqualTo(callableA(n, f), expected, callableA.__name__, n, f)
+def test_byFormula(oeisID: OEISid, n: int, f: LiteralString | None, expected: int) -> None:
+	assertEqualTo(getattr(byFormula, oeisID)(n, f), expected, oeisID, n, f)

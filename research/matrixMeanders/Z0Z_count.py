@@ -1,4 +1,4 @@
-# ruff: file-ignore[undocumented-public-function,ambiguous-variable-name,undocumented-public-module]
+#ruff: file-ignore[undocumented-public-function,ambiguous-variable-name,undocumented-public-module]
 from __future__ import annotations
 
 from collections import defaultdict

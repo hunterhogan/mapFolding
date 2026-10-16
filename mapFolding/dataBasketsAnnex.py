@@ -1,6 +1,6 @@
-# ruff: ignore[undocumented-public-module]
+#ruff: ignore[undocumented-public-module]
 # DEVELOPMENT
-# ruff: file-ignore[private-member-access]
+#ruff: file-ignore[private-member-access]
 from __future__ import annotations
 
 from contextlib import ExitStack

@@ -1,4 +1,5 @@
-from __future__ import annotations  # ruff: ignore[undocumented-public-module]
+#ruff: ignore[undocumented-public-module]
+from __future__ import annotations
 
 from astToolkit import Be, Grab, NodeTourist, Then
 from astToolkit.changeDef import makeDictionaryFunctionDef, makeDictionaryMosDef
@@ -90,7 +91,8 @@ if count:
 else:
 	boxOfIdentifiers = map(methodcaller('removeprefix', '_'), boxOfIdentifiers)
 	boxOfIdentifiers = sorted(set(boxOfIdentifiers))
-	def has(identifier: str) -> bool:  # ruff: ignore[undocumented-public-function]
+	#ruff: ignore[undocumented-public-function]
+	def has(identifier: str) -> bool:
 		return any(string in identifier for string in containsString)
 	boxOfIdentifiers = filter(has, boxOfIdentifiers)
 	pprint(list(boxOfIdentifiers), width=120)  # ruff: ignore[p-print]

@@ -1,5 +1,5 @@
-# DEVELOPMENT  # ruff: ignore[implicit-namespace-package]
-# ruff: file-ignore[undocumented-public-module, undocumented-public-function]
+# DEVELOPMENT
+#ruff: file-ignore[undocumented-public-module, undocumented-public-function, implicit-namespace-package]
 # pyright: reportUnknownVariableType=false, reportOperatorIssue=false, reportUnknownArgumentType=false
 # pyright: reportUnknownMemberType=false, reportArgumentType=false, reportCallIssue=false, reportAssignmentType=false
 from __future__ import annotations
@@ -9,12 +9,12 @@ from astToolkit.containers import IngredientsFunction, IngredientsModule
 from fractions import Fraction
 from functools import partial, reduce
 from itertools import accumulate
-from mapFolding.kitFilesystem import readDiagonal
+from mapFolding.kitFilesystem import makePathFilenameCount, readDiagonal
 from mapFolding.theSSOT import settingsPackage
 from more_itertools import filter_map
 from operator import itemgetter, mul, sub
+from pathlib import Path
 from research.matrixMeanders.archiveTriangle.createGeneratingFunction import makeA005315Formula
-from research.matrixMeanders.infoBooth import makePathFilenameDiagonal, pathFilenameFormulaA005315PolynomialCyclic
 from sympy import Add, apart, cancel, cyclotomic_poly, factor_list, factorint, fraction, Poly, symbols
 from typing import TYPE_CHECKING
 
@@ -24,6 +24,8 @@ if TYPE_CHECKING:
 	import ast
 
 z, u = symbols('z u')
+
+pathFilenameFormulaA005315PolynomialCyclic: Path = Path(__file__).with_name('A005315PolynomialCyclic.py')
 
 def makePolynomialCyclicFormula(次function: int, diagonal: Mapping[int, int]) -> tuple[dict[int, tuple[tuple[Fraction, ...], ...]], ...]:
 	numerator, stepsNumerator, stepsDenominator = makeA005315Formula(次function, diagonal)
@@ -223,7 +225,9 @@ def makeIngredientsFunction(次function: int, formula: tuple[dict[int, tuple[tup
 if __name__ == '__main__':
 	ingredientsModule = IngredientsModule()
 	for 次function in range(2, 11):
-		diagonal: dict[int, int] = readDiagonal(makePathFilenameDiagonal(次function), 次function)
+		diagonal: dict[int, int] = readDiagonal(
+			makePathFilenameCount(settingsPackage.pathPackage / 'oeis' / 'A400429', 'diagonal', str(次function), suffix='.csv'),
+			次function)
 		ingredientsModule.appendIngredientsFunction(makeIngredientsFunction(次function, makePolynomialCyclicFormula(次function, diagonal)))
 
 	ingredientsModule.write_astModule(pathFilenameFormulaA005315PolynomialCyclic, settingsPackage.identifierPackage)

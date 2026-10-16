@@ -1,4 +1,5 @@
-from __future__ import annotations  # ruff: ignore[undocumented-public-package]
+# DOCUMENT
+from __future__ import annotations
 
 from mapFolding.oeis.A400429._A005315 import (
 	A005315of0 as A005315of0, A005315of1 as A005315of1, A005315of2 as A005315of2, A005315of3 as A005315of3, A005315of4 as A005315of4,

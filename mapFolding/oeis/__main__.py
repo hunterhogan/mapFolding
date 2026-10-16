@@ -258,8 +258,8 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		sys.stdout.write(formatBenchmarkRatio(known, computed, ratio) + '\t')
 	sys.stdout.write(f"{ansiColorReset}\n")
 
-#=SIN= Ruff suppression: the generation instructions prohibit unrequested docstrings.
-def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeStart: float, *, ratio: int = 0) -> None:  # ruff: ignore[undocumented-public-function]
+def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeStart: float, *, ratio: int = 0) -> None:
+	# DOCUMENT
 	#=SIN= Intermediate tuple: comparison, aligned output, and ratios consume the known cells separately.
 	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
 	match: bool = len(computed) == len(known) and all(map(eq, computed, known))

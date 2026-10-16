@@ -23,7 +23,7 @@ Domain labels
 		Identify a pile position.
 	形Triangle
 		Map row numbers to ordered integer values.
-	形TriangleTerms
+	形TriangleSparse
 		Map row and column numbers to individual terms.
 Generic NumPy
 	形Array1Dint64
@@ -99,63 +99,43 @@ if TYPE_CHECKING:
 	from pathlib import PurePosixPath
 	from typing import Any, LiteralString, TypeAlias
 
-#=EndNotes##TypeAlias=
-type Endpoint = int
-"""Identify an endpoint label in an arch diagram."""
-
-type EndpointPosition = int
-"""Identify an endpoint's position along the diagram axis."""
-
 type ArchDiagram = tuple[Endpoint, ...]
 """Represent an arch diagram as endpoint labels indexed by position along the axis."""
 
-Leaf: TypeAlias = int
-"""Identify a leaf in a folding.
+# SEMIOTICS
+type Endpoint = int
+"""Identify an endpoint label in an arch diagram."""
 
-(AI generated docstring)
-
-This alias uses `int` for leaf labels.
-"""
-type Pile = int
-"""Identify a pile position in a folding.
-
-(AI generated docstring)
-
-This alias uses `int` for pile labels.
-"""
+# SEMIOTICS
+type EndpointPosition = int
+"""Identify an endpoint's position along the diagram axis."""
 
 type Folding = tuple[Leaf, ...]
-"""Represent a folding as leaf labels indexed by pile position.
+# DOCUMENT
 
-This tuple contains one leaf label for each pile position; its length must match the leaf count.
-"""
+#=EndNotes##TypeAlias=
+Leaf: TypeAlias = int
+# DOCUMENT
+
+type Pile = int
+"""Location of a `Leaf` in a `Folding`."""
 
 type OEISid = LiteralString
-"""Identify an integer sequence by an OEIS label.
-
-(AI generated docstring)
-
-This alias uses `typing.LiteralString` [1] for the sequence labels used by the package.
-
-References
-----------
-[1] Python `typing.LiteralString`.
-	https://docs.python.org/3/library/typing.html#typing.LiteralString
-"""
+# DOCUMENT
 
 type 形Triangle = Mapping[int, Sequence[int]]
-"""Describe integer rows indexed by row number.
+"""Describe integer groups indexed by group key.
 
 (AI generated docstring)
 
-This mapping stores each row as an ordered sequence of values.
+This mapping stores each group as an ordered sequence of values.
 """
-type 形TriangleTerms = Mapping[int, Mapping[int, int]]
-"""Describe integer terms indexed by row number and column number.
+type 形TriangleSparse = Mapping[int, Mapping[int, int]]
+"""Describe integers indexed by group key and column number.
 
 (AI generated docstring)
 
-This nested mapping supports rows whose stored column positions need not be consecutive.
+This nested mapping supports groups whose stored integer keys need not be consecutive.
 """
 
 #================== Generic NumPy =================================================================

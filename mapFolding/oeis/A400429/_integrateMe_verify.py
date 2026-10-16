@@ -4,13 +4,13 @@ from fractions import Fraction
 from functools import partial
 from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import chain, filterfalse, groupby, repeat
-from mapFolding.kitFilesystem import readDiagonal
+from mapFolding.kitFilesystem import makePathFilenameCount, readDiagonal
 from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
 from mapFolding.oeis.A400429._integrateMe_fromTriangleCells import (
 	A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, calculateDiagonal2, calculateDiagonal3)
 from mapFolding.oeis.A400429._semi import boxOfDiagonals
+from mapFolding.theSSOT import settingsPackage
 from operator import add, itemgetter
-from research.matrixMeanders.infoBooth import makePathFilenameDiagonal
 from textwrap import wrap
 from typing import TYPE_CHECKING
 import sys
@@ -67,7 +67,9 @@ def checkDiagonal(次diagonal: int, 工diagonal: Callable[[int], int]) -> tuple[
 	return (
 		*checkFormula(f"D_{次diagonal} / A400429", 工diagonal, getTriangleDiagonal('A400429', 次diagonal))
 		, *checkFormula(f"D_{次diagonal} / counted CSV", 工diagonal
-			, readDiagonal(makePathFilenameDiagonal(次diagonal), 次diagonal))
+			, readDiagonal(
+				makePathFilenameCount(settingsPackage.pathPackage / 'oeis' / 'A400429', 'diagonal', str(次diagonal), suffix='.csv'),
+				次diagonal))
 	)
 
 def checkTriangle(triangle: 形Triangle) -> tuple[Report, ...]:

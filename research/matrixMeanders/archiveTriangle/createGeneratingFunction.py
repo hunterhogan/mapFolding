@@ -1,16 +1,15 @@
 # DEVELOPMENT
-# ruff: file-ignore[undocumented-public-module, undocumented-public-function, unnecessary-map, print]
+#ruff: file-ignore[undocumented-public-module, undocumented-public-function, unnecessary-map, print, implicit-namespace-package]
 # pyright: reportArgumentType=false
 from __future__ import annotations
 
 from functools import partial, reduce
 from humpy_cytoolz import take
-from hunterMakesPy import zeroIndexed, zip_longest
-from itertools import accumulate, chain
-from mapFolding.kitFilesystem import readDiagonal
+from hunterMakesPy import zeroIndexed
+from itertools import accumulate, chain, zip_longest
+from mapFolding.oeis import getTriangleDiagonal
 from more_itertools import distribute, split_into
 from operator import sub
-from research.matrixMeanders.infoBooth import pathFilenameTriangleSemiCommaSeparatedValues
 from sympy import mobius
 from typing import TYPE_CHECKING
 
@@ -92,9 +91,6 @@ def makeA005315Formula(次function: int, diagonal: Mapping[int, int], *, multipl
 if __name__ == '__main__':
 	次function: int = 3
 
-	numerator, stepsNumerator, stepsDenominator = makeA005315Formula(次function,
-		readDiagonal(pathFilenameTriangleSemiCommaSeparatedValues, 次function)
-		# | readDiagonal(makePathFilenameDiagonal(次function), 次function, formatData='diagonalCSV')
-	)
+	numerator, stepsNumerator, stepsDenominator = makeA005315Formula(次function, getTriangleDiagonal('A400429', 次function))
 	message: str = f"{numerator = }\n{stepsNumerator = }\n{stepsDenominator = }"
 	print(message)
