@@ -126,7 +126,6 @@ def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 
 	[3] `makeMapShape`
 
-
 	"""
 	return merge(*[keymap(partial(makeMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in oeisIDsMapFoldingImplemented])
 
@@ -264,20 +263,18 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
 	match: bool = len(computed) == len(known) and all(map(eq, computed, known))
 	timeElapsed: float = time.perf_counter() - timeStart
-	sys.stdout.write(
-		f"{n:2} "
-		f"{(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[match]}{match}{ansiColorReset}\t"
-		f"{timeElapsed:5.2f}\t"
-	)
+
+	sys.stdout.write(f"{n:2} {(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[match]}{match}{ansiColorReset}\t{timeElapsed:5.2f}\t")
+
+	width: int = max(map(len, map(str, chain(computed, known))), default=1)
+	sys.stdout.write(' '.join(map(str.rjust, chain(map(str, computed), repeat('?', max(0, len(known) - len(computed)))), repeat(width))))
+
 	if not match:
-		width: int = max(map(len, map(str, chain(computed, known))), default=1)
-		sys.stdout.write(' '.join(map(str.rjust,
-			chain(map(str, computed), repeat('?', max(0, len(known) - len(computed)))), repeat(width))))
 		if ratio:
 			sys.stdout.write('\t' + ' '.join(map(partial(formatBenchmarkRatio, ratio=ratio), known, computed)))
 		sys.stdout.write('\n' + ' ' * len(f"{n:2} {match}\t{timeElapsed:5.2f}\t".expandtabs()))
-		sys.stdout.write(' '.join(map(str.rjust,
-			chain(map(str, known), repeat('?', max(0, len(computed) - len(known)))), repeat(width))))
+		sys.stdout.write(' '.join(map(str.rjust, chain(map(str, known), repeat('?', max(0, len(computed) - len(known)))), repeat(width))))
+
 	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
