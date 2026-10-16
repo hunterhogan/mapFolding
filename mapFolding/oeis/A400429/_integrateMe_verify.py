@@ -7,7 +7,7 @@ from itertools import chain, filterfalse, groupby, repeat
 from mapFolding.kitFilesystem import readDiagonal
 from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
 from mapFolding.oeis.A400429 import A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, boxOfDiagonals
-from mapFolding.oeis.A400429._fromTriangleCells import calculateDiagonal2, calculateDiagonal3
+from mapFolding.oeis.A400429._integrateMe_fromTriangleCells import calculateDiagonal2, calculateDiagonal3
 from operator import add, itemgetter
 from research.matrixMeanders.infoBooth import makePathFilenameDiagonal
 from textwrap import wrap
@@ -66,7 +66,7 @@ def checkDiagonal(次diagonal: int, 工diagonal: Callable[[int], int]) -> tuple[
 	return (
 		*checkFormula(f"D_{次diagonal} / A400429", 工diagonal, getTriangleDiagonal('A400429', 次diagonal))
 		, *checkFormula(f"D_{次diagonal} / counted CSV", 工diagonal
-			, readDiagonal(makePathFilenameDiagonal(次diagonal), 次diagonal, formatData='diagonalCSV'))
+			, readDiagonal(makePathFilenameDiagonal(次diagonal), 次diagonal))
 	)
 
 def checkTriangle(triangle: 形Triangle) -> tuple[Report, ...]:

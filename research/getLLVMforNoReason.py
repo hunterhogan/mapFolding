@@ -1,5 +1,3 @@
-# pyright: reportMissingTypeStubs=false
-# pyright: reportUnknownMemberType=false
 """
 Utility for extracting LLVM IR from compiled Python modules.
 

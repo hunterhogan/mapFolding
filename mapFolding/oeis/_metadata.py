@@ -1,18 +1,23 @@
 from __future__ import annotations
 
-from functools import cache
-from humpy_cytoolz import get_in
+from functools import cache, partial
+from humpy_cytoolz import dissoc, get_in, merge
 from hunterMakesPy import errorL33T
-from mapFolding.kitFilesystem import getCacheOrURL
-from mapFolding.oeis._beDRY import formatOEISid, parse_bFile
+from itertools import count, takewhile
+from mapFolding.dataStructures import (
+	getTriangleIndices as triangleIndices, makeLookupDiagonal, makeLookupTriangle, sequenceToTriangle, triangleToSequence)
+from mapFolding.kitFilesystem import getCacheOrURL, readText, writeText
+from mapFolding.oeis._beDRY import formatBFile, formatOEISid, parse_bFile
 from mapFolding.oeis._dataBaskets import MetadataOEISid
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
 from oeis_tools import oeis_bfile, oeis_url  # pyright: ignore[reportMissingTypeStubs] https://github.com/oeistools/oeis-tools/pull/12
+from operator import add
 from typing import TYPE_CHECKING
 import warnings
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import OEISid
+	from collections.abc import Iterable, Mapping, Sequence
+	from mapFolding.theTypes import OEISid, 形Triangle, 形TriangleTerms
 	from pathlib import Path
 
 #================== Sausage =======================================================================
@@ -106,6 +111,116 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 	"""
 	return get_in((str(formatOEISid(oeisID)),), dictionaryOEIS, dict[str, dict[int, int]]()).get(
 		'valuesKnown', dict[int, int]([(-errorL33T, -errorL33T)]))
+
+def getTriangleRows(oeisID: OEISid) -> 形Triangle:
+	"""Group known values for `oeisID` into numbered triangle rows.
+
+	(AI generated docstring)
+
+	You can use this function to access a supported sequence as rows for further analysis. This
+	function obtains the sequence metadata through `mapFolding.oeis.getMetadata` [1] and returns
+	a new dictionary mapping row numbers to lists of known values.
+
+	Row Boundaries
+	--------------
+	`mapFolding.oeis._dataBaskets.MetadataOEISid` [2] supplies the starting row through `rowStart`,
+	falling back to `offset`. When metadata supplies `rowLength`, the function evaluates `rowLength`
+	for successive row numbers. Otherwise, requested row lengths begin at one and increase by one,
+	regardless of the starting row number.
+
+	`mapFolding.dataStructures.makeLookupTriangle` [3] groups consecutive known indices starting at
+	`offset`. Grouping ends at the first missing sequence index. A
+	partially known final row is retained. Grouping stops at the first empty row, including an empty
+	row caused by a requested length of zero. The function does not check whether the sequence
+	represents a triangle.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Identifier of a sequence present in the package metadata. Lookup ignores letter case and
+		leading or trailing whitespace.
+
+	Returns
+	-------
+	triangleRows : 形Triangle
+		Consecutive row numbers mapped to newly allocated lists of known sequence values.
+
+	Unknown Sequences
+	-----------------
+	This function propagates `KeyError` from the metadata lookup if the normalized `oeisID` is
+	absent from the package metadata.
+
+	Examples
+	--------
+	`getTriangleDiagonal` [4] obtains rows with the following call before selecting a diagonal,
+	using the caller's `oeisID`.
+
+		```python
+		from mapFolding.oeis import getTriangleRows
+
+		getTriangleRows(oeisID)
+		```
+
+	References
+	----------
+	[1] `mapFolding.oeis.getMetadata`
+
+	[2] `mapFolding.oeis._dataBaskets.MetadataOEISid`
+
+	[3] `mapFolding.dataStructures.makeLookupTriangle`
+
+	[4] `getTriangleDiagonal`
+
+	"""
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	rowStart: int = metadata.get('rowStart', metadata['offset'])
+	rowLengths: Iterable[int] | None = None
+	if 'rowLength' in metadata:
+		rowLengths = map(metadata['rowLength'], count(rowStart))
+	return makeLookupTriangle(map(metadata['valuesKnown'].__getitem__,
+		takewhile(metadata['valuesKnown'].__contains__, count(metadata['offset']))), rowLengths, rowStart)
+
+def getTriangleTerms(oeisID: OEISid) -> 形TriangleTerms:
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	rowStart: int = metadata.get('rowStart', metadata['offset'])
+	rowLengths: Iterable[int] | None = None
+	if 'rowLength' in metadata:
+		rowLengths = map(metadata['rowLength'], count(rowStart))
+	return sequenceToTriangle(metadata['valuesKnown'], rowLengths, rowStart, metadata['offset'])
+
+def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	return makeLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
+		rowLength=metadata.get('rowLength', partial(add, 1 - metadata.get('rowStart', metadata['offset']))))
+
+def getTriangleIndices(oeisID: OEISid, n: int) -> range:
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	return triangleIndices(n, rowStart=metadata.get('rowStart', metadata['offset']), offset=metadata['offset'],
+		rowLength=metadata.get('rowLength'))
+
+def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
+	oeisID = formatOEISid(oeisID)
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	pathFilename: Path = pathCache / oeis_bfile(oeisID)
+	contents: str = readText(pathFilename, default='')
+	known: dict[int, int] = {}
+	if contents:
+		known = parse_bFile(contents)
+	sequence = dissoc(merge(sequence, metadata['valuesKnown']), -errorL33T, *known)
+	if sequence:
+		known.update(sequence)
+		contents = ''.join(map('{}\n'.format, filter(lambda record: record.lstrip().startswith('#'), contents.splitlines())))
+		writeText(contents + formatBFile(known), pathFilename)
+	metadata['valuesKnown'].clear()
+	metadata['valuesKnown'].update(sorted(known.items()))
+	metadata['valueUnknown'] = max(known, default=metadata['offset'] - 1) + 1
+	return pathFilename
+
+def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> Path:
+	metadata: MetadataOEISid = getMetadata(oeisID)
+	return updateBFile(oeisID, triangleToSequence(triangle, rowStart=metadata.get('rowStart', metadata['offset']),
+		offset=metadata['offset'], rowLength=metadata.get('rowLength')))
+
 
 #================== Meat grinders =================================================================
 

@@ -36,6 +36,7 @@ if __name__ == "__main__":
 	oeisID = "A000136"
 
 	printEasyRunHeader(oeisID, flow)
+	ratio: int = 0
 
 	for n in range(12, 14):
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
@@ -66,7 +67,7 @@ if __name__ == "__main__":
 		if oeisID == "A000136" and 3 < n:  # pyright: ignore[reportUnnecessaryComparison]
 			computed += 2 * _A000682(state.totalLeaves - 1) * state.totalLeaves  # pyright: ignore[reportOptionalMemberAccess] # ty: ignore[unresolved-attribute]
 
-		printEasyRunBenchmark(oeisID, n, computed, timeStart, ratio=False)
+		printEasyRunBenchmark(oeisID, n, computed, timeStart, ratio=ratio)
 
 r"""
 title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on mapFolding\_e\easyRun\eliminateFolds.py & title I'm done

@@ -26,16 +26,21 @@ from hunterMakesPy import raiseIfNone
 from mapFolding._e.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import (
 	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
-	saveTotal)
+	readDiagonal, readTriangle, readTriangleIncomplete, saveTotal, writeDiagonal, writeTriangle, writeTriangleIncomplete)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
+from mapFolding.tests.dataSamples.triangleData import triangleDense, triangleSparse
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
+from typing import TYPE_CHECKING
 import io
 import numpy
 import pandas
 import pytest
 import unittest.mock
+
+if TYPE_CHECKING:
+	from collections.abc import Mapping, Sequence
 
 @pytest.mark.parametrize(
 	'totalDimensions, suffix, expected'
@@ -109,3 +114,37 @@ def test_getPathFilenameTotalFolds_createsDirs(mapShape: tuple[int, ...], pathRo
 	pathFilenameTotalFolds: Path = makePathFilenameFolds(mapShape, pathLikeWrite=pathFilenameNested)
 	assertEqualTo(pathFilenameTotalFolds.parent.exists(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=pathFilenameNested)
 	assertEqualTo(pathFilenameTotalFolds.parent.is_dir(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite=pathFilenameNested)
+
+@pytest.mark.parametrize('triangle, append, expected', (
+	pytest.param(triangleDense, False, triangleDense, id='replace'),
+	pytest.param(triangleDense, True, {2: (11, 13), 3: (17, 19, 23), 5: (29,), 7: (37,)}, id='append'),
+))
+def test_writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path, append: bool,
+	expected: dict[int, tuple[int, ...]]) -> None:
+	writeTriangle({7: (37,)}, pathFilename)
+	writeTriangle(triangle, pathFilename, append=append)
+	assertEqualTo(readTriangle(pathFilename), expected, writeTriangle.__name__, triangle)
+
+@pytest.mark.parametrize('triangleTerms, expected', ((triangleSparse, triangleSparse), ({2: {1: 0, 4: 2 ** 100}}, {2: {1: 0, 4: 2 ** 100}}), ({}, {})))
+def test_writeTriangleIncomplete(triangleTerms: Mapping[int, Mapping[int, int]], pathFilename: Path,
+	expected: dict[int, dict[int, int]]) -> None:
+	writeTriangleIncomplete(triangleTerms, pathFilename)
+	assertEqualTo(readTriangleIncomplete(pathFilename), expected, writeTriangleIncomplete.__name__, triangleTerms)
+
+@pytest.mark.parametrize('diagonal, 次diagonal, append, expected', (
+	pytest.param({3: 11, 5: 2 ** 100}, 2, False, {3: 11, 5: 2 ** 100}, id='replace'),
+	pytest.param({3: 11, 5: 2 ** 100}, 2, True, {3: 11, 5: 2 ** 100, 7: 37}, id='append'),
+))
+def test_writeDiagonal(diagonal: Mapping[int, int], pathFilename: Path, 次diagonal: int, append: bool, expected: dict[int, int]) -> None:
+	writeDiagonal({7: 37}, pathFilename, 次diagonal)
+	writeDiagonal(diagonal, pathFilename, 次diagonal, append=append)
+	assertEqualTo(readDiagonal(pathFilename, 次diagonal), expected, writeDiagonal.__name__, diagonal)
+
+@pytest.mark.parametrize('pathFilename, 次diagonal, expected', (
+	pytest.param('3,2,11\n3,2,13\n', 2, ValueError, id='duplicate-row'),
+	pytest.param('3,2\n', 2, ValueError, id='missing-value'),
+	pytest.param('3,2,11,13\n', 2, ValueError, id='extra-value'),
+), indirect=('pathFilename',))
+def test_readDiagonalError(pathFilename: Path, 次diagonal: int, expected: type[Exception]) -> None:
+	with pytest.raises(expected):
+		readDiagonal(pathFilename, 次diagonal)

@@ -1,0 +1,138 @@
+from __future__ import annotations
+
+from itertools import chain, product as CartesianProduct, starmap
+from mapFolding.oeis import getMetadata
+from mapFolding.tests import assertEqualTo
+from operator import itemgetter
+from typing import TYPE_CHECKING
+import pytest
+
+if TYPE_CHECKING:
+	from hunterMakesPy import CallableFunction
+	from typing import LiteralString
+
+# TODO There isn't a better way to do this?
+# It is good that it is NOT a faux pytest data structure.
+# Bad: it's not dry. When the module it tests updates, this must be manually updated.
+# There must be a way to simplify with CartesianProduct.
+parametrizeOEISidByFormula: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, f', (
+	pytest.param('A000136', 'A000560')
+	, pytest.param('A000136', 'A001011 and A001010')
+	, pytest.param('A000136', 'A223094 and A000682')
+	, pytest.param('A000136', 'A223095, A077014, and A000682')
+	, pytest.param('A000136', 'A227167')
+	, pytest.param('A000136', 'A000682')
+	, pytest.param('A000560', 'A000136')
+	, pytest.param('A000560', 'A000682')
+	, pytest.param('A000682', 'A000560')
+	, pytest.param('A000682', 'A001010')
+	, pytest.param('A000682', 'A223094')
+	, pytest.param('A000682', 'A259689')
+	, pytest.param('A000682', 'A301620')
+	, pytest.param('A000682', 'A337581')
+	, pytest.param('A000682', 'A077460, A005316, and A223093')
+	, pytest.param('A000682', 'A223093 and A005316')
+	, pytest.param('A000682', 'A223093 and A077014')
+	, pytest.param('A000682', 'A000136, A077014, and A223095')
+	, pytest.param('A000682', 'A223094 and A000682')
+	, pytest.param('A000682', 'A259702 and A000682')
+	, pytest.param('A000682', 'A333971 and A000682')
+	, pytest.param('A000682', 'A334615 and A000682')
+	, pytest.param('A000682', 'A060206 and A000560')
+	, pytest.param('A000682', 'A000136')
+	, pytest.param('A001010', 'A001011 and A000682')
+	, pytest.param('A001010', 'A007822 and A000682')
+	, pytest.param('A001011', 'A001010 and A000682')
+	, pytest.param('A005315', 'A077460, A005316, and A060206')
+	, pytest.param('A005315', 'A078591')
+	, pytest.param('A005315', 'A085973 and A077054')
+	, pytest.param('A005315', 'A208357')
+	, pytest.param('A005315', 'A005316')
+	, pytest.param('A005316', 'A077014')
+	, pytest.param('A005316', 'A077054 and A005315')
+	, pytest.param('A005316', 'A077460, A005315, and A060206')
+	, pytest.param('A005316', 'A078592 and A005315')
+	, pytest.param('A005316', 'A227167, A217310, and A217318')
+	, pytest.param('A005316', 'A000682 and A223093')
+	, pytest.param('A007822', 'A001010')
+	, pytest.param('A060206', 'A077460, A005315, and A005316')
+	, pytest.param('A060206', 'A000682')
+	, pytest.param('A077014', 'A000682 and A223093')
+	, pytest.param('A077014', 'A223095 and A000682')
+	, pytest.param('A077014', 'A005316')
+	, pytest.param('A077054', 'A085973 and A005315')
+	, pytest.param('A077054', 'A005316')
+	, pytest.param('A077460', 'A005315, A005316, and A060206')
+	, pytest.param('A077460', 'A000682 and A005316')
+	, pytest.param('A078591', 'A005316')
+	, pytest.param('A078591', 'A005315')
+	, pytest.param('A078592', 'A005316')
+	, pytest.param('A085973', 'A077054 and A005315')
+	, pytest.param('A085973', 'A005316')
+	, pytest.param('A208357', 'A005315')
+	, pytest.param('A208357', 'A005316')
+	, pytest.param('A217310', 'A223093')
+	, pytest.param('A217310', 'A227167, A217318, and A005316')
+	, pytest.param('A217310', 'A000682 and A005316')
+	, pytest.param('A217318', 'A223095')
+	, pytest.param('A217318', 'A227167, A217310, and A005316')
+	, pytest.param('A217318', 'A005316 and A000682')
+	, pytest.param('A223093', 'A217310')
+	, pytest.param('A223093', 'A223094 and A223095')
+	, pytest.param('A223093', 'A000682 and A077014')
+	, pytest.param('A223093', 'A000682 and A005316')
+	, pytest.param('A223094', 'A223094 and A000682')
+	, pytest.param('A223094', 'A223093 and A223095')
+	, pytest.param('A223094', 'A000682')
+	, pytest.param('A223095', 'A077014, and A000682')
+	, pytest.param('A223095', 'A223094 and A223093')
+	, pytest.param('A223095', 'A217318')
+	, pytest.param('A223095', 'A000682 and A005316')
+	, pytest.param('A227167', 'A217310, A217318, and A005316')
+	, pytest.param('A227167', 'A000136')
+	, pytest.param('A259689', 'A000682')
+	, pytest.param('A259702', 'A301620')
+	, pytest.param('A259702', 'A000682')
+	, pytest.param('A301620', 'A334615, A301620, and A000682')
+	, pytest.param('A301620', 'A259689')
+	, pytest.param('A301620', 'A259702')
+	, pytest.param('A301620', 'A000682')
+	, pytest.param('A333971', 'A000682')
+	, pytest.param('A334615', 'A000560')
+	, pytest.param('A334615', 'A001010')
+	, pytest.param('A334615', 'A259702')
+	, pytest.param('A334615', 'A337581')
+	, pytest.param('A334615', 'A227167')
+	, pytest.param('A334615', 'A223094')
+	, pytest.param('A334615', 'A301620')
+	, pytest.param('A334615', 'A005316 and A223093')
+	, pytest.param('A334615', 'A005316 and A217310')
+	, pytest.param('A334615', 'A000682')
+	, pytest.param('A337581', 'A000682')
+))
+
+parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n, f, keywordArguments', tuple(chain(
+	chain.from_iterable(
+		CartesianProduct((parameterRow.values[0],)
+			, (getMetadata(parameterRow.values[0])['offset'], 3)
+			, (parameterRow.values[1],), (None,))
+			for parameterRow in parametrizeOEISidByFormula.args[1])
+
+	, chain.from_iterable(starmap(CartesianProduct, (
+		(('A000136',), (getMetadata('A000136')['offset'], 3), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+		, (('A001415',), (getMetadata('A001415')['offset'], 3), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+		, (('A001416',), (getMetadata('A001416')['offset'], 3), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+		, (('A001417',), (getMetadata('A001417')['offset'],), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+		, (('A001418',), (getMetadata('A001418')['offset'],), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+		, (('A195646',), (getMetadata('A195646')['offset'],), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+		, (('A000682',), (getMetadata('A000682')['offset'], 3), (None,), ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'))
+		, (('A005316',), (getMetadata('A005316')['offset'], 3), (None,), ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'))
+		, (('A007822',), (getMetadata('A007822')['offset'], 3), (None,), ('algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
+	)))
+)), indirect=('keywordArguments',))
+
+@pytest.mark.parametrize('oeisID, n, f', tuple(filter(
+	itemgetter(2), map(itemgetter(0, 1, 2), parametrizeOEISfor_n.args[1])
+)))
+def test_byFormula(callableA: CallableFunction[[int, LiteralString | None], int], n: int, f: LiteralString | None, expected: int) -> None:
+	assertEqualTo(callableA(n, f), expected, callableA.__name__, n, f)

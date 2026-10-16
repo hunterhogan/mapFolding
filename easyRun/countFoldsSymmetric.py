@@ -23,6 +23,7 @@ if __name__ == '__main__':
 	flow = 'theorem2Numba'
 
 	printEasyRunHeader(oeisID, flow)
+	ratio: int = 0
 
 	for n in range(7, 9):
 
@@ -31,4 +32,4 @@ if __name__ == '__main__':
 		timeStart: float = time.perf_counter()
 		totalFolds: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
 
-		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=False)
+		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=ratio)

@@ -1,10 +1,11 @@
+#=SIN= Ruff suppression: the generation instructions prohibit unrequested docstrings.
+# ruff: file-ignore[undocumented-public-function]
 """Construct array storage and row-indexed integer lookups.
 
 (AI generated docstring)
 
 You can use this module to allocate NumPy arrays [1], construct folding connection graphs, and
-organize integer sequences into rows or diagonals. Parsing functions read comma-separated records
-through the Python `csv` module [2].
+organize integer sequences into rows or diagonals.
 
 Contents
 --------
@@ -17,41 +18,33 @@ Functions
 		Select a column offset from each available row of an integer table.
 	makeLookupTriangle
 		Split consecutive sequence values into numbered rows.
-	make_memmap
-		Request an array backed by a named file.
 	make_zeros
 		Allocate a zero-filled array with the common container signature.
-	parseCSVtoIntegers
-		Read nonempty comma-separated records as tuples of integers.
-	parseDiagonal
-		Read a diagonal from triangle records or explicit diagonal records.
-	parseTriangle
-		Map the first integer of each record to the remaining row values.
 
 References
 ----------
 [1] NumPy reference.
 	https://numpy.org/doc/stable/reference/index.html
-[2] Python `csv` module.
-	https://docs.python.org/3/library/csv.html
 """
 from __future__ import annotations
 
-from csv import reader as csv_reader
-from hunterMakesPy import inclusive
-from itertools import count, starmap, takewhile
-from mapFolding.theTypes import 形NumPyTotalLeaves
+from collections.abc import Mapping
+from functools import partial
+from humpy_cytoolz import keymap, merge, valmap
+from hunterMakesPy import inclusive, oneIndexed
+from itertools import count, repeat, starmap, takewhile, tee
+from mapFolding.theTypes import 形NumPyInteger, 形NumPyTotalLeaves
 from more_itertools import split_into
 from numba import jit
-from operator import itemgetter
-from typing import TYPE_CHECKING
+from numpy import dtype, memmap
+from operator import add, itemgetter, sub
+from typing import Any, TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable, Mapping, Sequence
-	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D, 形NumPyInteger
-	from numpy import dtype, dtype as numpy_dtype, memmap, ndarray
-	from typing import Any, Literal
+	from collections.abc import Callable, Iterable, Sequence
+	from mapFolding.theTypes import 形ArrayTotalLeaves1D, 形ArrayTotalLeaves2D, 形ArrayTotalLeaves3D
+	from numpy import dtype as numpy_dtype, ndarray
 
 def getConnectionGraph(mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Construct the map connection graph and cast its elements to `datatype`.
@@ -185,7 +178,7 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | 
 	replace the same binding.
 
 	The local allocator in `mapFolding.algorithms.matrixMeandersNumPy` [3] delegates to
-	`make_memmap` [4], which uses `name` as a filename stem. Supply a meaningful `name` at allocation
+	`mapFolding.kitFilesystem.make_memmap` [4], which uses `name` as a filename stem. Supply a meaningful `name` at allocation
 	sites that may later use file-backed storage, even when the current allocator ignores `name`.
 
 	Examples
@@ -204,7 +197,7 @@ def makeDataContainer(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | 
 
 	[3] `mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer`
 
-	[4] `make_memmap`
+	[4] `mapFolding.kitFilesystem.make_memmap`
 
 	"""
 	return make_zeros(shape, datatype, name)
@@ -213,7 +206,7 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 	"""Open file-backed array storage named from `name`.
 
 	You can use this function to request a NumPy memory-mapped array [1] with `shape` and `datatype`.
-	This function forwards the filename `f'{name}.mM'` and the literal mode `'write'` to the
+	This function forwards the filename `f'{name}.mM'` and the mode `'w+'` to the
 	NumPy constructor.
 
 	Parameters
@@ -230,12 +223,6 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 	container : memmap[tuple[Any, ...], dtype[形NumPyInteger]]
 		File-backed array if the constructor accepts the supplied arguments.
 
-	Validation Failures
-	-------------------
-	ValueError
-		If the NumPy constructor rejects the mode `'write'`. The documented NumPy modes are
-		`'r'`, `'r+'`, `'w+'`, and `'c'` [1].
-
 	Examples
 	--------
 	`mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer` [2] forwards allocation requests.
@@ -251,10 +238,10 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 	[2] `mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer`
 
 	"""
-	return numpy.memmap(f'{name}.mM', datatype, mode='write', shape=shape)
+	return numpy.memmap(f'{name}.mM', datatype, mode='w+', shape=shape)
 
 @jit(nopython=True, error_model='numpy', fastmath=True)
-def make_zeros(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:  # ruff: ignore[undocumented-public-function, unused-function-argument]
+def make_zeros(shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:  # ruff: ignore[unused-function-argument]
 	return numpy.zeros(shape, datatype)
 
 def makeLookupTriangle(sequence: Iterable[int], rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> dict[int, list[int]]:
@@ -289,7 +276,7 @@ def makeLookupTriangle(sequence: Iterable[int], rowLengths: Iterable[int] | None
 
 	Examples
 	--------
-	`mapFolding.oeis._beDRY.parseTriangleBFile` [2] passes the parsed sequence values and row layout.
+	`mapFolding.oeis.getTriangleRows` [2] passes the parsed sequence values and row layout.
 
 		```python
 		makeLookupTriangle(sequence.values(), rowLengths, rowStart)
@@ -299,15 +286,15 @@ def makeLookupTriangle(sequence: Iterable[int], rowLengths: Iterable[int] | None
 	----------
 	[1] more-itertools `split_into`.
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.split_into
-	[2] `mapFolding.oeis._beDRY.parseTriangleBFile`
+	[2] `mapFolding.oeis.getTriangleRows`
 
 	"""
 	rowLengths = rowLengths or count(1)
 	return dict(enumerate(takewhile(bool, split_into(sequence, rowLengths)), rowStart))
 
-# Improve
 def makeLookupDiagonal(
-	triangle: Mapping[int, Sequence[int]], 次diagonal: int, *, fromRight: bool = True, rowLength: Callable[[int], int] | None = None
+	triangle: Mapping[int, Sequence[int] | Mapping[int, int]], 次diagonal: int, *, fromRight: bool = True,
+	rowLength: Callable[[int], int] | None = None
 ) -> dict[int, int]:
 	"""Select one diagonal from the numbered rows of an integer table.
 
@@ -328,15 +315,16 @@ def makeLookupDiagonal(
 
 	Parameters
 	----------
-	triangle : Mapping[int, Sequence[int]]
-		Rows keyed by row number, with each row stored from left to right.
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Rows keyed by row number, with dense values stored from left to right and sparse columns starting at one.
 	次diagonal : int
 		Distance from the selected row edge, normally starting at one. Negative values are rejected.
 	fromRight : bool = True
 		Select relative to the right edge when `True`, or the left edge when `False`.
 	rowLength : Callable[[int], int] | None = None
 		Expected complete row length from a row number. With `fromRight=True`, use this length
-		instead of the stored row length. The function ignores `rowLength` with `fromRight=False`.
+		instead of the stored row length. Sparse rows require this callable for right-edge selection.
+		The function ignores `rowLength` with `fromRight=False`.
 
 	Returns
 	-------
@@ -348,63 +336,97 @@ def makeLookupDiagonal(
 	ValueError
 		If `次diagonal` is negative.
 
-	Examples
-	--------
-	`parseDiagonal` [1] selects a diagonal after parsing numbered rows with `parseTriangle` [2].
-
-		```python
-		diagonal = makeLookupDiagonal(
-			parseTriangle(contents), 次diagonal, fromRight=fromRight, rowLength=rowLength
-		)
-		```
-
-	References
-	----------
-	[1] `parseDiagonal`
-
-	[2] `parseTriangle`
-
 	"""
 	if 次diagonal < 0:
 		message: str = f"I received `{次diagonal = }`, but diagonal positions must be non-negative."
 		raise ValueError(message)
+	if fromRight:
+		return merge(*map(rowToColumnTerm,
+			map(sub, map(partial(triangleRowLength, triangle, rowLength=rowLength), sorted(triangle)), repeat(次diagonal - 1)),
+			repeat(triangle), sorted(triangle)))
+	return triangle_getColumn(次diagonal, triangle)
 
-	def locateColumn(rowNumber: int, sequence: Sequence[int]) -> tuple[int, Sequence[int], int]:
-		column: int = 次diagonal - 1
-		if fromRight:
-			column = (len(sequence) if rowLength is None else rowLength(rowNumber)) - 次diagonal
-		return rowNumber, sequence, column
+def triangleRowLength(triangle: Mapping[int, Sequence[int] | Mapping[int, int]], rowNumber: int, *,
+	rowLength: Callable[[int], int] | None = None) -> int:
+	if rowLength is not None:
+		return rowLength(rowNumber)
+	if isinstance(triangle[rowNumber], Mapping):
+		message: str = f"I received sparse terms for `{rowNumber = }`, but I need `rowLength` to locate the right edge."
+		raise TypeError(message)
+	return len(triangle[rowNumber])
 
-	return {coordinate[0]: coordinate[1][coordinate[2]]
-			for coordinate in filter(lambda coordinate: 0 <= coordinate[2] < len(coordinate[1])
-			, starmap(locateColumn, sorted(triangle.items())))}
+def triangle_getColumn(column_k: int, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> dict[int, int]:
+	return merge(*map(partial(rowToColumnTerm, column_k, triangle), sorted(triangle)))
 
-# Improve
-def parseCSVtoIntegers(lines: Iterable[str]) -> Iterable[tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
-	return (tuple(map(int, row)) for row in filter(bool, csv_reader(lines)))
+def subtractTerms(rowTermsMinuend: Mapping[int, int], rowTermsSubtrahend: Mapping[int, int]) -> dict[int, int]:
+	positionsTerms, positionsMinuend, positionsSubtrahend = tee(filter(rowTermsSubtrahend.__contains__, rowTermsMinuend), 3)
+	return dict(zip(positionsTerms, map(sub, map(rowTermsMinuend.__getitem__, positionsMinuend)
+		, map(rowTermsSubtrahend.__getitem__, positionsSubtrahend)), strict=True))
 
-# Improve
-def parseTriangle(contents: str) -> dict[int, tuple[int, ...]]:  # ruff: ignore[undocumented-public-function]
-	return dict(map(itemgetter(0, slice(1, None)), parseCSVtoIntegers(contents.splitlines())))
+def sequenceToLookup(rowTerms: Sequence[int] | Mapping[int, int]) -> Mapping[int, int]:
+	if not isinstance(rowTerms, Mapping):
+		rowTerms = dict(enumerate(rowTerms, oneIndexed))
+	return rowTerms
 
-# Improve
-def parseDiagonal(contents: str, 次diagonal: int, *, formatData: Literal['triangleCSV', 'diagonalCSV'] = 'triangleCSV',  # ruff: ignore[undocumented-public-function]
-	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
-	diagonal: dict[int, int]
-	if formatData == 'diagonalCSV':
-		records: tuple[tuple[int, ...], ...] = tuple(parseCSVtoIntegers(contents.splitlines()))
-		if not all(len(record) == 3 for record in records):
-			message: str = "I received a diagonal CSV record without exactly three integers: a row, a diagonal, and a value."
-			raise ValueError(message)
-		records = tuple(filter(lambda record: record[1] == 次diagonal, records))
-		diagonal = dict(map(itemgetter(0, 2), records))
-		if len(diagonal) != len(records):
-			message = f"I received duplicate rows for `{次diagonal = }`."
-			raise ValueError(message)
-		diagonal = dict(sorted(diagonal.items()))
-	elif formatData == 'triangleCSV':
-		diagonal = makeLookupDiagonal(parseTriangle(contents), 次diagonal, fromRight=fromRight, rowLength=rowLength)
-	else:
-		message = f"I received `{formatData = }`, but I support 'triangleCSV' and 'diagonalCSV' diagonals."
+def positionCountToTerms(次term: int, count: int | None) -> dict[int, int]:
+	boxOfKnownTerms: dict[int, int] = {}
+	if count is not None:
+		boxOfKnownTerms = {次term: count}
+	return boxOfKnownTerms
+
+def rowToColumnTerm(column_k: int, triangle: Mapping[int, Sequence[int] | Mapping[int, int]], row_n: int) -> dict[int, int]:
+	rowTerms = triangle[row_n]
+	count: int | None = None
+	if isinstance(rowTerms, Mapping):
+		count = rowTerms.get(column_k)
+	elif oneIndexed <= column_k <= len(rowTerms):
+		count = rowTerms[column_k - oneIndexed]
+	return positionCountToTerms(row_n, count)
+
+def triangleToDiagonalTerms(次diagonal: int, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> dict[int, int]:
+	return makeLookupDiagonal(triangle, 次diagonal, rowLength=int)
+
+def termsToTuple(rowTerms: Sequence[int] | Mapping[int, int], boxOfPositions: Sequence[int] | None = None) -> tuple[int, ...]:
+	rowTerms = sequenceToLookup(rowTerms)
+	if boxOfPositions is None:
+		boxOfPositions = sorted(rowTerms)
+	return tuple(map(rowTerms.__getitem__, boxOfPositions))
+
+def rowIsComplete(rowNumberAndTerms: tuple[int, Mapping[int, int]], *, rowLength: Callable[[int], int] = int) -> bool:
+	rowNumber, rowTerms = rowNumberAndTerms
+	rangeColumns: range = range(oneIndexed, rowLength(rowNumber) + oneIndexed)
+	return len(rowTerms) == len(rangeColumns) and all(map(rowTerms.__contains__, rangeColumns))
+
+def completeTriangle(triangleTerms: Mapping[int, Mapping[int, int]], *, rowLength: Callable[[int], int] = int) -> dict[int, tuple[int, ...]]:
+	return valmap(termsToTuple, dict(filter(partial(rowIsComplete, rowLength=rowLength), triangleTerms.items())))
+
+def getTriangleIndices(n: int, *, rowStart: int = 1, offset: int = 1, rowLength: Callable[[int], int] | None = None) -> range:
+	if n < rowStart:
+		message: str = f"I received `{n = }`, but triangle rows start at `{rowStart = }`."
 		raise ValueError(message)
-	return diagonal
+	if rowLength is None:
+		rowLength = partial(add, 1 - rowStart)
+	index: int = offset + sum(map(rowLength, range(rowStart, n)))
+	return range(index, index + rowLength(n))
+
+def rowToSequence(rowNumber: int, rowTerms: Sequence[int] | Mapping[int, int], *, rowStart: int = 1, offset: int = 1,
+	rowLength: Callable[[int], int] | None = None) -> dict[int, int]:
+	rangeIndices: range = getTriangleIndices(rowNumber, rowStart=rowStart, offset=offset, rowLength=rowLength)
+	rowTerms = sequenceToLookup(rowTerms)
+	if not all(map(range(oneIndexed, len(rangeIndices) + oneIndexed).__contains__, rowTerms)):
+		message: str = f"I received `{rowTerms = }` outside the complete row at `{rowNumber = }`."
+		raise ValueError(message)
+	return keymap(partial(add, rangeIndices.start - oneIndexed), rowTerms)
+
+def triangleToSequence(triangle: Mapping[int, Sequence[int] | Mapping[int, int]], *, rowStart: int = 1, offset: int = 1,
+	rowLength: Callable[[int], int] | None = None) -> dict[int, int]:
+	return merge(*starmap(partial(rowToSequence, rowStart=rowStart, offset=offset, rowLength=rowLength), sorted(triangle.items())))
+
+def rowIndicesToTerms(rowIndices: Sequence[int], sequence: Mapping[int, int]) -> dict[int, int]:
+	columns, indexes = tee(filter(lambda term: term[1] in sequence, enumerate(rowIndices, oneIndexed)))
+	return dict(zip(map(itemgetter(0), columns), map(sequence.__getitem__, map(itemgetter(1), indexes)), strict=True))
+
+def sequenceToTriangle(sequence: Mapping[int, int], rowLengths: Iterable[int] | None = None, rowStart: int = 1,
+	offset: int = 1) -> dict[int, dict[int, int]]:
+	return valmap(partial(rowIndicesToTerms, sequence=sequence),
+		makeLookupTriangle(range(offset, max(sequence, default=offset - 1) + 1), rowLengths, rowStart))

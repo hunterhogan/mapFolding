@@ -16,7 +16,7 @@ if __name__ == '__main__':
 	oeisID: OEISid = 'A000682'
 	kind: str = 'semi'
 	printEasyRunHeader(oeisID, flow)
-
+	ratio: int = 0
 	boxOf_n: list[int] = []
 	boxOf_n.extend(range(2, 24))
 	boxOf_n.extend(range(24, 28))
@@ -29,6 +29,6 @@ if __name__ == '__main__':
 		state: StateMeanders = countMeanders(kind, n, flow)
 		countTotal: int = state.totalMeanders
 
-		printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
+		printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=ratio)
 
 	checkFormulas()

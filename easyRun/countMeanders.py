@@ -37,6 +37,8 @@ if __name__ == '__main__':
 			('A000682', 'semi'),
 		]
 
+	ratio: int = 0
+
 	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
 		printEasyRunHeader(oeisID, flow)
 
@@ -58,7 +60,7 @@ if __name__ == '__main__':
 			gc.collect()
 			countTotal: int = state.totalMeanders
 
-			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=False)
+			printEasyRunBenchmark(oeisID, n, countTotal, timeStart, ratio=ratio)
 
 r"""
 

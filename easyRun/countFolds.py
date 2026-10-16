@@ -34,6 +34,7 @@ if __name__ == '__main__':
 	oeisID = 'A001415'
 
 	printEasyRunHeader(oeisID, flow)
+	ratio: int = 0
 
 	for n in range(14, 15):
 
@@ -42,4 +43,4 @@ if __name__ == '__main__':
 		timeStart: float = time.perf_counter()
 		totalFolds: int = countFolds(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 
-		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=False)
+		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=ratio)

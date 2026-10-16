@@ -1,141 +1,22 @@
 from __future__ import annotations
 
-from itertools import chain, product as CartesianProduct, starmap
-from mapFolding.oeis import getMetadata, getOEISids, getTotalFoldsKnown, OEIS_for_n, oeisIDfor_n
+from mapFolding.oeis import (
+	getMetadata, getOEISids, getTotalFoldsKnown, getTriangleDiagonal, getTriangleRows, getTriangleTerms, getValuesKnown, OEIS_for_n,
+	oeisIDfor_n, updateBFile, updateTriangle)
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.tests import assertEqualTo, messageTestFailure
-from operator import itemgetter
+from mapFolding.tests.dataSamples.triangleData import contentsBFile, sequenceHalf, triangleHalf
+from mapFolding.tests.test_oeis_byFormula import parametrizeOEISfor_n
 from typing import TYPE_CHECKING
 import pytest
 import re as regex
 
 if TYPE_CHECKING:
 	from _pytest.capture import CaptureResult
-	from hunterMakesPy import CallableFunction
-	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
+	from collections.abc import Mapping, Sequence
+	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount, 形Triangle, 形TriangleTerms
+	from pathlib import Path
 	from typing import LiteralString
-
-parametrizeOEISidByFormula: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, f', (
-	pytest.param('A000136', 'A000560')
-	, pytest.param('A000136', 'A001011 and A001010')
-	, pytest.param('A000136', 'A223094 and A000682')
-	, pytest.param('A000136', 'A223095, A077014, and A000682')
-	, pytest.param('A000136', 'A227167')
-	, pytest.param('A000136', 'A000682')
-	, pytest.param('A000560', 'A000136')
-	, pytest.param('A000560', 'A000682')
-	, pytest.param('A000682', 'A000560')
-	, pytest.param('A000682', 'A001010')
-	, pytest.param('A000682', 'A223094')
-	, pytest.param('A000682', 'A259689')
-	, pytest.param('A000682', 'A301620')
-	, pytest.param('A000682', 'A337581')
-	, pytest.param('A000682', 'A077460, A005316, and A223093')
-	, pytest.param('A000682', 'A223093 and A005316')
-	, pytest.param('A000682', 'A223093 and A077014')
-	, pytest.param('A000682', 'A000136, A077014, and A223095')
-	, pytest.param('A000682', 'A223094 and A000682')
-	, pytest.param('A000682', 'A259702 and A000682')
-	, pytest.param('A000682', 'A333971 and A000682')
-	, pytest.param('A000682', 'A334615 and A000682')
-	, pytest.param('A000682', 'A060206 and A000560')
-	, pytest.param('A000682', 'A000136')
-	, pytest.param('A001010', 'A001011 and A000682')
-	, pytest.param('A001010', 'A007822 and A000682')
-	, pytest.param('A001011', 'A001010 and A000682')
-	, pytest.param('A005315', 'A077460, A005316, and A060206')
-	, pytest.param('A005315', 'A078591')
-	, pytest.param('A005315', 'A085973 and A077054')
-	, pytest.param('A005315', 'A208357')
-	, pytest.param('A005315', 'A005316')
-	, pytest.param('A005316', 'A077014')
-	, pytest.param('A005316', 'A077054 and A005315')
-	, pytest.param('A005316', 'A077460, A005315, and A060206')
-	, pytest.param('A005316', 'A078592 and A005315')
-	, pytest.param('A005316', 'A227167, A217310, and A217318')
-	, pytest.param('A005316', 'A000682 and A223093')
-	, pytest.param('A007822', 'A001010')
-	, pytest.param('A060206', 'A077460, A005315, and A005316')
-	, pytest.param('A060206', 'A000682')
-	, pytest.param('A077014', 'A000682 and A223093')
-	, pytest.param('A077014', 'A223095 and A000682')
-	, pytest.param('A077014', 'A005316')
-	, pytest.param('A077054', 'A085973 and A005315')
-	, pytest.param('A077054', 'A005316')
-	, pytest.param('A077460', 'A005315, A005316, and A060206')
-	, pytest.param('A077460', 'A000682 and A005316')
-	, pytest.param('A078591', 'A005316')
-	, pytest.param('A078591', 'A005315')
-	, pytest.param('A078592', 'A005316')
-	, pytest.param('A085973', 'A077054 and A005315')
-	, pytest.param('A085973', 'A005316')
-	, pytest.param('A208357', 'A005315')
-	, pytest.param('A208357', 'A005316')
-	, pytest.param('A217310', 'A223093')
-	, pytest.param('A217310', 'A227167, A217318, and A005316')
-	, pytest.param('A217310', 'A000682 and A005316')
-	, pytest.param('A217318', 'A223095')
-	, pytest.param('A217318', 'A227167, A217310, and A005316')
-	, pytest.param('A217318', 'A005316 and A000682')
-	, pytest.param('A223093', 'A217310')
-	, pytest.param('A223093', 'A223094 and A223095')
-	, pytest.param('A223093', 'A000682 and A077014')
-	, pytest.param('A223093', 'A000682 and A005316')
-	, pytest.param('A223094', 'A223094 and A000682')
-	, pytest.param('A223094', 'A223093 and A223095')
-	, pytest.param('A223094', 'A000682')
-	, pytest.param('A223095', 'A077014, and A000682')
-	, pytest.param('A223095', 'A223094 and A223093')
-	, pytest.param('A223095', 'A217318')
-	, pytest.param('A223095', 'A000682 and A005316')
-	, pytest.param('A227167', 'A217310, A217318, and A005316')
-	, pytest.param('A227167', 'A000136')
-	, pytest.param('A259689', 'A000682')
-	, pytest.param('A259702', 'A301620')
-	, pytest.param('A259702', 'A000682')
-	, pytest.param('A301620', 'A334615, A301620, and A000682')
-	, pytest.param('A301620', 'A259689')
-	, pytest.param('A301620', 'A259702')
-	, pytest.param('A301620', 'A000682')
-	, pytest.param('A333971', 'A000682')
-	, pytest.param('A334615', 'A000560')
-	, pytest.param('A334615', 'A001010')
-	, pytest.param('A334615', 'A259702')
-	, pytest.param('A334615', 'A337581')
-	, pytest.param('A334615', 'A227167')
-	, pytest.param('A334615', 'A223094')
-	, pytest.param('A334615', 'A301620')
-	, pytest.param('A334615', 'A005316 and A223093')
-	, pytest.param('A334615', 'A005316 and A217310')
-	, pytest.param('A334615', 'A000682')
-	, pytest.param('A337581', 'A000682')
-))
-
-parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n, f, keywordArguments', tuple(chain(
-	chain.from_iterable(
-		CartesianProduct((parameterRow.values[0],)
-			, (getMetadata(parameterRow.values[0])['offset'], 3)
-			, (parameterRow.values[1],), (None,))
-			for parameterRow in parametrizeOEISidByFormula.args[1])
-
-	, chain.from_iterable(starmap(CartesianProduct, (
-		(('A000136',), (getMetadata('A000136')['offset'], 3), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-		, (('A001415',), (getMetadata('A001415')['offset'], 3), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-		, (('A001416',), (getMetadata('A001416')['offset'], 3), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-		, (('A001417',), (getMetadata('A001417')['offset'],), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-		, (('A001418',), (getMetadata('A001418')['offset'],), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-		, (('A195646',), (getMetadata('A195646')['offset'],), (None,), ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-		, (('A000682',), (getMetadata('A000682')['offset'], 3), (None,), ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'))
-		, (('A005316',), (getMetadata('A005316')['offset'], 3), (None,), ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'))
-		, (('A007822',), (getMetadata('A007822')['offset'], 3), (None,), ('algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
-	)))
-)), indirect=('keywordArguments',))
-
-@pytest.mark.parametrize('oeisID, n, f', tuple(filter(
-	itemgetter(2), map(itemgetter(0, 1, 2), parametrizeOEISfor_n.args[1])
-)))
-def test_byFormula(callableA: CallableFunction[[int, LiteralString | None], int], n: int, f: LiteralString | None, expected: int) -> None:
-	assertEqualTo(callableA(n, f), expected, callableA.__name__, n, f)
 
 @parametrizeOEISfor_n
 def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None, keywordArguments: 形KeywordArgumentsCount, expected: int) -> None:
@@ -212,3 +93,51 @@ def test_OEIS_for_nError(expected: tuple[int, str, str], argv: tuple[str, ...], 
 	assertEqualTo(exception.value.code, expected[0], OEIS_for_n.__name__, argv)
 	assert regex.fullmatch(expected[1], actual.out), messageTestFailure(actual.out, expected[1], OEIS_for_n.__name__, argv)
 	assert regex.fullmatch(expected[2], actual.err), messageTestFailure(actual.err, expected[2], OEIS_for_n.__name__, argv)
+
+@pytest.mark.parametrize('oeisID', ('A400429', ' a400429 '))
+@pytest.mark.parametrize('oeisStorage, sequence, expected', (
+	pytest.param((None, dict[int, int]()), {2: 11}, '2 11\n', id='absent'),
+	pytest.param((None, {2: 11}), {2: 37, 3: 13}, '2 11\n3 13\n', id='retain-memory'),
+	pytest.param(('  # primes\n2 11\n', {2: 11}), {3: 13}, '  # primes\n2 11\n3 13\n', id='indented-comment'),
+	pytest.param(('', dict[int, int]()), {2: 11}, '2 11\n', id='empty'),
+	pytest.param(('# prime observations\n', dict[int, int]()), {2: 11}, '# prime observations\n2 11\n', id='comments-only'),
+	pytest.param((contentsBFile, {2: 11, 3: 13}), {2: 37, 4: 17}, '# prime observations\n2 11\n3 13\n4 17\n', id='retain-known'),
+	pytest.param((contentsBFile, {2: 11, 3: 13}), {2: 37}, contentsBFile, id='no-additions'),
+), indirect=('oeisStorage',))
+def test_updateBFile(oeisID: OEISid, sequence: Mapping[int, int], expected: str, oeisStorage: Path) -> None:
+	known = getValuesKnown(oeisID)
+	assertEqualTo(updateBFile(oeisID, sequence), oeisStorage / 'b400429.txt', updateBFile.__name__, oeisID, sequence)
+	assertEqualTo((oeisStorage / 'b400429.txt').read_text(encoding='utf-8'), expected, updateBFile.__name__, oeisID, sequence)
+	assert known is getMetadata(oeisID)['valuesKnown']
+	assertEqualTo(getMetadata(oeisID)['valueUnknown'], max(known) + 1, updateBFile.__name__, oeisID, sequence)
+
+@pytest.mark.parametrize('oeisID, triangle, expected', (
+	pytest.param('A400429', triangleHalf, sequenceHalf, id='half-length-rows'),
+	pytest.param('A400429', {4: {2: 19}}, {5: 19}, id='sparse-cell'),
+))
+def test_updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]],
+	expected: dict[int, int], oeisStorage: Path) -> None:
+	updateTriangle(oeisID, triangle)
+	assertEqualTo(getValuesKnown(oeisID), expected, updateTriangle.__name__, oeisID, triangle)
+	assert (oeisStorage / 'b400429.txt').is_file()
+
+@pytest.mark.parametrize('oeisStorage, expected', (
+	pytest.param((None, sequenceHalf), {2: [11], 3: [13], 4: [17, 19], 5: [23]}, id='partial-row'),
+	pytest.param((None, {2: 11, 5: 19}), {2: [11]}, id='first-gap'),
+), indirect=('oeisStorage',))
+@pytest.mark.parametrize('oeisID', ('A400429',))
+def test_getTriangleRows(oeisID: OEISid, expected: 形Triangle, oeisStorage: Path) -> None:
+	assertEqualTo(getTriangleRows(oeisID), expected, getTriangleRows.__name__, oeisID)
+
+@pytest.mark.parametrize('oeisStorage', ((None, {2: 11, 5: 19}),), indirect=True)
+@pytest.mark.parametrize('oeisID, expected', (('A400429', {2: {1: 11}, 3: {}, 4: {2: 19}}),))
+def test_getTriangleTerms(oeisID: OEISid, expected: 形TriangleTerms, oeisStorage: Path) -> None:
+	assertEqualTo(getTriangleTerms(oeisID), expected, getTriangleTerms.__name__, oeisID)
+
+@pytest.mark.parametrize('oeisStorage', ((None, {2: 11, 5: 19, 6: 23}),), indirect=True)
+@pytest.mark.parametrize('oeisID, 次diagonal, fromRight, expected', (
+	pytest.param('A400429', 1, True, {2: 11, 4: 19}, id='sparse-right'),
+	pytest.param('A400429', 1, False, {2: 11, 5: 23}, id='sparse-left'),
+))
+def test_getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, fromRight: bool, expected: dict[int, int], oeisStorage: Path) -> None:
+	assertEqualTo(getTriangleDiagonal(oeisID, 次diagonal, fromRight=fromRight), expected, getTriangleDiagonal.__name__, oeisID, 次diagonal)

@@ -31,6 +31,8 @@ if __name__ == '__main__':
 	if True:
 		boxOfOEISid.append('A000682')
 
+	ratio: int = 0
+
 	for oeisID in boxOfOEISid:
 		printEasyRunHeader(oeisID, flow)
 
@@ -60,4 +62,4 @@ if __name__ == '__main__':
 				if pathLikeWrite is not None:
 					writeAlbum(state.boxOfPermutations, makePathFilenameCount(pathLikeWrite, oeisID, n, suffix='.album'))
 
-			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=False)
+			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=ratio)

@@ -32,10 +32,6 @@ Functions
 		Print a comparison between a computed term and a known value.
 	printEasyRunHeader
 		Print benchmark labels with reproducible terminal colors.
-	readBFileDiagonal
-		Read a local b-file and select a diagonal.
-	readBFileTriangle
-		Read a local b-file and group its values into rows.
 
 Variables
 	oeisIDsImplemented
@@ -60,13 +56,15 @@ from mapFolding.oeis._beDRY import formatBFile as formatBFile
 from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, oeisIDsMapFoldingImplemented as oeisIDsMapFoldingImplemented
 
 # isort: split
-from mapFolding.oeis._metadata import getMetadata as getMetadata, getValuesKnown as getValuesKnown
+from mapFolding.oeis._metadata import (
+	getMetadata as getMetadata, getTriangleDiagonal as getTriangleDiagonal, getTriangleIndices as getTriangleIndices,
+	getTriangleRows as getTriangleRows, getTriangleTerms as getTriangleTerms, getValuesKnown as getValuesKnown, updateBFile as updateBFile,
+	updateTriangle as updateTriangle)
 
 # isort: split
 from mapFolding.oeis.__main__ import (
-	getTotalFoldsKnown as getTotalFoldsKnown, getTriangleDiagonal as getTriangleDiagonal, getTriangleRows as getTriangleRows,
-	makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunHeader as printEasyRunHeader,
-	readBFileDiagonal as readBFileDiagonal, readBFileTriangle as readBFileTriangle)
+	getTotalFoldsKnown as getTotalFoldsKnown, makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark,
+	printEasyRunHeader as printEasyRunHeader, printEasyRunTriangle as printEasyRunTriangle)
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n

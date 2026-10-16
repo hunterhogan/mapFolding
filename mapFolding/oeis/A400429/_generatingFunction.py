@@ -1,5 +1,5 @@
 #=SIN= Pyright unknown-type suppressions: SymPy provides no type stubs for its exact polynomial operations.
-# pyright: reportMissingTypeStubs=false, reportUnknownVariableType=false, reportUnknownMemberType=false
+# pyright: reportUnknownVariableType=false, reportUnknownMemberType=false
 # pyright: reportUnknownArgumentType=false, reportUnknownLambdaType=false
 from __future__ import annotations
 

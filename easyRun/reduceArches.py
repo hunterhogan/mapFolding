@@ -34,6 +34,7 @@ if __name__ == '__main__':
 	nStop: int = 20
 
 	printEasyRunHeader(oeisID, flow)
+	ratio: int = 0
 
 	if flow == 'reduce':
 		for n in range(nStart, nStop):
@@ -43,7 +44,7 @@ if __name__ == '__main__':
 			print(triangleRow)
 			total: int = triangleRow[-1]
 
-			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=False)
+			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=ratio)
 
 	else:
 		write(nStart, nStop, pathLikeWrite)

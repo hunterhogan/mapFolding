@@ -223,7 +223,7 @@ def makeIngredientsFunction(次function: int, formula: tuple[dict[int, tuple[tup
 if __name__ == '__main__':
 	ingredientsModule = IngredientsModule()
 	for 次function in range(2, 11):
-		diagonal: dict[int, int] = readDiagonal(makePathFilenameDiagonal(次function), 次function, formatData='diagonalCSV')
+		diagonal: dict[int, int] = readDiagonal(makePathFilenameDiagonal(次function), 次function)
 		ingredientsModule.appendIngredientsFunction(makeIngredientsFunction(次function, makePolynomialCyclicFormula(次function, diagonal)))
 
 	ingredientsModule.write_astModule(pathFilenameFormulaA005315PolynomialCyclic, settingsPackage.identifierPackage)

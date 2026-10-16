@@ -10,10 +10,6 @@ Contents
 Functions
 	getTotalFoldsKnown
 		Retrieve a known folding total for an exact map shape.
-	getTriangleDiagonal
-		Select a diagonal using the sequence's row layout.
-	getTriangleRows
-		Group known sequence values into numbered rows.
 	makeLookupTotalFoldsKnown
 		Build a map-shape lookup from registered map-folding sequences.
 	makeMapShape
@@ -22,10 +18,6 @@ Functions
 		Print computed and known values with elapsed time and optional ratio.
 	printEasyRunHeader
 		Print two labels with reproducible terminal colors.
-	readBFileDiagonal
-		Read a local b-file and select a diagonal.
-	readBFileTriangle
-		Read a local b-file and group its values into rows.
 
 Module Execution
 ----------------
@@ -40,30 +32,25 @@ References
 """
 from __future__ import annotations
 
-from functools import cache, partial
+from functools import partial
 from humpy_cytoolz import keymap, merge
 from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
-from itertools import count
-from mapFolding.dataStructures import makeLookupDiagonal, makeLookupTriangle
-from mapFolding.kitFilesystem import readText
-from mapFolding.oeis import getMetadata, getValuesKnown
-from mapFolding.oeis._beDRY import parseDiagonalBFile, parseTriangleBFile
-from mapFolding.oeis._metadata import dictionaryOEIS
+from itertools import chain, repeat
+from mapFolding.oeis._beDRY import formatBenchmarkRatio
+from mapFolding.oeis._metadata import dictionaryOEIS, getTriangleIndices, getValuesKnown
 from mapFolding.oeis._theSSOT import oeisIDsMapFoldingImplemented
 from more_itertools import loops
+from operator import eq
 from typing import TYPE_CHECKING
 import anyascii
 import sys
 import time
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable
-	from mapFolding.oeis._dataBaskets import MetadataOEISid
-	from mapFolding.theTypes import OEISid, 形Triangle
-	from pathlib import Path
+	from collections.abc import Sequence
+	from mapFolding.theTypes import OEISid
 	from typing import Literal, LiteralString
 
-@cache
 def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	"""Retrieve the known folding total for an exact map shape.
 
@@ -89,11 +76,6 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	`makeLookupTotalFoldsKnown`
 		Retrieve the complete shape-to-total lookup instead of one total.
 
-	Caching
-	-------
-	`functools.cache` [2] retains results for previously requested shapes. Each uncached call
-	rebuilds the complete lookup before selecting the total for `mapShape`.
-
 	Examples
 	--------
 	`mapFolding.kitAST.RecipeJob.fromMapShape` [3] queries the known total before estimating a
@@ -109,8 +91,6 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	----------
 	[1] `makeLookupTotalFoldsKnown`
 
-	[2] functools.cache - Python standard library.
-		https://docs.python.org/3/library/functools.html#functools.cache
 	[3] `mapFolding.kitAST.RecipeJob.fromMapShape`
 
 	"""
@@ -220,89 +200,7 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 		raise ValueError(message)
 	return mapShape
 
-def getTriangleRows(oeisID: OEISid) -> 形Triangle:
-	"""Group known values for `oeisID` into numbered triangle rows.
-
-	(AI generated docstring)
-
-	You can use this function to access a supported sequence as rows for further analysis. This
-	function obtains the sequence metadata through `mapFolding.oeis.getMetadata` [1] and returns
-	a new dictionary mapping row numbers to lists of known values.
-
-	Row Boundaries
-	--------------
-	`mapFolding.oeis._dataBaskets.MetadataOEISid` [2] supplies the starting row through `rowStart`,
-	falling back to `offset`. When metadata supplies `rowLength`, the function evaluates `rowLength`
-	for successive row numbers. Otherwise, requested row lengths begin at one and increase by one,
-	regardless of the starting row number.
-
-	`mapFolding.dataStructures.makeLookupTriangle` [3] groups `valuesKnown.values()` in dictionary
-	insertion order. Sequence index keys do not determine row boundaries and are not sorted. A
-	partially known final row is retained. Grouping stops at the first empty row, including an empty
-	row caused by a requested length of zero. The function does not check whether the sequence
-	represents a triangle.
-
-	Parameters
-	----------
-	oeisID : OEISid
-		Identifier of a sequence present in the package metadata. Lookup ignores letter case and
-		leading or trailing whitespace.
-
-	Returns
-	-------
-	triangleRows : 形Triangle
-		Consecutive row numbers mapped to newly allocated lists of known sequence values.
-
-	Unknown Sequences
-	-----------------
-	This function propagates `KeyError` from the metadata lookup if the normalized `oeisID` is
-	absent from the package metadata.
-
-	Examples
-	--------
-	`getTriangleDiagonal` [4] obtains rows with the following call before selecting a diagonal,
-	using the caller's `oeisID`.
-
-		```python
-		from mapFolding.oeis import getTriangleRows
-
-		getTriangleRows(oeisID)
-		```
-
-	References
-	----------
-	[1] `mapFolding.oeis.getMetadata`
-
-	[2] `mapFolding.oeis._dataBaskets.MetadataOEISid`
-
-	[3] `mapFolding.dataStructures.makeLookupTriangle`
-
-	[4] `getTriangleDiagonal`
-
-	"""
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	rowStart: int = metadata.get('rowStart', metadata['offset'])
-	rowLengths: Iterable[int] | None = None
-	if 'rowLength' in metadata:
-		rowLengths = map(metadata['rowLength'], count(rowStart))
-	return makeLookupTriangle(metadata['valuesKnown'].values(), rowLengths, rowStart)
-
-# TODO
-def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:  # ruff: ignore[undocumented-public-function]
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	return makeLookupDiagonal(getTriangleRows(oeisID), 次diagonal, fromRight=fromRight,
-		rowLength=metadata.get('rowLength', lambda rowNumber: rowNumber - metadata.get('rowStart', metadata['offset']) + 1))
-
-# TODO remove
-def readBFileTriangle(pathFilename: Path, rowLengths: Iterable[int] | None = None, rowStart: int = 1) -> 形Triangle:  # ruff: ignore[undocumented-public-function]
-	return parseTriangleBFile(readText(pathFilename), rowLengths, rowStart)
-
-# TODO remove
-def readBFileDiagonal(pathFilename: Path, 次diagonal: int, *, rowStart: int = 1,  # ruff: ignore[undocumented-public-function]
-	rowLength: Callable[[int], int] | None = None, fromRight: bool = True) -> dict[int, int]:
-	return parseDiagonalBFile(readText(pathFilename), 次diagonal, rowStart=rowStart, rowLength=rowLength, fromRight=fromRight)
-
-def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: bool = False) -> None:
+def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: int = 0) -> None:
 	"""Print a benchmark comparison line for an OEIS sequence value.
 
 	You can use this function to compare `computed` with the stored value at index `n` from
@@ -319,8 +217,8 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		The computed value to compare against the known OEIS value.
 	timeStart : float
 		Start time from `time.perf_counter` [2] for elapsed time calculation.
-	ratio : bool = False
-		Print the known-to-computed ratio when `True` and `computed` is nonzero.
+	ratio : int = 0
+		Number of decimal places for the known-to-computed ratio. Zero hides the ratio.
 
 	Output Fields
 	-------------
@@ -336,7 +234,7 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		```python
 		from mapFolding.oeis import printEasyRunBenchmark
 
-		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=False)
+		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=0)
 		```
 
 	References
@@ -357,8 +255,29 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 		f"{computed}\t{known}\t"
 	)
 	if ratio and computed:
-		integer = (known / computed).is_integer()
-		sys.stdout.write(f"{(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[integer]}{known / computed}{ansiColorReset}\t")
+		sys.stdout.write(formatBenchmarkRatio(known, computed, ratio) + '\t')
+	sys.stdout.write(f"{ansiColorReset}\n")
+
+#=SIN= Ruff suppression: the generation instructions prohibit unrequested docstrings.
+def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeStart: float, *, ratio: int = 0) -> None:  # ruff: ignore[undocumented-public-function]
+	#=SIN= Intermediate tuple: comparison, aligned output, and ratios consume the known cells separately.
+	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
+	match: bool = len(computed) == len(known) and all(map(eq, computed, known))
+	timeElapsed: float = time.perf_counter() - timeStart
+	sys.stdout.write(
+		f"{n:2} "
+		f"{(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[match]}{match}{ansiColorReset}\t"
+		f"{timeElapsed:5.2f}\t"
+	)
+	if not match:
+		width: int = max(map(len, map(str, chain(computed, known))), default=1)
+		sys.stdout.write(' '.join(map(str.rjust,
+			chain(map(str, computed), repeat('?', max(0, len(known) - len(computed)))), repeat(width))))
+		if ratio:
+			sys.stdout.write('\t' + ' '.join(map(partial(formatBenchmarkRatio, ratio=ratio), known, computed)))
+		sys.stdout.write('\n' + ' ' * len(f"{n:2} {match}\t{timeElapsed:5.2f}\t".expandtabs()))
+		sys.stdout.write(' '.join(map(str.rjust,
+			chain(map(str, known), repeat('?', max(0, len(computed) - len(known)))), repeat(width))))
 	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
