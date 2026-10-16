@@ -3,11 +3,6 @@
 
 from typing import Final
 
-#======== Expected values from mapFolding/_semiotics.py =======
-
-expectedDecreasing: Final[int] = -1
-expectedInclusive: Final[int] = 1
-
 #======== Expected values from mapFolding/_e/_semiotics.py =======
 
 # Dimension index constants (powers of 2)
@@ -35,10 +30,6 @@ expectedDimensionIndex: Final[tuple[tuple[int, int], ...]] = (
 	, (expected八, 8)
 	, (expected九, 9)
 )
-
-# Origin constants
-expectedLeafOrigin: Final[int] = 0
-expectedPileOrigin: Final[int] = 0
 
 # Function expected outputs for totalDimensions in range(5, 9)
 # Each tuple is (totalDimensions, expectedResult)

@@ -11,6 +11,7 @@ Multi-argument functions use curated static cases plus invalid-input coverage.
 
 from __future__ import annotations
 
+from itertools import repeat
 from mapFolding._e.dataBaskets import StateElimination
 from mapFolding._e.p2上nDimensional import (
 	invertLeafIn2上nDimensions, leafInSubHyperplane, ptount, 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零,
@@ -18,7 +19,7 @@ from mapFolding._e.p2上nDimensional import (
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples.measurementData import (
 	dataDimensionFourthNearest, dataDimensionNearest, dataDimensionSecondNearest, dataDimensionThirdNearest, dataHowMany0coordinatesAtTail,
-	dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount, dataTotalDimensionsTail)
+	dataInvertLeafIn2上nDimensions, dataLeafInSubHyperplane, dataPtount, dataTotalDimensionsTail, data工totalDimensionsOdd)
 from typing import TYPE_CHECKING
 import pytest
 
@@ -36,7 +37,7 @@ def test_工totalDimensionsTail(mapShape: tuple[int, ...], integerNonnegative: i
 	, *[(工dimension首二, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionThirdNearest.items()]
 	, *[(工dimension首三, inputValue, expectedResult) for inputValue, expectedResult in dataDimensionFourthNearest.items()]
 	, *[(工dimensionTail, inputValue, expectedResult) for inputValue, expectedResult in dataHowMany0coordinatesAtTail.items()]
-	, (工totalDimensionsOdd, 45, 3)
+	, *zip(repeat(工totalDimensionsOdd, len(data工totalDimensionsOdd)), data工totalDimensionsOdd, data工totalDimensionsOdd.values(), strict=True)
 ])
 def test_integerNonnegativeFunctions(functionTarget: CallableFunction[[int], int | None], inputValue: int, expectedResult: int | None) -> None:
 	assertEqualTo(functionTarget(inputValue), expectedResult, functionTarget.__name__, inputValue)

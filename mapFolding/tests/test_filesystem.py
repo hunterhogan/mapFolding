@@ -29,7 +29,8 @@ from mapFolding.kitFilesystem import (
 	readDiagonal, readTriangle, readTriangleIncomplete, saveTotal, writeDiagonal, writeTriangle, writeTriangleIncomplete)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
-from mapFolding.tests.dataSamples.triangleData import triangleDense, triangleSparse
+from mapFolding.tests.dataSamples.triangleData import (
+	triangleBeyondInt64, triangleDense, triangleInt64Edges, triangleSparse, triangleSparseEdges)
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -118,6 +119,8 @@ def test_getPathFilenameTotalFolds_createsDirs(mapShape: tuple[int, ...], pathRo
 @pytest.mark.parametrize('triangle, append, expected', (
 	pytest.param(triangleDense, False, triangleDense, id='replace'),
 	pytest.param(triangleDense, True, {2: (11, 13), 3: (17, 19, 23), 5: (29,), 7: (37,)}, id='append'),
+	pytest.param(triangleInt64Edges, False, triangleInt64Edges, id='int64-edges'),
+	pytest.param(triangleBeyondInt64, False, triangleBeyondInt64, id='beyond-int64'),
 ))
 def test_writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path, append: bool,
 	expected: dict[int, tuple[int, ...]]) -> None:
@@ -125,7 +128,12 @@ def test_writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path
 	writeTriangle(triangle, pathFilename, append=append)
 	assertEqualTo(readTriangle(pathFilename), expected, writeTriangle.__name__, triangle)
 
-@pytest.mark.parametrize('triangleTerms, expected', ((triangleSparse, triangleSparse), ({2: {1: 0, 4: 2 ** 100}}, {2: {1: 0, 4: 2 ** 100}}), ({}, {})))
+@pytest.mark.parametrize('triangleTerms, expected', (
+	pytest.param(triangleSparse, triangleSparse, id='sparse-primes'),
+	pytest.param({2: {1: 0, 4: 2 ** 100}}, {2: {1: 0, 4: 2 ** 100}}, id='zero-and-missing-cells'),
+	pytest.param(triangleSparseEdges, triangleSparseEdges, id='uint64-1025-bit-values'),
+	pytest.param({}, {}, id='empty'),
+))
 def test_writeTriangleIncomplete(triangleTerms: Mapping[int, Mapping[int, int]], pathFilename: Path,
 	expected: dict[int, dict[int, int]]) -> None:
 	writeTriangleIncomplete(triangleTerms, pathFilename)

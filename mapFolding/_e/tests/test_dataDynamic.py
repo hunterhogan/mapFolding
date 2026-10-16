@@ -23,18 +23,19 @@ from mapFolding._e.p2上nDimensional import (
 from mapFolding._e.pileOptions import getLookupChoicesLeaf
 from mapFolding._e.tests import assertEqualTo
 from mapFolding._e.tests.dataSamples import (
-	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_7_5_4, p2上nDimensionalDomain7_6,
-	p2上nDimensionalDomain首二_首零二_首零一二_首一二, p2上nDimensionalDomain首零一二_首一二, p2上nDimensionalDomain首零二_首二)
+	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain3_首一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_5,
+	p2上nDimensionalDomain6_7_5_4, p2上nDimensionalDomain7_6, p2上nDimensionalDomain首二_首零一二, p2上nDimensionalDomain首二_首零二_首零一二_首一二,
+	p2上nDimensionalDomain首零一二_首一二, p2上nDimensionalDomain首零二_首二)
 from more_itertools import all_unique as allUnique吗, unique_to_each
-from typing import TYPE_CHECKING
+from operator import itemgetter
+from typing import cast, TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Sequence
 	from hunterMakesPy import CallableFunction
 	from mapFolding._e.theTypes import ChoicesLeaf
-	from mapFolding.theTypes import Leaf, Pile
-
+	from mapFolding.theTypes import Pile
 	from types import ModuleType
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
@@ -82,17 +83,41 @@ def test_getDomainLeaf(mapShape: tuple[int, ...]) -> None:
 		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getDomainLeaf.range.stop', leaf, mapShape)
 		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getDomainLeaf.range.step', leaf, mapShape)
 
-@pytest.mark.parametrize("totalDimensions", [5, 6], ids=lambda totalDimensions: f"2^{totalDimensions}-dimensional")
-@pytest.mark.parametrize("domainFunction,moduleAuthoritativeData", [
-	(getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一)
-	, (getDomainDimension二, p2上nDimensionalDomain6_7_5_4)
-	, (getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二)
-	, (getDomain二一零and二一, p2上nDimensionalDomain7_6)
-	, (getDomain二零and二, p2上nDimensionalDomain5_4)
-	, (getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二)
-	, (getDomain首零二and首二, p2上nDimensionalDomain首零二_首二)
-], ids=lambda domainFunction: domainFunction.__name__)
-def test_getDomainLeafsCombined(domainFunction: CallableFunction[[StateElimination], Sequence[tuple[int, ...]]], moduleAuthoritativeData: ModuleType, totalDimensions: int) -> None:
+xfailDimension4: pytest.MarkDecorator = pytest.mark.xfail(
+	raises=AssertionError, strict=True, reason='Four-dimensional combined domains disagree with observations verified against the folding pickle.')
+
+@pytest.mark.parametrize('totalDimensions, domainFunction, moduleAuthoritativeData, columnPositions', (
+	pytest.param(4, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一, (0, 1, 2, 3), id='dimension-one-4'),
+	pytest.param(5, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一, (0, 1, 2, 3), id='dimension-one-5'),
+	pytest.param(6, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一, (0, 1, 2, 3), id='dimension-one-6'),
+	pytest.param(4, getDomainDimension一, p2上nDimensionalDomain3_首一, (0, 2), id='dimension-one-pairs-4'),
+	pytest.param(5, getDomainDimension一, p2上nDimensionalDomain3_首一, (0, 2), id='dimension-one-pairs-5'),
+	pytest.param(6, getDomainDimension一, p2上nDimensionalDomain3_首一, (0, 2), id='dimension-one-pairs-6'),
+	pytest.param(4, getDomainDimension二, p2上nDimensionalDomain6_7_5_4, (0, 1, 2, 3), marks=xfailDimension4, id='dimension-two-4'),
+	pytest.param(5, getDomainDimension二, p2上nDimensionalDomain6_7_5_4, (0, 1, 2, 3), id='dimension-two-5'),
+	pytest.param(6, getDomainDimension二, p2上nDimensionalDomain6_7_5_4, (0, 1, 2, 3), id='dimension-two-6'),
+	pytest.param(4, getDomainDimension二, p2上nDimensionalDomain6_5, (0, 2), marks=xfailDimension4, id='dimension-two-pairs-4'),
+	pytest.param(5, getDomainDimension二, p2上nDimensionalDomain6_5, (0, 2), id='dimension-two-pairs-5'),
+	pytest.param(6, getDomainDimension二, p2上nDimensionalDomain6_5, (0, 2), id='dimension-two-pairs-6'),
+	pytest.param(4, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二, (0, 1, 2, 3), marks=xfailDimension4, id='head-dimension-two-4'),
+	pytest.param(5, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二, (0, 1, 2, 3), id='head-dimension-two-5'),
+	pytest.param(6, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二, (0, 1, 2, 3), id='head-dimension-two-6'),
+	pytest.param(4, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二, (0, 2), marks=xfailDimension4, id='headDimensionTwoPairs4'),
+	pytest.param(5, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二, (0, 2), id='headDimensionTwoPairs5'),
+	pytest.param(6, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二, (0, 2), id='headDimensionTwoPairs6'),
+	pytest.param(4, getDomain二一零and二一, p2上nDimensionalDomain7_6, (0, 1), marks=xfailDimension4, id='crease-two-one-4'),
+	pytest.param(5, getDomain二一零and二一, p2上nDimensionalDomain7_6, (0, 1), id='crease-two-one-5'),
+	pytest.param(6, getDomain二一零and二一, p2上nDimensionalDomain7_6, (0, 1), id='crease-two-one-6'),
+	pytest.param(4, getDomain二零and二, p2上nDimensionalDomain5_4, (0, 1), marks=xfailDimension4, id='crease-two-4'),
+	pytest.param(5, getDomain二零and二, p2上nDimensionalDomain5_4, (0, 1), id='crease-two-5'),
+	pytest.param(6, getDomain二零and二, p2上nDimensionalDomain5_4, (0, 1), id='crease-two-6'),
+	pytest.param(5, getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二, (0, 1), id='head-crease-two-one-5'),
+	pytest.param(6, getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二, (0, 1), id='head-crease-two-one-6'),
+	pytest.param(5, getDomain首零二and首二, p2上nDimensionalDomain首零二_首二, (0, 1), id='head-crease-two-5'),
+	pytest.param(6, getDomain首零二and首二, p2上nDimensionalDomain首零二_首二, (0, 1), id='head-crease-two-6'),
+))
+def test_getDomainLeafsCombined(totalDimensions: int, domainFunction: CallableFunction[[StateElimination], Sequence[tuple[int, ...]]],
+	moduleAuthoritativeData: ModuleType, columnPositions: tuple[int, ...]) -> None:
 	"""Verify combined domain function against authoritative dataset: completeness, uniqueness, correctness."""
 	mapShape: tuple[int, ...] = (2,) * totalDimensions
 	state: StateElimination = StateElimination(mapShape=mapShape)
@@ -101,14 +126,15 @@ def test_getDomainLeafsCombined(domainFunction: CallableFunction[[StateEliminati
 		moduleAuthoritativeData, f"boxOfDomain2上{totalDimensions}Dimensional"
 	)
 
-	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(tuplesDomainAuthoritativeData, tuplesDomainActual)
+	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(tuplesDomainAuthoritativeData,
+		map(cast('CallableFunction[[tuple[int, ...]], tuple[int, ...]]', itemgetter(*columnPositions)), tuplesDomainActual))
 	tuplesMissingFromActual = tuple(tuplesMissingFromActual)
 	tuplesExtraInActual = tuple(tuplesExtraInActual)
 	hasAllUnique: bool = allUnique吗(tuplesDomainActual)
 
 	assertEqualTo(hasAllUnique, True, domainFunction.__name__, mapShape)
-	assertEqualTo(len(tuplesMissingFromActual), 0, domainFunction.__name__, mapShape)
-	assertEqualTo(len(tuplesExtraInActual), 0, domainFunction.__name__, mapShape)
+	assertEqualTo(len(tuplesMissingFromActual), 0, domainFunction.__name__, mapShape, missing=tuplesMissingFromActual)
+	assertEqualTo(len(tuplesExtraInActual), 0, domainFunction.__name__, mapShape, extra=tuplesExtraInActual)
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryChoicesLeafKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryChoicesLeafKnown])
 def test_getChoicesLeaf(mapShape: tuple[int, ...]) -> None:

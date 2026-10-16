@@ -6,8 +6,9 @@ from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import chain, filterfalse, groupby, repeat
 from mapFolding.kitFilesystem import readDiagonal
 from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
-from mapFolding.oeis.A400429 import A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, boxOfDiagonals
-from mapFolding.oeis.A400429._integrateMe_fromTriangleCells import calculateDiagonal2, calculateDiagonal3
+from mapFolding.oeis.A400429._integrateMe_fromTriangleCells import (
+	A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, calculateDiagonal2, calculateDiagonal3)
+from mapFolding.oeis.A400429._semi import boxOfDiagonals
 from operator import add, itemgetter
 from research.matrixMeanders.infoBooth import makePathFilenameDiagonal
 from textwrap import wrap

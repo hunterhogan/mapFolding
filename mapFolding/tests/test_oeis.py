@@ -101,8 +101,8 @@ def test_OEIS_for_nError(expected: tuple[int, str, str], argv: tuple[str, ...], 
 	pytest.param(('  # primes\n2 11\n', {2: 11}), {3: 13}, '  # primes\n2 11\n3 13\n', id='indented-comment'),
 	pytest.param(('', dict[int, int]()), {2: 11}, '2 11\n', id='empty'),
 	pytest.param(('# prime observations\n', dict[int, int]()), {2: 11}, '# prime observations\n2 11\n', id='comments-only'),
-	pytest.param((contentsBFile, {2: 11, 3: 13}), {2: 37, 4: 17}, '# prime observations\n2 11\n3 13\n4 17\n', id='retain-known'),
-	pytest.param((contentsBFile, {2: 11, 3: 13}), {2: 37}, contentsBFile, id='no-additions'),
+	pytest.param((contentsBFile, {2: 701, 3: 709}), {2: 719, 4: 727}, '# prime observations\n2 701\n3 709\n4 727\n', id='retain-known'),
+	pytest.param((contentsBFile, {2: 701, 3: 709}), {2: 733}, contentsBFile, id='no-additions'),
 ), indirect=('oeisStorage',))
 def test_updateBFile(oeisID: OEISid, sequence: Mapping[int, int], expected: str, oeisStorage: Path) -> None:
 	known = getValuesKnown(oeisID)
@@ -112,7 +112,7 @@ def test_updateBFile(oeisID: OEISid, sequence: Mapping[int, int], expected: str,
 	assertEqualTo(getMetadata(oeisID)['valueUnknown'], max(known) + 1, updateBFile.__name__, oeisID, sequence)
 
 @pytest.mark.parametrize('oeisID, triangle, expected', (
-	pytest.param('A400429', triangleHalf, sequenceHalf, id='half-length-rows'),
+	pytest.param('A400429', triangleHalf, {2: 503, 3: 509, 4: 521, 5: 523, 6: 541}, id='half-length-rows'),
 	pytest.param('A400429', {4: {2: 19}}, {5: 19}, id='sparse-cell'),
 ))
 def test_updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]],
@@ -122,7 +122,7 @@ def test_updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | M
 	assert (oeisStorage / 'b400429.txt').is_file()
 
 @pytest.mark.parametrize('oeisStorage, expected', (
-	pytest.param((None, sequenceHalf), {2: [11], 3: [13], 4: [17, 19], 5: [23]}, id='partial-row'),
+	pytest.param((None, sequenceHalf), {2: [601], 3: [607], 4: [613, 617], 5: [619]}, id='partial-row'),
 	pytest.param((None, {2: 11, 5: 19}), {2: [11]}, id='first-gap'),
 ), indirect=('oeisStorage',))
 @pytest.mark.parametrize('oeisID', ('A400429',))
