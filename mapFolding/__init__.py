@@ -8,13 +8,13 @@ available in `mapFolding.basecamp` [1].
 
 Attributes
 ----------
-endpointOrigin : Endpoint
+endpointOrigin : Leaf
 	Zero-valued endpoint label fixed at the origin of a normalized arch diagram.
 leafOrigin : Leaf
 	Zero-valued label for the leaf at the origin of every map dimension.
 pileOrigin : Pile
 	Zero-valued label for the pile at the origin of every map dimension.
-positionOrigin : EndpointPosition
+positionOrigin : Pile
 	Zero-valued position along an arch diagram's axis.
 
 Modules

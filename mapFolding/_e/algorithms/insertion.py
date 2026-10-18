@@ -36,7 +36,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import ArchDiagram, Endpoint, EndpointPosition
+	from mapFolding.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
 
 pathAlbum: Path = settingsPackage.pathPackage / '_e' / 'research' / 'albums'
@@ -47,41 +47,41 @@ pathAlbum: Path = settingsPackage.pathPackage / '_e' / 'research' / 'albums'
 You can locate the research album directory within the package. Use the insertion entry point to
 derive album filenames from the map shape."""
 
-def _makeDescendants(diagram: ArchDiagram, mapShape: tuple[int, ...]) -> tuple[ArchDiagram, ...]:
-	inserting: Iterable[ArchDiagram] = map(partial(_insertEndpointAt, diagram, len(diagram)), range(len(diagram), positionOrigin, decreasing))
+def _makeDescendants(diagram: Folding, mapShape: tuple[int, ...]) -> tuple[Folding, ...]:
+	inserting: Iterable[Folding] = map(partial(_insertEndpointAt, diagram, len(diagram)), range(len(diagram), positionOrigin, decreasing))
 	return tuple(filter(partial(_archDiagramValid吗, mapShape=mapShape), inserting))
 
-def _insertEndpointAt(diagram: ArchDiagram, endpoint: Endpoint, position: EndpointPosition) -> ArchDiagram:
+def _insertEndpointAt(diagram: Folding, endpoint: Leaf, position: Pile) -> Folding:
 	return (*diagram[:position], endpoint, *diagram[position:])
 
-def _archDiagramValid吗(diagram: ArchDiagram, mapShape: tuple[int, ...]) -> bool:
-	lookupPosition: dict[Endpoint, EndpointPosition] = dict(zip(diagram, range(len(diagram)), strict=True))
-	endpointInserted: Endpoint = len(diagram) - 1
+def _archDiagramValid吗(diagram: Folding, mapShape: tuple[int, ...]) -> bool:
+	lookupPosition: dict[Leaf, Pile] = dict(zip(diagram, range(len(diagram)), strict=True))
+	endpointInserted: Leaf = len(diagram) - 1
 	mapShapeProducts: tuple[int, ...] = getMapShapeProducts(mapShape)
 
 	def dimensionValid吗(dimension: int) -> bool:
-		endpointAnte: Endpoint = endpointInserted - mapShapeProducts[dimension]
+		endpointAnte: Leaf = endpointInserted - mapShapeProducts[dimension]
 		if endpointAnte < endpointOrigin or getArchPost(mapShape, endpointAnte, dimension) != endpointInserted:
 			return True
 
-		positionsArch: tuple[EndpointPosition, EndpointPosition] = (lookupPosition[endpointAnte], lookupPosition[endpointInserted])
+		positionsArch: tuple[Pile, Pile] = (lookupPosition[endpointAnte], lookupPosition[endpointInserted])
 		archParity: int = endpointOdd吗(mapShape, endpointAnte, dimension)
 
-		def comparandViolates吗(endpointComparand: Endpoint) -> bool:
-			endpointPost: Endpoint | None = getArchPost(mapShape, endpointComparand, dimension)
+		def comparandViolates吗(endpointComparand: Leaf) -> bool:
+			endpointPost: Leaf | None = getArchPost(mapShape, endpointComparand, dimension)
 			if endpointPost is None or endpointPost >= endpointInserted:
 				return False
 			if endpointOdd吗(mapShape, endpointComparand, dimension) != archParity:
 				return False
-			positionsComparand: tuple[EndpointPosition, EndpointPosition] = (lookupPosition[endpointComparand], lookupPosition[endpointPost])
+			positionsComparand: tuple[Pile, Pile] = (lookupPosition[endpointComparand], lookupPosition[endpointPost])
 			return _archesCross吗(positionsArch, positionsComparand)
 
 		return not any(map(comparandViolates吗, range(endpointInserted)))
 
 	return all(map(dimensionValid吗, range(len(mapShape))))
 
-def _archesCross吗(positionsArch: tuple[EndpointPosition, EndpointPosition], positionsComparand: tuple[EndpointPosition, EndpointPosition]) -> bool:
-	archesSorted: list[tuple[EndpointPosition, EndpointPosition]] = sorted((positionsArch, positionsComparand))
+def _archesCross吗(positionsArch: tuple[Pile, Pile], positionsComparand: tuple[Pile, Pile]) -> bool:
+	archesSorted: list[tuple[Pile, Pile]] = sorted((positionsArch, positionsComparand))
 	return archesCross吗(archesSorted[0][0], archesSorted[1][0], archesSorted[0][1], archesSorted[1][1])
 
 def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -> Path:
@@ -144,7 +144,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 		raise ValueError(message)
 
 	endpointsInserted: int = 1
-	diagramsAtDepth: Iterable[ArchDiagram] = ((endpointOrigin,),)
+	diagramsAtDepth: Iterable[Folding] = ((endpointOrigin,),)
 	pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, pathAlbum, suffix='.album')
 	if pathFilenameAlbum.exists():
 		message = f'Album already exists: {pathFilenameAlbum}.'
@@ -178,8 +178,8 @@ if __name__ == '__main__':
 
 # DEVELOPMENT Changes:
 # TODO to make the files smaller, use a truncated notation. The graph notation I created is very
-# compact: one delimiter and one `Endpoint` represents one `ArchDiagram`, if the diagrams are sorted. An
-# `ArchDiagram` is a permutation, and there is a special notation for permutations, but it's opaque to
+# compact: one delimiter and one `Leaf` represents one `Folding`, if the diagrams are sorted. An
+# `Folding` is a permutation, and there is a special notation for permutations, but it's opaque to
 # me. However, there are packages that implement it, so that would likely be more robust, even if
 # it is not more compact.
 
@@ -193,5 +193,5 @@ if __name__ == '__main__':
 
 # `streamAlbum` only read when requested: good for iterating past existing files.
 
-# No: `ArchDiagram` -> endpoint positions. This requires overwriting keys or reading/changing a ton of keys.
+# No: `Folding` -> endpoint positions. This requires overwriting keys or reading/changing a ton of keys.
 # No: endpointAnte -> endpointPost. ante makes it easier to count backwards from the last endpoint.

@@ -3,24 +3,24 @@
 
 You can use this module to study Sade's constructive enumeration of overlap-free permutations [1].
 Sade labels the endpoints from 1 through n, while `mapFolding` labels the same endpoints from 0 through n−1.
-Every `ArchDiagram` in this module therefore begins with `endpointOrigin`, and each album preserves Sade's
+Every `Folding` in this module therefore begins with `endpointOrigin`, and each album preserves Sade's
 right-to-left insertion order.
 
-The construction relies on one invariant. A parent `ArchDiagram` has no arch crossings, so inserting
-the newest `Endpoint` can introduce a crossing only between the newest arch and an older arch on the
+The construction relies on one invariant. A parent `Folding` has no arch crossings, so inserting
+the newest `Leaf` can introduce a crossing only between the newest arch and an older arch on the
 same side of the axis. The module imports `archesCross吗` from the shared crossing predicate [2].
 
 Contents
 --------
 Functions
     countContributions
-        Count the valid descendants contributed by one `ArchDiagram`.
+        Count the valid descendants contributed by one `Folding`.
     getAlbum
         Construct the album for one number of endpoints.
     makeAlbums
         Construct every album through one number of endpoints.
     makeDescendants
-        Construct the valid descendants contributed by one `ArchDiagram`.
+        Construct the valid descendants contributed by one `Folding`.
     deconstructAlbumToRow
         Count how many album members have each contribution total.
 
@@ -48,9 +48,9 @@ from mapFolding._e.algorithms.iff import foldingValid吗 as diagramValid吗
 if TYPE_CHECKING:
 	from collections.abc import Collection
 
-	from mapFolding.theTypes import ArchDiagram, Endpoint, EndpointPosition
+	from mapFolding.theTypes import Folding, Leaf, Pile
 
-def getAlbum(totalEndpoints: int) -> tuple[ArchDiagram, ...]:
+def getAlbum(totalEndpoints: int) -> tuple[Folding, ...]:
 	"""Construct the Sade album for `totalEndpoints`.
 
 	(AI generated docstring)
@@ -62,16 +62,16 @@ def getAlbum(totalEndpoints: int) -> tuple[ArchDiagram, ...]:
 	Parameters
 	----------
 	totalEndpoints : int
-		The number of endpoints in every returned `ArchDiagram`. `totalEndpoints` must be at least 2.
+		The number of endpoints in every returned `Folding`. `totalEndpoints` must be at least 2.
 
 	Returns
 	-------
-	diagramAlbum : tuple[ArchDiagram, ...]
+	diagramAlbum : tuple[Folding, ...]
 		The overlap-free permutations in Sade's album order.
 	"""
 	return makeAlbums(totalEndpoints)[totalEndpoints]
 
-def makeAlbums(totalEndpoints: int) -> dict[int, tuple[ArchDiagram, ...]]:
+def makeAlbums(totalEndpoints: int) -> dict[int, tuple[Folding, ...]]:
 	"""Construct every Sade album through `totalEndpoints`.
 
 	(AI generated docstring)
@@ -87,7 +87,7 @@ def makeAlbums(totalEndpoints: int) -> dict[int, tuple[ArchDiagram, ...]]:
 
 	Returns
 	-------
-	sadeAlbums : dict[int, tuple[ArchDiagram, ...]]
+	sadeAlbums : dict[int, tuple[Folding, ...]]
 		Each number of endpoints mapped to the corresponding ordered album.
 
 	Raises
@@ -105,7 +105,7 @@ def makeAlbums(totalEndpoints: int) -> dict[int, tuple[ArchDiagram, ...]]:
 		raise ValueError(message)
 
 	endpointsActive: int = 2
-	sadeAlbums: dict[int, tuple[ArchDiagram, ...]] = {endpointsActive: ((endpointOrigin, 1),)}
+	sadeAlbums: dict[int, tuple[Folding, ...]] = {endpointsActive: ((endpointOrigin, 1),)}
 	while endpointsActive < totalEndpoints:
 		sadeAlbums[endpointsActive + 1] = tuple(
 			chain.from_iterable(map(_makeDescendants, sadeAlbums[endpointsActive]))
@@ -113,22 +113,22 @@ def makeAlbums(totalEndpoints: int) -> dict[int, tuple[ArchDiagram, ...]]:
 		endpointsActive += 1
 	return sadeAlbums
 
-def _makeDescendants(diagram: ArchDiagram) -> tuple[ArchDiagram, ...]:
+def _makeDescendants(diagram: Folding) -> tuple[Folding, ...]:
 	return tuple(filter(_diagramValid吗, map(partial(_insertEndpointLast, diagram), range(len(diagram), positionOrigin, decreasing))))
 
-def _insertEndpointLast(diagram: ArchDiagram, position: EndpointPosition) -> ArchDiagram:
+def _insertEndpointLast(diagram: Folding, position: Pile) -> Folding:
 	return (*diagram[:position], len(diagram), *diagram[position:])
 
-def _diagramValid吗(diagram: ArchDiagram) -> bool:
+def _diagramValid吗(diagram: Folding) -> bool:
 	return not _newArchCrosses吗(diagram)
 
-def _newArchCrosses吗(diagram: ArchDiagram) -> bool:
-	lookupPosition: dict[Endpoint, EndpointPosition] = dict(zip(diagram, range(len(diagram)), strict=True))
-	endpointArchLast: Endpoint = len(diagram) - 2
+def _newArchCrosses吗(diagram: Folding) -> bool:
+	lookupPosition: dict[Leaf, Pile] = dict(zip(diagram, range(len(diagram)), strict=True))
+	endpointArchLast: Leaf = len(diagram) - 2
 	return any(map(partial(_archesCross吗, lookupPosition, endpointArchLast), range(endpointArchLast - 2, endpointOrigin - inclusive, 2 * decreasing)))
 
-def _archesCross吗(lookupPosition: dict[Endpoint, EndpointPosition], endpoint: Endpoint, endpointComparand: Endpoint) -> bool:
-	archesSorted: list[tuple[EndpointPosition, EndpointPosition]] = sorted((
+def _archesCross吗(lookupPosition: dict[Leaf, Pile], endpoint: Leaf, endpointComparand: Leaf) -> bool:
+	archesSorted: list[tuple[Pile, Pile]] = sorted((
 				(lookupPosition[endpoint], lookupPosition[endpoint + 1])
 				, (lookupPosition[endpointComparand], lookupPosition[endpointComparand + 1])
 			))
@@ -136,7 +136,7 @@ def _archesCross吗(lookupPosition: dict[Endpoint, EndpointPosition], endpoint: 
 
 #================== Deconstruct Album to Row ======================================================
 
-def deconstructAlbumToRow(album: Collection[ArchDiagram]) -> dict[int, int]:
+def deconstructAlbumToRow(album: Collection[Folding]) -> dict[int, int]:
 	"""Count how many album members have each Sade contribution total.
 
 	(AI generated docstring)
@@ -147,8 +147,8 @@ def deconstructAlbumToRow(album: Collection[ArchDiagram]) -> dict[int, int]:
 
 	Parameters
 	----------
-	album : Collection[ArchDiagram]
-		A nonempty collection of normalized, overlap-free `ArchDiagram` values with one common number of
+	album : Collection[Folding]
+		A nonempty collection of normalized, overlap-free `Folding` values with one common number of
 		endpoints.
 
 	Returns
@@ -166,31 +166,31 @@ def deconstructAlbumToRow(album: Collection[ArchDiagram]) -> dict[int, int]:
 	[1] Albert Sade (1949). Sur les Chevauchements des Permutations, sections 3–7.
 		Marseille, France.
 	"""
-	diagramAlbum: tuple[ArchDiagram, ...] = tuple(album)
+	diagramAlbum: tuple[Folding, ...] = tuple(album)
 	if not diagramAlbum:
-		message: str = f'I received `{diagramAlbum = }`, but a Sade contribution row needs at least one `ArchDiagram`.'
+		message: str = f'I received `{diagramAlbum = }`, but a Sade contribution row needs at least one `Folding`.'
 		raise ValueError(message)
 
 	endpointCounts: tuple[int, ...] = tuple(map(len, diagramAlbum))
 	if len(frozenset(endpointCounts)) != 1:
-		message = f'I received `{endpointCounts = }`, but every `ArchDiagram` in one Sade album must have the same length.'
+		message = f'I received `{endpointCounts = }`, but every `Folding` in one Sade album must have the same length.'
 		raise ValueError(message)
 
 	return dict(sorted(Counter(map(countContributions, diagramAlbum)).items()))
 
-def countContributions(diagram: ArchDiagram) -> int:
-	"""Count the valid Sade descendants contributed by one `ArchDiagram`.
+def countContributions(diagram: Folding) -> int:
+	"""Count the valid Sade descendants contributed by one `Folding`.
 
 	(AI generated docstring)
 
 	You can use this function to obtain Sade's contribution value i for one member of an album. The
-	contribution value is the number of gaps that accept the newest `Endpoint` without creating an arch
+	contribution value is the number of gaps that accept the newest `Leaf` without creating an arch
 	crossing.
 
 	Parameters
 	----------
-	diagram : ArchDiagram
-		An overlap-free permutation of consecutive `Endpoint` values that begins with `endpointOrigin`.
+	diagram : Folding
+		An overlap-free permutation of consecutive `Leaf` values that begins with `endpointOrigin`.
 
 	Returns
 	-------
@@ -199,23 +199,23 @@ def countContributions(diagram: ArchDiagram) -> int:
 	"""
 	return len(makeDescendants(diagram))
 
-def makeDescendants(diagram: ArchDiagram) -> tuple[ArchDiagram, ...]:
-	"""Construct the valid Sade descendants contributed by one `ArchDiagram`.
+def makeDescendants(diagram: Folding) -> tuple[Folding, ...]:
+	"""Construct the valid Sade descendants contributed by one `Folding`.
 
 	(AI generated docstring)
 
 	You can use this function to inspect one step of Sade's construction. The function inserts the
-	newest `Endpoint` into each gap after `endpointOrigin`, starting with the rightmost gap, and retains each
+	newest `Leaf` into each gap after `endpointOrigin`, starting with the rightmost gap, and retains each
 	child whose newest arch does not cross an older arch of matching parity [1].
 
 	Parameters
 	----------
-	diagram : ArchDiagram
-		An overlap-free permutation of consecutive `Endpoint` values that begins with `endpointOrigin`.
+	diagram : Folding
+		An overlap-free permutation of consecutive `Leaf` values that begins with `endpointOrigin`.
 
 	Returns
 	-------
-	diagramDescendants : tuple[ArchDiagram, ...]
+	diagramDescendants : tuple[Folding, ...]
 		The overlap-free descendants in Sade's right-to-left insertion order.
 
 	References
@@ -226,25 +226,25 @@ def makeDescendants(diagram: ArchDiagram) -> tuple[ArchDiagram, ...]:
 	_validateDiagram(diagram)
 	return _makeDescendants(diagram)
 
-def _validateDiagram(diagram: ArchDiagram) -> None:
+def _validateDiagram(diagram: Folding) -> None:
 	if len(diagram) < 2:
-		message: str = f'I received `{diagram = }`, but a Sade album `ArchDiagram` must contain at least two endpoints.'
+		message: str = f'I received `{diagram = }`, but a Sade album `Folding` must contain at least two endpoints.'
 		raise ValueError(message)
 
 	if diagram[positionOrigin] != endpointOrigin:
-		message = f'I received `{diagram = }`, but a Sade album `ArchDiagram` must begin with `{endpointOrigin = }`.'
+		message = f'I received `{diagram = }`, but a Sade album `Folding` must begin with `{endpointOrigin = }`.'
 		raise ValueError(message)
 
 	if frozenset(diagram) != frozenset(range(len(diagram))):
-		message = f'I received `{diagram = }`, but I expected each `Endpoint` from 0 through {len(diagram) - 1}.'
+		message = f'I received `{diagram = }`, but I expected each `Leaf` from 0 through {len(diagram) - 1}.'
 		raise ValueError(message)
 
 	if not diagramValid吗(diagram, (len(diagram),)):
-		message = f'I received `{diagram = }`, but a Sade album `ArchDiagram` cannot contain an arch crossing.'
+		message = f'I received `{diagram = }`, but a Sade album `Folding` cannot contain an arch crossing.'
 		raise ValueError(message)
 
 if __name__ == '__main__':
 	totalEndpoints: int = 6
-	album: dict[int, tuple[ArchDiagram, ...]] = makeAlbums(totalEndpoints)
+	album: dict[int, tuple[Folding, ...]] = makeAlbums(totalEndpoints)
 	pprint(album, width=120, compact=True)
 	pprint(deconstructAlbumToRow(album[totalEndpoints]), width=120, compact=True)

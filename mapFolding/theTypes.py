@@ -7,12 +7,6 @@ Array aliases use NumPy [1].
 Contents
 --------
 Domain labels
-	ArchDiagram
-		Represent endpoint labels indexed by position along the axis.
-	Endpoint
-		Identify an endpoint label.
-	EndpointPosition
-		Identify a position along the diagram axis.
 	Folding
 		Represent leaf labels indexed by pile position.
 	Leaf
@@ -98,17 +92,6 @@ if TYPE_CHECKING:
 	from os import PathLike
 	from pathlib import PurePosixPath
 	from typing import Any, LiteralString, TypeAlias
-
-type ArchDiagram = tuple[Endpoint, ...]
-"""Represent an arch diagram as endpoint labels indexed by position along the axis."""
-
-# SEMIOTICS
-type Endpoint = int
-"""Identify an endpoint label in an arch diagram."""
-
-# SEMIOTICS
-type EndpointPosition = int
-"""Identify an endpoint's position along the diagram axis."""
 
 type Folding = tuple[Leaf, ...]
 # DOCUMENT

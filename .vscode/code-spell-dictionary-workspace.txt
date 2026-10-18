@@ -394,6 +394,7 @@ posargs
 posonlyargs
 prange
 prec
+prechecking
 presolve
 primefactors
 primenu
@@ -437,6 +438,7 @@ rmuln
 Rplus
 rref
 rtol
+rulebooks
 Ruskey
 Saakov
 saam
@@ -520,6 +522,7 @@ unliteral
 unparameterized
 unparses
 unrank
+unrequested
 Unroller
 unshifted
 unsignedinteger
