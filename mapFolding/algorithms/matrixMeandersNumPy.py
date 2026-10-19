@@ -283,17 +283,65 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
     datatype : type[形NumPyInteger]
         Integer `dtype` used for each array element.
     name : str | None = None
-        If applicable, filename stem `f"{name}.mM"` for a file based `ndarray`.
+        Required filename stem for the current memory-mapped allocator. The default `None`
+        does not supply a usable storage name.
 
     Returns
     -------
     container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-        `numpy.ndarray` of `shape` with `datatype`.
+        File-backed array created by `mapFolding.dataStructures.make_memmap` [1]. Existing
+        storage with the same filename is replaced.
+
+    References
+    ----------
+    [1] `mapFolding.dataStructures.make_memmap`
     """
     return make_memmap(shape, datatype, raiseIfNone(name))
 
 def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMAXIMUM: int) -> tuple[形ArrayArcCode, int]:
-    """Record valid `arcCode` and corresponding `meanders` in `arrayAnalyzed`."""
+    """Record retained `arcCode` values and their counts in a possibly extended `arrayAnalyzed`.
+
+    (AI generated docstring)
+
+    You can use this function during a transfer step to append new arch-code records. This
+    function returns both the output array and the next unused record position. The caller
+    must retain both returned values because the output array can be replaced.
+
+    Parameters
+    ----------
+    arrayAnalyzed : 形ArrayArcCode
+        Two-axis output buffer containing arch codes and counts in the configured columns.
+    次start : int
+        First output record position to write.
+    arcCode : 形ArrayArcCode1D
+        Candidate arch codes aligned with the records in `arrayMeanders`. This array is
+        modified in place to zero codes greater than `arcCodeMAXIMUM`.
+    arrayMeanders : 形ArrayArcCode
+        Source records containing the counts associated with each candidate arch code.
+    arcCodeMAXIMUM : int
+        Largest retained code. Codes equal to this value remain eligible.
+
+    Returns
+    -------
+    arrayAnalyzed : 形ArrayArcCode
+        Updated output buffer, extended with `mapFolding.dataStructures.extendArray` [1]
+        when the retained records exceed the current allocation.
+    次Stop : int
+        Position immediately after the last written output record.
+
+    Record Selection
+    ----------------
+    After disallowed codes are zeroed, `numpy.flatnonzero` [2] selects all remaining nonzero
+    codes. Zero codes are omitted. Each selected code and its source count are copied to
+    consecutive output records without aggregation.
+
+    References
+    ----------
+    [1] `mapFolding.dataStructures.extendArray`
+
+    [2] NumPy `numpy.flatnonzero`.
+        https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html
+    """
     selectorOverLimit: 形ArrayBoolean1D = arcCodeMAXIMUM < arcCode
     arcCode[selectorOverLimit] = 0
 

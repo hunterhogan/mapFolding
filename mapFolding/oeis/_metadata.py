@@ -131,6 +131,7 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 	partially known final row is retained. Grouping stops at the first empty row, including an empty
 	row caused by a requested length of zero. The function does not check whether the sequence
 	represents a triangle.
+	Use `getTriangleTerms` [4] to preserve known values beyond gaps in the flat indices.
 
 	Parameters
 	----------
@@ -150,13 +151,12 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 
 	Examples
 	--------
-	`getTriangleDiagonal` [4] obtains rows with the following call before selecting a diagonal,
-	using the caller's `oeisID`.
+	`mapFolding.oeis.A400429.checkFormulas` [5] obtains the stored semi-meander rows.
 
 		```python
 		from mapFolding.oeis import getTriangleRows
 
-		getTriangleRows(oeisID)
+		triangleRows = getTriangleRows('A400429')
 		```
 
 	References
@@ -167,10 +167,12 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 
 	[3] `mapFolding.dataStructures.makeTriangle`
 
-	[4] `getTriangleDiagonal`
+	[4] `getTriangleTerms`
+
+	[5] `mapFolding.oeis.A400429.checkFormulas`
 
 	"""
-	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
+	from mapFolding.dataStructures import makeTriangle
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None
@@ -180,7 +182,43 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 		takewhile(metadata['valuesKnown'].__contains__, count(metadata['offset']))), rowLengths, rowStart)
 
 def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
-	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
+	"""Group available terms for `oeisID` into sparse triangle rows.
+
+	(AI generated docstring)
+
+	You can use this function to inspect known triangle cells even when some flat sequence indices
+	are missing. This function uses `getMetadata` [1] for the row layout and
+	`mapFolding.dataStructures.lookupToTriangle` [2] to preserve each available cell's column.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Registered sequence identifier, ignoring letter case and surrounding whitespace.
+
+	Returns
+	-------
+	triangleTerms : 形TriangleSparse
+		New dictionaries mapping row numbers to available columns, with columns starting at one.
+
+	Row Layout
+	----------
+	The first row uses `rowStart`, or `offset` when `rowStart` is absent. Flat indices start at
+	`offset`. A supplied `rowLength` determines each complete row length; otherwise lengths start
+	at one and increase by one. Rows through the largest stored flat index are retained, including
+	empty rows caused by gaps. A partial final row keeps the original column keys.
+
+	See Also
+	--------
+	`getTriangleRows`
+		Read dense rows from the consecutive prefix of known sequence indices.
+
+	References
+	----------
+	[1] `getMetadata`
+
+	[2] `mapFolding.dataStructures.lookupToTriangle`
+	"""
+	from mapFolding.dataStructures import lookupToTriangle
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None
@@ -189,18 +227,141 @@ def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
 	return lookupToTriangle(metadata['valuesKnown'], rowLengths, rowStart, metadata['offset'])
 
 def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:
-	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
+	"""Select an available triangle diagonal for `oeisID` without shifting missing cells.
+
+	(AI generated docstring)
+
+	You can use this function to compare one diagonal with a formula or independently computed
+	counts. This function obtains sparse rows from `getTriangleTerms` [1] and selects cells with
+	`mapFolding.dataStructures.getLookupDiagonal` [2].
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Registered triangle sequence identifier, ignoring case and surrounding whitespace.
+	次diagonal : int
+		Offset from the selected row edge, starting at one. Zero selects no ordinary cell.
+	fromRight : bool = True
+		Measure from the complete row's right edge when `True`, or the left edge when `False`.
+
+	Returns
+	-------
+	diagonal : dict[int, int]
+		Available selected cells keyed by ascending row number. Missing cells are omitted.
+
+	Complete Row Lengths
+	--------------------
+	Right-edge selection uses the metadata `rowLength`, or the default lengths starting at one.
+	Missing cells therefore retain their positions relative to the complete row's edge.
+	Selection propagates `ValueError` from the diagonal selector if `次diagonal` is negative.
+
+	References
+	----------
+	[1] `getTriangleTerms`
+
+	[2] `mapFolding.dataStructures.getLookupDiagonal`
+	"""
+	from mapFolding.dataStructures import getLookupDiagonal
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return getLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
 		getGroupLength=metadata.get('rowLength', partial(add, 1 - metadata.get('rowStart', metadata['offset']))))
 
 def getTriangleIndices(oeisID: OEISid, n: int) -> range:
-	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
+	"""Locate the complete triangle row `n` in the flat sequence `oeisID`.
+
+	(AI generated docstring)
+
+	You can use this function to match a row calculation with b-file indices. This function reads
+	the row layout from `getMetadata` [1] and delegates index calculation to
+	`mapFolding.dataStructures.makeGroupKeys` [2].
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Registered triangle sequence identifier, ignoring case and surrounding whitespace.
+	n : int
+		Row number, no smaller than the first row specified by the metadata.
+
+	Returns
+	-------
+	indices : range
+		Flat indices for every column of the complete row, whether or not those terms are known.
+
+	Row Layout
+	----------
+	Flat indices start at `offset`; row numbers start at `rowStart`, falling back to `offset`.
+	A supplied `rowLength` determines row lengths. Otherwise lengths start at one and increase
+	by one, independently of the first row number.
+	Index calculation propagates `ValueError` if `n` precedes the first metadata row.
+
+	References
+	----------
+	[1] `getMetadata`
+
+	[2] `mapFolding.dataStructures.makeGroupKeys`
+	"""
+	from mapFolding.dataStructures import makeGroupKeys
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return makeGroupKeys(n, keyGroupFirst=metadata.get('rowStart', metadata['offset']), keyFlatFirst=metadata['offset'],
 		getGroupLength=metadata.get('rowLength'))
 
 def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
+	"""Add missing terms to the local b-file for `oeisID` and update shared known values.
+
+	(AI generated docstring)
+
+	You can use this function to retain computed terms between research runs. This function merges
+	`sequence` with the known values from `getMetadata` [1] and the existing local b-file [2],
+	then returns the local path. This function does not submit data to OEIS.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Registered sequence identifier, ignoring case and surrounding whitespace.
+	sequence : Mapping[int, int]
+		Computed values keyed by flat sequence index. Existing file and metadata values take
+		precedence over supplied values.
+
+	Returns
+	-------
+	pathFilename : Path
+		B-file path under `pathCache` [3]. The path may remain absent when there are no terms to add.
+
+	Merge and Persistence
+	---------------------
+	Existing file values take precedence over metadata values. Metadata values take precedence
+	over `sequence`. The negative `hunterMakesPy.errorL33T` sentinel [4] is excluded from additions.
+	When missing indices are added, comment lines are retained before all terms and
+	`mapFolding.oeis.formatBFile` [5] writes the terms in ascending index order. No rewrite occurs
+	when there are no missing indices.
+
+	The shared `valuesKnown` dictionary is cleared and updated in place from the merged local
+	values, in index order. Existing references returned by `getValuesKnown` [6] observe this
+	update. `valueUnknown` becomes one greater than the largest stored index, or `offset` when
+	there are no terms. Gaps below that index remain possible.
+
+	Examples
+	--------
+	The cell writer in `easyRun/triangleSemiMake.py` saves each computed triangle term.
+
+		```python
+		updateBFile('A400429', {nT: aOFn下k})
+		```
+
+	References
+	----------
+	[1] `getMetadata`
+
+	[2] OEIS b-files.
+		https://oeis.org/wiki/B-files
+	[3] `mapFolding.oeis._theSSOT.pathCache`
+
+	[4] hunterMakesPy.
+		https://github.com/hunterhogan/hunterMakesPy
+	[5] `mapFolding.oeis.formatBFile`
+
+	[6] `getValuesKnown`
+	"""
 	oeisID = formatOEISid(oeisID)
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	pathFilename: Path = pathCache / oeis_bfile(oeisID)
@@ -219,7 +380,41 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	return pathFilename
 
 def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> Path:
-	from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
+	"""Add dense or sparse rows from `triangle` to the local sequence cache for `oeisID`.
+
+	(AI generated docstring)
+
+	You can use this function to save row computations without converting column positions to
+	flat indices yourself. This function flattens `triangle` using
+	`mapFolding.dataStructures.triangleToLookup` [1], then delegates persistence and shared-value
+	updates to `updateBFile` [2].
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Registered triangle sequence identifier, ignoring case and surrounding whitespace.
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Row numbers mapped to dense cell sequences or sparse dictionaries with columns starting
+		at one. Supplied columns must fit the complete row length defined by the metadata.
+
+	Returns
+	-------
+	pathFilename : Path
+		Local b-file path. Existing file and metadata values take precedence over supplied cells.
+
+	Row Layout
+	----------
+	The metadata `offset` selects the first flat index; `rowStart` selects the first row, falling
+	back to `offset`. A supplied `rowLength` sets each complete row length. Otherwise lengths
+	start at one and increase by one. Missing rows and columns keep their flat index positions.
+
+	References
+	----------
+	[1] `mapFolding.dataStructures.triangleToLookup`
+
+	[2] `updateBFile`
+	"""
+	from mapFolding.dataStructures import triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return updateBFile(oeisID, triangleToLookup(triangle, keyGroupFirst=metadata.get('rowStart', metadata['offset']),
 		keyFlatFirst=metadata['offset'], getGroupLength=metadata.get('rowLength')))

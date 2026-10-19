@@ -33,11 +33,14 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: 形ArrayArcCode | No
 	----------
 	state : StateMeanders
 		The current state of the computation, including `lookupMeanders`.
+	arrayMeanders : 形ArrayArcCode | None = None
+		Working array. When supplied without `dataframe`, its maximum element supplies the
+		width used for both arch-code and count checks.
 	dataframe : pandas.DataFrame | None = None
 		DataFrame containing 'analyzed' and 'meanders' columns. If provided, use this instead of
 		`state.lookupMeanders`.
 	fixedSizeMAXIMUMarcCode : bool = False
-		Set this to `True` if you cast `state.arcCodeMAXIMUM` to the same fixed size integer type as
+		Set this to `True` if you cast `state.arcCodeMaximum` to the same fixed size integer type as
 		`dtypeArcCode`.
 
 	Returns
@@ -45,22 +48,22 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: 形ArrayArcCode | No
 	wider : bool
 		True if at least one integer is wider than the fixed-size integers.
 
-	Notes
-	-----
-	Casting `state.arcCodeMAXIMUM` to a fixed-size 64-bit unsigned integer might cause the flow to be
-	a little more complicated because `arcCodeMAXIMUM` is usually 1-bit larger than the `max(arcCode)`
+	Threshold Width
+	---------------
+	Casting `state.arcCodeMaximum` to a fixed-size 64-bit unsigned integer might cause the flow to be
+	a little more complicated because `state.arcCodeMaximum` is usually 1-bit larger than the `max(arcCode)`
 	value.
 
 	If you start the algorithm with very large `arcCode` in your `lookupMeanders` (*i.e.,*
 	semi), then the flow will go to a function that does not use fixed size integers. When the
 	integers are below the limits (*e.g.,* `bitWidthArcCodeMaximum`), the flow will go to a function
-	with fixed size integers. In that case, casting `arcCodeMAXIMUM` to a fixed size merely delays the
+	with fixed size integers. In that case, casting `state.arcCodeMaximum` to a fixed size merely delays the
 	transition from one function to the other by one iteration.
 
 	If you start with small values in `lookupMeanders`, however, then the flow goes to the
 	function with fixed size integers and usually stays there until `meanders` is huge, which is near
-	the end of the computation. If you cast `arcCodeMAXIMUM` into a 64-bit unsigned integer, however,
-	then around `state.boundary == 28`, the bit width of `arcCodeMAXIMUM` might exceed the limit. That
+	the end of the computation. If you cast `state.arcCodeMaximum` into a 64-bit unsigned integer, however,
+	then around `state.boundary == 28`, the bit width of `state.arcCodeMaximum` might exceed the limit. That
 	will cause the flow to go to the function that does not have fixed size integers for a few
 	iterations before returning to the function with fixed size integers.
 	"""
@@ -86,18 +89,19 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: 形ArrayArcCode | No
 def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
 	"""Create the starting `lookupMeanders` for a matrix meander count.
 
-	You can use this function to build the initial `arcCode` → total meanders count mapping. For `kind
-	== 'semi'`, the dictionary has two `arcCode` keys based on the parity of `n` and the magnitude of
-	`boundary`. For `kind == 'meanders'`, the dictionary has one `arcCode` based on the parity of `n`.
+	You can use this function to build the initial mapping from arch codes to counts. For
+	`kind == 'semi'`, the number and values of the starting codes depend on `n` and `boundary`.
+	For `kind == 'meanders'`, one starting code is selected using the parity of `n`.
+	For `kind == 'closed'`, one fixed starting code is used.
 
 	Parameters
 	----------
-	kind : Literal['semi', 'meanders'] | LiteralString
+	kind : Literal['closed', 'meanders', 'semi'] | LiteralString
 		Which family of meander count to initialize.
 	n : int
 		The number of times the meander crosses the road.
-	boundary : int = `n` - 1
-		The boundary from which to start counting.
+	boundary : int = 0
+		The boundary from which to start counting. Zero selects `n - 1`.
 
 	Returns
 	-------
@@ -107,7 +111,7 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 	Raises
 	------
 	ValueError
-		Raised when `kind` is not `'semi'` or `'meanders'`.
+		Raised when `kind` is not `'closed'`, `'semi'`, or `'meanders'`.
 	"""
 	if not boundary:
 		boundary = n - 1
@@ -195,13 +199,17 @@ totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5:
 	, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
 
 def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
-	"""Return the allocation length for one transfer-matrix step.
+	"""Estimate the output allocation length for one transfer-matrix step.
+
+	You can use this function to choose an initial output-buffer length from the number of input
+	records and the transfer boundary. The estimate can be smaller than the required allocation;
+	callers that write additional records must allow the buffer to grow.
 
 	Parameters
 	----------
 	state : StateMeanders
 		The current transfer-matrix state.
-	totalArcCodes : int
+	totalArcCodes : int = 0
 		Number of unique input `arcCode` at the current boundary.
 
 	Returns
@@ -233,6 +241,41 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	return max(totalBuckets, totalBucketsMaximumBy_boundary.get(state.boundary, totalBuckets))
 
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
+	"""Prepare a semi-meander state for counting diagonal `次diagonal` at row `n`.
+
+	(AI generated docstring)
+
+	You can use this function to initialize the transfer calculation for one triangle cell.
+	The returned `StateMeanders` [1] starts with one arch code and count one. Counting has not
+	yet run.
+
+	Parameters
+	----------
+	n : int
+		Semi-meander row number in the domain of the selected diagonal.
+	次diagonal : int
+		Diagonal offset from the complete right edge, starting at one.
+
+	Returns
+	-------
+	state : StateMeanders
+		Initial state for the selected diagonal term, ready for
+		`mapFolding.basecamp.countMeanders` [2].
+
+	Examples
+	--------
+	`easyRun/triangleSemiMake.py` counts a diagonal term before saving the total.
+
+		```python
+		state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
+		```
+
+	References
+	----------
+	[1] `mapFolding.dataBaskets.StateMeanders`
+
+	[2] `mapFolding.basecamp.countMeanders`
+	"""
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
 	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
 

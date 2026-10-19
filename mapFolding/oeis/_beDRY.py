@@ -12,6 +12,28 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 
 def formatBFile(sequence: Mapping[int, int]) -> str:
+	"""Format `sequence` as b-file records in ascending index order.
+
+	(AI generated docstring)
+
+	You can use this function to prepare integer sequence terms for OEIS b-file storage [1].
+	Each record contains an index, a space, a value, and a newline. No header or comments are added.
+
+	Parameters
+	----------
+	sequence : Mapping[int, int]
+		Sequence indices mapped to integer values.
+
+	Returns
+	-------
+	contents : str
+		Sorted b-file records, or an empty string when no terms are supplied.
+
+	References
+	----------
+	[1] OEIS b-files.
+		https://oeis.org/wiki/B-files
+	"""
 	return ''.join(map(lambda term: f"{term[0]} {term[1]}\n", sorted(sequence.items())))  # ruff: ignore[unnecessary-map]
 
 def formatBenchmarkRatio(known: int, computed: int, ratio: int) -> str:
@@ -34,6 +56,9 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 
 	Line Parsing
 	------------
+	Each line is stripped before empty lines and lines starting with `'#'` are removed. Indented
+	comments and whitespace-only lines are therefore ignored.
+
 	Each remaining line is split on whitespace [2]. Only the first two fields are converted to
 	integers; additional fields are ignored. Repeated indices keep the last value at the first
 	occurrence's dictionary position [3]. The function does not sort indices or check that indices

@@ -6,11 +6,15 @@ utilities. The tests are designed to support multiple audiences and use cases.
 
 Test Module Organization (in mapFolding/tests/):
 - conftest.py: Testing infrastructure and shared fixtures
-- test_computations.py: Core mathematical validation and algorithm testing
+- test_algorithms.py: Core mathematical validation and algorithm testing
+- test_dataBaskets.py: Computation state and array-shape behavior
+- test_dataStructures.py: Dense and sparse triangle conversions and selections
 - test_filesystem.py: File operations and path management
-- test_oeis.py: OEIS sequence integration and caching
-- test_other.py: Foundational utilities and data validation
-- test_tasks.py: Task division and work distribution
+- test_oeis.py: OEIS sequence access, triangle layouts, and local b-file updates
+- test_oeis_byFormula.py: Formula selection and sequence relationships
+- test_parameterValidation.py: Input and processor-limit validation
+- test_taskDivisions.py: Task division and work distribution
+- test_Z0Z_generatingFunction.py: Generating-function research checks
 
 For Contributors:
 The test suite follows Domain-Driven Design principles, organizing tests around
@@ -18,7 +22,7 @@ mathematical concepts rather than implementation details. Use the existing
 patterns as templates when adding new functionality.
 
 For Users Adding Custom Modules:
-The test_computations.py module provides the most relevant examples for testing
+The test_algorithms.py module provides the most relevant examples for testing
 custom computational approaches. The standardized testing functions in conftest.py
 ensure consistent error reporting across all tests.
 

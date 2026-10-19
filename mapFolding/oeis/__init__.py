@@ -18,8 +18,12 @@ Functions
 		Retrieve a known folding total for an exact map shape.
 	getTriangleDiagonal
 		Select a diagonal from known values using the metadata row layout.
+	getTriangleIndices
+		Locate a complete row's flat sequence indices.
 	getTriangleRows
-		Group known sequence values into numbered rows.
+		Group consecutive known sequence values into numbered rows.
+	getTriangleTerms
+		Group available sequence terms into sparse rows without shifting missing cells.
 	getValuesKnown
 		Retrieve shared known values or a sentinel dictionary for an unknown identifier.
 	makeMapShape
@@ -32,6 +36,12 @@ Functions
 		Print a comparison between a computed term and a known value.
 	printEasyRunHeader
 		Print benchmark labels with reproducible terminal colors.
+	printEasyRunTriangle
+		Compare a computed row with known cells and align differing rows.
+	updateBFile
+		Add missing terms to a local b-file and refresh shared known values.
+	updateTriangle
+		Add dense or sparse triangle rows to a local b-file.
 
 Variables
 	oeisIDsImplemented

@@ -15,7 +15,7 @@ iff
 	Check crease crossings and compute leaf-coordinate connections.
 insertion
 	Insert endpoints incrementally and save an arch-diagram album.
-insertion2上nDimensional吗
+insertion2上nDimensional
 	Expand previous-dimension albums into constrained search spaces.
 """
 

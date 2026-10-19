@@ -7,17 +7,67 @@ group integers into triangles and retrieve diagonal lookups.
 
 Contents
 --------
-Functions
-	makeConnectionGraph
-		Construct a connection graph with the requested integer datatype.
+Array storage
+	extendArray
+		Extend a two-axis array's first axis with zero-filled records.
 	makeDataContainer
 		Allocate storage through a replaceable allocation interface.
-	getLookupDiagonal
-		Select a column offset from each available group of an integer table.
-	makeTriangle
-		Split consecutive integers into keyed groups.
+	make_memmap
+		Open file-backed integer storage using a filename stem.
 	make_zeros
 		Allocate a zero-filled array with the common container signature.
+Connection graphs
+	makeConnectionGraph
+		Construct a connection graph with the requested integer datatype.
+Boxes and lookups
+	getBoxOfIntegers
+		Collect integer values in selected key order.
+	getBoxWithGaps
+		Preserve missing column positions with empty entries.
+	getInteger
+		Retrieve a value using a column key starting at one.
+	getLookup
+		Expose dense values as a lookup or retain an existing mapping.
+	keysToLookup
+		Select flat keys and retain their positions as sparse columns.
+	lookupHasKey
+		Check whether a column has an available value.
+	stringsToLookup
+		Convert nonempty cell strings while retaining column positions.
+	subtractLookups
+		Subtract values at the keys shared by two lookups.
+Triangles
+	getTriangleComplete
+		Retain sparse groups containing every expected column.
+	getTriangleGroupLength
+		Obtain a complete group length from a callable or dense storage.
+	groupIsComplete
+		Check a sparse group's expected column keys.
+	groupToLookup
+		Convert one group's columns to flat sequence indices.
+	lookupToTriangle
+		Convert a flat lookup to sparse groups without shifting missing cells.
+	makeGroupKeys
+		Locate a complete group's flat sequence indices.
+	makeTriangle
+		Split consecutive integers into keyed groups.
+	triangleToLookup
+		Convert dense or sparse groups to flat sequence indices.
+Triangle selections
+	getLookupColumn
+		Select one column from available groups.
+	getLookupDiagonal
+		Select a column offset from either edge of each group.
+	getLookupDiagonalRight
+		Select a right-edge diagonal when each group key is its complete length.
+	getLookupSelected
+		Collect available cells from supplied group and column pairs.
+
+Column Keys
+-----------
+Dense groups are Python sequences; sparse groups map column keys to integers. The lookup and
+selection functions use column keys starting at one for both representations. Flat sequence
+indices and group keys have separately configurable origins.
 
 References
 ----------
@@ -81,8 +131,9 @@ def makeDataContainer(
 	replace the same binding.
 
 	The local allocator in `mapFolding.algorithms.matrixMeandersNumPy` [3] delegates to
-	`mapFolding.kitFilesystem.make_memmap` [4], which uses `name` as a filename stem. Supply a meaningful `name` at allocation
-	sites that may later use file-backed storage, even when the current allocator ignores `name`.
+	`make_memmap` [4], which uses `name` as a filename stem. Supply a meaningful `name` at
+	allocation sites that may later use file-backed storage, even when the current allocator
+	ignores `name`.
 
 	Examples
 	--------
@@ -100,7 +151,7 @@ def makeDataContainer(
 
 	[3] `mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer`
 
-	[4] `mapFolding.kitFilesystem.make_memmap`
+	[4] `make_memmap`
 
 	"""
 	return make_zeros(shape, datatype, name)
@@ -110,6 +161,33 @@ def make_zeros(
 	shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]
 	, name: str | None = None  # ruff: ignore[unused-function-argument]
 ) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:
+	"""Allocate a zero-filled integer array with the common storage interface.
+
+	(AI generated docstring)
+
+	This function returns storage allocated by `numpy.zeros` [1]. The unused `name` argument
+	keeps the call interface compatible with `makeDataContainer` [2].
+
+	Parameters
+	----------
+	shape : int | tuple[Any, ...]
+		Requested array dimensions.
+	datatype : 形NumPyInteger | numpy_dtype[形NumPyInteger]
+		Integer element datatype.
+	name : str | None = None
+		Storage name accepted for interface compatibility and ignored by this allocator.
+
+	Returns
+	-------
+	container : ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]
+		New zero-filled array with the requested shape and datatype.
+
+	References
+	----------
+	[1] NumPy `numpy.zeros`.
+		https://numpy.org/doc/stable/reference/generated/numpy.zeros.html
+	[2] `makeDataContainer`
+	"""
 	return numpy.zeros(shape, datatype)
 
 #======== Connection graphs ========================================================================
@@ -217,15 +295,65 @@ def makeConnectionGraph(
 	connectionGraph: 形ArrayTotalLeaves3D = _makeConnectionGraph(mapShape, totalLeaves)
 	return connectionGraph.astype(datatype)
 
-#======== Boxes and lookups ========================================================================
+#======== Containers ========================================================================
 
 def getBoxOfIntegers(lookupIntegers: Sequence[int] | Mapping[int, int], boxOfKeys: Iterable[int] | None = None) -> tuple[int, ...]:
+	"""Collect integer values from `lookupIntegers` in selected key order.
+
+	(AI generated docstring)
+
+	You can use this function to obtain a dense tuple of available values. This function uses
+	`getLookup` [1] to assign column keys to dense input. Missing sparse columns are omitted
+	when no explicit selection is supplied.
+
+	Parameters
+	----------
+	lookupIntegers : Sequence[int] | Mapping[int, int]
+		Dense values or an integer lookup.
+	boxOfKeys : Iterable[int] | None = None
+		Keys to retrieve in the supplied order, including repetitions. `None` selects all
+		available keys in ascending order. Every explicitly selected key must exist.
+
+	Returns
+	-------
+	boxOfIntegers : tuple[int, ...]
+		Values in the selected order.
+
+	References
+	----------
+	[1] `getLookup`
+	"""
 	lookupIntegers = getLookup(lookupIntegers)
 	if boxOfKeys is None:
 		boxOfKeys = sorted(lookupIntegers)
 	return tuple(map(lookupIntegers.__getitem__, boxOfKeys))
 
 def getBoxWithGaps(lookupIntegers: Sequence[int] | Mapping[int, int], keyLast: int = 0) -> tuple[int | None, ...]:
+	"""Collect a group's values while preserving gaps in sparse column positions.
+
+	(AI generated docstring)
+
+	You can use this function to prepare cells for aligned output. Sparse input becomes a tuple
+	with `None` at missing columns; dense input becomes a tuple without padding.
+
+	Parameters
+	----------
+	lookupIntegers : Sequence[int] | Mapping[int, int]
+		Dense values or a sparse lookup with positive column keys.
+	keyLast : int = 0
+		Minimum final column for sparse input. A larger stored key extends the result further.
+		Dense input ignores this argument.
+
+	Returns
+	-------
+	boxWithGaps : tuple[int | None, ...]
+		Cells starting at column one, including `None` for each unavailable sparse column.
+
+	Raises
+	------
+	ValueError
+		If a sparse column key is smaller than one.
+	"""
 	if isinstance(lookupIntegers, Mapping):
 		if not all(map(oneIndexed.__le__, lookupIntegers)):
 			message: str = f"I received `{lookupIntegers = }`, but sparse integer keys must start at one."
@@ -234,16 +362,71 @@ def getBoxWithGaps(lookupIntegers: Sequence[int] | Mapping[int, int], keyLast: i
 	return tuple(lookupIntegers)
 
 def getInteger(lookupIntegers: Sequence[int] | Mapping[int, int], keyInteger: int) -> int:
+	"""Retrieve the value at column `keyInteger` from dense or sparse storage.
+
+	(AI generated docstring)
+
+	This function accesses mapping keys directly and translates dense column keys to Python
+	sequence positions. The caller supplies an available column key starting at one.
+
+	Parameters
+	----------
+	lookupIntegers : Sequence[int] | Mapping[int, int]
+		Dense group or sparse column lookup.
+	keyInteger : int
+		Column key to retrieve.
+
+	Returns
+	-------
+	integer : int
+		Value at the requested column. Column bounds are not validated before access.
+	"""
 	if isinstance(lookupIntegers, Mapping):
 		return lookupIntegers[keyInteger]
 	return getitem(lookupIntegers, (keyInteger - oneIndexed))
 
 def getLookup(lookupIntegers: Sequence[int] | Mapping[int, int]) -> Mapping[int, int]:
+	"""Expose `lookupIntegers` as a mapping of column keys to values.
+
+	(AI generated docstring)
+
+	This function assigns keys starting at one to dense values and returns existing mappings
+	unchanged. The result lets callers use one column-key convention for either representation.
+
+	Parameters
+	----------
+	lookupIntegers : Sequence[int] | Mapping[int, int]
+		Dense values or an existing column lookup.
+
+	Returns
+	-------
+	lookup : Mapping[int, int]
+		New dictionary for dense input, or the original mapping without copying or key validation.
+	"""
 	if not isinstance(lookupIntegers, Mapping):
 		lookupIntegers = dict(enumerate(lookupIntegers, oneIndexed))
 	return lookupIntegers
 
 def keysToLookup(boxOfKeys: Sequence[int], lookupIntegers: Mapping[int, int]) -> dict[int, int]:
+	"""Select flat keys and retain their positions as sparse column keys.
+
+	(AI generated docstring)
+
+	You can use this function to recover one sparse row from a flat sequence lookup. Missing
+	keys are omitted without changing the column positions of later available values.
+
+	Parameters
+	----------
+	boxOfKeys : Sequence[int]
+		Flat keys in the intended column order.
+	lookupIntegers : Mapping[int, int]
+		Available values keyed by flat sequence index.
+
+	Returns
+	-------
+	lookup : dict[int, int]
+		Available values keyed by their positions in `boxOfKeys`, starting at one.
+	"""
 	pairsIntegerKeys, pairsFlatKeys = tee(filter(lambda keyPair: keyPair[1] in lookupIntegers, enumerate(boxOfKeys, oneIndexed)))
 	return dict(zip(
 		map(itemgetter(0), pairsIntegerKeys)
@@ -252,11 +435,47 @@ def keysToLookup(boxOfKeys: Sequence[int], lookupIntegers: Mapping[int, int]) ->
 	))
 
 def lookupHasKey(lookupIntegers: Sequence[int] | Mapping[int, int], keyInteger: int) -> bool:
+	"""Check whether column `keyInteger` has an available value in `lookupIntegers`.
+
+	(AI generated docstring)
+
+	This function checks dense bounds using column keys starting at one. For a mapping, an
+	absent key or a value of `None` is unavailable; other stored values are available.
+
+	Parameters
+	----------
+	lookupIntegers : Sequence[int] | Mapping[int, int]
+		Dense values or a sparse column lookup.
+	keyInteger : int
+		Column key to inspect.
+
+	Returns
+	-------
+	hasKey : bool
+		Whether the requested column has an available value.
+	"""
 	if isinstance(lookupIntegers, Mapping):
 		return lookupIntegers.get(keyInteger) is not None
 	return oneIndexed <= keyInteger <= len(lookupIntegers)
 
 def stringsToLookup(boxOfStrings: Sequence[str]) -> dict[int, int]:
+	"""Convert nonempty strings to integers while retaining their column positions.
+
+	(AI generated docstring)
+
+	You can use this function to read sparse cell fields from a CSV record. Empty strings are
+	omitted. Every retained string is passed directly to `int`, including whitespace-only strings.
+
+	Parameters
+	----------
+	boxOfStrings : Sequence[str]
+		Cell strings in column order, without a row-key field.
+
+	Returns
+	-------
+	lookup : dict[int, int]
+		Parsed values keyed by original column position, starting at one.
+	"""
 	pairsStringKeys, pairsStringContents = tee(filter(lambda pairKeyString: bool(pairKeyString[1]), enumerate(boxOfStrings, oneIndexed)))
 	return dict(zip(
 		map(itemgetter(0), pairsStringKeys)
@@ -265,6 +484,25 @@ def stringsToLookup(boxOfStrings: Sequence[str]) -> dict[int, int]:
 	))
 
 def subtractLookups(lookupMinuend: Mapping[int, int], lookupSubtrahend: Mapping[int, int]) -> dict[int, int]:
+	"""Subtract corresponding values at the keys shared by two integer lookups.
+
+	(AI generated docstring)
+
+	This function returns a new lookup containing only shared keys, in the iteration order of
+	`lookupMinuend`. Zero and negative differences remain in the result.
+
+	Parameters
+	----------
+	lookupMinuend : Mapping[int, int]
+		Values from which to subtract.
+	lookupSubtrahend : Mapping[int, int]
+		Values to subtract at shared keys.
+
+	Returns
+	-------
+	lookupDifference : dict[int, int]
+		Shared keys mapped to the corresponding arithmetic differences.
+	"""
 	keysDifference, keysMinuend, keysSubtrahend = tee(filter(lookupSubtrahend.__contains__, lookupMinuend), 3)
 	return dict(zip(
 		keysDifference
@@ -277,6 +515,32 @@ def subtractLookups(lookupMinuend: Mapping[int, int], lookupSubtrahend: Mapping[
 def getTriangleComplete(
 	triangleSparse: Mapping[int, Mapping[int, int]], *, getGroupLength: Callable[[int], int] = int
 ) -> dict[int, tuple[int, ...]]:
+	"""Retain the groups in `triangleSparse` that contain every expected column.
+
+	(AI generated docstring)
+
+	You can use this function to obtain dense rows suitable for calculations requiring complete
+	data. This function checks each group with `groupIsComplete` [1] and collects accepted cells
+	in ascending column order with `getBoxOfIntegers` [2].
+
+	Parameters
+	----------
+	triangleSparse : Mapping[int, Mapping[int, int]]
+		Group keys mapped to sparse column lookups.
+	getGroupLength : Callable[[int], int] = int
+		Expected complete length from a group key. The default uses the group key as its length.
+
+	Returns
+	-------
+	triangle : dict[int, tuple[int, ...]]
+		Complete groups in the supplied group iteration order, with cells in column order.
+
+	References
+	----------
+	[1] `groupIsComplete`
+
+	[2] `getBoxOfIntegers`
+	"""
 	keysGroups, keysContents = tee(filter(
 		lambda keyGroup: groupIsComplete(keyGroup, triangleSparse[keyGroup], getGroupLength=getGroupLength), triangleSparse
 	))
@@ -286,6 +550,33 @@ def getTriangleGroupLength(
 	triangle: Mapping[int, Sequence[int] | Mapping[int, int]], keyGroup: int
 	, *, getGroupLength: Callable[[int], int] | None = None
 ) -> int:
+	"""Obtain the complete length of group `keyGroup` in `triangle`.
+
+	(AI generated docstring)
+
+	This function uses `getGroupLength` when supplied, including for dense groups. Otherwise this
+	function uses the stored length of a dense group. Sparse groups require an explicit callable
+	because missing columns do not establish the complete length.
+
+	Parameters
+	----------
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Groups represented by dense sequences or sparse column lookups.
+	keyGroup : int
+		Group whose complete length is needed.
+	getGroupLength : Callable[[int], int] | None = None
+		Complete length from a group key, overriding the stored length when supplied.
+
+	Returns
+	-------
+	length : int
+		Supplied complete length or stored dense length.
+
+	Raises
+	------
+	TypeError
+		If the selected group is sparse and `getGroupLength` is absent.
+	"""
 	if getGroupLength is not None:
 		return getGroupLength(keyGroup)
 	if isinstance(triangle[keyGroup], Mapping):
@@ -294,6 +585,27 @@ def getTriangleGroupLength(
 	return len(triangle[keyGroup])
 
 def groupIsComplete(keyGroup: int, lookupIntegers: Mapping[int, int], *, getGroupLength: Callable[[int], int] = int) -> bool:
+	"""Check whether group `keyGroup` contains exactly the expected column keys.
+
+	(AI generated docstring)
+
+	This function compares the sparse key set with the complete range of columns starting at
+	one. Extra keys and missing keys both make the group incomplete; cell values are not checked.
+
+	Parameters
+	----------
+	keyGroup : int
+		Group key supplied to the length callable.
+	lookupIntegers : Mapping[int, int]
+		Available cells keyed by column.
+	getGroupLength : Callable[[int], int] = int
+		Expected complete group length. The default uses the group key as its length.
+
+	Returns
+	-------
+	isComplete : bool
+		Whether the lookup has every expected column key and no additional keys.
+	"""
 	keysInteger: range = range(oneIndexed, getGroupLength(keyGroup) + inclusive)
 	return len(lookupIntegers) == len(keysInteger) and all(map(lookupIntegers.__contains__, keysInteger))
 
@@ -301,6 +613,44 @@ def groupToLookup(
 	keyGroup: int, lookupIntegers: Sequence[int] | Mapping[int, int]
 	, *, keyGroupFirst: int = 1, keyFlatFirst: int = 1, getGroupLength: Callable[[int], int] | None = None
 ) -> dict[int, int]:
+	"""Convert the cells of group `keyGroup` to flat sequence indices.
+
+	(AI generated docstring)
+
+	You can use this function to place a partial row in a flat sequence without shifting cells
+	across gaps. This function obtains the complete row's index range from `makeGroupKeys` [1]
+	and assigns dense column keys using `getLookup` [2].
+
+	Parameters
+	----------
+	keyGroup : int
+		Group number, no smaller than `keyGroupFirst`.
+	lookupIntegers : Sequence[int] | Mapping[int, int]
+		Dense values or a sparse lookup with column keys starting at one.
+	keyGroupFirst : int = 1
+		Number assigned to the first group.
+	keyFlatFirst : int = 1
+		Flat index assigned to the first cell of the first group.
+	getGroupLength : Callable[[int], int] | None = None
+		Complete length from a group number. `None` selects lengths starting at one and increasing
+		by one from `keyGroupFirst`.
+
+	Returns
+	-------
+	lookup : dict[int, int]
+		Supplied cell values keyed by flat index, retaining supplied column iteration order.
+
+	Raises
+	------
+	ValueError
+		If the group precedes `keyGroupFirst` or a supplied column lies outside the complete group.
+
+	References
+	----------
+	[1] `makeGroupKeys`
+
+	[2] `getLookup`
+	"""
 	keysFlat: range = makeGroupKeys(
 		keyGroup, keyGroupFirst=keyGroupFirst, keyFlatFirst=keyFlatFirst, getGroupLength=getGroupLength
 	)
@@ -313,6 +663,43 @@ def groupToLookup(
 def lookupToTriangle(
 	lookupIntegers: Mapping[int, int], boxOfLengths: Iterable[int] | None = None, keyGroupFirst: int = 1, keyFlatFirst: int = 1
 ) -> dict[int, dict[int, int]]:
+	"""Convert a flat integer lookup to sparse groups without shifting missing cells.
+
+	(AI generated docstring)
+
+	You can use this function to recover triangle rows from sequence terms containing gaps.
+	This function groups the complete flat index range with `makeTriangle` [1] and retrieves
+	available cells with `keysToLookup` [2].
+
+	Parameters
+	----------
+	lookupIntegers : Mapping[int, int]
+		Available values keyed by flat sequence index.
+	boxOfLengths : Iterable[int] | None = None
+		Complete lengths of successive groups. `None` or an empty container selects lengths
+		starting at one and increasing by one. An empty iterator produces no groups.
+	keyGroupFirst : int = 1
+		Number assigned to the first group.
+	keyFlatFirst : int = 1
+		First flat index to include; smaller lookup keys are ignored.
+
+	Returns
+	-------
+	triangleSparse : dict[int, dict[int, int]]
+		Groups in ascending order with columns starting at one. Missing columns are omitted;
+		groups with no available cells remain as empty dictionaries.
+
+	Index Extent
+	------------
+	Grouping extends through the largest lookup key, retaining a partial final group. Exhausted
+	group lengths or a zero requested length stop grouping as in `makeTriangle`.
+
+	References
+	----------
+	[1] `makeTriangle`
+
+	[2] `keysToLookup`
+	"""
 	return valmap(
 		partial(keysToLookup, lookupIntegers=lookupIntegers)
 		, makeTriangle(range(keyFlatFirst, max(lookupIntegers, default=keyFlatFirst - 1) + inclusive), boxOfLengths, keyGroupFirst)
@@ -321,6 +708,35 @@ def lookupToTriangle(
 def makeGroupKeys(
 	keyGroup: int, *, keyGroupFirst: int = 1, keyFlatFirst: int = 1, getGroupLength: Callable[[int], int] | None = None
 ) -> range:
+	"""Locate group `keyGroup` in a sequence stored one group after another.
+
+	(AI generated docstring)
+
+	You can use this function to translate a group number to the flat indices of all cells in
+	that group. The result depends on complete group lengths, not on available cell values.
+
+	Parameters
+	----------
+	keyGroup : int
+		Requested group number, no smaller than `keyGroupFirst`.
+	keyGroupFirst : int = 1
+		Number assigned to the first group.
+	keyFlatFirst : int = 1
+		Flat index assigned to the first cell of the first group.
+	getGroupLength : Callable[[int], int] | None = None
+		Complete length from a group number. `None` selects lengths starting at one and increasing
+		by one. Supplied lengths are expected to be nonnegative and are not validated.
+
+	Returns
+	-------
+	keys : range
+		Consecutive flat indices for the complete requested group.
+
+	Raises
+	------
+	ValueError
+		If `keyGroup` precedes `keyGroupFirst`.
+	"""
 	if keyGroup < keyGroupFirst:
 		message: str = f"I received `{keyGroup = }`, but triangle group keys start at `{keyGroupFirst = }`."
 		raise ValueError(message)
@@ -361,17 +777,20 @@ def makeTriangle(boxOfIntegers: Iterable[int], boxOfLengths: Iterable[int] | Non
 
 	Examples
 	--------
-	`mapFolding.oeis.getTriangleRows` [2] passes the parsed integers and group layout.
+	`lookupToTriangle` [2] groups its complete flat index range before retrieving available cells.
 
 		```python
-		makeTriangle(lookupIntegers.values(), boxOfLengths, keyGroupFirst)
+		makeTriangle(
+			range(keyFlatFirst, max(lookupIntegers, default=keyFlatFirst - 1) + inclusive),
+			boxOfLengths, keyGroupFirst
+		)
 		```
 
 	References
 	----------
 	[1] more-itertools `split_into`.
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.split_into
-	[2] `mapFolding.oeis.getTriangleRows`
+	[2] `lookupToTriangle`
 
 	"""
 	boxOfLengths = boxOfLengths or count(1)
@@ -381,6 +800,40 @@ def triangleToLookup(
 	triangle: Mapping[int, Sequence[int] | Mapping[int, int]]
 	, *, keyGroupFirst: int = 1, keyFlatFirst: int = 1, getGroupLength: Callable[[int], int] | None = None
 ) -> dict[int, int]:
+	"""Convert dense or sparse groups in `triangle` to a flat integer lookup.
+
+	(AI generated docstring)
+
+	You can use this function to prepare triangle cells for b-file storage. This function uses
+	`groupToLookup` [1] for each group in ascending group-key order. Missing cells and missing
+	groups retain their positions in the complete flat layout.
+
+	Parameters
+	----------
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Group numbers mapped to dense values or sparse lookups with column keys starting at one.
+	keyGroupFirst : int = 1
+		Number assigned to the first group.
+	keyFlatFirst : int = 1
+		First flat index of the first group.
+	getGroupLength : Callable[[int], int] | None = None
+		Complete length from a group number. `None` selects lengths starting at one and increasing
+		by one from `keyGroupFirst`.
+
+	Returns
+	-------
+	lookup : dict[int, int]
+		Available values keyed by flat index. An empty triangle produces an empty dictionary.
+
+	Invalid Group Bounds
+	--------------------
+	`groupToLookup` propagates `ValueError` if a supplied group precedes `keyGroupFirst` or a
+	column lies outside its complete group bounds.
+
+	References
+	----------
+	[1] `groupToLookup`
+	"""
 	return merge(*starmap(
 		partial(groupToLookup, keyGroupFirst=keyGroupFirst, keyFlatFirst=keyFlatFirst, getGroupLength=getGroupLength)
 		, sorted(triangle.items())
@@ -389,6 +842,25 @@ def triangleToLookup(
 #======== Triangle selections ======================================================================
 
 def getLookupColumn(keyInteger: int, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> dict[int, int]:
+	"""Select column `keyInteger` from every available group in `triangle`.
+
+	(AI generated docstring)
+
+	This function returns available cells in ascending group-key order, omitting groups without
+	the selected column. Dense and sparse input use the same column keys starting at one.
+
+	Parameters
+	----------
+	keyInteger : int
+		Column key to select.
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Group keys mapped to dense values or sparse column lookups.
+
+	Returns
+	-------
+	lookupColumn : dict[int, int]
+		Selected values keyed by group number.
+	"""
 	return getLookupSelected(triangle, zip(sorted(triangle), repeat(keyInteger, len(triangle)), strict=True))
 
 def getLookupDiagonal(
@@ -405,8 +877,8 @@ def getLookupDiagonal(
 	Column Selection
 	----------------
 	Left-edge selection uses integer key `次diagonal`. Right-edge selection uses the complete group
-	length minus `次diagonal` plus `oneIndexed`. A `getGroupLength` callable preserves the intended right edge
-	when a stored group is only a prefix of the complete group.
+	length minus `次diagonal` plus one. A `getGroupLength` callable preserves the intended right
+	edge when a stored group is only a prefix of the complete group.
 
 	Only columns within the stored group are returned. A zero value for `次diagonal` is accepted but
 	selects no value with ordinary group lengths. A custom `getGroupLength` can place that zero-offset
@@ -423,6 +895,7 @@ def getLookupDiagonal(
 	getGroupLength : Callable[[int], int] | None = None
 		Expected complete group length from a group key. With `fromRight=True`, use this length
 		instead of the stored group length. Sparse groups require this callable for right-edge selection.
+		Omitting the callable for a sparse group propagates `TypeError`.
 		The function ignores `getGroupLength` with `fromRight=False`.
 
 	Returns
@@ -451,11 +924,55 @@ def getLookupDiagonal(
 	return getLookupColumn(次diagonal, triangle)
 
 def getLookupDiagonalRight(次diagonal: int, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> dict[int, int]:
+	"""Select a right-edge diagonal when each group key gives its complete length.
+
+	(AI generated docstring)
+
+	This function calls `getLookupDiagonal` [1] with `int` as the group-length callable. Missing
+	columns remain located relative to the complete group length, including for sparse input.
+
+	Parameters
+	----------
+	次diagonal : int
+		Offset from the complete right edge, starting at one. Negative offsets are rejected.
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Dense or sparse groups whose complete lengths equal their group keys.
+
+	Returns
+	-------
+	lookupDiagonal : dict[int, int]
+		Available diagonal cells keyed by ascending group number.
+
+	References
+	----------
+	[1] `getLookupDiagonal`
+	"""
 	return getLookupDiagonal(triangle, 次diagonal, getGroupLength=int)
 
 def getLookupSelected(
 	triangle: Mapping[int, Sequence[int] | Mapping[int, int]], boxOfKeyPairs: Iterable[tuple[int, int]]
 ) -> dict[int, int]:
+	"""Collect available cells selected by group and column pairs in `triangle`.
+
+	(AI generated docstring)
+
+	You can use this function to select a column pattern across dense or sparse groups. The
+	result contains one value per selected group; a later available selection for the same
+	group replaces the earlier value.
+
+	Parameters
+	----------
+	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
+		Groups mapped to dense values or sparse column lookups.
+	boxOfKeyPairs : Iterable[tuple[int, int]]
+		Pairs of an existing group key and a column key starting at one, consumed in supplied order.
+
+	Returns
+	-------
+	lookupSelected : dict[int, int]
+		Available values keyed by group, in first retained group occurrence order. Missing
+		columns are omitted; missing groups propagate `KeyError`.
+	"""
 	pairsSelectedKeys, pairsSelectedContents = tee(filter(lambda keyPair: lookupHasKey(triangle[keyPair[0]], keyPair[1]), boxOfKeyPairs))
 	return dict(zip(
 		map(itemgetter(0), pairsSelectedKeys)
@@ -508,6 +1025,40 @@ def make_memmap(
 
 # TODO This is not tenable. What is the shape?
 def extendArray(array: 形ArrayArcCode, length: int) -> 形ArrayArcCode:
+	"""Extend the first axis of the two-axis working `array` to `length`.
+
+	(AI generated docstring)
+
+	You can use this function when a meander transfer step needs more output records than
+	initially allocated. Existing values are preserved and added records are filled with zeros.
+	The caller must retain the returned array because storage can be replaced.
+
+	Parameters
+	----------
+	array : 形ArrayArcCode
+		Two-axis working array, optionally backed by a NumPy memory map [1].
+	length : int
+		Requested first-axis length, at least the existing first-axis length.
+
+	Returns
+	-------
+	arrayExtended : 形ArrayArcCode
+		Array with the requested first-axis length, the same second-axis length, and preserved
+		element datatype.
+
+	Storage Behavior
+	----------------
+	Memory-mapped input is flushed and reopened over the same file with mode `'r+'`, preserving
+	the datatype and byte offset. Ordinary arrays are copied using `numpy.pad` [2]. The alias
+	does not enforce the two-axis shape at runtime.
+
+	References
+	----------
+	[1] NumPy `numpy.memmap`.
+		https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
+	[2] NumPy `numpy.pad`.
+		https://numpy.org/doc/stable/reference/generated/numpy.pad.html
+	"""
 	from mapFolding.dataBaskets import ShapeArray
 	if isinstance(array, numpy.memmap):
 		lengthStored: int = len(array)

@@ -22,7 +22,8 @@ class MetadataOEISid(TypedDict):
 	valuesKnown : dict[int, int]
 		Sequence indices mapped to known values.
 	valueUnknown : int
-		One greater than the largest key in `valuesKnown`, as assigned during metadata loading.
+		One greater than the largest key in `valuesKnown`, refreshed during metadata loading
+		and local b-file updates. This value does not locate gaps below the largest stored index.
 	rowLength : NotRequired[Callable[[int], int]]
 		Optional callable that maps a row number to the expected complete row length.
 	rowStart : NotRequired[int]

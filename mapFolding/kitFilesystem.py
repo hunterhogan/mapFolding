@@ -28,16 +28,24 @@ Functions
 		saveTotalFAILearly
 			Leave a test value at a new output path before counting.
 	Write
+		appendTriangle
+			Append numbered dense groups to a triangle CSV file.
 		iterableToCSV
 			Write groups to CSV with optional appending.
 		saveTotal
 			Save an integer with fallback output on failure.
+		saveTriangleGroup
+			Save one dense group using a generated or supplied filename.
 		writeAlbum
 			Write each folding as one CSV record.
 		writeDiagonal
 			Write sorted group, diagonal, and value records.
+		writeText
+			Write text and create missing parent directories.
 		writeTriangle
 			Write sorted group keys followed by group values.
+		writeTriangleSparse
+			Write sparse groups with empty fields for missing cells.
 	Read and write
 		getCacheOrURL
 			Retrieve cached text or request updated text from a URL.
@@ -54,8 +62,15 @@ Functions
 			Read UTF-8 text.
 		readTriangle
 			Read numbered integer groups.
+		readTriangleSparse
+			Read sparse integer groups without shifting missing columns.
+	Stream
 		streamAlbum
 			Yield folding records as the file is read.
+		streamCSV
+			Yield nonempty CSV records as strings.
+		streamCSVintegers
+			Yield nonempty CSV records as integer tuples.
 """
 from __future__ import annotations
 
@@ -396,6 +411,29 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 #======== Save =====================================================================================
 
 def appendTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
+	"""Append the numbered groups in `triangle` to a CSV file.
+
+	(AI generated docstring)
+
+	This function delegates to `writeTriangle` [1] with appending enabled. Existing group keys
+	are not checked, so a file can contain repeated groups after appending.
+
+	Parameters
+	----------
+	triangle : 形Triangle
+		Group keys mapped to dense integer sequences.
+	pathFilename : Path
+		Destination CSV file, created with its parent directories when absent.
+
+	Returns
+	-------
+	pathFilenameWritten : Path
+		The supplied path after appending completes.
+
+	References
+	----------
+	[1] `writeTriangle`
+	"""
 	return writeTriangle(triangle, pathFilename, append=True)
 
 def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, append: bool = False) -> Path:
@@ -501,6 +539,35 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 def saveTriangleGroup(
 	keyGroup: int, boxOfIntegers: Sequence[int], nameTriangle: str, pathLikeWrite: PathLike[str] | None = None
 ) -> Path:
+	"""Save one group of `boxOfIntegers` as a numbered triangle CSV record.
+
+	(AI generated docstring)
+
+	You can use this function to keep the result of one row calculation. This function resolves
+	the output path with `makePathFilenameCount` [1], then writes the group with `writeTriangle` [2].
+
+	Parameters
+	----------
+	keyGroup : int
+		Group number written as the first CSV field.
+	boxOfIntegers : Sequence[int]
+		Dense group values in column order.
+	nameTriangle : str
+		Triangle name used with the group number in a generated filename.
+	pathLikeWrite : PathLike[str] | None = None
+		Existing directory, explicit filename, or `None` for the default output location.
+
+	Returns
+	-------
+	pathFilenameWritten : Path
+		Resolved path of the saved group. Existing contents are replaced.
+
+	References
+	----------
+	[1] `makePathFilenameCount`
+
+	[2] `writeTriangle`
+	"""
 	return writeTriangle({keyGroup: boxOfIntegers}, makePathFilenameCount(pathLikeWrite, nameTriangle, str(keyGroup), suffix='.csv'))
 
 def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
@@ -594,8 +661,30 @@ def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diag
 	)
 
 def writeText(contents: str, pathFilename: Path) -> Path:
-	# RTFM
-	pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	"""Write `contents` to `pathFilename` and create missing parent directories.
+
+	(AI generated docstring)
+
+	This function creates the parent directory tree and delegates writing to
+	`hunterMakesPy.filesystemToolkit.writeStringToHere` [1]. Existing contents are replaced.
+
+	Parameters
+	----------
+	contents : str
+		Text to write.
+	pathFilename : Path
+		Destination file.
+
+	Returns
+	-------
+	pathFilenameWritten : Path
+		The supplied path after writing completes.
+
+	References
+	----------
+	[1] hunterMakesPy filesystem toolkit.
+		https://github.com/hunterhogan/hunterMakesPy
+	"""
 	writeStringToHere(contents, pathFilename)
 	return pathFilename
 
@@ -604,16 +693,22 @@ def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path,
 
 	(AI generated docstring)
 
-	You can use this function to persist a triangle for later loading with `readTriangle` [1].
-	This function writes the groups to `pathFilename` and returns `pathFilename` after closing the file.
+	You can use this function to persist a triangle for later loading with `readTriangle` [1] or
+	`readTriangleSparse` [2]. This function writes the groups to `pathFilename` and returns
+	`pathFilename` after closing the file.
 
 	CSV Layout
 	----------
 	Each record contains the group key followed by that group's values, without a header. Records
-	appear in ascending group-key order. Values within each group retain their supplied order, and
-	an empty group contains only the group key. The file uses UTF-8 and the default `csv.writer`
-	dialect [2]. `iterableToCSV` [3] creates missing parent directories and replaces existing file
-	contents. An empty `triangle` produces an empty file. Group lengths are not validated.
+	appear in ascending group-key order. Dense groups retain their supplied cell order, and empty
+	dense groups contain only the group key. Sparse groups use column keys starting at one and
+	write empty fields for missing cells, extending through at least the group key or the largest
+	stored column key. `mapFolding.dataStructures.getBoxWithGaps` [3] supplies this sparse layout.
+
+	The file uses UTF-8 and the default `csv.writer` dialect [4]. `iterableToCSV` [5] creates
+	missing parent directories and replaces existing contents unless `append=True`. An empty
+	`triangle` produces an empty file when replacing, or appends no records when appending.
+	Group lengths are not validated.
 
 	Parameters
 	----------
@@ -649,18 +744,47 @@ def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path,
 	----------
 	[1] `readTriangle`
 
-	[2] csv.writer - Python standard library.
+	[2] `readTriangleSparse`
+
+	[3] `mapFolding.dataStructures.getBoxWithGaps`
+
+	[4] csv.writer - Python standard library.
 		https://docs.python.org/3/library/csv.html#csv.writer
-	[3] `iterableToCSV`
+	[5] `iterableToCSV`
 
 	"""
-	from mapFolding.dataStructures import getBoxWithGaps, stringsToLookup
+	from mapFolding.dataStructures import getBoxWithGaps
 	return iterableToCSV(
 		map(lambda keyGroup: (keyGroup, *getBoxWithGaps(triangle[keyGroup], keyGroup)), sorted(triangle))  # ruff: ignore[unnecessary-map]
 		, pathFilename, append=append
 	)
 
 def writeTriangleSparse(triangleSparse: 形TriangleSparse, pathFilename: Path) -> Path:
+	"""Save `triangleSparse` as numbered CSV groups with empty fields for missing columns.
+
+	(AI generated docstring)
+
+	This function uses the sparse layout of `writeTriangle` [1] and replaces existing contents.
+	Read the result with `readTriangleSparse` [2] to preserve the original column keys.
+
+	Parameters
+	----------
+	triangleSparse : 形TriangleSparse
+		Group keys mapped to sparse cell lookups with positive column keys.
+	pathFilename : Path
+		Destination CSV file.
+
+	Returns
+	-------
+	pathFilenameWritten : Path
+		The supplied path after writing completes.
+
+	References
+	----------
+	[1] `writeTriangle`
+
+	[2] `readTriangleSparse`
+	"""
 	return writeTriangle(triangleSparse, pathFilename)
 
 #======== Read and save ===========================================================================
@@ -843,6 +967,36 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))
 
 def readDiagonal(pathFilename: Path, 次diagonal: int) -> dict[int, int]:
+	"""Read diagonal `次diagonal` from three-field integer CSV records.
+
+	(AI generated docstring)
+
+	You can use this function to load counts saved by `writeDiagonal` [1]. Each nonempty record
+	contains a group key, a diagonal offset, and a value. This function selects records with the
+	requested offset and returns the values in ascending group-key order.
+
+	Parameters
+	----------
+	pathFilename : Path
+		UTF-8 CSV file with three integer fields per nonempty record and no header.
+	次diagonal : int
+		Diagonal offset to select. This function does not validate the offset range.
+
+	Returns
+	-------
+	lookupDiagonal : dict[int, int]
+		Selected values keyed by group number, or an empty dictionary when no record matches.
+
+	Raises
+	------
+	ValueError
+		If any nonempty record has a field count other than three, a field cannot be parsed as
+		an integer, or selected records repeat a group key. Malformed unselected records also fail.
+
+	References
+	----------
+	[1] `writeDiagonal`
+	"""
 	#=SIN= Intermediate tuple: duplicate-row validation needs the selected record count after dictionary construction.
 	boxOfBoxes: tuple[tuple[int, ...], ...] = tuple(streamCSVintegers(pathFilename))
 	if not all(map(lambda boxOfIntegers: len(boxOfIntegers) == 3, boxOfBoxes)):  # ruff: ignore[unnecessary-map]
@@ -860,8 +1014,8 @@ def readText(pathFilename: Path, *, default: str | None = None) -> str:
 
 	(AI generated docstring)
 
-	You can use this function to load a text file into one string. File access and decoding errors
-	propagate to the caller.
+	You can use this function to load a text file into one string. `default` supplies a value
+	when the file is absent. Other file-access and decoding errors propagate to the caller.
 
 	Parameters
 	----------
@@ -877,15 +1031,15 @@ def readText(pathFilename: Path, *, default: str | None = None) -> str:
 
 	Examples
 	--------
-	`getCacheOrURL` [1] reads cached text.
+	`mapFolding.oeis.updateBFile` [1] reads an existing b-file or starts with empty contents.
 
 		```python
-		readText(pathFilename)
+		contents = readText(pathFilename, default='')
 		```
 
 	References
 	----------
-	[1] `getCacheOrURL`
+	[1] `mapFolding.oeis.updateBFile`
 
 	"""
 	try:
@@ -945,6 +1099,40 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 	return dict(map(itemgetter(0, slice(oneIndexed, None)), streamCSVintegers(pathFilename)))
 
 def readTriangleSparse(pathFilename: Path) -> dict[int, dict[int, int]]:
+	"""Load numbered sparse groups from `pathFilename` without shifting missing columns.
+
+	(AI generated docstring)
+
+	You can use this function to recover sparse cells saved by `writeTriangleSparse` [1] or
+	`writeTriangle` [2]. Empty cell fields are omitted while later cells retain their original
+	column keys. `mapFolding.dataStructures.stringsToLookup` [3] converts the cell fields.
+
+	Parameters
+	----------
+	pathFilename : Path
+		UTF-8 CSV file without a header. Each nonempty record starts with an integer group key,
+		followed by integer cell fields or empty fields.
+
+	Returns
+	-------
+	triangleSparse : dict[int, dict[int, int]]
+		Groups mapped to available values with column keys starting at one. Empty records are
+		ignored. Repeated group keys retain the last record's cells, and a record containing only
+		a group key produces an empty dictionary.
+
+	See Also
+	--------
+	`readTriangle`
+		Read dense integer records when every cell field contains an integer.
+
+	References
+	----------
+	[1] `writeTriangleSparse`
+
+	[2] `writeTriangle`
+
+	[3] `mapFolding.dataStructures.stringsToLookup`
+	"""
 	from mapFolding.dataStructures import getBoxWithGaps, stringsToLookup
 	streamKeys, streamGroups = tee(streamCSV(pathFilename))
 	return dict(zip(
@@ -993,8 +1181,57 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	yield from streamCSVintegers(pathFilename)
 
 def streamCSV(pathFilename: Path) -> Iterable[list[str]]:
+	"""Yield nonempty CSV records from `pathFilename` as lists of strings.
+
+	(AI generated docstring)
+
+	This function reads UTF-8 records using the default Python `csv.reader` dialect [1]. Empty
+	records are skipped; records containing empty fields are retained. Headers and comments
+	receive no special treatment.
+
+	Parameters
+	----------
+	pathFilename : Path
+		CSV file to read.
+
+	Yields
+	------
+	boxOfStrings : list[str]
+		One nonempty record in file order, preserving each field as parsed text.
+
+	Open File Lifetime
+	------------------
+	The file opens when iteration begins and remains open until the generator finishes or is
+	closed. Close the generator if iteration ends before the file is exhausted.
+
+	References
+	----------
+	[1] Python `csv.reader`.
+		https://docs.python.org/3/library/csv.html#csv.reader
+	"""
 	with pathFilename.open(encoding='utf-8', mode='r', newline='') as streamRead:
 		yield from filter(bool, csv_reader(streamRead))
 
 def streamCSVintegers(pathFilename: Path) -> Iterable[tuple[int, ...]]:
+	"""Yield nonempty CSV records from `pathFilename` as integer tuples.
+
+	(AI generated docstring)
+
+	This function converts every field read by `streamCSV` [1] using `int`. Headers, comments,
+	and empty fields are not skipped and must be absent for conversion to succeed.
+
+	Parameters
+	----------
+	pathFilename : Path
+		UTF-8 CSV file containing integer fields.
+
+	Yields
+	------
+	boxOfIntegers : tuple[int, ...]
+		One nonempty record in file order.
+
+	References
+	----------
+	[1] `streamCSV`
+	"""
 	yield from map(lambda boxOfStrings: tuple(map(int, boxOfStrings)), streamCSV(pathFilename))  # ruff: ignore[unnecessary-map]

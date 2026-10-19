@@ -460,7 +460,7 @@ class StateMeanders:
 		Number of bits in the largest active arch code, recomputed during initialization.
 	bitsLocator : int = 0
 		Mask selecting bit positions zero, two, four, and so on below the current width.
-	arcCodeMAXIMUM : int = 0
+	arcCodeMaximum : int = 0
 		Power-of-two threshold derived from the current boundary.
 	bitWidthLimitArcCode : int | None = None
 		Arc-code width limit used when selecting fixed-width computation.
@@ -600,7 +600,7 @@ class StateMeanders:
 	def set_arcCodeMaximum(self) -> None:
 		"""Set the arch-code threshold from the current transfer boundary.
 
-		This method stores `1 << (2 * self.boundary + 4)` in `self.arcCodeMAXIMUM` and returns `None`.
+		This method stores `1 << (2 * self.boundary + 4)` in `self.arcCodeMaximum` and returns `None`.
 		This method does not inspect or change the count lookup.
 		"""
 		self.arcCodeMaximum = 1 << (2 * self.boundary + 4)

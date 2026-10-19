@@ -10,7 +10,12 @@
 
 A map-folding problem asks how many ways the labeled panels of a map can be stacked while preserving their connections. A strip of stamps is the one-dimensional case. Related meander problems count configurations of non-self-intersecting curves crossing a line or ray.
 
-Earlier versions of this project computed the terms for `2 × 19` and `2 × 20` stamp strips, extending [OEIS A001415](https://oeis.org/A001415).
+## Research results
+
+I use `mapFolding` to compute new sequence terms and develop exact relationships between folding and meander problems.
+
+- 2 × n maps: I computed the folding counts for `2 × 19` and `2 × 20` stamp strips, extending [OEIS A001415](https://oeis.org/A001415). OEIS published the terms in 2025 March.
+- Semi-meanders: I extended the semi-meander sequence [OEIS A000682](https://oeis.org/A000682) from `n = 45` through `n = 49` and added many formulas relating it to stamp foldings, meanders, and other sequences. The package's [`byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py) implements exact sequence relationships for further computation and comparison.
 
 ## Research with mapFolding
 
@@ -23,7 +28,7 @@ You can use the package to calculate sequence terms, dissect an algorithm's stat
 | Inspect or change a computation      | [`dataBaskets.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataBaskets.py) describes the state containers; [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains source implementations. |
 | Transform or specialize an algorithm | [`kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST/) generates variants and jobs, with derived implementations in [`synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized/).                |
 | Explore a different search strategy  | [`_e/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/_e/) contains elimination, constraint propagation, insertion, and search-space analysis.                                                                                                |
-| Validate a new implementation        | [`test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py) compares implementations with known sequence values.                                                                                       |
+| Validate a new implementation        | [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py) compares implementations with known sequence values.                                                                                           |
 
 The module, function, and class docstrings explain parameters, state layouts, mathematical relationships, and implementation details. Use them when choosing an experiment or following a computation through the package.
 
@@ -82,6 +87,27 @@ The `getOEISids` console command lists registered sequences and usage examples. 
 
 OEIS metadata and b-files are loaded when the metadata module is imported. Local files have a 30-day freshness interval; missing or stale entries trigger a request to `oeis.org`, and stale data remains available if a refresh fails.
 
+### Triangle data and new terms
+
+Triangle utilities use the sequence metadata to locate rows, columns, and flat b-file indices. Columns start at one, including when a row is supplied as a Python sequence.
+
+For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/A400429/) exposes triangle-cell identities and fixed-diagonal formulas. Its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven.
+
+| Task                         | Interface                                                 | Result                                                    |
+| ---------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
+| Read consecutive known rows  | `getTriangleRows(oeisID)`                                 | Dense rows, stopping at the first missing flat index      |
+| Preserve gaps in known terms | `getTriangleTerms(oeisID)`                                | Rows mapped to dictionaries of available columns          |
+| Select a diagonal            | `getTriangleDiagonal(oeisID, 次diagonal, fromRight=True)` | Available terms keyed by row number; offsets start at one |
+| Locate a row in a b-file     | `getTriangleIndices(oeisID, n)`                           | Range of flat indices for the complete row                |
+| Save newly computed terms    | `updateBFile(oeisID, sequence)`                           | Local b-file path                                         |
+| Save dense or sparse rows    | `updateTriangle(oeisID, triangle)`                        | Local b-file path                                         |
+
+`updateBFile` and `updateTriangle` add missing terms to the local cache and update the shared known-value dictionary in place. Existing local b-file values take precedence over metadata values, which take precedence over supplied values. These functions retain b-file comments and write terms in index order; they do not submit edits to OEIS. `valueUnknown` is one greater than the largest stored index, so it can lie beyond gaps in a sparse sequence.
+
+For research files, `mapFolding.kitFilesystem` reads and writes triangle CSV records with a row key followed by cell values. `writeTriangle` leaves empty fields for missing sparse cells; use `readTriangleSparse` to preserve their column positions. `readTriangle` expects every cell field to contain an integer. Diagonal CSV files use three fields: row key, diagonal offset, and value.
+
+`printEasyRunBenchmark` compares one computed term with its known value. `printEasyRunTriangle` compares a computed row with its known cells and aligns differing rows for inspection. Both accept `ratio` as a number of decimal places; `ratio=0` hides ratios.
+
 ## Algorithm experiments
 
 The package includes several approaches to the same combinatorial problems:
@@ -89,7 +115,7 @@ The package includes several approaches to the same combinatorial problems:
 - **Map folding:** insertion-search algorithms derived from Lunnon's work, including variants that apply symmetry restrictions from his theorems.
 - **Meanders:** transfer-matrix counting based on Jensen's approach, with dictionary, NumPy, Pandas, and pruning variants.
 - **Permutation generation:** stamp-folding and meander algorithms based on Sawada and Li's work, with experimental bilateral variants.
-- **Elimination:** possible leaf positions, pile assignments, and constraint propagation in `mapFolding._e`.
+- **Elimination and insertion:** possible leaf positions, pile assignments, constraint propagation, and incremental arch-diagram generation in `mapFolding._e`.
 
 Counting entry points accept a `flow` preference. Omit it to use the default route. Available variants and dispatch rules change as the research develops; [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) and the relevant `easyRun` runner show the current choices.
 
@@ -200,10 +226,10 @@ pip install -e ".[development,testing]"
 Run project commands from the repository root with the environment active. For example, to check the main counting implementations:
 
 ```console
-pytest mapFolding/tests/test_computations.py
+pytest mapFolding/tests/test_algorithms.py
 ```
 
-The tests compare algorithm variants with known OEIS values and exercise generated jobs. When adding a counting implementation, extend the relevant test cases in [`test_computations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_computations.py); supporting behavior has its own tests in `mapFolding/tests` and `mapFolding/_e/tests`.
+The tests compare algorithm variants with known OEIS values and exercise generated jobs. When adding a counting implementation, extend the relevant test cases in [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py). Triangle conversions, OEIS updates, and sequence formulas have dedicated checks in `test_dataStructures.py`, `test_oeis.py`, and `test_oeis_byFormula.py`; supporting behavior has its own tests in `mapFolding/tests` and `mapFolding/_e/tests`.
 
 ## Computation targets
 
@@ -242,7 +268,7 @@ This is my ongoing to-do list across this package and related projects. It recor
     1. Symmetry algorithm is too slow.
     2. Asynchronous + accelerated doesn't work yet.
 6. Matrix Meanders
-    1. Polars is completely broken. Start over.
+    1. Rebuild the Polars meander implementation because it's broken.
     2. I need a lot more tools in kitAST.
     3. I hate `getTotalBuckets` but it _should_ be a brilliant function.
 7. Permutations

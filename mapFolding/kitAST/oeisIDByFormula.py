@@ -50,7 +50,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 
 	Examples
 	--------
-	The module `easyRun.synthesizeModules` uses this call [3].
+	The module `easyRun.synthesizeModules` uses this call [2].
 
 		```python
 		makeOEISidByFormulaLookup(pathFilenameSource)
@@ -60,9 +60,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	----------
 	[1] `mapFolding.oeis.getValuesKnown`
 
-	[2] `mapFolding.theSSOT.settingsPackage`
-
-	[3] `easyRun.synthesizeModules`
+	[2] `easyRun.synthesizeModules`
 	"""
 	pathFilenameWrite: Path = pathFilenameSource.with_stem('_' + pathFilenameSource.stem + 'Lookup')
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)

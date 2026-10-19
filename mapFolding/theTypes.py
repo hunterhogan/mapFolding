@@ -94,17 +94,42 @@ if TYPE_CHECKING:
 	from typing import Any, LiteralString, TypeAlias
 
 type Folding = tuple[Leaf, ...]
-# DOCUMENT
+"""Represent leaf labels in pile order.
+
+(AI generated docstring)
+
+This tuple records one `Leaf` at each `Pile` position. The algorithm determines the label origin;
+this alias does not check label uniqueness, tuple length, or folding validity.
+"""
 
 #=EndNotes##TypeAlias=
 Leaf: TypeAlias = int
-# DOCUMENT
+"""Identify an individual panel in a folding.
+
+(AI generated docstring)
+
+This alias uses Python integers for panel labels. The label identifies the panel independently
+of the panel's `Pile` position in a `Folding`. Each algorithm supplies its own labeling convention;
+the annotation does not restrict the integer range.
+"""
 
 type Pile = int
 """Location of a `Leaf` in a `Folding`."""
 
 type OEISid = LiteralString
-# DOCUMENT
+"""Identify an integer sequence with an OEIS label.
+
+(AI generated docstring)
+
+This alias uses `typing.LiteralString` [1] for sequence identifiers such as `'A000682'`.
+The annotation does not validate identifier syntax or establish that a sequence is registered
+with the package.
+
+References
+----------
+[1] Python `typing.LiteralString`.
+	https://docs.python.org/3/library/typing.html#typing.LiteralString
+"""
 
 type 形Triangle = Mapping[int, Sequence[int]]
 """Describe integer groups indexed by group key.
@@ -118,7 +143,8 @@ type 形TriangleSparse = Mapping[int, Mapping[int, int]]
 
 (AI generated docstring)
 
-This nested mapping supports groups whose stored integer keys need not be consecutive.
+This nested mapping supports groups whose stored integer keys need not be consecutive. Triangle
+utilities use column keys starting at one and preserve missing columns without shifting values.
 """
 
 #================== Generic NumPy =================================================================

@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this module's functions to look up known folding totals, convert sequence indices
-to map shapes, inspect triangle rows and diagonals, and print benchmark comparisons.
+to map shapes, and print benchmark comparisons for individual terms or triangle rows.
 
 Contents
 --------
@@ -18,6 +18,8 @@ Functions
 		Print computed and known values with elapsed time and optional ratio.
 	printEasyRunHeader
 		Print two labels with reproducible terminal colors.
+	printEasyRunTriangle
+		Compare a computed triangle row with known cells and align differing rows.
 
 Module Execution
 ----------------
@@ -78,7 +80,7 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 
 	Examples
 	--------
-	`mapFolding.kitAST.RecipeJob.fromMapShape` [3] queries the known total before estimating a
+	`mapFolding.kitAST.RecipeJob.fromMapShape` [2] queries the known total before estimating a
 	job's size.
 
 		```python
@@ -91,7 +93,7 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	----------
 	[1] `makeLookupTotalFoldsKnown`
 
-	[3] `mapFolding.kitAST.RecipeJob.fromMapShape`
+	[2] `mapFolding.kitAST.RecipeJob.fromMapShape`
 
 	"""
 	lookupTotalFolds: dict[tuple[int, ...], int] = makeLookupTotalFoldsKnown()
@@ -258,7 +260,55 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	sys.stdout.write(f"{ansiColorReset}\n")
 
 def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeStart: float, *, ratio: int = 0) -> None:
-	# DOCUMENT
+	"""Compare the computed triangle row `n` with known sequence cells.
+
+	(AI generated docstring)
+
+	You can use this function to inspect a row computation with its elapsed time. This function
+	uses `mapFolding.oeis.getTriangleIndices` [1] to locate the complete row and
+	`mapFolding.oeis.getValuesKnown` [2] to obtain the reference cells. The function prints the
+	comparison and returns `None`.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Registered triangle sequence whose metadata defines the row layout.
+	n : int
+		Row number in the sequence's metadata layout.
+	computed : Sequence[int]
+		Computed cells in column order, starting with the first column.
+	timeStart : float
+		Starting value from `time.perf_counter` [3] for the elapsed-time display.
+	ratio : int = 0
+		Decimal places for known-to-computed ratios on a differing row. Zero hides ratios.
+
+	Output Layout
+	-------------
+	The first line contains the row number, an exact-match flag, elapsed seconds, and `computed`.
+	A match requires equal lengths and equal corresponding values. A differing row prints the
+	known cells on a second aligned line. Missing positions in the shorter row display `'?'`.
+	An unavailable reference value uses the negative `hunterMakesPy.errorL33T` sentinel [4].
+
+	Ratios are printed only for differing rows and only for paired cells. Zero computed cells
+	display `'-'`; integer ratios use the success color even when the ratio differs from
+	one. This function does not calculate sequence terms or save results.
+
+	See Also
+	--------
+	`printEasyRunBenchmark`
+		Compare a single computed sequence term with its known value.
+
+	References
+	----------
+	[1] `mapFolding.oeis.getTriangleIndices`
+
+	[2] `mapFolding.oeis.getValuesKnown`
+
+	[3] Python `time.perf_counter`.
+		https://docs.python.org/3/library/time.html#time.perf_counter
+	[4] hunterMakesPy.
+		https://github.com/hunterhogan/hunterMakesPy
+	"""
 	#=SIN= Intermediate tuple: comparison, aligned output, and ratios consume the known cells separately.
 	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
 	match: bool = len(computed) == len(known) and all(map(eq, computed, known))
