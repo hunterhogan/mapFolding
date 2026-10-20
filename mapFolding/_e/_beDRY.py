@@ -1,4 +1,6 @@
-"""Access shared bitset operations and map-shape arithmetic without state imports.
+"""Access shared `ChoicesLeaf` operations and map-shape arithmetic without state imports.
+
+(AI generated docstring)
 
 You can construct and inspect leaf sets and compute dimension products and sums. Pass values directly
 to use these operations in modules that define elimination state without introducing circular imports.
@@ -7,15 +9,15 @@ Contents
 --------
 ChoicesLeaf functions
 	choicesLeafAND
-		Intersect two leaf bitsets.
-	choicesLeafLeafNone
-		Normalize a bitset to a leaf, an empty result, or a bitset.
+		Intersect two `ChoicesLeaf` values.
+	distinguishChoicesLeaf
+		Distinguish `ChoicesLeaf`, its only `Leaf`, or `None`.
 	lengthChoicesLeaf
-		Count leaves in a sentinel-bearing bitset.
+		Count the possible leaves in `ChoicesLeaf`.
 	makeAntiChoicesLeaf
-		Build a leaf bitset by excluding the specified leaf indices.
+		Build a `ChoicesLeaf` by excluding the specified leaf indices.
 	makeChoicesLeaf
-		Build a bitset from the specified leaf indices.
+		Build a `ChoicesLeaf` from the specified leaf indices.
 Be DRY functions
 	getMapShapeProducts
 		Compute cumulative products of the dimension lengths in a map shape.
@@ -47,7 +49,9 @@ if TYPE_CHECKING:
 #======== `ChoicesLeaf` functions ================================================
 
 def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
-	"""Count leaves in a sentinel-bearing bitset.
+	"""Count the possible leaves in `ChoicesLeaf`.
+
+	(AI generated docstring)
 
 	You can count the leaf indices represented by `choicesLeaf`, excluding the sentinel from the set-bit
 	count provided by `gmpy2.mpz.bit_count` [1].
@@ -55,7 +59,7 @@ def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
 	Parameters
 	----------
 	choicesLeaf : ChoicesLeaf
-		Leaf bitset with one sentinel bit above all leaf bits.
+		`ChoicesLeaf` with one sentinel bit above all leaf bits.
 
 	Returns
 	-------
@@ -82,9 +86,11 @@ def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
 	return choicesLeaf.bit_count() - 1
 
 def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
-	"""Build a leaf bitset by excluding the specified leaf indices.
+	"""Build a `ChoicesLeaf` by excluding the specified leaf indices.
 
-	You can obtain a bitset containing every leaf index below `totalLeaves` except the indices in
+	(AI generated docstring)
+
+	You can obtain a `ChoicesLeaf` containing every leaf index below `totalLeaves` except the indices in
 	`leaves`. You retain the sentinel while clearing excluded bits with `gmpy2.bit_clear` [1].
 
 	Parameters
@@ -97,7 +103,7 @@ def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf
 	Returns
 	-------
 	antiChoicesLeaf : ChoicesLeaf
-		Bitset containing the remaining leaves and the sentinel.
+		`ChoicesLeaf` containing the remaining leaves and the sentinel.
 
 	Examples
 	--------
@@ -115,9 +121,11 @@ def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf
 	return reduce(bit_clear, leaves, bit_mask(totalLeaves + inclusive))
 
 def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
-	"""Build a bitset from the specified leaf indices.
+	"""Build a `ChoicesLeaf` from the specified leaf indices.
 
-	You can encode `leaves` as a bitset with a sentinel at `totalLeaves`. You set the leaf bits with
+	(AI generated docstring)
+
+	You can encode `leaves` as a `ChoicesLeaf` with a sentinel at `totalLeaves`. You set the leaf bits with
 	`gmpy2.bit_set` [1].
 
 	Parameters
@@ -130,7 +138,7 @@ def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	Returns
 	-------
 	choicesLeaf : ChoicesLeaf
-		Bitset containing the requested leaves and the sentinel.
+		`ChoicesLeaf` containing the requested leaves and the sentinel.
 
 	Examples
 	--------
@@ -147,15 +155,16 @@ def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	"""
 	return reduce(bit_set, leaves, bit_set(0, totalLeaves))
 
-# SEMIOTICS
-def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
-	"""Normalize a bitset to a leaf, an empty result, or a bitset.
+def distinguishChoicesLeaf(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
+	"""Distinguish `ChoicesLeaf`, its only `Leaf`, or `None`.
 
-	You can distinguish an empty leaf set from a forced leaf assignment. You receive a bitset when
-	several leaves remain, or the unchanged input when its value is not an instance of the bitset type.
+	(AI generated docstring)
 
-	Bitset normalization
-	--------------------
+	You can distinguish an empty leaf set from a forced leaf assignment. You receive a `ChoicesLeaf` when
+	several leaves remain, or the unchanged input when its value is not an instance of the `ChoicesLeaf` type.
+
+	Distinguishing leaf choices
+	--------------------------
 	You can inspect the set-bit count and first set bit with `gmpy2.mpz.bit_count` and
 	`gmpy2.mpz.bit_scan1` [1]. Two set bits identify one leaf plus the sentinel. One set bit identifies
 	the sentinel alone.
@@ -163,12 +172,12 @@ def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | Non
 	Parameters
 	----------
 	choicesLeaf : ChoicesLeaf
-		Bitset with a sentinel above all leaf bits.
+		`ChoicesLeaf` with a sentinel above all leaf bits.
 
 	Returns
 	-------
 	leafSpaceOrNone : ChoicesLeaf | Leaf | None
-		The only remaining leaf, `None` for a sentinel-only bitset, or the unchanged value.
+		The only remaining leaf, `None` for a sentinel-only `ChoicesLeaf`, or the unchanged value.
 
 	References
 	----------
@@ -184,10 +193,12 @@ def choicesLeafLeafNone(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | Non
 	return whoAmI
 
 def choicesLeafAND(choicesLeafDISPOSABLE: ChoicesLeaf, choicesLeaf: ChoicesLeaf) -> ChoicesLeaf:
-	"""Intersect two leaf bitsets.
+	"""Intersect two `ChoicesLeaf` values.
+
+	(AI generated docstring)
 
 	You can keep leaf indices present in both `choicesLeafDISPOSABLE` and `choicesLeaf`. You receive a
-	new bitset with both arguments unchanged.
+	new `ChoicesLeaf` with both arguments unchanged.
 
 	Parameters
 	----------
@@ -207,6 +218,8 @@ def choicesLeafAND(choicesLeafDISPOSABLE: ChoicesLeaf, choicesLeaf: ChoicesLeaf)
 
 def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	"""Compute cumulative products of the dimension lengths in a map shape.
+
+	(AI generated docstring)
 
 	You can convert `mapShape` into the strides used to identify leaves across dimensions. You receive a
 	tuple that includes the initial empty product and the final product of every dimension.
@@ -234,6 +247,8 @@ def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	"""Compute cumulative sums of a map shape's dimension products.
 
+	(AI generated docstring)
+
 	You can sum the cumulative products from `getMapShapeProducts` [1]. You receive a tuple that includes
 	the initial empty sum and the sum including the total leaf count.
 
@@ -255,6 +270,8 @@ def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 
 def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], totalDimensions: int | None = None, dimensionFrom首: int | None = None) -> tuple[int, ...]:
 	"""Compute cumulative dimension-product sums from the head of a map.
+
+	(AI generated docstring)
 
 	You can use `mapShapeProducts` to compute bounds measured from the largest dimension stride toward
 	the smallest dimension stride. You receive a tuple beginning with the empty sum.
@@ -306,6 +323,8 @@ def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], totalDimension
 
 def mapShapeLengthsAreEqual(mapShape: tuple[int, ...]) -> Iterator[tuple[int, ...]]:
 	"""Group dimension indices that share a repeated length greater than one.
+
+	(AI generated docstring)
 
 	You can identify dimension groups that can share an ordering restriction. You receive groups in the
 	order of the first occurrence of each length in `mapShape`, excluding dimension lengths of one.

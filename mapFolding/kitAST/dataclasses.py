@@ -1,5 +1,7 @@
 """Decompose state dataclasses and adapt generated field-based functions.
 
+(AI generated docstring)
+
 You can use this module to extract field syntax from Python dataclasses [1], replace
 state-object parameters with field parameters, and reconstruct state after generated calls.
 
@@ -55,6 +57,8 @@ if TYPE_CHECKING:
 class ShatteredDataclass:
 	"""Store field syntax for removing and reconstructing a dataclass.
 
+	(AI generated docstring)
+
 	You can use this container to carry the field declarations, imports, and reconstruction syntax
 	produced by `shatterDataclass` [1]. Transformations reuse these nodes to replace a state object
 	with individual parameters and a tuple of returned field values.
@@ -103,56 +107,58 @@ class ShatteredDataclass:
 	"""
 
 	countingVariableAnnotation: ast.expr
-	"""Inspect the type annotation for the counting variable extracted from the dataclass."""
+	"""Type annotation for the counting variable extracted from the dataclass."""
 
 	countingVariableName: ast.Name
-	"""Inspect the AST name node representing the counting variable identifier."""
+	"""AST name node representing the counting variable identifier."""
 
 	lookupAnnAssignWithConstructor: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict[str, ast.AnnAssign | ast.Assign])
-	"""Inspect the mapping that maps field names to their corresponding AST assignment expressions for initialization."""
+	"""Maps field names to their corresponding AST assignment expressions for initialization."""
 
 	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict[str, tuple[ast.AnnAssign | ast.Assign, str]])
-	"""Inspect the field identifiers mapped to initialization syntax and constructor classification."""
+	"""Temporary mapping for field assignments with constructor type information."""
 
 	fragments4AssignmentOrParameters: ast.Tuple = dataclasses.field(default_factory=lambda: Make.Tuple([Make.Name("dummyElement")]))
-	"""Inspect the ordered field tuple reused in result expressions and tuple assignment targets."""
+	"""AST tuple used as target for assignment to capture returned field values."""
 
 	imports: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-	"""Inspect the import records for the dataclass and its constituent field types."""
+	"""Import records for the dataclass and its constituent field types."""
 
 	boxOf_argAnnotated: list[ast.arg] = dataclasses.field(default_factory=list[ast.arg])
-	"""Inspect the function argument nodes with type annotations for parameter specification."""
+	"""Function argument nodes with type annotations for parameter specification."""
 
 	boxOf_keyword_field__field4init: list[ast.keyword] = dataclasses.field(default_factory=list[ast.keyword])
-	"""Inspect the keyword arguments for dataclass initialization using field=field format."""
+	"""Keyword arguments for dataclass initialization using field=field format."""
 
 	boxOfStaticArrays: list[str] = dataclasses.field(default_factory=list[str])
-	"""Inspect the array field identifiers classified as static because their constructor setting is `init=False`."""
+	"""Identifiers of unchanging array fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
 
 	boxOfStaticScalars: list[str] = dataclasses.field(default_factory=list[str])
-	"""Inspect the scalar field identifiers classified as static because their constructor setting is `init=False`."""
+	"""Identifiers of unchanging scalar fields with `init=False`; mutually exclusive with `boxOf_keyword_field__field4init`."""
 
 	boxOfAnnotations: list[ast.expr] = dataclasses.field(default_factory=list[ast.expr])
-	"""Inspect the type annotations for each dataclass field in declaration order."""
+	"""Type annotations for each dataclass field in declaration order."""
 
 	boxOfName4Parameters: list[ast.Name] = dataclasses.field(default_factory=list[ast.Name])
-	"""Inspect the name nodes for each dataclass field used as function parameters."""
+	"""Name nodes for each dataclass field used as function parameters."""
 
 	boxOfUnpack: list[ast.AnnAssign] = dataclasses.field(default_factory=list[ast.AnnAssign])
-	"""Inspect the annotated assignment statements to extract individual fields from dataclass instances."""
+	"""Annotated assignment statements to extract individual fields from dataclass instances."""
 
 	map_stateDOTfield2Name: dict[ast.AST, ast.Name] = dataclasses.field(default_factory=dict[ast.AST, ast.Name])
-	"""Inspect the attribute-access nodes mapped to replacement field-name nodes."""
+	"""Maps dataclass attribute access expressions to field name nodes for find-replace operations."""
 
 	repack: ast.Assign = dataclasses.field(default_factory=lambda: Make.Assign([Make.Name("dummyTarget")], Make.Constant(None)))
-	"""Inspect the AST assignment statement that reconstructs the original dataclass instance from individual fields."""
+	"""AST assignment statement that reconstructs the original dataclass instance from individual fields."""
 
 	signatureReturnAnnotation: ast.Subscript = dataclasses.field(default_factory=lambda: Make.Subscript(Make.Name("dummy"), Make.Name("slice")))
-	"""Inspect the tuple-based return type annotation for functions returning decomposed field values."""
+	"""Tuple-based return type annotation for functions returning decomposed field values."""
 
 @dataclasses.dataclass(slots=True)
 class DeReConstructField2ast:
 	"""Represent one dataclass field as reusable syntax nodes.
+
+	(AI generated docstring)
 
 	You can use this container to inspect one source field and obtain declarations, parameters,
 	attribute access, and constructor syntax for generated functions. The container copies field
@@ -215,73 +221,75 @@ class DeReConstructField2ast:
 	"""
 
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[identifierDotAttribute]
-	"""Inspect the logical path to the module containing the source dataclass definition."""
+	"""Logical path to the module containing the source dataclass definition."""
 
 	dataclassClassDef: dataclasses.InitVar[ast.ClassDef]
-	"""Inspect the AST class definition node for the source dataclass."""
+	"""AST class definition node for the source dataclass."""
 
 	dataclassesDOTdataclassInstanceIdentifier: dataclasses.InitVar[str]
-	"""Inspect the variable identifier for the dataclass instance in generated code."""
+	"""Variable identifier for the dataclass instance in generated code."""
 
 	field: dataclasses.InitVar[dataclasses.Field[Any]]
-	"""Inspect the dataclass field object to be transformed into AST components."""
+	"""Dataclass field object to be transformed into AST components."""
 
 	ledger: LedgerOfImports = dataclasses.field(default_factory=LedgerOfImports)
-	"""Inspect the import tracking for types and modules required by this field."""
+	"""Import tracking for types and modules required by this field."""
 
 	name: str = dataclasses.field(init=False)
-	"""Inspect the field name extracted from the dataclass field definition."""
+	"""Field name extracted from the dataclass field definition."""
 
 	typeBuffalo: type[Any] | str | Any = dataclasses.field(init=False)
-	"""Inspect the type annotation of the field as specified in the dataclass."""
+	"""Type annotation of the field as specified in the dataclass."""
 
 	default: Any | None = dataclasses.field(init=False)
-	"""Inspect the declared field default, or `None` when no default is declared."""
+	"""Default value for the field, or None if no default is specified."""
 
 	default_factory: Callable[..., Any] | None = dataclasses.field(init=False)
-	"""Inspect the declared default factory, or `None` when no factory is declared."""
+	"""Default factory function for the field, or None if not specified."""
 
 	repr: bool = dataclasses.field(init=False)
-	"""Inspect whether the field should be included in the string representation."""
+	"""Whether the field should be included in the string representation."""
 
 	hash: bool | None = dataclasses.field(init=False)
-	"""Inspect whether the field should be included in hash computation."""
+	"""Whether the field should be included in hash computation."""
 
 	init: bool = dataclasses.field(init=False)
-	"""Inspect whether the source field participates in the generated dataclass initializer."""
+	"""Whether the field should be included in the generated __init__ method."""
 
 	compare: bool = dataclasses.field(init=False)
-	"""Inspect whether the field should be included in comparison operations."""
+	"""Whether the field should be included in comparison operations."""
 
 	metadata: dict[Any, Any] = dataclasses.field(init=False)
-	"""Inspect the field metadata dictionary containing additional configuration information."""
+	"""Field metadata dictionary containing additional configuration information."""
 
 	kw_only: bool = dataclasses.field(init=False)
-	"""Inspect whether the field must be specified as a keyword-only argument."""
+	"""Whether the field must be specified as a keyword-only argument."""
 
 	astName: ast.Name = dataclasses.field(init=False)
-	"""Inspect the AST name node representing the field identifier."""
+	"""AST name node representing the field identifier."""
 
 	ast_keyword_field__field: ast.keyword = dataclasses.field(init=False)
-	"""Inspect the AST keyword argument for dataclass initialization using field=field pattern."""
+	"""AST keyword argument for dataclass initialization using field=field pattern."""
 
 	ast_nameDOTname: ast.Attribute = dataclasses.field(init=False)
-	"""Inspect the AST attribute access expression for accessing the field from an instance."""
+	"""AST attribute access expression for accessing the field from an instance."""
 
 	astAnnotation: ast.expr = dataclasses.field(init=False)
-	"""Inspect the source annotation syntax extracted for the field."""
+	"""AST expression representing the field's type annotation."""
 
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
-	"""Inspect the AST function argument with type annotation for parameter specification."""
+	"""AST function argument with type annotation for parameter specification."""
 
 	astAnnAssignConstructor: ast.AnnAssign | ast.Assign = dataclasses.field(init=False)
-	"""Inspect the field initialization syntax selected from annotation shape and metadata."""
+	"""AST assignment statement for field initialization with appropriate constructor."""
 
 	Z0Z_hack: tuple[ast.AnnAssign | ast.Assign, str] = dataclasses.field(init=False)
-	"""Inspect the initialization syntax paired with its scalar, array, or element-constructor classification."""
+	"""Temporary tuple containing assignment statement and constructor type information."""
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: identifierDotAttribute, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
 		"""I use this to prepare field syntax during dataclass decomposition.
+
+		(AI generated docstring)
 
 		This method records settings from `field`, locates the source annotation in
 		`dataclassClassDef`,
@@ -544,6 +552,8 @@ def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee
 
 def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
 	"""Extract the source module, type, and instance name of a function parameter.
+
+	(AI generated docstring)
 
 	You can use this function to identify the state dataclass assumed by a function container.
 	The function inspects the last argument annotation, finds the last name inside that annotation,

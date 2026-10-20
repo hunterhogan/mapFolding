@@ -134,6 +134,8 @@ def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418', 'A007822'], n: int) -> tuple[int, ...]:
 	"""Convert a supported OEIS sequence identifier and index to map dimensions.
 
+	(AI generated docstring)
+
 	You can use this function to obtain the map shape corresponding to `n` for one of the supported
 	folding sequences. This function checks the offset in `mapFolding.oeis._metadata.dictionaryOEIS`
 	[1], then returns the sequence's dimension tuple.
@@ -203,6 +205,8 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 
 def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, *, ratio: int = 0) -> None:
 	"""Print a benchmark comparison line for an OEIS sequence value.
+
+	(AI generated docstring)
 
 	You can use this function to compare `computed` with the stored value at index `n` from
 	`mapFolding.oeis.getValuesKnown` [1]. This function writes the index, a colored match flag,
@@ -329,6 +333,8 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 
 def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
 	"""Print a title and subtitle with reproducible terminal colors.
+
+	(AI generated docstring)
 
 	You can use this function to label a benchmark run with `title` and `subtitle`. This function
 	writes the original labels to standard output and selects each color from the corresponding

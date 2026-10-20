@@ -7,6 +7,8 @@ from operator import neg
 def Y7Y_walkDyckPath(intWithExtra_0b1: int) -> int:
     """Locate the first Y7Y_Dyck-balance failure bit in `intWithExtra_0b1`.
 
+    (AI generated docstring)
+
     You can use `Y7Y_walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
     the meander transfer matrix closes a mismatched pair [1]. The `intWithExtra_0b1` value stores one
     side of the packed boundary state with parity bits at even positions.

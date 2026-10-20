@@ -1,6 +1,8 @@
 # TODO Modernize kitNumba.
 """Configure and emit Numba compilation for generated functions and modules.
 
+(AI generated docstring)
+
 You can use this module to inspect compiler settings, replace function decorators, and append
 module compilation calls for Numba [1]. Source generation writes compiler calls; the generated
 module performs compilation when imported or called according to its decorator settings.
@@ -58,6 +60,8 @@ if TYPE_CHECKING:
 
 class ParametersNumba(TypedDict):
 	"""Describe compiler options accepted by the generated Numba calls.
+
+	(AI generated docstring)
 
 	You can use this mapping to configure compilation of generated functions or modules.
 	`cache`, `error_model`, and `fastmath` are required mapping keys. Other keys are optional.
@@ -146,6 +150,8 @@ class ParametersNumba(TypedDict):
 parametersNumbaDefault: Final[ParametersNumba] = {'_nrt': True, 'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True, 'inline': 'always', 'looplift': False, 'no_cfunc_wrapper': False, 'no_cpython_wrapper': False, 'nopython': True, 'parallel': False}
 """Access the shared default compilation option mapping.
 
+(AI generated docstring)
+
 This mapping requests caching, numeric error handling, relaxed floating-point transformations,
 inlining, and compilation without Python object mode through Numba [1]. Bounds checking and
 automatic parallel transformations are disabled.
@@ -159,6 +165,8 @@ References
 parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
 """Access the shared smaller compilation option mapping.
 
+(AI generated docstring)
+
 This mapping requests caching, the `numpy` error model, relaxed floating-point transformations,
 and LLVM inlining through Numba [1]. Omitted options use compiler defaults.
 
@@ -171,6 +179,8 @@ References
 名moduleNumbaDataType: identifierDotAttribute = 'numba'
 """Inspect the module identifier used for generated compiler imports.
 
+(AI generated docstring)
+
 The decorator generator imports compilation functions and discovered datatype names from
 this module. The initial value is `numba` [1].
 
@@ -182,6 +192,8 @@ References
 
 名callableDecorator: str = 'jit'
 """Inspect the imported compilation decorator identifier.
+
+(AI generated docstring)
 
 The decorator generator uses this identifier for both the import and decorator call.
 The initial value selects Numba `jit` [1].
@@ -414,6 +426,8 @@ class SpicesJobNumba:
 
 def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Write a source-module variant with a final Numba compilation call.
+
+	(AI generated docstring)
 
 	You can use this function to gather imports from `astModule`, remove import nodes from the
 	supplied syntax, and append a call to Numba `jit_module` [1]. The function writes the assembled

@@ -1,5 +1,7 @@
 """Generate and save arch-diagram representatives by inserting endpoints.
 
+(AI generated docstring)
+
 You can build endpoint orders incrementally and save surviving diagrams as an album.
 You check the arches of each newly inserted endpoint in every dimension of the supplied map shape.
 

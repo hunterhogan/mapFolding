@@ -165,7 +165,7 @@ def filterDoubleParity(pile: Pile, totalDimensions: int, leaf: Leaf) -> bool:
 
 	Second Bit
 	----------
-	You can identify the special leaf as `首零(totalDimensions) + 零` with the coordinate vocabulary [2].
+	You can identify the special leaf as `首零(totalDimensions) + 零` with the positional-numeral system [2].
 	You compare bit `1` of `pile` with bit `1` of the domain start. Combine this predicate with
 	`filterParity` to enforce spacing of four piles.
 

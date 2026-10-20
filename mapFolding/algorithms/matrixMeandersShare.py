@@ -89,6 +89,8 @@ def integersWide吗(state: StateMeanders, *, arrayMeanders: 形ArrayArcCode | No
 def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
 	"""Create the starting `lookupMeanders` for a matrix meander count.
 
+	(AI generated docstring)
+
 	You can use this function to build the initial mapping from arch codes to counts. For
 	`kind == 'semi'`, the number and values of the starting codes depend on `n` and `boundary`.
 	For `kind == 'meanders'`, one starting code is selected using the parity of `n`.
@@ -200,6 +202,8 @@ totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5:
 
 def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	"""Estimate the output allocation length for one transfer-matrix step.
+
+	(AI generated docstring)
 
 	You can use this function to choose an initial output-buffer length from the number of input
 	records and the transfer boundary. The estimate can be smaller than the required allocation;

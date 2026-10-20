@@ -544,6 +544,8 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	"""I use this to assemble the metadata registry during module import.
 
+	(AI generated docstring)
+
 	This function loads descriptions, offsets, and b-file values for each identifier in
 	`mapFolding.oeis._theSSOT.oeisIDsImplemented` [1]. The result also supplies row settings for
 	`A259689` and `A400429`, with rows starting at two and complete lengths equal to half the row
@@ -577,4 +579,4 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	return dictionary
 
 dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
-"""Access the mutable metadata registry loaded during module import."""
+"""Metadata for every implemented OEIS sequence."""

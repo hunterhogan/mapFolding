@@ -208,13 +208,4 @@ lookupMapFoldingEstimates: Final[dict[tuple[int, ...], int]] = {
 	, (3, 3, 3, 3): 85109616000000000000000000000000
 	, (8, 8): 791274195985524900  # Two tests, months apart, estimated 300,000 hours to compute.
 }
-"""Look up selected fold-count estimates for expensive map shapes.
-
-This mapping supplies estimated total-fold counts for progress reporting when a known value
-is unavailable.
-`mapFolding.kitAST.RecipeJob.fromMapShape` consumes this mapping [1].
-
-References
-----------
-[1] `mapFolding.kitAST.RecipeJob.fromMapShape`
-"""
+"""Estimates of multidimensional map folding `totalFolds`."""

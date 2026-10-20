@@ -1,5 +1,7 @@
 """Generate width tests, counting variants, and pruning variants for meanders.
 
+(AI generated docstring)
+
 You can use this module to derive matrix-meander variants from complete source modules and
 write the configured output modules.
 
@@ -45,6 +47,8 @@ if TYPE_CHECKING:
 
 def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a meander counting variant guarded by the configured integer-width test.
+
+	(AI generated docstring)
 
 	You can use this function to rename the source counting function, remove the dispatcher,
 	and add the configured width test to the active-boundary loop. The generated function
@@ -410,6 +414,8 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a NumPy counting variant with selected control flow removed.
 
+	(AI generated docstring)
+
 	You can use this generator to replace data-container allocation with
 	NumPy zeros [1], extract selected loop contents, remove matching control-flow and progress
 	statements, and assemble a counting function with a dispatcher.
@@ -542,6 +548,8 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 
 def makeModulesMeanders() -> None:
 	"""Regenerate the configured matrix-meander counting variants and shared modules.
+
+	(AI generated docstring)
 
 	You can use this function to write width-guarded counting, state pruning, array pruning,
 	dataframe pruning, and the compiled shared Y7Y_Dyck-path function.

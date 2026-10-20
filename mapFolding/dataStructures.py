@@ -104,6 +104,8 @@ def makeDataContainer(
 ) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:
 	"""Allocate a zero-filled integer array through a replaceable container interface.
 
+	(AI generated docstring)
+
 	You can use this function wherever an algorithm needs array storage, including when the current
 	implementation only needs `numpy.zeros` [1]. The default implementation calls `make_zeros` [2]
 	and returns an array with the requested shape and integer datatype.
@@ -246,6 +248,8 @@ def makeConnectionGraph(
 	mapShape: tuple[int, ...], totalLeaves: int, datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]
 ) -> ndarray[tuple[int, int, int], numpy_dtype[形NumPyInteger]]:
 	"""Construct the map connection graph and cast its elements to `datatype`.
+
+	(AI generated docstring)
 
 	You can use this function to obtain the leaf-connection lookup required by folding algorithms.
 	This function builds the lookup from `mapShape` and `totalLeaves` and returns a NumPy array [1]
@@ -987,6 +991,8 @@ def make_memmap(
 	shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str
 ) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
 	"""Open file-backed array storage named from `name`.
+
+	(AI generated docstring)
 
 	You can use this function to request a NumPy memory-mapped array [1] with `shape` and `datatype`.
 	This function forwards the filename `f'{name}.mM'` and the mode `'w+'` to the

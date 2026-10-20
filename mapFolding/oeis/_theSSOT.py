@@ -8,13 +8,13 @@ if TYPE_CHECKING:
 	from typing import LiteralString
 
 cacheDays: int = 30
-"""Set the cache freshness interval to 30 days before attempting an online refresh."""
+"""Number of days to retain cached OEIS data before refreshing from the online source."""
 
 # TODO Dynamic, but authoritative, discovery of OEIS IDs implemented in mapFolding.
 # TODO Dynamic, but authoritative, discovery of valid parameter values for `f` and `flow`: primarily for testing.
 
 oeisIDsMapFoldingImplemented: tuple[LiteralString, ...] = ('A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418')
-"""List the OEIS sequence identifiers dispatched to map-folding algorithms."""
+"""OEIS IDs of multidimensional map-folding algorithms."""
 
 oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented
 	, 'A000108', 'A000560', 'A000682', 'A001010', 'A001011'
@@ -25,6 +25,6 @@ oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented
 	, 'A301620', 'A331499', 'A333971', 'A334615', 'A337581', 'A380367'
 	, 'A400429', 'A400630'  # , 'A400631', 'A400632', 'A400633', 'A400634', 'A400635', 'A400636', 'A400637', 'A400638', 'A400639'
 )
-"""List the OEIS sequence identifiers registered for metadata loading and sequence selection."""
+"""Every implemented OEIS ID."""
 pathCache: Path = settingsPackage.pathPackage / 'oeis' / '.cache'
-"""Locate cached sequence values and descriptions in the package's `oeis/.cache` directory."""
+"""Local directory path for storing cached OEIS sequence data and metadata."""

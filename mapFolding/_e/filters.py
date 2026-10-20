@@ -1,15 +1,17 @@
 """Test leaf assignments and filter elimination search spaces.
 
+(AI generated docstring)
+
 You can test leaf membership, pinned leaves, and pile positions. Use the type predicates to
-distinguish a pinned leaf index from a bitset without validating index bounds.
+distinguish a pinned leaf index from a `ChoicesLeaf` without validating index bounds.
 
 Contents
 --------
 Boolean antecedents
 	choicesLeaf吗
-		Identify a bitset and narrow the value's type.
+		Identify a `ChoicesLeaf` and narrow the value's type.
 	leafInChoicesLeaf吗
-		Test whether a bitset contains a leaf index.
+		Test whether a `ChoicesLeaf` contains a leaf index.
 	leafPinned吗
 		Test whether a leaf is already assigned in a pinned-leaf mapping.
 	leaf吗
@@ -17,7 +19,7 @@ Boolean antecedents
 	notPileLast
 		Test whether a pile differs from the final pile index.
 	pileChoicesLeaf吗
-		Identify a pile-and-bitset pair and narrow the pair's type.
+		Identify a pile paired with `ChoicesLeaf` and narrow the pair's type.
 Filtering functions
 	是valid
 		Keep permutation spaces whose validity flag is true.
@@ -37,7 +39,9 @@ if TYPE_CHECKING:
 #======== Boolean antecedents ================================================
 
 def leafInChoicesLeaf吗(leaf: Leaf, choicesLeaf: ChoicesLeaf) -> bool:
-	"""Test whether a bitset contains a leaf index.
+	"""Test whether a `ChoicesLeaf` contains a leaf index.
+
+	(AI generated docstring)
 
 	You can check the bit at `leaf` in `choicesLeaf` with `gmpy2.mpz.bit_test` [1]. Supply a leaf index
 	below the sentinel position.
@@ -47,7 +51,7 @@ def leafInChoicesLeaf吗(leaf: Leaf, choicesLeaf: ChoicesLeaf) -> bool:
 	leaf : Leaf
 		Leaf index to test.
 	choicesLeaf : ChoicesLeaf
-		Leaf bitset.
+		`ChoicesLeaf`.
 
 	Returns
 	-------
@@ -63,6 +67,8 @@ def leafInChoicesLeaf吗(leaf: Leaf, choicesLeaf: ChoicesLeaf) -> bool:
 
 def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 	"""Test whether a leaf is already assigned in a pinned-leaf mapping.
+
+	(AI generated docstring)
 
 	You can check whether `leaf` occurs among the values in `leavesPinned`.
 
@@ -82,6 +88,8 @@ def leafPinned吗(leavesPinned: PinnedLeaves, leaf: Leaf) -> bool:
 
 def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 	"""Test whether a pile differs from the final pile index.
+
+	(AI generated docstring)
 
 	You can compare `pile` with `pileLast` without checking whether `pile` belongs to the map.
 
@@ -106,6 +114,8 @@ def notPileLast(pileLast: Pile, pile: Pile) -> bool:
 def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	"""Identify a leaf-index value and narrow the value's type.
 
+	(AI generated docstring)
+
 	You can identify the integer type used for pinned leaves and use a positive result for
 	`typing.TypeIs` narrowing [1] without validating index bounds. You also accept integer subclasses,
 	including `bool`.
@@ -113,7 +123,7 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	Parameters
 	----------
 	leafSpace : LeafSpace | None
-		Pinned leaf, bitset, or `None` to inspect.
+		Pinned leaf, `ChoicesLeaf`, or `None` to inspect.
 
 	Returns
 	-------
@@ -123,7 +133,7 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	See Also
 	--------
 	`choicesLeaf吗`
-		Identify a bitset instead of a pinned leaf.
+		Identify a `ChoicesLeaf` instead of a pinned leaf.
 	`mapFolding._e.dataBaskets.PermutationSpace.pilePinned吗`
 		Check the assignment at a pile and normalize the leaf set.
 
@@ -135,25 +145,27 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	return isinstance(leafSpace, Leaf)
 
 def choicesLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[ChoicesLeaf]:
-	"""Identify a bitset and narrow the value's type.
+	"""Identify a `ChoicesLeaf` and narrow the value's type.
 
-	You can identify the bitset type and use a positive result for `typing.TypeIs` narrowing [1] without
+	(AI generated docstring)
+
+	You can identify the `ChoicesLeaf` type and use a positive result for `typing.TypeIs` narrowing [1] without
 	checking the sentinel or leaf count.
 
 	Parameters
 	----------
 	leafSpace : LeafSpace | None
-		Pinned leaf, bitset, or `None` to inspect.
+		Pinned leaf, `ChoicesLeaf`, or `None` to inspect.
 
 	Returns
 	-------
 	leafSpaceIsChoicesLeaf : TypeIs[ChoicesLeaf]
-		`True` for an instance of the bitset type.
+		`True` for an instance of the `ChoicesLeaf` type.
 
 	See Also
 	--------
 	`leaf吗`
-		Identify a pinned leaf instead of a bitset.
+		Identify a pinned leaf instead of a `ChoicesLeaf`.
 	`mapFolding._e.dataBaskets.PermutationSpace.pileUndetermined吗`
 		Check the assignment at a pile and normalize the leaf set.
 
@@ -165,22 +177,22 @@ def choicesLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[ChoicesLeaf]:
 	return isinstance(leafSpace, ChoicesLeaf)
 
 def pileChoicesLeaf吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pile, ChoicesLeaf]]:
-	"""Identify a pile-and-bitset pair and narrow the pair's type.
+	"""Identify a pile paired with `ChoicesLeaf` and narrow the pair's type.
 
 	(AI generated docstring)
 
-	You can check that `pileLeafSpace` contains an integer pile index and a bitset, then use a positive
+	You can check that `pileLeafSpace` contains an integer pile index and a `ChoicesLeaf`, then use a positive
 	result for `typing.TypeIs` narrowing [1]. Validate index bounds and the sentinel separately.
 
 	Parameters
 	----------
 	pileLeafSpace : tuple[Pile, LeafSpace]
-		Pile index paired with a pinned leaf or bitset.
+		Pile index paired with a pinned leaf or `ChoicesLeaf`.
 
 	Returns
 	-------
 	pileHasChoicesLeaf : TypeIs[tuple[Pile, ChoicesLeaf]]
-		`True` when the pile is an integer and the second item is a bitset.
+		`True` when the pile is an integer and the second item is a `ChoicesLeaf`.
 
 	References
 	----------

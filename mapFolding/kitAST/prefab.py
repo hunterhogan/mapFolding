@@ -1,5 +1,7 @@
 """Apply common syntax transformations and write generated modules.
 
+(AI generated docstring)
+
 You can use this module to remove or rename function definitions, rename matching name nodes,
 and resolve output settings before writing source containers from `astToolkit` [1].
 

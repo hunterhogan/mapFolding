@@ -59,6 +59,8 @@ if TYPE_CHECKING:
 class StateMapFolding:
 	"""Store mutable insertion-search state for a map-folding computation.
 
+	(AI generated docstring)
+
 	You can use this class to carry a folding search between initialization and algorithm execution.
 	Construction derives the dimension count, leaf count, and connection graph from the supplied
 	dimension lengths. Counting algorithms update the counters, cursors, and leaf-neighbor arrays.
@@ -127,50 +129,52 @@ class StateMapFolding:
 	"""
 
 	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True, metadata={'elementConstructor': '形TotalLeaves'})
-	"""Inspect dimension lengths in their supplied order."""
+	"""Dimensions of the map being analyzed for folding patterns."""
 
 	groupsOfFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
-	"""Accumulate folding groups, each contributing one folding per leaf."""
+	"""Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings."""
 
 	gap1ndex: 形Elephino = 形Elephino(0)
-	"""Track the one-based cursor within the gap workspace."""
+	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: 形Elephino = 形Elephino(0)
-	"""Track the upper bound of the gap-workspace cursor."""
+	"""The upper bound of `gap1ndex`."""
 	次Dimension: 形TotalLeaves = 形TotalLeaves(0)
-	"""Track the zero-based dimension cursor."""
+	"""The current 0-indexed position of the dimension during computation."""
 	次Leaf: 形TotalLeaves = 形TotalLeaves(0)
-	"""Track a zero-based leaf cursor within a search loop."""
+	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
 	次MiniGap: 形Elephino = 形Elephino(0)
-	"""Track a zero-based cursor within a candidate gap range."""
+	"""The current 0-indexed position of a 'gap' in a loop during computation."""
 	leaf1ndex: 形TotalLeaves = 形TotalLeaves(1)
-	"""Track the one-based leaf label currently being inserted."""
+	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
 	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
-	"""Track the leaf label selected for a connection."""
+	"""Target leaf for connection operations."""
 
 	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
-	"""Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count."""
+	"""Count of dimensions not subject to folding constraints."""
 
 	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Track the number of dimensions admitting each candidate gap."""
+	"""Array tracking computed number of dimensions with gaps."""
 	gapRangeStart: 形ArrayElephino1D = dataclasses.field(default_factory=lambda: 形ArrayElephino1D([]), init=True, metadata={'dtype': 形ArrayElephino1D.__args__[1].__args__[0]})
-	"""Track starting offsets of candidate gap ranges."""
+	"""Array tracking computed starting positions of gap ranges."""
 	gapsWhere: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Store candidate gap positions in the search workspace."""
+	"""Array indicating locations of gaps in the folding pattern."""
 	leafAbove: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Map each leaf label to the neighboring leaf above."""
+	"""Array tracking the leaves above the current leaf, `leaf1ndex`, during computation."""
 	leafBelow: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Map each leaf label to the neighboring leaf below."""
+	"""Array tracking the leaves below the current leaf, `leaf1ndex`, during computation."""
 
 	connectionGraph: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': 形ArrayTotalLeaves3D.__args__[1].__args__[0]})
-	"""Inspect the connection lookup derived during initialization."""
+	"""Unchanging array representing connections between all leaves."""
 	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
-	"""Inspect the dimension count derived from `mapShape`."""
+	"""Unchanging total number of dimensions in the map."""
 	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
-	"""Inspect the leaf count derived from `mapShape`."""
+	"""Unchanging total number of leaves in the map."""
 
 	@property
 	def totalFolds(self) -> 形TotalFolds:
 		"""Compute the folding count represented by the current group count.
+
+		(AI generated docstring)
 
 		You can use this property to convert the accumulated group count to the number of foldings.
 		The property reflects the current search progress and is zero before any group has been counted.
@@ -214,6 +218,8 @@ class StateMapFolding:
 @dataclasses.dataclass(slots=True)
 class StateMapFoldingSymmetric:
 	"""Store mutable insertion-search state for symmetric map foldings.
+
+	(AI generated docstring)
 
 	You can use this class to carry a folding search between initialization and algorithm execution.
 	Construction derives the dimension count, leaf count, and connection graph from the supplied
@@ -290,50 +296,50 @@ class StateMapFoldingSymmetric:
 	"""
 
 	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True, metadata={'elementConstructor': '形TotalLeaves'})
-	"""Inspect dimension lengths in their supplied order."""
+	"""Dimensions of the map being analyzed for folding patterns."""
 
 	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
-	"""Accumulate foldings that satisfy the symmetry constraint."""
+	"""Current count of symmetric folds."""
 
 	gap1ndex: 形Elephino = 形Elephino(0)
-	"""Track the one-based cursor within the gap workspace."""
+	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
 	gap1ndexCeiling: 形Elephino = 形Elephino(0)
-	"""Track the upper bound of the gap-workspace cursor."""
+	"""The upper bound of `gap1ndex`."""
 	次Dimension: 形TotalLeaves = 形TotalLeaves(0)
-	"""Track the zero-based dimension cursor."""
+	"""The current 0-indexed position of the dimension during computation."""
 	次Leaf: 形TotalLeaves = 形TotalLeaves(0)
-	"""Track a zero-based leaf cursor within a search loop."""
+	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
 	次MiniGap: 形Elephino = 形Elephino(0)
-	"""Track a zero-based cursor within a candidate gap range."""
+	"""The current 0-indexed position of a 'gap' in a loop during computation."""
 	leaf1ndex: 形TotalLeaves = 形TotalLeaves(1)
-	"""Track the one-based leaf label currently being inserted."""
+	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
 	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
-	"""Track the leaf label selected for a connection."""
+	"""Target leaf for connection operations."""
 
 	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
-	"""Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count."""
+	"""Count of dimensions not subject to folding constraints."""
 
 	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Track the number of dimensions admitting each candidate gap."""
+	"""Array tracking computed number of dimensions with gaps."""
 	gapRangeStart: 形ArrayElephino1D = dataclasses.field(default_factory=lambda: 形ArrayElephino1D([]), init=True, metadata={'dtype': 形ArrayElephino1D.__args__[1].__args__[0]})
-	"""Track starting offsets of candidate gap ranges."""
+	"""Array tracking computed starting positions of gap ranges."""
 	gapsWhere: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Store candidate gap positions in the search workspace."""
+	"""Array indicating locations of gaps in the folding pattern."""
 	leafAbove: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Map each leaf label to the neighboring leaf above."""
+	"""Array tracking the leaves above the current leaf, `leaf1ndex`, during computation."""
 	leafBelow: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Map each leaf label to the neighboring leaf below."""
+	"""Array tracking the leaves below the current leaf, `leaf1ndex`, during computation."""
 	leafComparison: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': 形ArrayTotalLeaves1D.__args__[1].__args__[0]})
-	"""Store the leaf sequence used for symmetric-fold comparisons."""
+	"""Array for finding symmetric folds."""
 
 	connectionGraph: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': 形ArrayTotalLeaves3D.__args__[1].__args__[0]})
-	"""Inspect the connection lookup derived during initialization."""
+	"""Unchanging array representing connections between all leaves."""
 	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
-	"""Inspect the dimension count derived from `mapShape`."""
+	"""Unchanging total number of dimensions in the map."""
 	indices: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': 形ArrayTotalLeaves3D.__args__[1].__args__[0]})
-	"""Inspect precomputed pairs of positions for symmetric-fold comparisons."""
+	"""Precomputed index pairs for symmetric fold checking."""
 	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
-	"""Inspect the leaf count derived from `mapShape`."""
+	"""Unchanging total number of leaves in the map."""
 
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value.
@@ -401,12 +407,16 @@ class StateMapFoldingParallel(StateMapFolding):
 	taskDivisions: 形TotalLeaves = 形TotalLeaves(0)
 	"""Select the number of computation tasks.
 
+	(AI generated docstring)
+
 	Initialization replaces zero with the derived leaf count. Values greater than the leaf count
 	can overcount foldings; construction does not validate the upper bound.
 	"""
 
 	task次: 形TotalLeaves = 形TotalLeaves(0)
 	"""Select the zero-based task represented by this state.
+
+	(AI generated docstring)
 
 	Use an index from zero through one less than the selected task count. Construction does not
 	validate the index.
@@ -430,6 +440,8 @@ class StateMapFoldingParallel(StateMapFolding):
 @dataclasses.dataclass(slots=True)
 class StateMeanders:
 	"""Store transfer counts and boundary progress for a meander computation.
+
+	(AI generated docstring)
 
 	You can use this class to start or continue a meander computation. Construction fills an empty
 	count lookup, selects a starting boundary when the supplied boundary is zero, and derives bit
@@ -496,24 +508,30 @@ class StateMeanders:
 	"""
 
 	n: int
-	"""Identify the meander problem being computed."""
+	"""The index of the meanders problem being solved."""
 	kind: Literal['semi', 'meanders'] | LiteralString
-	"""Select the meander family for lookup initialization."""
+	"""'semi' for semi-meanders or 'meanders' for meanders."""
 
 	boundary: int = 0
-	"""Track the current transfer boundary.
-
-	Initialization replaces a zero value with `n - 1`.
-	"""
+	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
 	lookupMeanders: dict[int, int] = dataclasses.field(default_factory=dict[int, int])
-	"""Map active arch codes to counts stored as Python integers."""
+	"""A Python `dict` (*dict*ionary) of `arcCode` to `meanders`. The values are stored as Python `int`
+	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
+	'bigint' (big *int*eger).
+	"""
 
 	bitWidth: int = 0
-	"""Track the bit length of the largest active arch code."""
+	"""Track the bit length of the largest active arch code.
+
+	(AI generated docstring)
+	"""
 	bitsLocator: int = 0
-	"""Select alternating bit positions below the current bit width."""
+	"""An odd-parity bit-mask with `bitWidth` bits."""
 	arcCodeMaximum: int = 0
-	"""Track the boundary-derived power-of-two threshold for arch codes."""
+	"""Track the boundary-derived power-of-two threshold for arch codes.
+
+	(AI generated docstring)
+	"""
 
 	bitWidthLimitArcCode: int | None = None
 	"""Select the arch-code width limit for fixed-width computation.
@@ -527,12 +545,14 @@ class StateMeanders:
 	"""
 
 	次Target: int = 0
-	"""Track the current algorithm-specific target cursor."""
+	"""What is being indexed depends on the algorithm flavor."""
 	countAddend: int = 0
 	"""Retain completed counting contributions removed from the active computation."""
 
 	def reduceBoundary(self) -> None:
 		"""Advance to the next transfer step by reducing the boundary.
+
+		(AI generated docstring)
 
 		This method subtracts one from `self.boundary` and recomputes the stored bit width, locator mask,
 		and arch-code threshold. This method returns `None`. The active lookup must be nonempty.
@@ -543,15 +563,26 @@ class StateMeanders:
 		self.set_arcCodeMaximum()
 
 	def setBitsLocator(self) -> None:
-		"""Set the locator mask from the stored arch-code bit width.
+		"""Compute an odd-parity bit-mask with `bitWidth` bits.
 
-		This method sets `self.bitsLocator` to select bit positions zero, two, four, and so on below
-		`self.bitWidth`. The least significant bit is position zero. This method returns `None`.
+		Semiotics
+		---------
+		In binary, `bitsLocator` has alternating 0s and 1s and ends with a 1, such as '101',
+		'0101', and '10101'. The last digit is in the 1's column, but programmers usually call it the
+		"least significant bit" (LSB). If we count the columns from the right, the 1's column is
+		column 1, the 2's column is column 2, the 4's column is column 3, and so on. When counting
+		this way, `bitsLocator` has 1s in the columns with odd index numbers. Mathematicians and
+		programmers, therefore, tend to call `bitsLocator` something like the "odd bit-mask", the
+		"odd-parity numbers", or simply "odd mask" or "odd numbers". In addition to "odd" being
+		inherently ambiguous in this context, this algorithm also segregates odd numbers from even
+		numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 		"""
 		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
 
 	def _setBitWidth(self) -> None:
 		"""I use this to refresh the arch-code bit width during initialization and boundary reduction.
+
+		(AI generated docstring)
 
 		This method updates `self.bitWidth` from the largest key in `self.lookupMeanders` and returns
 		`None`. An empty lookup propagates `ValueError` from the maximum-key calculation.
@@ -565,6 +596,8 @@ class StateMeanders:
 
 	def setBitWidthNumPy(self, arrayMeanders: 形ArrayArcCode) -> None:
 		"""Set the stored bit width from the largest value in `arrayMeanders`.
+
+		(AI generated docstring)
 
 		This method finds the maximum value across the entire supplied NumPy array [1], converts the
 		maximum to a Python integer, and stores its bit length in `self.bitWidth`. This method returns
@@ -589,6 +622,8 @@ class StateMeanders:
 
 	def set_arcCodeMaximum(self) -> None:
 		"""Set the arch-code threshold from the current transfer boundary.
+
+		(AI generated docstring)
 
 		This method stores `1 << (2 * self.boundary + 4)` in `self.arcCodeMaximum` and returns `None`.
 		This method does not inspect or change the count lookup.
@@ -668,66 +703,25 @@ class StateMeanders:
 
 # TODO abstract `length` to that-which-is-indexed, and something like `int | tuple[Any, ...]` or `_ShapeLike`.
 class ShapeArray(NamedTuple):
-	"""Name the record-count and field-count axes of an array shape.
+	"""Always use this `NamedTuple` for the `shape` parameter of `ndarray`; _always_ make the `NamedTuple` with _KEYWORD_ syntax, never positional syntax.
 
-	You can use this tuple as the shape of a two-axis NumPy array [1]. Construct this tuple with
-	keyword arguments so callers do not depend on the field order.
+	Why always use _KEYWORD_ syntax?
+	--------------------------------
+	If the order of the elements changes, expressions using positional syntax will break.
 
-	Attributes
-	----------
-	length : int
-		Number of records on the first axis.
-	indexes : int
-		Number of indexed fields on the second axis.
-
-	Examples
-	--------
-	`mapFolding.algorithms.matrixMeandersNumPy` [2] allocates one record per active arch code.
-
-		```python
-		shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
-		```
-
-	References
-	----------
-	[1] NumPy array reference.
-		https://numpy.org/doc/stable/reference/index.html
-	[2] `mapFolding.algorithms.matrixMeandersNumPy`
-
+	Why go through the extra effort?
+	----------------------------------------------------------
+	The shape of the array is a `tuple`, of course, and this `NamedTuple` abstracts the order of the
+	`tuple` elements. At the very least, it mitigates the risk of a bug due to mis-ordering the axes
+	when constructing the array. It creates a SSOT for the axis order. Refactoring the axis order for
+	the entire codebase does not require changing every `ndarray` constructor.
 	"""
 
 	length: int
 	indexes: int
 
 class ShapeSlicer(NamedTuple):
-	"""Name the record selection and field selection of an array index.
-
-	You can use this tuple to select records and one field from an array whose shape follows
-	`ShapeArray` [1]. Construct this tuple with keyword arguments to preserve the named-axis
-	convention.
-
-	Attributes
-	----------
-	length : EllipsisType | slice
-		Record selection on the first axis; an ellipsis selects all records.
-	axis : int
-		Field position on the second axis.
-
-	Examples
-	--------
-	`mapFolding.algorithms.matrixMeandersNumPy` [2] selects the arch-code field for every record.
-
-		```python
-		slicerArcCode = ShapeSlicer(length=..., axis=次ArcCode)
-		```
-
-	References
-	----------
-	[1] `ShapeArray`
-
-	[2] `mapFolding.algorithms.matrixMeandersNumPy`
-
-	"""
+	"""Always use this for fancy indexing if possible: see `ShapeArray`."""
 
 	length: EllipsisType | slice
 	at: int

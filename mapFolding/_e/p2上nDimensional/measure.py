@@ -1,7 +1,9 @@
-"""Measure coordinate features of leaf and pile integers.
+"""Measure positional-numeral features of leaf and pile integers.
 
-You can locate set coordinate bits, count coordinate bits, and project or invert leaf
-values. The coordinate vocabulary lives in
+(AI generated docstring)
+
+You can locate digits with value `1`, count digits with value `1`, and project or invert leaf
+values. The positional-numeral system lives in
 `mapFolding._e.p2上nDimensional.semiotics` [1].
 
 Contents
@@ -46,6 +48,8 @@ if TYPE_CHECKING:
 def 工totalDimensionsTail(state: StateElimination, integerNonnegative: int) -> int:
 	"""Measure trailing set bits in `integerNonnegative` within the map width.
 
+	(AI generated docstring)
+
 	You can inspect consecutive set bits starting at the least significant end of
 	`integerNonnegative`. The map width comes from `state.totalDimensions`. The result is
 	`0` when the inverted value has no set bit.
@@ -82,9 +86,11 @@ def 工totalDimensionsTail(state: StateElimination, integerNonnegative: int) -> 
 def 工dimension首零(integerNonnegative: int, /) -> int:
 	"""Locate the most significant set bit in `integerNonnegative`.
 
+	(AI generated docstring)
+
 	You can inspect the dimension index of the most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the coordinate vocabulary [1].
+	The head convention is defined in the positional-numeral system [1].
 
 	Parameters
 	----------
@@ -106,9 +112,11 @@ def 工dimension首零(integerNonnegative: int, /) -> int:
 def 工dimension首一(integerNonnegative: int, /) -> int | None:
 	"""Locate the second most significant set bit in `integerNonnegative`.
 
+	(AI generated docstring)
+
 	You can inspect the dimension index of the second most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the coordinate vocabulary [1].
+	The head convention is defined in the positional-numeral system [1].
 
 	Parameters
 	----------
@@ -136,9 +144,11 @@ def 工dimension首一(integerNonnegative: int, /) -> int | None:
 def 工dimension首二(integerNonnegative: int, /) -> int | None:
 	"""Locate the third most significant set bit in `integerNonnegative`.
 
+	(AI generated docstring)
+
 	You can inspect the dimension index of the third most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the coordinate vocabulary [1].
+	The head convention is defined in the positional-numeral system [1].
 
 	Parameters
 	----------
@@ -172,9 +182,11 @@ def 工dimension首二(integerNonnegative: int, /) -> int | None:
 def 工dimension首三(integerNonnegative: int, /) -> int | None:
 	"""Locate the fourth most significant set bit in `integerNonnegative`.
 
+	(AI generated docstring)
+
 	You can inspect the dimension index of the fourth most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the coordinate vocabulary [1].
+	The head convention is defined in the positional-numeral system [1].
 
 	Parameters
 	----------
@@ -212,7 +224,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	(AI generated docstring, which may or may not have been accurate; edited by me, Hunter Hogan,
 	which may or may not have improved it.)
 
-	You can project the coordinate value `notLeafOrigin` into the lower-dimensional
+	You can project the leaf value `notLeafOrigin` into the lower-dimensional
 	part of the map by clearing the most significant set bit. Every lower bit keeps the same
 	position and value.
 
@@ -224,7 +236,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 	Returns
 	-------
 	leafSubHyperplane : int
-		Coordinate value with the most significant set bit removed. A power of two returns
+		Leaf value with the most significant set bit removed. A power of two returns
 		`0`; the input `0` also returns `0`.
 
 	Remainder Calculation
@@ -251,6 +263,8 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 @cache
 def 工dimensionTail(integerNonnegative: int, /) -> int:
 	"""Locate the least significant set bit in `integerNonnegative`.
+
+	(AI generated docstring)
 
 	You can inspect the dimension index of the first set bit when reading `integerNonnegative` from the
 	least significant end. You receive index `0` for the input `0`, which has no set bit.
@@ -280,6 +294,8 @@ def 工dimensionTail(integerNonnegative: int, /) -> int:
 def 工totalDimensionsOdd(integerNonnegative: int, /) -> int:
 	"""Count set bits below the head bit of `integerNonnegative`.
 
+	(AI generated docstring)
+
 	You can count the active coordinate positions of `integerNonnegative` after
 	excluding the most significant set bit. The input `0` returns `0`.
 
@@ -299,6 +315,8 @@ def 工totalDimensionsOdd(integerNonnegative: int, /) -> int:
 def invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int) -> int:
 	"""Invert the lowest `totalDimensions` bits of `integerNonnegative`.
 
+	(AI generated docstring)
+
 	You can exchange set and unset coordinate bits of `integerNonnegative` within
 	the map width `totalDimensions`. Bits above the map width keep their original values.
 
@@ -307,7 +325,7 @@ def invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int) -
 	totalDimensions : int
 		Nonnegative number of bit positions to invert.
 	integerNonnegative : int
-		Nonnegative coordinate value to invert.
+		Nonnegative integer to invert.
 
 	Returns
 	-------
@@ -329,6 +347,8 @@ def invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int) -
 @cache
 def ptount(integerAbove3: int, /) -> int:
 	"""Count lower set bits after subtracting three from `integerAbove3`.
+
+	(AI generated docstring)
 
 	You can obtain a coordinate measurement used to exclude crease neighbors by subtracting `3` from
 	`integerAbove3`, removing the most significant set bit, and counting the remaining set bits.

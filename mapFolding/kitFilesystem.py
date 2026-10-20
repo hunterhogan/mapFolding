@@ -319,6 +319,8 @@ def makePathFilenameFolds(
 ) -> Path:
 	"""Resolve a folding-count output path named from `mapShape`.
 
+	(AI generated docstring)
+
 	You can use this function to combine the filename from `makeFilenameFolds` [1] with an output
 	location. Path interpretation and directory creation follow `makePathFilenameCount` [2].
 
@@ -791,6 +793,8 @@ def writeTriangleSparse(triangleSparse: 形TriangleSparse, pathFilename: Path) -
 
 def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	"""Read cached text or request updated text from `url`.
+
+	(AI generated docstring)
 
 	You can use this function to retrieve UTF-8 text while reusing `pathFilenameCache`. A recent
 	cache returns immediately. A stale or missing cache triggers an HTTP request with urllib3 [1].

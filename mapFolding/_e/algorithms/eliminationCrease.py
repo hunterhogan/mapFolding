@@ -94,6 +94,8 @@ def consumeQueue(mapShape: tuple[int, ...], queuePermutationSpace: Queue[Permuta
 def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
 	"""Enumerate folding representatives with concurrent crease reduction.
 
+	(AI generated docstring)
+
 	Parameters
 	----------
 	state : StateElimination

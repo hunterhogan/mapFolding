@@ -1,5 +1,7 @@
 """Verify that a folding sequence is possible.
 
+(AI generated docstring)
+
 You can validate stamp-folding sequences by detecting forbidden crease crossings with the inequality
 constraints established by Koehler (1968) [1] and simplified by Legendre (2014) [2]. You can validate
 complete foldings or eliminate assignments from permutation spaces.
@@ -96,11 +98,12 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 	Mathematics
 	-----------
 	Let creases (k, k+1) and (r, r+1) have pile positions π(k), π(k+1), π(r), π(r+1) respectively. The
-	creases cross when the four pile positions violate one of the eight forbidden orderings enumerated by
-	Koehler (1968). You can evaluate the four simplified orderings from the supplied pile positions.
+	creases cross when the four pile positions violate one of the eight forbidden orderings enumerated
+	by Koehler (1968). This function evaluates the four simplified orderings given the pile positions
+	and crease-computation thunks.
 
-	Crease Comparison Order
-	-----------------------
+	Mathematical reasons for the design of this function
+	----------------------------------------------------
 
 		1. To confirm that a multidimensional folding is valid, confirm that each of the constituent
 			one-dimensional¹ foldings is valid.
@@ -109,21 +112,23 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 
 	A "crease" is a convenient lie: it is a shorthand description of two leaves that are physically
 	connected to each other. Leaves in a one-dimensional folding are physically connected to at most
-	two other leaves: the leaf before and the leaf after. When examining a one-dimensional section of a
-	multidimensional folding, you ignore the other dimensions and still reference the leaves before and
-	after. To check whether two creases cross, you must compare the four leaves of the two creases.
+	two other leaves: the leaf before and the leaf after. When talking about a one-dimensional section
+	of a multidimensional folding, we ignore the other dimensions and still reference the leaves
+	before and after. To check whether two creases cross, we must compare the four leaves of the two
+	creases.
 
 	¹ A so-called one-dimensional folding, map, or strip of stamps has two dimensions, but one of the
 	dimensions has a width of 1.
 
-	Crease Identifier Vocabulary
-	----------------------------
+	Idiosyncratic reasons for the design of this function
+	-----------------------------------------------------
 
-	You can read `leaf` as the first `Leaf` of the first crease and `comparand` as the `Leaf` being
-	compared with it. A crease² connects a `Leaf` to the `Leaf` after it. You therefore compare the
-	crease from `leaf` to `leafCrease` with the crease from `comparand` to `comparandCrease`.
+	I name the first `Leaf` of the first crease "`leaf`". I name the `Leaf` to which I am comparing
+	`leaf` "`comparand`". A crease² is a connection between a `Leaf` and the `Leaf` after it,
+	therefore, the crease of "`leaf`" connects it to "`leafCrease`". The crease of "`comparand`"
+	connects it to "`comparandCrease`".
 
-	You can read `pile` as the `Pile` of `leaf` and `pileComparand` as the `Pile` of `comparand`.
+	I name the `Pile` of `leaf` as "`pile`". I name the `Pile` of `comparand` as "`pileComparand`".
 
 	Nearly everyone else names the leaves with letters, such as k, k+1, r, and r+1. (Which stand for
 	Kahlo and Rivera, of course.)
@@ -146,6 +151,8 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 
 def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	"""Validate a concrete `Folding` by checking for crease crossings in every dimension.
+
+	(AI generated docstring)
 
 	You can validate a constructed `Folding` at the leaf level. In
 	`mapFolding._e.algorithms.eliminationCrease` [1], you can filter possible foldings that already
@@ -201,6 +208,8 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 
 def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) -> bool:
 	"""Validate a concrete `Folding` by checking for crease crossings in every dimension.
+
+	(AI generated docstring)
 
 	Parameters
 	----------
@@ -289,6 +298,8 @@ def _totalLeaves(mapShape: tuple[int, ...]) -> int:
 @cache
 def getCreasePost(mapShape: tuple[int, ...], leaf: Leaf, dimension: int) -> Leaf | None:
 	"""Compute the `Leaf`, if any, attached by the crease "after" (post) `leaf` in `dimension`.
+
+	(AI generated docstring)
 
 	Parameters
 	----------

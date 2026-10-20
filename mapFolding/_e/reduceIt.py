@@ -55,15 +55,15 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 
 	Domain preservation
 	-------------------
-	You must supply a bitset that appropriately restricts each pile. Check membership in the existing
-	dictionary value yourself; your supplied bitset is not intersected with that value.
+	You must supply a `ChoicesLeaf` that appropriately restricts each pile. Check membership in the existing
+	dictionary value yourself; your supplied `ChoicesLeaf` is not intersected with that value.
 
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
 		Permutation space to mutate.
 	pilesToUpdate : Iterable[tuple[Pile, ChoicesLeaf]]
-		Pile indices and bitsets to intersect with the mask. The supplied bitsets, rather than the
+		Pile indices and `ChoicesLeaf` values to intersect with the mask. The supplied `ChoicesLeaf` values, rather than the
 		current dictionary values, determine the new choices.
 	antiChoicesLeaf : ChoicesLeaf
 		Allowed-leaf mask including the sentinel. Cleared bits identify excluded leaves.
@@ -75,7 +75,7 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 		failure.
 	"""
 	for pile, choicesLeaf in pilesToUpdate:
-		leafSpace: LeafSpace | None = _e.choicesLeafLeafNone(_e.choicesLeafAND(antiChoicesLeaf, choicesLeaf))
+		leafSpace: LeafSpace | None = _e.distinguishChoicesLeaf(_e.choicesLeafAND(antiChoicesLeaf, choicesLeaf))
 		if leafSpace is None:
 			#=SIN= Early return.
 			permutationSpace.valid = False
@@ -91,6 +91,8 @@ def _odd吗(mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile, 
 
 def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Detect and eliminate crossed creases.
+
+	(AI generated docstring)
 
 	You can detect configurations where two creases would cross and either invalidate `permutationSpace`
 	or restrict forbidden pile positions for unpinned crease leaves. For each dimension, you partition
@@ -187,6 +189,8 @@ def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace)
 def reducePermutationSpace_LeafIsPinned(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Remove pinned leaves from the remaining pile leaf sets.
 
+	(AI generated docstring)
+
 	You can enforce one pile per pinned leaf by removing pinned leaf indices from undetermined piles. You
 	repeat when an exclusion pins another leaf and stop when no additional leaf is pinned or the
 	permutation space becomes invalid.
@@ -217,12 +221,14 @@ def reducePermutationSpace_LeafIsPinned(state: StateElimination, permutationSpac
 def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Reserve identical leaf sets for matching groups of piles.
 
-	You can find groups of at least two piles with the same leaf bitset. When the leaf count equals the
+	(AI generated docstring)
+
+	You can find groups of at least two piles with the same `ChoicesLeaf`. When the leaf count equals the
 	pile count, you exclude those leaves from every other undetermined pile.
 
 	Subset coverage
 	---------------
-	You compare identical bitsets rather than arbitrary unions of leaf sets. The current repeat condition
+	You compare identical `ChoicesLeaf` values rather than arbitrary unions of leaf sets. The current repeat condition
 	requires the pinned-leaf count to decrease, so use the state's repeated reduction method [1] for
 	further propagation.
 
@@ -267,6 +273,8 @@ def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace
 
 def reducePermutationSpace_leafDomainOf0or1(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Pin leaves with one remaining pile and invalidate leaves with no pile.
+
+	(AI generated docstring)
 
 	You can count each leaf's occurrences across pinned assignments and leaf sets. You invalidate the
 	permutation space for a missing leaf, or pin an unpinned leaf with one possible pile and propagate

@@ -1,5 +1,7 @@
 """Expand smaller-map albums into constrained higher-dimensional search spaces.
 
+(AI generated docstring)
+
 You can read an album for a map with one fewer dimension and build constrained elimination branches
 for a map whose dimension lengths are all two. You can also record the folding collection already
 present in state.
@@ -46,6 +48,8 @@ if TYPE_CHECKING:
 
 def makeDescendants(folding: Folding, state: StateElimination, position: int) -> StateElimination:
 	"""Build constrained target-map branches from one smaller-map folding.
+
+	(AI generated docstring)
 
 	You can use the leaf ordering in `folding` to restrict the target map in `state`. You try possible
 	piles for the final leaf in `folding`, pin end piles, and reduce the resulting branches. You update
@@ -110,6 +114,8 @@ def makeDescendants(folding: Folding, state: StateElimination, position: int) ->
 
 def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> StateElimination:
 	"""Build target-map search spaces from an album with one fewer dimension.
+
+	(AI generated docstring)
 
 	You can read the previous-dimension album from `mapFolding._e.algorithms.insertion.pathAlbum` [1],
 	process each source folding with `makeDescendants` [2], and gather worker permutation spaces and

@@ -1,5 +1,7 @@
 """Provide the ordered coordinate-based reduction sequence.
 
+(AI generated docstring)
+
 You can select the reduction functions used to refine possible foldings for maps
 whose axis lengths are `2`. The public sequence works with
 `mapFolding._e.dataBaskets.StateElimination.reduceAllPermutationSpace` [1].
@@ -44,6 +46,8 @@ if TYPE_CHECKING:
 
 def _byCrease2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Enforce crease adjacency constraints.
+
+	(AI generated docstring)
 
 	You can restrict an undetermined pile adjacent to a pinned leaf to that leaf's crease neighbors. You
 	identify pinned leaves next to undetermined `ChoicesLeaf` assignments and restrict those assignments
@@ -93,6 +97,8 @@ def _byCrease2上nDimensional(state: StateElimination, permutationSpace: Permuta
 
 def _conditionalPredecessors2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Enforce conditional predecessor constraints.
+
+	(AI generated docstring)
 
 	You can exclude conditional `Leaf` predecessors from piles after a pinned `Leaf`. You apply the
 	restriction when the pinned `Leaf` has conditional predecessors at its `Pile`.
@@ -150,6 +156,8 @@ def _odd吗(_mapShape: tuple[int, ...], dimension: int) -> Callable[[tuple[Pile,
 
 def _crossedCreases2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Detect and eliminate crossed creases.
+
+	(AI generated docstring)
 
 	You can detect configurations where two creases would cross and either invalidate `permutationSpace`
 	or restrict forbidden pile positions for unpinned crease leaves. For each dimension, you partition
@@ -242,6 +250,8 @@ def _crossedCreases2上nDimensional(state: StateElimination, permutationSpace: P
 def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Enforce head-before-tail ordering constraints.
 
+	(AI generated docstring)
+
 	You can require leaves with large coordinates in a dimension (tail) to follow all leaves with small
 	coordinates in that dimension (head). When a leaf with nonzero nearest head dimension is pinned, you
 	remove leaves with larger coordinates in that dimension from preceding piles. When a leaf with
@@ -315,6 +325,8 @@ def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace:
 
 def _noConsecutiveDimensions2上nDimensional(state: StateElimination, permutationSpace: PermutationSpace) -> PermutationSpace:
 	"""Enforce non-consecutive dimension constraints.
+
+	(AI generated docstring)
 
 	You can detect arithmetic progressions in pinned leaves and exclude the next term from an adjacent
 	pile. When three consecutive piles contain an arithmetic progression (leaf_k, leaf, leaf_r where

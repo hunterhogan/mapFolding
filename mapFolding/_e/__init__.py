@@ -1,6 +1,8 @@
 """Develop elimination-based map-folding algorithms.
 
-You can access shape-based leaf domains, bitset operations, and shared indexing values. Use the
+(AI generated docstring)
+
+You can access shape-based leaf domains, `ChoicesLeaf` operations, and shared indexing values. Use the
 separate modules for algorithms, search-state containers, and specialized dimension rules.
 
 Modules
@@ -42,15 +44,15 @@ tests
 Public exports
 --------------
 choicesLeafAND
-	Intersect leaf bitsets [1].
-choicesLeafLeafNone
-	Normalize empty and singleton leaf sets [2].
+	Intersect `ChoicesLeaf` values [1].
+distinguishChoicesLeaf
+	Distinguish `ChoicesLeaf`, its only `Leaf`, or `None` [2].
 getChoicesLeaf
 	Compute possible leaves for one pile [3].
 getDomainLeaf
 	Compute possible piles for one leaf [4].
 getIteratorOfLeaves
-	Enumerate leaf indices from a bitset [5].
+	Enumerate leaf indices from a `ChoicesLeaf` [5].
 getLookupChoicesLeaf
 	Compute leaf sets for every pile [6].
 getLookupDomainsLeaves
@@ -61,24 +63,20 @@ getMapShapeProductsSums
 	Sum cumulative dimension products [9].
 getMapShape首ProductsSums
 	Sum dimension products from the head [10].
-leafOrigin
-	Identify the zero-based origin leaf [11].
 lengthChoicesLeaf
-	Count leaf bits excluding the sentinel [12].
+	Count leaf bits excluding the sentinel [11].
 makeAntiChoicesLeaf
-	Build a bitset by excluding leaf indices [13].
+	Build a `ChoicesLeaf` by excluding leaf indices [12].
 makeChoicesLeaf
-	Build a bitset from leaf indices [14].
+	Build a `ChoicesLeaf` from leaf indices [13].
 mapShapeLengthsAreEqual
-	Group repeated dimension lengths greater than one [15].
-pileOrigin
-	Identify the zero-based origin pile [16].
+	Group repeated dimension lengths greater than one [14].
 
 References
 ----------
 [1] `mapFolding._e._beDRY.choicesLeafAND`
 
-[2] `mapFolding._e._beDRY.choicesLeafLeafNone`
+[2] `mapFolding._e._beDRY.distinguishChoicesLeaf`
 
 [3] `mapFolding._e.pileOptions.getChoicesLeaf`
 
@@ -96,26 +94,19 @@ References
 
 [10] `mapFolding._e._beDRY.getMapShape首ProductsSums`
 
-[11] `mapFolding.leafOrigin`
+[11] `mapFolding._e._beDRY.lengthChoicesLeaf`
 
-[12] `mapFolding._e._beDRY.lengthChoicesLeaf`
+[12] `mapFolding._e._beDRY.makeAntiChoicesLeaf`
 
-[13] `mapFolding._e._beDRY.makeAntiChoicesLeaf`
+[13] `mapFolding._e._beDRY.makeChoicesLeaf`
 
-[14] `mapFolding._e._beDRY.makeChoicesLeaf`
-
-[15] `mapFolding._e._beDRY.mapShapeLengthsAreEqual`
-
-[16] `mapFolding.pileOrigin`
+[14] `mapFolding._e._beDRY.mapShapeLengthsAreEqual`
 """
 
 # isort: split
 from __future__ import annotations
 
 from mapFolding._e import theTypes as theTypes
-
-# isort: split
-from mapFolding import pileOrigin as pileOrigin
 
 # isort: split
 from mapFolding._e.leafDomains import getDomainLeaf as getDomainLeaf, getLookupDomainsLeaves as getLookupDomainsLeaves
@@ -125,9 +116,8 @@ from mapFolding._e.pileOptions import getChoicesLeaf as getChoicesLeaf, getLooku
 from mapFolding._e._disaggregation import getIteratorOfLeaves as getIteratorOfLeaves
 
 # isort: split
-from mapFolding import leafOrigin as leafOrigin
 from mapFolding._e._beDRY import (
-	choicesLeafAND as choicesLeafAND, choicesLeafLeafNone as choicesLeafLeafNone, getMapShapeProducts as getMapShapeProducts,
+	choicesLeafAND as choicesLeafAND, distinguishChoicesLeaf as distinguishChoicesLeaf, getMapShapeProducts as getMapShapeProducts,
 	getMapShapeProductsSums as getMapShapeProductsSums, getMapShape首ProductsSums as getMapShape首ProductsSums,
 	lengthChoicesLeaf as lengthChoicesLeaf, makeAntiChoicesLeaf as makeAntiChoicesLeaf, makeChoicesLeaf as makeChoicesLeaf,
 	mapShapeLengthsAreEqual as mapShapeLengthsAreEqual)

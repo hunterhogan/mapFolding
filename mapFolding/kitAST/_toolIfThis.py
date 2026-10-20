@@ -1,5 +1,7 @@
 """I use this module to extend state-pattern predicates for source generation.
 
+(AI generated docstring)
+
 This module defines comparison and control-flow predicates on Python syntax [1].
 The exported class extends `astToolkit.IfThis` [2] with state-attribute patterns.
 

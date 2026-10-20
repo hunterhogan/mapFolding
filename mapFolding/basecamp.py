@@ -2,6 +2,8 @@
 #ruff: file-ignore[import-outside-top-level]
 """Select and run map-folding, stamp-folding, and meander algorithms.
 
+(AI generated docstring)
+
 You can use this module as the entry point for counting map foldings, rotationally symmetric
 foldings, and meander sequence terms, or enumerate stamp-folding and meander permutations. Each
 entry point selects an algorithm, prepares computation state, and optionally saves a result.
@@ -289,6 +291,8 @@ def countMeanders(
 	, suffix: str = ".countTotal"
 ) -> StateMeanders:
 	"""Compute a meander sequence term for `kind` and `n`, or continue `state`.
+
+	(AI generated docstring)
 
 	You can use this function to count meanders or semi-meanders and inspect the completed computation
 	state. An existing `state` takes precedence over `kind` and `n`. This function returns

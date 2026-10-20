@@ -1,23 +1,4 @@
-"""Validate dimensions and select resource limits for folding computations.
-
-You can use this module to normalize map dimensions, calculate the number of leaves, select
-processor limits, and divide counting work into tasks.
-
-Contents
---------
-Parse parameters
-	defineProcessorLimit
-		Resolve a processor limit and optionally update the Numba thread limit.
-	getTaskDivisions
-		Resolve a requested number of computation tasks.
-	validateMapShape
-		Convert dimension values to a tuple while preserving dimension order.
-Map folding
-	getTotalLeaves
-		Multiply dimension lengths with a platform-size check.
-	mapShapeIs2上nDimensions
-		Check the minimum dimension count and require every dimension length to be two.
-"""
+"""Oft-needed computations or actions, especially for multi-dimensional map folding."""
 from __future__ import annotations
 
 from collections.abc import Sequence
@@ -35,6 +16,8 @@ if TYPE_CHECKING:
 
 def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | None = None) -> int:
 	"""Resolve the processor count from `CPUlimit` and the concurrency backend.
+
+	(AI generated docstring)
 
 	You can use this function to convert a processor-usage preference into a worker count. This
 	function delegates limit interpretation to `hunterMakesPy.parseParameters.defineConcurrencyLimit` [1]. Selecting `'numba'` also changes the active Numba thread limit [2].
@@ -88,6 +71,8 @@ def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | N
 
 def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: int, totalLeaves: int) -> int:
 	"""Resolve computation task divisions from `computationDivisions`.
+
+	(AI generated docstring)
 
 	You can use this function to translate a task-count preference into a nonnegative count bounded
 	by `totalLeaves`. A result of zero means the caller should run one undivided computation.
@@ -248,6 +233,8 @@ def getTotalLeaves(mapShape: tuple[int, ...]) -> int:
 
 def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsTallToRideThis: int = 3) -> bool:
 	"""Check that `mapShape` has enough dimensions and every length is two.
+
+	(AI generated docstring)
 
 	You can use this predicate to select algorithms that require at least a specified number of
 	dimensions, with exactly two leaves along every dimension.

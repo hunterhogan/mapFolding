@@ -55,23 +55,10 @@ def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	return _getDomainLeaf(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 
 def getLookupDomainsLeaves(state: StateElimination) -> dict[int, range]:
-	"""Build possible pile ranges keyed by leaf index.
+	"""Dictionary of `Leaf` to `range` of `Pile` in which `Leaf` may be found in a `Folding`.
 
-	You can compute `getDomainLeaf` [1] for every leaf in `state`. You receive a dictionary of
-	shape-based domains without current pinning constraints.
-
-	Parameters
-	----------
-	state : StateElimination
-		Elimination state providing the shape and total number of leaves.
-
-	Returns
-	-------
-	lookupDomainsLeaves : dict[int, range]
-		Possible pile range for each leaf index.
-
-	References
-	----------
-	[1] `getDomainLeaf`
+	For each `Leaf`, the associated Python `range` defines the mathematical domain:
+	1. every `Pile` at which `Leaf` may be found in a `Folding` and
+	2. in the set of all valid `Folding`, every `Pile` at which `Leaf` must be found.
 	"""
 	return {leaf: getDomainLeaf(state, leaf) for leaf in range(state.totalLeaves)}

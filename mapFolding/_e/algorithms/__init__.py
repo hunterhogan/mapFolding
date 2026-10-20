@@ -1,5 +1,7 @@
 """Access experimental map-folding algorithms and crease validators.
 
+(AI generated docstring)
+
 You can count or collect folding representatives and check crease crossings. Supply either elimination
 state or a map shape to the algorithm entry points, as documented by each module.
 

@@ -1,5 +1,7 @@
 """Describe arch and folding labels, integer storage, array shapes, and configuration records.
 
+(AI generated docstring)
+
 You can use this module to annotate domain values and select integer storage for counting
 algorithms. Type aliases describe intended roles; type aliases do not validate values at runtime.
 Array aliases use NumPy [1].
@@ -94,12 +96,7 @@ if TYPE_CHECKING:
 	from typing import Any, LiteralString, TypeAlias
 
 type Folding = tuple[Leaf, ...]
-"""Represent leaf labels in pile order.
-
-(AI generated docstring)
-
-This tuple records one `Leaf` at each `Pile` position. The algorithm determines the label origin;
-this alias does not check label uniqueness, tuple length, or folding validity.
+"""`leaf` indexed to `pile`; length must be `totalLeaves`.
 """
 
 #=EndNotes##TypeAlias=
@@ -237,43 +234,16 @@ References
 # TODO Change to generic class? "The preferred way to construct a type variable is via the dedicated
 # syntax for generic functions, classes, and type aliases." <- type aliases? really?
 形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)
-"""Describe a covariant NumPy integer type variable.
-
-This type variable is bounded by `numpy.integer` [1]. Covariance follows the Python `TypeVar`
-declaration [2] and supports generic integer-array signatures.
-
-References
-----------
-[1] NumPy scalar datatypes.
-	https://numpy.org/doc/stable/reference/arrays.scalars.html
-[2] Python `typing.TypeVar`.
-	https://docs.python.org/3/library/typing.html#typing.TypeVar
-"""
+"""Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 
 #================== Matrix meanders ===============================================================
 
 # Hypothetically, the dtypes could be different from each other, especially in pandas.
 形ArcCode: TypeAlias = numpy_uint64
-"""Store encoded arch configurations as unsigned 64-bit integers.
-
-This alias selects `numpy.uint64` [1] for arch-code array elements.
-
-References
-----------
-[1] NumPy scalar datatypes.
-	https://numpy.org/doc/stable/reference/arrays.scalars.html
-"""
+"""The fixed-size integer type used to store `arcCode`."""
 
 形Meanders: TypeAlias = numpy_uint64
-"""Store meander counts as unsigned 64-bit integers.
-
-This alias selects `numpy.uint64` [1] for fixed-width counting storage.
-
-References
-----------
-[1] NumPy scalar datatypes.
-	https://numpy.org/doc/stable/reference/arrays.scalars.html
-"""
+"""The fixed-size integer type used to store `meanders`."""
 
 type 形ArrayArcCode = ndarray[tuple[Any, ...], dtype[形ArcCode]]
 """Describe an array with any number of axes containing `形ArcCode` values.
@@ -311,60 +281,40 @@ References
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
 
 形TotalLeaves: TypeAlias = int
-"""Annotate nonnegative integers bounded by the leaf count.
-
-This alias uses `int`. The alias describes a domain role without enforcing the bound.
-"""
+"""Use on unsigned integers that will never exceed the magnitude of `totalLeaves`."""
 
 # TODO use lessons from mapFolding\reference\multiDimensionalMapFolding\elephinoIntegerWidthAnalysis.ipynb.
 形Elephino: TypeAlias = int
-"""Annotate intermediate integers that can exceed the leaf count.
+"""Use on unsigned integers that will exceed the magnitude of `totalLeaves` but that are not "colossal."
 
-This alias uses `int` for offsets and intermediate values whose magnitude can exceed the
-leaf count. The alias imposes no fixed-width limit.
+Note well
+---------
+Colossal values are found with the cross humpy inequality:
+
+	⎡ el  ⎤   ⎡     ⎤
+	⎢ eph ⎥ X ⎢ rhi ⎥ <= elephino
+	⎣ ant ⎦   ⎣ no  ⎦
 """
 
 形TotalFolds: TypeAlias = int
-"""Annotate folding counts that can require arbitrarily large integers.
-
-This alias uses `int` for counts without a fixed-width storage limit.
-"""
+"""Use on unsigned integers that might have colossal magnitudes similar to `totalFolds`."""
 
 #-------- Additional `TypeAlias` with NumPy types as their default --------------------------------
 
 形NumPyTotalLeaves: TypeAlias = numpy_uint8
-"""Store leaf-bounded values as unsigned 8-bit integers.
-
-This alias selects `numpy.uint8` [1]. Values must fit the range from zero through 255.
-
-References
-----------
-[1] NumPy scalar datatypes.
-	https://numpy.org/doc/stable/reference/arrays.scalars.html
-"""
+"""Use in NumPy data structures whose elements are unsigned integers that will never exceed the magnitude of `totalLeaves`."""
 
 # TODO use lessons from mapFolding\reference\multiDimensionalMapFolding\elephinoIntegerWidthAnalysis.ipynb.
 形NumPyElephino: TypeAlias = numpy_uint16
-"""Store intermediate offsets as unsigned 16-bit integers.
-
-This alias selects `numpy.uint16` [1]. Values must fit the range from zero through 65535.
-
-References
-----------
-[1] NumPy scalar datatypes.
-	https://numpy.org/doc/stable/reference/arrays.scalars.html
-"""
+"""Use in NumPy data structures whose elements are unsigned integers that might exceed the magnitude of `totalLeaves` but that are not 'colossal.'"""
 
 形NumPyTotalFolds: TypeAlias = numpy_uint64
-"""Store folding counts as unsigned 64-bit integers.
+"""Use in NumPy data structures whose elements are unsigned integers that might have colossal magnitudes similar to `totalFolds`.
 
-This alias selects `numpy.uint64` [1]. Values must fit the range from zero through
-18446744073709551615. Use wider storage when counts can exceed this range.
-
-References
-----------
-[1] NumPy scalar datatypes.
-	https://numpy.org/doc/stable/reference/arrays.scalars.html
+Element value limit
+-------------------
+If your element values might exceed 1.8 x 10^19, then you should take extra steps to ensure the integrity of the data in NumPy or use a
+different data type.
 """
 
 #-------- Yet more `TypeAlias` with NumPy `ndarray` types -----------------------------------------
@@ -372,84 +322,26 @@ References
 # Reminder: you can override the types with anything you want, not just `ndarray`. See, e.g., `makeJobTheorem2Numba`.
 
 形ArrayElephino1D: TypeAlias = ndarray[tuple[int], dtype[形NumPyElephino]]
-"""Describe an array with one axis containing `形NumPyElephino` values.
-
-This alias describes a NumPy array [1] containing `形NumPyElephino` [2].
-The annotation
-does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形NumPyElephino`
-
-"""
+"""A `numpy.ndarray` with one axis and elements of type `形NumPyElephino`."""
 
 形ArrayTotalFolds1D: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalFolds]]
-"""Describe an array with one axis containing `形NumPyTotalFolds` values.
-
-This alias describes a NumPy array [1] containing `形NumPyTotalFolds` [2].
-The annotation
-does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形NumPyTotalFolds`
-
-"""
+"""A `numpy.ndarray` with one axis and elements of type `形NumPyTotalFolds`."""
 
 形ArrayTotalLeaves1D: TypeAlias = ndarray[tuple[int], dtype[形NumPyTotalLeaves]]
-"""Describe an array with one axis containing `形NumPyTotalLeaves` values.
-
-This alias describes a NumPy array [1] containing `形NumPyTotalLeaves` [2].
-The annotation
-does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形NumPyTotalLeaves`
-
-"""
+"""A `numpy.ndarray` with one axis and elements of type `形NumPyTotalLeaves`."""
 
 形ArrayTotalLeaves2D: TypeAlias = ndarray[tuple[int, int], dtype[形NumPyTotalLeaves]]
-"""Describe an array with two axes containing `形NumPyTotalLeaves` values.
-
-This alias describes a NumPy array [1] containing `形NumPyTotalLeaves` [2].
-The annotation
-does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形NumPyTotalLeaves`
-
-"""
+"""A `numpy.ndarray` with two axes and elements of type `形NumPyTotalLeaves`."""
 
 形ArrayTotalLeaves3D: TypeAlias = ndarray[tuple[int, int, int], dtype[形NumPyTotalLeaves]]
-"""Describe an array with three axes containing `形NumPyTotalLeaves` values.
-
-This alias describes a NumPy array [1] containing `形NumPyTotalLeaves` [2].
-The annotation
-does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形NumPyTotalLeaves`
-
-"""
+"""A `numpy.ndarray` with three axes and elements of type `形NumPyTotalLeaves`."""
 
 #================== Function signatures ===========================================================
 
 class 形KeywordArgumentsCount(TypedDict, total=False):
 	"""Describe optional keyword arguments shared by counting entry points.
+
+	(AI generated docstring)
 
 	This record describes optional keyword arguments accepted by `mapFolding.basecamp` [1].
 	Every key may be omitted because the record is declared with `total=False` [2].
@@ -482,6 +374,8 @@ class 形KeywordArgumentsCount(TypedDict, total=False):
 
 class Default(TypedDict):
 	"""Describe default values grouped by their configuration role.
+
+	(AI generated docstring)
 
 	This record groups filesystem locations, function names, import targets, module names, and
 	variable names. Each category is required by the record declaration.

@@ -81,6 +81,8 @@ def _threadDoesSomething() -> None:
 def _filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
 	"""I use this placeholder to define the filtering contract in the worker template.
 
+	(AI generated docstring)
+
 	This function returns `state`. The asynchronous module generator replaces this definition
 	with the source symmetry filter [1].
 

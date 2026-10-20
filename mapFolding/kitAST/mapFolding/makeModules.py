@@ -1,5 +1,7 @@
 """Regenerate multidimensional map-folding modules from configured source.
 
+(AI generated docstring)
+
 You can use this module to coordinate dependent source transformations and overwrite the
 configured sequential, parallel, initialization, and Theorem 2 output modules.
 
@@ -24,6 +26,8 @@ if TYPE_CHECKING:
 
 def makeModulesMapFolding() -> None:
 	"""Regenerate the configured multidimensional counting modules.
+
+	(AI generated docstring)
 
 	You can use this function to write module-level compilation, sequential and parallel counting,
 	state initialization, and the Theorem 2 variants. The function uses

@@ -1,8 +1,8 @@
-"""Compute leaf bitsets for map piles.
+"""Compute `ChoicesLeaf` values for map piles.
 
 (AI generated docstring)
 
-You can obtain shape-based leaf choices for one pile or every pile. You receive bitsets independent of
+You can obtain shape-based leaf choices for one pile or every pile. You receive `ChoicesLeaf` values independent of
 the current pinning or reductions in an elimination state.
 
 Contents
@@ -11,7 +11,7 @@ Functions
 	getChoicesLeaf
 		Compute possible leaves for a pile in the state's map.
 	getLookupChoicesLeaf
-		Build leaf bitsets keyed by pile index.
+		Build `ChoicesLeaf` values keyed by pile index.
 """
 
 from __future__ import annotations
@@ -42,12 +42,12 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	Returns
 	-------
 	choicesLeaf : ChoicesLeaf
-		Leaf bitset including the sentinel at the total leaf count.
+		`ChoicesLeaf` including the sentinel at the total leaf count.
 
 	See Also
 	--------
 	`getLookupChoicesLeaf`
-		Compute bitsets for every pile.
+		Compute `ChoicesLeaf` values for every pile.
 
 	References
 	----------
@@ -57,23 +57,12 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	return _getChoicesLeaf(pile, state.totalDimensions, state.mapShape, state.totalLeaves)
 
 def getLookupChoicesLeaf(state: StateElimination) -> UndeterminedPiles:
-	"""Build leaf bitsets keyed by pile index.
-
-	You can compute `getChoicesLeaf` [1] for every pile in `state`. You receive a dictionary of initial
-	leaf choices before pinning or search-space reduction.
-
-	Parameters
-	----------
-	state : StateElimination
-		Elimination state providing the shape and total number of piles.
+	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object.
 
 	Returns
 	-------
-	pilesUndetermined : UndeterminedPiles
-		Leaf bitset for every pile index.
-
-	References
-	----------
-	[1] `getChoicesLeaf`
+	pilesUndetermined: UndeterminedPiles
+		`pile: choicesLeaf` for each `pile` in the `folding`, where `choicesLeaf` is a `ChoicesLeaf` of all
+		`leaf` values that may be found at that `pile`.
 	"""
 	return {pile: getChoicesLeaf(state, pile) for pile in range(state.totalLeaves)}

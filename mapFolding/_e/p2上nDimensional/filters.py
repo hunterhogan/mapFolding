@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 	"""Test whether `leaf` is greater than the first non-origin leaf.
 
+	(AI generated docstring)
+
 	You can exclude the origin leaf and the leaf numbered `1` from a sequence of leaf indices by
 	comparing the numeric value directly with `零` [1]. You do not distinguish a leaf index from an
 	encoded domain in this comparison.
@@ -42,7 +44,7 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 
 	Examples
 	--------
-	From `pinByDomain.py`, with the coordinate values already computed.
+	From `pinByDomain.py`, with the leaf labels already computed.
 
 		```python
 		filter(moreThanLeaf零吗, mapShape首ProductsSumsInSubSubHyperplane)
@@ -56,6 +58,8 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 
 def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
 	"""Test whether the coordinate bit at `dimension` is set in `leaf`.
+
+	(AI generated docstring)
 
 	You can inspect whether `leaf` has coordinate `1` on the axis indexed by
 	`dimension`. The bit test uses `gmpy2.bit_test` [1].

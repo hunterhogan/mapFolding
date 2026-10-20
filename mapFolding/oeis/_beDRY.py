@@ -105,6 +105,8 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 def formatOEISid(oeisID: OEISid) -> OEISid:
 	"""Uppercase an OEIS sequence identifier and strip surrounding whitespace.
 
+	(AI generated docstring)
+
 	You can use this function to standardize an identifier before a sequence lookup. This function
 	converts `oeisID` to text, uppercases the text, and removes leading and trailing whitespace.
 	This function does not remove internal whitespace or validate the identifier's syntax.

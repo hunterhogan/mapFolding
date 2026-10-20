@@ -1,5 +1,7 @@
 """Generate synchronous symmetric counting and Theorem 2 variants.
 
+(AI generated docstring)
+
 You can use this module to insert symmetry filtering into map-folding source and coordinate
 generation of compilation, initialization, and Theorem 2 variants.
 
@@ -36,6 +38,8 @@ if TYPE_CHECKING:
 
 def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
 	"""Write a counting module that filters discovered fold groups for symmetry.
+
+	(AI generated docstring)
 
 	You can use this function to adapt a map-folding source module to symmetric state and insert
 	the filter from `mapFolding.algorithms.foldsSymmetric` [1]. Count increments become assigned
@@ -185,6 +189,8 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 
 def makeModulesFoldsSymmetric() -> None:
 	"""Regenerate synchronous symmetric counting and Theorem 2 modules.
+
+	(AI generated docstring)
 
 	You can use this function to generate symmetry filtering, module-level compilation,
 	state initialization, and the Theorem 2 variants using

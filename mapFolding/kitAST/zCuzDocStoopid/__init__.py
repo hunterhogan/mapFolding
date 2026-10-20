@@ -1,10 +1,4 @@
-"""Generate formula-source documentation from sequence metadata.
+"""I mean, you must write docstrings after you write the code because you don't know what the code will do until after you write it.
 
-You can use this package to insert sequence descriptions into formula-source functions and
-derive literal selector annotations before writing the documented source module.
-
-Modules
--------
-makeDocstrings
-	Transform formula source using sequence metadata and selector values.
+I suspect this directory will slowly evolve into an entire ecosystem of docstring tools.
 """

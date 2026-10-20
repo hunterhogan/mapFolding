@@ -1,5 +1,7 @@
 """Write specialized counting jobs with Numba compilation and progress reporting.
 
+(AI generated docstring)
+
 You can use this module to specialize source for one initialized map shape, embed field values,
 and add a launcher with timing and result-file output. Generated functions use Numba [1].
 

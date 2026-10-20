@@ -1,9 +1,9 @@
-"""Access coordinate tools for maps whose axis lengths are two.
+"""Access positional-numeral tools for maps whose dimension lengths are two.
 
 (AI generated docstring)
 
-You can inspect coordinate values, measure leaf indices, enumerate crease neighbors, and obtain joint
-pile domains for experimental elimination algorithms. Access the coordinate vocabulary and public
+You can inspect positional-numeral values, measure leaf indices, enumerate crease neighbors, and obtain joint
+pile domains for experimental elimination algorithms. Access the positional-numeral system and public
 measurement, crease, domain, and ordering functions through this package. Use the modules below for
 pinning and reduction, or `mapFolding._e.leafDomains.getLookupDomainsLeaves` [1] for individual leaf
 domains.
@@ -19,7 +19,7 @@ filters
 leafDomains
 	Compute joint pile domains and restrictions from pinned leaves.
 measure
-	Measure coordinate features of leaf and pile integers.
+	Measure positional-numeral features of leaf and pile integers.
 pileOptions
 	Test possible pile positions against coordinate domain restrictions.
 pinByCrease
@@ -31,7 +31,7 @@ pinIt
 reduceIt
 	Provide the ordered coordinate-based reduction sequence.
 semiotics
-	Encode dimension coordinates with index ideographs.
+	Assign digits to dimension positions using index ideographs.
 
 References
 ----------

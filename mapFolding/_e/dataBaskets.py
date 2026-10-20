@@ -1,17 +1,4 @@
-"""Store and manipulate elimination search spaces and computation state.
-
-You can represent pile assignments as permutation spaces and store active branches, completed
-foldings, and symmetry multipliers in elimination state. Check each operation for its mutation and
-replacement behavior.
-
-Contents
---------
-Classes
-	PermutationSpace
-		Store pinned leaves and leaf sets keyed by pile index.
-	StateElimination
-		Store search branches, folding representatives, and map-derived elimination values.
-"""
+"""Use data baskets to easily move data, including values that affect computations: don't limit yourself to one data basket per algorithm."""
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -45,8 +32,10 @@ if TYPE_CHECKING:
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Store pinned leaves and leaf sets keyed by pile index.
 
+	(AI generated docstring)
+
 	You can represent a partial leaf arrangement by mapping each pile to either a pinned integer leaf or
-	a leaf bitset. You can normalize singleton leaf sets and mark impossible assignments with a false
+	a `ChoicesLeaf`. You can normalize singleton leaf sets and mark impossible assignments with a false
 	validity flag. Include every pile in a complete search-space mapping.
 
 	Keep permutation spaces disjoint in collections you use for counting. When you pin a leaf, replace
@@ -59,7 +48,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		impossible.
 	leafCount : int
 		Number of values already represented as pinned integer leaves. Reading the property does not
-		normalize bitsets.
+		normalize `ChoicesLeaf` values.
 	"""
 
 	#============== Modify inherited methods and attributes =======================================
@@ -123,44 +112,51 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return self
 
 	def atPilePinLeaf(self, pile: Pile, leaf: Leaf) -> PermutationSpace:
-		"""Create a new permutation space with a leaf pinned at a selected pile.
+		"""DANGEROUSLY create a new `PermutationSpace` with `leaf` pinned at `pile` without modifying `permutationSpace`.
 
-		You can copy the assignments and replace the value at `pile` with `leaf`, leaving the source
-		dictionary unchanged. Validate the assignment and propagate exclusions to other piles separately.
+		Danger: Corrupted `PermutationSpace`
+		------------------------------------
+		If you overwrite a different `Leaf` pinned at `pile`, it will corrupt the `PermutationSpace`.
+		If `leaf` is already pinned at a different `Pile`, but you pin `leaf` at `pile`, it will
+		corrupt the `PermutationSpace`.
 
-		Assignment integrity
-		--------------------
-		Ensure that `pile` is open or already holds `leaf`, that `leaf` is allowed, and that `leaf` is not
-		pinned at a different pile. You can overwrite an assignment or duplicate a leaf if you violate those
-		requirements. Replace the source permutation space with the new branch before counting to avoid
-		overlap.
+		Nevertheless, this method _assumes_ either 1. a. `leaf` is not pinned and b. `pile` is open or
+		2. `leaf` is already pinned at `pile`.
+
+		Danger: Corrupted Collection of `PermutationSpace`
+		--------------------------------------------------
+		If any `PermutationSpace` in your collection overlaps with any other `PermutationSpace` in
+		your collection, it will corrupt your collection. This method creates a new `PermutationSpace`
+		that _almost completely overlaps_ the original `PermutationSpace`. Ensure your logic never
+		puts both versions in your collection.
 
 		Parameters
 		----------
-		pile : Pile
-			Pile at which to pin `leaf`.
-		leaf : Leaf
-			Leaf index to pin.
+		pile : int
+			`pile` at which to pin `leaf`.
+		leaf : int
+			`leaf` to pin.
 
 		Returns
 		-------
-		permutationSpace : PermutationSpace
-			New permutation space with the requested assignment and the default validity flag.
+		dictionaryPermutationSpace : PermutationSpace
+			New dictionary with `pile` mapped to `leaf`.
 
-		Examples
-		--------
-		The domain expansion replaces a working branch after pinning.
-
-			```python
-			permutationSpace = permutationSpace.atPilePinLeaf(boxOfPiles[次], leaves[次])
-			```
+		Example
+		-------
+		Overwriting the original `PermutationSpace` avoids corruption.
+		```python
+			ImaPermutationSpace = ImaPermutationSpace.atPilePinLeaf(pile, leaf)
+		```
 		"""
 		return PermutationSpace(associateKeyValue(self, pile, leaf, PermutationSpace))
 
 	def bifurcate(self) -> tuple[PinnedLeaves, UndeterminedPiles]:
 		"""Separate pinned leaves from possible pile assignments.
 
-		You can partition the current dictionary values into fixed assignments and leaf bitsets without
+		(AI generated docstring)
+
+		You can partition the current dictionary values into fixed assignments and `ChoicesLeaf` values without
 		normalizing singleton leaf sets.
 
 		Returns
@@ -168,7 +164,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		leavesPinned : PinnedLeaves
 			New dictionary of piles mapped to pinned leaf indices.
 		pilesUndetermined : UndeterminedPiles
-			New dictionary of piles mapped to leaf bitsets.
+			New dictionary of piles mapped to `ChoicesLeaf` values.
 		"""
 		leavesPinned: PinnedLeaves = self.pinnedLeaves()
 		#=SIN= `cast`: type checkers cannot infer that partitioning `PermutationSpace` preserves `UndeterminedPiles`.
@@ -176,6 +172,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 	def deconstructDomainOfLeaf(self, leaf: Leaf, leafDomain: Iterable[Pile]) -> list[PermutationSpace]:
 		"""Create branches that pin a leaf within its supplied pile domain.
+
+		(AI generated docstring)
 
 		You can create one branch for each open pile in `leafDomain` whose leaf set contains `leaf`. If
 		`leaf` is already pinned, you receive the original object in a list without checking the supplied
@@ -294,7 +292,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		(AI generated docstring)
 
 		You can expand the leaf choices at `pile` into alternative pinning branches. Pass `None` for `pile`
-		to select the first dictionary entry holding a leaf bitset. You can normalize the source assignment
+		to select the first dictionary entry holding a `ChoicesLeaf`. You can normalize the source assignment
 		when testing the selected pile.
 
 		Branch consumption
@@ -306,16 +304,16 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Parameters
 		----------
 		pile : Pile | None = None
-			Existing pile to expand. `None` requires at least one bitset entry.
+			Existing pile to expand. `None` requires at least one `ChoicesLeaf` entry.
 		leavesToPin : Iterable[Leaf] = ()
-			Leaf indices to pin. A false-valued argument uses every choice in the selected bitset. Supply
-			leaves that belong to that bitset. You filter out only leaves already pinned elsewhere.
+			Leaf indices to pin. A false-valued argument uses every choice in the selected `ChoicesLeaf`. Supply
+			leaves that belong to that `ChoicesLeaf`. You filter out only leaves already pinned elsewhere.
 
 		Returns
 		-------
 		deconstructed : Iterable[PermutationSpace]
-			Lazy iterable of new branches, or a list containing the original object if the pile has no choice
-			bitset after normalization.
+			Lazy iterable of new branches, or a list containing the original object if the pile no longer
+			holds `ChoicesLeaf` after normalization.
 		"""
 		if pile is None:
 			pile = first(filterLeaf(choicesLeaf吗, self))
@@ -335,8 +333,10 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def getLeaf[个](self, pile: Pile, default: Leaf | 个 | None = None) -> Leaf | 个 | None:
 		"""Read a pinned leaf at a pile or return a fallback value.
 
+		(AI generated docstring)
+
 		You can normalize the assignment at `pile` and read the pinned leaf when the normalized value is an
-		integer leaf index. You receive `default` for a remaining leaf bitset, or `KeyError` for a missing
+		integer leaf index. You receive `default` for a remaining `ChoicesLeaf`, or `KeyError` for a missing
 		pile key.
 
 		Parameters
@@ -344,7 +344,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		pile : Pile
 			Existing pile index to inspect.
 		default : Leaf | 个 | None = None
-			Fallback for an assignment that remains a bitset.
+			Fallback for an assignment that remains a `ChoicesLeaf`.
 
 		Returns
 		-------
@@ -364,11 +364,13 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	@overload
 	def getChoicesLeaf[个](self, pile: Pile, default: 个) -> ChoicesLeaf | 个: ...
 	def getChoicesLeaf[个](self, pile: Pile, default: ChoicesLeaf | 个 | None = None) -> ChoicesLeaf | 个 | None:
-		"""Read a pile's bitset or return a fallback value.
+		"""Read a pile's `ChoicesLeaf` or return a fallback value.
 
-		You can normalize the assignment at `pile` and read its bitset when leaf choices remain. You receive
+		(AI generated docstring)
+
+		You can normalize the assignment at `pile` and read its `ChoicesLeaf` when leaf choices remain. You receive
 		`default` for a pinned leaf. With an empty leaf set, you mark the permutation space invalid but
-		still receive a bitset. You receive `KeyError` for a missing pile key.
+		still receive a `ChoicesLeaf`. You receive `KeyError` for a missing pile key.
 
 		Parameters
 		----------
@@ -380,7 +382,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		choicesLeafOrDefault : ChoicesLeaf | 个 | None
-			Remaining bitset or the supplied fallback.
+			Remaining `ChoicesLeaf` or the supplied fallback.
 		"""
 		self._solidifyLeafSpaceAtPile(pile)
 		ImaChoicesLeaf: LeafSpace = self[pile]
@@ -391,6 +393,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	@property
 	def leafCount(self) -> int:
 		"""Count assignments already represented as pinned leaves.
+
+		(AI generated docstring)
 
 		You can count integer leaf values in the current dictionary without normalizing leaf sets. You count
 		entries rather than distinct leaf indices.
@@ -405,7 +409,9 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def leafNotPinned吗(self, leaf: Leaf) -> bool:
 		"""Test whether a leaf is absent from the pinned assignments.
 
-		You can check whether `leaf` occurs among the dictionary values without normalizing leaf bitsets.
+		(AI generated docstring)
+
+		You can check whether `leaf` occurs among the dictionary values without normalizing `ChoicesLeaf` values.
 		Treat a singleton leaf set as unpinned until you normalize it.
 
 		Parameters
@@ -423,7 +429,9 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def leafPinned吗(self, leaf: Leaf) -> bool:
 		"""Test whether a leaf is present in the pinned assignments.
 
-		You can check whether `leaf` occurs among the dictionary values without normalizing leaf bitsets.
+		(AI generated docstring)
+
+		You can check whether `leaf` occurs among the dictionary values without normalizing `ChoicesLeaf` values.
 
 		Parameters
 		----------
@@ -439,6 +447,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 
 	def leafPinnedAtPile吗(self, leaf: Leaf, pile: Pile) -> bool:
 		"""Test whether a selected pile holds a selected pinned leaf.
+
+		(AI generated docstring)
 
 		You can normalize the assignment at `pile` and compare the resulting value with `leaf`. You can pin
 		the only remaining leaf or mark the space invalid during normalization. You receive `KeyError` for a
@@ -487,6 +497,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def pilePinned吗(self, pile: Pile) -> bool:
 		"""Test whether a pile holds a pinned leaf after normalization.
 
+		(AI generated docstring)
+
 		You can normalize the assignment at `pile` and test whether the result is an integer leaf. You can
 		modify the dictionary or validity flag during normalization. You receive `KeyError` for a missing
 		pile key.
@@ -504,7 +516,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		See Also
 		--------
 		`pileUndetermined吗`
-			Check whether the pile still holds a bitset.
+			Check whether the pile still holds a `ChoicesLeaf`.
 		`mapFolding._e.filters.leaf吗`
 			Inspect an existing value without normalizing a pile assignment.
 		"""
@@ -512,10 +524,12 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return leaf吗(self[pile])
 
 	def pileUndetermined吗(self, pile: Pile) -> bool:
-		"""Test whether a pile still holds a bitset after normalization.
+		"""Test whether a pile still holds a `ChoicesLeaf` after normalization.
 
-		You can normalize the assignment at `pile` and test whether the result is a leaf bitset. With an
-		empty leaf set, you mark the permutation space invalid but retain the bitset. You receive `KeyError`
+		(AI generated docstring)
+
+		You can normalize the assignment at `pile` and test whether the result is a `ChoicesLeaf`. With an
+		empty leaf set, you mark the permutation space invalid but retain the `ChoicesLeaf`. You receive `KeyError`
 		for a missing pile key.
 
 		Parameters
@@ -526,7 +540,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		pileIsUndetermined : bool
-			`True` when the normalized assignment remains a bitset.
+			`True` when the normalized assignment remains a `ChoicesLeaf`.
 
 		See Also
 		--------
@@ -554,7 +568,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		rangeOfPile: LeafSpace | None = self[pile]
 		if choicesLeaf吗(rangeOfPile):
 			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
-			rangeOfPile = _e.choicesLeafLeafNone(rangeOfPile)
+			rangeOfPile = _e.distinguishChoicesLeaf(rangeOfPile)
 			if rangeOfPile is None:
 				self.valid = False
 			elif choicesLeaf吗(rangeOfPile):
@@ -568,7 +582,9 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def pinnedLeaves(self) -> PinnedLeaves:
 		"""Extract the pile assignments already represented as pinned leaves.
 
-		You can create a dictionary containing integer leaf assignments without normalizing leaf bitsets or
+		(AI generated docstring)
+
+		You can create a dictionary containing integer leaf assignments without normalizing `ChoicesLeaf` values or
 		validating the assignments.
 
 		Returns
@@ -579,20 +595,24 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return filterLeaf(leaf吗, self)
 
 	def undeterminedPiles(self) -> UndeterminedPiles:
-		"""Extract the pile assignments represented as bitsets.
+		"""Extract the pile assignments represented as `ChoicesLeaf` values.
 
-		You can create a dictionary containing leaf bitsets without normalizing empty or singleton leaf
+		(AI generated docstring)
+
+		You can create a dictionary containing `ChoicesLeaf` values without normalizing empty or singleton leaf
 		sets.
 
 		Returns
 		-------
 		pilesUndetermined : UndeterminedPiles
-			New pile-to-bitset dictionary in the source dictionary's insertion order.
+			New dictionary mapping piles to `ChoicesLeaf` in the source dictionary's insertion order.
 		"""
 		return filterLeaf(choicesLeaf吗, self)
 
 	def updatePilesMissing(self, missing: PermutationSpace | UndeterminedPiles | PinnedLeaves) -> PermutationSpace:
 		"""Create a complete pile mapping while preserving existing assignments.
+
+		(AI generated docstring)
 
 		You can merge `missing` with the existing assignments, giving existing assignments precedence. You
 		receive a new permutation space sorted by pile index, leaving the source dictionary unchanged.
@@ -617,6 +637,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 @dataclasses.dataclass(slots=True)
 class StateElimination:
 	"""Store search branches, folding representatives, and map-derived elimination values.
+
+	(AI generated docstring)
 
 	You can keep the map description, current search spaces, and counting results together. You receive a
 	validated map shape, leaf counts, and dimension strides during initialization. Use the methods to
@@ -673,23 +695,23 @@ class StateElimination:
 	"""
 
 	mapShape: tuple[int, ...] = dataclasses.field(init=True)
-	"""Inspect the validated dimension lengths of the map."""
+	"""Dimensions of the map being analyzed for folding patterns."""
 
 	boxOfPermutationSpace: list[PermutationSpace] = dataclasses.field(default_factory=list[PermutationSpace], init=True)
-	"""Access the active disjoint permutation-space branches."""
+	"""A list of dictionaries (`{pile: leaf or possible leaves}`) that each define an exclusive permutation space: no overlap between dictionaries."""
 
 	permutationSpace: PermutationSpace = dataclasses.field(default_factory=PermutationSpace, init=True)
-	"""Access the current permutation space on the workbench."""
+	"""The `permutationSpace` dictionary (`{pile: leaf or possible leaves}`) on the workbench."""
 
 	boxOfFunctionsReduction: Sequence[Callable[[StateElimination, PermutationSpace], PermutationSpace]] = dataclasses.field(default_factory=list[Callable[['StateElimination', PermutationSpace], PermutationSpace]], init=True)
 
 	groupsOfFolds: int = 0
-	"""Inspect the representative count before symmetry multipliers."""
+	"""`totalFolds` is divisible by `totalLeaves`; the algorithm counts each `Folding` that represents a group of `totalLeaves`-many foldings."""
 
 	boxOfFolding: list[Folding] = dataclasses.field(default_factory=list[Folding], init=True)
-	"""Access the collected folding representatives."""
+	"""A list of `Folding` patterns found."""
 	pile: Pile = -1
-	"""Inspect the current workbench pile index."""
+	"""The `pile` on the workbench."""
 
 	Theorem2aMultiplier: int = 1
 	Theorem2Multiplier: int = 1
@@ -697,27 +719,38 @@ class StateElimination:
 	Theorem4Multiplier: int = 1
 
 	totalDimensions: int = dataclasses.field(init=False)
-	"""Inspect the dimension count derived during initialization."""
+	"""Unchanging total number of dimensions in the map."""
 	leafLast: Leaf = dataclasses.field(init=False)
-	"""Inspect the largest zero-based leaf index."""
+	"""Unchanging 0-indexed largest `leaf` in a `Folding`."""
 	totalLeaves: int = dataclasses.field(init=False)
-	"""Inspect the leaf count derived during initialization."""
+	"""Unchanging total number of leaves in the map."""
 	pileLast: Pile = dataclasses.field(init=False)
-	"""Inspect the largest zero-based pile index."""
+	"""Unchanging 0-indexed final `pile` in a `Folding`."""
 	pilesTotal: int = dataclasses.field(init=False)
-	"""Inspect the pile count derived during initialization."""
+	"""Unchanging total number of piles in the map."""
 	mapShapeProducts: tuple[int, ...] = dataclasses.field(init=False)
-	"""Access cumulative dimension products, including the empty product."""
+	"""Access cumulative dimension products, including the empty product.
+
+	(AI generated docstring)
+	"""
 	mapShapeProductsSums: tuple[int, ...] = dataclasses.field(init=False)
-	"""Access cumulative sums of dimension products, beginning with zero."""
+	"""Access cumulative sums of dimension products, beginning with zero.
+
+	(AI generated docstring)
+	"""
 	mapShape首ProductsSums: tuple[int, ...] = dataclasses.field(init=False)
-	"""Access cumulative sums of reversed dimension strides."""
+	"""Access cumulative sums of reversed dimension strides.
+
+	(AI generated docstring)
+	"""
 	首: int = dataclasses.field(init=False)
-	"""Inspect the first out-of-bounds leaf index, equal to the total leaf count."""
+	"""Unchanging single-base positional-numeral value of the Cartesian coordinates that are the first to be _out-of-bounds_ for the `mapShape`."""
 
 	@property
 	def totalFolds(self) -> int:
 		"""Compute the total fold count from representatives and symmetry factors.
+
+		(AI generated docstring)
 
 		You can multiply `self.groupsOfFolds` by the four stored symmetry multipliers without additional
 		enumeration or validation.
@@ -755,6 +788,8 @@ class StateElimination:
 
 	def permutationSpaceCreaseViolation吗(self, permutationSpace: PermutationSpace) -> bool:
 		"""Detect crease crossings among a permutation space's pinned leaves.
+
+		(AI generated docstring)
 
 		You can check `permutationSpace` for forbidden crossings in each map dimension. You compare a crease
 		only when both endpoints are pinned and the forward endpoint has a nonzero pile index, skipping
@@ -803,7 +838,7 @@ class StateElimination:
 
 		You can check that `leaf` is not already pinned, that `self.pile` remains undetermined, and that
 		`self.pile` belongs to the shape-based leaf domain [1]. Check membership in the pile's current leaf
-		bitset separately.
+		`ChoicesLeaf` separately.
 
 		Workbench requirements
 		----------------------
@@ -913,7 +948,10 @@ class StateElimination:
 		return self
 
 	def __post_init__(self) -> None:
-		"""Initialize map-derived elimination values."""
+		"""Initialize map-derived elimination values.
+
+		(AI generated docstring)
+		"""
 		self.mapShape = validateMapShape(self.mapShape)
 		self.totalDimensions = len(self.mapShape)
 		self.totalLeaves = getTotalLeaves(self.mapShape)

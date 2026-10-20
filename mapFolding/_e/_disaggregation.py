@@ -1,4 +1,4 @@
-"""Enumerate the leaf indices stored in bitsets.
+"""Enumerate the leaf indices stored in `ChoicesLeaf` values.
 
 (AI generated docstring)
 
@@ -8,7 +8,7 @@ Contents
 --------
 Functions
 	getIteratorOfLeaves
-		Enumerate leaf indices from a sentinel-bearing bitset.
+		Enumerate leaf indices from a sentinel-bearing `ChoicesLeaf`.
 """
 
 from __future__ import annotations
@@ -22,16 +22,18 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Leaf
 
 def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
-	"""Enumerate leaf indices from a sentinel-bearing bitset.
+	"""Enumerate leaf indices from a sentinel-bearing `ChoicesLeaf`.
+
+	(AI generated docstring)
 
 	You can enumerate the leaves represented by `choicesLeaf` in ascending order without changing the
-	input bitset. You iterate over the remaining set bits after copying `choicesLeaf` to `gmpy2.xmpz` [1]
+	input `ChoicesLeaf`. You iterate over the remaining set bits after copying `choicesLeaf` to `gmpy2.xmpz` [1]
 	and clearing the highest bit as the sentinel.
 
 	Parameters
 	----------
 	choicesLeaf : ChoicesLeaf
-		Nonnegative leaf bitset whose highest set bit is the sentinel.
+		Nonnegative `ChoicesLeaf` whose highest set bit is the sentinel.
 
 	Returns
 	-------

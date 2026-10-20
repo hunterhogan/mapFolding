@@ -1,5 +1,7 @@
 """Access OEIS sequence computations, known values, and triangle utilities.
 
+(AI generated docstring)
+
 You can use this package to calculate supported terms from the On-Line Encyclopedia of Integer
 Sequences (OEIS) [1], inspect known values, and compare computed results with stored values.
 The package exposes sequence dispatch, map-shape conversion, b-file formatting, triangle

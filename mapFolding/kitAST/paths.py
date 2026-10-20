@@ -88,6 +88,8 @@ def getModule(
 ) -> ast.Module:
 	"""Parse the source module resolved from explicit or default identifiers.
 
+	(AI generated docstring)
+
 	You can use this function to resolve a dotted source path from `identifierPackage`,
 	`logicalPathInfix`, and `identifierModule`, then parse the source with `astToolkit` [1].
 	The function returns module syntax for subsequent inspection or transformation.

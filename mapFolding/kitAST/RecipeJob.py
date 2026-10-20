@@ -1,5 +1,7 @@
 """Configure and specialize computation jobs for initialized map shapes.
 
+(AI generated docstring)
+
 You can use this module to create recipes, embed state values, replace datatype imports,
 and append counting launchers to source containers from `astToolkit` [1].
 
@@ -67,6 +69,8 @@ if TYPE_CHECKING:
 class RecipeJobTheorem2:
 	"""Configure a computation job for one initialized map shape.
 
+	(AI generated docstring)
+
 	You can use this recipe to carry initialized state, source syntax, field metadata, output paths,
 	and identifiers into job generation. Construction fills missing result and module filenames,
 	decomposes the target dataclass when enough identifiers are supplied, and loads the default
@@ -128,55 +132,55 @@ class RecipeJobTheorem2:
 	"""
 
 	state: StateMapFolding | StateMapFoldingSymmetric
-	"""Inspect the initialized folding state with map dimensions and starting field values."""
+	"""The map folding computation state containing dimensions and initial values."""
 	totalFoldsEstimated: int = 0
-	"""Inspect the estimated total number of folds for progress tracking."""
+	"""Estimated total number of folds for progress tracking."""
 	shatteredDataclass: ShatteredDataclass | None = None
-	"""Inspect the decomposed field syntax used during job specialization."""
+	"""Deconstructed dataclass metadata for code transformation."""
 
 #-------- Source -----------------------------------------
 	source_astModule: ast.Module | None = None
-	"""Inspect the source module syntax from which the counting function is extracted."""
+	"""Parsed AST of the source module containing the generic algorithm."""
 	identifierCallableSource: str = defaultMapFolding['function']['counting']
-	"""Inspect the name of the counting function to extract."""
+	"""Name of the counting function to extract."""
 
 	logicalPathModuleDataclassSource: identifierDotAttribute = f'{settingsPackage.identifierPackage}.dataBaskets'
-	"""Inspect the logical path to the dataclass module."""
+	"""Logical path to the dataclass module."""
 	identifierDataclassSource: str = defaultMapFolding['variable']['stateDataclass']
-	"""Inspect the name of the source dataclass."""
+	"""Name of the source dataclass."""
 	identifierDataclassInstanceSource: str = defaultMapFolding['variable']['stateInstance']
-	"""Inspect the instance identifier for the dataclass."""
+	"""Instance identifier for the dataclass."""
 
 	pathPackageSource: PurePosixPath | None = defaultMapFolding['filesystem']['sourcePackage']
-	"""Inspect the path to the source package."""
+	"""Path to the source package."""
 	identifierPackageSource: str | None = settingsPackage.identifierPackage
-	"""Inspect the name of the source package."""
+	"""Name of the source package."""
 
 #-------- Filesystem, names of physical objects ------------------------------------------
 	pathPackage: PurePosixPath | None = None
-	"""Inspect the override path for the target package."""
+	"""Override path for the target package."""
 	pathModule: PurePosixPath | None = defaultMapFolding['filesystem']['jobModule']
-	"""Inspect the override path for the target module directory."""
+	"""Override path for the target module directory."""
 	fileExtension: str = settingsPackage.fileExtension
-	"""Inspect the file extension for generated modules."""
+	"""File extension for generated modules."""
 	pathFilenameTotalFolds: PurePosixPath | None = None
-	"""Inspect the path for writing fold count results."""
+	"""Path for writing fold count results."""
 
 #-------- Logical identifiers, as opposed to physical identifiers ------------------------
 	identifierPackage: str = ''
-	"""Inspect the target package identifier."""
+	"""Target package identifier."""
 	logicalPathRoot: identifierDotAttribute | None = None
-	"""Inspect the optional logical root retained as recipe metadata."""
+	"""Logical path root; probably corresponds to physical filesystem directory."""
 	identifierModule: str | None = None
-	"""Inspect the target module identifier."""
+	"""Target module identifier."""
 	identifierCallable: str = identifierCallableSource
-	"""Inspect the callable identifier used by the generated launcher."""
+	"""Name of the counting function in generated module."""
 	identifierDataclass: str | None = identifierDataclassSource
-	"""Inspect the target dataclass identifier."""
+	"""Target dataclass identifier."""
 	identifierDataclassInstance: str | None = identifierDataclassInstanceSource
-	"""Inspect the target dataclass instance identifier."""
+	"""Target dataclass instance identifier."""
 	logicalPathModuleDataclass: identifierDotAttribute | None = logicalPathModuleDataclassSource
-	"""Inspect the logical path to target dataclass module."""
+	"""Logical path to target dataclass module."""
 	totalFoldsMultiplier: int = 1
 	"""Inspect the multiplier used to convert the reported group count into total folds.
 
@@ -186,10 +190,12 @@ class RecipeJobTheorem2:
 #-------- Datatypes ------------------------------------------
 
 	initializationConstructor: bool = True
-	"""Inspect whether embedded scalar values retain their datatype constructor."""
+	"""Whether to use constructor initialization for scalar dataclass fields."""
 
 	def _makePathFilename(self, pathRoot: PurePosixPath | None = None, logicalPathInfix: identifierDotAttribute | None = None, filenameStem: str | None = None, fileExtension: str | None = None) -> PurePosixPath:
 		"""I use this to resolve output filenames from recipe fields and explicit components.
+
+		(AI generated docstring)
 
 		This method builds a path using `mapFolding.kitAST.paths.getPathFilename` [1]. Falsy explicit
 		components fall back to recipe values. The root falls back to the current working directory
@@ -224,6 +230,8 @@ class RecipeJobTheorem2:
 	def pathFilenameModule(self) -> PurePosixPath:
 		"""Resolve the destination filename for the generated job module.
 
+		(AI generated docstring)
+
 		You can use this property to obtain the output path from the recipe module identifier and
 		file extension. A configured `self.pathModule` supplies the root. Otherwise, the property
 		uses `self.pathPackage` or the current working directory.
@@ -240,6 +248,8 @@ class RecipeJobTheorem2:
 
 	def __post_init__(self) -> None:
 		"""I use this to fill source syntax, output paths, and field metadata for job recipes.
+
+		(AI generated docstring)
 
 		This method derives a result filename from `self.state.mapShape` with
 		`mapFolding.kitFilesystem.makePathFilenameFolds` [1]. Missing module identifiers use the
@@ -273,6 +283,8 @@ class RecipeJobTheorem2:
 
 def fromMapShape(mapShape: tuple[形TotalLeaves, ...], **keywordArguments: Any) -> RecipeJobTheorem2:
 	"""Create an initialized job recipe for the dimensions in `mapShape`.
+
+	(AI generated docstring)
 
 	You can use this function to prepare a `RecipeJobTheorem2` [1] for a specific map shape.
 	The function advances the state to grouped counting, selects a known fold total or an estimate,
@@ -472,6 +484,8 @@ def moveStaticArrays(job: RecipeJobTheorem2, ingredientsFunction: IngredientsFun
 def replaceStaticScalars(job: RecipeJobTheorem2, ingredientsCount: IngredientsFunction) -> None:
 	"""Replace static scalar names with values from the job state.
 
+	(AI generated docstring)
+
 	You can use this function to specialize `ingredientsCount` by replacing every matching name
 	from `job.shatteredDataclass.boxOfStaticScalars` with the corresponding integer in `job.state`.
 	The function modifies the function syntax in place and returns `None`.
@@ -504,6 +518,8 @@ def replaceStaticScalars(job: RecipeJobTheorem2, ingredientsCount: IngredientsFu
 
 def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba | None = None) -> None:
 	"""Append a standalone counting launcher and result-file writer.
+
+	(AI generated docstring)
 
 	You can use this function to add timing, fold-total reporting, and file output to
 	`ingredientsModule`. The function also changes the counting function return contract.
@@ -594,38 +610,22 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 
 # TODO Use this concept in general modules, not just custom jobs.
 def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
-	"""Replace datatype import aliases in generated function and module containers.
+	"""Customize data types in the given ingredients by adjusting imports.
 
-	You can use this function to apply each entry in `boxOfSettings形` to imports in the two
-	containers. The function removes imports whose alias matches the original datatype identifier
-	and adds the replacement import to `ingredientsFunction`. Both containers are modified and
-	returned.
+	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
+	preserving _abstract_ names for datatypes, such as `形ArrayTotalLeaves1D` and `形TotalFolds`. This function well
+	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
+	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
+	for example, `mapFolding.synthesized.foldsSymmetric.asynchronousNumba` or its equivalent), ought to still have the abstract
+	names, this function gives you the power to change the datatype from numpy to numba and/or from 8-bits to 16-bits merely by
+	changing the import statements. You shouldn't need to change any "business" logic.
 
-	Parameters
-	----------
-	ingredientsFunction : IngredientsFunction
-		Function container receiving replacement imports.
-	ingredientsModule : IngredientsModule
-		Module container from which matching datatype aliases will be removed.
-	boxOfSettings形 : list[Settings形]
-		Ordered replacement module, type, and alias configurations.
+	This will not remove potentially conflicting existing imports from other modules.
 
 	Returns
 	-------
-	datatypeContainers : tuple[IngredientsFunction, IngredientsModule]
-		The original function and module containers, in that order.
-
-	Examples
-	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [1].
-
-		```python
-		setDatatypeViaImport(ingredientsCount, ingredientsModule, boxOfSettings形)
-		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.codon.makeJob`
+	datatypesIngredientsObjects : tuple[IngredientsFunction, IngredientsModule]
+		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
 	"""
 	for datatypeConfig in boxOfSettings形:
 		ingredientsFunction.imports.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)

@@ -1,17 +1,6 @@
-"""Restrict leaf order and exclude leaf assignments for arbitrary map shapes.
+"""Generalized pinning functions in the "Elimination" algorithm for any `mapShape`.
 
-You can partition permutation spaces to impose leaf ordering and remove specified leaf choices from
-pile positions. You update the supplied elimination state or permutation spaces in place.
-
-Contents
---------
-Functions
-	atPileExcludeLeaf
-		Exclude a leaf at one pile in every supplied permutation space.
-	excludeLeaf_rBeforeLeaf_k
-		Restrict permutation spaces so a selected leaf precedes another leaf.
-	excludeLeaf_rBeforeLeaf_kAtPile_k
-		Exclude an earlier leaf when another leaf is pinned at a selected pile.
+Functions for 2^n-dimensional maps must go in other modules.
 """
 from __future__ import annotations
 
@@ -27,6 +16,8 @@ if TYPE_CHECKING:
 
 def excludeLeaf_rBeforeLeaf_k(state: StateElimination, leaf_k: Leaf, leaf_r: Leaf, domain_k: Iterable[Pile] | None = None, domain_r: Iterable[Pile] | None = None) -> StateElimination:
 	"""Restrict permutation spaces so a selected leaf precedes another leaf.
+
+	(AI generated docstring)
 
 	You can require `leaf_k` to occur before `leaf_r` across the supplied pile domains. You replace the
 	state's active permutation-space list with branches satisfying the restriction. Omit a domain to use
@@ -145,6 +136,8 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 
 def atPileExcludeLeaf(boxOfPermutationSpace: list[PermutationSpace], pile: Pile, leaf: Leaf) -> list[PermutationSpace]:
 	"""Exclude a leaf at one pile in every supplied permutation space.
+
+	(AI generated docstring)
 
 	You can exclude a leaf from each permutation space in `boxOfPermutationSpace` and receive the
 	original list with its spaces modified in place. You can invalidate a branch when the excluded leaf

@@ -25,6 +25,8 @@ if TYPE_CHECKING:
 class Settings形(NamedTuple):
 	"""Specify a replacement import for an abstract datatype.
 
+	(AI generated docstring)
+
 	You can use this tuple to map a datatype identifier in generated source to an imported type.
 	The configuration records the original identifier, replacement module, type, and import alias.
 	`mapFolding.kitAST.RecipeJob.setDatatypeViaImport` applies the configuration [1].

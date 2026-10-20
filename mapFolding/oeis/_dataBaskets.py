@@ -9,6 +9,8 @@ if TYPE_CHECKING:
 class MetadataOEISid(TypedDict):
 	"""Describe known sequence values and optional triangle row settings.
 
+	(AI generated docstring)
+
 	You can use this dictionary schema to inspect the metadata returned by
 	`mapFolding.oeis.getMetadata` [1]. The schema uses `typing.TypedDict` [2] to describe fields;
 	instances remain ordinary dictionaries without runtime field validation.
@@ -38,13 +40,13 @@ class MetadataOEISid(TypedDict):
 	"""
 
 	description: str
-	"""Read the sequence description or a diagnostic message when no description is available."""
+	"""The OEIS.org description of the integer sequence."""
 	offset: int
-	"""Read the starting sequence index or a fallback sentinel when no offset is available."""
+	"""The starting index, 'n', of the sequence, typically 0 or 1."""
 	valuesKnown: dict[int, int]
-	"""Look up known sequence values by integer index."""
+	"""Dictionary of sequence indices, 'n', to their known values, `totalFolds`."""
 	valueUnknown: int
-	"""Read one greater than the largest known index, without checking for gaps in the indices."""
+	"""The smallest value of 'n' for for which `totalFolds` is unknown."""
 
 	rowLength: NotRequired[Callable[[int], int]]
 	"""Obtain the expected complete row length from a row number.

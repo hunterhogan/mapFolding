@@ -37,6 +37,8 @@ def eliminateFolds(
 ) -> int:
 	"""Count distinct map foldings by eliminating invalid leaf arrangements.
 
+	(AI generated docstring)
+
 	You can run the selected algorithm for `mapShape` or the supplied `state`. When you supply `state`,
 	you use its shape and existing search space. You can also save the count to `pathLikeWrite`.
 

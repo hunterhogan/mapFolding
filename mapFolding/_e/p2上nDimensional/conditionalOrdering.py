@@ -33,37 +33,10 @@ if TYPE_CHECKING:
 
 # IMPROVEMENT getDictionaryConditionalLeafPredecessors development
 def getLeafPredecessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:
-	"""Build conditional predecessor requirements for each leaf and pile.
+	"""leaf: pile: [conditional `leafPredecessor`].
 
-	You can inspect leaves that must appear earlier in the pile order when another leaf occupies a
-	particular pile. You obtain requirements from the map shape rather than from the current pinned
-	leaves in `state`.
-
-	Parameters
-	----------
-	state : StateElimination
-		Elimination state that provides the map shape and dimension count.
-
-	Returns
-	-------
-	dictionaryConditionalPredecessors : dict[Leaf, dict[Pile, list[Leaf]]]
-		Mapping from a leaf to a pile to the required predecessor leaf indices. An absent
-		entry states no requirement. A map with fewer than six dimensions, or with an axis
-		length other than `2`, returns an empty mapping.
-
-	Cached Requirements
-	-------------------
-	You derive requirements from `mapFolding._e.leafDomains.getLookupDomainsLeaves` [1]. You require
-	relative order without requiring adjacent piles. For supported map shapes, you reuse mutable
-	dictionaries through `functools.cache` [2]. Treat returned dictionaries and nested lists as
-	read-only.
-
-	References
-	----------
-	[1] `mapFolding._e.leafDomains.getLookupDomainsLeaves`
-
-	[2] Python `functools.cache`.
-		https://docs.python.org/3/library/functools.html#functools.cache
+	Some leaves are always preceded by one or more leaves. Most leaves, however, are preceded by one or more other leaves only if
+	the leaf is in a specific pile.
 	"""
 	dictionaryConditionalLeafPredecessors: dict[Leaf, dict[Pile, list[Leaf]]] = {}
 	if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=6):
@@ -71,7 +44,10 @@ def getLeafPredecessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[L
 	return dictionaryConditionalLeafPredecessors
 @cache
 def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict[Leaf, dict[Pile, list[Leaf]]]:
-	"""Build cached predecessor requirements for experimental map shapes."""
+	"""Build cached predecessor requirements for experimental map shapes.
+
+	(AI generated docstring)
+	"""
 	state = StateElimination(mapShape)
 	dictionaryDomains: dict[Leaf, range] = getLookupDomainsLeaves(state)
 
@@ -199,6 +175,8 @@ def _getDictionaryConditionalLeafPredecessors(mapShape: tuple[int, ...]) -> dict
 # IMPROVEMENT getDictionaryConditionalLeafSuccessors development
 def getLeafSuccessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Leaf]]]:
 	"""Build conditional successor requirements for each leaf and pile.
+
+	(AI generated docstring)
 
 	You can inspect leaves that must appear later in the pile order when another leaf occupies a
 	particular pile. You obtain requirements from the map shape rather than from the current pinned

@@ -217,6 +217,8 @@ def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin selected piles near both ends of the pile order.
 
+	(AI generated docstring)
+
 	You can split possible foldings in `state` by assigning leaves to selected end piles. You initialize
 	`state.boxOfPermutationSpace` when empty and refine the permutation spaces in place. For unsupported
 	map shapes, you receive `state` unchanged.
@@ -296,6 +298,8 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpace: int = 2**14, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the pile immediately before the head-origin position.
 
+	(AI generated docstring)
+
 	You can refine possible foldings in `state` at an interior pile after pinning the required end piles.
 	You first perform depth-four end pinning, then apply domain exclusions to the interior pile when the
 	map has at least six dimensions.
@@ -319,7 +323,7 @@ def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpa
 	Pinning Sequence
 	----------------
 	The target pile is `首零(state.totalDimensions) - 零`,
-	using the coordinate vocabulary [2]. The map-shape predicate [3] requires every axis length
+	using the positional-numeral system [2]. The map-shape predicate [3] requires every axis length
 	to be `2`. Maps with fewer than three dimensions return unchanged. Maps with three through
 	five dimensions receive only the depth-four step of `pinPilesAtEnds` [4].
 
@@ -583,6 +587,8 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the origin and head-origin leaves to the end piles.
 
+	(AI generated docstring)
+
 	You can refine possible foldings in `state` by assigning the selected leaves to their permitted pile
 	positions. For supported map shapes, you initialize an empty `state.boxOfPermutationSpace` and
 	replace permutation spaces with the surviving splits.
@@ -602,7 +608,7 @@ def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit =
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(0, 首零(state.totalDimensions))
@@ -653,7 +659,7 @@ def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: ConcurrencyLimit 
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(零 + 首零(state.totalDimensions),)
@@ -682,6 +688,8 @@ def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: ConcurrencyLimit 
 
 def pinLeavesDimension零(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the origin pile and the head-plus-one leaf.
+
+	(AI generated docstring)
 
 	You can seed the origin pile in `state` and refine possible foldings by placing the head-plus-one
 	leaf. You update `state.boxOfPermutationSpace` in place.
@@ -721,6 +729,8 @@ def pinLeavesDimension零(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the four dimension-one leaves using combined pile domains.
 
+	(AI generated docstring)
+
 	You can refine possible foldings in `state` by assigning the selected leaves to their permitted pile
 	positions. For supported map shapes, you initialize an empty `state.boxOfPermutationSpace` and
 	replace permutation spaces with the surviving splits.
@@ -740,7 +750,7 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
@@ -774,6 +784,8 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 
 def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the dimension-one leaves, origin pile, and head-plus-one leaf.
+
+	(AI generated docstring)
 
 	You can apply the dimension-one and dimension-zero pinning steps to `state`. You update
 	`state.boxOfPermutationSpace` in place and receive the same state.
@@ -819,6 +831,8 @@ def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Concurrency
 def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the four dimension-two leaves using combined pile domains.
 
+	(AI generated docstring)
+
 	You can refine possible foldings in `state` by assigning the selected leaves to their permitted pile
 	positions. For supported map shapes, you initialize an empty `state.boxOfPermutationSpace` and
 	replace permutation spaces with the surviving splits.
@@ -838,7 +852,7 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(二 + 一, 二 + 一 + 零, 二 + 零, 二)
@@ -873,6 +887,8 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the four head-relative dimension-two leaves using combined pile domains.
 
+	(AI generated docstring)
+
 	You can refine possible foldings in `state` by assigning the selected leaves to their permitted pile
 	positions. For supported map shapes, you initialize an empty `state.boxOfPermutationSpace` and
 	replace permutation spaces with the surviving splits.
@@ -892,7 +908,7 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
@@ -948,7 +964,7 @@ def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) ->
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(一 + 零, 一)
@@ -1004,7 +1020,7 @@ def pin首beans(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -
 
 	Leaf Assignments
 	----------------
-	The coordinate vocabulary [2] identifies the leaves in the following order.
+	The positional-numeral system [2] identifies the leaves in the following order.
 
 		```python
 		(首一(state.totalDimensions), 首零一(state.totalDimensions))

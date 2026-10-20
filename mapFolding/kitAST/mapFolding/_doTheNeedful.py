@@ -1,5 +1,7 @@
 """I use this module to derive state initialization from counting source.
 
+(AI generated docstring)
+
 This module extracts and rewrites source counting so initialization stops after the first
 counted group, then writes the derived function to a configured module.
 
@@ -28,6 +30,8 @@ if TYPE_CHECKING:
 
 def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a state initializer that stops after the first counted fold group.
+
+	(AI generated docstring)
 
 	You can use this function to inline source counting and derive a state-initialization function.
 	The transformation replaces the selected active-leaf loop condition with a comparison of the

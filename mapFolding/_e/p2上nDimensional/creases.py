@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can inspect crease-connected leaves compatible with an earlier or later position in the pile
-order. You obtain these leaves from the map dimensions and the coordinate value of the queried leaf.
+order. You obtain these leaves from the map dimensions and the integer label of the queried leaf.
 
 Contents
 --------
@@ -29,6 +29,8 @@ if TYPE_CHECKING:
 def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 	"""Iterate over crease-connected leaves that can appear before `leaf`.
 
+	(AI generated docstring)
+
 	You can retrieve an iterator over neighboring leaves compatible with placing a crease-connected
 	neighbor before `leaf` in the pile order. You obtain these leaves from the map dimensions without
 	inspecting pinned piles.
@@ -46,9 +48,9 @@ def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 		Iterator over leaf indices in increasing order of the flipped dimension
 		index. An origin leaf has no predecessor choice.
 
-	Coordinate Order
-	----------------
-	The binary coordinate vocabulary [1] assigns one
+	Dimension Order
+	---------------
+	The binary positional-numeral system [1] assigns one
 	dimension to each bit. Possible leaves differ from `leaf` by one bit. Leaf labels
 	need not increase with the flipped dimension index.
 
@@ -69,6 +71,8 @@ def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 	"""Iterate over crease-connected leaves that can appear after `leaf`.
 
+	(AI generated docstring)
+
 	You can retrieve an iterator over neighboring leaves compatible with placing a crease-connected
 	neighbor after `leaf` in the pile order. You obtain these leaves from the map dimensions without
 	inspecting pinned piles.
@@ -86,9 +90,9 @@ def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 		Iterator over leaf indices in increasing order of the flipped dimension
 		index. An origin leaf has only leaf `1` as a successor choice.
 
-	Coordinate Order
-	----------------
-	The binary coordinate vocabulary [1] assigns one
+	Dimension Order
+	---------------
+	The binary positional-numeral system [1] assigns one
 	dimension to each bit. Possible leaves differ from `leaf` by one bit. Leaf labels
 	need not increase with the flipped dimension index.
 

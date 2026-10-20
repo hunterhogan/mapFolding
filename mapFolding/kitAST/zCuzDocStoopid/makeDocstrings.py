@@ -1,5 +1,7 @@
 """Generate formula-source docstrings and selector annotations from metadata.
 
+(AI generated docstring)
+
 You can use this module to enrich sequence-formula source with descriptions and literal
 selector values from `mapFolding.oeis.getMetadata` [1]. The generator writes source to a
 filename derived by removing the configured prefix.
@@ -50,6 +52,8 @@ moduleWarning = "This is a generated file; edit the source file.\n"
 
 def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     """Write formula-source functions with metadata descriptions and selector annotations.
+
+    (AI generated docstring)
 
     You can use this function to read formula source, obtain sequence metadata through
     `mapFolding.oeis.getMetadata` [1], insert function docstrings, and expand selector annotations

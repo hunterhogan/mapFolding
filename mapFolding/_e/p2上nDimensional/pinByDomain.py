@@ -35,8 +35,43 @@ if TYPE_CHECKING:
 def pinPile零Ante首零AfterDepth4(state: StateElimination) -> list[int]:
 	"""Select possible leaves for the pile before the head-origin position.
 
+	(AI generated docstring)
+
 	You can narrow the leaves available at the target pile using leaves already pinned near both ends of
 	the pile order. You receive the remaining leaves without pinning a leaf or modifying `state`.
+
+	Research
+	--------
+	All fourth-order piles must be pinned or you will get an error.
+
+	Unless I've made a mistake:
+
+	I have made a rule to exclude a leaf from pile 零Ante首零
+		for all piles in the first four orders (pile <= 4 or pile >= 首 - 4),
+			for all leaves in each pile's pile-range
+				that exclude a leaf from pile 零Ante首零.
+
+	If I were to figure out the last few cases, it would remove 23 surplus dictionaries.
+		10 of 23 dictionaries
+			if leafAt二 == 15:
+				boxOfRemoveLeaves.extend([38])
+		2 of 23 dictionaries
+			if leafAt二 == 9:
+				boxOfRemoveLeaves.extend([19])
+		2 of 23 dictionaries
+				boxOfRemoveLeaves.extend([59])
+		3 of 23 dictionaries
+			if leafAt二 == 23:
+				boxOfRemoveLeaves.extend([50])
+		4 of 23 dictionaries
+			if leafAt二 == 29:
+				boxOfRemoveLeaves.extend([7])
+		2 of 23 dictionaries
+				boxOfRemoveLeaves.extend([35])
+
+	But I would still have 1312 surplus dictionaries.
+
+	Therefore, if I continue to pin pile 零Ante首零, I should probably focus on different strategies.
 
 	Parameters
 	----------
@@ -53,7 +88,7 @@ def pinPile零Ante首零AfterDepth4(state: StateElimination) -> list[int]:
 	Pinned Piles
 	------------
 	The target pile is `首零(state.totalDimensions) - 零`,
-	using the coordinate vocabulary [1]. Piles `2`, `3`, `4`, `state.首 - 2`, `state.首 - 3`,
+	using the positional-numeral system [1]. Piles `2`, `3`, `4`, `state.首 - 2`, `state.首 - 3`,
 	and `state.首 - 4` must contain pinned leaves. The public orchestration function
 	`mapFolding._e.p2上nDimensional.pinIt.pinPile零Ante首零` [2] prepares these piles.
 

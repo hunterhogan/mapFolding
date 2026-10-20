@@ -1,5 +1,7 @@
 """Write specialized counting jobs and compile source on Linux.
 
+(AI generated docstring)
+
 You can use this module to embed state values and insert datatype conversions for generated
 counting jobs. On Linux, generation also calls `mapFolding.kitAST.linux.toCodon` [1].
 
@@ -52,6 +54,8 @@ aliases used by the source algorithm.
 
 def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 	"""Write a specialized counting job and compile the source on Linux.
+
+	(AI generated docstring)
 
 	You can use this function to specialize `job` by embedding state values, inserting datatype
 	conversions, replacing datatype imports, and adding a standalone launcher.
@@ -107,6 +111,8 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 
 def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2) -> IngredientsFunction:
 	"""Insert datatype conversions around selected field operations.
+
+	(AI generated docstring)
 
 	You can use this function to adapt `ingredientsFunction` for compiled execution by using
 	field annotations from `job`. The function inserts conversions in selected assignments,

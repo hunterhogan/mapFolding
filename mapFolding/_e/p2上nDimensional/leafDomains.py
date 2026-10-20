@@ -149,6 +149,8 @@ def getDomainLeaf(state: StateElimination, leaf: int) -> range:
 def getDomainDimension一(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
 	"""Compute combined pile choices for the dimension-one leaves.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -167,7 +169,7 @@ def getDomainDimension一(state: StateElimination) -> tuple[tuple[int, int, int,
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -223,6 +225,8 @@ def _getDomainDimension一(domain一零: tuple[int, ...], domain首一: tuple[in
 def getDomainDimension二(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
 	"""Compute combined pile choices for the dimension-two leaves.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -241,7 +245,7 @@ def getDomainDimension二(state: StateElimination) -> tuple[tuple[int, int, int,
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -364,6 +368,8 @@ def _getDomainDimension二(domain二零and二: tuple[tuple[int, int], ...], doma
 def getDomainDimension首二(state: StateElimination) -> tuple[tuple[int, int, int, int], ...]:
 	"""Compute combined pile choices for the head-relative dimension-two leaves.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -382,7 +388,7 @@ def getDomainDimension首二(state: StateElimination) -> tuple[tuple[int, int, i
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -482,6 +488,8 @@ def _getDomainDimension首二(totalDimensions: int, domain首零二and首二: tu
 def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Compute combined pile choices for the leaves five and four.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -500,7 +508,7 @@ def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -524,6 +532,8 @@ def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...
 def getDomain二一零and二一(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Compute combined pile choices for the leaves seven and six.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -542,7 +552,7 @@ def getDomain二一零and二一(state: StateElimination) -> tuple[tuple[int, int
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -690,6 +700,8 @@ def _getDomains二Or二一(domain零: tuple[int, ...], domain0: tuple[int, ...],
 def getDomain首零二and首二(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Compute combined pile choices for the head-relative zero-two and two leaves.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -708,7 +720,7 @@ def getDomain首零二and首二(state: StateElimination) -> tuple[tuple[int, int
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -807,6 +819,8 @@ def _getDomain首零二and首二(domain首零二: tuple[int, ...], domain首二:
 def getDomain首零一二and首一二(state: StateElimination) -> tuple[tuple[int, int], ...]:
 	"""Compute combined pile choices for the head-relative zero-one-two and one-two leaves.
 
+	(AI generated docstring)
+
 	You can enumerate joint pile assignments for a fixed group of leaves in `state` by combining
 	individual pile domains and coordinate restrictions. You obtain assignments from the map shape
 	without inspecting `state.permutationSpace`.
@@ -825,7 +839,7 @@ def getDomain首零一二and首一二(state: StateElimination) -> tuple[tuple[in
 
 	Leaf Order
 	----------
-	The coordinate vocabulary [1] identifies the leaves
+	The positional-numeral system [1] identifies the leaves
 	in the following order.
 
 		```python
@@ -942,6 +956,8 @@ def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], 
 
 def getDomainLeaf首零Plus零(state: StateElimination, leaf: Leaf | None = None) -> tuple[Pile, ...]:
 	"""Compute pile choices for the head-plus-one leaf using pinned neighbors.
+
+	(AI generated docstring)
 
 	You can retrieve the pile domain of the special head-plus-one leaf in `state`. When both neighboring
 	reference leaves are pinned in `state.permutationSpace`, you receive a domain narrowed by their

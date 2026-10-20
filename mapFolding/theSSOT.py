@@ -1,5 +1,7 @@
 """Access shared package settings and bundled sample-data paths.
 
+(AI generated docstring)
+
 You can use this module to inspect package metadata and the default concurrency backend through
 a shared settings instance.
 
@@ -21,6 +23,8 @@ import dataclasses
 @dataclasses.dataclass
 class mapFoldingPackageSettings(PackageSettings):
 	"""Store package metadata, concurrency preferences, and sample-data locations.
+
+	(AI generated docstring)
 
 	You can use this class to extend `hunterMakesPy.PackageSettings` [1] with settings required by
 	folding computations. Construction resolves package metadata through the inherited initializer
@@ -57,7 +61,7 @@ class mapFoldingPackageSettings(PackageSettings):
 	"""
 
 	concurrencyPackage: str = 'multiprocessing'
-	"""Select the default concurrency backend for processor-limit resolution."""
+	"""Package identifier for concurrent execution operations."""
 
 	pathDataSamples: Path = dataclasses.field(init=False, default=Path())
 	"""Locate bundled sample data under `pathPackage / 'tests' / 'dataSamples'`.
@@ -85,12 +89,4 @@ class mapFoldingPackageSettings(PackageSettings):
 		self.pathDataSamples = self.pathPackage / 'tests' / 'dataSamples'
 
 settingsPackage = mapFoldingPackageSettings('mapFolding')
-"""Access the package settings shared by folding and filesystem operations.
-
-This instance uses `mapFoldingPackageSettings` [1] with the fallback identifier `'mapFolding'`.
-
-References
-----------
-[1] `mapFoldingPackageSettings`
-
-"""
+"""Global package settings."""

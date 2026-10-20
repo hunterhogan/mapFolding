@@ -1,5 +1,7 @@
 """I use this module to derive counting variants from map-folding source.
 
+(AI generated docstring)
+
 This module generates sequential, parallel, and Theorem 2 counting variants. The transforms
 expect the source structures and state metadata configured by
 `mapFolding.kitAST.theSSOT.defaultMapFolding` [1].
@@ -50,6 +52,8 @@ if TYPE_CHECKING:
 
 def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a sequential counting module with field parameters and Numba compilation.
+
+	(AI generated docstring)
 
 	You can use this function to inline the source counting function, replace dataclass state
 	with individual field parameters, and attach Numba compilation [1]. A configured dispatcher
@@ -131,6 +135,8 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 
 def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a counting module restricted to the initial fold-group search.
+
+	(AI generated docstring)
 
 	You can use this function to derive the Theorem 2 counting variant from `astModule`.
 	The function inlines counting, changes the active-leaf loop threshold to four, doubles
@@ -265,6 +271,8 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a Numba counting module from a Theorem 2 source variant.
 
+	(AI generated docstring)
+
 	You can use this function to inline a Theorem 2 counting function, replace the state object
 	with individual field parameters, remove unused parameters, and add Numba compilation [1].
 	A configured dispatcher is adapted to the field argument and return contract.
@@ -349,6 +357,8 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a Theorem 2 variant with unconstrained-dimension branches removed.
 
+	(AI generated docstring)
+
 	You can use this function to derive a counting variant that assumes dimension constraints
 	already hold. The function removes conditionals testing the negation of the state
 	`dimensionsUnconstrained` attribute and updates a configured dispatcher to the target name.
@@ -418,6 +428,8 @@ def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a counting module with compiled workers and a process dispatcher.
+
+	(AI generated docstring)
 
 	You can use this function to derive counting workers that accept individual fields and
 	compile through Numba [1]. The generated dispatcher creates one state per task division,
