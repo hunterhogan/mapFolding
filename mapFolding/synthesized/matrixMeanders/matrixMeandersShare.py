@@ -4,10 +4,10 @@ from numba import jit
 from operator import neg
 
 @jit(['int64(int64)', 'uint64(uint64)'], cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
-def walkDyckPath(intWithExtra_0b1: int) -> int:
-    """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
+def Y7Y_walkDyckPath(intWithExtra_0b1: int) -> int:
+    """Locate the first Y7Y_Dyck-balance failure bit in `intWithExtra_0b1`.
 
-    You can use `walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
+    You can use `Y7Y_walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
     the meander transfer matrix closes a mismatched pair [1]. The `intWithExtra_0b1` value stores one
     side of the packed boundary state with parity bits at even positions.
 
@@ -25,7 +25,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
     ----------
     The scan advances by shifting `flipExtra_0b1_Here` left by `2` each step. The scan adds `1` when
     the bit is `0` and subtracts `1` when the bit is `1`. The function returns immediately at the
-    first index where the running balance is negative in the Dyck-prefix sense [2].
+    first index where the running balance is negative in the Y7Y_Dyck-prefix sense [2].
 
     Mathematics
     -----------
@@ -42,7 +42,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
     [1] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
         Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
         https://dx.doi.org/10.1088/0305-4470/33/34/301
-    [2] Dyck language and balanced-parenthesis paths.
+    [2] Y7Y_Dyck language and balanced-parenthesis paths.
         https://en.wikipedia.org/wiki/Dyck_language
     """
     findTheExtra_0b1: int = 0

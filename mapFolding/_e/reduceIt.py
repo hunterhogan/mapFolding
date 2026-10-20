@@ -28,7 +28,7 @@ from collections import Counter
 from functools import partial
 from humpy_cytoolz import dissoc, get, groupby as toolz_groupby, valfilter as filterLeaf, valfilter as filterValue
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
-from itertools import chain, combinations
+from itertools import chain, combinations as Y7Y_combinations
 from mapFolding import _e
 from mapFolding._e.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding._e.filters import leafInChoicesLeaf吗, leafPinned吗, pileChoicesLeaf吗
@@ -124,7 +124,7 @@ def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace)
 			for upDown, leftRight in ((False, True), (True, False)):
 				leavesPinnedParityOpposite: PinnedLeaves = dict(get(upDown, groupedByParity, ()))
 
-				for ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in combinations(sorted(get(leftRight, groupedByParity, ())), 2):
+				for ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in Y7Y_combinations(sorted(get(leftRight, groupedByParity, ())), 2):
 					leaf_kCrease: Leaf | None = getCreasePost(state.mapShape, leaf_k, dimension)
 					if leaf_kCrease is None:
 						continue

@@ -83,23 +83,23 @@ def _groupCyclotomicTerms(expression: Expr, maximumOrder: int) -> dict[int, Expr
 
 	return reduce(addTerm, Add.make_args(apart(expression, u)), {})
 
-def _coefficientSequence(expression: Expr, count: int) -> tuple[Fraction, ...]:
+def Z0Z__coefficientSequence(expression: Expr, count: int) -> tuple[Fraction, ...]:
 	numeratorExpression, denominatorExpression = fraction(cancel(expression))
 	numerator: Poly = Poly(numeratorExpression, u)
 	denominator: Poly = Poly(denominatorExpression, u)
 	denominatorConstant: Fraction = Fraction(int(denominator.nth(0)))
 
-	def appendCoefficient(coefficients: tuple[Fraction, ...], index: int) -> tuple[Fraction, ...]:
-		numeratorCoefficient: Fraction = Fraction(int(numerator.nth(index)))
+	def Z0Z_appendCoefficient(Z0Z_coefficients: tuple[Fraction, ...], index: int) -> tuple[Fraction, ...]:
+		Z0Z_numeratorCoefficient: Fraction = Fraction(int(numerator.nth(index)))
 		maximumDegree: int = min(index, denominator.degree())
 		convolution: Fraction = sum(
-			(Fraction(int(denominator.nth(degree))) * coefficients[index - degree] for degree in range(1, maximumDegree + 1)), Fraction()
+			(Fraction(int(denominator.nth(degree))) * Z0Z_coefficients[index - degree] for degree in range(1, maximumDegree + 1)), Fraction()
 		)
-		return (*coefficients, (numeratorCoefficient - convolution) / denominatorConstant)
+		return (*Z0Z_coefficients, (Z0Z_numeratorCoefficient - convolution) / denominatorConstant)
 
-	return reduce(appendCoefficient, range(count), ())
+	return reduce(Z0Z_appendCoefficient, range(count), ())
 
-def _binomialCoefficients(values: tuple[Fraction, ...]) -> tuple[Fraction, ...]:
+def Z0Z__binomialCoefficients(values: tuple[Fraction, ...]) -> tuple[Fraction, ...]:
 	def difference(previous: tuple[Fraction, ...], _index: int) -> tuple[Fraction, ...]:
 		return tuple(map(sub, previous[1:], previous[:-1]))
 	return tuple(map(itemgetter(0), tuple(accumulate(range(1, len(values)), difference, initial=values))))
@@ -110,10 +110,10 @@ def _makeCyclotomicWave(order: int, expression: Expr) -> tuple[tuple[Fraction, .
 		message: str = f'I received a cyclotomic component with {len(factors)} denominator factors instead of one.'
 		raise ValueError(message)
 	multiplicity: int = factors[0][1]
-	coefficients: tuple[Fraction, ...] = _coefficientSequence(expression, order * multiplicity)
+	Z0Z_coefficients: tuple[Fraction, ...] = Z0Z__coefficientSequence(expression, order * multiplicity)
 
 	def makeResiduePolynomial(residue: int) -> tuple[Fraction, ...]:
-		return _binomialCoefficients(tuple(map(coefficients.__getitem__, range(residue, order * multiplicity, order))))
+		return Z0Z__binomialCoefficients(tuple(map(Z0Z_coefficients.__getitem__, range(residue, order * multiplicity, order))))
 
 	return tuple(map(makeResiduePolynomial, range(order)))
 
@@ -133,7 +133,7 @@ def identity(ast_expr: ast.expr) -> ast.expr:
 	return ast_expr
 
 def _make_pow(basePower: tuple[int, int]) -> ast.expr:
-	return Make.Call(Make.Name('pow'), [Make.Constant(basePower[0]), Make.Constant(basePower[1])])
+	return Make.Call(Make.Name('pow'), [Make.Constant(int(basePower[0])), Make.Constant(int(basePower[1]))])
 
 def _makeNumber(integer: int, order: int = 1) -> ast.expr:
 	boxOfOrderPower: list[tuple[int, int]] = []
@@ -147,40 +147,40 @@ def _makeNumber(integer: int, order: int = 1) -> ast.expr:
 	boxOfOrderPower = boxOfOrderPower or [(1, 1)]
 	return Make.Mult.join(map(_make_pow, boxOfOrderPower))
 
-def _makeCoefficient_ast_expr(coefficient: Fraction, order: int = 1) -> ast.expr:
-	if coefficient < 0:
-		coefficient = -coefficient
+def Z0Z__makeCoefficient_ast_expr(Z0Z_coefficient: Fraction, order: int = 1) -> ast.expr:
+	if Z0Z_coefficient < 0:
+		Z0Z_coefficient = -Z0Z_coefficient
 		negOrNo: Callable[[ast.expr], ast.expr] = _call_neg
 	else:
 		negOrNo = identity
-	if coefficient.denominator == 1:
-		ast_expr: ast.expr = _makeNumber(coefficient.numerator, order)
+	if Z0Z_coefficient.denominator == 1:
+		ast_expr: ast.expr = _makeNumber(Z0Z_coefficient.numerator, order)
 	else:
-		ast_expr = Make.Call(Make.Name('Fraction'), [_makeNumber(coefficient.numerator, 1), _makeNumber(coefficient.denominator, order)])
+		ast_expr = Make.Call(Make.Name('Fraction'), [_makeNumber(Z0Z_coefficient.numerator, 1), _makeNumber(Z0Z_coefficient.denominator, order)])
 	return negOrNo(ast_expr)
 
-def _makePolynomial_ast_expr(ast_exprPolynomialArgument: ast.expr, boxOfCoefficients: tuple[Fraction, ...], order: int = 1) -> ast.expr:
+def _makePolynomial_ast_expr(ast_exprPolynomialArgument: ast.expr, Z0Z_boxOfCoefficients: tuple[Fraction, ...], order: int = 1) -> ast.expr:
 	def makePolynomialTerm_ast_expr(indexed: tuple[int, Fraction]) -> ast.expr | None:
-		degree, coefficient = indexed
-		if not coefficient:
+		degree, Z0Z_coefficient = indexed
+		if not Z0Z_coefficient:
 			ast_exprPolynomialTerm: ast.expr | None = None
 		elif degree == 0:
-			ast_exprPolynomialTerm = _makeCoefficient_ast_expr(coefficient, order)
+			ast_exprPolynomialTerm = Z0Z__makeCoefficient_ast_expr(Z0Z_coefficient, order)
 		else:
 			if degree == 1:
-				ast_exprBinomialBasis: ast.expr = ast_exprPolynomialArgument
+				Y7Y_ast_exprBinomialBasis: ast.expr = ast_exprPolynomialArgument
 			else:
-				ast_exprBinomialBasis = Make.Call(Make.Name('comb'), [ast_exprPolynomialArgument, Make.Constant(degree)])
-			if coefficient == 1:
-				ast_exprPolynomialTerm = ast_exprBinomialBasis
-			elif coefficient == -1:
-				ast_exprPolynomialTerm = _call_neg(ast_exprBinomialBasis)
+				Y7Y_ast_exprBinomialBasis = Make.Call(Make.Name('Y7Y_comb'), [ast_exprPolynomialArgument, Make.Constant(degree)])
+			if Z0Z_coefficient == 1:
+				ast_exprPolynomialTerm = Y7Y_ast_exprBinomialBasis
+			elif Z0Z_coefficient == -1:
+				ast_exprPolynomialTerm = _call_neg(Y7Y_ast_exprBinomialBasis)
 			else:
-				ast_exprPolynomialTerm = Make.Mult.join([_makeCoefficient_ast_expr(coefficient, order), ast_exprBinomialBasis])
+				ast_exprPolynomialTerm = Make.Mult.join([Z0Z__makeCoefficient_ast_expr(Z0Z_coefficient, order), Y7Y_ast_exprBinomialBasis])
 		return ast_exprPolynomialTerm
 
 	boxOf_ast_exprPolynomialTerms: tuple[ast.expr, ...] = tuple(
-		filter_map(makePolynomialTerm_ast_expr, enumerate(boxOfCoefficients))
+		filter_map(makePolynomialTerm_ast_expr, enumerate(Z0Z_boxOfCoefficients))
 	) or (Make.Constant(0),)
 	return Make.Add.join(boxOf_ast_exprPolynomialTerms)
 
@@ -216,8 +216,9 @@ def makeIngredientsFunction(次function: int, formula: tuple[dict[int, tuple[tup
 			, returns=Make.Name('int')
 		)
 	)
+	ingredientsFunction.imports.addImportFrom_asStr('__future__', 'annotations')
 	ingredientsFunction.imports.addImportFrom_asStr('fractions', 'Fraction')
-	ingredientsFunction.imports.addImportFrom_asStr('math', 'comb')
+	ingredientsFunction.imports.addImportFrom_asStr('math', 'comb', 'Y7Y_comb')
 	ingredientsFunction.imports.addImportFrom_asStr('operator', 'floordiv')
 	ingredientsFunction.imports.addImportFrom_asStr('operator', 'neg')
 	return ingredientsFunction

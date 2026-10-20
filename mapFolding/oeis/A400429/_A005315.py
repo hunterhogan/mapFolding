@@ -37,19 +37,19 @@ Input and representation
 ------------------------
 `x` is the semi-meander row index at the default offset. The suffix selects the
 fixed formula; changing `次n` only translates its input origin. It does not
-select another diagonal or coefficient table. The A005315 identities and the
+select another diagonal or Z0Z_coefficient table. The A005315 identities and the
 diagonal interpretation above use the default `次n`.
 
 For j >= 3, let N_j(z) and Q_j(z) have the stored `numerator` and `denominator`
-coefficients in ascending order of degree. The implementation evaluates
+Z0Z_coefficients in ascending order of degree. The implementation evaluates
 
 	f_j(2*j + t) = 2 * [z^t] N_j(z) / Q_j(z),    t >= 0.
 
-`crunchCoefficients` consumes every numerator coefficient in order, then zeros.
+`Z0Z_crunchCoefficients` consumes every numerator Z0Z_coefficient in order, then zeros.
 The external factor 2 is part of the formula; in the status report's normalized
 numerator convention, P_j = 2*N_j. This is an exact recurrence implementation of
-the rational coefficient representation, not a compact formula uniform in j.
-All supplied denominators have constant coefficient one. Input preconditions
+the rational Z0Z_coefficient representation, not a compact formula uniform in j.
+All supplied denominators have constant Z0Z_coefficient one. Input preconditions
 are documented below; no additional validation is performed.
 
 References
@@ -67,7 +67,7 @@ References
 from __future__ import annotations
 
 from itertools import chain, repeat
-from math import comb
+from math import comb as Y7Y_comb
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -75,35 +75,35 @@ if TYPE_CHECKING:
 
 #================== Sausage making =========================================================
 
-def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...]) -> int:
-	"""Return [z^次coefficient] N(z)/Q(z), assuming Q(0) = 1.
+def Z0Z_crunchCoefficients(Z0Z_次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...]) -> int:
+	"""Return [z^Z0Z_次coefficient] N(z)/Q(z), assuming Q(0) = 1.
 
 	(AI generated docstring)
 
-	The tuples give polynomial coefficients in ascending order of degree. With
+	The tuples give polynomial Z0Z_coefficients in ascending order of degree. With
 	N_i = numerator[i] while that entry exists and N_i = 0 afterward, the recurrence is
 
 		a_i = N_i - sum(denominator[h] * a_(i-h),
 						h = 1, ..., min(i, len(denominator) - 1)).
 
 	The single `neverEndingNumerator` iterator is created before the loop and
-	advanced once per coefficient. Every numerator entry is consumed in order;
+	advanced once per Z0Z_coefficient. Every numerator entry is consumed in order;
 	later entries are not ignored and the first entry is not repeated.
 
 	Parameters
 	----------
-	次coefficient : int
-		Nonnegative, zero-based coefficient index.
+	Z0Z_次coefficient : int
+		Nonnegative, zero-based Z0Z_coefficient index.
 	numerator : tuple[int, ...]
-		Numerator coefficients from constant term upward. An empty tuple means zero.
+		Numerator Z0Z_coefficients from constant term upward. An empty tuple means zero.
 	denominator : tuple[int, ...]
-		Denominator coefficients from constant term upward, with denominator[0] == 1.
-		The constant coefficient is assumed, not validated or used as a divisor.
+		Denominator Z0Z_coefficients from constant term upward, with denominator[0] == 1.
+		The constant Z0Z_coefficient is assumed, not validated or used as a divisor.
 
 	Returns
 	-------
 	int
-		The coefficient at the requested index, evaluated with exact integer arithmetic.
+		The Z0Z_coefficient at the requested index, evaluated with exact integer arithmetic.
 
 	Notes
 	-----
@@ -112,12 +112,12 @@ def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denomina
 	the unchanged implementation then subtracts no recurrence terms.
 	"""
 	neverEndingNumerator: chain[int] = chain(numerator, repeat(0))
-	boxOfCoefficients: list[int] = []
-	while len(boxOfCoefficients) <= 次coefficient:
-		boxOfCoefficients.append(next(neverEndingNumerator) - sum(
-			denominator[degree] * boxOfCoefficients[-degree] for degree in range(1, min(len(denominator), len(boxOfCoefficients) + 1))
+	Z0Z_boxOfCoefficients: list[int] = []
+	while len(Z0Z_boxOfCoefficients) <= Z0Z_次coefficient:
+		Z0Z_boxOfCoefficients.append(next(neverEndingNumerator) - sum(
+			denominator[degree] * Z0Z_boxOfCoefficients[-degree] for degree in range(1, min(len(denominator), len(Z0Z_boxOfCoefficients) + 1))
 		))
-	return boxOfCoefficients[-1]
+	return Z0Z_boxOfCoefficients[-1]
 
 #================== A005315 formulas and diagonal extensions =========================================================
 
@@ -134,7 +134,7 @@ def A005315of0(x: int, 次n: int = 0) -> int:
 	nonnegative shifted-input precondition is not explicitly checked; a negative
 	shifted input raises ValueError through math.comb.
 	"""
-	return comb(x - 2 * 次n, 0)
+	return Y7Y_comb(x - 2 * 次n, 0)
 
 def A005315of1(x: int, 次n: int = 1) -> int:
 	"""A005315(1) = 1 at x = 2; A005315(2) = 2 at x = 3.
@@ -160,7 +160,7 @@ def A005315of2(x: int, 次n: int = 2) -> int:
 
 		D_2(x) = (x*x + 2*x + (x % 2) - 20) / 2.
 
-	The binomial expression below is exactly equivalent on that domain. The
+	The Y7Y_binomial expression below is exactly equivalent on that domain. The
 	quasipolynomial has degree 2 and minimal period 2; the independent cut proof
 	and its reported Lean formalization are described in reference [3].
 
@@ -169,7 +169,7 @@ def A005315of2(x: int, 次n: int = 2) -> int:
 	sufficiently small inputs raise ValueError through math.comb.
 	"""
 	x -= 2 * 次n
-	return 2 * ((comb((x + 6) // 2, 2) + comb((x + 7) // 2, 2)) - 5)
+	return 2 * ((Y7Y_comb((x + 6) // 2, 2) + Y7Y_comb((x + 7) // 2, 2)) - 5)
 
 def A005315of3(x: int, 次n: int = 3) -> int:
 	"""Return A005315(3) at x = 6 and A005315(4) at x = 7.
@@ -178,8 +178,8 @@ def A005315of3(x: int, 次n: int = 3) -> int:
 
 	With the default offset, these values are 8 and 42.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with D_3(x) is proved for every x >= 6 by Zhang and Ma,
 	Theorem 1. The stored rational function agrees exactly with certificate3.json.
@@ -190,20 +190,20 @@ def A005315of3(x: int, 次n: int = 3) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 3
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (4, 17, 17, -5, -22, -13, 6, 9, 1, -1)
 	denominator: tuple[int, ...] = (1, -1, -3, 2, 4, 0, -4, -2, 3, 1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of4(x: int, 次n: int = 4) -> int:
 	"""Return A005315(4) at x = 8 and A005315(5) at x = 9.
@@ -212,8 +212,8 @@ def A005315of4(x: int, 次n: int = 4) -> int:
 
 	With the default offset, these values are 42 and 262.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with D_4(x) is proved for every x >= 8 by Zhang and Ma,
 	Theorem 1. The stored rational function agrees exactly with certificate4.json.
@@ -224,20 +224,20 @@ def A005315of4(x: int, 次n: int = 4) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 4
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (21, 131, 292, 320, 118, -102, -89, 107, 193, 37, -196, -226, -8, 217, 199, 5, -106, -58, 14, 19, -2, -4)
 	denominator: tuple[int, ...] = (1, 0, -4, -2, 6, 8, -3, -12, -4, 8, 10, 0, -10, -8, 4, 12, 3, -8, -6, 2, 4, 0, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of5(x: int, 次n: int = 5) -> int:
 	"""Return A005315(5) at x = 10 and A005315(6) at x = 11.
@@ -246,8 +246,8 @@ def A005315of5(x: int, 次n: int = 5) -> int:
 
 	With the default offset, these values are 262 and 1828.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_5(x), x >= 10, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -260,23 +260,23 @@ def A005315of5(x: int, 次n: int = 5) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 5
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (131, 1045, 3505, 7365, 11088, 13643, 15743, 19375, 24467, 28832, 29618, 27221, 24022, 22856, 22893, 21943
 		, 18107, 12913, 8487, 6688, 6968, 7669, 6451, 3172, -106, -796, 830, 2166, 1217, -1102, -2348, -1422, 384, 1113, 472, -306, -329
 		, 50, 187, 66, -31, -21)
 	denominator: tuple[int, ...] = (1, 1, -3, -6, 0, 12, 11, -7, -20, -9, 16, 23, 3, -24, -25, 3, 27, 22, -5, -21, -17, 0, 17, 21, 5, -22
 		, -27, -3, 25, 24, -3, -23, -16, 9, 20, 7, -11, -12, 0, 6, 3, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of6(x: int, 次n: int = 6) -> int:
 	"""Return A005315(6) at x = 12 and A005315(7) at x = 13.
@@ -285,8 +285,8 @@ def A005315of6(x: int, 次n: int = 6) -> int:
 
 	With the default offset, these values are 1828 and 13820.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_6(x), x >= 12, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -299,16 +299,16 @@ def A005315of6(x: int, 次n: int = 6) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 6
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (914, 7824, 28951, 70374, 131821, 219341, 348589, 543932, 809543, 1146019, 1543605, 2021443, 2573226
 		, 3209519, 3885355, 4599005, 5294304, 5989069, 6613316, 7187300, 7630393, 7984353, 8159826, 8212490, 8074707, 7845946, 7458601
@@ -318,7 +318,7 @@ def A005315of6(x: int, 次n: int = 6) -> int:
 	denominator: tuple[int, ...] = (1, 1, -3, -6, 1, 13, 8, -13, -20, 3, 26, 15, -15, -28, -7, 19, 21, -2, -18, -8, 3, 3, 3, 18, 11, -21
 		, -30, 7, 38, 9, -30, -27, 14, 27, 0, -27, -14, 27, 30, -9, -38, -7, 30, 21, -11, -18, -3, -3, -3, 8, 18, 2, -21, -19, 7, 28, 15, -15
 		, -26, -3, 20, 13, -8, -13, -1, 6, 3, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of7(x: int, 次n: int = 7) -> int:
 	"""Return A005315(7) at x = 14 and A005315(8) at x = 15.
@@ -327,8 +327,8 @@ def A005315of7(x: int, 次n: int = 7) -> int:
 
 	With the default offset, these values are 13820 and 110954.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_7(x), x >= 14, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -341,16 +341,16 @@ def A005315of7(x: int, 次n: int = 7) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 7
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (6910, 62387, 255447, 732514, 1697318, 3550062, 6912599, 12817723, 22487914, 37870341, 61194477, 96088195
 		, 146084579, 216942629, 313418857, 444004118, 614165342, 835414736, 1112495985, 1459877991, 1879091953, 2387205141, 2979068595
@@ -365,7 +365,7 @@ def A005315of7(x: int, 次n: int = 7) -> int:
 		, 34, 34, -4, -43, 5, 45, 18, -28, -36, 17, 11, 4, -35, -12, -7, 7, 2, -1, 21, -7, -6, -14, 62, 40, -16, -66, 0, 66, 16, -40, -62, 14
 		, 6, 7, -21, 1, -2, -7, 7, 12, 35, -4, -11, -17, 36, 28, -18, -45, -5, 43, 4, -34, -34, 19, 21, 2, -13, -4, 5, 2, 7, 6, 7, -7, -12, -5
 		, 13, 14, -7, -19, -6, 14, 10, -5, -9, 0, 5, 2, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of8(x: int, 次n: int = 8) -> int:
 	"""Return A005315(8) at x = 16 and A005315(9) at x = 17.
@@ -374,8 +374,8 @@ def A005315of8(x: int, 次n: int = 8) -> int:
 
 	With the default offset, these values are 110954 and 933458.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_8(x), x >= 16, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -388,16 +388,16 @@ def A005315of8(x: int, 次n: int = 8) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 8
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (55477, 522206, 2314852, 7471768, 19845175, 47664132, 105511467, 220734152, 435909251, 826407875
 		, 1502611971, 2651001737, 4524555184, 7537371103, 12217239841, 19411527238, 30128939445, 45976116630, 68737186239, 101266013711
@@ -421,7 +421,7 @@ def A005315of8(x: int, 次n: int = 8) -> int:
 		, 52, 149, -200, 63, 138, -71, -124, -237, 164, -181, -26, -253, 133, -68, -5, -75, 53, 144, 0, 64, -65, 191, 25, 76, -116, 62, 43, -5
 		, -89, -56, 66, -50, -49, -79, 71, -12, -21, -39, 44, 39, -8, -9, 2, 47, 7, -2, -27, 13, 14, 1, -21, -8, 11, -3, -12, -5, 15, 2, -11
 		, -7, 10, 9, -3, -6, 0, 4, 1, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of9(x: int, 次n: int = 9) -> int:
 	"""Return A005315(9) at x = 18 and A005315(10) at x = 19.
@@ -430,8 +430,8 @@ def A005315of9(x: int, 次n: int = 9) -> int:
 
 	With the default offset, these values are 933458 and 8152860.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_9(x), x >= 18, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -444,16 +444,16 @@ def A005315of9(x: int, 次n: int = 9) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 9
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (466729, 4543159, 21484565, 75940876, 222762406, 590962139, 1438573545, 3302338533, 7150294834, 14855441170
 		, 29576159509, 57086577567, 106548386997, 194004349946, 343644747613, 596404693036, 1011166623296, 1684939833772, 2751303727007
@@ -492,7 +492,7 @@ def A005315of9(x: int, 次n: int = 9) -> int:
 		, -3672, 1414, -2948, 1518, -1436, 800, -182, 460, 1168, -200, 1650, -558, 2026, -693, 1571, -862, 1103, -538, 377, -504, -165, -42
 		, -575, -41, -722, 337, -641, 186, -511, 360, -201, 146, -67, 170, 161, 6, 151, -18, 215, -68, 119, -84, 93, -57, 8, -61, -3, 1, -40
 		, -31, -35, 35, -16, -6, -24, 25, 3, 0, -3, 14, 7, -7, -2, 6, 8, -4, -4, -1, 3, 0, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of10(x: int, 次n: int = 10) -> int:
 	"""Return A005315(10) at x = 20 and A005315(11) at x = 21.
@@ -501,8 +501,8 @@ def A005315of10(x: int, 次n: int = 10) -> int:
 
 	With the default offset, these values are 8152860 and 73424650.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_10(x), x >= 20, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -515,16 +515,16 @@ def A005315of10(x: int, 次n: int = 10) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 10
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (4076430, 40788755, 199563993, 733511107, 2254614431, 6301650666, 16205451986, 39323450209, 90074370130
 		, 198066802176, 417681946742, 854051926721, 1689473341756, 3260494983770, 6124059026063, 11269907145876
@@ -597,7 +597,7 @@ def A005315of10(x: int, 次n: int = 10) -> int:
 		, 5860, -6166, 1080, -1520, -2986, -1192, -5360, 2562, -5732, 1737, -5605, 3625, -3678, 2000, -2602, 2452, -478, 841, 119, 715, 1334
 		, -234, 1090, -417, 1399, -574, 771, -698, 653, -355, 172, -480, 16, -19, -143, -194, -201, 177, -150, -53, -163, 201, -34, -22, -82
 		, 123, 39, -20, -27, 48, 41, -24, -9, 15, 26, -18, -10, 1, 13, -5, -6, -3, 3, 0, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 def A005315of11(x: int, 次n: int = 11) -> int:
 	"""Return A005315(11) at x = 22 and A005315(12) at x = 23.
@@ -606,8 +606,8 @@ def A005315of11(x: int, 次n: int = 11) -> int:
 
 	With the default offset, these values are 73424650 and 678390116.
 	For t = x - 2*次n >= 0, return 2*[z^t] N(z)/Q(z), where N and Q have the
-	stored `numerator` and `denominator` coefficients in ascending order of degree.
-	`crunchCoefficients` consumes all numerator coefficients in order, then zeros.
+	stored `numerator` and `denominator` Z0Z_coefficients in ascending order of degree.
+	`Z0Z_crunchCoefficients` consumes all numerator Z0Z_coefficients in order, then zeros.
 
 	The identity with the whole counting diagonal D_11(x), x >= 22, remains
 	conjectural. Exact recurrence evaluation and verified anchor values do not
@@ -620,16 +620,16 @@ def A005315of11(x: int, 次n: int = 11) -> int:
 		Row input at the default offset; use x >= 2*次n.
 	次n : int = 11
 		Input-origin offset. Changing it translates this fixed formula without
-		selecting another coefficient table. The identities above use the default.
+		selecting another Z0Z_coefficient table. The identities above use the default.
 
 	Returns
 	-------
 	int
-		Twice the rational-series coefficient at x - 2*次n.
+		Twice the rational-series Z0Z_coefficient at x - 2*次n.
 
 	Notes
 	-----
-	A negative shifted input raises IndexError in `crunchCoefficients`.
+	A negative shifted input raises IndexError in `Z0Z_crunchCoefficients`.
 	"""
 	numerator: tuple[int, ...] = (36712325, 375907383, 1929414452, 7566598225
 		, 24920678269, 74693982045, 205600671062, 533738808678
@@ -745,7 +745,7 @@ def A005315of11(x: int, 次n: int = 11) -> int:
 		, 54381, 17780, 16060, 43256, -6431, 57145, -24162, 53883, -30064, 46553, -30555, 32278, -26473, 20403, -19211, 8498, -13240, 1050
 		, -5839, -4145, -2451, -6160, 2000, -6338, 2285, -5539, 4008, -3845, 2629, -2692, 2955, -1155, 1376, -629, 1366, 189, 274, 145, 347
 		, 460, -194, 200, -47, 307, -231, 86, -99, 131, -136, 11, -54, 43, -53, -10, -20, 12, -12, -6, -6, 2, -1, -1, -1)
-	return 2 * crunchCoefficients(x - 2 * 次n, numerator, denominator)
+	return 2 * Z0Z_crunchCoefficients(x - 2 * 次n, numerator, denominator)
 
 boxOfA005315of: list[CallableFunction[[int], int]] = [
 	A005315of0, A005315of1, A005315of2, A005315of3, A005315of4, A005315of5

@@ -6,28 +6,28 @@ from fractions import Fraction
 from functools import partial, reduce
 from typing import NamedTuple
 
-class PeriodicCoefficients(NamedTuple):
+class Z0Z_PeriodicCoefficients(NamedTuple):
 	period: int
 	byResidue: tuple[Fraction, ...]
 
-boxOfDegreesDescending: tuple[PeriodicCoefficients, PeriodicCoefficients, PeriodicCoefficients
-							, PeriodicCoefficients, PeriodicCoefficients, PeriodicCoefficients
-							, PeriodicCoefficients] = (
-	PeriodicCoefficients(1, (Fraction(49, 5 * 12**2 * 4 * 8),))
-	, PeriodicCoefficients(1, (Fraction(1171, 5 * 12**2 * 4**2),))
-	, PeriodicCoefficients(2, (Fraction(6893, 9 * 12 * 4 * 8)
+boxOfDegreesDescending: tuple[Z0Z_PeriodicCoefficients, Z0Z_PeriodicCoefficients, Z0Z_PeriodicCoefficients
+							, Z0Z_PeriodicCoefficients, Z0Z_PeriodicCoefficients, Z0Z_PeriodicCoefficients
+							, Z0Z_PeriodicCoefficients] = (
+	Z0Z_PeriodicCoefficients(1, (Fraction(49, 5 * 12**2 * 4 * 8),))
+	, Z0Z_PeriodicCoefficients(1, (Fraction(1171, 5 * 12**2 * 4**2),))
+	, Z0Z_PeriodicCoefficients(2, (Fraction(6893, 9 * 12 * 4 * 8)
 						, Fraction(27617, 9 * 12 * 4**2 * 8)))
-	, PeriodicCoefficients(2, (Fraction(3625, 12 * 4**2)
+	, Z0Z_PeriodicCoefficients(2, (Fraction(3625, 12 * 4**2)
 						, Fraction(7279, 12 * 4 * 8)))
-	, PeriodicCoefficients(2, (Fraction(11929, 5 * 4 * 8)
+	, Z0Z_PeriodicCoefficients(2, (Fraction(11929, 5 * 4 * 8)
 						, Fraction(578357, 5 * 12 * 4**2 * 8)))
-	, PeriodicCoefficients(6, (Fraction(6697, 5 * 12)
+	, Z0Z_PeriodicCoefficients(6, (Fraction(6697, 5 * 12)
 						, Fraction(4004017, 5 * 9 * 12 * 8**2)
 						, Fraction(60353, 5 * 9 * 12)
 						, Fraction(443753, 5 * 12 * 8**2)
 						, Fraction(60433, 5 * 9 * 12)
 						, Fraction(3998897, 5 * 9 * 12 * 8**2)))
-	, PeriodicCoefficients(24, (
+	, Z0Z_PeriodicCoefficients(24, (
 		Fraction(42, 1)
 		, Fraction(229381, 9 * (2**3)**3)
 		, Fraction(3161, 9 * 2**3)
@@ -55,7 +55,7 @@ boxOfDegreesDescending: tuple[PeriodicCoefficients, PeriodicCoefficients, Period
 	))
 )
 
-def _accumulate(accumulation: Fraction, accretion: PeriodicCoefficients, index: int) -> Fraction:
+def _accumulate(accumulation: Fraction, accretion: Z0Z_PeriodicCoefficients, index: int) -> Fraction:
 	return accumulation * index + accretion.byResidue[index % accretion.period]
 
 def diagonal4(x: int) -> int:

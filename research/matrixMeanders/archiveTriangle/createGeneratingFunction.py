@@ -51,13 +51,13 @@ def makeA005315Steps(次function: int) -> tuple[tuple[int, ...], tuple[int, ...]
 	return cyclotomicMultiplicitiesToSteps(dict(map(calculateCyclotomicMultiplicity, range(1, 2 * 次function + 1))))
 
 
-def _crunchNumerator(coefficients: tuple[int, ...], step: int) -> tuple[int, ...]:
-	unmodified, minuend = tuple(split_into(coefficients, (min(step, len(coefficients)), None)))
-	return (*unmodified, *map(sub, minuend, coefficients[0:-step]))
+def _crunchNumerator(Z0Z_coefficients: tuple[int, ...], step: int) -> tuple[int, ...]:
+	unmodified, minuend = tuple(split_into(Z0Z_coefficients, (min(step, len(Z0Z_coefficients)), None)))
+	return (*unmodified, *map(sub, minuend, Z0Z_coefficients[0:-step]))
 
 
-def _crunchDenominator(coefficients: tuple[int, ...], step: int, *, 次coefficient: int) -> tuple[int, ...]:
-	return tuple(take(次coefficient + zeroIndexed, chain.from_iterable(zip_longest(*map(accumulate, distribute(step, coefficients)), fillvalue=0))))
+def _crunchDenominator(Z0Z_coefficients: tuple[int, ...], step: int, *, Z0Z_次coefficient: int) -> tuple[int, ...]:
+	return tuple(take(Z0Z_次coefficient + zeroIndexed, chain.from_iterable(zip_longest(*map(accumulate, distribute(step, Z0Z_coefficients)), fillvalue=0))))
 
 def makeNumerator(sequence: Sequence[int], stepsNumerator: tuple[int, ...], stepsDenominator: tuple[int, ...], *,
 	multiplier: int = 1, numeratorLength: int | None = None) -> tuple[int, ...]:
@@ -70,11 +70,11 @@ def makeNumerator(sequence: Sequence[int], stepsNumerator: tuple[int, ...], step
 		message = f"I received `{len(sequence) = }` and `{numeratorLength = }`, but I need at least a positive numerator length of consecutive values."
 		raise ValueError(message)
 	numerator: tuple[int, ...] = reduce(_crunchNumerator, stepsDenominator, tuple(sequence[:numeratorLength]))
-	numerator = reduce(partial(_crunchDenominator, 次coefficient=numeratorLength - 1), stepsNumerator, numerator)
-	if any(map(lambda coefficient: coefficient % multiplier, numerator)):
-		message = f"I received `{multiplier = }`, but it does not divide every reconstructed numerator coefficient."
+	numerator = reduce(partial(_crunchDenominator, Z0Z_次coefficient=numeratorLength - 1), stepsNumerator, numerator)
+	if any(map(lambda Z0Z_coefficient: Z0Z_coefficient % multiplier, numerator)):
+		message = f"I received `{multiplier = }`, but it does not divide every reconstructed numerator Z0Z_coefficient."
 		raise ValueError(message)
-	return tuple(map(lambda coefficient: coefficient // multiplier, numerator))
+	return tuple(map(lambda Z0Z_coefficient: Z0Z_coefficient // multiplier, numerator))
 
 def makeA005315Formula(次function: int, diagonal: Mapping[int, int], *, multiplier: int = 2
 	) -> tuple[tuple[int, ...], tuple[int, ...], tuple[int, ...]]:

@@ -57,7 +57,7 @@ References
 from __future__ import annotations
 
 from functools import cache
-from itertools import combinations
+from itertools import combinations as Y7Y_combinations
 from mapFolding.beDRY import getTotalLeaves
 from math import prod
 from typing import TYPE_CHECKING
@@ -73,11 +73,11 @@ if TYPE_CHECKING:
 
 # To validate one folding, in each of the 2 dimensions, we must prove there are no crease violations.
 # We reduce the work by only comparing creases that have the same parity. By dimension and parity, the
-# total combinations is (14choose2) + 14c2 + 21c2 + 18c2 = 91 + 91 + 210 + 153 = 545 total calls to
+# total Y7Y_combinations is (Y7Y_14choose2) + Y7Y_14c2 + Y7Y_21c2 + Y7Y_18c2 = 91 + 91 + 210 + 153 = 545 total calls to
 # the function that checks for crease violations.
 
 # If ALL invalid foldings were eliminated before this module, we would still need to validate 545
-# combinations of creases for 1,171,669,604,282 foldings, which is 638,559,934,333,690 validations.
+# Y7Y_combinations of creases for 1,171,669,604,282 foldings, which is 638,559,934,333,690 validations.
 
 # Therefore, to pointlessly compute a value we already know, in addition to all of the other
 # computations in this package, ONE function in this module must run 638 trillion times.
@@ -229,7 +229,7 @@ def leavesPinnedValid吗(leavesPinned: PinnedLeaves, mapShape: tuple[int, ...]) 
 				boxOfPilePileCreaseByParity[oddLeaf吗(mapShape, leaf, dimension)].append((pile, lookupPile[crease]))
 		for groupedParity in boxOfPilePileCreaseByParity:
 			if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
-				for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
+				for (pile, pileCrease), (pileComparand, pileComparandCrease) in Y7Y_combinations(sorted(groupedParity), 2)):
 					#=SIN= Early return.
 					return False
 	return True

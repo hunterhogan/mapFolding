@@ -12,7 +12,7 @@ Diagonal Formula Status
 The first four fixed-diagonal formulas are proved on their stated domains. The formulas for
 diagonals five through eleven agree with known counts but remain conjectural as complete
 diagonal formulas. `mapFolding.oeis.A400429._A005315` [2] records domains, initial exceptions,
-coefficient representations, and proof references. Agreement printed by `checkFormulas` is a
+Z0Z_coefficient representations, and proof references. Agreement printed by `checkFormulas` is a
 comparison with available data, not an additional proof.
 
 Contents

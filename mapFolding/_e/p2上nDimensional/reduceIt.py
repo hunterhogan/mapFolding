@@ -20,7 +20,7 @@ from functools import partial
 from gmpy2 import bit_flip
 from humpy_cytoolz import get, groupby as toolz_groupby, keyfilter as filterPile, valfilter as filterLeaf
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
-from itertools import combinations
+from itertools import combinations as Y7Y_combinations
 from mapFolding._e import makeAntiChoicesLeaf
 from mapFolding._e.algorithms.iff import creaseViolation吗
 from mapFolding._e.filters import choicesLeaf吗, leafPinned吗, leaf吗, notPileLast, pileChoicesLeaf吗
@@ -183,7 +183,7 @@ def _crossedCreases2上nDimensional(state: StateElimination, permutationSpace: P
 			for upDown, leftRight in ((False, True), (True, False)):
 				leavesPinnedParityOpposite: PinnedLeaves = dict(get(upDown, groupedByParity, ()))
 
-				for ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in combinations(sorted(get(leftRight, groupedByParity, ())), 2):
+				for ((pileOf_k, leaf_k), (pileOf_r, leaf_r)) in Y7Y_combinations(sorted(get(leftRight, groupedByParity, ())), 2):
 					leaf_kCrease: Leaf = int(bit_flip(leaf_k, dimension))
 					leaf_rCrease: Leaf = int(bit_flip(leaf_r, dimension))
 

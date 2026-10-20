@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from inspect import getsource
-from research.matrixMeanders.archiveTriangle import A005315Binomial
+from research.matrixMeanders.archiveTriangle import Y7Y_A005315Binomial
 from typing import Any
 import ast
 import sympy
 
-src: str = getsource(A005315Binomial)
+src: str = getsource(Y7Y_A005315Binomial)
 tr: ast.Module = ast.parse(src)
 z, u = sympy.symbols('z u')
 

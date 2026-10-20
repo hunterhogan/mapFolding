@@ -12,7 +12,7 @@ def count(n: int) -> list[int]:
 	histogram: list[int] = [0] * (n + 1)
 	while archCode <= archCodeMaximum:  # C(n) iterations.
 		histogram[generations(archCode, bitEndpointFirst)] += 1
-		archCode = advanceDyck(archCode, Z0Z_calibrator)
+		archCode = Y7Y_advanceDyck(archCode, Z0Z_calibrator)
 	return histogram[1:None]
 
 def generations(archCode: int, bitEndpointFirst: int) -> int:
@@ -40,7 +40,7 @@ def findPartnerLast(archCode: int) -> int:
 		depth += 1 - 2 * bool(archCode & bitEndpointLast)
 	return bitEndpointLast
 
-def advanceDyck(archCode: int, archCodeAlternating: int) -> int:
+def Y7Y_advanceDyck(archCode: int, archCodeAlternating: int) -> int:
 	bitPivot: int = archCode & neg(archCode)
 	archCodePivoted: int = archCode + bitPivot
 	pairsReset: int = (((archCode ^ archCodePivoted) // bitPivot) >> 2) + 1
