@@ -1,6 +1,6 @@
 # n-choose-r terminology: (continued)
 
-## EXACT-SPELLING INDEX
+## Exact-Spelling Index
 
 Each entry includes source identifiers and textual occurrences with this exact
 spelling. Quoted labels, prose and imports are included; repeated appearances
@@ -1256,7 +1256,7 @@ values
 - Z0Z_research/catalanArches/formulasParents.py: 19-20, 22, 24-25, 28-30, 86-87, 89
 - Z0Z_research/constraint/archParentsPrototype.py: 118-120, 122, 124, 141-142, 144-145, 147-149, 153, 156-157, 160-162, 168, 172, 180, 185
 
-DOCUMENTARY NAME LOCATIONS
+Documentary NAME LOCATIONS
 
 工multiplicand
 

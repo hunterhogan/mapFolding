@@ -13,7 +13,7 @@ Functions
 		Write a counting module with compiled workers and a process dispatcher.
 	makeTheorem2
 		Write a counting module restricted to the initial fold-group search.
-	numbaOnTheorem2
+	makeTheorem2Numba
 		Write a Numba counting module from a Theorem 2 source variant.
 	trimTheorem2
 		Write a Theorem 2 variant with unconstrained-dimension branches removed.
@@ -34,8 +34,8 @@ from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import (
 	DeReConstructField2ast, findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass)
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
-from mapFolding.kitAST.prefab import toDisk
 from mapFolding.kitAST.paths import getLogicalPath
+from mapFolding.kitAST.prefab import toDisk
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
 from typing import TYPE_CHECKING
 import ast
@@ -262,8 +262,7 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-# SEMIOTICS
-def numbaOnTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a Numba counting module from a Theorem 2 source variant.
 
 	You can use this function to inline a Theorem 2 counting function, replace the state object
@@ -292,7 +291,7 @@ def numbaOnTheorem2(astModule: ast.Module, identifiers: Default | None = None, *
 	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
 
 		```python
-		numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
+		makeTheorem2Numba(parsePathFilename2astModule(pathFilename), defaultMapFolding)
 		```
 
 	References

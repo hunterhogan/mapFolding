@@ -1,37 +1,16 @@
 #=SIN=
 # DEVELOPMENT module.
 # ruff: file-ignore[undocumented-magic-method, undocumented-public-method]
-"""Count the six permutation stamp-folding and meander sequences.
-
-(AI generated docstring)
-
-You can use this module to study the mutable node tree, linked permutation intervals, wind-factor
-tracking, and symmetry filters from Sawada and Li's C implementation [1].
-
-Contents
---------
-Functions
-	doTheNeedful
-		Count one supported sequence at order `n`.
-
-References
-----------
-[1] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-meanders, and Open Meanders:
-	Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
-	https://doi.org/10.37236/2404
-"""
-
 from __future__ import annotations
 
 from itertools import repeat, starmap
-from mapFolding.oeis import getMetadata
-from mapFolding.theTypes import OEISid
 from typing import TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
-	from typing import Literal
+	from mapFolding.theTypes import Folding
+	from typing import Literal, LiteralString
 
 """# DEVELOPMENT mode specific
 - wind
@@ -59,7 +38,8 @@ class Interval:
 	nodeAfter: int = empty
 
 	def __post_init__(self) -> None:
-		# DEVELOPMENT The following statements are self-verifying and self-documenting.
+		# DEVELOPMENT The following statements are self-verifying and self-documenting, so don't mess
+		# with them unless you make something self-verifying and self-documenting as well.
 		if not self.end:
 			self.end.extend([left, right])
 			self.end[left] = empty
@@ -139,10 +119,6 @@ class StateStampMeander:
 		return len(self.boxOfPermutations)
 
 	def __post_init__(self) -> None:
-		"""I use this to allocate independent mutable records for one enumeration.
-
-		(AI generated docstring)
-		"""
 		totalDataStructures: int = 2 * self.n + 1
 		self.boxOfIntervals = tuple(starmap(Interval, repeat((), totalDataStructures)))
 		self.boxOfNodes = tuple(starmap(Node, repeat((), totalDataStructures)))
@@ -542,68 +518,68 @@ class SettingsMode:
 	semiMeanders: bool = False
 	symmetricSemiMeanders: bool = False
 
-@dataclasses.dataclass(frozen=True, slots=True)
-class SettingsGeneration:
-	# SEMIOTICS
-	Z0Z_normalizeIndex: int = 0
-
-lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
-	'A000136': (SettingsGeneration(), SettingsMode(folds=True)),
-	'A000560': (SettingsGeneration(), SettingsMode(symmetricSemiMeanders=True)),
-	'A000682': (SettingsGeneration(Z0Z_normalizeIndex=1), SettingsMode(semiMeanders=True)),
-	'A001011': (SettingsGeneration(), SettingsMode(folds=True, equivalenceClasses=True)),
-	'A005316': (SettingsGeneration(), SettingsMode(meanders=True)),
-	'A077055': (SettingsGeneration(Z0Z_normalizeIndex=-1), SettingsMode(meanders=True, equivalenceClasses=True)),
-}
-
-def doTheNeedful(oeisID: OEISid, n: int) -> StateStampMeander:
-	"""Count one permutation sequence at order `n` [1].
+def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
+	"""Generate stamp-folding or meander permutations at sequence index `n`.
 
 	(AI generated docstring)
 
-	You can use this function to select any of the six sequences implemented by Sawada and Li and
-	return the number of generated objects. The function creates fresh mutable state for every call.
-	The recursive core retains the paper's order convention; this boundary translates the current
-	OEIS indexing, which differs by one for A000682.
+	You can use this function to obtain the complete list of permutations for a canonical family
+	name. This function creates fresh enumeration state for every call. The public entry point
+	`mapFolding.basecamp.enumerateSequences` [1] resolves family aliases and optionally saves the
+	result. This function expects an already resolved `kind` and does not validate `n` or `kind`.
+
+	Sequence Indexing
+	-----------------
+	The enumeration core follows the permutation construction of Sawada and Li [2]. For `'semi'`,
+	the core uses one fewer leaf than `n`; saving adds the fixed first leaf. For
+	`'meanders symmetric'`, the core uses one more leaf than `n`. Other families use `n` directly.
+	The blank stamp-folding and symmetric open-meander choices retain equivalence-class
+	representatives [2].
 
 	Parameters
 	----------
-	oeisID : OEISid
-		Sequence identifier from A000136, A000560, A000682, A001011, A005316, or A077055.
 	n : int
-		Current OEIS index of the stamp folding, semi-meander, or open meander.
+		Sequence index in the domain documented by the public entry point [1].
+	kind : LiteralString
+		Canonical family name. Supported values are `'stamps'`, `'stamps blank'`, `'meanders'`,
+		`'meanders symmetric'`, `'semi'`, and `'semi-meanders symmetric'`. OEIS identifiers and
+		alternative family spellings must be resolved before this call.
 
 	Returns
 	-------
-	aOFn : int
-		Number of objects or equivalence classes at OEIS index `n`.
+	album : list[Folding]
+		Generated permutations in enumeration order. Each tuple lists leaf labels by pile position.
+		Each tuple contains `n` leaves, except `'meanders symmetric'`, which contains one additional
+		leaf. The list retains every generated representative in memory.
 
-	Raises
-	------
-	ValueError
-		Raised when `oeisID` is unsupported or `n` precedes the sequence's OEIS offset.
+	Examples
+	--------
+	The public entry point [1] calls this function after resolving `kind`.
+
+		```python
+		album: list[Folding] = doTheNeedful(n, kind)
+		```
 
 	References
 	----------
-	[1] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-meanders, and Open Meanders:
+	[1] `mapFolding.basecamp.enumerateSequences`
+
+	[2] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-Meanders, and Open Meanders:
 		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
-		https://doi.org/10.37236/2404
+		https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43
 	"""
-	if oeisID not in lookupSettings:
-		message: str = f'I received `{oeisID = }`, but the permutation algorithm supports only {tuple(lookupSettings)}.'
-		raise ValueError(message)
-
-	generationMode, mode = lookupSettings[oeisID]
-	if n < getMetadata(oeisID)['offset']:
-		message = f'I received `{n = }`, but OEIS sequence `{oeisID}` is not defined below `offset = {getMetadata(oeisID)['offset']}`.'
-		raise ValueError(message)
-
-	nNormalized: int = n - generationMode.Z0Z_normalizeIndex
+	mode: SettingsMode = SettingsMode(
+		equivalenceClasses=kind in {'stamps blank', 'meanders symmetric'},
+		folds=kind in {'stamps', 'stamps blank'},
+		meanders=kind in {'meanders', 'meanders symmetric'},
+		semiMeanders=kind == 'semi',
+		symmetricSemiMeanders=kind == 'semi-meanders symmetric',
+	)
+	nNormalized: int = n - mode.semiMeanders + (kind == 'meanders symmetric')
 	state: StateStampMeander = StateStampMeander(nNormalized)
 	if nNormalized == 0:
 		savePermutation(state, mode)
-
 	else:
 		initializeState(state)
 		state = count(state, mode)
-	return state
+	return state.boxOfPermutations

@@ -92,7 +92,7 @@ def _gatherFrontier(n下i: int, milepost: Milepost, n: int, splitDepth: int, *, 
 
 	return listQQ, totalFU
 
-def doTheNeedful(n: int, *, symmetric: bool) -> int:
+def doTheNeedful(n: int, *, symmetric: bool, concurrencyLimit: int | None = None) -> int:
 	totalPermutations: int = 1
 	milepost: Milepost = makeMilepost()
 	n下i: int = 1
@@ -106,7 +106,7 @@ def doTheNeedful(n: int, *, symmetric: bool) -> int:
 	if not 是.keepCounting:
 		return totalPermutations
 
-	cpuCount: int = os.cpu_count() or 1
+	cpuCount: int = (os.cpu_count() or 1) if concurrencyLimit is None else concurrencyLimit
 	# Split halfway down the recursion tree: produces O(3^(n/2)) tasks, each small enough
 	# that the pool drains them with negligible imbalance across all available cores.
 	splitDepth: int = max(4, n // 2)

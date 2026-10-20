@@ -19,7 +19,7 @@ from astToolkit.containers import LedgerOfImports
 from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.mapFolding._count import makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.kitAST.mapFolding._count import makeTheorem2, makeTheorem2Numba, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
 from mapFolding.kitAST.paths import getModule, getPathFilename
@@ -217,7 +217,7 @@ def makeModulesFoldsSymmetric() -> None:
 
 	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
-	numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
+	makeTheorem2Numba(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':
 	makeModulesFoldsSymmetric()

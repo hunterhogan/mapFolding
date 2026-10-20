@@ -1,10 +1,10 @@
 #=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
 #ruff: file-ignore[import-outside-top-level]
-"""Select and run map-folding and meander counting algorithms.
+"""Select and run map-folding, stamp-folding, and meander algorithms.
 
 You can use this module as the entry point for counting map foldings, rotationally symmetric
-foldings, and meander sequence terms. Each entry point selects an algorithm, prepares computation
-state, and optionally saves a result.
+foldings, and meander sequence terms, or enumerate stamp-folding and meander permutations. Each
+entry point selects an algorithm, prepares computation state, and optionally saves a result.
 
 Contents
 --------
@@ -15,18 +15,21 @@ Functions
 		Count foldings constrained by rotational symmetry.
 	countMeanders
 		Compute a meander term and return the completed computation state.
+	enumerateSequences
+		Generate stamp-folding or meander permutations, or return a bilateral count.
 """
 from __future__ import annotations
 
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders
-from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly
+from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly, writeAlbum
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy import ConcurrencyLimit
+	from mapFolding.theTypes import Folding
 	from os import PathLike
 	from pathlib import Path
 	from typing import Literal, LiteralString
@@ -391,3 +394,138 @@ def countMeanders(
 		saveTotal(pathFilenameCountTotal, countTotal)
 
 	return state
+
+def enumerateSequences(
+	n: int
+	, kind: LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None = None
+	, flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None = None
+	, pathLikeWrite: PathLike[str] | None = None
+	, *
+	, CPUlimit: ConcurrencyLimit = None
+	, suffix: str = '.album'
+) -> list[Folding] | int:
+	"""Generate stamp-folding or meander permutations at sequence index `n`.
+
+	(AI generated docstring)
+
+	You can use this function to obtain the permutations for a selected sequence, or count
+	semi-meanders without retaining the permutations. The permutation algorithm [1] returns a list.
+	Either bilateral algorithm [2, 3] returns an integer count. Providing `pathLikeWrite` also saves
+	the list or count to a new file.
+
+	Parameters
+	----------
+	n : int
+		Sequence index.
+	kind : LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None = 'semi'
+		Sequence family.
+	flow : Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None = 'permutations'
+		`'permutations'` generates a list for any supported family. `'bilateral'` and
+		`'bilateralConcurrent'` only count at the moment.
+	pathLikeWrite : PathLike[str] | None = None
+		New output filename or existing output directory. `None` skips all file output. An existing
+		directory receives a filename formed from the canonical family name, `n`, and `suffix`.
+		Relative file paths resolve under the default job directory [5].
+	CPUlimit : ConcurrencyLimit = None
+		Processor preference used only by `'bilateralConcurrent'`. `None`, `False`, and zero use the
+		default processor count; `True` selects one worker. Positive integers request a worker
+		count; negative integers reserve processors. Fractions between zero and one request a share
+		of processors; fractions between minus one and zero reserve a share. Other floats truncate
+		to integers. Resolution follows `mapFolding.beDRY.defineProcessorLimit` [6].
+	suffix : str = '.album'
+		Suffix for a generated filename. An explicit filename keeps its supplied suffix. This
+		parameter does not select the output format.
+
+	Returns
+	-------
+	album : list[Folding] | int
+		List of leaf-label tuples in generation order for the permutation algorithm, or an integer
+		count for either bilateral algorithm. Each tuple lists leaf labels by pile position. For
+		`'meanders symmetric'`, each tuple has one more leaf than `n`.
+
+	Output Files
+	------------
+	Path resolution creates missing parent directories [5]. Before computation,
+	`mapFolding.kitFilesystem.saveTotalFAILearly` [7] rejects an existing output file with
+	`FileExistsError`, then writes and reads a test integer for a new file. The test integer
+	remains in the output file if subsequent computation fails. Successful permutation
+	enumeration replaces the test integer with one comma-separated record per folding through
+	`mapFolding.kitFilesystem.writeAlbum` [8]. Bilateral counting writes the integer count through
+	`mapFolding.kitFilesystem.saveTotal` [9], even when the filename ends in `'.album'`.
+
+	Examples
+	--------
+	The script `easyRun/permutations.py` supplies the computation choices and handles both return
+	types with this call.
+
+		```python
+		album = enumerateSequences(n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit)
+		total: int = album if isinstance(album, int) else len(album)
+		```
+
+	References
+	----------
+	[1] `mapFolding.algorithms.permutations.doTheNeedful`
+
+	[2] `mapFolding.algorithms.permutationsBilateral.doTheNeedful`
+
+	[3] `mapFolding.algorithms.permutationsBilateralConcurrent.doTheNeedful`
+
+	[4] `mapFolding.oeis.getMetadata`
+
+	[5] `mapFolding.kitFilesystem.makePathFilenameCount`
+
+	[6] `mapFolding.beDRY.defineProcessorLimit`
+
+	[7] `mapFolding.kitFilesystem.saveTotalFAILearly`
+
+	[8] `mapFolding.kitFilesystem.writeAlbum`
+
+	[9] `mapFolding.kitFilesystem.saveTotal`
+
+	"""
+	lookupParameterKind: dict[LiteralString | str | None, LiteralString | None] = {'a000136': 'stamps', 'A000136': 'stamps'
+		, 'a000560': 'semi-meanders symmetric', 'A000560': 'semi-meanders symmetric', 'a000682': 'semi', 'A000682': 'semi'
+		, 'a001011': 'stamps blank', 'A001011': 'stamps blank', 'a005316': 'meanders', 'A005316': 'meanders'
+		, 'a077055': 'meanders symmetric', 'A077055': 'meanders symmetric', 'meanders symmetric': 'meanders symmetric'
+		, 'meanders': 'meanders', 'semi-meanders symmetric': 'semi-meanders symmetric', 'semi-meanders': 'semi', 'semi': 'semi'
+		, 'semimeanders symmetric': 'semi-meanders symmetric', 'semimeanders': 'semi', 'stamps blank': 'stamps blank', 'stamps': 'stamps'
+		, None: None}
+	kind = lookupParameterKind[kind]
+	kind = kind or 'semi'
+
+#-------- memorialization instructions ---------------------------------------------
+
+	if pathLikeWrite is None:
+		pathFilenameAlbum: Path | None = None
+	else:
+		pathFilenameAlbum = saveTotalFAILearly(makePathFilenameCount(pathLikeWrite, kind, str(n), suffix=suffix))
+
+#-------- Algorithm selection and execution ---------------------------------------------
+
+	if flow in {'bilateral', 'bilateralConcurrent'}:
+		n = {'semi': n - 1, 'semi-meanders symmetric': n}[kind]
+		symmetric: bool = kind == 'semi-meanders symmetric'
+		if flow == 'bilateralConcurrent':
+			from mapFolding.algorithms.permutationsBilateralConcurrent import doTheNeedful
+
+			countTotal: int = doTheNeedful(n, symmetric=symmetric, concurrencyLimit=defineProcessorLimit(CPUlimit))
+		else:
+			from mapFolding.algorithms.permutationsBilateral import doTheNeedful
+
+			countTotal = doTheNeedful(n, symmetric=symmetric)
+
+		if pathFilenameAlbum is not None:
+			saveTotal(pathFilenameAlbum, countTotal)
+		return countTotal
+
+	from mapFolding.algorithms.permutations import doTheNeedful
+
+	album: list[Folding] = doTheNeedful(n, kind)
+
+#-------- Follow memorialization instructions ---------------------------------------------
+
+	if pathFilenameAlbum is not None:
+		writeAlbum(album, pathFilenameAlbum)
+
+	return album

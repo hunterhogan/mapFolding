@@ -46,7 +46,7 @@ terminology and COMBIN/CHOOSE formula calls. No matches were found. I assumed th
 
 ## Issues
 
-### MOST IMPORTANT DISTINCTIONS ALREADY PRESENT
+### Most Important Distinctions Already Present
 
 1. "Binomial coefficient" has two different referents. binomial(top, degree) and
    comb(...) produce n-choose-r values. binomialCoefficients in the Catalan CSV,
@@ -88,7 +88,7 @@ terminology and COMBIN/CHOOSE formula calls. No matches were found. I assumed th
    individual Catalan multipliers, in ascending basis order. This is a different
    representation, not merely another spelling of the stored row.
 
-### SCALAR OPERATIONS AND RELATED COMBINATORIAL OPERATIONS
+### Scalar Operations And Related Combinatorial Operations
 
 binomial(top, degree) -> int
 
@@ -180,7 +180,7 @@ Production versus archived A005315 representations:
 - numerator, denominator and 次coefficient are polynomial/series coefficient
 - labels in the production version, not scalar n-choose-r arguments.
 
-### BASIS SEQUENCES, MULTIPLIERS AND EVALUATORS
+### Basis Sequences, Multipliers And Evaluators
 
 工boxOfBasisBinomial(top, start, stop=None, step=1)
 
@@ -237,7 +237,7 @@ The notebook cells 7 and 17 redefine the evaluator names locally for experiments
 Their references 工growthBinomialReference and 工antiCatalanReference are captured
 callables; their names do not denote stored numeric reference tables.
 
-### THE DIFFERENT COEFFICIENT FAMILIES
+### The Different Coefficient Families
 
 Original Catalan-linear coefficient rows:
 
@@ -269,7 +269,7 @@ Growth residual coefficients:
 - The terms "growth terms", "growth tuples", "residual tuples" and
 - "binomial coefficients" refer to different stages in these operations.
 
-Laws across polynomial degrees:
+Laws Across Polynomial Degrees:
 
 - `lookupDegreeFormulas[parityEven,less][position]`, `lookupGrowthDegreeFormulas`,
 - degreeFormula; b_{less,q} in explain/A CoefficientAnalysis.md.
@@ -313,7 +313,7 @@ Cyclic/quasipolynomial binomial multipliers:
 - and basis(offset,label) = comb((offset+shift)//period,degree).
 - These are a separate binomial-basis representation of A005315 formulas.
 
-### COORDINATES AND CONTROL LABELS
+### Coordinates And Control Labels
 
 top
 
@@ -396,7 +396,7 @@ formulasAntiCatalan; totalCatalan; totalBasis; totalCoefficients
 - boxOfAntiCatalanPositions and boxOfCatalanPositions are coordinate ranges;
 - their elements are not Catalan values.
 
-### PERSISTED FILES, COLUMN LABELS, TYPES AND NOTEBOOK STATE
+### Persisted Files, Column Labels, Types And Notebook State
 
 All nine research CSVs live under Z0Z_research/catalanArches/data.
 
@@ -472,7 +472,7 @@ Other output labels:
 - These labels can describe values, residual weights or changes to weights;
 - consult the producing function rather than inferring identity from 'terms'.
 
-### MATHEMATICAL NOTATION IN LOCAL EXPLANATIONS
+### Mathematical Notation In Local Explanations
 
 explain/A CoefficientAnalysis.md
 
@@ -528,7 +528,7 @@ Additional representations:
 - 'unimplemented-sequence'. constraintPropagationPrototype.py resolves that ID
 - directly with catalan(n); these are different access layers.
 
-### DOCUMENTATION-ONLY OR HISTORICAL SPELLINGS
+### Documentation-Only Or Historical Spellings
 
 explain/A CoefficientAnalysis.md contains names not defined by current Python:
 
@@ -548,7 +548,7 @@ count is 次kMaximum-4 (32-4). Treat numerical claims in those notes as historic
 until checked against the current implementation/data. No such verification was
 performed in this naming review.
 
-### BOUNDARY CASES THAT SHOULD NOT BE MERGED INTO ONE CONCEPT
+### Boundary Cases That Should Not Be Merged Into One Concept
 
 The test ID cancel-part-of-binomial at test_Z0Z_generatingFunction.py:36,69 refers
 to cancellation involving a two-term polynomial (1+x), rather than an n-choose-r
@@ -564,6 +564,6 @@ are the principal additional explicit families beyond binomial and Catalan.
 The remaining appendices provide the exact spellings and all matched locations.
 Line ranges compress consecutive matching lines; gaps are never filled in.
 
-## EXACT-SPELLING INDEX
+## Exact-Spelling Index
 
 Continued in development/nChooseR-inventoryAnnex.md

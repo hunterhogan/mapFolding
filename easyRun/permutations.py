@@ -1,65 +1,48 @@
 # pyright: reportUnnecessaryComparison=false
 from __future__ import annotations
 
-from mapFolding.algorithms.permutations import doTheNeedful, StateStampMeander
-from mapFolding.algorithms.permutationsBilateral import doTheNeedful as bilateral
-from mapFolding.algorithms.permutationsBilateralConcurrent import doTheNeedful as bilateralConcurrent
-from mapFolding.kitFilesystem import makePathFilenameCount, writeAlbum
+from mapFolding.basecamp import enumerateSequences
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
+from pprint import pprint
 from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
+	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import OEISid
 	from os import PathLike
+	from typing import Literal
 
 if __name__ == '__main__':
 	flow = 'permutations'
-	flow = 'bilateral'
 	flow = 'bilateralConcurrent'
+	flow = 'bilateral'
 
-	boxOfOEISid: list[OEISid] = []
+	boxOfSequences: list[tuple[OEISid, Literal['stamps blank', 'stamps', 'meanders symmetric', 'meanders', 'semi-meanders symmetric', 'semi']]] = []
 	pathLikeWrite: PathLike[str] | None = None
+	CPUlimit: ConcurrencyLimit = None
 
 	if False:
 		n: int = 2
-		boxOfOEISid.append('A001011')
-		boxOfOEISid.append('A000136')
-		boxOfOEISid.append('A077055')
-		boxOfOEISid.append('A005316')
-		boxOfOEISid.append('A000560')
+		boxOfSequences.append(('A001011', 'stamps blank'))
+		boxOfSequences.append(('A000136', 'stamps'))
+		boxOfSequences.append(('A077055', 'meanders symmetric'))
+		boxOfSequences.append(('A005316', 'meanders'))
+		boxOfSequences.append(('A000560', 'semi-meanders symmetric'))
 	if True:
-		boxOfOEISid.append('A000682')
+		boxOfSequences.append(('A000682', 'semi'))
 
 	ratio: int = 0
 
-	for oeisID in boxOfOEISid:
+	for oeisID, kind in boxOfSequences:
 		printEasyRunHeader(oeisID, flow)
 
-		for n in range(2, 20):
+		for n in range(6, 7):
 
 			timeStart: float = time.perf_counter()
-			# Until I figure out how to integrate into basecamp, this must be a proto-basecamp
-			# Need CPUlimit argument.
-			# Still too slow: try numba and/or codon.
-			if flow == 'bilateralConcurrent':
-				if oeisID == 'A000560' and 2 <= n:
-					total: int = bilateralConcurrent(n, symmetric=True)
-				elif oeisID == 'A000682' and 3 <= n:
-					total = 2 * bilateralConcurrent(n - 1, symmetric=True)
-				else:
-					total = bilateralConcurrent(n - 1, symmetric=False)
-			elif flow == 'bilateral':
-				if oeisID == 'A000560' and 2 <= n:
-					total = bilateral(n, symmetric=True)
-				elif oeisID == 'A000682' and 3 <= n:
-					total = 2 * bilateralConcurrent(n - 1, symmetric=True)
-				else:
-					total = bilateral(n - 1, symmetric=False)
-			else:
-				state: StateStampMeander = doTheNeedful(oeisID, n)
-				total = state.total
-				if pathLikeWrite is not None:
-					writeAlbum(state.boxOfPermutations, makePathFilenameCount(pathLikeWrite, oeisID, n, suffix='.album'))
+			album = enumerateSequences(n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit)
+			total: int = album if isinstance(album, int) else len(album)
 
 			printEasyRunBenchmark(oeisID, n, total, timeStart, ratio=ratio)
+
+			# pprint(album)

@@ -20,14 +20,15 @@ References
 
 from __future__ import annotations
 
+import dataclasses
 from itertools import repeat, starmap
 from pprint import pprint
 from typing import TYPE_CHECKING
-import dataclasses
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import OEISid
 	from typing import Literal
+
+	from mapFolding.theTypes import OEISid
 
 type Side = Literal['left', 'right']
 

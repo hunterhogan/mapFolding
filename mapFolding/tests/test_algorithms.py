@@ -24,31 +24,31 @@ consistent with the established mathematical foundation.
 The `test_writeJobNumba` function shows how to test dynamically generated code,
 which is useful if you're working with the code synthesis features of the package.
 """
-
 from __future__ import annotations
 
 from itertools import product as CartesianProduct
-from mapFolding.algorithms.permutations import doTheNeedful
-from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders, enumerateSequences
 from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
 from mapFolding.kitAST.numba.makeJob import makeJobNumba
 from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
+from mapFolding.kitFilesystem import readAlbum, writeAlbum
 from mapFolding.oeis import getTotalFoldsKnown, getValuesKnown, makeMapShape
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from mapFolding.tests import assertEqualTo
+from mapFolding.tests.dataSamples.sequenceAlbums import albumSemi4, parametersEnumeration, parametersErrors
 from numba.core.errors import NumbaPendingDeprecationWarning
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 import pytest
 import runpy
 import warnings
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import OEISid
+	from hunterMakesPy import ConcurrencyLimit
+	from mapFolding.theTypes import Folding, OEISid
 	from os import PathLike
-	from pathlib import Path
-	from typing import LiteralString
+	from typing import Literal, LiteralString
 
 @pytest.mark.parametrize('CPUlimit', (None,))
 @pytest.mark.parametrize('oeisID, n, flow'
@@ -152,34 +152,49 @@ def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Pat
 	actual: str = pathFilenameTotalFolds.read_text(encoding='utf-8').strip()
 	assertEqualTo(actual, expected, 'Path.read_text', pathFilenameTotalFolds, encoding='utf-8')
 
-# TODO These tests do not conform.
-@pytest.mark.parametrize(
-	'oeisID, n, expected',
-	[
-		pytest.param('A000136', 6, 144, id='stamp-foldings'),
-		pytest.param('A000560', 6, 33, id='symmetric-semi-meanders'),
-		pytest.param('A000682', 6, 24, id='semi-meanders'),
-		pytest.param('A001011', 6, 38, id='unlabeled-stamp-foldings'),
-		pytest.param('A005316', 0, 1, id='open-meanders-base'),
-		pytest.param('A005316', 6, 14, id='open-meanders'),
-		pytest.param('A077055', 0, 1, id='symmetric-open-meanders-base'),
-		pytest.param('A077055', 6, 13, id='symmetric-open-meanders'),
-		pytest.param('A077055', 7, 42, id='symmetric-open-meanders-odd'),
-		pytest.param('A000682', 1, 1, id='semi-meanders-base'),
-		pytest.param('A000682', 2, 1, id='semi-meanders-index-shift'),
-	],
-)
-def test_doTheNeedful(oeisID: OEISid, n: int, expected: int) -> None:
-	assertEqualTo(doTheNeedful(oeisID, n).total, expected, doTheNeedful.__name__, oeisID, n)
+@pytest.mark.parametrize('suffix', ('.album', '.csv'))
+@pytest.mark.parametrize('pathLikeWrite', (None, Path(), Path('nested/sequences.album')))
+@pytest.mark.parametrize('n, kind, flow, CPUlimit, oeisID', parametersEnumeration)
+def test_enumerateSequences(
+	n: int, kind: LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None,
+	flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None,
+	pathLikeWrite: PathLike[str] | None, *, CPUlimit: ConcurrencyLimit, suffix: str, expected: int,
+	pathRootJobDEFAULTTesting: Path
+) -> None:
+	if pathLikeWrite == Path():
+		pathLikeWrite = pathRootJobDEFAULTTesting
+	actual: list[Folding] | int = enumerateSequences(n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
+	if flow in {'bilateral', 'bilateralConcurrent'}:
+		assertEqualTo(actual, expected, enumerateSequences.__name__, n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
+	elif isinstance(actual, list):
+		assertEqualTo(len(actual), expected, enumerateSequences.__name__, n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
+		assertEqualTo(len(set(actual)), expected, enumerateSequences.__name__, n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
+	if pathLikeWrite is None:
+		assertEqualTo(tuple(pathRootJobDEFAULTTesting.iterdir()), (), enumerateSequences.__name__, n, kind, flow, pathLikeWrite)
+	else:
+		pathFilenameAlbum: Path = (
+			pathRootJobDEFAULTTesting / f"{kind or 'semi'}_{n}{suffix}"
+			if pathLikeWrite == pathRootJobDEFAULTTesting else pathRootJobDEFAULTTesting / pathLikeWrite
+		)
+		if isinstance(actual, int):
+			assertEqualTo(pathFilenameAlbum.read_text(encoding='utf-8'), str(expected), enumerateSequences.__name__, n, kind, flow, pathLikeWrite)
+		elif n == 0 and kind == 'meanders':
+			assertEqualTo(pathFilenameAlbum.read_text(encoding='utf-8'), '\n', enumerateSequences.__name__, n, kind, flow, pathLikeWrite)
+		else:
+			assertEqualTo(readAlbum(pathFilenameAlbum), tuple(actual), enumerateSequences.__name__, n, kind, flow, pathLikeWrite)
 
-@pytest.mark.parametrize(
-	'oeisID, n, match',
-	[
-		pytest.param('A999999', 6, 'supports only', id='unsupported-sequence'),
-		pytest.param('A000136', 0, 'not defined below', id='stamp-folding-before-offset'),
-		pytest.param('A000560', 1, 'not defined below', id='symmetric-semi-meander-before-offset'),
-	],
-)
-def test_doTheNeedful_error(oeisID: OEISid, n: int, match: str) -> None:
-	with pytest.raises(ValueError, match=match):
-		doTheNeedful(oeisID, n)
+@pytest.mark.parametrize('suffix', ('.album',))
+@pytest.mark.parametrize('n, kind, flow, pathLikeWrite, CPUlimit, expected', parametersErrors)
+def test_enumerateSequencesError(
+	n: int, kind: LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None,
+	flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None,
+	pathLikeWrite: PathLike[str] | None, *, CPUlimit: ConcurrencyLimit, suffix: str, expected: type[Exception],
+	pathRootJobDEFAULTTesting: Path
+) -> None:
+	if pathLikeWrite is not None:
+		pathLikeWrite = pathRootJobDEFAULTTesting / pathLikeWrite
+		writeAlbum(albumSemi4, pathLikeWrite)
+	with pytest.raises(expected):
+		enumerateSequences(n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
+	if pathLikeWrite is not None:
+		assertEqualTo(readAlbum(Path(pathLikeWrite)), tuple(albumSemi4), enumerateSequences.__name__, n, kind, flow, pathLikeWrite)

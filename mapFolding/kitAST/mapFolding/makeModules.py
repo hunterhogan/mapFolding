@@ -12,7 +12,7 @@ Functions
 from __future__ import annotations
 
 from astToolkit.filesystem import parsePathFilename2astModule
-from mapFolding.kitAST.mapFolding._count import makeInlineNumba, makeInlineParallelNumba, makeTheorem2, numbaOnTheorem2, trimTheorem2
+from mapFolding.kitAST.mapFolding._count import makeInlineNumba, makeInlineParallelNumba, makeTheorem2, makeTheorem2Numba, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
 from mapFolding.kitAST.paths import getModule
@@ -51,7 +51,7 @@ def makeModulesMapFolding() -> None:
 	makeInitializeState(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 	pathFilename: PurePath = makeTheorem2(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
-	numbaOnTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
+	makeTheorem2Numba(parsePathFilename2astModule(pathFilename), defaultMapFolding)
 
 if __name__ == '__main__':
 	makeModulesMapFolding()

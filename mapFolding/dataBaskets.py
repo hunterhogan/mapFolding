@@ -538,7 +538,7 @@ class StateMeanders:
 		and arch-code threshold. This method returns `None`. The active lookup must be nonempty.
 		"""
 		self.boundary -= 1
-		self.setBitWidth()
+		self._setBitWidth()
 		self.setBitsLocator()
 		self.set_arcCodeMaximum()
 
@@ -550,18 +550,8 @@ class StateMeanders:
 		"""
 		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
 
-	# SEMIOTICS
-	# What is `def setBitWidth`?
-	# `self.bitWidth = max(self.lookupMeanders.keys()).bit_length()`
-	# `bitWidth` is a variable. More precisely, it is a `field` in a `dataclass`, and therefore requires dot-notation syntax.
-	# `max(self.lookupMeanders.keys()).bit_length()` is an expression specifically designed to "inform" the variable.
-	# Therefore, in my current semiotic system, "工bitWidth" is the precise label for `max(self.lookupMeanders.keys()).bit_length()`.
-	# Simplify to the statement, `self.bitWidth = 工bitwidth(...)`.
-	# `setBitWidth` is a subroutine that realizes the statement `self.bitWidth = 工bitwidth(...)`.
-	# Therefore, what the fuck do I call it?
-
-	def setBitWidth(self) -> None:
-		"""Set the arch-code bit width from the largest active lookup key.
+	def _setBitWidth(self) -> None:
+		"""I use this to refresh the arch-code bit width during initialization and boundary reduction.
 
 		This method updates `self.bitWidth` from the largest key in `self.lookupMeanders` and returns
 		`None`. An empty lookup propagates `ValueError` from the maximum-key calculation.
@@ -587,7 +577,7 @@ class StateMeanders:
 
 		See Also
 		--------
-		`StateMeanders.setBitWidth`
+		`StateMeanders._setBitWidth`
 			Derive the width from the stored lookup instead of an array.
 
 		References
@@ -647,7 +637,7 @@ class StateMeanders:
 			from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders
 			self.lookupMeanders = makeLookupMeanders(self.kind, self.n, self.boundary)
 
-		self.setBitWidth()
+		self._setBitWidth()
 		self.setBitsLocator()
 		self.set_arcCodeMaximum()
 
