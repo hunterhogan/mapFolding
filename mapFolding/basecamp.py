@@ -23,7 +23,7 @@ Functions
 from __future__ import annotations
 
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
-from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders
+from mapFolding.dataBaskets import StateElimination, StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly, writeAlbum
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
@@ -398,6 +398,121 @@ def countMeanders(
 		saveTotal(pathFilenameCountTotal, countTotal)
 
 	return state
+
+def eliminateFolds(
+	mapShape: tuple[int, ...] | None = None
+	, state: StateElimination | None = None
+	, pathLikeWrite: PathLike[str] | None = None
+	, *
+	, CPUlimit: ConcurrencyLimit = None
+	, flow: str | None = None
+	, suffix: str = '.totalFolds'
+) -> int:
+	"""Count distinct map foldings by eliminating invalid leaf arrangements.
+
+	(AI generated docstring)
+
+	You can run the selected algorithm for `mapShape` or the supplied `state`. When you supply `state`,
+	you use its shape and existing search space. You can also save the count to `pathLikeWrite`.
+
+	Parameters
+	----------
+	mapShape : tuple[int, ...] | None = None
+		Nonempty tuple of nonnegative dimension lengths. Required when `state` is absent.
+	state : StateElimination | None = None
+		Existing elimination state [1]. The selected algorithm can mutate `state`.
+	pathLikeWrite : PathLike[str] | None = None
+		Filename or destination directory for the count. `None` disables writing. A directory receives a
+		filename derived from the map shape [2].
+	CPUlimit : ConcurrencyLimit = None
+		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit` [3]. `None`, `False`, and `0`
+		use available processors; `True` selects one. Positive integers cap usage, negative integers reserve
+		processors, and fractions specify the proportion to use or reserve.
+	flow : str | None = None
+		Algorithm selector. `None`, `'elimination'`, and unrecognized strings select elimination [4].
+		`'constraintPropagation'` selects the constraint solver [5]. `'crease'` selects the specialized
+		crease algorithm [6].
+	suffix : str = '.totalFolds'
+		Suffix used when creating the output filename.
+
+	Returns
+	-------
+	totalFolds : int
+		Count after applying the selected algorithm's symmetry multipliers. A shape containing zero returns
+		`1`.
+
+	Raises
+	------
+	ValueError
+		If neither `state` nor a nonempty `mapShape` is supplied, or shape validation fails.
+	NotImplementedError
+		If `flow` is `'crease'` and the nonzero shape is not `(2,) * n` for `n >= 4`.
+
+	Examples
+	--------
+	The computation script passes both input and output options.
+
+		```python
+		computed = eliminateFolds(
+			mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow
+		)
+		```
+
+	References
+	----------
+	[1] `mapFolding.dataBaskets.StateElimination`
+
+	[2] `mapFolding.kitFilesystem.makePathFilenameFolds`
+
+	[3] `mapFolding.beDRY.defineProcessorLimit`
+
+	[4] `mapFolding.algorithms.elimination.doTheNeedful`
+
+	[5] `mapFolding.algorithms.constraintPropagation.doTheNeedful`
+
+	[6] `mapFolding.algorithms.eliminationCrease.doTheNeedful`
+	"""
+	if not state:
+		if not mapShape:
+			message: str = f'I received `{mapShape = }` and `{state = }`, and I was unable to select a `mapShape`.'
+			raise ValueError(message)
+		state = StateElimination(mapShape)
+
+	concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
+
+	#-------- Memorialization instructions ---------------------------------------------
+
+	if pathLikeWrite is None:
+		pathFilenameTotalFolds: Path | None = None
+	else:
+		pathFilenameTotalFolds = makePathFilenameFolds(state.mapShape, pathLikeWrite, suffix=suffix)
+		saveTotalFAILearly(pathFilenameTotalFolds)
+
+	#-------- Algorithm version -----------------------------------------------------
+
+	if 0 in state.mapShape:
+		totalFolds: int = 1
+	else:
+		match flow:
+			case 'constraintPropagation':
+				from mapFolding.algorithms.constraintPropagation import doTheNeedful
+			case 'crease':
+				if mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=4):
+					from mapFolding.algorithms.eliminationCrease import doTheNeedful
+				else:
+					message: str = f'`{flow = }` is restricted to `mapShape` = (2,) * n, 4 <= n. Did I forget to update this check?'
+					raise NotImplementedError(message)
+			case 'elimination' | _:
+				from mapFolding.algorithms.elimination import doTheNeedful
+
+		totalFolds = doTheNeedful(state, concurrencyLimit).totalFolds
+
+	#-------- Follow memorialization instructions ---------------------------------------------
+
+	if pathFilenameTotalFolds is not None:
+		saveTotal(pathFilenameTotalFolds, totalFolds)
+
+	return totalFolds
 
 def enumerateSequences(
 	n: int

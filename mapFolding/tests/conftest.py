@@ -11,6 +11,7 @@ import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
+	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import OEISid
 	from numpy.typing import NDArray
 	from pathlib import Path
@@ -92,3 +93,23 @@ def loadArrayFoldings() -> Callable[[int], NDArray[numpy.uint8]]:
 	def loader(totalDimensions: int) -> NDArray[numpy.uint8]:
 		return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
 	return loader
+
+@pytest.fixture()
+def path_tmpTesting(tmp_path: Path) -> Path:
+	return tmp_path
+
+@pytest.fixture()
+def arrayAlbum(totalDimensions: int) -> NDArray[numpy.uint8]:
+	return readDataFrame(makePathFilenameArrayFoldings(totalDimensions)).to_numpy(dtype=numpy.uint8, copy=False)
+
+@pytest.fixture(params=(0.75,))
+def CPUlimit(request: pytest.FixtureRequest) -> ConcurrencyLimit:
+	return request.param
+
+@pytest.fixture()
+def expectedAlbum(request: FixtureRequest, loadArrayFoldings: Callable[[int], NDArray[numpy.uint8]]) -> NDArray[numpy.uint8]:
+	return loadArrayFoldings(int(request.param))
+
+@pytest.fixture(params=(2, 3, 4), ids=lambda pileDepth: f"pileDepth={pileDepth}")
+def pileDepthPinningTests(request: pytest.FixtureRequest) -> int:
+	return int(request.param)

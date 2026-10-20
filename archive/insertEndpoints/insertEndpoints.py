@@ -29,7 +29,7 @@ References
 [1] Albert Sadé (1949). Sur les Chevauchements des Permutations. Chez l’auteur, Marseille, France.
 Available at https://oeis.org/A000108/a000108_17.pdf.
 
-[2] `mapFolding._e.algorithms.iff.creaseViolation吗`
+[2] `mapFolding.algorithms.iff.creaseViolation吗`
 """
 
 from __future__ import annotations
@@ -42,8 +42,8 @@ from typing import TYPE_CHECKING
 
 from hunterMakesPy import decreasing, inclusive
 from mapFolding import endpointOrigin, positionOrigin
-from mapFolding._e.algorithms.iff import creaseViolation吗 as archesCross吗
-from mapFolding._e.algorithms.iff import foldingValid吗 as diagramValid吗
+from mapFolding.algorithms.iff import creaseViolation吗 as archesCross吗
+from mapFolding.algorithms.iff import foldingValid吗 as diagramValid吗
 
 if TYPE_CHECKING:
 	from collections.abc import Collection

@@ -95,7 +95,7 @@ if TYPE_CHECKING:
 	from _csv import Writer
 	from collections.abc import Iterable, Mapping, Sequence
 	from io import TextIOWrapper
-	from mapFolding._e.dataBaskets import StateElimination
+	from mapFolding.dataBaskets import StateElimination
 	from mapFolding.theTypes import Folding, 形Triangle, 形TriangleSparse
 	from os import PathLike
 	from pandas import DataFrame

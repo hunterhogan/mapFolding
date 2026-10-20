@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from contextlib import redirect_stdout
 from hunterMakesPy import raiseIfNone
-from mapFolding._e.dataBaskets import StateElimination
+from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import (
 	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
 	readDiagonal, readTriangle, readTriangleSparse, saveTotal, writeDiagonal, writeTriangle, writeTriangleSparse)

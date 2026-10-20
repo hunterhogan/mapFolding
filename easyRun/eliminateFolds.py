@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from mapFolding import leafOrigin, pileOrigin
-from mapFolding._e import getLookupChoicesLeaf
-from mapFolding._e.algorithms.elimination import theorem2b
-from mapFolding._e.basecamp import eliminateFolds
-from mapFolding._e.dataBaskets import PermutationSpace, StateElimination
-from mapFolding._e.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
+from mapFolding.pileOptions import getLookupChoicesLeaf
+from mapFolding.algorithms.elimination import theorem2b
+from mapFolding.basecamp import eliminateFolds
+from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from mapFolding.oeis._byFormulaLookup import _A000682
+from mapFolding.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from typing import TYPE_CHECKING
 import time
 
@@ -70,5 +70,5 @@ if __name__ == "__main__":
 		printEasyRunBenchmark(oeisID, n, computed, timeStart, ratio=ratio)
 
 r"""
-title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on mapFolding\_e\easyRun\eliminateFolds.py & title I'm done
+title running && start "working" /B /HIGH /wait py -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on easyRun\eliminateFolds.py & title I'm done
 """

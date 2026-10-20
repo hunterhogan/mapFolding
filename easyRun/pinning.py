@@ -3,13 +3,17 @@ from __future__ import annotations
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
-from mapFolding._e import getChoicesLeaf, getDomainLeaf, getIteratorOfLeaves, getLookupDomainsLeaves, lengthChoicesLeaf
-from mapFolding._e.algorithms.eliminationCrease import doTheNeedful
-from mapFolding._e.algorithms.insertion2上nDimensional import makeAlbum2上nDimensional, recordAlbum2上nDimensional
-from mapFolding._e.dataBaskets import StateElimination
-from mapFolding._e.p2上nDimensional import getLeafPredecessors, getLeavesCreaseAnte, getLeavesCreasePost, pinIt, 首一
-from mapFolding._e.p2上nDimensional.reduceIt import boxOfFunctionsReduction2上nDimensional
-from mapFolding._e.pileOptions import getLookupChoicesLeaf
+from mapFolding import pinIt
+from mapFolding.algorithms.eliminationCrease import doTheNeedful
+from mapFolding.algorithms.insertion2上nDimensional import makeAlbum2上nDimensional, recordAlbum2上nDimensional
+from mapFolding.beDRYElimination import getIteratorOfLeaves, lengthChoicesLeaf
+from mapFolding.conditionalOrdering import getLeafPredecessors
+from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
+from mapFolding.dataBaskets import StateElimination
+from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
+from mapFolding.pileOptions import getChoicesLeaf, getLookupChoicesLeaf
+from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional
+from mapFolding.semiotics import 首一
 from math import prod
 from operator import methodcaller
 from pprint import pprint
@@ -19,7 +23,7 @@ import time
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding._e.theTypes import ChoicesLeaf
+	from mapFolding.theTypes import ChoicesLeaf
 
 def printStatisticsPermutations(state: StateElimination) -> None:
 	def prodOfDOTvalues(boxOfChoicesLeaf: Iterable[ChoicesLeaf]) -> int:
@@ -41,7 +45,7 @@ if __name__ == '__main__':
 		state = makeAlbum2上nDimensional(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
-		from mapFolding._e.research.toolkit import verifyPinning2Dn
+		from mapFolding.needsAHome.verify import verifyPinning2Dn
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 

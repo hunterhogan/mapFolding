@@ -85,6 +85,7 @@ References
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from gmpy2 import mpz
 from numpy import dtype, int64 as numpy_int64, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
 from typing import TYPE_CHECKING, TypedDict, TypeVar
 
@@ -405,3 +406,58 @@ class Default(TypedDict):
 	logicalPath: dict[str, identifierDotAttribute]
 	module: dict[str, str]
 	variable: dict[str, str]
+
+#=EndNotes##TypeAlias=
+#======== Scalars ================================
+
+type DimensionIndex = int
+"""Zero-based index of a dimension."""
+
+ChoicesLeaf: TypeAlias = mpz
+"""Represent the possible `Leaf` at a `Pile`.
+
+(AI generated docstring)
+
+You can record which leaves may occupy a pile using the binary digits of a `gmpy2.mpz` [1].
+Assign `1` to position `leaf` when that leaf is a possible choice, and `0` when that leaf is
+excluded. The position of the digit identifies the leaf; the integer's value is not a leaf index.
+
+Position `totalLeaves` contains a sentinel digit with value `1`. Keep the sentinel set during
+operations on `ChoicesLeaf`. A value with only the sentinel set represents no possible leaf; a
+value with the sentinel and one other digit set represents exactly one possible leaf.
+
+The Python type distinguishes `ChoicesLeaf` (`gmpy2.mpz`) from `Leaf` (`int`). Clearing the sentinel
+does not change an object's Python type.
+
+You can construct sets with `mapFolding.beDRYElimination.makeChoicesLeaf` [2] or
+`mapFolding.beDRYElimination.makeAntiChoicesLeaf` [3], enumerate leaves with
+`mapFolding.beDRYElimination.getIteratorOfLeaves` [4], and distinguish empty or singleton choices with
+`mapFolding.beDRYElimination.distinguishChoicesLeaf` [5].
+
+References
+----------
+[1] gmpy2 integer operations and the mpz type.
+	https://gmpy2.readthedocs.io/en/latest/mpz.html
+[2] `mapFolding.beDRYElimination.makeChoicesLeaf`
+
+[3] `mapFolding.beDRYElimination.makeAntiChoicesLeaf`
+
+[4] `mapFolding.beDRYElimination.getIteratorOfLeaves`
+
+[5] `mapFolding.beDRYElimination.distinguishChoicesLeaf`
+"""
+
+type LeafSpace = Leaf | ChoicesLeaf
+"""Represent either a pinned leaf index or a `ChoicesLeaf`.
+
+(AI generated docstring)
+
+You can distinguish a fixed leaf assignment from the remaining leaf set for a pile."""
+
+#======== Containers ============================
+
+type PinnedLeaves = dict[Pile, Leaf]
+"""`pile: leaf`; length ought to be less than `totalLeaves`: when length equals `totalLeaves`, ought to convert to `Folding`."""
+
+type UndeterminedPiles = dict[Pile, ChoicesLeaf]
+"""`pile: choicesLeaf`; length less than or equal to `totalLeaves`."""
