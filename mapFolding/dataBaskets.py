@@ -697,15 +697,7 @@ class ShapeArray(NamedTuple):
 	"""
 
 	length: int
-	"""Select the record count on the first array axis.
-
-	(AI generated docstring)
-	"""
 	indexes: int
-	"""Select the field count on the second array axis.
-
-	(AI generated docstring)
-	"""
 
 class ShapeSlicer(NamedTuple):
 	"""Name the record selection and field selection of an array index.
@@ -738,18 +730,9 @@ class ShapeSlicer(NamedTuple):
 	"""
 
 	length: EllipsisType | slice
-	"""Select records on the first array axis.
-
-	(AI generated docstring)
-	"""
-	# SEMIOTICS I think this field is really the "index in the indexing axis that indexes
-	# that-which-is-indexed." I think the axis is strictly determined by the order of the fields in
-	# the NamedTuple, so by being the second field, the axis is 2.
-	axis: int
-	"""Select a field position on the second array axis.
-
-	(AI generated docstring)
-	"""
+	at: int
+	# ^^^ This field is the "index in the indexing axis that indexes that-which-is-indexed." By being
+	# the second field, the axis is 2. `index` is a tuple attribute, so I can't use it.
 
 #================== `numba` types =================================================================
 

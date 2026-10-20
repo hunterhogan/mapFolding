@@ -13,13 +13,13 @@ if TYPE_CHECKING:
 
 次Values: int = 2
 次Subset: int = 3
-slicerValues: ShapeSlicer = ShapeSlicer(axis=次Values, length=...)
+slicerValues: ShapeSlicer = ShapeSlicer(at=次Values, length=...)
 
 @jit(cache=False, error_model='numpy', fastmath=True, forceinline=True, locals={})
 def exerciseShapeObjectsNumba(length: int, indexes: int, values: tuple[int, ...]) -> 形Array2Dint64:
 	arrayTarget: 形Array2Dint64 = numpy.zeros(ShapeArray(indexes=indexes, length=length), dtype=numpy.int64)
 	arrayTarget[slicerValues] = values
-	arrayTarget[ShapeSlicer(axis=次Subset, length=slice(oneIndexed, length))] = values[oneIndexed:]
+	arrayTarget[ShapeSlicer(at=次Subset, length=slice(oneIndexed, length))] = values[oneIndexed:]
 	arrayTarget[slicerValues] >>= oneIndexed
 	return arrayTarget
 

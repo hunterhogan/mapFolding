@@ -28,14 +28,14 @@ bitsLocator: int = sum(1 << twoMore for twoMore in range(0, numpy.dtype(形ArcCo
 
 indexesAnalyzed: int = 2
 次ArcCode, 次Meanders = range(indexesAnalyzed)
-slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., axis=次ArcCode)
-slicerMeanders: ShapeSlicer = ShapeSlicer(length=..., axis=次Meanders)
+slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., at=次ArcCode)
+slicerMeanders: ShapeSlicer = ShapeSlicer(length=..., at=次Meanders)
 
 indexesWorkbench: int = 3
 次PrepArea, 次Alfa, 次Zulu = range(indexesWorkbench)
-slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., axis=次PrepArea)
-slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., axis=次Alfa)
-slicerZulu: ShapeSlicer = ShapeSlicer(length=..., axis=次Zulu)
+slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., at=次PrepArea)
+slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., at=次Alfa)
+slicerZulu: ShapeSlicer = ShapeSlicer(length=..., at=次Zulu)
 
 # Improvement: refactor everything about this: `boxOfDiagonals`, not vectorized.
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
@@ -352,8 +352,8 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形Ar
         arrayAnalyzed = extendArray(arrayAnalyzed, 次Stop)
     sliceAnalysis: slice = slice(次start, 次Stop)
 
-    slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次ArcCode)
-    slicerMeandersAnalysis = ShapeSlicer(length=sliceAnalysis, axis=次Meanders)
+    slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, at=次ArcCode)
+    slicerMeandersAnalysis = ShapeSlicer(length=sliceAnalysis, at=次Meanders)
 
     arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
     arrayAnalyzed[slicerMeandersAnalysis] = arrayMeanders[slicerMeanders][selectorAnalysis]
