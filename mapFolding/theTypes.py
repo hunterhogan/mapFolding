@@ -242,8 +242,13 @@ References
 	https://numpy.org/doc/stable/reference/index.html
 """
 
-# TODO Change to generic class? "The preferred way to construct a type variable is via the dedicated
-# syntax for generic functions, classes, and type aliases." <- type aliases? really?
+# Change to generic class? "The preferred way to construct a type variable is via the dedicated syntax
+# for generic functions, classes, and type aliases." The documentation sucks. ^^^ That is a
+# motherfucking locally-scoped type variable, not a "constructed" type variable. That bullshit is the
+# FIRST fucking example under `class typing.TypeVar`. That's like having the first example of an `int`
+# be a parameter to a function, and telling the reader it is the "preferred way to construct an int."
+# But all of the Python priests believe they are Ronan Farrow, and they have rejected all of my offers
+# to improve the documentation. Most of the rejections have been openly contemptuous.
 形NumPyInteger = TypeVar('形NumPyInteger', bound=integer, covariant=True)
 """Any NumPy integer type, which is usually between 8-bit signed and 64-bit unsigned."""
 

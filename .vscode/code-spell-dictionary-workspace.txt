@@ -436,6 +436,7 @@ reindexing
 relators
 rels
 rmuln
+Ronan
 Rplus
 rref
 rtol

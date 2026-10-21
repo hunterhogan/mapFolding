@@ -83,13 +83,6 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import DimensionIndex
 
 #======== Using a single-base positional-numeral system as a proxy for Cartesian coordinates =======
-# https://en.wikipedia.org/wiki/Positional_notation
-
-"""NOTE Do you hate my system of ideographs for powers of 2?
-
-With relatively little effort you could use `astToolkit` (pip install astToolkit) to replace all of the ideographs with
-`state.mapShapeProducts[dimensionIndex]`. With `astToolkit`, you create a transformation that you can apply after any update.
-"""
 
 _dimensionLength: int = 2  # Hypothetically, change to 3 for 3ⁿ-dimensional maps.
 
