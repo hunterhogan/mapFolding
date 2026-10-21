@@ -6,12 +6,6 @@ if TYPE_CHECKING:
     from mapFolding.theTypes import Leaf, Pile
     from typing import Final
 
-endpointOrigin: Final[Leaf] = 0
-"""The endpoint label fixed at the origin of a normalized arch diagram."""
-
-positionOrigin: Final[Pile] = 0
-"""The first endpoint position along the diagram axis."""
-
 leafOrigin: Final[Leaf] = 0
 """The `leaf` at the origin of all dimensions, with `0` in every `DimensionIndex`."""
 

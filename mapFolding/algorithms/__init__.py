@@ -15,7 +15,7 @@ foldsSymmetric
 iff
 	Check leaf arrangements for forbidden crease crossings.
 insertion
-	Generate and save arch-diagram representatives by inserting endpoints.
+	Generate and save arch-diagram representatives by inserting leaves.
 insertion2上nDimensional
 	Expand smaller-map albums into constrained higher-dimensional search spaces.
 matrixMeanders

@@ -12,7 +12,7 @@ _binomialCoefficients
 
 A000108
 
-- archive/insertEndpoints/insertEndpoints.py: 30
+- archive/insertion/insertion.py: 30
 - citations/Sade1949.bib: 7-8
 - mapFolding/oeis/_theSSOT.py: 20
 - mapFolding/tests/test_oeis.py: 38
@@ -1866,8 +1866,8 @@ TEXT FILES INCLUDED IN THE SCAN
 - Z0Z_research/theorem4/theorem4initializeState.py
 - archive/.isort.cfg
 - archive/__init__.py
-- archive/insertEndpoints/insertEndpoints.py
-- archive/insertEndpoints/learningSade.ipynb
+- archive/insertion/insertion.py
+- archive/insertion/learningSade.ipynb
 - archive/matrixMeanders/A000682expAnalysis.csv
 - archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb
 - archive/matrixMeanders/A005316JavaPort.py

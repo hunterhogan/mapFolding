@@ -12,14 +12,10 @@ rules for maps whose dimension lengths are all two.
 
 Attributes
 ----------
-endpointOrigin : Leaf
-	Zero-valued endpoint label fixed at the origin of a normalized arch diagram.
 leafOrigin : Leaf
 	Zero-valued label for the leaf at the origin of every map dimension.
 pileOrigin : Pile
 	Zero-valued label for the pile at the origin of every map dimension.
-positionOrigin : Pile
-	Zero-valued position along an arch diagram's axis.
 
 Modules
 -------
@@ -84,5 +80,4 @@ References
 
 from __future__ import annotations
 
-from mapFolding._semiotics import (
-	endpointOrigin as endpointOrigin, leafOrigin as leafOrigin, pileOrigin as pileOrigin, positionOrigin as positionOrigin)
+from mapFolding._semiotics import leafOrigin as leafOrigin, pileOrigin as pileOrigin
