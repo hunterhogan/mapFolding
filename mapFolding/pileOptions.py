@@ -1,9 +1,10 @@
-"""Test possible pile positions against coordinate domain restrictions.
+"""Compute possible leaf choices for piles and test pile-domain restrictions.
 
 (AI generated docstring)
 
-You can check the bounds, parity, and extra spacing of pile positions for maps whose axis lengths are
-`2`. Combine these separate restrictions to test the complete individual domain.
+You can compute a `ChoicesLeaf` for one pile or a lookup for every pile. For supported maps whose
+axis lengths are `2`, bounds, parity, and extra spacing restrict the leaf choices. Other shapes
+retain every leaf. You can also apply the individual restrictions separately.
 
 Contents
 --------
@@ -17,16 +18,21 @@ Functions
 			Test whether `pile` reaches the lower domain bound for `leaf`.
 		filterParity
 			Test whether `pile` has the parity required by the domain of `leaf`.
+	Leaf choices
+		getChoicesLeaf
+			Compute possible leaves for one pile in the state's map.
+		getLookupChoicesLeaf
+			Map every pile to its possible leaf choices.
 """
 from __future__ import annotations
 
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask
 from mapFolding import leafOrigin
+from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.beDRYElimination import makeChoicesLeaf
 from mapFolding.measure import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from mapFolding.semiotics import 零, 首零
-from mapFolding.beDRY import mapShapeIs2上nDimensions
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -205,8 +211,8 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	(AI generated docstring)
 
 	You can use the map shape in `state` to compute possible leaves at `pile`. You receive bounds and
-	parity restrictions from the specialized pile-options implementation [1] when every dimension length
-	is two, or every leaf for other shapes.
+	parity restrictions from the cached shape-based calculation [1] for supported maps whose dimension
+	lengths are all two, or every leaf for other shapes.
 
 	Parameters
 	----------

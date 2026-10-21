@@ -5,6 +5,8 @@
 You can propagate pinned leaves, restrict repeated leaf sets, and detect leaves with no remaining pile
 or only one remaining pile. Use the default reduction sequence to also restrict leaf choices using
 crease crossings.
+The specialized reduction sequence additionally applies dimension-order and conditional-predecessor
+rules for maps whose axis lengths are two.
 
 Contents
 --------
@@ -18,6 +20,8 @@ Functions
 	reducePermutationSpace_nakedSubset
 		Reserve identical leaf sets for matching groups of piles.
 Reduction sequences
+	boxOfFunctionsReduction2上nDimensional
+		Access the ordered reductions for maps whose axis lengths are two.
 	boxOfFunctionsReductionDEFAULT
 		Access the default sequence of permutation-space reductions.
 """
@@ -46,8 +50,8 @@ import mapFolding.beDRYElimination
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
-	from mapFolding.theTypes import LeafSpace, PinnedLeaves, UndeterminedPiles
 	from mapFolding.dataBaskets import PermutationSpace, StateElimination
+	from mapFolding.theTypes import LeafSpace, PinnedLeaves, UndeterminedPiles
 
 def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[tuple[Pile, ChoicesLeaf]], antiChoicesLeaf: ChoicesLeaf) -> PermutationSpace:
 	"""Restrict specified pile domains with an allowed-leaf mask.
@@ -577,9 +581,9 @@ def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace:
 
 	References
 	----------
-	[1] mapFolding.工dimension首零
+	[1] mapFolding.measure.工dimension首零
 
-	[2] mapFolding.工dimensionTail
+	[2] mapFolding.measure.工dimensionTail
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 

@@ -13,6 +13,8 @@
 You can use this module to construct mutable state for map-folding and meander algorithms.
 State initialization derives map sizes, connection lookups, or arch-code limits from the supplied
 problem. Named array layouts keep shape construction and indexing consistent.
+`PermutationSpace` stores pinned leaves and possible leaf choices at each pile. `StateElimination`
+groups these search branches with map-derived values, reduction preferences, and folding counts.
 
 Contents
 --------
@@ -23,6 +25,11 @@ Folding state
 		Extend insertion-search state with task-division fields.
 	StateMapFoldingSymmetric
 		Store insertion-search state and symmetric-fold comparison indices.
+Elimination state
+	PermutationSpace
+		Store pinned leaves and leaf choices keyed by pile index.
+	StateElimination
+		Store search branches, folding representatives, and map-derived elimination values.
 Meander state
 	StateMeanders
 		Store transfer counts, boundary position, and integer-width limits.
@@ -34,10 +41,14 @@ Matrix-meander array layouts
 Numba types
 	形DataclassNumba
 		Re-export the compiled-state adapter from `mapFolding.dataBasketsAnnex` [1].
+	形StateMapFoldingNumba
+		Re-export the compiled map-folding state type from `mapFolding.dataBasketsAnnex` [2].
 
 References
 ----------
 [1] `mapFolding.dataBasketsAnnex.形DataclassNumba`
+
+[2] `mapFolding.dataBasketsAnnex.形StateMapFoldingNumba`
 
 """
 from __future__ import annotations
@@ -49,13 +60,13 @@ from humpy_cytoolz import (
 	assoc as associateKeyValue, compose, dissoc as dissociatePile, first, groupby as toolz_groupby, merge, valfilter as filterLeaf)
 from hunterMakesPy import CallableFunction, raiseIfNone
 from itertools import combinations as Y7Y_combinations, filterfalse
-from mapFolding.theTypes import ChoicesLeaf, LeafSpace, PinnedLeaves, UndeterminedPiles
 from mapFolding.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding.beDRY import getTotalLeaves, validateMapShape
 from mapFolding.dataStructures import makeConnectionGraph, makeDataContainer
 from mapFolding.filters import choicesLeaf吗, leafInChoicesLeaf吗, leaf吗, 是valid
 from mapFolding.theTypes import (
-	Folding, Leaf, Pile, 形ArcCode, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形Elephino, 形Meanders, 形TotalFolds, 形TotalLeaves)
+	ChoicesLeaf, Folding, Leaf, LeafSpace, Pile, PinnedLeaves, UndeterminedPiles, 形ArcCode, 形ArrayElephino1D, 形ArrayTotalLeaves1D,
+	形ArrayTotalLeaves3D, 形Elephino, 形Meanders, 形TotalFolds, 形TotalLeaves)
 from math import prod
 from operator import attrgetter, methodcaller
 from typing import cast, NamedTuple, overload, Self, TYPE_CHECKING

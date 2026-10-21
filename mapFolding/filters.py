@@ -16,8 +16,12 @@ Boolean antecedents
 		Test whether a leaf is already assigned in a pinned-leaf mapping.
 	leaf吗
 		Identify a leaf-index value and narrow the value's type.
+	moreThanLeaf零吗
+		Test whether a numeric leaf-space value exceeds the first non-origin leaf.
 	notPileLast
 		Test whether a pile differs from the final pile index.
+	oddLeaf2上nDimensional吗
+		Test the binary digit at a dimension position in a leaf label.
 	pileChoicesLeaf吗
 		Identify a pile paired with `ChoicesLeaf` and narrow the pair's type.
 Filtering functions
@@ -28,15 +32,13 @@ from __future__ import annotations
 
 from gmpy2 import bit_test as isBit1吗
 from mapFolding.semiotics import 零
-from mapFolding.theTypes import ChoicesLeaf, DimensionIndex, LeafSpace
-from mapFolding.theTypes import Leaf
+from mapFolding.theTypes import ChoicesLeaf, DimensionIndex, Leaf, LeafSpace
 from operator import attrgetter
 from typing import TYPE_CHECKING, TypeIs
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import PinnedLeaves
 	from mapFolding.dataBaskets import PermutationSpace
-	from mapFolding.theTypes import Pile
+	from mapFolding.theTypes import Pile, PinnedLeaves
 
 #======== Boolean antecedents ================================================
 

@@ -34,8 +34,7 @@ non-crease-crossing if and only if all its one-dimensional sections are non-crea
 reduction allows multidimensional validation to be performed by checking each dimension independently.
 
 You can apply Lunnon's theorem by projecting each dimension axis and testing crease pairs for
-forbidden orderings with the pile-position predicates `creaseViolation吗` and
-`creaseViolationComplicated吗`.
+forbidden orderings with the pile-position predicate `creaseViolation吗`.
 
 Forbidden inequalities
 ----------------------
@@ -65,8 +64,7 @@ from math import prod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import PinnedLeaves
-	from mapFolding.theTypes import Folding, Leaf, Pile
+	from mapFolding.theTypes import Folding, Leaf, Pile, PinnedLeaves
 
 # DEVELOPMENT This module must be efficient. Imagine computing mapShape(3, 14), for example, which we
 # know has 98,420,246,759,688 valid foldings. With mathamagic, we only have to find one-half of them,
@@ -100,7 +98,7 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 	Let creases (k, k+1) and (r, r+1) have pile positions π(k), π(k+1), π(r), π(r+1) respectively. The
 	creases cross when the four pile positions violate one of the eight forbidden orderings enumerated
 	by Koehler (1968). This function evaluates the four simplified orderings given the pile positions
-	and crease-computation thunks.
+	of both creases.
 
 	Mathematical reasons for the design of this function
 	----------------------------------------------------
@@ -154,9 +152,9 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 
 	(AI generated docstring)
 
-	You can validate a constructed `Folding` at the leaf level. In
-	`mapFolding.algorithms.eliminationCrease` [1], you can filter possible foldings that already
-	satisfy arithmetic invariants such as `state.foldingCheckSum`.
+	You can validate a constructed `Folding` at the leaf level, including complete arrangements
+	produced by `mapFolding.algorithms.eliminationCrease` [1]. The function converts the supplied
+	pile order to a pinned-leaf mapping and checks it with `leavesPinnedValid吗` [2].
 
 	Mathematics
 	-----------
@@ -165,24 +163,14 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	dimension, for crease pairs that violate the forbidden inequalities. You obtain a valid
 	multidimensional folding when all d sections are valid.
 
-	Algorithm Details
-	-----------------
+	Crease Comparisons
+	------------------
 	You can treat each dimension of `mapShape` as a one-dimensional strip projection and check that no
 	pair of potentially crossing creases violates the forbidden inequalities encoded by
-	`creaseViolationComplicated吗` [3].
+	`creaseViolation吗` [3].
 
-	The leaf-boundary filter in `foldingValid吗` uses a cached leaf count derived from
-	`mapFolding.getTotalLeaves` [2].
-
-	You enumerate each pair of `(pile, leaf)` positions from `folding` and combine each pair with each
-	`dimension` index. With the parity filter from `matchingParityLeaf`, you skip pairs that cannot cross
-	in the selected `dimension`.
-
-	Performance Considerations
-	--------------------------
-	You defer crease computation by passing thunk functions returned by `callGetCreasePost` into
-	`creaseViolationComplicated吗`. You avoid computing `Leaf` creases for pairs rejected by earlier
-	comparisons.
+	For each dimension, `leavesPinnedValid吗` obtains connected leaf pairs, groups their pile positions
+	by leaf parity, and compares crease pairs within each group. It stops at the first crossing.
 
 	Parameters
 	----------
@@ -200,9 +188,9 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	----------
 	[1] mapFolding.algorithms.eliminationCrease
 
-	[2] mapFolding.getTotalLeaves
+	[2] mapFolding.algorithms.iff.leavesPinnedValid吗
 
-	[3] mapFolding.algorithms.iff.creaseViolationComplicated吗
+	[3] mapFolding.algorithms.iff.creaseViolation吗
 	"""
 	return leavesPinnedValid吗(dict(enumerate(folding)), mapShape)
 
@@ -275,7 +263,7 @@ def _totalLeaves(mapShape: tuple[int, ...]) -> int:
 
 	You can reuse leaf counts in frequent validation paths such as `foldingValid吗`. With
 	`functools.cache` [1], you receive a result memoized per `mapShape` value from
-	`mapFolding.getTotalLeaves` [2].
+	`mapFolding.beDRY.getTotalLeaves` [2].
 
 	Parameters
 	----------
@@ -291,7 +279,7 @@ def _totalLeaves(mapShape: tuple[int, ...]) -> int:
 	----------
 	[1] functools.cache
 		https://docs.python.org/3/library/functools.html#functools.cache
-	[2] mapFolding.getTotalLeaves
+	[2] mapFolding.beDRY.getTotalLeaves
 	"""
 	return getTotalLeaves(mapShape)
 

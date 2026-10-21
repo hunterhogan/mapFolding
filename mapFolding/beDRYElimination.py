@@ -12,6 +12,8 @@ ChoicesLeaf functions
 		Intersect two `ChoicesLeaf` values.
 	distinguishChoicesLeaf
 		Distinguish `ChoicesLeaf`, its only `Leaf`, or `None`.
+	getIteratorOfLeaves
+		Enumerate leaf indices from a sentinel-bearing `ChoicesLeaf`.
 	lengthChoicesLeaf
 		Count the possible leaves in `ChoicesLeaf`.
 	makeAntiChoicesLeaf

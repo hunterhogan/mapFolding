@@ -9,14 +9,24 @@ Array aliases use NumPy [1].
 Contents
 --------
 Domain labels
+	ChoicesLeaf
+		Represent possible leaves with binary digits and a sentinel.
+	DimensionIndex
+		Identify a zero-based dimension position.
 	Folding
 		Represent leaf labels indexed by pile position.
 	Leaf
 		Identify a leaf.
+	LeafSpace
+		Represent a pinned leaf index or possible leaf choices.
 	OEISid
 		Identify an integer sequence.
 	Pile
 		Identify a pile position.
+	PinnedLeaves
+		Map pile positions to pinned leaf indices.
+	UndeterminedPiles
+		Map pile positions to possible leaf choices.
 	形Triangle
 		Map row numbers to ordered integer values.
 	形TriangleSparse

@@ -52,7 +52,7 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 
 	See Also
 	--------
-	mapFolding.oeis.countMeanders
+	mapFolding.basecamp.countMeanders
 		Compute A000682 and A005316 with native meander algorithms.
 	mapFolding.basecamp.countFolds
 		General multidimensional map-folding computation.

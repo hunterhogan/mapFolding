@@ -27,7 +27,7 @@ You can use the package to calculate sequence terms, dissect an algorithm's stat
 | Work with integer sequences          | [`oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/) provides sequence dispatch, exact formula relationships, metadata, known values, and triangle utilities.                                                                       |
 | Inspect or change a computation      | [`dataBaskets.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataBaskets.py) describes the state containers; [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains source implementations. |
 | Transform or specialize an algorithm | [`kitAST/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/kitAST/) generates variants and jobs, with derived implementations in [`synthesized/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/synthesized/).                |
-| Explore a different search strategy  | [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains elimination, constraint propagation, and insertion; package modules provide search-space analysis.                                                                                                |
+| Explore a different search strategy  | [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/) contains elimination, constraint propagation, and insertion; package modules provide search-space analysis.                                                        |
 | Validate a new implementation        | [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py) compares implementations with known sequence values.                                                                                           |
 
 The module, function, and class docstrings explain parameters, state layouts, mathematical relationships, and implementation details. Use them when choosing an experiment or following a computation through the package.
@@ -39,6 +39,7 @@ The main counting functions are in `mapFolding.basecamp`; sequence functions are
 | Task                                                   | Interface                            | Result                                              |
 | ------------------------------------------------------ | ------------------------------------ | --------------------------------------------------- |
 | Count foldings for supplied dimensions                 | `countFolds(mapShape, ...)`          | Integer count                                       |
+| Count foldings by elimination or constraint solving    | `eliminateFolds(mapShape, ...)`      | Integer count                                       |
 | Count rotationally symmetric stamp foldings            | `countFoldsSymmetric(mapShape, ...)` | Integer count                                       |
 | Count semi-meanders, open meanders, or closed meanders | `countMeanders(kind, n, ...)`        | Completed `StateMeanders`                           |
 | Calculate a supported OEIS term                        | `oeisIDfor_n(oeisID, n, ...)`        | Integer value of `a(n)`                             |
@@ -115,7 +116,21 @@ The package includes several approaches to the same combinatorial problems:
 - **Map folding:** insertion-search algorithms derived from Lunnon's work, including variants that apply symmetry restrictions from his theorems.
 - **Meanders:** transfer-matrix counting based on Jensen's approach, with dictionary, NumPy, Pandas, and pruning variants.
 - **Permutation generation:** stamp-folding and meander algorithms based on Sawada and Li's work, with experimental bilateral variants.
-- **Elimination and insertion:** possible leaf positions, pile assignments, constraint propagation, and incremental arch-diagram generation in `mapFolding`.
+- **Elimination and insertion:** elimination, constraint propagation, crease-based search, and incremental arch-diagram generation in [`algorithms/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/algorithms/).
+
+`mapFolding.basecamp.eliminateFolds` selects the `'elimination'`, `'constraintPropagation'`, or
+`'crease'` flow. It accepts a map shape or an existing `mapFolding.dataBaskets.StateElimination`,
+which groups permutation spaces, folding representatives, and symmetry multipliers. Each
+`PermutationSpace` maps pile positions to pinned leaves or `ChoicesLeaf` values.
+
+The supporting operations are package modules: [`leafDomains.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/leafDomains.py)
+computes possible piles for leaves, [`pileOptions.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/pileOptions.py)
+computes possible leaves for piles, and [`beDRYElimination.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/beDRYElimination.py)
+constructs and inspects `ChoicesLeaf` values. [`pinIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/pinIt.py)
+restricts assignments and relative leaf order; [`reduceIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reduceIt.py)
+propagates constraints through the search spaces. Specialized rules for maps whose dimension lengths
+are all two use `conditionalOrdering`, `creases`, `measure`, `pinByCrease`, `pinByDomain`, and the
+positional-numeral notation in `semiotics`.
 
 Counting entry points accept a `flow` preference. Omit it to use the default route. Available variants and dispatch rules change as the research develops; [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) and the relevant `easyRun` runner show the current choices.
 
@@ -138,9 +153,9 @@ Pass `pathLikeWrite` to a counting function to save the total. An existing direc
 | [`mapFolding/dataStructures.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/dataStructures.py), [`theTypes.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theTypes.py), and [`theSSOT.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/theSSOT.py) | Array storage, domain types, and shared settings                           |
 | [`mapFolding/kitFilesystem.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitFilesystem.py)                                                                                                                                                                                               | Result files, caches, and computation-data storage                         |
 | [`mapFolding/jobs/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/jobs/)                                                                                                                                                                                                                     | Computation jobs specialized for particular map shapes                     |
-| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests/)                                                                                                            | Correctness checks, dispatch and filesystem tests, and stored data samples |
+| [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests/)                                                                                                                                                                                                                   | Correctness checks, dispatch and filesystem tests, and stored data samples |
 | [`easyRun/`](https://github.com/hunterhogan/mapFolding/tree/main/easyRun/)                                                                                                                                                                                                                                     | Editable runners for computations, benchmarks, synthesis, and exploration  |
-| [`research/elimination/`](https://github.com/hunterhogan/mapFolding/tree/main/research/elimination/) and [`research/`](https://github.com/hunterhogan/mapFolding/tree/main/research/)                                                                                                                      | Analysis tools, folding data, and research materials                       |
+| [`research/elimination/`](https://github.com/hunterhogan/mapFolding/tree/main/research/elimination/) and [`research/`](https://github.com/hunterhogan/mapFolding/tree/main/research/)                                                                                                                          | Analysis tools, folding data, and research materials                       |
 | [`archive/`](https://github.com/hunterhogan/mapFolding/tree/main/archive/) and [`development/`](https://github.com/hunterhogan/mapFolding/tree/main/development/)                                                                                                                                              | Historical code, notes, and development materials                          |
 | [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations/)                                                                                                                                                                                                                                 | Software citation metadata and BibTeX references                           |
 
@@ -207,8 +222,6 @@ Activate the environment before installing. On PowerShell:
 
 ```powershell
 . .\.venv\Scripts\Activate.ps1
-$env:PYTHONUTF8 = '1'
-$env:PYTHONIOENCODING = 'utf-8'
 ```
 
 On a POSIX shell:
@@ -275,22 +288,21 @@ This is my ongoing to-do list across this package and related projects. It recor
     1. The base algorithm is a dumpster fire.
     2. Bilateral concurrent can't produce a folding, but uses too much memory and is too slow to count folds.
 8. Reduce arches: slower than counting by hand.
-9. _e
-    1. Constraint propagation or SAT
-        1. ortools won't apply concurrency, and I don't know how to think about divisions of the problem space that actually reduce computation time.
-        2. Understanding other packages is harder than a self-enema with a firehouse.
-    2. 2^n-dimensional (aka elimination by crease)
-        1. Computation algorithms needed for: conditional predecessors, conditional successors,
-           DomainLeaf首零Plus零 in dimension零, the range of a pile (aka pile options, aka choices
-           leaf), pinPile二ByCrease, pinPile二Ante首ByCrease, and pinPile零Ante首零AfterDepth4.
-        2. Acceleration.
-        3. Bug in `boxOfFunctionsReduction2上nDimensional`.
-        4. Finish collecting 2^7 data.
-        5. Fastest algorithm for 2^5. Can't complete 2^6. I mean, wtf?
-        6. `PermutationSpace` and its OOP structure: I don't really know what I am doing.
-        7. The reduce-it concept is strong: reorient more code around it. Resolve the tension with `PermutationSpace._solidifyLeafSpace()`.
-    3. Elimination: atrophied.
-    4. Insert leaves: But for the data storage, it would be powerful. IDK anything about data compression. I lost the code I wrote for the notation I created to store graphs, and it seems I am too stupid to recreate or reverse engineer my own code from my own files AND OTHER FUNCTIONS. fml. Ironically, LLMs can't figure it out either because I guess my idea was novel. F.M.L.
+9. Constraint propagation or SAT
+    1. ortools won't apply concurrency, and I don't know how to think about divisions of the problem space that actually reduce computation time.
+    2. Understanding other packages is harder than a self-enema with a firehouse.
+10. 2^n-dimensional (aka elimination by crease)
+    1. Computation algorithms needed for: conditional predecessors, conditional successors,
+     DomainLeaf首零Plus零 in dimension零, the range of a pile (aka pile options, aka choices
+     leaf), pinPile二ByCrease, pinPile二Ante首ByCrease, and pinPile零Ante首零AfterDepth4.
+    2. Acceleration.
+    3. Bug in `boxOfFunctionsReduction2上nDimensional`.
+    4. Finish collecting 2^7 data.
+    5. Fastest algorithm for 2^5. Can't complete 2^6. I mean, wtf?
+    6. `PermutationSpace` and its OOP structure: I don't really know what I am doing.
+    7. The reduce-it concept is strong: reorient more code around it. Resolve the tension with `PermutationSpace._solidifyLeafSpace()`.
+11. Elimination: atrophied.
+12. Insert leaves: But for the data storage, it would be powerful. IDK anything about data compression. I lost the code I wrote for the notation I created to store graphs, and it seems I am too stupid to recreate or reverse engineer my own code from my own files AND OTHER FUNCTIONS. fml. Ironically, LLMs can't figure it out either because I guess my idea was novel. F.M.L.
 
 Hunter, this list is incomplete: you quit writing after you got upset. Resume at mapFolding.kitAST.
 

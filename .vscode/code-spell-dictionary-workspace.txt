@@ -293,6 +293,7 @@ Mersenne
 meshgrid
 Meshgrids
 metaprogramming
+Mitani
 mobius
 Möbius
 Mult
@@ -440,6 +441,7 @@ rref
 rtol
 rulebooks
 Ruskey
+Ryuhei
 Saakov
 saam
 Sadé
@@ -512,6 +514,7 @@ triplewise
 Truncator
 udivisor
 udivisors
+Uehara
 ufunc
 Ufunc
 uintp
@@ -562,6 +565,7 @@ Xxor
 yada
 yapf
 yeong
+Yiyang
 yjtbnivvytbnjyvjtnbjvytnjyvntjyntv
 ylabel
 ZOGRAF

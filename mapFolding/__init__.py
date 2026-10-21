@@ -6,6 +6,10 @@ You can use this package to count folding patterns and meander sequence terms, i
 computational state, and experiment with generated algorithm variants. Counting entry points are
 available in `mapFolding.basecamp` [1].
 
+Elimination algorithms share the state containers in `dataBaskets`. Leaf-domain, pile-choice,
+pinning, and reduction operations are available in the modules listed below, including specialized
+rules for maps whose dimension lengths are all two.
+
 Attributes
 ----------
 endpointOrigin : Leaf
@@ -23,12 +27,38 @@ basecamp
 	Select and run folding or meander counting algorithms.
 beDRY
 	Validate map dimensions and resolve computation-resource preferences.
+beDRYElimination
+	Construct and inspect `ChoicesLeaf` values and compute map-shape products.
+conditionalOrdering
+	Compute conditional predecessor and successor requirements.
+creases
+	Enumerate crease-connected leaves by their possible pile order.
 dataBaskets
-	Store folding and meander computation state.
+	Store folding, meander, and elimination state and permutation spaces.
+dataBasketsAnnex
+	Adapt state containers and named array layouts for Numba.
 dataStructures
 	Allocate array storage and construct integer-table lookups.
+filters
+	Test leaf assignments and filter elimination search spaces.
 kitFilesystem
 	Name, save, cache, and load computation data.
+leafDomains
+	Compute possible pile ranges and joint pile assignments for leaves.
+measure
+	Measure positional-numeral features of leaf and pile labels.
+pileOptions
+	Compute possible leaf choices for piles and test domain restrictions.
+pinByCrease
+	Select leaves for end piles using crease restrictions.
+pinByDomain
+	Select interior-pile leaves using pinned end-pile restrictions.
+pinIt
+	Pin leaf assignments and restrict relative leaf order.
+reduceIt
+	Propagate constraints through elimination permutation spaces.
+semiotics
+	Express dimension positions with positional-numeral ideographs.
 theSSOT
 	Access shared package settings.
 theTypes

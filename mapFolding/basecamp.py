@@ -7,6 +7,8 @@
 You can use this module as the entry point for counting map foldings, rotationally symmetric
 foldings, and meander sequence terms, or enumerate stamp-folding and meander permutations. Each
 entry point selects an algorithm, prepares computation state, and optionally saves a result.
+`eliminateFolds` selects elimination, constraint-propagation, or specialized crease algorithms and
+can continue from a supplied `StateElimination`.
 
 Contents
 --------
@@ -17,6 +19,8 @@ Functions
 		Count foldings constrained by rotational symmetry.
 	countMeanders
 		Compute a meander term and return the completed computation state.
+	eliminateFolds
+		Count map foldings by reducing and branching possible leaf arrangements.
 	enumerateSequences
 		Generate stamp-folding or meander permutations, or return a bilateral count.
 """

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
+from mapFolding.basecamp import eliminateFolds
+from mapFolding.dataBaskets import StateElimination
+from mapFolding.oeis import getMetadata, getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
 from mapFolding.pinIt import (
 	pin3beans2, pinLeavesDimensions0零一, pinLeavesDimension一, pinLeavesDimension二, pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零,
 	pin首beans)
 from mapFolding.tests import assertEqualTo
-from mapFolding.basecamp import eliminateFolds
-from mapFolding.dataBaskets import StateElimination
-from mapFolding.oeis import getMetadata, getTotalFoldsKnown, getValuesKnown, makeMapShape, oeisIDsMapFoldingImplemented
 from sys import version_info
 from typing import TYPE_CHECKING
 import pytest
@@ -88,8 +88,8 @@ def test_eliminateFoldsMapShapeError(expected: type[Exception], oeisID: OEISid, 
 def test_eliminateFoldsPinnedState(pinningFunctionEliminateFolds2上nDimensional: Callable[..., StateElimination], CPUlimit: float, n: int, flow: str) -> None:
 	"""Validate `eliminateFolds` after applying state-only pinning functions to `A001417`.
 
-	This test uses the shared pinning fixtures in `conftest.py` so each requested
-	pinning function is exercised against both supported `_e` flows.
+	This test applies each function from `pinningFunctionEliminateFolds2上nDimensional`
+	before counting through `mapFolding.basecamp.eliminateFolds` with the `'crease'` flow.
 	"""
 	oeisID: OEISid = "A001417"
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)

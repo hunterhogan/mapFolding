@@ -154,7 +154,7 @@ def doTheNeedful(state: StateMeanders) -> StateMeanders:
 
     References
     ----------
-    [1] `mapFolding.oeis.countingMeanders`
+    [1] `mapFolding.basecamp.countMeanders`
 
     [2] OEIS A000682, Semi-meanders.
         https://oeis.org/A000682

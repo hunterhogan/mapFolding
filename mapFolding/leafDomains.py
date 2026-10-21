@@ -1,10 +1,11 @@
-"""Compute joint pile domains and restrictions from pinned leaves.
+"""Compute pile domains for individual leaves and leaf groups.
 
 (AI generated docstring)
 
-You can enumerate possible pile assignments for specific leaf groups in maps whose
-axis lengths are `2`. Combined domains describe joint assignments; the special
-head-plus-one domain can also use pinned leaves from the workbench state.
+You can obtain a shape-based pile range for one leaf or a lookup for every leaf. Specialized
+rules restrict these ranges for supported maps whose axis lengths are `2`; other shapes retain
+every pile. Combined domains describe joint assignments for specific leaf groups in those maps.
+The special head-plus-one domain can also use pinned leaves from the workbench state.
 
 Contents
 --------
@@ -15,6 +16,8 @@ Functions
 		Compute combined pile choices for the dimension-two leaves.
 	getDomainDimension首二
 		Compute combined pile choices for the head-relative dimension-two leaves.
+	getDomainLeaf
+		Compute the shape-based possible pile range for one leaf.
 	getDomainLeaf首零Plus零
 		Compute pile choices for the head-plus-one leaf using pinned neighbors.
 	getDomain二一零and二一
@@ -25,6 +28,8 @@ Functions
 		Compute combined pile choices for the head-relative zero-one-two and one-two leaves.
 	getDomain首零二and首二
 		Compute combined pile choices for the head-relative zero-two and two leaves.
+	getLookupDomainsLeaves
+		Map every leaf to its shape-based possible pile range.
 """
 from __future__ import annotations
 
@@ -32,9 +37,9 @@ from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive, raiseIfNone
 from mapFolding import leafOrigin
-from mapFolding.semiotics import dimensionIndex, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二
-from mapFolding.measure import 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零, 工totalDimensionsOdd
 from mapFolding.beDRY import mapShapeIs2上nDimensions
+from mapFolding.measure import 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零, 工totalDimensionsOdd
+from mapFolding.semiotics import dimensionIndex, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二
 from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
 from typing import TYPE_CHECKING
@@ -151,8 +156,8 @@ def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	(AI generated docstring)
 
 	You can use the map shape in `state` to locate possible piles for `leaf`. You receive a restricted
-	domain from the specialized implementation [1] when every dimension length is two, or every pile
-	index for other shapes.
+	domain from the cached shape-based calculation [1] for supported maps whose dimension lengths
+	are all two, or every pile index for other shapes.
 
 	Parameters
 	----------
@@ -967,7 +972,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 
 @cache
 def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], totalLeaves: int) -> range:
-	"""Supply `dimensionLength == 2` for these subroutines. You may be able to extend the concept to other `mapShape` values."""
+	"""I use this cache to restrict pile ranges for supported length-two maps and retain every pile otherwise."""
 	from mapFolding.dataBaskets import StateElimination  # ruff: ignore[import-outside-top-level]
 	state: StateElimination = StateElimination(mapShape)
 	if mapShapeIs2上nDimensions(state.mapShape):

@@ -7,14 +7,20 @@ utilities. The tests are designed to support multiple audiences and use cases.
 Test Module Organization (in mapFolding/tests/):
 - conftest.py: Testing infrastructure and shared fixtures
 - test_algorithms.py: Core mathematical validation and algorithm testing
+- test_computations.py: Elimination flows and counts after pinning
 - test_dataBaskets.py: Computation state and array-shape behavior
+- test_dataDynamic.py: Leaf domains, pile choices, and map-derived lookups
 - test_dataStructures.py: Dense and sparse triangle conversions and selections
 - test_filesystem.py: File operations and path management
+- test_insertion.py: Album insertion and constrained search-space construction
+- test_measurements.py: Positional-numeral measurements of leaf and pile labels
 - test_oeis.py: OEIS sequence access, triangle layouts, and local b-file updates
 - test_oeis_byFormula.py: Formula selection and sequence relationships
 - test_parameterValidation.py: Input and processor-limit validation
+- test_pinning.py: Pinning and leaf-order restrictions
+- test_semiotics.py: Dimension-position ideographs and head-relative labels
 - test_taskDivisions.py: Task division and work distribution
-- test_Z0Z_generatingFunction.py: Generating-function research checks
+- testsNeedAHome/test_generatingFunction.py: Generating-function research checks
 
 For Contributors:
 The test suite follows Domain-Driven Design principles, organizing tests around

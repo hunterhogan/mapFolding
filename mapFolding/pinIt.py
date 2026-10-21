@@ -1,13 +1,23 @@
-"""Pin possible leaf assignments for maps whose axis lengths are two.
+"""Pin leaf assignments and restrict relative leaf order in elimination search spaces.
 
 (AI generated docstring)
 
-You can refine possible foldings by pinning selected piles or selected leaf groups. You update
-permutation spaces in `mapFolding.dataBaskets.StateElimination` [1] and receive the supplied state.
+You can refine possible foldings by pinning selected piles or selected leaf groups. The state-based
+functions update permutation spaces in `mapFolding.dataBaskets.StateElimination` [1] and return the
+supplied state. `atPileExcludeLeaf` updates and returns a list of permutation spaces.
+The dimension-specific pinning functions use rules for maps whose axis lengths are two. The
+exclusion functions also support other map shapes.
 
 Contents
 --------
 Functions
+	Exclude assignments
+		atPileExcludeLeaf
+			Exclude one leaf at one pile in each supplied permutation space.
+		excludeLeaf_rBeforeLeaf_k
+			Restrict branches so one selected leaf precedes another.
+		excludeLeaf_rBeforeLeaf_kAtPile_k
+			Apply a leaf-order restriction when another leaf occupies a selected pile.
 	Pin by pile
 		pinPilesAtEnds
 			Pin selected piles near both ends of the pile order.
@@ -42,21 +52,18 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding import leafOrigin, pileOrigin
-from mapFolding.leafDomains import getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomainLeaf首零Plus零
-from mapFolding.semiotics import 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二
-from mapFolding.leafDomains import getDomainLeaf
+from mapFolding import leafDomains, leafOrigin, pileOrigin
+from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
+from mapFolding.dataBaskets import PermutationSpace, StateElimination
+from mapFolding.filters import leafInChoicesLeaf吗, 是valid
+from mapFolding.leafDomains import getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomainLeaf, getDomainLeaf首零Plus零
+from mapFolding.pileOptions import getLookupChoicesLeaf
 from mapFolding.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional
-from mapFolding.theTypes import ChoicesLeaf
-from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
-from mapFolding.dataBaskets import PermutationSpace, StateElimination
-from mapFolding.filters import leafInChoicesLeaf吗, 是valid
-from mapFolding import leafDomains
-from mapFolding.pileOptions import getLookupChoicesLeaf
-from mapFolding.theTypes import Leaf, Pile
+from mapFolding.semiotics import 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二
+from mapFolding.theTypes import ChoicesLeaf, Leaf, Pile
 from more_itertools import partition
 from operator import getitem, neg
 from tqdm import tqdm
@@ -79,12 +86,12 @@ def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pi
 	You can process each `pile` in `pileProcessingOrder` by partitioning `state.boxOfPermutationSpace`
 	into dictionaries that are open at that pile and dictionaries that are not.
 
-	You compute the partition with `partition` [1] and `PermutationSpace.pileOpen吗` [2]. You concurrently
-	deconstruct open `PermutationSpace` dictionaries with `ProcessPoolExecutor` [3] and track progress
-	with `tqdm` [4].
+	You compute the partition with `partition` [1] and `PermutationSpace.pileUndetermined吗` [2]. You
+	concurrently deconstruct open `PermutationSpace` dictionaries with `ProcessPoolExecutor` [3] and
+	track progress with `tqdm` [4].
 
 	You retain closed `PermutationSpace` dictionaries and concurrently deconstruct each open dictionary
-	at `pile` with `PermutationSpace.deconstructPermutationSpaceAtPile` [5].
+	at `pile` with `PermutationSpace.deconstructPile` [5].
 
 	Parameters
 	----------
@@ -106,15 +113,15 @@ def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pi
 	----------
 	[1] more-itertools `partition`.
 		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.partition
-	[2] mapFolding.dataBaskets.PermutationSpace.pileOpen吗.
+	[2] mapFolding.dataBaskets.PermutationSpace.pileUndetermined吗.
 
 	[3] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[4] tqdm documentation.
 		https://tqdm.github.io/
-	[5] mapFolding.dataBaskets.PermutationSpace.deconstructPermutationSpaceAtPile.
+	[5] mapFolding.dataBaskets.PermutationSpace.deconstructPile.
 
-	[6] mapFolding.defineProcessorLimit.
+	[6] mapFolding.beDRY.defineProcessorLimit.
 	"""
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
 	pileProcessingOrder.reverse()
@@ -141,7 +148,7 @@ def _pinPilesConcurrentTask(state: StateElimination) -> StateElimination:
 
 	(AI generated docstring)
 
-	You can call `PermutationSpace.deconstructPermutationSpaceAtPile` [1] with `leavesToPin` selected by
+	You can call `PermutationSpace.deconstructPile` [1] with `leavesToPin` selected by
 	`_getLeavesAtPile` [2].
 
 	Parameters
@@ -152,13 +159,13 @@ def _pinPilesConcurrentTask(state: StateElimination) -> StateElimination:
 	Returns
 	-------
 	statePinned : StateElimination
-		State returned by `PermutationSpace.deconstructPermutationSpaceAtPile`.
+		The supplied state containing branches after crease validation and reduction.
 
 	References
 	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPermutationSpaceAtPile.
+	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPile.
 
-	[2] mapFolding.pin2上nDimensions._getLeavesAtPile.
+	[2] mapFolding.pinIt._getLeavesAtPile.
 	"""
 	state.boxOfPermutationSpace.extend(state.permutationSpace.deconstructPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
@@ -182,15 +189,15 @@ def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 	Returns
 	-------
 	leavesToPin : Iterable[Leaf]
-		Leaves that should be used by `PermutationSpace.deconstructPermutationSpaceAtPile`.
+		Leaves that should be used by `PermutationSpace.deconstructPile`.
 
 	References
 	----------
 	[1] Python `operator` module documentation.
 		https://docs.python.org/3/library/operator.html
-	[2] mapFolding.pin2上nDimensionsByCrease.
+	[2] mapFolding.pinByCrease.
 
-	[3] mapFolding.pin2上nDimensionsByDomain.pinPile零Ante首零AfterDepth4.
+	[3] mapFolding.pinByDomain.pinPile零Ante首零AfterDepth4.
 	"""
 	leavesToPin: Iterable[Leaf] = frozenset()
 	if state.pile == pileOrigin:
@@ -375,24 +382,24 @@ def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDo
 	(AI generated docstring)
 
 	You can deconstruct each dictionary in `state.boxOfPermutationSpace` into a refined list with
-	`PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1]. You run tasks concurrently with
+	`PermutationSpace.deconstructDomainsCombined` [1]. You run tasks concurrently with
 	`ProcessPoolExecutor` [2], aggregate results with `as_completed` [2], and track progress with `tqdm`
 	[3].
 
-	You initialize an empty `state.boxOfPermutationSpace` with `pinPilesAtEnds(state, 0)` [4]. You bind
-	`leaves` and `leavesDomain` for worker calls with `functools.partial` [5].
+	You initialize an empty `state.boxOfPermutationSpace` with `pinPilesAtEnds(state, 0)` [4]. You pass
+	`leaves` and `leavesDomain` to each worker.
 
-	You receive `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails [6].
+	You receive `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails [5].
 
-	You configure the worker limit by passing `CPUlimit` to `defineProcessorLimit` [7].
+	You configure the worker limit by passing `CPUlimit` to `defineProcessorLimit` [6].
 
 	Parameters
 	----------
 	state : StateElimination
 		State that owns `state.boxOfPermutationSpace` and map-shape metadata.
-	leaves : tuple[Leaf, ...]
+	leaves : Sequence[Leaf]
 		Leaves to pin.
-	leavesDomain : tuple[tuple[Pile, ...], ...]
+	leavesDomain : Iterable[Sequence[Pile]]
 		Domains associated with `leaves`.
 	youMustBeDimensionsTallToRideThis : int = 3
 		Minimum `state.totalDimensions` required by `mapShapeIs2上nDimensions`.
@@ -406,19 +413,17 @@ def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDo
 
 	References
 	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainsCombined.
+	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainsCombined.
 
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[3] tqdm documentation.
 		https://tqdm.github.io/
-	[4] mapFolding.pin2上nDimensions.pinPilesAtEnds.
+	[4] mapFolding.pinIt.pinPilesAtEnds.
 
-	[5] Python `functools.partial` documentation.
-		https://docs.python.org/3/library/functools.html#functools.partial
-	[6] mapFolding._beDRY.mapShapeIs2上nDimensions.
+	[5] mapFolding.beDRY.mapShapeIs2上nDimensions.
 
-	[7] mapFolding.defineProcessorLimit.
+	[6] mapFolding.beDRY.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=youMustBeDimensionsTallToRideThis):
 		return state
@@ -446,16 +451,16 @@ def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[L
 	"""Deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	You can build `state.boxOfPermutationSpace` with
-	`PermutationSpace.deconstructPermutationSpaceByDomainsCombined` [1], then normalize and filter the
-	result with `reduceAllPermutationSpace` [2] and `removeIFFViolationsFromEliminationState` [3].
+	`PermutationSpace.deconstructDomainsCombined` [1], then remove crease violations with
+	`removeCreaseViolations` [2] and apply `reduceAllPermutationSpace` [3].
 
 	Parameters
 	----------
 	state : StateElimination
 		State that owns `state.permutationSpace`.
-	leaves : tuple[Leaf, ...]
+	leaves : Sequence[Leaf]
 		Leaves to pin.
-	leavesDomain : tuple[tuple[Pile, ...], ...]
+	leavesDomain : Iterable[Sequence[Pile]]
 		Domains associated with `leaves`.
 
 	Returns
@@ -465,11 +470,11 @@ def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[L
 
 	References
 	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainsCombined.
+	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainsCombined.
 
-	[2] mapFolding.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
+	[2] mapFolding.dataBaskets.StateElimination.removeCreaseViolations.
 
-	[3] mapFolding.algorithms.iff.removeIFFViolationsFromEliminationState.
+	[3] mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace.
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
@@ -481,8 +486,8 @@ def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[P
 
 	(AI generated docstring)
 
-	You can compute `leavesDomain` for each input dictionary with `getDomainLeaf(StateElimination(...),
-	leaf)`, then deconstruct it with `PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1].
+	You can deconstruct each input dictionary using the supplied `leaf` and `leafDomain` with
+	`PermutationSpace.deconstructDomainOfLeaf` [1].
 	You run tasks concurrently with `ProcessPoolExecutor` [2], aggregate results with `as_completed` [2],
 	and track progress with `tqdm` [3].
 
@@ -512,17 +517,17 @@ def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[P
 
 	References
 	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf.
+	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainOfLeaf.
 
 	[2] Python `concurrent.futures` documentation.
 		https://docs.python.org/3/library/concurrent.futures.html
 	[3] tqdm documentation.
 		https://tqdm.github.io/
-	[4] mapFolding.pin2上nDimensions.pinPilesAtEnds.
+	[4] mapFolding.pinIt.pinPilesAtEnds.
 
-	[5] mapFolding._beDRY.mapShapeIs2上nDimensions.
+	[5] mapFolding.beDRY.mapShapeIs2上nDimensions.
 
-	[6] mapFolding.defineProcessorLimit.
+	[6] mapFolding.beDRY.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=youMustBeDimensionsTallToRideThis):
 		return state
@@ -556,8 +561,8 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 	(AI generated docstring)
 
 	You can build `state.boxOfPermutationSpace` with
-	`PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf` [1], then normalize and filter the
-	result with `reduceAllPermutationSpace` [2] and `removeIFFViolationsFromEliminationState` [3].
+	`PermutationSpace.deconstructDomainOfLeaf` [1], then remove crease violations with
+	`removeCreaseViolations` [2] and apply `reduceAllPermutationSpace` [3].
 
 	Parameters
 	----------
@@ -575,11 +580,11 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 
 	References
 	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPermutationSpaceByDomainOfLeaf.
+	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainOfLeaf.
 
-	[2] mapFolding.pin2上nDimensionsAnnex.reduceAllPermutationSpace.
+	[2] mapFolding.dataBaskets.StateElimination.removeCreaseViolations.
 
-	[3] mapFolding.algorithms.iff.removeIFFViolationsFromEliminationState.
+	[3] mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace.
 
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainOfLeaf(leaves, leavesDomain)
