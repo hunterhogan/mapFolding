@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from mapFolding.oeis.A400429._A005315 import Z0Z_crunchCoefficients
+from mapFolding.oeis.A400429._A005315 import crunchCoefficients
 from mapFolding.oeis.A400429._generatingFunction import reduceFraction, reduceSteps
 from mapFolding.tests import assertEqualTo
 import pytest
 
-@pytest.mark.parametrize('Z0Z_次coefficient, numerator, denominator, expected', (
+@pytest.mark.parametrize('次coefficient, numerator, denominator, expected', (
 	pytest.param(0, (0, 1), (1, -1, -1), 0, id='fibonacci-constant')
 	, pytest.param(1, (0, 1), (1, -1, -1), 1, id='fibonacci-first')
 	, pytest.param(11, (0, 1), (1, -1, -1), 89, id='fibonacci-eleventh')
@@ -16,21 +16,21 @@ import pytest
 	, pytest.param(17, (1,), (1, 1), -1, id='alternating-sign')
 	, pytest.param(2, (0, 0, 5), (1, -1), 5, id='shifted-numerator')
 	, pytest.param(11, (0, 0, 5), (1, -1), 5, id='shifted-geometric')
-	, pytest.param(1, (5, 7), (1,), 7, id='Z0Z_polynomial-coefficient')
+	, pytest.param(1, (5, 7), (1,), 7, id='polynomial-coefficient')
 	, pytest.param(11, (5, 7), (1,), 0, id='past-polynomial-degree')
 	, pytest.param(11, (0,), (1, -1), 0, id='zero-numerator')
 	, pytest.param(11, (), (1, -1), 0, id='empty-numerator')
 ))
-def test_Z0Z_crunchCoefficients(Z0Z_次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...], expected: int) -> None:
-	assertEqualTo(Z0Z_crunchCoefficients(Z0Z_次coefficient, numerator, denominator), expected,
-		Z0Z_crunchCoefficients.__name__, Z0Z_次coefficient, numerator, denominator)
+def test_crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...], expected: int) -> None:
+	assertEqualTo(crunchCoefficients(次coefficient, numerator, denominator), expected,
+		crunchCoefficients.__name__, 次coefficient, numerator, denominator)
 
-@pytest.mark.parametrize('Z0Z_次coefficient, numerator, denominator, expected', (
-	pytest.param(-3, (5, 7), (1, -1), IndexError, id='Z0Z_negative-coefficient-index'),
+@pytest.mark.parametrize('次coefficient, numerator, denominator, expected', (
+	pytest.param(-3, (5, 7), (1, -1), IndexError, id='negative-coefficient-index'),
 ))
-def test_Z0Z_crunchCoefficientsError(Z0Z_次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...], expected: type[Exception]) -> None:
+def test_crunchCoefficientsError(次coefficient: int, numerator: tuple[int, ...], denominator: tuple[int, ...], expected: type[Exception]) -> None:
 	with pytest.raises(expected):
-		Z0Z_crunchCoefficients(Z0Z_次coefficient, numerator, denominator)
+		crunchCoefficients(次coefficient, numerator, denominator)
 
 @pytest.mark.parametrize('numerator, stepsNumerator, stepsDenominator, expected', (
 	pytest.param((1, 1), (), (2,), ((1,), (1, -1)), id='Z0Z_cancel-part-of-binomial')

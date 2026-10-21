@@ -1,1784 +1,3579 @@
-# n-choose-r terminology: (continued)
+# n-choose-r terminology: inventory annex; refreshed 2026-10-21
+
+This annex records the current working tree, including the separate `Z0Z_research` repository. The coefficient decisions are recorded in
+[the main inventory](n-choose-r%20inventory.md) and
+[the semiotic system](n-choose-r%20semiotic%20system.md). The deleted
+`research/matrixMeanders/archiveTriangle` modules have no current entries.
 
 ## Exact-Spelling Index
 
 Each entry includes source identifiers and textual occurrences with this exact
 spelling. Quoted labels, prose and imports are included; repeated appearances
-on the same line count as one location. OEIS cache text is separated below.
+on the same line count as one location. Notebook source cells are numbered from one;
+saved execution output is excluded. OEIS cache text is separated below.
 
-_binomialCoefficients
+The scan includes coefficient and nCr-related term families, plus the control and
+index spellings retained from the original inventory and their prefixed forms.
+Single-letter mathematical notation remains in the main inventory. These inventories
+and the semiotic-system document are excluded from their own lexical scan.
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 102, 116
+### `A000108`
 
-A000108
-
+- README.md: 168
+- Z0Z_research/constraint/archParentsPrototype.py: 114-115, 133-134, 137-138
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 56, 190
 - archive/insertion/insertion.py: 30
 - citations/Sade1949.bib: 7-8
 - mapFolding/oeis/_theSSOT.py: 20
 - mapFolding/tests/test_oeis.py: 38
-- README.md: 153
-- Z0Z_literature/Sade_1949_working_reference.md: 373
-- Z0Z_research/constraint/archParentsPrototype.py: 114-115, 133-134, 137-138
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 56, 190
 
-A005315Binomial
+### `aCoefficient`
 
-- research/matrixMeanders/archiveTriangle/get_parity.py: 10, 15
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 14, code]: 16, 19, 21, 23
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 23, code]: 24
 
-advanceDyck
+### `as_coefficients_dict`
 
-- mapFolding/algorithms/catalanArch.py: 15, 43
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 201
 
-antiCatalan
+### `basis`
 
-- Z0Z_research/catalanArches/analyze.py: 252
-- Z0Z_research/catalanArches/generate.py: 94, 96, 103, 118, 153, 161
+- README.md: 171
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 75, 242
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 42, 68, 142
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 115
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 6
+- Z0Z_research/constraint/archReducePrototype.py: 105
+- mapFolding/beDRY.py: 30
 
-AntiCatalanFormula
+### `bCoefficient`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 22, 43, 77, 82, 101
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 14, code]: 17, 19, 21, 23
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 23, code]: 24
 
-antiCatalanFormulasToEquation
+### `binom`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 77, 86
+- .vscode/code-spell-dictionary-workspace.txt: 49
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 10, 62-65
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 8, 10, 194, 209
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 54, 65, 108, 111, 137
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 113
 
-antiCatalanFormulasToMultiplyThis
+### `binomial`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 14
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
-- Z0Z_research/catalanArches/formulaExperiments.py: 100
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 8
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 13
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 36, 69
 
-antiCatalanFormulasToRow
+### `boxOfCoefficients`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 81, 104
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 80-81, 85, 90, 93, 102-105
+- mapFolding/oeis/A400429/_A005315.py: 147-150, 152
 
-antiCatalanSelection
+### `boxOfColumnCoefficients`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 13, 15-16
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 100, 103, 107
 
-antiCatalanTermsToReport
+### `boxOfIntegers`
 
-- Z0Z_research/catalanArches/generate.py: 93, 164
+- mapFolding/dataStructures.py: 323, 752, 762, 773, 777, 779, 801
+- mapFolding/kitFilesystem.py: 542, 544, 555, 573, 1006, 1009, 1234
 
-ast_exprBinomialBasis
+### `boxOfMultiplicands`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 171, 173, 175, 177, 179
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 43-44
 
-basisLobb
+### `boxOfNumbers`
+
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 39-40, 43-44
+
+### `cardinality`
+
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 3, markdown]: 3
+
+### `catalan`
+
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 8
+
+### `cCoefficient`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 14, code]: 18-19, 21, 23
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 15, code]: 7
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 23, code]: 24
+
+### `Choose`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 4
+
+### `choose`
+
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 117
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 3
+- mapFolding/algorithms/matrixMeandersShare.py: 208
+- mapFolding/kitAST/numba/kitNumba.py: 398
+- mapFolding/kitFilesystem.py: 268
+- research/histogram of values technique.py: 6
+
+### `CHOOSE_FIRST`
+
+- Z0Z_research/constraint/archParentsPrototype.py: 107
+
+### `chooses`
+
+- README.md: 85
+
+### `Coefficient`
+
+- mapFolding/oeis/A400429/_A005315.py: 57
+
+### `coefficient`
+
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 119
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 11, code]: 13, 19, 21
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 22, code]: 4
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 4, code]: 18, 20
+- mapFolding/oeis/A400429/_A005315.py: 40, 48, 51-52, 59, 113, 124, 130, 136, 142-143, 228, 233, 260, 265, 294, 299, 331, 336, 371, 376, 416, 421, 470, 475, 539, 544, 642, 647
+- mapFolding/oeis/A400429/__init__.py: 15
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 19, 29
+
+### `coefficientBase`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 22, code]: 5, 8
+
+### `coefficientFinder`
+
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 79, 102
+
+### `Coefficients`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 4, code]: 1
+- mapFolding/oeis/A400429/_A005315.py: 133, 135
+
+### `coefficients`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 14
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 3, 25
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 127
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 28, 74
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 14, code]: 19
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 24, code]: 8
+- mapFolding/oeis/A400429/_A005315.py: 44, 59, 117, 215-216, 247-248, 279-280, 316-317, 356-357, 401-402, 455-456, 524-525, 627-628
+
+### `coefficientsEqual吗`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 262
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 15, 104
+
+### `coefficientsLinear`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 11, code]: 12-13
+
+### `coefficientsLobb`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 91
+
+### `coefficientsParity`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 22, code]: 5
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 23, code]: 20, 26
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 4, code]: 4, 18
+
+### `coefficientsParitySerializable`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 23, code]: 20, 26
+
+### `column_k`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 20-21, 23, 28-29, 31, 37-38, 45-46, 49, 51, 98-99, 102, 104-106, 108-109, 111-113, 119, 123-125, 132-135, 142-143, 146-147, 262, 264-266
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 4, 60
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 3, 5
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 85-86, 88
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 27-28, 31, 79-81, 83, 89
+- Z0Z_research/constraint/archParentsPrototype.py: 61, 105-106, 131-132
+
+### `comb`
+
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 6
+- Z0Z_research/constraint/archReducePrototype.py: 8
+- mapFolding/oeis/A400429/_A005315.py: 104
+- ruff.toml: 108
+
+### `Combin`
+
+- .vscode/code-spell-dictionary-workspace.txt: 82
+
+### `combinations`
+
+- Z0Z_research/constraint/insertionPrototype.py: 6
+- Z0Z_research/constraint/monster.py: 8
+- Z0Z_research/constraint/windingNumberPrototype.py: 6
+- mapFolding/algorithms/iff.py: 61
+- mapFolding/dataBaskets.py: 62
+- mapFolding/reduceIt.py: 36
+
+### `countBound`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 24, 26, 44, 47, 65, 69, 72, 82, 87
+
+### `countKnown`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 44, 46, 49-51, 55, 57, 59-60, 68, 85-87
+- mapFolding/needsAHome/verify.py: 147, 152-153
+
+### `countSum`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 117-118, 121, 127-129, 133
+
+### `countSumBound`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 121, 131
+
+### `crunchCoefficients`
+
+- mapFolding/oeis/A400429/_A005315.py: 48, 58, 112, 216, 225, 238, 248, 257, 270, 280, 291, 307, 317, 328, 347, 357, 368, 392, 402, 413, 446, 456, 467, 515, 525, 536, 618, 628, 639, 764
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 3, 25-26, 33
+
+### `dataframeCoefficientsLinear`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 11, code]: 13, 19, 21, 23
+
+### `degree`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 21
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 37, 104, 113-114, 130, 140, 142, 146-147, 150, 162, 192
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 23, 27, 77, 81, 93, 117
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
+- archive/insertion/learningSade.ipynb [cell 2, code]: 17
+- development/EndNotes.md: 5
+- mapFolding/oeis/A400429/_A005315.py: 44, 117, 150, 198, 215, 247, 279, 316, 356, 401, 455, 524, 627
+- mapFolding/oeis/byFormula.py: 838, 851
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 20
+
+### `direction`
+
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 23, 27, 29-30
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 32
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 35
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 59
+- mapFolding/leafDomains.py: 565-566, 609-610, 613-614, 732, 786-787, 798, 804, 846, 896-897, 899, 911, 917, 961, 969
+- mapFolding/pinByCrease.py: 89, 92-93, 138, 141-142, 188, 191-192, 240, 243-244, 293, 296-297, 356, 359-360
+
+### `Dyck`
+
+- .vscode/code-spell-dictionary-workspace.txt: 127
+
+### `Dyck_language`
+
+- mapFolding/algorithms/matrixMeanders.py: 49
+- mapFolding/synthesized/matrixMeanders/bigInt.py: 50
+- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 48
+- mapFolding/synthesized/matrixMeanders/prune.py: 50
+- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 50
+
+### `eliminationCrease`
+
+- easyRun/pinning.py: 7
+- mapFolding/algorithms/__init__.py: 11
+- mapFolding/algorithms/iff.py: 156, 189
+- mapFolding/basecamp.py: 477, 505
+
+### `inner5`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 38
+
+### `isEven吗`
+
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 33, 38
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 193, 208, 220, 230
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 12
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 35, 58
+- Z0Z_research/Y7Y_catalanArches/generate.py: 65, 87
+- Z0Z_research/constraint/windingNumberPrototype.py: 5, 39, 72, 84
+- mapFolding/conditionalOrdering.py: 22, 92-93, 108, 123-124, 150
+- mapFolding/creases.py: 19, 128
+- mapFolding/leafDomains.py: 37, 504, 509, 641
+- mapFolding/pinByCrease.py: 30, 199, 307-309
+- mapFolding/pinByDomain.py: 16, 204, 293, 440, 449, 475, 490
+- research/elimination/pileOptionsDevelopment.py: 9, 152, 157
+- research/elimination/workBenchPatternFinder.py: 8, 108, 113
+- ruff.toml: 102
+
+### `isOdd吗`
+
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 37
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 8
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 5
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 4, 65
+- Z0Z_research/constraint/monster.py: 6, 142, 270
+- Z0Z_research/constraint/windingNumberPrototype.py: 5, 34
+- mapFolding/conditionalOrdering.py: 22, 100, 109, 116
+- mapFolding/creases.py: 19, 123
+- mapFolding/leafDomains.py: 37, 630, 681, 724, 798, 804, 846, 911, 917, 961
+- mapFolding/pinByCrease.py: 30, 304
+- mapFolding/pinByDomain.py: 16, 179, 234, 268, 280, 322, 441, 463, 485
+- research/elimination/pileOptionsDevelopment.py: 9, 175
+- research/elimination/workBenchPatternFinder.py: 8, 127
+- ruff.toml: 103
+
+### `kArchetype`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 25, 28-29, 31, 179-180
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 54-55, 58
+
+### `Label`
+
+- mapFolding/oeis/__main__.py: 350
+
+### `label`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 26, code]: 31-32
+- mapFolding/__init__.py: 16, 18
+- mapFolding/algorithms/insertion.py: 94
+- mapFolding/basecamp.py: 565
+- mapFolding/creases.py: 6
+- mapFolding/dataBaskets.py: 123, 125, 135, 137, 288, 290, 300, 302
+- mapFolding/filters.py: 24
+- mapFolding/oeis/__main__.py: 339, 346, 348, 352, 357
+- mapFolding/oeis/_commandLine.py: 71
+- mapFolding/theSSOT.py: 44
+- mapFolding/theTypes.py: 119, 128
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 11, markdown]: 6
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 9, markdown]: 1
+- research/matrixMeanders/Z0Z_transfer.py: 85, 89
+- research/matrixMeanders/buckets.ipynb [cell 12, code]: 4, 6
+
+### `Labels`
+
+- mapFolding/oeis/__main__.py: 358
+
+### `labels`
+
+- archive/insertion/insertion.py: 5
+- mapFolding/__init__.py: 45, 61
+- mapFolding/algorithms/permutations.py: 551
+- mapFolding/basecamp.py: 566
+- mapFolding/creases.py: 54, 96
+- mapFolding/dataStructures.py: 260
+- mapFolding/filters.py: 252
+- mapFolding/kitFilesystem.py: 174, 269, 587
+- mapFolding/oeis/__init__.py: 40
+- mapFolding/oeis/__main__.py: 20, 340, 359, 363
+- mapFolding/tests/__init__.py: 16, 21
+- mapFolding/theTypes.py: 1, 11, 17, 119, 403, 405, 407, 409, 411
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 11, markdown]: 7
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 2, markdown]: 14
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 3, markdown]: 3
+- research/matrixMeanders/Z0Z_transfer.py: 29
+
+### `Less`
+
+- .vscode/identifiers.code-snippets: 94-95
+- development/identifiers notes.txt: 28
+
+### `less`
+
+- archive/insertion/insertion.py: 96
+- archive/matrixMeanders/matrixMeandersNumPyV1finalForm.py: 376
+- archive/multiDimensionalMapFolding/__init__.py: 41
+- development/Elimination--Ideas to improve the algorithm.md: 28
+- development/Elimination.md: 95-96
+- development/identifiers notes.txt: 36-37, 41, 43
+- mapFolding/algorithms/constraintPropagation.py: 163
+- mapFolding/algorithms/matrixMeandersNumPy.py: 78-79
+- mapFolding/basecamp.py: 96
+- mapFolding/dataBaskets.py: 447
+- mapFolding/oeis/A400429/A400631.txt: 8
+- mapFolding/oeis/A400429/A400632.txt: 8
+- mapFolding/oeis/A400429/A400633.txt: 8
+- mapFolding/oeis/A400429/A400634.txt: 8
+- mapFolding/oeis/A400429/A400635.txt: 8
+- mapFolding/oeis/A400429/A400636.txt: 8
+- mapFolding/oeis/A400429/A400637.txt: 8
+- mapFolding/oeis/A400429/A400638.txt: 8
+- mapFolding/oeis/A400429/A400639.txt: 8
+- mapFolding/synthesized/matrixMeanders/pruneNumPy.py: 73-74
+- mapFolding/theTypes.py: 475, 478
+
+### `Lobb`
+
+- .vscode/code-spell-dictionary-workspace.txt: 266
+
+### `lookupAddThis`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 44, 48, 102, 105
+
+### `lookupGrowthTerms`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 35, 38, 40, 167, 172-173, 237, 239, 241
+
+### `lookupMultiplyThis`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 44, 47
+
+### `lookupPredictionByDegree`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 173, 187
+
+### `multiplicities`
+
+- mapFolding/oeis/A400429/_generatingFunction.py: 41-42, 45, 47
+
+### `nCr`
+
+- Z0Z_research/constraint/archReducePrototype.py: 8, 109, 142
+- mapFolding/oeis/A400429/_A005315.py: 104, 167, 169, 197, 203, 206
+- ruff.toml: 108
+
+### `Offset`
+
+- mapFolding/dataStructures.py: 941
+- mapFolding/oeis/_metadata.py: 243
+
+### `offset`
+
+- README.md: 48, 108
+- archive/matrixMeanders/A000682expAnalysis.csv: 1
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 3, code]: 5
+- development/Elimination.md: 151
+- development/EndNotes.md: 61
+- mapFolding/algorithms/matrixMeandersShare.py: 261
+- mapFolding/basecamp.py: 143-144
+- mapFolding/dataStructures.py: 60, 888, 917, 1058, 1072
+- mapFolding/kitAST/zCuzDocStoopid/makeDocstrings.py: 124
+- mapFolding/kitFilesystem.py: 608, 628, 979-980, 987, 1007
+- mapFolding/oeis/A400429/_A005315.py: 23, 38, 161, 193, 213, 224, 227, 245, 256, 259, 277, 290, 293, 314, 327, 330, 354, 367, 370, 399, 412, 415, 453, 466, 469, 522, 535, 538, 625, 638, 641
+- mapFolding/oeis/A400429/__init__.py: 41, 43, 45, 47, 49, 51, 53, 55, 57, 59, 61, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84
+- mapFolding/oeis/__main__.py: 140, 155, 165, 182, 202
+- mapFolding/oeis/_byFormulaLookup.py: 407-415
+- mapFolding/oeis/_byID.py: 45, 82-83, 86
+- mapFolding/oeis/_dataBaskets.py: 22-23, 32, 44
+- mapFolding/oeis/_metadata.py: 92, 125, 130, 177, 182, 205-206, 223, 227, 267, 292, 305, 340, 379, 407-408, 419-420, 487-488, 493, 497, 499, 523, 533, 538-539, 541-542, 573-574
+- mapFolding/oeis/byFormula.py: 1032-1040
+- mapFolding/oeis/zCuzDocStoopidbyFormula.py: 459-461, 463-464, 466, 468-469, 471
+- mapFolding/tests/dataSamples/sequenceAlbums.py: 236-238, 240-241, 243, 256-258, 260-261, 263, 269, 271, 276, 278, 283, 285
+- mapFolding/tests/test_computations.py: 52-53, 75
+- mapFolding/tests/test_dataStructures.py: 20, 35
+- mapFolding/tests/test_oeis.py: 36, 79, 94
+- mapFolding/tests/test_oeis_byFormula.py: 117, 122-130
+- mapFolding/theTypes.py: 74
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 16, markdown]: 11
+
+### `Order`
+
+- mapFolding/algorithms/elimination.py: 23, 222
+- mapFolding/beDRY.py: 150
+- mapFolding/creases.py: 51, 93
+- mapFolding/kitAST/paths.py: 97
+- mapFolding/leafDomains.py: 206, 282, 425, 545, 589, 757, 876
+- mapFolding/reduceIt.py: 702
+- mapFolding/tests/test_parameterValidation.py: 43
+
+### `order`
+
+- .vscode/identifiers.code-snippets: 75, 80, 85, 90, 95, 100, 105
+- README.md: 106, 130
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 113
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 109
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 175
+- Z0Z_research/Y7Y_catalanArches/generate.py: 74
+- archive/insertion/insertion.py: 7, 70, 81, 219
+- archive/insertion/learningSade.ipynb [cell 2, code]: 13
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 1, markdown]: 21
+- archive/multiDimensionalMapFolding/lunnonNumpy.py: 87
+- archive/multiDimensionalMapFolding/total_countPlus1vsPlusN.py: 184
+- archive/permutationMeanders/stamp_meander.py: 12, 449, 455
+- citations/Jensen.bib: 13
+- citations/Jia2020.bib: 12
+- development/Elimination--Ideas to improve the algorithm.md: 15
+- development/Elimination.md: 236
+- development/EndNotes.md: 30, 39
+- development/bureaucracy.md: 29, 40
+- easyRun/triangleSemiMake.py: 25
+- mapFolding/__init__.py: 31, 53
+- mapFolding/algorithms/constraintPropagation.py: 62
+- mapFolding/algorithms/elimination.py: 227
+- mapFolding/algorithms/iff.py: 12, 157, 178, 217, 330
+- mapFolding/algorithms/insertion.py: 94
+- mapFolding/algorithms/matrixMeandersShare.py: 377
+- mapFolding/algorithms/permutations.py: 551
+- mapFolding/basecamp.py: 565
+- mapFolding/beDRY.py: 147, 153, 164
+- mapFolding/beDRYElimination.py: 231, 259, 298, 331, 336, 360
+- mapFolding/conditionalOrdering.py: 5, 183, 202
+- mapFolding/creases.py: 6, 35, 48, 77, 90
+- mapFolding/dataBaskets.py: 109, 274, 736, 740, 742, 1204, 1216, 1324, 1339, 1386, 1609, 1611
+- mapFolding/dataBasketsAnnex.py: 31
+- mapFolding/dataStructures.py: 24, 268, 305, 318-319, 324, 425, 476, 495, 528, 540, 645, 693, 763, 773, 812, 853, 972, 977
+- mapFolding/kitAST/RecipeJob.py: 351, 445
+- mapFolding/kitAST/dataclasses.py: 91, 140, 376, 519, 570
+- mapFolding/kitFilesystem.py: 20, 175, 209, 214, 330, 556, 587, 617, 705, 921, 980, 1070, 1100, 1171, 1204, 1235
+- mapFolding/leafDomains.py: 203, 209, 279, 285, 422, 428, 542, 548, 586, 592, 754, 760, 873, 879
+- mapFolding/oeis/A400429/_A005315.py: 44, 48, 117, 124, 215-216, 247-248, 279-280, 316-317, 356-357, 401-402, 455-456, 524-525, 627-628
+- mapFolding/oeis/A400429/_generatingFunction.py: 36, 45
+- mapFolding/oeis/__main__.py: 68, 283
+- mapFolding/oeis/_beDRY.py: 15, 92
+- mapFolding/oeis/_commandLine.py: 47
+- mapFolding/oeis/_metadata.py: 335, 339
+- mapFolding/oeis/byFormula.py: 603, 616, 634, 647, 667, 680, 807, 820
+- mapFolding/pinByCrease.py: 58, 71, 81, 107, 120, 130, 157, 170, 180, 209, 222, 232, 262, 275, 285, 325, 338, 348
+- mapFolding/pinByDomain.py: 44, 48
+- mapFolding/pinIt.py: 1, 20, 23, 103, 228, 619, 670, 761, 863, 919, 975, 1031, 1189, 1191
+- mapFolding/reduceIt.py: 8, 334, 682, 705-706
+- mapFolding/tests/__init__.py: 20
+- mapFolding/tests/createDataSamples.py: 89
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain3_2_首一_首零一.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain3_首一.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain5_4.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain6_5.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain6_7_5_4.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain7_6.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首二_首零一二.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首二_首零二_首零一二_首一二.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首零一二_首一二.py: 9
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首零二_首二.py: 9
+- research/mapFolding/databaskets.py: 40
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 1, markdown]: 18
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 10, markdown]: 21
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 15, markdown]: 3
+- research/matrixMeanders/Z0Z_count.py: 55-57
+- research/matrixMeanders/Z0Z_transfer.py: 72-74
+- ruff.toml: 48
+
+### `ordinal`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 185
+
+### `Parity`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 13, code]: 1
+
+### `parity`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 203, 206, 218
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 11
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 34, 134
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 7, 41, 79, 121
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 51, 53, 61, 66, 68, 117-118, 121, 146-147, 170, 173, 176
+- archive/insertion/insertion.py: 209
+- archive/insertion/learningSade.ipynb [cell 2, code]: 12
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 1, markdown]: 5, 7
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 13, code]: 1
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 15, code]: 1
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 16, code]: 3
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 17, code]: 3, 13
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 18, code]: 1
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 22, code]: 4
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 23, code]: 12
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 24, code]: 6, 9
+- development/Elimination.md: 91, 95-96, 273, 281
+- mapFolding/algorithms/iff.py: 21, 26, 28, 41, 45, 75, 173, 313, 319
+- mapFolding/algorithms/insertion.py: 194
+- mapFolding/algorithms/matrixMeanders.py: 15
+- mapFolding/algorithms/matrixMeandersShare.py: 96, 232, 234
+- mapFolding/dataBaskets.py: 555, 592, 602, 1532
+- mapFolding/dataStructures.py: 219
+- mapFolding/oeis/zCuzDocStoopidbyFormula.py: 21
+- mapFolding/pileOptions.py: 6, 20, 114, 131, 214
+- mapFolding/reduceIt.py: 108, 460
+- mapFolding/synthesized/matrixMeanders/bigInt.py: 16
+- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 14
+- mapFolding/synthesized/matrixMeanders/prune.py: 16
+- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 16
+
+### `parityEven`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 204, 208, 211, 219-220
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 33
+
+### `period`
+
+- mapFolding/oeis/A400429/_A005315.py: 198
+- ruff.toml: 54
+
+### `Position`
+
+- development/bureaucracy.md: 11
+- mapFolding/algorithms/matrixMeandersNumPy.py: 330
+- mapFolding/oeis/A400429/_A005315.py: 774
+- mapFolding/synthesized/matrixMeanders/pruneNumPy.py: 261
+- mapFolding/theTypes.py: 440
+
+### `position`
+
+- README.md: 70
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 203, 206
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 33, 44, 117, 134, 180
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 51, 115, 121
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 73-76, 149-151
+- Z0Z_research/constraint/increasingRunsPrototype.py: 28
+- archive/insertion/learningSade.ipynb [cell 2, code]: 14
+- archive/multiDimensionalMapFolding/__init__.py: 27
+- archive/multiDimensionalMapFolding/hunterNumba.py: 144
+- archive/multiDimensionalMapFolding/notes.md: 8, 17-18
+- development/bureaucracy.md: 6-7, 9-10, 12, 16-17, 20, 22, 26, 30, 54
+- easyRun/triangleSemiMake.py: 24, 26
+- mapFolding/algorithms/iff.py: 16, 37
+- mapFolding/algorithms/insertion2上nDimensional.py: 49, 65, 79, 163, 167
+- mapFolding/algorithms/matrixMeanders.py: 25
+- mapFolding/algorithms/matrixMeandersNumPy.py: 307, 315
+- mapFolding/algorithms/permutations.py: 551
+- mapFolding/basecamp.py: 566
+- mapFolding/creases.py: 5
+- mapFolding/dataBaskets.py: 35, 164, 168, 170, 172, 174, 331, 335, 337, 339, 341, 924, 945, 957, 959
+- mapFolding/dataStructures.py: 481
+- mapFolding/filters.py: 24, 51
+- mapFolding/kitFilesystem.py: 587, 1072
+- mapFolding/measure.py: 103, 129, 161, 199, 229, 280
+- mapFolding/oeis/A400429/__init__.py: 90, 92
+- mapFolding/oeis/_beDRY.py: 64
+- mapFolding/pinByDomain.py: 12, 39
+- mapFolding/pinIt.py: 25, 309
+- mapFolding/semiotics.py: 5-6, 17, 126
+- mapFolding/synthesized/matrixMeanders/bigInt.py: 26
+- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 24
+- mapFolding/synthesized/matrixMeanders/prune.py: 26
+- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 26
+- mapFolding/synthesized/matrixMeanders/pruneNumPy.py: 238, 246
+- mapFolding/tests/__init__.py: 21
+- mapFolding/theTypes.py: 15, 17, 25, 120, 437-438
+- research/elimination/analysisMeasurements.py: 57
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 15, markdown]: 7
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 2, markdown]: 10
+
+### `powerLawCoefficients`
+
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 14, code]: 23-24
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 16, code]: 18
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 17, code]: 19-20, 24
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 22, code]: 12-13, 17
+
+### `rangeDataRowsNeeded`
+
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 83, 87, 89-90
+
+### `rangeSansFormula`
+
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 81-82, 85, 88, 92
+
+### `Residue`
+
+- archive/multiDimensionalMapFolding/irvineJavaPort.py: 21
+
+### `residue`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 24-25
+- archive/multiDimensionalMapFolding/__init__.py: 17
+
+### `Row`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 38, 72
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 100
+- archive/insertion/insertion.py: 137
+- mapFolding/algorithms/matrixMeandersShare.py: 384
+- mapFolding/oeis/A400429/A400631.txt: 28
+- mapFolding/oeis/A400429/A400632.txt: 29
+- mapFolding/oeis/A400429/A400633.txt: 29
+- mapFolding/oeis/A400429/A400634.txt: 21
+- mapFolding/oeis/A400429/A400635.txt: 21
+- mapFolding/oeis/A400429/A400636.txt: 21
+- mapFolding/oeis/A400429/A400637.txt: 21
+- mapFolding/oeis/A400429/A400638.txt: 21
+- mapFolding/oeis/A400429/A400639.txt: 21
+- mapFolding/oeis/A400429/_A005315.py: 224, 256, 290, 327, 367, 412, 466, 535, 638
+- mapFolding/oeis/__main__.py: 281
+- mapFolding/oeis/_metadata.py: 122, 203, 252, 283, 290, 397, 405
+- mapFolding/oeis/byFormula.py: 881, 894
+
+### `row`
+
+- README.md: 48, 93, 95, 101-102, 108, 110
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 26-27, 32-35
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 75, 97
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 17, 21, 25, 38, 74
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 3, 91, 105, 166, 184, 216, 232, 300, 302
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 104
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 128, 143
+- Z0Z_research/Y7Y_catalanArches/generate.py: 28, 30-31
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 78, 81, 92, 105
+- Z0Z_research/constraint/archParentsPrototype.py: 41, 56, 168, 172, 185
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 244
+- Z0Z_research/constraint/insertionPrototype.py: 21, 24, 99, 101, 110, 113
+- Z0Z_research/constraint/windingNumberPrototype.py: 20, 23, 26, 121-122, 125, 133, 139, 142-143
+- archive/insertion/insertion.py: 144, 171
+- archive/insertion/learningSade.ipynb [cell 2, code]: 65-66
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 21, code]: 7-8, 11
+- archive/matrixMeanders/matrixMeandersNumPyV1finalForm.py: 340
+- easyRun/triangleSemiMake.py: 23
+- mapFolding/algorithms/insertion2上nDimensional.py: 66
+- mapFolding/algorithms/matrixMeandersShare.py: 248, 259
+- mapFolding/dataStructures.py: 419, 476, 624-625
+- mapFolding/kitFilesystem.py: 548, 1004
+- mapFolding/oeis/A400429/_A005315.py: 38
+- mapFolding/oeis/A400429/__init__.py: 22, 24, 36
+- mapFolding/oeis/A400429/_integrateMe_fromTriangleCells.py: 9-10
+- mapFolding/oeis/A400429/_integrateMe_verify.py: 116, 122
+- mapFolding/oeis/__init__.py: 22, 24, 42
+- mapFolding/oeis/__main__.py: 22, 267, 271-272, 279, 287, 291-293
+- mapFolding/oeis/_dataBaskets.py: 10, 30, 32, 52, 57
+- mapFolding/oeis/_metadata.py: 92, 120, 124, 126-127, 131-132, 145, 190, 201, 205-206, 208, 243, 245, 250, 255, 270, 274-275, 283, 288, 292-295, 387, 398, 407-408, 550-551
+- mapFolding/tests/test_dataStructures.py: 83
+- mapFolding/tests/test_filesystem.py: 152
+- mapFolding/tests/test_oeis.py: 141
+- mapFolding/theTypes.py: 31, 33
+- research/elimination/positionAnalysis.py: 34-35
+- research/matrixMeanders/Z0Z_transfer.py: 84, 89-90
+
+### `row_n`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 131-132
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 28-30, 32, 34-35, 60, 62, 65, 68, 70-73, 76, 78-82, 85-86, 90, 109, 111-112, 114-115
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 28, 75-77, 101-102, 104-105
+- Z0Z_research/constraint/archParentsPrototype.py: 144-145, 147-148, 153, 156-157
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 114-115, 117-118
+
+### `shift`
+
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 46-47, 49-50
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 5, 12, 18, 41, 46, 69, 72, 107, 115, 119
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 7
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 13-22, 24, 26-34
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 172, 180
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 36-45, 47, 49-57
+- mapFolding/algorithms/matrixMeandersPandas.py: 51
+- mapFolding/synthesized/matrixMeanders/prunePandas.py: 47
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 44, 77
+
+### `stored`
+
+- README.md: 106, 156
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 122, 126-127
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 15
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 177, 190
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 7-8
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 51, 63
+- Z0Z_research/Y7Y_catalanArches/generate.py: 80, 104
+- archive/multiDimensionalMapFolding/__init__.py: 42
+- mapFolding/algorithms/matrixMeandersShare.py: 308, 382
+- mapFolding/dataBaskets.py: 544, 583, 619, 624, 640, 1426, 1487, 1493
+- mapFolding/dataStructures.py: 348, 447, 562, 572, 577, 715, 885, 887, 889, 894, 901
+- mapFolding/kitFilesystem.py: 624, 708, 942
+- mapFolding/oeis/A400429/_A005315.py: 34, 43, 215, 219, 247, 251, 279, 316, 356, 401, 455, 524, 627
+- mapFolding/oeis/A400429/__init__.py: 6
+- mapFolding/oeis/__init__.py: 6
+- mapFolding/oeis/__main__.py: 62, 155, 165, 211
+- mapFolding/oeis/_dataBaskets.py: 28
+- mapFolding/oeis/_metadata.py: 86, 97, 154, 207, 340
+- mapFolding/tests/test_dataDynamic.py: 6
+- mapFolding/tests/test_dataStructures.py: 16
+- mapFolding/tests/test_measurements.py: 3
+- mapFolding/theTypes.py: 154
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 3, markdown]: 5
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 9, markdown]: 1
+- research/matrixMeanders/optimizingOperations.py: 6
+
+### `storedAddThis`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 83, 88, 91, 97-99
+
+### `test_crunchCoefficients`
+
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 24
+
+### `test_crunchCoefficientsError`
+
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 31
+
+### `top`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 177
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 19
+- citations/Koehler1968.bib: 12
+- mapFolding/algorithms/constraintPropagation.py: 290
+- mapFolding/algorithms/iff.py: 12
+- mapFolding/basecamp.py: 2
+- mapFolding/dataBaskets.py: 697, 760, 1630
+- mapFolding/kitAST/codon/makeJob.py: 107
+- mapFolding/kitFilesystem.py: 969
+- mapFolding/leafDomains.py: 976
+- mapFolding/oeis/byFormula.py: 915, 928, 953, 966, 985, 998, 1067, 1080
+- mapFolding/pileOptions.py: 238
+- research/elimination/pileOptionsDevelopment.py: 3
+- research/matrixMeanders/Z0Z_transfer.py: 6
+- ruff.toml: 34
+
+### `totalSansFormula`
+
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 82-83
+
+### `valueCalculated`
+
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 113, 116, 119-120, 127, 130, 135, 139-140, 142
+
+### `VALUES`
+
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 132
+
+### `Values`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 6
+- mapFolding/dataBaskets.py: 438
+- mapFolding/dataStructures.py: 324, 501, 503, 763
+- mapFolding/oeis/_metadata.py: 560
+
+### `values`
+
+- README.md: 27, 31, 47-48, 106, 108, 124, 129, 137, 183, 245
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 57, 74, 86, 128, 138, 153, 161, 163, 173, 185, 190, 204, 207, 213, 223, 227
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 10, 17, 38, 69
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 166, 186
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 58, 96, 99, 118, 183
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 5, 8
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 12, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 13, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 59, 68, 71, 105-107, 133, 152, 163-165, 184-187
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 125, 145
+- Z0Z_research/Y7Y_catalanArches/generate.py: 53, 64, 72, 83, 85, 100, 107, 109, 117, 126
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 105
+- Z0Z_research/leafSequence/exploreGraph.py: 31, 114
+- archive/insertion/insertion.py: 151, 193, 214
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 20, code]: 19-20
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 26, code]: 43
+- archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 6, code]: 8, 23
+- archive/matrixMeanders/A005316imperative.py: 68
+- archive/matrixMeanders/A005316primitiveOptimized.py: 64
+- archive/matrixMeanders/A005316write2disk.py: 141
+- archive/matrixMeanders/matrixMeanders64retired.py: 27
+- archive/matrixMeanders/matrixMeandersBaselineV2.py: 131
+- archive/matrixMeanders/matrixMeandersNumPyV1finalForm.py: 150, 396
+- archive/matrixMeanders/matrixMeandersSlicePop.py: 104
+- archive/multiDimensionalMapFolding/__init__.py: 7
+- archive/multiDimensionalMapFolding/flattened.py: 224, 236
+- archive/multiDimensionalMapFolding/jaxCount.py: 212
+- archive/multiDimensionalMapFolding/jobsCompleted/__init__.py: 8, 44
+- archive/multiDimensionalMapFolding/rotatedEntryPoint.py: 29, 39, 53, 81
+- citations/Koehler1968.bib: 12
+- citations/Lunnon1968.bib: 12
+- development/Elimination.md: 7, 52
+- development/EndNotes.md: 39-41, 59
+- development/bureaucracy.md: 5, 14, 17-21, 23, 35, 65
+- development/identifiers notes.txt: 2
+- easyRun/countFolds.py: 1, 4-5
+- easyRun/countFoldsSymmetric.py: 1
+- easyRun/findMissingOEISvalues.py: 19
+- easyRun/reduceArches.py: 23-24
+- mapFolding/__init__.py: 27
+- mapFolding/algorithms/iff.py: 178, 219
+- mapFolding/algorithms/insertion.py: 110
+- mapFolding/algorithms/matrixMeanders.py: 132
+- mapFolding/algorithms/matrixMeandersNumPy.py: 77-78, 87, 247, 251, 302, 308
+- mapFolding/algorithms/matrixMeandersPandas.py: 29, 76
+- mapFolding/algorithms/matrixMeandersShare.py: 30, 63, 78, 95, 111, 394
+- mapFolding/algorithms/permutations.py: 544
+- mapFolding/basecamp.py: 80, 88, 143, 213, 317, 322
+- mapFolding/beDRY.py: 90, 146, 158, 164
+- mapFolding/beDRYElimination.py: 5, 12, 114, 197
+- mapFolding/dataBaskets.py: 17, 32, 544, 630, 635, 673, 688, 781-782, 890, 898, 1130, 1136, 1138, 1145, 1156, 1158, 1165, 1175, 1177, 1291, 1307, 1318, 1329, 1333, 1371, 1612, 1639, 1649, 1651, 1684
+- mapFolding/dataStructures.py: 24, 30, 38, 305, 309, 316, 336, 346, 393, 397, 403, 420, 427, 432, 447, 452, 481, 491, 597, 633, 645, 681, 720, 758, 779, 818, 830, 861, 866, 878, 894, 896, 908, 970, 977, 1039
+- mapFolding/filters.py: 77, 89, 91
+- mapFolding/kitAST/RecipeJob.py: 5, 19, 23, 83, 127, 135, 201, 339, 343, 349, 351, 364, 485
+- mapFolding/kitAST/codon/makeJob.py: 5, 60, 184
+- mapFolding/kitAST/dataclasses.py: 64, 102, 122, 155, 170, 512
+- mapFolding/kitAST/matrixMeanders/makeModules.py: 220
+- mapFolding/kitAST/numba/kitNumba.py: 68, 73-74, 208, 438
+- mapFolding/kitAST/numba/makeJob.py: 5, 64, 122
+- mapFolding/kitAST/oeisIDByFormula.py: 5, 12, 27
+- mapFolding/kitAST/prefab.py: 89, 156, 172, 177
+- mapFolding/kitAST/zCuzDocStoopid/makeDocstrings.py: 6, 60, 124, 130
+- mapFolding/kitFilesystem.py: 46, 408, 556, 624, 704, 980, 992, 1064, 1069, 1071, 1083, 1123
+- mapFolding/leafDomains.py: 633-634
+- mapFolding/measure.py: 6, 321
+- mapFolding/oeis/A400429/_A005315.py: 6, 31, 213, 245, 277, 283, 314, 320, 354, 360, 399, 405, 453, 459, 522, 528, 625, 631
+- mapFolding/oeis/A400429/__init__.py: 6
+- mapFolding/oeis/A400429/_integrateMe_verify.py: 46, 82, 110, 115, 121
+- mapFolding/oeis/__init__.py: 1, 6, 14, 22, 26, 30, 44
+- mapFolding/oeis/__main__.py: 1, 18, 103, 109, 120, 230, 292
+- mapFolding/oeis/_beDRY.py: 25, 49
+- mapFolding/oeis/_byID.py: 19-20, 83
+- mapFolding/oeis/_dataBaskets.py: 10, 25, 47, 57
+- mapFolding/oeis/_metadata.py: 30, 69, 73, 92, 114, 120, 134, 145, 309, 314, 322-323, 332, 339, 403, 426, 441, 498, 549
+- mapFolding/oeis/_theSSOT.py: 14
+- mapFolding/oeis/byFormula.py: 18, 24, 60, 66, 91, 97, 163, 169, 200, 206, 232, 238, 275, 281, 326, 332, 358, 364, 392, 398, 431, 437, 465, 471, 505, 511, 539, 545, 571, 577, 605, 611, 636, 642, 669, 675, 702, 708, 737, 743, 774, 780, 809, 815, 840, 846, 883, 889, 917, 923, 955, 961, 987, 993, 1069, 1075
+- mapFolding/pileOptions.py: 232, 243, 249
+- mapFolding/pinIt.py: 103, 174, 178, 180, 241-242
+- mapFolding/reduceIt.py: 75-76, 240, 316, 334
+- mapFolding/synthesized/matrixMeanders/bigInt.py: 124
+- mapFolding/synthesized/matrixMeanders/prune.py: 125
+- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 125
+- mapFolding/synthesized/matrixMeanders/pruneNumPy.py: 72-73, 81, 185, 188, 233, 239
+- mapFolding/synthesized/matrixMeanders/prunePandas.py: 27, 66
+- mapFolding/tests/dataSamples/semioticsData.py: 6, 20
+- mapFolding/tests/test_algorithms.py: 109
+- mapFolding/tests/test_dataBaskets.py: 19, 21-22, 27, 45, 48, 50
+- mapFolding/tests/test_dataDynamic.py: 12
+- mapFolding/tests/test_dataStructures.py: 25
+- mapFolding/tests/test_filesystem.py: 134
+- mapFolding/tests/test_measurements.py: 40
+- mapFolding/tests/test_oeis_byFormula.py: 116-118
+- mapFolding/tests/test_taskDivisions.py: 117
+- mapFolding/theTypes.py: 5-6, 31, 64, 71, 86, 88, 147, 155, 167, 181, 189, 193, 195, 203, 207, 209, 223, 237, 265, 271, 281, 287, 308, 332, 389, 392
+- research/elimination/analysisMeasurements.py: 54, 57
+- research/elimination/positionAnalysis.py: 47
+- research/elimination/toolkitCSVsequences.py: 51, 175
+- research/histogram of values technique.py: 4, 22, 492, 496
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 2, markdown]: 14
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 4, markdown]: 3
+- research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 5, code]: 32
+- research/matrixMeanders/Z0Z_transfer.py: 146, 150, 155
+- research/matrixMeanders/buckets.ipynb [cell 10, markdown]: 2, 7, 11-12, 18-19
+- research/matrixMeanders/buckets.ipynb [cell 19, code]: 6
+
+### `verifyFormulas`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 15
+
+### `walkDyckPath`
+
+- archive/matrixMeanders/matrixMeandersNumPyV1finalForm.py: 45-46, 66, 89, 91, 103, 273, 290
+
+### `Y7Y_14choose2`
+
+- mapFolding/algorithms/iff.py: 76
+
+### `Y7Y_advanceDyck`
+
+- mapFolding/algorithms/Y7Y_catalanArch.py: 15, 43
+
+### `Y7Y_antiCatalan`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 253
+- Z0Z_research/Y7Y_catalanArches/generate.py: 95, 97, 104, 119, 154, 162
+
+### `Y7Y_AntiCatalanFormula`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 23, 44, 78, 83, 102
+
+### `Y7Y_antiCatalanFormulasToEquation`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 78, 87
+
+### `Y7Y_antiCatalanSelection`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 13, 15-16
+
+### `Y7Y_antiCatalanTermsToReport`
+
+- Z0Z_research/Y7Y_catalanArches/generate.py: 94, 165
+
+### `Y7Y_archesOffset`
+
+- Z0Z_research/constraint/archReducePrototype.py: 53-54, 101-102, 104, 106, 110, 112, 114, 139-142
+
+### `Y7Y_basis`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 36, 55, 57, 121, 130
+
+### `Y7Y_basisCoefficients`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 121, 124, 136, 147, 166
+
+### `Y7Y_basisDigits`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 147, 149, 156, 164
+
+### `Y7Y_basisLobb`
 
 - Z0Z_research/constraint/archReducePrototype.py: 106, 109, 114
 
-binom
+### `Y7Y_Binomial`
 
-- .vscode/code-spell-dictionary-workspace.txt: 49
-- research/matrixMeanders/Status Semi-Meander Triangle.md: 361
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 54, 65, 108, 111, 137
-- Z0Z_research/catalanArches/explain/anti catalan.md: 10, 62-65
-- Z0Z_research/catalanArches/explain/lobb.md: 8, 10, 194, 209
-- Z0Z_research/catalanArches/explain/shifting.md: 113
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 12, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 3, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 1
 
-binomial
+### `Y7Y_binomial`
 
-- mapFolding/oeis/A400429/_A005315.py: 163
-- mapFolding/tests/test_Z0Z_generatingFunction.py: 36, 69
-- research/matrixMeanders/archiveTriangle/A005315Binomial.py: 395
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 69
-- Z0Z_literature/Sade_1949_working_reference.md: 220, 240
-- Z0Z_research/catalanArches/__init__.py: 23
-- Z0Z_research/catalanArches/_beDry.py: 8, 15, 22
-- Z0Z_research/catalanArches/analyze.py: 12, 28, 30, 103-104, 113-114, 125, 133-134, 144, 190, 211, 221, 227, 254
-- Z0Z_research/catalanArches/counting/archCurses.py: 6, 117, 136
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 61, 113
-- Z0Z_research/catalanArches/explain/anti catalan.md: 10, 44
-- Z0Z_research/catalanArches/explain/lobb.md: 14, 186
-- Z0Z_research/catalanArches/explain/shifting.md: 3, 25, 63, 119
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 13, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 3-4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 5
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 6
-- Z0Z_research/catalanArches/formulaExperiments.py: 13, 15, 60, 75, 93, 126
-- Z0Z_research/constraint/archReducePrototype.py: 13, 102
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 24
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 15, 22
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 12, 29, 31, 104-105, 114-115, 126, 134-135, 145, 191, 212, 222, 228, 255
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 6, 117, 136
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 10, 44
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 14, 186
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 61, 113
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 63
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 13, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 3-4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 6
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 15, 61, 76, 94
+- Z0Z_research/constraint/archReducePrototype.py: 14, 102
 
-Binomial
-
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 12, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 3, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 1
-
-binomialCoefficients
-
-- Z0Z_research/catalanArches/_filesystem.py: 63, 86-87
-- Z0Z_research/catalanArches/data/catalanMultiplyThis.csv: 1
-
-binomialDegree
+### `Y7Y_binomialDegree`
 
 - Z0Z_research/constraint/archReducePrototype.py: 140-142
 
-binomialDegreeToAnalysisRecord
+### `Y7Y_binomialLookupToReference`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 135, 182
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 5, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 39
 
-binomialDegreeToRecord
+### `Y7Y_boxOfAntiCatalanPositions`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 116, 122
+- Z0Z_research/Y7Y_catalanArches/generate.py: 145, 147, 149, 162
 
-binomialLookupToReference
+### `Y7Y_boxOfBasisCatalan`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 5, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.py: 38
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 25-26, 31-32
 
-binomialLookupToTuple
+### `Y7Y_boxOfCatalanPositions`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 27, 41
+- Z0Z_research/Y7Y_catalanArches/generate.py: 146, 148-149
 
-binomialMultiplyThis
+### `Y7Y_Catalan`
 
-- Z0Z_research/catalanArches/_filesystem.py: 27
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 12, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 13, code]: 5
-- Z0Z_research/catalanArches/generate.py: 69, 86
+- Z0Z_research/Y7Y_catalanArches/explain/A331499.md: 8, 41
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 17, 44, 53
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 41, 57
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 1, 90, 192
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 1, 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 19, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 94
 
-BinomialMultiplyThis
+### `Y7Y_catalan`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 23, 27, 38, 69, 119
-
-binomialMultiplyThisToTable
-
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 9, code]: 1
-- Z0Z_research/catalanArches/formulaExperiments.py: 119
-
-binomialParityToAnalysis
-
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 11, code]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
-- Z0Z_research/catalanArches/formulaExperiments.py: 145
-
-boxOfAntiCatalanPositions
-
-- Z0Z_research/catalanArches/generate.py: 144, 146, 148, 161
-
-boxOfBasisCatalan
-
-- Z0Z_research/catalanArches/cXc.py: 24-25, 30-31
-
-boxOfCatalanPositions
-
-- Z0Z_research/catalanArches/generate.py: 145, 147-148
-
-catalan
-
-- Z0Z_research/catalanArches/__init__.py: 23
-- Z0Z_research/catalanArches/_beDry.py: 8, 28, 30, 38
-- Z0Z_research/catalanArches/analyze.py: 12, 83, 254-255
-- Z0Z_research/catalanArches/cXc.py: 8, 34
-- Z0Z_research/catalanArches/explain/anti catalan.md: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.py: 15, 74-75
-- Z0Z_research/catalanArches/formulasParents.py: 11, 79, 115, 146
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 85
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 9, 35
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 24
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 28, 30, 37
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 12, 84, 255-256
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 15, 75-76
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 11, 79, 115, 146
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 13, 86
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 15, 57, 82, 115, 118
 
-Catalan
+### `Y7Y_CatalanAddThis`
 
-- research/matrixMeanders/Status Semi-Meander Triangle.md: 625-627
-- Z0Z_literature/Sade_1949_working_reference.md: 170, 373
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 1, 90, 192
-- Z0Z_research/catalanArches/explain/A331499.md: 8, 41
-- Z0Z_research/catalanArches/explain/anti catalan.md: 17, 44, 53
-- Z0Z_research/catalanArches/explain/lobb.md: 41, 57
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 1, 5
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 19, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.py: 93, 126
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 26, 34, 44, 102, 132
 
-catalanAddThis
+### `Y7Y_catalanAddThis`
 
-- Z0Z_research/catalanArches/_filesystem.py: 28
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 7, 9
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 6
-- Z0Z_research/catalanArches/generate.py: 113
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 28
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 7, 9
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 6
+- Z0Z_research/Y7Y_catalanArches/generate.py: 114
 
-CatalanAddThis
+### `Y7Y_catalanAddThisToTable`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 25, 33, 43, 101, 131
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 19, code]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 14
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 132
 
-catalanAddThisToTable
-
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 19, code]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 14
-- Z0Z_research/catalanArches/formulaExperiments.py: 131
-
-catalanArch
+### `Y7Y_catalanArch`
 
 - easyRun/reduceArches.py: 5
+- mapFolding/algorithms/__init__.py: 35
 
-catalanArches
+### `Y7Y_catalanArches`
 
-- Z0Z_research/catalanArches/__init__.py: 4, 17, 22
-- Z0Z_research/catalanArches/_filesystem.py: 25
-- Z0Z_research/catalanArches/analyze.py: 11, 176
-- Z0Z_research/catalanArches/counting/archCurses.py: 9
-- Z0Z_research/catalanArches/cXc.py: 8
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 12-13, 15, 167-169
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 9, 11-12
-- Z0Z_research/catalanArches/formulaExperiments.py: 15-16, 18
-- Z0Z_research/catalanArches/formulasParents.py: 11
-- Z0Z_research/catalanArches/formulasReduce.py: 12, 15
-- Z0Z_research/catalanArches/generate.py: 13, 17, 20-21
-- Z0Z_research/constraint/archParentsPrototype.py: 12-14
-- Z0Z_research/constraint/archReducePrototype.py: 13
-- Z0Z_research/constraint/coefficientsPrototype.py: 10
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 8
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 4, 18, 23
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 25
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 11, 177
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 9
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 12-13, 15, 167-169
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 9, 11-12
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 15-16, 19
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 11
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 12, 15
+- Z0Z_research/Y7Y_catalanArches/generate.py: 13, 17, 21-22
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 10
+- Z0Z_research/constraint/archParentsPrototype.py: 13-15
+- Z0Z_research/constraint/archReducePrototype.py: 14
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 15
-- Z0Z_research/constraint/windingNumberPrototype.py: 11
+- Z0Z_research/constraint/windingNumberPrototype.py: 12
 
-catalanCoefficients
+### `Y7Y_catalanLookupToAddThis`
 
-- Z0Z_research/catalanArches/_filesystem.py: 63, 86-87
-- Z0Z_research/catalanArches/data/catalanMultiplyThis.csv: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 34, 48
 
-catalanLookupToAddThis
+### `Y7Y_catalanLookupToReference`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 33, 47
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 14
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 44
 
-catalanLookupToReference
+### `Y7Y_catalanMultiplyThis`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 14
-- Z0Z_research/catalanArches/formulaExperiments.py: 43
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 25
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 33
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 15, 92, 99
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 13, 63
 
-catalanLookupToTuple
+### `Y7Y_combinations`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 30, 46
-
-catalanMultiplyThis
-
-- Z0Z_research/catalanArches/__init__.py: 23
-- Z0Z_research/catalanArches/_beDry.py: 34
-- Z0Z_research/catalanArches/_filesystem.py: 29
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 5
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 6
-- Z0Z_research/catalanArches/formulaExperiments.py: 15, 91, 98
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 63
-
-CatalanMultiplyThis
-
-- Z0Z_research/catalanArches/formulaExperiments.py: 24, 30, 43, 125
-
-catalanMultiplyThisToTable
-
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 6
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 17
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 14
-- Z0Z_research/catalanArches/formulaExperiments.py: 125
-
-coefficientLobb
-
-- Z0Z_research/constraint/archReducePrototype.py: 107, 114-115, 139, 142
-
-coefficientsCatalan
-
-- Z0Z_research/constraint/archReducePrototype.py: 138, 141, 144
-
-coefficientsLobb
-
-- Z0Z_research/catalanArches/_filesystem.py: 30
-- Z0Z_research/catalanArches/explain/lobb.md: 91
-- Z0Z_research/constraint/archReducePrototype.py: 24, 54, 134, 137-139, 141
-
-comb
-
-- mapFolding/oeis/A400429/_A005315.py: 70, 135, 137, 169, 172
-- research/matrixMeanders/archiveTriangle/A005315Binomial.py: 16, 22, 42, 47-48, 57-67, 75-95, 103-136, 144-196, 204-279, 287-391, 399-536
-- research/matrixMeanders/archiveTriangle/A005315PolynomialCyclic.py: 7, 15-16, 28-30, 35-37, 50-54, 69-73, 92-98, 106, 109, 112, 129-135, 143, 146, 149, 175-183, 187, 190, 195, 198-199, 202-203, 208, 211, 214, 217, 239-247, 251, 254, 259-260, 263, 266-267, 273, 277, 308-311, 315-321, 325-326, 329-330, 335-337, 340-342, 345-347, 352-353, 356, 359-360, 363, 368, 371, 374, 377, 380, 410-414, 419-424, 428-429, 432-433, 438-440, 443-445, 448-450, 455-456, 459-460, 463-464, 467-468, 473, 476, 479, 482, 485, 517, 522, 527-532, 534-538, 542-544, 547-549, 554-557, 560-563, 566-568, 573-575, 578-580, 583-585, 588-590, 595-596, 599-600, 603-604, 607-608, 611-612, 617, 620, 623, 626, 629, 632, 661-662, 666, 668-677, 681-683, 686-688, 693-695, 698-701, 704-707, 712-714, 717-718, 721-723, 726-727, 732-733, 736-737, 740-741, 744-745, 748-749, 754, 757, 760, 763, 766, 769, 807, 811-814, 819, 821, 825, 827, 829-830, 832-834, 836, 840-843, 847-850, 855-859, 862-866, 869-873, 878-880, 883-886, 889-891, 894-897, 902-904, 907-909, 912-914, 917-919, 922-924, 929-930, 933-934, 937-938, 941-942, 945-946, 949-950, 955, 958, 961, 964, 967, 970, 973, 1011, 1013, 1015-1016, 1018, 1020, 1025, 1027, 1029, 1031-1032, 1034-1036, 1038, 1042-1045, 1048-1051, 1057-1061, 1064-1068, 1071-1075, 1080-1083, 1086-1089, 1092-1095, 1098-1101, 1106-1108, 1111-1113, 1116-1118, 1121-1123, 1126-1128, 1133-1134, 1137-1138, 1141-1142, 1145-1146, 1149-1150, 1154-1155, 1160, 1163, 1166, 1169, 1172, 1175, 1178, 1224-1225, 1230-1232, 1234, 1239, 1244, 1248, 1250, 1254-1258, 1260-1261, 1267-1268, 1270-1272, 1277, 1279-1282, 1287-1292, 1295-1299, 1302-1307, 1312-1316, 1319-1323, 1326, 1328-1331, 1334-1338, 1343-1346, 1349-1352, 1355-1358, 1362-1365, 1368-1371, 1376-1378, 1381-1383, 1386-1388, 1391-1393, 1396-1398, 1401-1403, 1408-1409, 1412-1413, 1416-1417, 1420-1421, 1424-1425, 1428-1429, 1432-1433, 1438, 1441, 1444, 1447, 1450, 1453, 1456, 1459, 1496, 1501-1503, 1508, 1510, 1512, 1517, 1522-1525, 1530, 1535, 1540, 1542-1543, 1548-1552, 1555-1556, 1558-1560, 1565-1567, 1569-1571, 1574-1575, 1577-1580, 1583-1587, 1592-1595, 1599-1603, 1607-1610, 1613-1617, 1622-1625, 1629-1632, 1635-1638, 1641-1644, 1647-1650, 1655-1657, 1660-1662, 1665-1667, 1670-1672, 1675-1677, 1680-1682, 1687-1688, 1691-1692, 1696-1697, 1700-1701, 1704-1705, 1708-1709, 1712-1713, 1718, 1721, 1724, 1727, 1730, 1733, 1736, 1739
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 173, 220
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 12, 24, 50
-- Z0Z_research/catalanArches/counting/archCurses.py: 6
-- Z0Z_research/constraint/archReducePrototype.py: 8, 109, 142
-
-combinations
-
-- mapFolding/_e/algorithms/iff.py: 60, 76, 80, 232
-- mapFolding/_e/dataBaskets.py: 23, 214, 218, 222, 235, 795
-- mapFolding/_e/p2上nDimensional/reduceIt.py: 23, 186
-- mapFolding/_e/reduceIt.py: 31, 127
-- research/matrixMeanders/Status Semi-Meander Triangle.md: 641
-- Z0Z_notes/A000136.ipynb [cell 10, code]: 1, 4-5
-- Z0Z_notes/A000136.ipynb [cell 11, code]: 1, 4-5
-- Z0Z_notes/A000136.ipynb [cell 8, code]: 1, 6
-- Z0Z_notes/A000136.ipynb [cell 9, code]: 1, 4-5
-- Z0Z_notes/FunctionalProgramming.md: 69
 - Z0Z_research/constraint/insertionPrototype.py: 6, 35
 - Z0Z_research/constraint/monster.py: 8, 94, 170
 - Z0Z_research/constraint/windingNumberPrototype.py: 6, 33, 45
+- mapFolding/algorithms/iff.py: 61, 76, 80, 229
+- mapFolding/dataBaskets.py: 62, 1562
+- mapFolding/reduceIt.py: 36, 138, 490
 
-countAntiCatalan
+### `Y7Y_countAntiCatalan`
 
-- Z0Z_research/catalanArches/analyze.py: 253, 256
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 254, 257
 
-dotProductBinomial
+### `Y7Y_degree`
 
-- Z0Z_research/catalanArches/__init__.py: 24
-- Z0Z_research/catalanArches/_beDry.py: 38, 47
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 8
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 33
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 15-16, 46-47
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 82-83
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 15
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 24, 38-39, 169, 180, 191-192, 194, 203, 209, 218, 220-222, 228-229, 231, 250, 255, 258-260
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 132, 134-137
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 123, 126
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 12, 18, 39, 46, 49, 69, 72, 75, 97, 107
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 7
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 4, 8, 13-14, 24-27
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 28-29, 51, 53, 55, 58, 61, 63, 117-118, 121, 137, 139-141, 150, 156-157, 159, 162, 168, 170, 173, 175, 181-182
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 30, 33, 36-37, 47-50, 58
+- Z0Z_research/Y7Y_catalanArches/generate.py: 51, 65, 76-78, 86-87, 89, 156
 
-dotProductCatalan
+### `Y7Y_degreeDirection`
 
-- Z0Z_research/catalanArches/__init__.py: 24
-- Z0Z_research/catalanArches/_beDry.py: 37, 50
-- Z0Z_research/catalanArches/analyze.py: 12, 263
-- Z0Z_research/catalanArches/formulasParents.py: 11, 29, 90
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 89
-- Z0Z_research/constraint/archParentsPrototype.py: 12, 129
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 19
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 191, 228
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 12, 18, 107
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 6, 13-14, 24, 26-27
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 32, 36-37, 47, 49-50
 
-Dyck
+### `Y7Y_degreeLess`
 
-- .vscode/code-spell-dictionary-workspace.txt: 127
-- mapFolding/algorithms/matrixMeanders.py: 9, 29, 46, 64, 79
-- mapFolding/algorithms/matrixMeandersShare.py: 152, 166
-- mapFolding/kitAST/matrixMeanders/__init__.py: 4
-- mapFolding/kitAST/matrixMeanders/makeModules.py: 22, 482, 486, 530, 547
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 24, 27, 29, 31
+
+### `Y7Y_degreeSelection`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 39, 41
+
+### `Y7Y_differenceOrder`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 23-24, 32, 167, 172
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 60, 69
+- Z0Z_research/Y7Y_catalanArches/generate.py: 41
+
+### `Y7Y_dotProductBinomial`
+
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 25
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 37, 46
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 8
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 13, 33
+
+### `Y7Y_dotProductCatalan`
+
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 26
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 36, 49
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 12, 264
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 11, 29, 90
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 13, 90
+- Z0Z_research/constraint/archParentsPrototype.py: 13, 129
+
+### `Y7Y_Dyck`
+
+- mapFolding/algorithms/matrixMeanders.py: 9, 31, 48, 68, 83
+- mapFolding/algorithms/matrixMeandersShare.py: 154, 168
+- mapFolding/kitAST/matrixMeanders/__init__.py: 6
+- mapFolding/kitAST/matrixMeanders/makeModules.py: 24, 488, 492, 536, 555
 - mapFolding/kitAST/theSSOT.py: 158
-- mapFolding/synthesized/matrixMeanders/bigInt.py: 10, 30, 47, 65, 80
-- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 8, 28, 45
-- mapFolding/synthesized/matrixMeanders/prune.py: 10, 30, 47, 65, 80
-- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 10, 30, 47, 65, 80
+- mapFolding/synthesized/matrixMeanders/bigInt.py: 10, 32, 49, 69, 84
+- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 8, 30, 47
+- mapFolding/synthesized/matrixMeanders/prune.py: 10, 32, 49, 69, 84
+- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 10, 32, 49, 69, 84
 
-Dyck_language
+### `Y7Y_formulasAntiCatalan`
 
-- mapFolding/algorithms/matrixMeanders.py: 47
-- mapFolding/synthesized/matrixMeanders/bigInt.py: 48
-- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 46
-- mapFolding/synthesized/matrixMeanders/prune.py: 48
-- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 48
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 22
+- Z0Z_research/Y7Y_catalanArches/generate.py: 22, 145
 
-extendRowSumXLobb
+### `Y7Y_get_sub_k`
 
-- Z0Z_research/catalanArches/analyze.py: 94
-- Z0Z_research/catalanArches/generate.py: 18, 139
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 123, 125, 137, 140, 146, 156
 
-formulasAntiCatalan
+### `Y7Y_getCatalanAddThis`
 
-- Z0Z_research/catalanArches/formulasReduce.py: 22
-- Z0Z_research/catalanArches/generate.py: 21, 144
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 8
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 89
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 12, 257
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 48
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 13, 69
+- Z0Z_research/Y7Y_catalanArches/generate.py: 14, 113
 
-getBinomialMultiplyThis
-
-- Z0Z_research/catalanArches/__init__.py: 6
-- Z0Z_research/catalanArches/_filesystem.py: 82
-- Z0Z_research/catalanArches/formulaExperiments.py: 41
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 58
-- Z0Z_research/catalanArches/generate.py: 14, 64
-
-getCatalanAddThis
-
-- Z0Z_research/catalanArches/__init__.py: 6
-- Z0Z_research/catalanArches/_filesystem.py: 89
-- Z0Z_research/catalanArches/analyze.py: 12, 256
-- Z0Z_research/catalanArches/formulaExperiments.py: 47
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 69
-- Z0Z_research/catalanArches/generate.py: 14, 112
-
-getCatalanBasis
+### `Y7Y_getCatalanBasis`
 
 - Z0Z_research/constraint/archParentsPrototype.py: 148
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 34, 114, 118
 
-getCatalanMultiplyThis
+### `Y7Y_indexSub_k`
 
-- Z0Z_research/catalanArches/__init__.py: 7
-- Z0Z_research/catalanArches/_filesystem.py: 85
-- Z0Z_research/catalanArches/analyze.py: 12, 248
-- Z0Z_research/catalanArches/formulaExperiments.py: 46
-- Z0Z_research/catalanArches/formulasReduce.py: 13, 68
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 109-110, 116-118, 123-124, 129, 132-133, 137, 139
 
-getLobbCoefficient
+### `Y7Y_indexSubSub_k`
 
-- Z0Z_research/constraint/archReducePrototype.py: 104, 118
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 72-73, 79, 84, 93-95, 101, 109-110, 115, 117
 
-lobb
+### `Y7Y_kPolynomial`
+
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 133-134
+
+### `Y7Y_Lobb`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 97, 101, 121, 141
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 3
+- Z0Z_research/constraint/archReducePrototype.py: 105, 114
+
+### `Y7Y_lobb`
 
 - Z0Z_research/constraint/archReducePrototype.py: 101, 106
 
-Lobb
+### `Y7Y_lookupAntiCatalan`
 
-- .vscode/code-spell-dictionary-workspace.txt: 266
-- Z0Z_research/catalanArches/analyze.py: 96, 100, 120, 140
-- Z0Z_research/catalanArches/explain/lobb.md: 3
-- Z0Z_research/constraint/archReducePrototype.py: 105, 114
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 18, 20, 171
+- Z0Z_research/Y7Y_catalanArches/generate.py: 35, 40, 42, 45, 48, 55, 94, 98-101, 106, 108, 110-113, 147, 151
 
-lobbCoefficient
+### `Y7Y_lookupCatalanAddCandidate`
 
-- Z0Z_research/constraint/archReducePrototype.py: 112
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 2, 14
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 19, code]: 1, 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 1, 5
 
-lookupAntiCatalan
+### `Y7Y_lookupCatalanAddStored`
 
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 18, 20, 171
-- Z0Z_research/catalanArches/generate.py: 34, 39, 41, 44, 47, 54, 93, 97-100, 105, 107, 109-112, 146, 150
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 2-3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 16
 
-lookupBinomialCandidate
+### `Y7Y_lookupCorrections`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 11, code]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 13, code]: 1, 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 5, code]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 1, 40
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 9, code]: 1
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 43, 51-52, 151-153, 158, 160-161, 239, 244, 246
 
-lookupBinomialStored
+### `Y7Y_lookupRecoveredAntiCatalan`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 5, code]: 1-2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 41
+- Z0Z_research/Y7Y_catalanArches/generate.py: 153, 158-159, 165
 
-lookupCatalanAddCandidate
+### `Y7Y_lookupResidual`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 5
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 2, 14
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 19, code]: 1, 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 1, 5
+- Z0Z_research/Y7Y_catalanArches/generate.py: 110, 115, 117
 
-lookupCatalanAddStored
+### `Y7Y_lookup工anti`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 2-3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 16
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 42, 49, 150-151, 156, 159
 
-lookupCatalanCandidate
+### `Y7Y_lookup工antiRow`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 1, 14, 17
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 1, 4
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 248, 254
 
-lookupCatalanStored
+### `Y7Y_multiplyThis`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 1, 3, 6
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 105, 114
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 12, 18, 46, 72, 119
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 7
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 5, 8, 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 8, 13-22, 24, 26-34
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 180
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 33, 36-45, 47, 49-58, 63, 65, 67-68
 
-lookupLobbX
+### `Y7Y_ordinal`
 
-- Z0Z_research/catalanArches/analyze.py: 99, 102, 107, 110, 112, 115, 118, 127, 137-138, 141, 145
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 49-50
+- Z0Z_research/constraint/archReducePrototype.py: 101-102
 
-lookupRecoveredAntiCatalan
+### `Y7Y_ordinalCatalan`
 
-- Z0Z_research/catalanArches/generate.py: 152, 157-158, 164
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 254-257
 
-ordinalCatalan
+### `Y7Y_ordinalLobb`
 
-- Z0Z_research/catalanArches/analyze.py: 253-256
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 132-135
 
-ordinalLobb
+### `Y7Y_outlineSubSub_k`
 
-- Z0Z_research/catalanArches/analyze.py: 131-134
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 115, 118
 
-pathDataCatalan
+### `Y7Y_pathDataCatalan`
 
-- Z0Z_research/catalanArches/__init__.py: 7
-- Z0Z_research/catalanArches/_filesystem.py: 25-35
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 8
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 25-35
 
-pathFilenameBinomialMultiplyThis
+### `Y7Y_pathFilenameCatalanAddThis`
 
-- Z0Z_research/catalanArches/__init__.py: 8
-- Z0Z_research/catalanArches/_filesystem.py: 27, 46, 60
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 9
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 28, 53, 67
 
-pathFilenameCatalanAddThis
+### `Y7Y_readCatalanAddThis`
 
-- Z0Z_research/catalanArches/__init__.py: 9
-- Z0Z_research/catalanArches/_filesystem.py: 28, 53, 67
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 9
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 52, 67, 90
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
 
-pathFilenameCatalanMultiplyThis
+### `Y7Y_sansAntiCatalan`
 
-- Z0Z_research/catalanArches/__init__.py: 9
-- Z0Z_research/catalanArches/_filesystem.py: 29, 50, 64
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 41, 48
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 25, 179, 238
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 5
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 54
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 31
 
-pathFilenameCoefficientsLobb
+### `Y7Y_shiftBinomial`
 
-- Z0Z_research/catalanArches/__init__.py: 10
-- Z0Z_research/catalanArches/_filesystem.py: 30
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 34, 37
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 4
 
-readBinomialMultiplyThis
+### `Y7Y_shiftCatalan`
 
-- Z0Z_research/catalanArches/__init__.py: 13
-- Z0Z_research/catalanArches/_filesystem.py: 44, 56, 83
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 5, code]: 1
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 34, 36
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 28, 30, 32, 34, 44
 
-readCatalanAddThis
+### `Y7Y_sumProductSumSubSub_k`
 
-- Z0Z_research/catalanArches/__init__.py: 13
-- Z0Z_research/catalanArches/_filesystem.py: 52, 67, 90
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py: 109, 111, 119, 139, 155
 
-readCatalanMultiplyThis
+### `Y7Y_sympy_binomial`
 
-- Z0Z_research/catalanArches/__init__.py: 14
-- Z0Z_research/catalanArches/_filesystem.py: 48, 64, 86
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 8, 16
 
-sansAntiCatalan
+### `Y7Y_sympy_catalan`
 
-- Z0Z_research/catalanArches/_semiotics.py: 41, 49
-- Z0Z_research/catalanArches/analyze.py: 24, 178, 237
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 5
-- Z0Z_research/catalanArches/formulaExperiments.py: 53
-- Z0Z_research/catalanArches/formulasReduce.py: 31
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 8, 31
 
-shiftBinomial
+### `Y7Y_sympyBinomial`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 38
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 13, 175
 
-shiftCatalan
+### `Y7Y_top`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 37
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 4
-- Z0Z_research/catalanArches/formulasParents.py: 28, 30, 32, 34, 44
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 15-16, 18, 22, 46-47
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 5, 8
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 31, 33
 
-sympy_binomial
+### `Y7Y_totalBasis`
 
-- Z0Z_research/catalanArches/_beDry.py: 8, 16
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 85-86, 88, 90-91
 
-sympy_catalan
+### `Y7Y_totalCatalan`
 
-- Z0Z_research/catalanArches/_beDry.py: 8, 31
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 251, 256, 258, 260
 
-sympyBinomial
+### `Y7Y_walkDyckPath`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 13, 174
-
-totalCatalan
-
-- Z0Z_research/catalanArches/analyze.py: 250, 255, 257, 259
-
-walkDyckPath
-
-- archive/matrixMeanders/matrixMeandersNumPyV1finalForm.py: 45-46, 66, 89, 91, 103, 273, 290
-- mapFolding/algorithms/matrixMeanders.py: 8, 11, 64, 86, 115, 117
-- mapFolding/algorithms/matrixMeandersShare.py: 6, 194
+- mapFolding/algorithms/matrixMeanders.py: 8, 13, 68, 90, 119, 121
+- mapFolding/algorithms/matrixMeandersShare.py: 6, 196
 - mapFolding/kitAST/theSSOT.py: 158
-- mapFolding/synthesized/matrixMeanders/bigInt.py: 9, 12, 65, 87, 111, 113
-- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 7, 10
-- mapFolding/synthesized/matrixMeanders/prune.py: 9, 12, 65, 87, 112, 114
-- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 9, 12, 65, 87, 112, 114
+- mapFolding/synthesized/matrixMeanders/bigInt.py: 9, 14, 69, 91, 115, 117
+- mapFolding/synthesized/matrixMeanders/matrixMeandersShare.py: 7, 12
+- mapFolding/synthesized/matrixMeanders/prune.py: 9, 14, 69, 91, 116, 118
+- mapFolding/synthesized/matrixMeanders/pruneBigInt.py: 9, 14, 69, 91, 116, 118
 
-writeBinomialMultiplyThis
+### `Y7Y_writeCatalanAddThis`
 
-- Z0Z_research/catalanArches/__init__.py: 15
-- Z0Z_research/catalanArches/_filesystem.py: 55
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 13, code]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 11
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 10
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 66
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 11
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 5
 
-writeCatalanAddThis
+### `Y7Y_工antiCatalan`
 
-- Z0Z_research/catalanArches/__init__.py: 15
-- Z0Z_research/catalanArches/_filesystem.py: 66
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 11
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 5
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 67
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 4, 15
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 19, 46
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 25, 61
+- Z0Z_research/Y7Y_catalanArches/generate.py: 22, 95, 101, 112, 149
 
-writeCatalanMultiplyThis
+### `Y7Y_工antiCatalanReference`
 
-- Z0Z_research/catalanArches/__init__.py: 16
-- Z0Z_research/catalanArches/_filesystem.py: 62
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 11
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 15
 
-工antiCatalan
+### `Y7Y_工basisAntiCatalan`
 
-- Z0Z_research/catalanArches/explain/anti catalan.md: 67
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 4, 15
-- Z0Z_research/catalanArches/formulaExperiments.py: 18, 45
-- Z0Z_research/catalanArches/formulasReduce.py: 25, 61
-- Z0Z_research/catalanArches/generate.py: 21, 94, 100, 111, 148
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 73, 79
 
-工antiCatalanReference
+### `Y7Y_工basisBinomialGrowth`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 15, code]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 15
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 23, 38, 172
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 60
 
-工basisAntiCatalan
+### `Y7Y_工boxOfBasisBinomial`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 72, 78
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 26
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 18, 47
 
-工basisBinomialGrowth
+### `Y7Y_工boxOfBasisCatalan`
 
-- Z0Z_research/catalanArches/analyze.py: 22, 37, 171
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 60
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 9, 25, 31
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 27
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 24, 50
+- Z0Z_research/Y7Y_catalanArches/generate.py: 15, 30
 
-工boxOfBasisBinomial
+### `Y7Y_工growthBinomial`
 
-- Z0Z_research/catalanArches/__init__.py: 25
-- Z0Z_research/catalanArches/_beDry.py: 18, 48
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 177, 182
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 4, 76, 102, 152, 179
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 3, 40
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 19, 41
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 25, 27
 
-工boxOfBasisCatalan
+### `Y7Y_工growthBinomialReference`
 
-- Z0Z_research/catalanArches/__init__.py: 25
-- Z0Z_research/catalanArches/_beDry.py: 24, 51
-- Z0Z_research/catalanArches/cXc.py: 8, 24, 30
-- Z0Z_research/catalanArches/generate.py: 15, 29
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 5, code]: 2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 40
 
-工growthBinomial
+### `Y7Y_工lookupAntiCatalan`
 
-- Z0Z_research/catalanArches/analyze.py: 176, 181
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 4, 76, 102, 152, 179
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 3, 40
-- Z0Z_research/catalanArches/formulaExperiments.py: 18, 40
-- Z0Z_research/catalanArches/formulasReduce.py: 25, 27
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 14, 18
 
-工growthBinomialReference
+### `Y7Y_次antiCatalan`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 5, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 40
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 34, 36-37
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 63, 85-86, 89-90
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 47
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 46, 48-49, 239, 244, 248-251, 257
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_catalanMultiplyThis.csv: 1
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 15
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 4-5, 7-9
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 31-32, 34-36, 73-76, 78-80, 83, 85, 87, 90, 92-94, 97-99, 127, 133
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 25, 61, 63-66, 68-69
+- Z0Z_research/Y7Y_catalanArches/generate.py: 98-101, 104, 106, 108, 110-113, 116
 
-工lookupAntiCatalan
+### `Y7Y_次kSansAntiCatalan`
 
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 14, 18
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 20
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py: 11, 42
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 12, 243
 
-次antiCatalan
+### `Y7Y_次Lobb`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 37-38
-- Z0Z_research/catalanArches/_filesystem.py: 63, 85-86, 89-90
-- Z0Z_research/catalanArches/_semiotics.py: 48
-- Z0Z_research/catalanArches/analyze.py: 45, 47-48, 238, 243, 247-250, 256
-- Z0Z_research/catalanArches/data/catalanMultiplyThis.csv: 1
-- Z0Z_research/catalanArches/explain/anti catalan.md: 15
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 4-5, 7-9
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.py: 30-31, 33-35, 72-75, 77-79, 82, 84, 86, 89, 91-93, 96-98, 126, 132
-- Z0Z_research/catalanArches/formulasReduce.py: 25, 61, 63-66, 68-69
-- Z0Z_research/catalanArches/generate.py: 97-100, 103, 105, 107, 109-112, 115
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 102-106, 110-117, 123, 125-126, 143, 145-146
 
-次kSansAntiCatalan
+### `Z0Z__coefficientPositionToTerm`
 
-- Z0Z_research/catalanArches/__init__.py: 19
-- Z0Z_research/catalanArches/_semiotics.py: 11, 42
-- Z0Z_research/catalanArches/analyze.py: 12, 242
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 28, 34
 
-次Lobb
+### `Z0Z__coefficientRowsToTerms`
 
-- Z0Z_research/catalanArches/analyze.py: 101-105, 109-116, 122, 124-125, 142, 144-145
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 32, 44, 112
 
-SCOPED COORDINATE, MULTIPLIER AND OPERATION SPELLINGS
+### `Z0Z__countTheCoefficientsComplete吗`
 
-These are searched only in the formula/basis/constraint files listed below.
-A generic name elsewhere in the package does not automatically have the same
-meaning. This index is lexical; consult the function containing a location.
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 19, 48-49, 72, 80-81, 104
 
-antiCatalanSelection
+### `Z0Z__termsToCoefficients`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 13, 15-16
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 136, 142
 
-archesOffset
+### `Z0Z__theCoefficientsToDifferences`
 
-- Z0Z_research/constraint/archReducePrototype.py: 53-54, 101-102, 104, 106, 110, 112, 114, 139-142
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 22, 52, 89
 
-basis
+### `Z0Z__triangleCoefficients`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 22, 26, 35
-- Z0Z_research/catalanArches/analyze.py: 35, 54, 56, 120, 129
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 10
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 6
-- Z0Z_research/constraint/archReducePrototype.py: 105
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 136, 150
 
-basisCoefficients
+### `Z0Z_addCoefficientSum`
 
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 121, 124, 136, 147, 166
+- Z0Z_research/constraint/archParentsPrototype.py: 122, 124, 147
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 109, 117
 
-basisDigits
+### `Z0Z_addWeightedCoefficientSum`
 
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 147, 149, 156, 164
+- Z0Z_research/constraint/archReducePrototype.py: 114
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 118, 120
 
-binomialDegree
+### `Z0Z_antiCatalanFormulasToMultiplyThis`
 
-- Z0Z_research/constraint/archReducePrototype.py: 140-142
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 14
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 101
 
-boxOfCoefficients
+### `Z0Z_antiCatalanFormulasToRow`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 162, 183
-- Z0Z_research/catalanArches/formulasParents.py: 87, 89-90
-- Z0Z_research/catalanArches/formulasReduce.py: 79-80, 84, 89, 92, 101-104
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 82, 105
+
+### `Z0Z_binomial`
+
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 3, 25, 119
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 127
+
+### `Z0Z_binomialCoefficients`
+
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 63, 86-87
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_catalanMultiplyThis.csv: 1
+
+### `Z0Z_binomialDegreeToAnalysisRecord`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 136, 183
+
+### `Z0Z_binomialDegreeToRecord`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 117, 123
+
+### `Z0Z_binomialLookupToTuple`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 28, 42
+
+### `Z0Z_BinomialMultiplyThis`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 24, 28, 39, 70, 120
+
+### `Z0Z_binomialMultiplyThis`
+
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 27
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 12, markdown]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 13, code]: 5
+- Z0Z_research/Y7Y_catalanArches/generate.py: 70, 87
+
+### `Z0Z_binomialMultiplyThisToTable`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 9, code]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 120
+
+### `Z0Z_binomialParityToAnalysis`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 11, code]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 13
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 146
+
+### `Z0Z_boxOfCoefficientDomains`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 125, 149, 156
+
+### `Z0Z_boxOfCoefficients`
+
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 87, 89-90
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 68, 84-85
 - Z0Z_research/constraint/archParentsPrototype.py: 142, 151, 162, 175-176
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 106, 111, 124-125, 164
 
-boxOfDiagonalCoefficients
+### `Z0Z_boxOfDiagonalCoefficients`
 
-- Z0Z_research/catalanArches/formulasParents.py: 151, 154, 157, 159
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 151, 154, 157, 159
 
-boxOfIntegers
+### `Z0Z_boxOfIntegers`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 37-38, 47-48
-- Z0Z_research/catalanArches/analyze.py: 248-250
-- Z0Z_research/catalanArches/formulaExperiments.py: 88, 91, 95, 98, 136, 139-140, 149-150, 156
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 34, 36-37, 46-47
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 249-251
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 89, 92, 96, 99, 137, 140-141, 150-151, 157
 
-boxOfMultiplicands
+### `Z0Z_boxOfNumbers`
 
-- Z0Z_research/catalanArches/_beDry.py: 44-45
+- Z0Z_research/Y7Y_catalanArches/_beDry.py: 49-50
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 264
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 90
 
-boxOfNumbers
+### `Z0Z_boxOfTheCoefficients`
 
-- Z0Z_research/catalanArches/_beDry.py: 40-41, 44-45, 50-51
-- Z0Z_research/catalanArches/analyze.py: 263
-- Z0Z_research/catalanArches/formulasReduce.py: 89
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 151, 153
 
-boxOfTheCoefficients
+### `Z0Z_Catalan`
 
-- Z0Z_research/catalanArches/formulasParents.py: 151, 153
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 127
 
-cardinality
+### `Z0Z_catalanCoefficients`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 37-38
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 63, 86-87
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_catalanMultiplyThis.csv: 1
 
-coefficient
+### `Z0Z_catalanLookupToTuple`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 150-152, 156-157, 159, 164-165, 168, 174, 176, 179
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 30-31, 35, 42-44, 46, 49-50
-- Z0Z_research/catalanArches/analyze.py: 74, 202
-- Z0Z_research/catalanArches/formulaExperiments.py: 136, 138, 169, 174
-- Z0Z_research/catalanArches/formulasParents.py: 17, 102
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 31, 47
+
+### `Z0Z_CatalanMultiplyThis`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 25, 31, 44, 126
+
+### `Z0Z_catalanMultiplyThis`
+
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 29
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 6
+
+### `Z0Z_catalanMultiplyThisToTable`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 6
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 17
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 14
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 126
+
+### `Z0Z_Coefficient`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 84, 164
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 8, markdown]: 1
+
+### `Z0Z_coefficient`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 75, 203
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 23
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 43, 87, 89, 91, 97, 105, 140, 164, 166, 184, 214, 238
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 1, 5, 39-40, 44, 69, 73, 95, 99, 111, 142, 177, 190
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 51, 63, 115, 117
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 137, 139, 170, 175
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 17, 102
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 78, 81, 89, 92, 105
 - Z0Z_research/constraint/archParentsPrototype.py: 168, 172, 180, 185
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 96, 99, 123, 182, 184, 186
 
-coefficientBound
+### `Z0Z_coefficientBound`
 
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 24, 31, 55, 69, 78, 89
 - Z0Z_research/constraint/archParentsPrototype.py: 160, 162, 168, 180
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 24, 27, 96, 126
 
-coefficientKnown
+### `Z0Z_coefficientKnown`
 
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 92, 94, 99-101
 
-coefficients
+### `Z0Z_coefficientLobb`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 92, 96, 98, 113, 116
-- Z0Z_research/catalanArches/analyze.py: 140, 217, 261, 263
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 11
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 10
-- Z0Z_research/catalanArches/formulaExperiments.py: 60, 93, 116-117, 126, 167
-- Z0Z_research/catalanArches/formulasParents.py: 39, 128
-- Z0Z_research/catalanArches/formulasReduce.py: 28
-- Z0Z_research/catalanArches/generate.py: 50
+- Z0Z_research/constraint/archReducePrototype.py: 107, 114-115, 139, 142
+
+### `Z0Z_coefficientPositionToGrowthFormula`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 94
+- Z0Z_research/Y7Y_catalanArches/generate.py: 34, 48, 55
+
+### `Z0Z_coefficientRecordToHTML`
+
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 112, 114
+
+### `Z0Z_coefficientRow`
+
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 84-85, 96, 98, 103-105
+- Z0Z_research/constraint/archParentsPrototype.py: 175-176, 187
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 104-105
+
+### `Z0Z_coefficientRowsConstrained`
+
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 32, 107, 110
+
+### `Z0Z_coefficientRowsToGrowthFormulas`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 15, 19, 145
+- Z0Z_research/Y7Y_catalanArches/generate.py: 44, 151
+
+### `Z0Z_Coefficients`
+
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 56
+
+### `Z0Z_coefficients`
+
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 141, 218, 262, 264
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md: 54
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md: 1, 45, 77, 201, 220, 240, 244, 304
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 5, 32-33, 36, 57, 69, 71, 74, 78, 118, 140, 150-151, 156, 178-179
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 121
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 11
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 61, 94, 117-118, 168
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 39, 128
+- Z0Z_research/Y7Y_catalanArches/generate.py: 51
 - Z0Z_research/constraint/archParentsPrototype.py: 56
+- research/matrixMeanders/Z0Z_transfer.py: 4
 
-column_k
+### `Z0Z_coefficientsCatalan`
 
-- Z0Z_research/catalanArches/analyze.py: 19-20, 22, 27-28, 30, 36-37, 44-45, 48, 50, 97-98, 101, 103-105, 107-108, 110-112, 118, 122-124, 131-134, 141-142, 145-146, 261, 263-265
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 3, 5
-- Z0Z_research/catalanArches/formulasParents.py: 85-86, 88
-- Z0Z_research/catalanArches/formulasReduce.py: 27-28, 31, 78-80, 82, 88
-- Z0Z_research/constraint/archParentsPrototype.py: 61, 105-106, 131-132
+- Z0Z_research/constraint/archReducePrototype.py: 138, 141, 144
 
-countAntiCatalan
+### `Z0Z_coefficientsLobb`
 
-- Z0Z_research/catalanArches/analyze.py: 253, 256
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 30
+- Z0Z_research/constraint/archReducePrototype.py: 24, 54, 134, 137-139, 141
 
-countBound
+### `Z0Z_coefficientsToTable`
 
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 24, 26, 44, 47, 65, 69, 72, 82, 87
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 109, 121, 127, 133, 162, 181
 
-countKnown
+### `Z0Z_coefficientTerms`
 
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 44, 46, 49-51, 55, 57, 59-60, 68, 85-87
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 26, 32, 34, 40, 45-46, 57, 64, 69
+- Z0Z_research/constraint/archParentsPrototype.py: 48, 50, 111, 119
 
-countSum
+### `Z0Z_coefficientVerify`
 
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 117-118, 121, 127-129, 133
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 169
 
-countSumBound
+### `Z0Z_combinations`
 
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 121, 131
+- mapFolding/dataBaskets.py: 943, 947, 951, 964
 
-degree
+### `Z0Z_constrainCoefficientRow`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 94, 96, 164, 167, 170, 173
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 20, 23-24, 47, 50
-- Z0Z_research/catalanArches/_beDry.py: 15-16, 47-48
-- Z0Z_research/catalanArches/_filesystem.py: 82-83
-- Z0Z_research/catalanArches/_semiotics.py: 15
-- Z0Z_research/catalanArches/analyze.py: 23, 37-38, 168, 179, 190-191, 193, 202, 208, 217, 219-221, 227-228, 230, 249, 254, 257-259
-- Z0Z_research/catalanArches/counting/archCurses.py: 132, 134-137
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 7
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 4, 8, 13-14, 24-27
-- Z0Z_research/catalanArches/formulaExperiments.py: 27-28, 50, 52, 54, 57, 60, 62, 116-117, 120, 136, 138-140, 149, 155-156, 158, 161, 167, 169, 172, 174, 180-181
-- Z0Z_research/catalanArches/formulasReduce.py: 30, 33, 36-37, 47-50, 58
-- Z0Z_research/catalanArches/generate.py: 50, 64, 75-77, 85-86, 88, 155
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 46
+- Z0Z_research/constraint/archParentsPrototype.py: 119
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 104
 
-degreeDirection
+### `Z0Z_countFromCoefficients`
 
-- Z0Z_research/catalanArches/_semiotics.py: 19
-- Z0Z_research/catalanArches/analyze.py: 190, 227
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 6, 13-14, 24, 26-27
-- Z0Z_research/catalanArches/formulasReduce.py: 32, 36-37, 47, 49-50
+- Z0Z_research/constraint/archParentsPrototype.py: 47
 
-degreeLess
+### `Z0Z_diagonalCoefficientsKnown吗`
 
-- Z0Z_research/catalanArches/analyze.py: 23, 26, 28, 30
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 42, 47
 
-degreeSelection
+### `Z0Z_diagonalPositionToCoefficients`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 39, 41
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 41, 51
+- Z0Z_research/constraint/archParentsPrototype.py: 15, 129
 
-differenceOrder
+### `Z0Z_extendRowSumXLobb`
 
-- Z0Z_research/catalanArches/analyze.py: 22-23, 31, 166, 171
-- Z0Z_research/catalanArches/generate.py: 40
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 95
+- Z0Z_research/Y7Y_catalanArches/generate.py: 18, 140
 
-direction
+### `Z0Z_getBinomialMultiplyThis`
 
-- Z0Z_research/catalanArches/_semiotics.py: 23, 27, 29-30
-- Z0Z_research/catalanArches/analyze.py: 31
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 35
-- Z0Z_research/catalanArches/formulasReduce.py: 59
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 10
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 82
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 42
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 13, 58
+- Z0Z_research/Y7Y_catalanArches/generate.py: 15, 65
 
-encoded_input_start
+### `Z0Z_getCatalanMultiplyThis`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 18, 27, 34, 37, 54, 69
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 11
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 85
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 13, 249
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 47
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 14, 68
 
-get_sub_k
+### `Z0Z_getCoefficient`
 
-- Z0Z_research/catalanArches/counting/archCurses.py: 123, 125, 137, 140, 146, 156
+- Z0Z_research/constraint/archParentsPrototype.py: 142, 149
+- Z0Z_research/constraint/archReducePrototype.py: 110
+- Z0Z_research/constraint/constraintPropagationPrototype.py: 37, 92, 105-106, 124
 
-indexSub_k
+### `Z0Z_getLobbCoefficient`
 
-- Z0Z_research/catalanArches/counting/archCurses.py: 109-110, 116-118, 123-124, 129, 132-133, 137, 139
+- Z0Z_research/constraint/archReducePrototype.py: 104, 118
 
-indexSubSub_k
+### `Z0Z_less`
 
-- Z0Z_research/catalanArches/counting/archCurses.py: 72-73, 79, 84, 93-95, 101, 109-110, 115, 117
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 23-24, 204, 208-213, 219-222
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 32-33, 57, 60
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 137, 140-141, 149, 153, 157-160, 162, 170-171, 173, 175-176, 180-183
+- Z0Z_research/Y7Y_catalanArches/generate.py: 81
 
-isEven吗
+### `Z0Z_lobbCoefficient`
 
-- Z0Z_research/catalanArches/_semiotics.py: 33, 38
-- Z0Z_research/catalanArches/analyze.py: 192, 207, 219, 229
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 12
-- Z0Z_research/catalanArches/formulasReduce.py: 35, 58
-- Z0Z_research/catalanArches/generate.py: 64, 86
+- Z0Z_research/constraint/archReducePrototype.py: 112
 
-isOdd吗
+### `Z0Z_lookupBinomialCandidate`
 
-- Z0Z_research/catalanArches/_semiotics.py: 37
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 8
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 2, code]: 5
-- Z0Z_research/catalanArches/formulasReduce.py: 4, 65
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 11, code]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 13, code]: 1, 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 5, code]: 3
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 1, 40
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 9, code]: 1
 
-j
+### `Z0Z_lookupBinomialStored`
 
-- Z0Z_research/catalanArches/_beDry.py: 33
-- Z0Z_research/catalanArches/_filesystem.py: 89-90
-- Z0Z_research/catalanArches/_semiotics.py: 45
-- Z0Z_research/catalanArches/analyze.py: 48, 84, 240
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 9
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 4-5
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.py: 33-35, 72, 74-75, 77-79, 132
-- Z0Z_research/catalanArches/formulasReduce.py: 25, 61, 63, 69, 86
-- Z0Z_research/catalanArches/generate.py: 104, 114
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 5, code]: 1-2
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 41
 
-k
+### `Z0Z_lookupCatalanCandidate`
 
-- Z0Z_research/catalanArches/counting/archCurses.py: 123-124, 134, 137, 139, 144, 146
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 17, code]: 1, 14, 17
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 1, 4
 
-kArchetype
+### `Z0Z_lookupCatalanStored`
 
-- Z0Z_research/catalanArches/analyze.py: 24, 27-28, 30, 178-179
-- Z0Z_research/catalanArches/formulaExperiments.py: 53-54, 57
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 1, 3, 6
 
-kPolynomial
+### `Z0Z_lookupCoefficients`
 
-- Z0Z_research/catalanArches/counting/archCurses.py: 133-134
-
-label
-
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 22-23, 26, 30, 35, 42-44, 46-47
-
-labels
-
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 20, 26, 30
-
-less
-
-- Z0Z_research/catalanArches/analyze.py: 22-23, 203, 207-212, 218-221
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.py: 136, 139-140, 148, 152, 156-159, 161, 169-170, 172, 174-175, 179-182
-- Z0Z_research/catalanArches/generate.py: 80
-
-lookupAddThis
-
-- Z0Z_research/catalanArches/formulaExperiments.py: 43, 47, 101, 104
-
-lookupCoefficients
-
-- Z0Z_research/catalanArches/analyze.py: 54, 56
-- Z0Z_research/catalanArches/formulasParents.py: 28, 30, 32, 34-35, 44, 103, 105, 109, 112
-- Z0Z_research/catalanArches/generate.py: 34, 37, 44, 47, 49, 54, 138-140, 145, 150, 159
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 55, 57
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 17-18, 20
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 28, 30, 32, 34-35, 44, 103, 105, 109, 112
+- Z0Z_research/Y7Y_catalanArches/generate.py: 35, 38, 45, 48, 50, 55, 139-141, 146, 151, 160
 - Z0Z_research/constraint/constraintPropagationPrototype.py: 30, 93, 95, 99, 101-102
 
-lookupCorrections
+### `Z0Z_lookupCoefficientsAddendum`
 
-- Z0Z_research/catalanArches/analyze.py: 42, 50-51, 150-152, 157, 159-160, 238, 243, 245
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 131, 138, 140
 
-lookupDegreeFormulas
+### `Z0Z_lookupCoefficientTerms`
 
-- Z0Z_research/catalanArches/analyze.py: 201, 210, 213, 215, 218
-- Z0Z_research/catalanArches/formulaExperiments.py: 168, 172, 175
-- Z0Z_research/catalanArches/generate.py: 57
+- Z0Z_research/Y7Y_catalanArches/generate.py: 38, 40, 42
 
-lookupDiagonalCoefficients
+### `Z0Z_lookupDegreeFormulas`
 
-- Z0Z_research/catalanArches/formulasParents.py: 40, 44, 154, 158
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 202, 211, 214, 216, 219
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 19, 33
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 169, 173, 176
+- Z0Z_research/Y7Y_catalanArches/generate.py: 58
 
-lookupGrowthCoefficients
+### `Z0Z_lookupDiagonalCoefficients`
 
-- Z0Z_research/catalanArches/analyze.py: 33, 38, 166, 168-169, 172, 187-190, 226, 228, 230, 232-233, 235, 237, 244
-- Z0Z_research/catalanArches/generate.py: 35, 38, 40-41, 48, 61-64
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 40, 44, 154, 158
 
-lookupGrowthDegreeFormulas
+### `Z0Z_lookupGrowthCoefficients`
 
-- Z0Z_research/catalanArches/generate.py: 53, 59, 150
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 34, 39, 167, 169-170, 173, 188-191, 227, 229, 231, 233-234, 236, 238, 245
+- Z0Z_research/Y7Y_catalanArches/generate.py: 36, 39, 41-42, 49, 62-65
 
-lookupGrowthFormulas
+### `Z0Z_lookupGrowthDegreeFormulas`
 
-- Z0Z_research/catalanArches/analyze.py: 183-185
-- Z0Z_research/catalanArches/generate.py: 46, 51-52, 54-55, 58, 66, 68, 74, 76-77, 81, 83, 85, 88, 150, 154-155, 159, 163
+- Z0Z_research/Y7Y_catalanArches/generate.py: 54, 60, 151
 
-lookupGrowthResiduals
+### `Z0Z_lookupGrowthFormulas`
 
-- Z0Z_research/catalanArches/analyze.py: 199, 203, 206
-- Z0Z_research/catalanArches/generate.py: 51, 53, 57
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 184-186
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 19, 22, 25-26, 32, 57, 171
+- Z0Z_research/Y7Y_catalanArches/generate.py: 47, 52-53, 55-56, 59, 67, 69, 75, 77-78, 82, 84, 86, 89, 151, 155-156, 160, 164
 
-lookupGrowthTerms
+### `Z0Z_lookupGrowthResiduals`
 
-- Z0Z_research/catalanArches/analyze.py: 34, 37, 39, 166, 171-172, 236, 238, 240
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 200, 204, 207
+- Z0Z_research/Y7Y_catalanArches/generate.py: 52, 54, 58
 
-lookupMultiplyThis
+### `Z0Z_lookupLobbX`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 43, 46
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 100, 103, 108, 111, 113, 116, 119, 128, 138-139, 142, 146
 
-lookupPredictionByDegree
+### `Z0Z_lookupResidual`
 
-- Z0Z_research/catalanArches/formulaExperiments.py: 172, 186
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 189, 192, 194, 196-197, 217, 222, 224, 226-228
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 56, 59, 63, 87, 90, 105-107
 
-lookupResidual
+### `Z0Z_lookupResidualByDegree`
 
-- Z0Z_research/catalanArches/analyze.py: 188, 191, 193, 195-196, 216, 221, 223, 225-227
-- Z0Z_research/catalanArches/formulaExperiments.py: 55, 58, 62, 86, 89, 104-106
-- Z0Z_research/catalanArches/generate.py: 109, 114, 116
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 205, 209-210, 212-213
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 157, 159-160, 163-166, 171, 173, 184-187
 
-lookupResidualByDegree
+### `Z0Z_lookupTheCoefficients`
 
-- Z0Z_research/catalanArches/analyze.py: 204, 208-209, 211-212
-- Z0Z_research/catalanArches/formulaExperiments.py: 156, 158-159, 162-165, 170, 172, 183-186
-
-lookupTheCoefficients
-
-- Z0Z_research/catalanArches/cXc.py: 20, 22, 28
-- Z0Z_research/catalanArches/formulasParents.py: 19-20, 22, 24-25, 38, 41-42, 47-49, 51-52, 56-57, 60, 62, 65, 70, 72-73, 76, 80-82, 85, 87, 89, 101, 104, 130, 132-133
-- Z0Z_research/catalanArches/generate.py: 27, 30, 129, 131, 135
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 21, 23, 29
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 171
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 19-20, 22, 24-25, 38, 41-42, 47-49, 51-52, 56-57, 60, 62, 65, 70, 72-73, 76, 80-82, 85, 87, 89, 101, 104, 130, 132-133
+- Z0Z_research/Y7Y_catalanArches/generate.py: 28, 31, 130, 132, 136
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 27, 32, 34, 41, 45, 59, 65, 69, 101, 103, 105
 - Z0Z_research/constraint/archParentsPrototype.py: 48, 50, 111, 126, 129, 131
 
-lookupX
+### `Z0Z_lookupX`
 
-- Z0Z_research/catalanArches/analyze.py: 72, 76-77, 86, 92, 98, 101, 105, 121, 143, 146, 257-259
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 73, 77-78, 87, 93, 99, 102, 106, 122, 144, 147, 258-260
 
-lookupXTerms
+### `Z0Z_lookupXTerms`
 
-- Z0Z_research/catalanArches/analyze.py: 149-150, 152, 235, 237, 240
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 150-151, 153, 236, 238, 241
 
-lookup工anti
+### `Z0Z_makeModelCoefficients`
 
-- Z0Z_research/catalanArches/analyze.py: 41, 48, 149-150, 155, 158
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 35
+- Z0Z_research/constraint/archParentsPrototype.py: 141, 162
 
-lookup工antiRow
+### `Z0Z_paritySelection`
 
-- Z0Z_research/catalanArches/analyze.py: 247, 253
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 37-38, 41
 
-maximum_degree
+### `Z0Z_pathFilenameBinomialMultiplyThis`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 20
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 11
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 27, 46, 60
 
-multiplicities
+### `Z0Z_pathFilenameCatalanMultiplyThis`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 19-20
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 12
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 29, 50, 64
 
-multiplicity
+### `Z0Z_pathFilenameCoefficientsLobb`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 112-113, 116
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 13
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 30
 
-multiplyThis
+### `Z0Z_pathFilenameTheCoefficients`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 7
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 5
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 5, 8, 10
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 8, 13-22, 24, 26-34
-- Z0Z_research/catalanArches/formulaExperiments.py: 179
-- Z0Z_research/catalanArches/formulasReduce.py: 33, 36-45, 47, 49-58, 63, 65, 67-68
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 13
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 34, 80
+- Z0Z_research/Y7Y_catalanArches/generate.py: 15, 141
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 11, 96
 
-n
+### `Z0Z_pathFilenameTheCoefficientsIncomplete`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 60
-- Z0Z_research/catalanArches/_beDry.py: 30-31
-- Z0Z_research/catalanArches/_semiotics.py: 45-46, 48-49
-- Z0Z_research/catalanArches/counting/archCurses.py: 163-164
-- Z0Z_research/catalanArches/cXc.py: 23-26, 29-31, 34
-- Z0Z_research/catalanArches/formulasReduce.py: 24-25
-- Z0Z_research/catalanArches/generate.py: 69, 72, 79-80, 84, 86, 88, 90, 94, 103-104, 108, 114, 116, 118, 161
-- Z0Z_research/constraint/archParentsPrototype.py: 23, 26, 31-33, 41, 48, 50, 56, 61, 65-66, 71-72, 83, 103, 111, 113-118, 120, 122, 124-125, 128-129, 131, 133-138
-- Z0Z_research/constraint/archReducePrototype.py: 21, 24, 56, 58, 104, 106, 109-110, 112, 114, 117-119, 121, 124-125, 129, 132, 136-137
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 44-45, 47, 49, 51-52, 54, 57, 59, 62-63, 65, 68, 70, 75, 77, 79, 81-82, 89-90, 92-93, 95-96, 99, 101-102, 104-110, 114-115, 117-118, 121, 124, 126, 173-174, 178, 189, 191, 195, 200, 204, 206, 208-209
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 14
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 35
+- Z0Z_research/Y7Y_catalanArches/generate.py: 16, 141
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 11, 64, 96
 
-offset
+### `Z0Z_readBinomialMultiplyThis`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 22, 24, 26-27, 34-35
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 15
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 44, 56, 83
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 5, code]: 1
 
-order
+### `Z0Z_readCatalanMultiplyThis`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 62-63, 66-67, 70, 81-82, 107, 113, 116, 118, 138, 140, 142-143, 145, 150, 157, 159, 162, 168, 179, 188-189, 192, 194-195
-- Z0Z_research/catalanArches/formulaExperiments.py: 174
-- Z0Z_research/catalanArches/generate.py: 73
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 15
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 48, 64, 86
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 15, code]: 1
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 10
 
-ordinal
+### `Z0Z_reproduceCoefficientExtensions`
 
-- Z0Z_research/catalanArches/_beDry.py: 50-51
-- Z0Z_research/constraint/archReducePrototype.py: 101-102
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 168, 171
 
-ordinalCatalan
+### `Z0Z_theCoefficients`
 
-- Z0Z_research/catalanArches/analyze.py: 253-256
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 34
 
-ordinalLobb
+### `Z0Z_theCoefficients_incomplete`
 
-- Z0Z_research/catalanArches/analyze.py: 131-134
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 35
 
-outlineSubSub_k
+### `Z0Z_totalCoefficients`
 
-- Z0Z_research/catalanArches/counting/archCurses.py: 115, 118
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 142, 144, 146-147
 
-parity
+### `Z0Z_triangleToTheCoefficients`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 47
-- Z0Z_research/catalanArches/analyze.py: 202, 205, 217
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 4
-- Z0Z_research/catalanArches/formulaExperiments.py: 50, 52, 60, 65, 67, 116-117, 120, 145-146, 169, 172, 175
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 130
 
-parityEven
+### `Z0Z_verifyCoefficientAnalysis`
 
-- Z0Z_research/catalanArches/analyze.py: 203, 207, 210, 218-219
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 169, 174, 190
 
-paritySelection
+### `Z0Z_writeBinomialMultiplyThis`
 
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 37-38, 41
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 16
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 55
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 13, code]: 4
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 11
 
-period
+### `Z0Z_writeCatalanMultiplyThis`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 20, 23-24, 47-48
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 16
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 62
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 2, code]: 11
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 21, code]: 4
 
-position
+### `Z0Z_工theCoefficients`
 
-- Z0Z_research/catalanArches/analyze.py: 202, 205
-- Z0Z_research/catalanArches/formulaExperiments.py: 72-75, 148-150
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py: 9, 21
+- Z0Z_research/Y7Y_catalanArches/__init__.py: 17
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 79
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 12, 17, 167, 172
+- Z0Z_research/Y7Y_catalanArches/generate.py: 16, 130, 132, 136, 139
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py: 12, 65, 101
 
-rangeDataRowsNeeded
+### `Z0Z_次k`
 
-- Z0Z_research/catalanArches/formulasReduce.py: 82, 86, 88-89
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 23-25, 32, 34, 38-39, 42, 46, 49, 150-151, 156, 159, 167, 169, 172, 175, 179-182, 188, 191-194, 207-209, 216, 220-222, 226, 228-231, 236, 238-239, 241, 243-245
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 7, code]: 3-6, 12, 35
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 53-54, 56-60, 121, 168
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 24-25, 27, 30-32, 35, 58-59
+- Z0Z_research/Y7Y_catalanArches/generate.py: 35, 38-40, 42, 51, 62, 64-65, 75-87, 89, 91, 144
 
-rangeSansFormula
+### `Z0Z_次k_isEven吗`
 
-- Z0Z_research/catalanArches/formulasReduce.py: 80-81, 84, 87, 91
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py: 82-83
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py: 28-29
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 58
+- Z0Z_research/Y7Y_catalanArches/generate.py: 65
 
-residue
+### `工boxOfCoefficients`
 
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 115-116
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 75, 80
 
-row
+### `工coefficient_k`
 
-- Z0Z_research/catalanArches/_beDry.py: 33
-- Z0Z_research/catalanArches/analyze.py: 74, 96
-- Z0Z_research/catalanArches/cXc.py: 25-26, 31-34
-- Z0Z_research/catalanArches/formulaExperiments.py: 103
-- Z0Z_research/catalanArches/formulasParents.py: 128, 143
-- Z0Z_research/catalanArches/generate.py: 27, 29-30
-- Z0Z_research/constraint/archParentsPrototype.py: 41, 56, 168, 172, 185
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 244
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py: 24, 77
 
-row_n
+### `工direction`
 
-- Z0Z_research/catalanArches/analyze.py: 130-131
-- Z0Z_research/catalanArches/formulasParents.py: 28-30, 32, 34-35, 60, 62, 65, 68, 70-73, 76, 78-82, 85-86, 90, 109, 111-112, 114-115
-- Z0Z_research/catalanArches/formulasReduce.py: 28, 74-76, 100-101, 103-104
-- Z0Z_research/constraint/archParentsPrototype.py: 144-145, 147-148, 153, 156-157
-- Z0Z_research/constraint/constraintPropagationPrototype.py: 114-115, 117-118
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 48
 
-shift
+### `工lookupGrowth`
 
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 20, 23-24, 47-48
-- Z0Z_research/catalanArches/_beDry.py: 47-48, 50-51
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 7
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 13-22, 24, 26-34
-- Z0Z_research/catalanArches/formulaExperiments.py: 171, 179
-- Z0Z_research/catalanArches/formulasReduce.py: 36-45, 47, 49-57
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 76
 
-shiftBinomial
+### `工multiplicand`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 38
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 4
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 3
 
-shiftCatalan
+### `次coefficient`
 
-- Z0Z_research/catalanArches/_beDry.py: 35, 37
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 4
-- Z0Z_research/catalanArches/formulasParents.py: 28, 30, 32, 34, 44
+- mapFolding/oeis/A400429/_A005315.py: 112-113, 129, 148
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py: 8, 24-26, 28, 31, 33
 
-stored
+### `次diagonal`
 
-- Z0Z_research/catalanArches/_filesystem.py: 122, 126-127
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 7-8
-- Z0Z_research/catalanArches/formulaExperiments.py: 50, 62
-- Z0Z_research/catalanArches/generate.py: 79, 103
-
-storedAddThis
-
-- Z0Z_research/catalanArches/formulaExperiments.py: 82, 87, 90, 96-98
-
-sumProductSumSubSub_k
-
-- Z0Z_research/catalanArches/counting/archCurses.py: 109, 111, 119, 139, 155
-
-top
-
-- Z0Z_research/catalanArches/_beDry.py: 15-16, 18, 22, 47-48
-- Z0Z_research/catalanArches/analyze.py: 176
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 5, 8
-- Z0Z_research/catalanArches/formulasReduce.py: 31, 33
-
-totalBasis
-
-- Z0Z_research/catalanArches/formulaExperiments.py: 84-85, 87, 89-90
-
-totalCatalan
-
-- Z0Z_research/catalanArches/analyze.py: 250, 255, 257, 259
-
-totalCoefficients
-
-- Z0Z_research/catalanArches/formulasParents.py: 142, 144, 146-147
-
-totalSansFormula
-
-- Z0Z_research/catalanArches/formulasReduce.py: 81-82
-
-valueCalculated
-
-- Z0Z_research/catalanArches/counting/archCurses.py: 113, 116, 119-120, 127, 130, 135, 139-140, 142
-
-values
-
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py: 102, 105
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py: 27-28
-- Z0Z_research/catalanArches/analyze.py: 56, 73, 85, 127, 137, 152, 160, 162, 172, 184, 189, 203, 206, 212, 222, 226
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 1, markdown]: 5, 8
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 12, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 13, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 18, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 21, code]: 2
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 1
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6, markdown]: 5
-- Z0Z_research/catalanArches/formulaExperiments.py: 58, 67, 70, 104-106, 132, 151, 162-164, 183-186
-- Z0Z_research/catalanArches/formulasParents.py: 125, 145
-- Z0Z_research/catalanArches/generate.py: 52, 63, 71, 82, 84, 99, 106, 108, 116, 125
-
-工theCoefficients
-
-- Z0Z_research/catalanArches/_filesystem.py: 79
-- Z0Z_research/catalanArches/cXc.py: 8, 20
-- Z0Z_research/catalanArches/generate.py: 16, 129, 131, 135, 138
-
-次antiCatalan
-
-- Z0Z_research/catalanArches/_beDry.py: 35, 37-38
-- Z0Z_research/catalanArches/_filesystem.py: 63, 85-86, 89-90
-- Z0Z_research/catalanArches/_semiotics.py: 48
-- Z0Z_research/catalanArches/analyze.py: 45, 47-48, 238, 243, 247-250, 256
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 17, code]: 4-5, 7-9
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.py: 30-31, 33-35, 72-75, 77-79, 82, 84, 86, 89, 91-93, 96-98, 126, 132
-- Z0Z_research/catalanArches/formulasReduce.py: 25, 61, 63-66, 68-69
-- Z0Z_research/catalanArches/generate.py: 97-100, 103, 105, 107, 109-112, 115
-
-次diagonal
-
-- Z0Z_research/catalanArches/formulasParents.py: 47-49, 51-52, 132-139
+- README.md: 101
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 47-49, 51-52, 132-139
 - Z0Z_research/constraint/archParentsPrototype.py: 125-126, 128-129
+- easyRun/triangleSemiMake.py: 16-17, 19-20, 55, 58
+- mapFolding/algorithms/matrixMeandersNumPy.py: 44-45
+- mapFolding/algorithms/matrixMeandersShare.py: 247-248, 260, 274, 283, 314-315, 344-345, 422, 424
+- mapFolding/dataStructures.py: 871, 883-884, 887, 895, 913, 916-917, 923, 928, 930, 940, 954
+- mapFolding/kitFilesystem.py: 607, 617, 627, 645-646, 661, 973-974, 986, 1009, 1012
+- mapFolding/oeis/A400429/_integrateMe_verify.py: 66, 68-69, 71-72
+- mapFolding/oeis/_metadata.py: 229, 242, 256, 266
+- mapFolding/synthesized/matrixMeanders/pruneNumPy.py: 40-41
+- mapFolding/tests/test_dataStructures.py: 13, 29, 31-32, 34, 38, 41
+- mapFolding/tests/test_filesystem.py: 142, 146-149, 151, 156, 158
+- mapFolding/tests/test_oeis.py: 156, 160, 162
 
-次diagonalParents
+### `次diagonalParents`
 
-- Z0Z_research/catalanArches/analyze.py: 75-77, 79-81, 86
+- Z0Z_research/Y7Y_catalanArches/analyze.py: 76-78, 80-82, 87
 
-次k
+### `次k`
 
-- Z0Z_research/catalanArches/analyze.py: 22-24, 31, 33, 37-38, 41, 45, 48, 149-150, 155, 158, 166, 168, 171, 174, 178-181, 187, 190-193, 206-208, 215, 219-221, 225, 227-230, 235, 237-238, 240, 242-244
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 3
-- Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 7, code]: 3-6, 12, 35
-- Z0Z_research/catalanArches/formulaExperiments.py: 52-53, 55-59, 120, 167
-- Z0Z_research/catalanArches/formulasReduce.py: 24-25, 27, 30-32, 35, 58-59
-- Z0Z_research/catalanArches/generate.py: 34, 37-39, 41, 50, 61, 63-64, 74-86, 88, 90, 143
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md: 4, 32, 44, 60, 123, 126, 156
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md: 15, 65
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]: 3
+- mapFolding/algorithms/constraintPropagation.py: 108-109
+- mapFolding/algorithms/elimination.py: 252-253
 
-次k_isEven吗
+### `次rowSum`
 
-- Z0Z_research/catalanArches/_filesystem.py: 82-83
-- Z0Z_research/catalanArches/formulaExperiments.py: 27-28
-- Z0Z_research/catalanArches/formulasReduce.py: 58
-- Z0Z_research/catalanArches/generate.py: 64
-
-次Lobb
-
-- Z0Z_research/catalanArches/analyze.py: 101-105, 109-116, 122, 124-125, 142, 144-145
-
-次rowSum
-
-- Z0Z_research/catalanArches/formulasParents.py: 19-20, 22, 24-25, 28-30, 86-87, 89
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py: 19-20, 22, 24-25, 28-30, 86-87, 89
 - Z0Z_research/constraint/archParentsPrototype.py: 118-120, 122, 124, 141-142, 144-145, 147-149, 153, 156-157, 160-162, 168, 172, 180, 185
 
-Documentary NAME LOCATIONS
+## File And Directory Labels Containing The Term Families
 
-工multiplicand
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py
+- Z0Z_research/Y7Y_catalanArches/__init__.py
+- Z0Z_research/Y7Y_catalanArches/_beDry.py
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py
+- Z0Z_research/Y7Y_catalanArches/analyze.py
+- Z0Z_research/Y7Y_catalanArches/counting/__init__.py
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py
+- Z0Z_research/Y7Y_catalanArches/data/A287548.csv
+- Z0Z_research/Y7Y_catalanArches/data/A331499.csv
+- Z0Z_research/Y7Y_catalanArches/data/A331499_incomplete.csv
+- Z0Z_research/Y7Y_catalanArches/data/Y7Y_catalanAddThis.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_binomialMultiplyThis.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_catalanMultiplyThis.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_coefficientsLobb.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_theCoefficients.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_theCoefficients_incomplete.csv
+- Z0Z_research/Y7Y_catalanArches/explain/A331499.md
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py
+- Z0Z_research/Y7Y_catalanArches/generate.py
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py
+- mapFolding/algorithms/Y7Y_catalanArch.py
+- mapFolding/algorithms/eliminationCrease.py
 
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 3
+## Non-Python Label And Notation Excerpts
 
-工lookupAntiCatalan
-
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 14, 18
-
-工lookupGrowth
-
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 76
-
-工direction
-
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 48
-
-reproduceCoefficientExtensions
-
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 168, 171
-
-verifyCoefficientAnalysis
-
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md: 169, 174, 190
-
-verifyFormulas
-
-- Z0Z_research/catalanArches/explain/anti catalan.md: 15
-
-inner5
-
-- Z0Z_research/catalanArches/explain/anti catalan.md: 38
-
-FILE AND DIRECTORY LABELS CONTAINING THE TERM FAMILIES
-
-- Z0Z_research/catalanArches/__init__.py
-- Z0Z_research/catalanArches/_beDry.py
-- Z0Z_research/catalanArches/_filesystem.py
-- Z0Z_research/catalanArches/_semiotics.py
-- Z0Z_research/catalanArches/analyze.py
-- Z0Z_research/catalanArches/cXc.py
-- Z0Z_research/catalanArches/counting/__init__.py
-- Z0Z_research/catalanArches/counting/archCurses.py
-- Z0Z_research/catalanArches/data/A287548.csv
-- Z0Z_research/catalanArches/data/A331499.csv
-- Z0Z_research/catalanArches/data/A331499_incomplete.csv
-- Z0Z_research/catalanArches/data/binomialMultiplyThis.csv
-- Z0Z_research/catalanArches/data/catalanAddThis.csv
-- Z0Z_research/catalanArches/data/catalanMultiplyThis.csv
-- Z0Z_research/catalanArches/data/coefficientsLobb.csv
-- Z0Z_research/catalanArches/data/theCoefficients.csv
-- Z0Z_research/catalanArches/data/theCoefficients_incomplete.csv
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md
-- Z0Z_research/catalanArches/explain/A331499.md
-- Z0Z_research/catalanArches/explain/anti catalan.md
-- Z0Z_research/catalanArches/explain/lobb.md
-- Z0Z_research/catalanArches/explain/shifting.md
-- Z0Z_research/catalanArches/formulaExperiments.ipynb
-- Z0Z_research/catalanArches/formulaExperiments.py
-- Z0Z_research/catalanArches/formulasParents.py
-- Z0Z_research/catalanArches/formulasReduce.py
-- Z0Z_research/catalanArches/generate.py
-- mapFolding/algorithms/catalanArch.py
-- research/matrixMeanders/archiveTriangle/A005315Binomial.py
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py
-
-NON-PYTHON LABEL AND NOTATION EXCERPTS
-
-These preserve the exact wording of matching local notes, table headers and
-notebook markdown. The main review above distinguishes current code from
-historical statements. Saved notebook execution output is excluded.
+These preserve matching wording from current notes, table headers, configuration,
+and notebook markdown. They describe source content, rather than additional instructions.
+Saved notebook execution output is excluded.
 
 .vscode/code-spell-dictionary-workspace.txt:49
 
-- binom
+> binom
+
+.vscode/code-spell-dictionary-workspace.txt:82
+
+> Combin
 
 .vscode/code-spell-dictionary-workspace.txt:127
 
-- Dyck
+> Dyck
 
 .vscode/code-spell-dictionary-workspace.txt:266
 
-- Lobb
+> Lobb
+
+.vscode/identifiers.code-snippets:75
+
+> 		"prefix": "Z order First"
+
+.vscode/identifiers.code-snippets:80
+
+> 		"prefix": "Z order Greater Than"
+
+.vscode/identifiers.code-snippets:85
+
+> 		"prefix": "Z order Index"
+
+.vscode/identifiers.code-snippets:90
+
+> 		"prefix": "Z order Last"
+
+.vscode/identifiers.code-snippets:94
+
+> 		"description": "Less Than. `<`. 小 means small. 小于 Chinese: xiǎoyú",
+
+.vscode/identifiers.code-snippets:95
+
+> 		"prefix": "Z order Less Than"
+
+.vscode/identifiers.code-snippets:100
+
+> 		"prefix": "Z order Subscript"
+
+.vscode/identifiers.code-snippets:105
+
+> 		"prefix": "Z order Superscript"
+
+README.md:27
+
+> | Work with integer sequences          | [`oeis/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/) provides sequence dispatch, exact formula relationships, metadata, known values, and triangle utilities.                                                                       |
+
+README.md:31
+
+> | Validate a new implementation        | [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py) compares implementations with known sequence values.                                                                                           |
+
+README.md:47
+
+> | Retrieve known sequence values                         | `getValuesKnown(oeisID)`             | Dictionary of indices and values                    |
+
+README.md:48
+
+> | Inspect sequence metadata                              | `getMetadata(oeisID)`                | Description, offset, known values, and row settings |
+
+README.md:70
+
+> The returned state retains the boundary position and transfer counts for inspection. Read the
+
+README.md:85
+
+> `oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or to an exact formula connecting related sequences. For sequences with selectable identities, its `f` argument chooses a formula. The formulas and their docstrings are in [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py).
+
+README.md:93
+
+> Triangle utilities use the sequence metadata to locate rows, columns, and flat b-file indices. Columns start at one, including when a row is supplied as a Python sequence.
+
+README.md:95
+
+> For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/A400429/) exposes triangle-cell identities and fixed-diagonal formulas. Its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven.
+
+README.md:101
+
+> | Select a diagonal            | `getTriangleDiagonal(oeisID, 次diagonal, fromRight=True)` | Available terms keyed by row number; offsets start at one |
+
+README.md:102
+
+> | Locate a row in a b-file     | `getTriangleIndices(oeisID, n)`                           | Range of flat indices for the complete row                |
+
+README.md:106
+
+> `updateBFile` and `updateTriangle` add missing terms to the local cache and update the shared known-value dictionary in place. Existing local b-file values take precedence over metadata values, which take precedence over supplied values. These functions retain b-file comments and write terms in index order; they do not submit edits to OEIS. `valueUnknown` is one greater than the largest stored index, so it can lie beyond gaps in a sparse sequence.
+
+README.md:108
+
+> For research files, `mapFolding.kitFilesystem` reads and writes triangle CSV records with a row key followed by cell values. `writeTriangle` leaves empty fields for missing sparse cells; use `readTriangleSparse` to preserve their column positions. `readTriangle` expects every cell field to contain an integer. Diagonal CSV files use three fields: row key, diagonal offset, and value.
+
+README.md:110
+
+> `printEasyRunBenchmark` compares one computed term with its known value. `printEasyRunTriangle` compares a computed row with its known cells and aligns differing rows for inspection. Both accept `ratio` as a number of decimal places; `ratio=0` hides ratios.
+
+README.md:124
+
+> `PermutationSpace` maps pile positions to pinned leaves or `ChoicesLeaf` values.
+
+README.md:129
+
+> constructs and inspects `ChoicesLeaf` values. [`pinIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/pinIt.py)
+
+README.md:130
+
+> restricts assignments and relative leaf order; [`reduceIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reduceIt.py)
+
+README.md:137
+
+> The transformation pipeline in `kitAST` can inline functions, decompose state dataclasses, specialize initialized values for a map shape, and prepare Numba or Linux Codon jobs. [`RecipeJob.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitAST/RecipeJob.py) describes job configuration; [`easyRun/synthesizeModules.py`](https://github.com/hunterhogan/mapFolding/blob/main/easyRun/synthesizeModules.py) coordinates module regeneration. For changes that should survive regeneration, edit the source algorithm or its transformation.
+
+README.md:156
+
+> | [`mapFolding/tests/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/tests/)                                                                                                                                                                                                                   | Correctness checks, dispatch and filesystem tests, and stored data samples |
+
+README.md:168
+
+> - **Albert Sadé (1949), _Sur les Chevauchements des Permutations_.** [PDF](https://oeis.org/A000108/a000108_17.pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sade1949.bib).
+
+README.md:171
+
+> - **W. F. Lunnon (1971), _Multi-dimensional map-folding_.** The basis for the multidimensional counting algorithms. [DOI](https://doi.org/10.1093/comjnl/14.1.75) · [PDF](https://academic.oup.com/comjnl/article-pdf/14/1/75/1020149/140075.pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Lunnon.bib).
+
+README.md:183
+
+> - **The On-Line Encyclopedia of Integer Sequences.** Sequence definitions, known values, formulas, and computation records. [OEIS](https://oeis.org/) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bib).
+
+README.md:245
+
+> The tests compare algorithm variants with known OEIS values and exercise generated jobs. When adding a counting implementation, extend the relevant test cases in [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py). Triangle conversions, OEIS updates, and sequence formulas have dedicated checks in `test_dataStructures.py`, `test_oeis.py`, and `test_oeis_byFormula.py`; supporting behavior has its own tests in `mapFolding/tests`.
+
+Z0Z_research/Y7Y_catalanArches/data/Z0Z_catalanMultiplyThis.csv:1
+
+> Y7Y_次antiCatalan,Z0Z_catalanCoefficients,Z0Z_binomialCoefficients
+
+Z0Z_research/Y7Y_catalanArches/explain/A331499.md:8
+
+> ## The right-edge diagonals are Y7Y_Catalan-linear
+
+Z0Z_research/Y7Y_catalanArches/explain/A331499.md:41
+
+> ### Third diagonal is the “sum of adjacent Y7Y_Catalan numbers”
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:1
+
+> # Anti Y7Y_catalan improvement
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:10
+
+> - **Same mechanism for the boundary.** Appendix B explains the first correction. A decoration count $\\binom{n−n0+p}{p}$ is only valid for n ≥ n0−p, below that the polynomial gives $(−1)^p-type$ values where the true count is 0, and the first correction is $c_{k−1}$ at n = 2k−2. That is exactly what your negative-argument Y7Y_binomial extension reproduces, and your first correction is $2·C(s−4)$ at $k = 2s−5$.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:11
+
+> - **Same closed-form shape.** Eq. (C.2) writes the corrections as $c_p · 2^j/j! · (rational with fixed denominator) · Π(n)$, split by parity, where Π is a monic polynomial. Those Π are fitted from data, not derived, so there is nothing to borrow for yours.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:15
+
+> I used your module's outputs as the data. I couldn't run `verifyFormulas` without the stored lists. In your coordinates, `Y7Y_j = k−s+1`, `a = Y7Y_次antiCatalan`, and `Y7Y_j+a = s−4`.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:17
+
+> **1. The j = 0 boundary is a free test.** Your Y7Y_Catalan formulas for a = 0..5 were fitted at j ≥ 1. At j = 0 they reproduce $−P_s(s−1)$ exactly, which is the condition that `a(s−1, s) = 0`. They do not continue to j = −1, because rows a = 1 and a = 2 would need contradictory values of `C(−1)`. This gives one extra data point per row. For s = 4..18 the values are 2, 4, 12, 34, 104, 316, 988, 3102, 9890, 31664, 102360, 332126, 1084828, 3554456, 11702806.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:19
+
+> **2. A column-only top.** For a ≥ 2 the top two terms are $2C(s−4) + (10−s)C(s−5)$, which depends on s but not on k.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:21
+
+> **3. Canonical form.** Each row is $D(j,a) = C(j)·r_a(j)$, where $r_a$ is a polynomial of degree ⌊a/2⌋ plus simple poles at j = −2, …, −(a+1). Rows 2–5 are overdetermined by your data alone (11, 10, 10 and 9 points against 4, 5, 7 and 8 unknowns). So your a = 4 and a = 5 formulas are pinned by data and not only by the ansatz. Three patterns come out as outputs:
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:23
+
+> - The leading Z0Z_coefficient is $2(−2)^m/m!$ for a = 2m, and 5 times that for odd a.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:24
+
+> - The last residue is $−a(a+1)(a+2)·C(a+1)$.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:25
+
+> - The second-to-last residue equals the previous row's last residue.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:38
+
+> **4. Row 6 as a formula.** The data is one point short for row 6. The three patterns close the system with two consistency checks, and the row-6 solution has all-integer residues. It reproduces your tuple-based values for j = 1..8, so it could replace the `3×inner5 + cumulative tuple` construction. It also predicts D(9..12, 6) = 8509214, 25005026, 73327118, 213172740, which nothing can check yet.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:44
+
+> ### Explicit Y7Y_Catalan and Y7Y_binomial formulas
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:53
+
+> `C(Y7Y_j+1)/C(Y7Y_j) = 4 - 6/(Y7Y_j+2)` repeatedly converts the shifted Y7Y_Catalan terms to their poles.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:54
+
+> The integer Z0Z_coefficients also make integer-valuedness explicit for every integer `Y7Y_j >= 0`.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:56
+
+> |    a | Polynomial multiplying $C(j)$            | Z0Z_Coefficients of $C(j+1), ..., C(j+a)$ |
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:62
+
+> |    4 | $8\binom j2-122j-46$                     | $40, 26, 6, 2$                            |
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:63
+
+> |    5 | $40\binom j2-562j-250$                   | $140, 54, 30, 6, 2$                       |
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:64
+
+> |    6 | $-16\binom j3+256\binom j2-2798j-1380$   | $508, 244, 76, 34, 6, 2$                  |
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:65
+
+> |    7 | $-80\binom j3+1168\binom j2-12418j-6342$ | $2116, 732, 294, 82, 38, 6, 2$            |
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:67
+
+> `Y7Y_工antiCatalan` now uses these expressions directly. Rows 0–5 are exact rewrites of the
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:69
+
+> Rows 8–14 retain explicit finite values with `Y7Y_j+a <= 14`; their `Y7Y_j=0` entries come from
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:72
+
+> ### Row 7 resolves the competing patterns
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md:74
+
+> The canonical row 7 is
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:1
+
+> # A genuine Newton-like matrix for these Z0Z_coefficients
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:3
+
+> The useful matrix here is **A039599**, the Y7Y_Lobb-number triangle. In row-column notation, define
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:8
+
+> \binom{2m}{m-r}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:10
+
+> \binom{2m}{m-r-1},
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:14
+
+> with Y7Y_binomial coefficients outside their ordinary range taken as zero. Its first rows are
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:41
+
+> This is the factorization of the Y7Y_Catalan Hankel matrix through a lower-triangular matrix whose diagonal entries are all $1$. Both the identity and the explicit inverse of $L$ are recorded in A039599. :chatgpt-content-reference{index="5"}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:43
+
+> ## Apply it to your existing Z0Z_coefficient rows
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:45
+
+> Define a second set of Z0Z_coefficients—not a renaming of the original ones—by
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:57
+
+> Substituting the Y7Y_Catalan identity into $F_k(n)$, with
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:75
+
+> This is an **exact, invertible integer change of basis**. It does not depend on an extrapolated pattern in the data.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:77
+
+> Applying it to your uploaded Z0Z_coefficients produces, for example:
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:87
+
+> These are calculated from the supplied Z0Z_coefficient rows. :chatgpt-content-reference{index="6"}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:89
+
+> **Every transformed Z0Z_coefficient in all 31 supplied rows is a nonnegative integer.** I also verified the inverse transformation back to every original Z0Z_coefficient, and verified that the transformed formulas reproduce all 558 overlapping A287548 cells available in the uploaded files.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:91
+
+> :chatgpt-content-reference{index="17"}[Download all 31 transformed Z0Z_coefficient rows](sandbox:/mnt/data/coefficientsLobb.csv). Each CSV row is $k,h_{k,0},\ldots,h_{k,k-1}$.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:97
+
+> There is another important property in your Z0Z_coefficient data:
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:105
+
+> I checked every applicable supplied row. Here $F_k(k-1)$ is an evaluation of the Z0Z_coefficient formula just outside the triangle’s ordinary domain; it is not an existing A287548 cell. Your reconstruction note also identifies this as an additional boundary condition, not a consequence of the partial-sum identity alone. :chatgpt-content-reference{index="7"}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:140
+
+> ### One new observation determines one new Z0Z_coefficient
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:164
+
+> **This is the useful Newton-like structure.** At each step, one previously unknown Z0Z_coefficient appears with multiplier $1$. No division or general-purpose linear-system solver is needed.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:166
+
+> The triangularity is in **successive $n$-values for a fixed Z0Z_coefficient row $k$**. It is not, by itself, a recurrence generating Z0Z_coefficient row $k+1$ from row $k$.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:184
+
+> Those are exactly the corresponding entries of the transformed Z0Z_coefficient row. :chatgpt-content-reference{index="9"}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:186
+
+> There is also a direct Y7Y_binomial formula, without computing the preceding $h$-values:
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:194
+
+> \binom{r+s}{r-s}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:201
+
+> To recover the original Z0Z_coefficients, put $p=k-1-i$. Then
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:209
+
+> \binom{r+p}{r-p}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:214
+
+> Thus the method remains completely compatible with the original Z0Z_coefficient representation.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:216
+
+> ### Why this can help complete a row
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:220
+
+> The first $p$ original Z0Z_coefficients determine the highest $p$ transformed Z0Z_coefficients,
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:232
+
+> The row is completely determined when these ranges meet:
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:238
+
+> This gives a constructive way to combine Z0Z_coefficient-prefix formulas with triangle data, and it identifies exactly which transformed positions remain undetermined when the ranges do not meet.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:240
+
+> ## A direct shortcut for the last two original Z0Z_coefficients
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:242
+
+> The zero boundary and the A000682 endpoint give an especially simple result without changing basis.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:244
+
+> Suppose the first $k-2$ original Z0Z_coefficients are known, leaving
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:300
+
+> recovering the end of your row. :chatgpt-content-reference{index="11"}
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:302
+
+> I verified this reconstruction for every supplied row $k=2,\ldots,31$.
+
+Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md:304
+
+> **This is a genuine reduction in what must be computed independently:** under the zero-boundary law, the last two Z0Z_coefficients do not need separate formulas once the prefix and $M_k$ are known. Extending that statement to every $k$ requires establishing the boundary law generally.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:1
+
+> # Growth analysis for Y7Y_Catalan Z0Z_coefficient extensions
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:3
+
+> `工multiplicand` has been removed from the analysis module. Growth evaluations now come from
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:4
+
+> `formulasReduce.Y7Y_工growthBinomial(column_k, 次k)`. The analysis works with whole growth
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:5
+
+> polynomials, their residual Z0Z_coefficients, and observations from the Z0Z_coefficient CSV.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:12
+
+> from Z0Z_research.Y7Y_catalanArches import Z0Z_工theCoefficients
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:13
+
+> from Z0Z_research.Y7Y_catalanArches.analyze import Z0Z_growthFormulaToResidual, Z0Z_growthFormulasToDifferences
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:14
+
+> from mapFolding.dataStructures import termsToTuple, Y7Y_工lookupAntiCatalan
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:15
+
+> from Z0Z_research.Y7Y_catalanArches.generate import Z0Z_coefficientRowsToGrowthFormulas
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:17
+
+> Z0Z_lookupCoefficients = Z0Z_工theCoefficients()
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:18
+
+> Y7Y_lookupAntiCatalan = Y7Y_工lookupAntiCatalan(range(9), range(max(Z0Z_lookupCoefficients) + 1))
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:19
+
+> Z0Z_lookupGrowthFormulas, Z0Z_lookupDegreeFormulas = Z0Z_coefficientRowsToGrowthFormulas(
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:20
+
+>     Z0Z_lookupCoefficients, Y7Y_lookupAntiCatalan,
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:22
+
+> residualNineteen = Z0Z_growthFormulaToResidual(19, Z0Z_lookupGrowthFormulas[19])
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:25
+
+>     19: Z0Z_lookupGrowthFormulas[19],
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:26
+
+>     20: Z0Z_lookupGrowthFormulas[20],
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:32
+
+> * `Z0Z_lookupGrowthFormulas[次k][Z0Z_less]`: determined Z0Z_coefficients in the whole growth polynomial.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:33
+
+> * `Z0Z_lookupDegreeFormulas[parityEven, Z0Z_less][position]`: determined Z0Z_coefficients in the
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:34
+
+>   parity-specific residual law across polynomial degrees.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:36
+
+> Missing keys mean unresolved Z0Z_coefficients. Explicit zeros are known zeros. Never pad a
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:37
+
+> partial polynomial or partial degree law with zeros to manufacture a complete formula.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:39
+
+> The callable analysis uses the supplied Z0Z_coefficient observations. The direct-execution
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:40
+
+> workflow in `generate.py` also performs its existing triangle and Z0Z_coefficient CSV updates.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:42
+
+> ## Coordinates and growth basis
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:44
+
+> For a fixed Z0Z_coefficient position `次k == s`, define
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:48
+
+> K_s=\max(s,2s-4),\qquad \sigma_s=\texttt{工direction}(s).
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:54
+
+> g_s(k)=\sigma_s\sum_{\ell=0}^{d}a_{s,\ell}\binom{k-K_s}{d-\ell}.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:57
+
+> `Z0Z_lookupGrowthFormulas[s][Z0Z_less]` stores $a_{s,\ell}$. These are Z0Z_coefficients recovered
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:58
+
+> from a whole polynomial, rather than values fetched from the removed granular function.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:60
+
+> `Y7Y_工basisBinomialGrowth(column_k, 次k, Y7Y_differenceOrder, Z0Z_less)` supports generalized
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:61
+
+> Y7Y_binomial evaluation before the anchor. For `L g(k) = g(k)-g(k+1)`,
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:65
+
+> \sum_{\ell=0}^{d-p}a_{s,\ell}\binom{k-K_s}{d-\ell-p}.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:68
+
+> `Z0Z_growthTermsToFormula` fits this basis using exact rational equations and any supplied
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:69
+
+> known Z0Z_coefficients. `Y7Y_differenceOrder=1` leaves the constant Z0Z_coefficient unresolved;
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:71
+
+> Only Z0Z_coefficients independent of every free variable are returned.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:73
+
+> `Y7Y_growthFormulaToTerms` evaluates a complete Z0Z_coefficient mapping. It raises
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:74
+
+> `KeyError` when required Z0Z_coefficients are unresolved.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:76
+
+> `工lookupGrowth` evaluates the current `Y7Y_工growthBinomial` over selected column positions.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:78
+
+> `Z0Z_growthFormulasToDifferences` compares inferred Z0Z_coefficients with those recovered from
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:84
+
+> Z0Z_Coefficient observations satisfy
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:90
+
+> `Z0Z_XColumnToGrowth` subtracts known anti-Y7Y_Catalan corrections. `Y7Y_diagonalParentsToGrowth`
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:94
+
+> `Z0Z_coefficientPositionToGrowthFormula` combines differences and absolute observations.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:95
+
+> Its supplied growth-Z0Z_coefficient mapping may contain already determined or hypothesized
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:96
+
+> values; the fitting equations validate them against the available observations.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:99
+
+> correction values regenerated from the Z0Z_coefficient CSV and contain finite lookup ranges.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:100
+
+> They are excluded from the discovery inputs. Row 16 remains provisional.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:102
+
+> ## Residual tuples for Y7Y_工growthBinomial
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:104
+
+> The current evaluator separates a shared scaffold from each degree-specific
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:105
+
+> `Y7Y_multiplyThis` tuple. Let $\epsilon_s=(-1)^{s+1}$. Its initial term is
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:108
+
+> \binom{k-K_s+\epsilon_s d}{d}.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:111
+
+> For $d>1$, the shared Z0Z_coefficient of $\binom{k-K_s}{d-1}$ is $-1$ for odd $s$
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:113
+
+> The returned mapping is in descending Y7Y_binomial-degree order, exactly the order used
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:114
+
+> by the degree-specific `Y7Y_multiplyThis` tuple.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:117
+
+> positions. A tuple is suitable for insertion only when every required position is known
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:118
+
+> and its Z0Z_coefficients have the intended integer values.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:123
+
+> # 次k == 19, Y7Y_degree == 9
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:126
+
+> # 次k == 20, Y7Y_degree == 9
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:130
+
+> Both reproduce the existing degree-nine growth formulas.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:134
+
+> For each parity and residual position, `Z0Z_growthResidualsToFormulas` fits
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:137
+
+> r_{\ell}(d)=\sum_{q=0}^{\ell}b_{\ell,q}\binom{d-\ell}{q}.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:140
+
+> It retains identifiable Z0Z_coefficients even when the degree law is incomplete.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:142
+
+> Z0Z_coefficient has zero basis at the requested degree. It never treats an unknown
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:145
+
+> `Z0Z_coefficientRowsToGrowthFormulas` first fits growth polynomials directly from observations.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:146
+
+> It then fits degree laws from those results and uses evaluable laws as seeds for a second
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:147
+
+> observation-based fit. The second pass does not feed its results back into degree-law fitting.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:150
+
+> The degree laws determine leading Z0Z_coefficients for positions 19 and 20; available
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:151
+
+> observations then determine their remaining Z0Z_coefficients. Both complete results match
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:152
+
+> `Y7Y_工growthBinomial` exactly.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:156
+
+> | 次k | Known whole-polynomial Z0Z_coefficients, positions 0–4 | Known residual Z0Z_coefficients, positions 0–4 |
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:162
+
+> specified degree laws, not complete new evaluator cases or proofs of an infinite sequence.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:164
+
+> ## Z0Z_Coefficient-extension replay
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:167
+
+> from Z0Z_research.Y7Y_catalanArches import pathFilenameCSVReduce, readTriangle, Z0Z_工theCoefficients
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:168
+
+> from Z0Z_research.Y7Y_catalanArches.explain.Z0Z_reproduceCoefficientExtensions import Z0Z_reproduceCoefficientExtensions
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:169
+
+> from Z0Z_research.Y7Y_catalanArches.explain.Z0Z_coefficientVerify import Z0Z_verifyCoefficientAnalysis
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:171
+
+> Z0Z_lookupTheCoefficients, Z0Z_lookupGrowthFormulas, Y7Y_lookupAntiCatalan = Z0Z_reproduceCoefficientExtensions(
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:172
+
+>     readTriangle(pathFilenameCSVReduce), Z0Z_工theCoefficients(),
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:174
+
+> verificationCounts = Z0Z_verifyCoefficientAnalysis()
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:177
+
+> The migrated replay seeds Z0Z_coefficient positions through 18 from stored observations.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:178
+
+> For positions 19 and 20 it retains Z0Z_coefficients 0–7 recovered by sampling
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:179
+
+> `Y7Y_工growthBinomial`, then reconstructs the remaining polynomial Z0Z_coefficients.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:180
+
+> Its sole directly supplied higher-position CSV sample is $c_{28,20}$.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:183
+
+> independent route for recovering new growth values.
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:185
+
+> `Y7Y_columnTo工anti` regenerates finite corrections and their model-derived zero-ordinal
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:190
+
+> `Z0Z_verifyCoefficientAnalysis()` checks 458 stored Z0Z_coefficient cells and reconstructs
+
+Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md:192
+
+> All fits remain conditional on the growth degree, Y7Y_Catalan-linear reconstruction model,
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:3
+
+> You're pointing to the important distinction I missed: each new shifted term must be chosen with its effect on the next several Z0Z_binomial coefficients in mind. Flattening one integer while leaving the earlier terms unshifted is not a systematic solution.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:5
+
+> And yes, there is a useful alternating-shift pattern.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:7
+
+> ## Odd parity: alternating shifts work
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:12
+
+> returnMe = Y7Y_multiplyThis((1,), shift=Y7Y_degreeDirection * Y7Y_degree)
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:15
+
+> For odd `次k`, replace the next two contributions with:
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:18
+
+> returnMe += Y7Y_multiplyThis((0, -1), shift=-Y7Y_degreeDirection * Y7Y_degree)returnMe += Y7Y_multiplyThis((0, 0, Y7Y_degree - 10), shift=Y7Y_degreeDirection * Y7Y_degree)
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:23
+
+> \\[ +degree,\quad -degree,\quad +degree. \\]
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:25
+
+> These preserve the first three Z0Z_binomial coefficients. After recalculating the fourth integer, its formula becomes
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:27
+
+> \\[ \boxed{68-4\\,degree}. \\]
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:39
+
+> That's exactly a constant-step result, and it uses the alternating `Y7Y_degree` shifts you anticipated.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:41
+
+> ## Even parity: an obstruction with the original leading shift
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:46
+
+> returnMe = Y7Y_multiplyThis((1,), shift=-Y7Y_degree)
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:49
+
+> and require every later integer to be linear in `Y7Y_degree`, with shifts restricted to integer multiples of `Y7Y_degree`, there is an algebraic obstruction.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:51
+
+> Write each second-position contribution as an affine Z0Z_coefficient \\(A_i d+B_i\\), shifted by \\(k_i d\\), where \\(k_i\\) is an integer.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:63
+
+> That means merely adding more integer-Z0Z_coefficient shifts at the second or third positions cannot solve the even case. We also have to redistribute the leading Y7Y_binomial, or relax the integer-linear-Z0Z_coefficient requirement.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:65
+
+> This explains why the even side has resisted the same transformation that works so naturally for odd `次k`.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:69
+
+> If we allow the even leading term to change from `-Y7Y_degree` to `+Y7Y_degree`, I found another alternating-shift pattern:
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:72
+
+> returnMe = Y7Y_multiplyThis((1, 2 * Y7Y_degree - 3), shift=Y7Y_degree)returnMe += Y7Y_multiplyThis((0, -1, 17 - 5 * Y7Y_degree), shift=-Y7Y_degree)
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:75
+
+> The shifts are now `+Y7Y_degree, -Y7Y_degree`, and the fourth integer becomes
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:77
+
+> \\[ \boxed{5\\,degree-72}. \\]
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:79
+
+> That produces a striking parity relationship:
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:81
+
+> | degree | Odd fourth | Even fourth | Sum |
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:93
+
+> \\[ \boxed{\text{odd fourth}+\text{even fourth}=degree-4}. \\]
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:97
+
+> For `Y7Y_degree == 4`, the revised case tuples are:
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:107
+
+> First, this even decomposition requires replacing the leading contribution for `Y7Y_degree > 1`; it is not compatible with keeping that single `shift=Y7Y_degreeDirection * Y7Y_degree` term unchanged.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:109
+
+> Second, the fifth integers still have cubic growth, even with these alternating shifts. So the next challenge is not merely shifting the fourth term; it is choosing the preceding shifts together so that their third-order contributions cancel.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:113
+
+> \\[ \boxed{ a_j(d)=C_j(d)-\sum\_{i\<j}a_i(d)\binom{s_i(d)}{j-i} } \\]
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:115
+
+> where \\(C_j\\) is the Z0Z_coefficient in the unshifted basis and \\(s_i\\) is the selected shift for each preceding contribution. If a position has multiple contributions, each belongs in the sum.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:117
+
+> This makes the approach systematic: choose shifts to eliminate higher-degree terms in the next residual Z0Z_coefficient, while checking the effects farther to the right.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:119
+
+> One small arithmetic correction: \\(1+2+3+4=10\\), rather than 14. Also, `Y7Y_multiplyThis((3, 4, 0), shift=0)` adds 3 to the leading Z0Z_binomial coefficient, so that particular expression would need an offsetting contribution to preserve the existing polynomial.
+
+Z0Z_research/Y7Y_catalanArches/explain/shifting.md:121
+
+> The important discovery is that alternating shifts can expose linear Z0Z_coefficients and parity symmetry that are hidden in the unshifted tuples. What remains is finding a compatible sequence of those shifts beyond the fourth integer, rather than treating each position independently.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]:5
+
+> 1. Run that section's **Load CSV values** cell once to capture a reference.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]:7
+
+>    `returnMe += Y7Y_multiplyThis((0, -16 + 6 * Y7Y_degree), shift=0)` inside the function.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]:8
+
+> 3. Inspect the recalculated residuals, then run that section's **Save CSV values** cell.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 1, markdown]:11
+
+> establish new Z0Z_coefficients from observations. Repeated calculations use the same reference.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 3, markdown]:1
+
+> ## Y7Y_Binomial
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]:1
+
+> ### Y7Y_Binomial — load CSV values
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]:3
+
+> - Run once per reference. `parity = 0` means even `次k`; `parity = 1` means odd `次k`.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 4, markdown]:4
+
+> - Column `Z0Z_less = 0` multiplies the degree-`Y7Y_degree` Y7Y_binomial, `Z0Z_less = 1` the next lower degree,
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]:1
+
+> ## Y7Y_Binomial — calculate
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]:4
+
+> the calculation below derives that residual. Choose degrees and parity at the bottom.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]:5
+
+> The initial formula reproduces the CSV values. Negative shifts use the existing generalized
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 6, markdown]:6
+
+> Y7Y_binomial basis. Values are checked at extra positions, including positions before the archetype.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 8, markdown]:1
+
+> ### Z0Z_Coefficient table
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 12, markdown]:1
+
+> ### Y7Y_Binomial — save CSV values
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 12, markdown]:3
+
+> Run after inspecting the calculation. This writes the selected rows to `data/Z0Z_binomialMultiplyThis.csv`.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]:1
+
+> ## Y7Y_Catalan — load CSV values
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]:3
+
+> This section is independent of the Y7Y_binomial section. Run once per reference.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]:4
+
+> The last tuple passed to `Y7Y_multiplyThis` contains Y7Y_binomial Z0Z_coefficients multiplying `Y7Y_catalan(Y7Y_j)`;
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 14, markdown]:5
+
+> preceding integers multiply descending Y7Y_Catalan terms.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:1
+
+> ### Y7Y_Catalan — calculate
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:3
+
+> Edit the explicit formula and choose `Y7Y_次antiCatalan` rows at the bottom.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:4
+
+> Use `Y7Y_shiftCatalan=...` and `Y7Y_shiftBinomial=...` with the original function's semantics.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:5
+
+> A purely Y7Y_binomial term still needs the outer tuple, for example `Y7Y_multiplyThis(((0, 6),))`.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:7
+
+> The calculation fits the model beyond the stored `Y7Y_catalanAddThis` range, where the finite
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:8
+
+> correction is zero. It checks additional tail positions, then recalculates every stored
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:9
+
+> `Y7Y_j` correction. A change affecting only those finite positions is absorbed into `Y7Y_catalanAddThis`.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 16, markdown]:10
+
+> Formulas that cannot be represented by integer Z0Z_coefficients in the existing basis raise an error.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 18, markdown]:1
+
+> ### Y7Y_Catalan — inspect finite corrections
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 18, markdown]:3
+
+> Run when you want to inspect `Y7Y_catalanAddThis`. Columns are the actual zero-based `Y7Y_j` values.
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]:1
+
+> ### Y7Y_Catalan — save CSV values
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]:3
+
+> Run after inspecting the calculation. This saves the selected `Y7Y_次antiCatalan` rows in both
+
+Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb [cell 20, markdown]:4
+
+> `data/Z0Z_catalanMultiplyThis.csv` and `data/Y7Y_catalanAddThis.csv`.
+
+archive/matrixMeanders/A000682expAnalysis.csv:1
+
+> n,k,buckets,nLess_k,nLess_kHalf,nLess_kOdd,expGrowth,kOdd,x,offset,A005316
+
+archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 1, markdown]:5
+
+> Test the hypothesis that during the exponential growth phase the A000682 bucketsTotal(n,k) may reuse the A005316 parity-based exponential formulas with systematic, multiplicative adjustments derived from initial condition structure and simple functions of n and k.
+
+archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 1, markdown]:7
+
+> We proceed through: data validation, reproduction of A005316 baseline, residual diagnostics, feature engineering, linear / regularized / nonlinear modeling, parity subclass analysis, power-law grid search, closed-form adjustment proposal, validation, and packaging of a predictive function.
+
+archive/matrixMeanders/A000682expHypothesisAnalysis.ipynb [cell 1, markdown]:21
+
+> - Deterministic execution order.
+
+archive/multiDimensionalMapFolding/notes.md:8
+
+> - A "gap" is a potential position where a new leaf can be folded
+
+archive/multiDimensionalMapFolding/notes.md:17
+
+> - Place leaf in valid position
+
+archive/multiDimensionalMapFolding/notes.md:18
+
+>   - Try to find another leaf to put in the adjacent position
+
+citations/Jensen.bib:13
+
+> abstract = {A closed-plane meander of order n is a closed self-avoiding curve intersecting an infinite line 2n times. Meanders are considered distinct up to any smooth deformation leaving the line fixed. We have developed an improved algorithm, based on transfer matrix methods, for the enumeration of plane meanders. While the algorithm has exponential complexity, its rate of growth is much smaller than that of previous algorithms. The algorithm is easily modified to enumerate various systems of closed meanders, semi-meanders, open meanders and many other geometries.}
+
+citations/Jia2020.bib:12
+
+>     abstract = {In this work, we consider a decision problem on whether an overlapping order of all the squares of an m × n map is valid under a particular context called simple folding. This problem belongs to the field of map folding. It is a variation of both the decision problem of valid orders of a 1 × n map under the context of simple folds and the decision problem of valid orders of an m × n map under the context of general folds. We provide a method and its corresponding linear-time algorithm to solve this problem, which is based on the construction of a directed graph representing the adjacency relations among squares.}
+
+citations/Koehler1968.bib:12
+
+> abstract = {This paper answers the problem of determining how many ways a strip of N stamps can be folded along the perforations so that the stamps are piled one on top of the other without destroying the continuity of the strip. Using combinatorial arguments, the problem is first solved by an inductive formula for N odd. Part of the computations involved are seen to yield an answer to the case when N is even. Three cases are considered: (1) both, (2) one of, (3) neither, the left end and top of the strip are labeled. If P(N) is the number of folds for a strip of N stamps of type (1), then 1/2P(N) and 1/4P(N)+1/4S(N) yields formulas for the number of folds for a strip of N stamps of types (2) and (3), where S(N) is the number of symmetric folds of the strip. P(N) also equals the number of ways of joining N dots on a circle by chords of alternating blue and red color without having any chords of the same color intersect. The formulas for P(N) and S(N) are too complicated to give here. However, the first few values are listed by computer as: NP(N)S(N)NP(N)S(N)36210140604841641146310178550612146376132614481348591457474621814155789234881392201552026901870945365616168619841008}
+
+citations/Lunnon1968.bib:12
+
+>     abstract = {An algorithm is described to compute the number of ways of folding a one-dimensional map, and a table of values is given.}
 
 citations/Sade1949.bib:7
 
-- url       = <https://oeis.org/A000108/a000108_17.pdf}>
+>   url       = {https://oeis.org/A000108/a000108_17.pdf},
 
 citations/Sade1949.bib:8
 
-- note      = Available at: <https://oeis.org/A000108/a000108_17.pdf}>
+>   note      = {Available at: https://oeis.org/A000108/a000108_17.pdf}
 
-README.md:153
+development/Elimination--Ideas to improve the algorithm.md:15
 
-- Albert Sadé (1949), _Sur les Chevauchements des Permutations_. [PDF](https://oeis.org/A000108/a000108_17.pdf) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Sade1949.bib).
+> order, but if leaf13 is in pile3, pile5, or pile7, then leaf9 must precede leaf13. If leaf13 is pinned, `_conditionalPredecessors`
 
-research/matrixMeanders/Status Semi-Meander Triangle.md:361
+development/Elimination--Ideas to improve the algorithm.md:28
 
-- A rational function with only root-of-unity poles has coefficients given by a quasipolynomial from coefficient zero when its reduced fraction is proper. Partial fractions give terms $\binom{t+r-1}{r-1}\lambda^t$ with $\lambda$ a root of unity. Conversely, the generating function of a quasipolynomial on all nonnegative indices is proper. Thus, in the shifted convention here, absence of initial exceptions is equivalent to properness of the actual reduced counting fraction. The theorem does not assert this properness for every $j$. For $j=1$, $E_1=-1$ as shown in 4.1.
+> The math is far less complex with 2^n-dimensional maps: the computational savings might be multiple orders of magnitude.
 
-research/matrixMeanders/Status Semi-Meander Triangle.md:625
+development/Elimination.md:7
 
-- | A046726                                   | Semi-meanders by number of components; the one-component edge gives A000682 and row sums are Catalan numbers. The record also notes polynomial low columns and related fixed-component sequences A046721-A046725. |
+> 1. In a dictionary of `Pile` keys and `LeafSpace` values, if `leaf` is not pinned, deconstruct `permutationSpace` by the `Pile` domain of `leaf`.
 
-research/matrixMeanders/Status Semi-Meander Triangle.md:626
+development/Elimination.md:52
 
-- | A287548                                   | Catalan arch configurations reduced through generations; its last entry in row $n$ is A000682($n$).                                                                                                               |
+> `工dimension首零(k)` is a 0-based index. Use the index on `state.mapShapeProducts`, and you get the lowest value of `r`. Furthermore, `k` precedes all multiples of `r`. This gives you multiple simple ways to make a list of the values of `r`.
 
-research/matrixMeanders/Status Semi-Meander Triangle.md:627
+development/Elimination.md:91
 
-- | A331499                                   | Catalan arch configurations by parent-arch count after reduction; its first entry in row $n$ is A000682($n$).                                                                                                     |
+> For $2^n$-dimensional maps, the crease neighbors of a `leaf` are obtained by flipping individual bits of the `leaf`'s binary representation. That is, the "next" and "prior" crease neighbors of `leaf` along `dimension` are `bit_flip(leaf, dimension)`. But not all bit-flips are valid creases: the crease list is a strict subset of the full list of bit-flips, and which bit-flips survive depends on the leaf's parity structure.
 
-research/matrixMeanders/Status Semi-Meander Triangle.md:641
+development/Elimination.md:95
 
-- Two- and three-term rational combinations of the first four A400429 columns and neighboring shifted columns/diagonals were also tried. The record reports 16380 three-term candidates and no additional identity. Its scope was small coefficients, windows of at most four rows, and same-$n$ alignment. Later work or wider searches are not ruled out. [Record, section 5]
+> - If the parity of `leaf` is even, then all crease-post neighbors are greater than `leaf`, and all crease-ante neighbors are less than `leaf`.
 
-Z0Z_literature/Sade_1949_working_reference.md:170
+development/Elimination.md:96
 
-- half-curve diagrams (Catalan numbers), and an observation of Errera's about how
+> - If the parity of `leaf` is odd, then all crease-post neighbors are less than `leaf`, and all crease-ante neighbors are greater than `leaf`.
 
-Z0Z_literature/Sade_1949_working_reference.md:220
+development/Elimination.md:151
 
-- not reliably legible on the scan (tightly-set nested binomial subscripts); I'm not
+> - The `stop` equals `mapShape首ProductsSums` from the head minus an offset of 2.
 
-Z0Z_literature/Sade_1949_working_reference.md:240
+development/Elimination.md:236
 
-- permutations with 2, 3, and 4 specified run lengths, expressed via binomial
+> Beyond the universal pairs, additional pairs have low entropy. In a $2^6$-dimensional map, the pair `(leaf二一, leaf二一零)` appears in consecutive piles in 22 out of 76 pile-pairs, but those 22 consecutive pairs cover 80% of the 7840 enumerated sequences. In the consecutive case, `leaf二一零` follows `leaf二一`; in the remaining domain, the order reverses.
 
-Z0Z_literature/Sade_1949_working_reference.md:373
+development/Elimination.md:273
 
-- | A000108                                                | Catalan numbers, f(k) in §8                                                                  | via Sainte-Laguë half-curve count               |
+> - **For inequality checking**: the next crease leaf (or `None`), and the parity in that dimension.
 
-Z0Z_notes/FunctionalProgramming.md:69
+development/Elimination.md:281
 
-33333333333333333333333333333333333333333333333itertools.combinations
+> A "crease" is shorthand for two leaves that are physically connected. In a one-dimensional section, each leaf connects to at most two neighbors (before and after). Two creases $(k, k{+}1)$ and $(r, r{+}1)$ with matching parity ($k \equiv r \pmod{2}$) cross when their pile positions satisfy any of four forbidden orderings (Legendre 2014, simplifying Koehler 1968's eight):
 
-Z0Z_research/catalanArches/data/catalanMultiplyThis.csv:1
+development/EndNotes.md:5
 
-- 次antiCatalan,catalanCoefficients,binomialCoefficients
+> `getTotalLeaves`: this check is one-degree short of absurd, but three lines of early absurdity is better than invalid output later. I'd add more checks if I could think of more. Fail early.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:1
+development/EndNotes.md:30
 
-## Growth analysis for Catalan coefficient extensions
+> `PermutationSpace.addMissingChoicesLeaf()`: `sorted` overrides the insertion order and sorts based on `Pile` index. This is partially "defensive" in the sense that it is a consistent, logical, expected order, and may prevent odd results if another subroutine didn't guarantee the order when it ought to have. I'm hoping it improves efficiency, too.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:4
+development/EndNotes.md:39
 
-- `formulasReduce.工growthBinomial(column_k, 次k)`. The analysis works with whole growth
+> non-negative values in the connection graph, but if the dimensions are not in ascending order of magnitude,
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:12
+development/EndNotes.md:40
 
-- from Z0Z_research.catalanArches import 工theCoefficients
+> the connection graph might have negative values, which as far as I know, is not an inherent problem, but the
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:13
+development/EndNotes.md:41
 
-- from Z0Z_research.catalanArches.analyze import growthFormulaToResidual, growthFormulasToDifferences
+> negative values propagate into other data structures, which requires the datatypes to hold negative values,
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:14
+development/EndNotes.md:59
 
-- from mapFolding.dataStructures import termsToTuple, 工lookupAntiCatalan
+> In [`oeisIDfor_n`](../mapFolding/oeis/_byID.py), values that are not already an `int` pass through
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:15
+development/EndNotes.md:61
 
-- from Z0Z_research.catalanArches.generate import coefficientRowsToGrowthFormulas
+> contains exactly one integer, then requires a non-negative index and checks the sequence's offset.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:18
+development/bureaucracy.md:5
 
-- lookupAntiCatalan = 工lookupAntiCatalan(range(9), range(max(lookupCoefficients) + 1))
+> 1. A column is an independent copy of the domain of all possible values.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:20
+development/bureaucracy.md:6
 
-- lookupCoefficients, lookupAntiCatalan,
+>    1. The column has a distinct index corresponding to its position on a line.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:54
+development/bureaucracy.md:7
 
-- g_s(k)=\sigma_s\sum_{\ell=0}^{d}a_{s,\ell}\binom{k-K_s}{d-\ell}.
+>    2. The first column is at position 0 and its index is 0.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:60
+development/bureaucracy.md:9
 
-- `工basisBinomialGrowth(column_k, 次k, differenceOrder, less)` supports generalized
+> 2. A position is a location in an uninterrupted linear sequence positions.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:61
+development/bureaucracy.md:10
 
-- binomial evaluation before the anchor. For `L g(k) = g(k)-g(k+1)`,
+>    1. If the position has a corresponding column hold, the position may or may not have a value assigned from the domain of the column.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:65
+development/bureaucracy.md:11
 
-- \sum_{\ell=0}^{d-p}a_{s,\ell}\binom{k-K_s}{d-\ell-p}.
+>    2. Position and column indices increase by one with each move to the right.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:76
+development/bureaucracy.md:12
 
-- `工lookupGrowth` evaluates the current `工growthBinomial` over selected column positions.
+> 3. The carriage starts at position -1, which does not have a column, and moves to the right, which is position 0.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:90
+development/bureaucracy.md:14
 
-- `XColumnToGrowth` subtracts known anti-Catalan corrections. `diagonalParentsToGrowth`
+>       1. The possible scribe actions are assign a value, assign no value, or collect values.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:102
+development/bureaucracy.md:16
 
-- ## Residual tuples for 工growthBinomial
+>    2. The scribe checks if the position does or does not have a column.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:108
+development/bureaucracy.md:17
 
-- \binom{k-K_s+\epsilon_s d}{d}.
+>       1. If the position has a column, the scribe checks if the domain of the column does or does not have values.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:111
+development/bureaucracy.md:18
 
-- For $d>1$, the shared coefficient of $\binom{k-K_s}{d-1}$ is $-1$ for odd $s$
+>          1. If the domain of the column has values, the scribe assigns a value from the domain of the column. The carriage moves to the right.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:113
+development/bureaucracy.md:19
 
-- The returned mapping is in descending binomial-degree order, exactly the order used
+>          2. If the domain of the column does not have values, the scribe assigns no value. The carriage moves to the left.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:137
+development/bureaucracy.md:20
 
-- r_{\ell}(d)=\sum_{q=0}^{\ell}b_{\ell,q}\binom{d-\ell}{q}.
+>       2. If the position does not have a column, the scribe checks if the positions to the left have values or are empty.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:152
+development/bureaucracy.md:21
 
-- `工growthBinomial` exactly.
+>          1. If the positions to the left have values, the scribe records the sequence of values in the list of sequences. The carriage moves to the left.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:167
+development/bureaucracy.md:22
 
-- from Z0Z_research.catalanArches import pathFilenameCSVReduce, readTriangle, 工theCoefficients
+>          2. If the positions to the left are empty, the scribe does nothing (because the carriage has moved to position -1). The carriage does not move.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:168
+development/bureaucracy.md:23
 
-- from Z0Z_research.catalanArches.explain.reproduceCoefficientExtensions import reproduceCoefficientExtensions
+> 4. A filter reduces the domain of possible values for one or more columns.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:169
+development/bureaucracy.md:26
 
-- from Z0Z_research.catalanArches.explain.coefficientVerify import verifyCoefficientAnalysis
+>    3. When a filter is created, an unchangeable expiration index corresponding to the position to the left of the carriage is automatically added to the filter.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:171
+development/bureaucracy.md:29
 
-- lookupTheCoefficients, lookupGrowthFormulas, lookupAntiCatalan = reproduceCoefficientExtensions(
+>    6. The filter must be independent; the filter application order must be irrelevant.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:179
+development/bureaucracy.md:30
 
-- `工growthBinomial`, then reconstructs the remaining polynomial coefficients.
+> 5. When the carriage moves to a position, the janitor¹ deletes each filter that has an expiration index matching the index of the carriage's position and removes the column's assigned value.
 
-Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md:192
+development/bureaucracy.md:35
 
-- All fits remain conditional on the growth degree, Catalan-linear reconstruction model,
+>          2. The filter's effect: remove all values from the column's domain. The scope: all columns to the right of the carriage.
 
-Z0Z_research/catalanArches/explain/A331499.md:5
+development/bureaucracy.md:40
 
-- - $A287548(n,k)=\sum_i c_{k,i}\,Cat(n-i)$
+> 7. Steps occur in the following order and do not overlap with other steps:
 
-Z0Z_research/catalanArches/explain/A331499.md:6
+development/bureaucracy.md:54
 
-- - $A331499(n,j)=\sum_i (c_{k,i}-c_{k+1,i})\,Cat(n-i)$
+> - The "actors" should be stupid, weak, and ignorant. Note that the scribe, the most sophisticated actor, for example, doesn't know the position index, the most important data point.
 
-Z0Z_research/catalanArches/explain/A331499.md:8
+development/bureaucracy.md:65
 
-- ## The right-edge diagonals are Catalan-linear
+> Question: is the state equal to: the assigned values and the domains of the columns?
 
-Z0Z_research/catalanArches/explain/A331499.md:12
+development/identifiers notes.txt:2
 
-- D_r(n)=\sum_{i=1}^{r+1}d_{r,i}C_{n-i}.
+> make: expression, a new value from existing values.
 
-Z0Z_research/catalanArches/explain/A331499.md:17
+development/identifiers notes.txt:28
 
-- [C_{n-1},C_{n-2},C_{n-3},\ldots].
+> Less and Plus
 
-Z0Z_research/catalanArches/explain/A331499.md:38
+development/identifiers notes.txt:36
 
-- \boxed{T(n,n-3)=C_{n-2}-C_{n-3}+3C_{n-4}}
+> Because the word "less" is the same length as "plus", identifiers with "less" and "more" will stay
 
-Z0Z_research/catalanArches/explain/A331499.md:41
+development/identifiers notes.txt:37
 
-- ### Third diagonal is the “sum of adjacent Catalan numbers”
+> physically aligned in the code. For _only_ the alignment reason, I prefer "less" over "minus."
 
-Z0Z_research/catalanArches/explain/A331499.md:64
+development/identifiers notes.txt:41
 
-- C(z)=\sum_{n\ge0}C_nz^n
+> Similarly, I prefer the pair "less than" and "more than" over "less than"
 
-Z0Z_research/catalanArches/explain/A331499.md:101
+development/identifiers notes.txt:43
 
-- \frac{C_{n-i}}{C_n}\longrightarrow4^{-i},
+> Luckily, in European languages other than English, the semiotics tend to be the equivalent of "n less
 
-Z0Z_research/catalanArches/explain/A331499.md:108
+mapFolding/oeis/A400429/A400631.txt:8
 
-- \lim_{n\to\infty}\frac{D_r(n)}{C_n}=Q_r(1/4).
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 4 less than the maximum.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:1
+mapFolding/oeis/A400429/A400631.txt:28
 
-## Anti catalan improvement
+> %e Row n=10 of A400429 is 262,752,340,50,2, corresponding to winding numbers 0,2,4,6,8. Since n-6=4, a(10)=340, which is the third-to-last value.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:10
+mapFolding/oeis/A400429/A400632.txt:8
 
-- Same mechanism for the boundary. Appendix B explains the first correction. A decoration count $\\binom{n−n0+p}{p}$ is only valid for n ≥ n0−p, below that the polynomial gives $(−1)^p-type$ values where the true count is 0, and the first correction is $c_{k−1}$ at n = 2k−2. That is exactly what your negative-argument binomial extension reproduces, and your first correction is $2·C(s−4)$ at $k = 2s−5$.
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 6 less than the maximum.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:15
+mapFolding/oeis/A400429/A400632.txt:29
 
-- I used your module's outputs as the data. I couldn't run `verifyFormulas` without the stored lists. In your coordinates, `j = k−s+1`, `a = 次antiCatalan`, and `j+a = s−4`.
+> %e Row n=12 of A400429 is 1828,5968,3516,810,74,2, corresponding to winding numbers 0,2,4,6,8,10. Since n-8=4, a(12)=3516, which is the fourth-to-last value.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:17
+mapFolding/oeis/A400429/A400633.txt:8
 
-- 1. The j = 0 boundary is a free test. Your Catalan formulas for a = 0..5 were fitted at j ≥ 1. At j = 0 they reproduce $−P_s(s−1)$ exactly, which is the condition that `a(s−1, s) = 0`. They do not continue to j = −1, because rows a = 1 and a = 2 would need contradictory values of `C(−1)`. This gives one extra data point per row. For s = 4..18 the values are 2, 4, 12, 34, 104, 316, 988, 3102, 9890, 31664, 102360, 332126, 1084828, 3554456, 11702806.
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 8 less than the maximum.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:44
+mapFolding/oeis/A400429/A400633.txt:29
 
-- ### Explicit Catalan and binomial formulas
+> %e Row n=14 of A400429 is 13820,49566,35230,10948,1610,102,2, corresponding to winding numbers 0,2,4,6,8,10,12. Since n-10=4, a(14)=35230, which is the fifth-to-last value.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:53
+mapFolding/oeis/A400429/A400634.txt:8
 
-- `C(j+1)/C(j) = 4 - 6/(j+2)` repeatedly converts the shifted Catalan terms to their poles.
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 10 less than the maximum.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:62
+mapFolding/oeis/A400429/A400634.txt:21
 
-- |    4 | $8\binom j2-122j-46$                     | $40, 26, 6, 2$                        |
+> %e Row n=16 of A400429 is 110954,427580,349822,135092,27434,2856,134,2, corresponding to winding numbers 0,2,4,6,8,10,12,14. Since n-12=4, a(16)=349822, which is the sixth-to-last value.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:63
+mapFolding/oeis/A400429/A400635.txt:8
 
-- |    5 | $40\binom j2-562j-250$                   | $140, 54, 30, 6, 2$                   |
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 12 less than the maximum.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:64
+mapFolding/oeis/A400429/A400635.txt:21
 
-- |    6 | $-16\binom j3+256\binom j2-2798j-1380$   | $508, 244, 76, 34, 6, 2$              |
+> %e Row n=18 of A400429 is 933458,3807200,3476110,1584952,408156,59736,4682,170,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16. Since n-14=4, a(18)=3476110, which is the seventh-to-last value.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:65
+mapFolding/oeis/A400429/A400636.txt:8
 
-- |    7 | $-80\binom j3+1168\binom j2-12418j-6342$ | $2116, 732, 294, 82, 38, 6, 2$        |
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 14 less than the maximum.
 
-Z0Z_research/catalanArches/explain/anti catalan.md:67
+mapFolding/oeis/A400429/A400636.txt:21
 
-- `工antiCatalan` now uses these expressions directly. Rows 0–5 are exact rewrites of the
+> %e Row n=20 of A400429 is 8152860,34816270,34717772,18057566,5588308,1053446,117744,7240,210,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18. Since n-16=4, a(20)=34717772, which is the eighth-to-last value.
 
-Z0Z_research/catalanArches/explain/lobb.md:3
+mapFolding/oeis/A400429/A400637.txt:8
 
-- The useful matrix here is A039599, the Lobb-number triangle. In row-column notation, define
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 16 less than the maximum.
 
-Z0Z_research/catalanArches/explain/lobb.md:8
+mapFolding/oeis/A400429/A400637.txt:21
 
-- \binom{2m}{m-r}
+> %e Row n=22 of A400429 is 73424650,325703336,349184078,202174358,72489674,16648452,2426888,215332,10698,254,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18,20. Since n-18=4, a(22)=349184078, which is the ninth-to-last value.
 
-Z0Z_research/catalanArches/explain/lobb.md:10
+mapFolding/oeis/A400429/A400638.txt:8
 
-- \binom{2m}{m-r-1},
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 18 less than the maximum.
 
-Z0Z_research/catalanArches/explain/lobb.md:14
+mapFolding/oeis/A400429/A400638.txt:21
 
-- with binomial coefficients outside their ordinary range taken as zero. Its first rows are
+> %e Row n=24 of A400429 is 678390116,3107014138,3539266774,2240280798,906541750,244169906,43847272,5126898,371234,15242,302,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18,20,22. Since n-20=4, a(24)=3539266774, which is the tenth-to-last value.
 
-Z0Z_research/catalanArches/explain/lobb.md:41
+mapFolding/oeis/A400429/A400639.txt:8
 
-- This is the factorization of the Catalan Hankel matrix through a lower-triangular matrix whose diagonal entries are all $1$. Both the identity and the explicit inverse of $L$ are recorded in A039599. :chatgpt-content-reference{index="5"}
+> %C The maximum winding number of a semi-meander with n crossings is n-2. Thus a(n) counts semi-meanders whose winding number is 20 less than the maximum.
 
-Z0Z_research/catalanArches/explain/lobb.md:57
+mapFolding/oeis/A400429/A400639.txt:21
 
-- Substituting the Catalan identity into $F_k(n)$, with
+> %e Row n=26 of A400429 is 6405031050,30145730504,36155933236,24677860682,11051733878,3396104098,722325334,105008654,10109160,610100,21076,354,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18,20,22,24. Since n-22=4, a(26)=36155933236, which is the eleventh-to-last value.
 
-Z0Z_research/catalanArches/explain/lobb.md:91
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 1, markdown]:18
 
-- :chatgpt-content-reference{index="17"}[Download all 31 transformed coefficient rows](sandbox:/mnt/data/coefficientsLobb.csv). Each CSV row is $k,h_{k,0},\ldots,h_{k,k-1}$.
+> This bound is conservative, not generally exact. The exact maximum depends on `mapShape`, dimension order, and which transformed flow is executed, so `totalLeaves` alone cannot determine the smallest safe width once the conservative bound crosses a dtype boundary.
 
-Z0Z_research/catalanArches/explain/lobb.md:186
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 2, markdown]:10
 
-- There is also a direct binomial formula, without computing the preceding $h$-values:
+> | `gapRangeStart` | `gapter` | Saved stack position for each leaf |
 
-Z0Z_research/catalanArches/explain/lobb.md:194
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 2, markdown]:14
 
-- \binom{r+s}{r-s}
+> `gapsWhere` is deliberately *not* Elephino-valued: its elements are leaf labels, while its indices are Elephino values. The A007822 flow briefly reuses `indexMiniGap` as a leaf-linked-list cursor, but that extra role is bounded by $N$ and cannot dominate the gap cursor.
 
-Z0Z_research/catalanArches/explain/lobb.md:209
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 3, markdown]:3
 
-- \binom{r+p}{r-p}
+> At active leaf $l$, the candidate gap labels are $0,\ldots,l-1$. Zero-indexing changes their labels, but not their cardinality: there are $l$ candidates.
 
-Z0Z_research/catalanArches/explain/shifting.md:3
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 3, markdown]:5
 
-- You're pointing to the important distinction I missed: each new shifted term must be chosen with its effect on the next several binomial coefficients in mind. Flattening one integer while leaving the earlier terms unshifted is not a systematic solution.
+> `gap1ndexCeiling` is an excluded upper bound, and `indexMiniGap` finishes at that bound. Therefore a one-past value really is stored. The relevant `+1` comes from stack and interval semantics, not from mixing zero-indexed and one-indexed leaf names.
 
-Z0Z_research/catalanArches/explain/shifting.md:25
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 4, markdown]:3
 
-- These preserve the first three binomial coefficients. After recalculating the fourth integer, its formula becomes
+> The monitor below observes the unmodified canonical implementation. It uses the project's default arbitrary-precision Python integers so that the mathematical values remain visible. For a large case it raises a private sentinel exception at a requested threshold, avoiding the full enumeration.
 
-Z0Z_research/catalanArches/explain/shifting.md:63
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 9, markdown]:1
 
-- That means merely adding more integer-coefficient shifts at the second or third positions cannot solve the even case. We also have to redistribute the leading binomial, or relax the integer-linear-coefficient requirement.
+> The $(2,22)$ monitor stops before counting even one folding. At active leaf 44, `gapRangeStart` has already reached 251 and `gap1ndexCeiling` reaches 256. At that instant, `gapsWhere[255]` is a valid array access (the array has 1,937 elements), and its stored leaf label also fits. The first representability violation is solely the scalar ceiling increment from 255 to 256. A `uint8` ceiling cannot represent that value; under rollover semantics it becomes 0, after which the next candidate overwrites the wrong gap slot. The hypothesis predicts only 89.
 
-Z0Z_research/catalanArches/explain/shifting.md:113
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 10, markdown]:21
 
-- \\[ \boxed{ a_j(d)=C_j(d)-\sum\_{i\<j}a_i(d)\binom{s_i(d)}{j-i} } \\]
+> 2. Dimension order can change the internal maximum even when it does not change `totalFolds`, as `(2, 5)` versus `(5, 2)` demonstrates.
 
-Z0Z_research/catalanArches/explain/shifting.md:119
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 11, markdown]:6
 
-- One small arithmetic correction: \\(1+2+3+4=10\\), rather than 14. Also, `multiplyThis((3, 4, 0), shift=0)` adds 3 to the leading binomial coefficient, so that particular expression would need an offsetting contribution to preserve the existing polynomial.
+> 2. It advances only for the first occurrence of a candidate gap label.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 3]:1
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 11, markdown]:7
 
-- ## Binomial
+> 3. Candidate labels lie in $\{0,\ldots,l-1\}$, so there are at most $l$ distinct candidates.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4]:1
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 15, markdown]:3
 
-- ### Binomial — load CSV values
+> The proved bound answers safety, but it does not always identify the smallest safe dtype for one particular shape. Examples with the same $N$ have different maxima, and dimension order matters. A tighter certificate must therefore use more information than `totalLeaves`—at least `mapShape` and the selected flow—or prove an additional structural theorem.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 4]:4
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 15, markdown]:7
 
-- - Column `less = 0` multiplies the degree-`degree` binomial, `less = 1` the next lower degree,
+> - `gapRangeStart` stores the post-decrement stack position.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6]:1
+research/mapFolding/elephinoIntegerWidthAnalysis.ipynb [cell 16, markdown]:11
 
-- ## Binomial — calculate
+> Sean Irvine's independent Java port, based on Fred Lunnon's C implementation, likewise allocates `new int[n * n + 1]` and repeats that `gg` and `g` are possible- and actual-gap counts offset by `gapter[l-1]`:
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 6]:6
+research/matrixMeanders/buckets.ipynb [cell 10, markdown]:2
 
-- binomial basis. Values are checked at extra positions, including positions before the archetype.
+> I examined these values so I could solve the pragmatic problem of allocating memory during computation. Therefore, I have tended to focus maxima of buckets and signatures at each boundary, and I have treated n as a second-tier independent variable. I will likely change this to n as the first-rate variable and return boundary to its role as a "subsection" of n.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 12]:1
+research/matrixMeanders/buckets.ipynb [cell 10, markdown]:7
 
-- ### Binomial — save CSV values
+> Furthermore, there are only 2 possible initial values of the 1 arcCode. If n is odd, arcCode = 15. If n is even, arcCode = 22. This simplicity is an advantage when analyzing A005316.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 12]:3
+research/matrixMeanders/buckets.ipynb [cell 10, markdown]:11
 
-- Run after inspecting the calculation. This writes the selected rows to `data/binomialMultiplyThis.csv`.
+> If we compare the total number of non-unique signatures (totalBuckets) at the same boundary across all values of n we can compute, we see three general trends. For a given boundary, as (n - boundary) increases:
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14]:1
+research/matrixMeanders/buckets.ipynb [cell 10, markdown]:12
 
-- ## Catalan — load CSV values
+> 1. totalBuckets increases through a specific series of values.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14]:3
+research/matrixMeanders/buckets.ipynb [cell 10, markdown]:18
 
-- This section is independent of the binomial section. Run once per reference.
+> - From n-boundary>=1 to boundary<=(n+1)//2, the value of buckets has two or four series: at least a series for odd and even values of boundary, and those might be bifurcated into odd and even values of n.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14]:4
+research/matrixMeanders/buckets.ipynb [cell 10, markdown]:19
 
-- The last tuple passed to `multiplyThis` contains binomial coefficients multiplying `catalan(j)`;
+> - In each series, it seems easier to describe the growth by dividing the series into odd and even values of n-boundary.
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 14]:5
+ruff.toml:34
 
-- preceding integers multiply descending Catalan terms.
+>   "blank-lines-top-level",
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16]:1
+ruff.toml:48
 
-- ### Catalan — calculate
+>   "incorrect-section-order",
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16]:3
+ruff.toml:54
 
-- Edit the explicit formula and choose `次antiCatalan` rows at the bottom.
+>   "missing-trailing-period",
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16]:4
+ruff.toml:102
 
-- Use `shiftCatalan=...` and `shiftBinomial=...` with the original function's semantics.
+> "gmpy2.is_even" = "isEven吗"
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16]:5
+ruff.toml:103
 
-- A purely binomial term still needs the outer tuple, for example `multiplyThis(((0, 6),))`.
+> "gmpy2.is_odd" = "isOdd吗"
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16]:7
+ruff.toml:108
 
-- The calculation fits the model beyond the stored `catalanAddThis` range, where the finite
+> "math.comb" = "nCr"
 
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 16]:9
-
-- `j` correction. A change affecting only those finite positions is absorbed into `catalanAddThis`.
-
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 18]:1
-
-- ### Catalan — inspect finite corrections
-
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 18]:3
-
-- Run when you want to inspect `catalanAddThis`. Columns are the actual zero-based `j` values.
-
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20]:1
-
-- ### Catalan — save CSV values
-
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20]:3
-
-- Run after inspecting the calculation. This saves the selected `次antiCatalan` rows in both
-
-Z0Z_research/catalanArches/formulaExperiments.ipynb [cell 20]:4
-
-- `data/catalanMultiplyThis.csv` and `data/catalanAddThis.csv`.
-
-ADJACENT FACTORIAL / PERMUTATION TERMINOLOGY
+## Adjacent Factorial / Permutation Terminology
 
 Locations only. These are not all n-choose-r expressions. Ordinary factorial
 ratios and symmetry multipliers have not been relabelled as binomial formulas.
 
-- development/notes identifiers.txt: 29-30, 33-35, 38
-- easyRun/pinning.py: 3, 29
-- mapFolding/_e/_beDRY.py: 329
-- mapFolding/_e/algorithms/constraintPropagation.py: 35, 104
-- mapFolding/_e/algorithms/elimination.py: 37, 227, 250
-- mapFolding/_e/algorithms/eliminationCrease.py: 29, 153
-- mapFolding/_e/development/Elimination expanded.md: 264-265, 334
-- mapFolding/_e/development/Elimination.md: 113
-- mapFolding/oeis/_byFormulaLookup.py: 5, 45-46, 296-297, 408-409, 411-412, 414-415
-- mapFolding/oeis/byFormula.py: 9, 118-119, 760-761, 1033-1034, 1036-1037, 1039-1040
-- mapFolding/oeis/zCuzDocStoopidbyFormula.py: 13, 70-71, 340-341, 460-461, 464-466, 469-471
-- Z0Z_literature/Sade_1949_working_reference.md: 302
-- Z0Z_research/catalanArches/_beDry.py: 33
+- README.md: 118, 123-124, 168, 173, 287, 302-303
+- Z0Z_research/constraint/Additional constraints for monster.md: 3
+- Z0Z_research/constraint/increasingRunsPrototype.py: 90
 - Z0Z_research/theorem4/theorem4A001417.md: 39, 52, 63
+- archive/insertion/insertion.py: 4, 29, 70, 100, 166, 193, 214, 223
+- archive/insertion/learningSade.ipynb [cell 2, code]: 8, 10, 17
+- archive/permutationMeanders/stamp_meander.py: 5, 70-71, 85-86, 218, 227, 337-339, 343-346, 349, 351, 353, 355-357, 360, 362, 364, 366-369, 372-374, 376, 378-379, 382-385, 387, 389, 392, 394, 403-407, 430, 468, 481, 490
+- citations/Sade1949.bib: 3
+- citations/Sawada2012.bib: 12
+- development/Elimination--Ideas to improve the algorithm.md: 3, 5-10, 12, 16-17
+- development/Elimination.md: 5, 7-13, 127, 204, 226-227, 264, 296
+- development/EndNotes.md: 26, 30
+- development/bureaucracy.md: 1, 3, 49
+- development/identifiers notes.txt: 29-30, 33-35, 38
+- easyRun/eliminateFolds.py: 7, 54, 58, 60, 63
+- easyRun/permutations.py: 17
+- easyRun/pinning.py: 28, 32-33, 35, 53, 63, 70
+- mapFolding/__init__.py: 33, 55
+- mapFolding/algorithms/__init__.py: 10, 29-31, 33
+- mapFolding/algorithms/constraintPropagation.py: 6, 12, 14, 34, 38, 52, 56, 75, 94, 107, 227, 229, 235, 268, 270-271, 273, 277-278, 281, 283
+- mapFolding/algorithms/elimination.py: 1, 8-9, 11-15, 18-19, 35, 38, 52, 59, 66, 69-70, 76, 92, 100, 102, 105-106, 110, 112, 118-119, 130-131, 133-134, 138, 144-145, 149-150, 154, 156, 158-159, 163-164, 171-172, 181, 218, 228, 251, 254, 262, 302, 304-305, 311, 318, 323-324, 326, 328-329, 332-333, 335, 338-339
+- mapFolding/algorithms/eliminationCrease.py: 5, 13-15, 19, 28-29, 41-42, 50, 58-59, 61-62, 68-69, 73-74, 76, 78-79, 87-88, 92, 115, 119, 125, 130-131, 133, 135-137, 141-143, 147, 150-151, 155
+- mapFolding/algorithms/iff.py: 7, 12
+- mapFolding/algorithms/insertion.py: 184
+- mapFolding/algorithms/insertion2上nDimensional.py: 33, 71, 78, 80-81, 86-90, 104, 110, 112, 121, 127, 164, 169, 173, 185
+- mapFolding/algorithms/permutations.py: 21-22, 37, 51-54, 95, 98, 119, 141, 321, 334, 406-409, 412-414, 416, 418-419, 422-425, 427, 429, 431-432, 435-438, 440-441, 443, 456-458, 461, 463, 466, 468-470, 474-477, 479-480, 482, 484-485, 507-511, 522, 526, 533, 551, 581, 585
+- mapFolding/algorithms/permutationsBilateral.py: 54, 72, 75, 111, 122, 124-126
+- mapFolding/algorithms/permutationsBilateralConcurrent.py: 3, 17, 35, 38, 96, 107, 133, 141
+- mapFolding/basecamp.py: 8, 25, 524, 530, 534-535, 545-546, 565, 574, 581, 591, 593, 595, 633, 637, 645
+- mapFolding/beDRYElimination.py: 76-77, 111, 349
+- mapFolding/dataBaskets.py: 16, 29, 763, 772, 798-799, 808-809, 811, 815, 821, 833, 845-846, 848, 850, 852, 857, 859-861, 873, 878, 880, 883, 901, 904, 928, 931, 936-937, 939-940, 942, 951, 963, 967, 988, 1004-1005, 1007, 1010-1011, 1013-1014, 1016, 1018, 1020, 1045, 1052, 1103, 1226, 1263, 1343, 1349, 1353, 1358-1359, 1362, 1387, 1389-1391, 1432-1433, 1435-1436, 1438, 1500, 1514-1515, 1517, 1521-1522, 1526, 1538-1539, 1550, 1554, 1577, 1595-1596, 1600-1601, 1617, 1632-1634, 1636-1639, 1644-1645, 1647, 1649, 1651, 1653, 1656, 1665, 1675, 1677-1679
+- mapFolding/filters.py: 29, 40, 141, 173, 210-211, 215, 220-221, 225-226, 228
+- mapFolding/leafDomains.py: 192, 268, 411, 531, 575, 743, 862, 1000, 1034-1036
+- mapFolding/needsAHome/verify.py: 7, 24-25, 28, 32, 35-36, 38, 41, 53, 57, 59, 64-65, 69, 71-72, 86, 89-92, 94-95, 98
+- mapFolding/oeis/_byFormulaLookup.py: 5, 45-46, 296-297, 408-409, 411-412, 414-415
+- mapFolding/oeis/byFormula.py: 9, 118-119, 760-761, 838, 851, 1033-1034, 1036-1037, 1039-1040
+- mapFolding/oeis/zCuzDocStoopidbyFormula.py: 13, 70-71, 340-341, 460-461, 464-466, 469-471
+- mapFolding/pileOptions.py: 45
+- mapFolding/pinByCrease.py: 6, 65, 92, 95, 114, 141, 144, 164, 191, 194-195, 216, 243, 246-247, 269, 296, 299-302, 332, 359, 362-366
+- mapFolding/pinByDomain.py: 83, 111-116
+- mapFolding/pinIt.py: 6-7, 16, 57, 81-82, 86, 89-90, 93-94, 99-101, 110, 116, 122, 129, 132-133, 137-138, 142, 147, 151, 157, 166, 170-171, 192, 227, 233, 239, 243-244, 252, 262, 284-285, 306, 308, 320-321, 330, 364, 367, 374, 380, 384-385, 389, 399, 412, 416, 431, 434-435, 440-441, 446, 451, 453-455, 460, 469, 473, 477, 479-480, 485, 490, 494, 503, 516, 520, 535, 540-541, 547, 550, 554, 559, 563-565, 570, 579, 583, 587, 590-591, 601-602, 607, 614, 626, 652-653, 658, 665, 677, 681-682, 703, 708, 715, 743-744, 749, 756, 768, 799, 804, 811, 845-846, 851, 858, 870, 901-902, 907, 914, 926, 957-958, 963, 970, 982, 1013-1014, 1019, 1026, 1038, 1064-1065, 1069, 1075-1076, 1084-1085, 1087-1089, 1129-1130, 1132-1133, 1135-1137, 1139-1141, 1144, 1146, 1159, 1161, 1163, 1165, 1171, 1176, 1187, 1201
+- mapFolding/reduceIt.py: 1, 16, 18, 20, 26, 53, 56, 62, 72-73, 82, 90-91, 93-94, 101, 106, 115, 120-121, 126, 128-130, 133, 177, 179, 185-186, 189, 191, 193-194, 196, 198, 205, 211-212, 216, 219, 221-226, 228, 230, 248-249, 253, 258, 260-263, 265, 274, 278-279, 281, 283, 289, 296-297, 301-302, 305-307, 309, 314, 318-320, 322-324, 326, 328, 338, 343, 356, 361-362, 366, 368-370, 372, 382, 385, 387, 389-390, 392, 394, 410, 415-416, 420, 424, 426, 428-429, 431, 435-436, 439, 441, 443-444, 446, 453, 458, 467, 472-473, 478, 480-482, 485, 526-527, 533-534, 537, 539, 541-542, 544, 546, 574, 579-580, 588, 590-592, 595, 599-600, 603, 605, 609-610, 613, 615, 617-618, 620, 622, 643, 648-649, 652, 654-656, 658, 672-673, 675, 677-678, 680, 683, 688-689, 691, 698-700, 720, 722, 724, 726
+- mapFolding/tests/dataSamples/sequenceAlbums.py: 245-264, 289-291
+- mapFolding/tests/test_algorithms.py: 160, 190
+- mapFolding/tests/test_parameterValidation.py: 29, 47
+- mapFolding/tests/test_pinning.py: 18, 21-22, 33, 36, 38-42, 44-46, 49-51, 54-55, 57
+- research/histogram of values technique.py: 49-50, 84, 111, 265, 278, 371-373, 376, 378, 380, 382-384, 388-391, 394, 396, 398, 400-402, 406-409, 411, 413-414, 418-421, 447-451
 
-OEIS CACHE TEXT (REFERENCE VOCABULARY)
+## OEIS Cache Text (Reference Vocabulary)
 
 These downloaded records contain third-party formulas, terminology and source
 code. Their words do not by themselves establish package identifiers. Paths and
 matching lines are listed to keep external vocabulary separate from authored code.
+The cache files were read without modification.
 
 - mapFolding/oeis/.cache/A000108.txt: 3, 6-810
-- mapFolding/oeis/.cache/A000560.txt: 27
-- mapFolding/oeis/.cache/A000682.txt: 69, 103
-- mapFolding/oeis/.cache/A001011.txt: 27
+- mapFolding/oeis/.cache/A000136.txt: 21-22
+- mapFolding/oeis/.cache/A000560.txt: 23, 27
+- mapFolding/oeis/.cache/A000682.txt: 61-62, 69, 103
+- mapFolding/oeis/.cache/A001010.txt: 16-17
+- mapFolding/oeis/.cache/A001011.txt: 24-25, 27
 - mapFolding/oeis/.cache/A005315.txt: 28
 - mapFolding/oeis/.cache/A005316.txt: 25-26, 53
-- mapFolding/oeis/.cache/A007822.txt: 14
-- mapFolding/oeis/.cache/A045445.txt: 26, 30-31, 33-34
+- mapFolding/oeis/.cache/A007822.txt: 11, 14
+- mapFolding/oeis/.cache/A045445.txt: 26, 30-31, 33-34, 36
 - mapFolding/oeis/.cache/A223093.txt: 15
 - mapFolding/oeis/.cache/A223094.txt: 23
 - mapFolding/oeis/.cache/A223095.txt: 15
+- mapFolding/oeis/.cache/A227167.txt: 15
 - mapFolding/oeis/.cache/A259689.txt: 23
 - mapFolding/oeis/.cache/A259698.txt: 13
 - mapFolding/oeis/.cache/A259702.txt: 13
 - mapFolding/oeis/.cache/A259703.txt: 16
-- mapFolding/oeis/.cache/A287548.txt: 10, 13, 15-17, 19-20, 41, 46
+- mapFolding/oeis/.cache/A287548.txt: 10, 13, 46
 - mapFolding/oeis/.cache/A331499.txt: 24, 26-28, 42
 - mapFolding/oeis/.cache/b000108.txt: 3
 
-TEXT FILES INCLUDED IN THE SCAN
+## Text Files Included In The Scan
+
+Existing tracked text files and non-ignored text files under `Z0Z_research` are included.
+Deleted files, binary artifacts, virtual environments, and the three inventory/decision
+documents are excluded. No workbooks were rescanned for this refresh.
 
 - .github/FUNDING.yml
 - .github/dependabot.yml
@@ -1788,66 +3583,45 @@ TEXT FILES INCLUDED IN THE SCAN
 - .isort.cfg
 - .vscode/code-spell-dictionary-workspace.txt
 - .vscode/identifiers.code-snippets
-- .vscode/settings.json
 - AGENTS.md
+- CITATION.cff
 - README.md
 - SECURITY.md
-- Z0Z_data/10.log
-- Z0Z_data/11.log
-- Z0Z_data/12.log
-- Z0Z_data/4.log
-- Z0Z_data/5.log
-- Z0Z_data/6.log
-- Z0Z_data/7.log
-- Z0Z_data/8.log
-- Z0Z_data/9.log
-- Z0Z_literature/Lunnon1971.txt
-- Z0Z_literature/Sade1949.py
-- Z0Z_literature/Sade_1949_working_reference.md
-- Z0Z_notes/.isort.cfg
-- Z0Z_notes/A000136.ipynb
-- Z0Z_notes/FunctionalProgramming.md
-- Z0Z_notes/deepThoughts.md
-- Z0Z_notes/foldings.py
-- Z0Z_notes/foldings2x2.py
-- Z0Z_notes/foldingsNumPy.py
-- Z0Z_notes/foldingsTheorem3.py
-- Z0Z_notes/historicalNotes-Crap_Im_wrong.py
 - Z0Z_research/.isort.cfg
+- Z0Z_research/Y7Y_catalanArches/Y7Y_cXc.py
+- Z0Z_research/Y7Y_catalanArches/__init__.py
+- Z0Z_research/Y7Y_catalanArches/_beDry.py
+- Z0Z_research/Y7Y_catalanArches/_filesystem.py
+- Z0Z_research/Y7Y_catalanArches/_semiotics.py
+- Z0Z_research/Y7Y_catalanArches/analyze.py
+- Z0Z_research/Y7Y_catalanArches/counting/__init__.py
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py
+- Z0Z_research/Y7Y_catalanArches/data/A287548.csv
+- Z0Z_research/Y7Y_catalanArches/data/A331499.csv
+- Z0Z_research/Y7Y_catalanArches/data/A331499_incomplete.csv
+- Z0Z_research/Y7Y_catalanArches/data/Y7Y_catalanAddThis.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_binomialMultiplyThis.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_catalanMultiplyThis.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_coefficientsLobb.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_theCoefficients.csv
+- Z0Z_research/Y7Y_catalanArches/data/Z0Z_theCoefficients_incomplete.csv
+- Z0Z_research/Y7Y_catalanArches/explain/A331499.md
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_anti catalan.md
+- Z0Z_research/Y7Y_catalanArches/explain/Y7Y_lobb.md
+- Z0Z_research/Y7Y_catalanArches/explain/Z0Z_A CoefficientAnalysis.md
+- Z0Z_research/Y7Y_catalanArches/explain/shifting.md
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.ipynb
+- Z0Z_research/Y7Y_catalanArches/formulaExperiments.py
+- Z0Z_research/Y7Y_catalanArches/formulasParents.py
+- Z0Z_research/Y7Y_catalanArches/formulasReduce.py
+- Z0Z_research/Y7Y_catalanArches/generate.py
 - Z0Z_research/__init__.py
-- Z0Z_research/catalanArches/__init__.py
-- Z0Z_research/catalanArches/_beDry.py
-- Z0Z_research/catalanArches/_filesystem.py
-- Z0Z_research/catalanArches/_semiotics.py
-- Z0Z_research/catalanArches/analyze.py
-- Z0Z_research/catalanArches/cXc.py
-- Z0Z_research/catalanArches/counting/__init__.py
-- Z0Z_research/catalanArches/counting/archCurses.py
-- Z0Z_research/catalanArches/data/A287548.csv
-- Z0Z_research/catalanArches/data/A331499.csv
-- Z0Z_research/catalanArches/data/A331499_incomplete.csv
-- Z0Z_research/catalanArches/data/binomialMultiplyThis.csv
-- Z0Z_research/catalanArches/data/catalanAddThis.csv
-- Z0Z_research/catalanArches/data/catalanMultiplyThis.csv
-- Z0Z_research/catalanArches/data/coefficientsLobb.csv
-- Z0Z_research/catalanArches/data/theCoefficients.csv
-- Z0Z_research/catalanArches/data/theCoefficients_incomplete.csv
-- Z0Z_research/catalanArches/explain/A CoefficientAnalysis.md
-- Z0Z_research/catalanArches/explain/A331499.md
-- Z0Z_research/catalanArches/explain/anti catalan.md
-- Z0Z_research/catalanArches/explain/lobb.md
-- Z0Z_research/catalanArches/explain/shifting.md
-- Z0Z_research/catalanArches/formulaExperiments.ipynb
-- Z0Z_research/catalanArches/formulaExperiments.py
-- Z0Z_research/catalanArches/formulasParents.py
-- Z0Z_research/catalanArches/formulasReduce.py
-- Z0Z_research/catalanArches/generate.py
 - Z0Z_research/connectionGraphs.ipynb
 - Z0Z_research/constraint/Additional constraints for monster.md
+- Z0Z_research/constraint/Z0Z_coefficientsPrototype.py
 - Z0Z_research/constraint/__init__.py
 - Z0Z_research/constraint/archParentsPrototype.py
 - Z0Z_research/constraint/archReducePrototype.py
-- Z0Z_research/constraint/coefficientsPrototype.py
 - Z0Z_research/constraint/constraintPropagationPrototype.py
 - Z0Z_research/constraint/increasingRunsPrototype.py
 - Z0Z_research/constraint/insertionPrototype.py
@@ -1896,11 +3670,11 @@ TEXT FILES INCLUDED IN THE SCAN
 - archive/multiDimensionalMapFolding/rotatedEntryPoint.py
 - archive/multiDimensionalMapFolding/total_countPlus1vsPlusN.py
 - archive/permutationMeanders/__init__.py
-- archive/permutationMeanders/stamp_meander.c
 - archive/permutationMeanders/stamp_meander.py
 - archive/pyrightconfig.json
 - archive/ruff.toml
 - archive/ty.toml
+- citations/CITATION.cff
 - citations/ClisbyJensen2012.bib
 - citations/Howroyd.bib
 - citations/Jensen.bib
@@ -1915,10 +3689,14 @@ TEXT FILES INCLUDED IN THE SCAN
 - citations/jOEIS.bib
 - citations/oeis.bib
 - context7.json
+- development/Elimination--Ideas to improve the algorithm.md
+- development/Elimination.md
 - development/EndNotes.md
 - development/__init__.py
-- development/notes identifiers.txt
-- development/refactoringIdentifiers.py
+- development/bureaucracy.md
+- development/identifierLengthAnalysis.ipynb
+- development/identifiers notes.txt
+- development/identifiersRefactoring.py
 - easyRun/__init__.py
 - easyRun/countFolds.py
 - easyRun/countFoldsSymmetric.py
@@ -1933,93 +3711,17 @@ TEXT FILES INCLUDED IN THE SCAN
 - easyRun/triangleSemiCheck.py
 - easyRun/triangleSemiMake.py
 - mapFolding/__init__.py
-- mapFolding/_e/__init__.py
-- mapFolding/_e/_beDRY.py
-- mapFolding/_e/_disaggregation.py
-- mapFolding/_e/algorithms/__init__.py
-- mapFolding/_e/algorithms/constraintPropagation.py
-- mapFolding/_e/algorithms/elimination.py
-- mapFolding/_e/algorithms/eliminationCrease.py
-- mapFolding/_e/algorithms/iff.py
-- mapFolding/_e/algorithms/insertion.py
-- mapFolding/_e/algorithms/insertion2上nDimensional.py
-- mapFolding/_e/algorithms/nishat.py
-- mapFolding/_e/algorithms/ruff.toml
-- mapFolding/_e/basecamp.py
-- mapFolding/_e/dataBaskets.py
-- mapFolding/_e/development/CaseStudy_PatternDiscoveryAndGeneralization.instructions.md
-- mapFolding/_e/development/Elimination expanded.md
-- mapFolding/_e/development/Elimination.md
-- mapFolding/_e/development/Ideas to improve the algorithms.md
-- mapFolding/_e/development/bureaucracy.md
-- mapFolding/_e/development/new-algorithm.instructions.md
-- mapFolding/_e/filters.py
-- mapFolding/_e/kitAST/__init__.py
-- mapFolding/_e/kitAST/theSSOT.py
-- mapFolding/_e/leafDomains.py
-- mapFolding/_e/p2上nDimensional/__init__.py
-- mapFolding/_e/p2上nDimensional/conditionalOrdering.py
-- mapFolding/_e/p2上nDimensional/creases.py
-- mapFolding/_e/p2上nDimensional/filters.py
-- mapFolding/_e/p2上nDimensional/leafDomains.py
-- mapFolding/_e/p2上nDimensional/measure.py
-- mapFolding/_e/p2上nDimensional/pileOptions.py
-- mapFolding/_e/p2上nDimensional/pinByCrease.py
-- mapFolding/_e/p2上nDimensional/pinByDomain.py
-- mapFolding/_e/p2上nDimensional/pinIt.py
-- mapFolding/_e/p2上nDimensional/reduceIt.py
-- mapFolding/_e/p2上nDimensional/semiotics.py
-- mapFolding/_e/pileOptions.py
-- mapFolding/_e/pinIt.py
-- mapFolding/_e/reduceIt.py
-- mapFolding/_e/research/__init__.py
-- mapFolding/_e/research/analysisMeasurements.py
-- mapFolding/_e/research/dataRaw/p2d4.csv
-- mapFolding/_e/research/dataRaw/p2d5.csv
-- mapFolding/_e/research/dataRaw/p2d6.csv
-- mapFolding/_e/research/excel/p2d4SurplusDictionaries.csv
-- mapFolding/_e/research/excel/p2d5SurplusDictionaries.csv
-- mapFolding/_e/research/excel/p2d6SurplusDictionaries.csv
-- mapFolding/_e/research/pileOptionsDevelopment.py
-- mapFolding/_e/research/positionAnalysis.py
-- mapFolding/_e/research/positionAnalysisPileRanges2d6.py
-- mapFolding/_e/research/toolkit.py
-- mapFolding/_e/research/toolkitCSVsequences.py
-- mapFolding/_e/research/workBenchPatternFinder.py
-- mapFolding/_e/semiotics.py
-- mapFolding/_e/synthesized/__init__.py
-- mapFolding/_e/synthesized/ruff.toml
-- mapFolding/_e/tests/__init__.py
-- mapFolding/_e/tests/conftest.py
-- mapFolding/_e/tests/conftestAnnex.py
-- mapFolding/_e/tests/createDataSamples.py
-- mapFolding/_e/tests/dataSamples/.isort.cfg
-- mapFolding/_e/tests/dataSamples/A001417.py
-- mapFolding/_e/tests/dataSamples/__init__.py
-- mapFolding/_e/tests/dataSamples/measurementData.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain3_2_首一_首零一.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain3_首一.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain5_4.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain6_5.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain6_7_5_4.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain7_6.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain首二_首零一二.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain首二_首零二_首零一二_首一二.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain首零一二_首一二.py
-- mapFolding/_e/tests/dataSamples/p2上nDimensionalDomain首零二_首二.py
-- mapFolding/_e/tests/dataSamples/semioticsData.py
-- mapFolding/_e/tests/test_computations.py
-- mapFolding/_e/tests/test_dataDynamic.py
-- mapFolding/_e/tests/test_insertion.py
-- mapFolding/_e/tests/test_measurements.py
-- mapFolding/_e/tests/test_pinning.py
-- mapFolding/_e/tests/test_semiotics.py
-- mapFolding/_e/theTypes.py
 - mapFolding/_semiotics.py
+- mapFolding/algorithms/Y7Y_catalanArch.py
 - mapFolding/algorithms/__init__.py
-- mapFolding/algorithms/catalanArch.py
+- mapFolding/algorithms/constraintPropagation.py
 - mapFolding/algorithms/daoOfMapFolding.py
+- mapFolding/algorithms/elimination.py
+- mapFolding/algorithms/eliminationCrease.py
 - mapFolding/algorithms/foldsSymmetric.py
+- mapFolding/algorithms/iff.py
+- mapFolding/algorithms/insertion.py
+- mapFolding/algorithms/insertion2上nDimensional.py
 - mapFolding/algorithms/matrixMeanders.py
 - mapFolding/algorithms/matrixMeandersNumPy.py
 - mapFolding/algorithms/matrixMeandersPandas.py
@@ -2030,14 +3732,13 @@ TEXT FILES INCLUDED IN THE SCAN
 - mapFolding/algorithms/ruff.toml
 - mapFolding/basecamp.py
 - mapFolding/beDRY.py
+- mapFolding/beDRYElimination.py
+- mapFolding/conditionalOrdering.py
+- mapFolding/creases.py
 - mapFolding/dataBaskets.py
 - mapFolding/dataBasketsAnnex.py
 - mapFolding/dataStructures.py
-- mapFolding/identifierLengthAnalysis.ipynb
-- mapFolding/jobs/p2x21.py
-- mapFolding/jobs/p2x22.py
-- mapFolding/jobs/p2x2x2x2x2x2x2x2.py
-- mapFolding/jobs/p3x15.py
+- mapFolding/filters.py
 - mapFolding/kitAST/RecipeJob.py
 - mapFolding/kitAST/__init__.py
 - mapFolding/kitAST/_containers.py
@@ -2067,6 +3768,9 @@ TEXT FILES INCLUDED IN THE SCAN
 - mapFolding/kitAST/zCuzDocStoopid/__init__.py
 - mapFolding/kitAST/zCuzDocStoopid/makeDocstrings.py
 - mapFolding/kitFilesystem.py
+- mapFolding/leafDomains.py
+- mapFolding/measure.py
+- mapFolding/needsAHome/verify.py
 - mapFolding/oeis/.cache/A000108.txt
 - mapFolding/oeis/.cache/A000136.txt
 - mapFolding/oeis/.cache/A000560.txt
@@ -2202,6 +3906,12 @@ TEXT FILES INCLUDED IN THE SCAN
 - mapFolding/oeis/_theSSOT.py
 - mapFolding/oeis/byFormula.py
 - mapFolding/oeis/zCuzDocStoopidbyFormula.py
+- mapFolding/pileOptions.py
+- mapFolding/pinByCrease.py
+- mapFolding/pinByDomain.py
+- mapFolding/pinIt.py
+- mapFolding/reduceIt.py
+- mapFolding/semiotics.py
 - mapFolding/synthesized/.isort.cfg
 - mapFolding/synthesized/__init__.py
 - mapFolding/synthesized/countParallelNumba.py
@@ -2231,24 +3941,55 @@ TEXT FILES INCLUDED IN THE SCAN
 - mapFolding/tests/__init__.py
 - mapFolding/tests/conftest.py
 - mapFolding/tests/conftestAnnex.py
+- mapFolding/tests/createDataSamples.py
 - mapFolding/tests/dataSamples/.isort.cfg
+- mapFolding/tests/dataSamples/A001417.py
 - mapFolding/tests/dataSamples/__init__.py
+- mapFolding/tests/dataSamples/measurementData.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain3_2_首一_首零一.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain3_首一.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain5_4.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain6_5.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain6_7_5_4.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain7_6.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首二_首零一二.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首二_首零二_首零一二_首一二.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首零一二_首一二.py
+- mapFolding/tests/dataSamples/p2上nDimensionalDomain首零二_首二.py
+- mapFolding/tests/dataSamples/semioticsData.py
+- mapFolding/tests/dataSamples/sequenceAlbums.py
 - mapFolding/tests/dataSamples/triangleData.py
 - mapFolding/tests/ruff.toml
-- mapFolding/tests/test_Z0Z_generatingFunction.py
 - mapFolding/tests/test_algorithms.py
+- mapFolding/tests/test_computations.py
 - mapFolding/tests/test_dataBaskets.py
+- mapFolding/tests/test_dataDynamic.py
 - mapFolding/tests/test_dataStructures.py
 - mapFolding/tests/test_filesystem.py
+- mapFolding/tests/test_insertion.py
+- mapFolding/tests/test_measurements.py
 - mapFolding/tests/test_oeis.py
 - mapFolding/tests/test_oeis_byFormula.py
 - mapFolding/tests/test_parameterValidation.py
+- mapFolding/tests/test_pinning.py
+- mapFolding/tests/test_semiotics.py
 - mapFolding/tests/test_taskDivisions.py
+- mapFolding/tests/testsNeedAHome/test_generatingFunction.py
 - mapFolding/theSSOT.py
 - mapFolding/theTypes.py
 - pyproject.toml
 - pyrightconfig.json
 - research/__init__.py
+- research/elimination/__init__.py
+- research/elimination/analysisMeasurements.py
+- research/elimination/dataRaw/p2d4.csv
+- research/elimination/dataRaw/p2d5.csv
+- research/elimination/dataRaw/p2d6.csv
+- research/elimination/pileOptionsDevelopment.py
+- research/elimination/positionAnalysis.py
+- research/elimination/positionAnalysisPileRanges2d6.py
+- research/elimination/toolkitCSVsequences.py
+- research/elimination/workBenchPatternFinder.py
 - research/getLLVMforNoReason.py
 - research/histogram of values technique.py
 - research/mapFolding/__init__.py
@@ -2261,17 +4002,9 @@ TEXT FILES INCLUDED IN THE SCAN
 - research/mapFoldingSymmetric/A007822_7transformationIndices.log
 - research/mapFoldingSymmetric/A007822_8transformationIndices.log
 - research/mapFoldingSymmetric/A007822exampleTransformation.log
-- research/matrixMeanders/Status Semi-Meander Triangle.md
 - research/matrixMeanders/Z0Z_count.py
 - research/matrixMeanders/Z0Z_transfer.py
 - research/matrixMeanders/__init__.py
-- research/matrixMeanders/archiveTriangle/A005315Binomial.py
-- research/matrixMeanders/archiveTriangle/A005315PolynomialCyclic.py
-- research/matrixMeanders/archiveTriangle/createGeneratingFunction.py
-- research/matrixMeanders/archiveTriangle/createPolynomialCyclicForm.py
-- research/matrixMeanders/archiveTriangle/d4.py
-- research/matrixMeanders/archiveTriangle/get_parity.py
-- research/matrixMeanders/archiveTriangle/translateToBinomial.py
 - research/matrixMeanders/buckets.ipynb
 - research/matrixMeanders/data/A000682.csv
 - research/matrixMeanders/data/A005316.csv

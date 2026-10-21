@@ -1,14 +1,52 @@
-# n-choose-r terminology: a descriptive inventory; 2026-10-19
+# n-choose-r terminology: a descriptive inventory; refreshed 2026-10-21
+
+## Settled Coefficient Names — 2026-10-21
+
+In `Z0Z_research/Y7Y_catalanArches/formulasReduce.py`, no identifier containing
+"coefficient" needs `Z0Z_` or any other naming adjustment. The accepted names are
+`工coefficient_k`, `工boxOfCoefficients`, `coefficientFinder`, `boxOfCoefficients`,
+`boxOfColumnCoefficients`, and the imported `coefficientsEqual吗`. The definition of
+`coefficientsEqual吗` in `analyze.py` uses the same name.
+
+In `mapFolding/oeis/A400429/_A005315.py`, all coefficient terms are unprefixed.
+The accepted identifiers are `crunchCoefficients`, `次coefficient`, and
+`boxOfCoefficients`; their existing test references use the same names. These are
+polynomial or rational-series coefficients. Ordinary prose such as "coefficient table"
+and "numerator coefficients" is also unprefixed. Docstrings put exact identifiers in
+backticks and do not pluralize them.
+
+These names are settled. The general ambiguity rule does not require another naming
+pass on these coefficient terms. Coefficient names elsewhere remain outside this decision.
+
+## Deleted Modules
+
+The following modules were deleted from `research/matrixMeanders/archiveTriangle`.
+They are historical representations, rather than current rename or regeneration targets.
+
+- `A005315PolynomialCyclic.py`
+- `Y7Y_A005315Binomial.py`
+- `Y7Y_translateToBinomial.py`
+- `createGeneratingFunction.py`
+- `createPolynomialCyclicForm.py`
+- `d4.py`
+- `get_parity.py`
+
+The directory is absent from the current working tree. Its old source locations have
+been removed from the annex.
+
+The semantic discussion below retains original spellings where they help explain the
+2026-10-19 findings. The [annex](n-choose-r%20inventoryAnnex.md) records current exact
+spellings and source locations, including later prefixes and relocations.
 
 ## Findings
 
-- Terms, 105 spellings
-- In 58 non-cache files.
+- Terms, 291 exact spellings in the refreshed annex.
+- In 184 non-cache files.
 - Related to
   - binomial,
   - Catalan and A000108
-  - ‼️ Lobb: I was didn't know this is nCr
-  - ‼️ Dyck: I was didn't know this is nCr
+  - ‼️ Lobb: I didn't know this is nCr
+  - ‼️ Dyck: I didn't know this is nCr
   - combinations (n-choose-r)
 - Found in
   - identifiers,
@@ -21,9 +59,10 @@
 
 ## Scope
 
-- 269 Python files
-- 8 notebooks
-- 227 text files
+- 232 Python files
+- 7 notebooks
+- 203 other text files
+- The inventory and semiotic-system documents are excluded from the lexical scan.
 
 Directories
 
@@ -41,16 +80,17 @@ Directories
 - CSV labels,
 - OEIS text caches.
 
-Six .xlsx workbooks were searched for binomial/Catalan/Lobb/Pascal/ ballot/Narayana/nCr/nCk
+On 2026-10-19, six .xlsx workbooks were searched for binomial/Catalan/Lobb/Pascal/ ballot/Narayana/nCr/nCk
 terminology and COMBIN/CHOOSE formula calls. No matches were found. I assumed this would be true.
+The workbooks were not rescanned for the 2026-10-21 refresh.
 
 ## Issues
 
 ### Most Important Distinctions Already Present
 
 1. "Binomial coefficient" has two different referents. binomial(top, degree) and
-   comb(...) produce n-choose-r values. binomialCoefficients in the Catalan CSV,
-   _binomialCoefficients in the cyclic-form generator, and the notebook's
+   comb(...) produce n-choose-r values. binomialCoefficients in the Catalan CSV
+   and the notebook's
    "binomial coefficients (descending)" describe multipliers of those values.
    The report text "integer binomial coefficients" also means basis multipliers.
 
@@ -63,7 +103,7 @@ terminology and COMBIN/CHOOSE formula calls. No matches were found. I assumed th
 3. The Catalan family includes scalars, evaluated basis sequences, weighted sums,
    mixed-basis evaluations, correction rows, residual coefficient tables, and
    on-disk paths. catalanMultiplyThis is a callable, while CatalanMultiplyThis is
-   a mapping type and catalanMultiplyThis.csv is a coefficient table. Their names
+   a mapping type and Z0Z_catalanMultiplyThis.csv is a coefficient table. Their names
    resemble one another, but they denote different kinds of objects.
 
 4. Coefficient levels are distinct: theCoefficients / X / c_{k,i}; whole-growth
@@ -92,10 +132,10 @@ terminology and COMBIN/CHOOSE formula calls. No matches were found. I assumed th
 
 binomial(top, degree) -> int
 
-- Z0Z_research/catalanArches/_beDry.py:15
+- Z0Z_research/Y7Y_catalanArches/_beDry.py:15
 - Returns int(sympy_binomial(top, degree)). top is the upper argument; degree
 - is the lower argument. The underlying import is sympy_binomial at line 8.
-- Re-exported by catalanArches/__init__.py:23.
+- Re-exported by Y7Y_catalanArches/__init__.py:23.
 
 sympy_binomial and sympyBinomial
 
@@ -104,18 +144,16 @@ sympy_binomial and sympyBinomial
 - wrapper; the latter builds symbolic degree laws in formulaExperiments.py:174.
 - These are spelling variants of the same external operation in different roles.
 
-comb
+nCr
 
-- math.comb in archReducePrototype.py:8, archiveTriangle/A005315Binomial.py:16,
-- A005315PolynomialCyclic.py:7, translateToBinomial.py:12, and the production
-- mapFolding/oeis/A400429/_A005315.py:70.
-- createPolynomialCyclicForm.py emits the quoted callable name 'comb' into
-- generated ASTs and imports. Those strings are references, not local bindings.
-- Repeated numeric comb terms dominate the raw match count in A005315Binomial.py.
+- `math.comb` is imported as `nCr` in `constraint/archReducePrototype.py` and
+  `mapFolding/oeis/A400429/_A005315.py`.
+- The deleted archived representations are listed above; they are no longer sources
+  for callable names or generated expressions.
 
 binomial as a math alias
 
-- Z0Z_research/catalanArches/counting/archCurses.py:6,117,136.
+- Z0Z_research/Y7Y_catalanArches/counting/archCurses.py:6,117,136.
 - The name resolves to math.comb here, not the research package wrapper.
 
 catalan(n) -> int; sympy_catalan
@@ -130,14 +168,14 @@ lobb(ordinal, archesOffset) -> int
 - binomial(2*ordinal, ordinal-archesOffset)
   - binomial(2*ordinal, ordinal-archesOffset-1).
 - The first argument is the Lobb row, the second the offset/column. The local
-- note explain/lobb.md writes the same operation as L(m,r), with A039599.
+- note explain/Y7Y_lobb.md writes the same operation as L(m,r), with A039599.
 
 combinations
 
 - itertools.combinations enumerates selections rather than returning their count.
-- Executable pair enumeration occurs in mapFolding/_e/dataBaskets.py:795,
-- _e/reduceIt.py:127 and ./_e/p2上nDimensional/reduceIt.py:186.
-- _e/algorithms/iff.py imports it at :60 but contains no combinations(...) call.
+- Executable pair enumeration occurs in `mapFolding/dataBaskets.py` and
+  `mapFolding/reduceIt.py`.
+- `mapFolding/algorithms/iff.py` imports and calls `Y7Y_combinations`.
 - Its comment at :76 writes (14choose2), 14c2, 21c2 and 18c2 as selection counts.
 - Z0Z_notes/A000136.ipynb cells 8-11 call combinations(cells,r) or combinations
 - on constructed cell collections. r is the selection size there; cc, symmetry
@@ -148,7 +186,7 @@ combinations
 
 Dyck-related labels
 
-- mapFolding/algorithms/catalanArch.py:43 defines advanceDyck and :13 labels its
+- mapFolding/algorithms/Y7Y_catalanArch.py:43 defines advanceDyck and :13 labels its
 - enumeration C(n) iterations. count(n) produces a generation histogram, not C_n
 - as a scalar. doTheNeedful(n) produces cumulative reduction counts.
 - mapFolding/algorithms/matrixMeanders.py:8 defines walkDyckPath; generated
@@ -167,18 +205,16 @@ Additional unbranded binomial computations:
 - also name persisted cache layers. These belong in the inventory even though
 - their function names would not be found by a binomial-only search.
 
-Production versus archived A005315 representations:
+Current A005315 representation:
 
-- mapFolding/oeis/A400429/_A005315.py uses comb in A005315of0 and A005315of2.
-- Its later A005315of3 through A005315of11 use numerator/denominator polynomial
-- coefficients and crunchCoefficients (a rational generating-function recurrence).
-- research/matrixMeanders/archiveTriangle/A005315Binomial.py instead stores
-- repeated explicit comb expansions in A005315of3 through A005315of10.
-- A005315PolynomialCyclic.py uses the same n-choose-r basis within cyclic waves.
-- x is the input row; 次n is an input-origin translation parameter. A005315ofN
-- selects a fixed formula. These names do not expose the chosen representation.
-- numerator, denominator and 次coefficient are polynomial/series coefficient
-- labels in the production version, not scalar n-choose-r arguments.
+- `mapFolding/oeis/A400429/_A005315.py` uses `nCr` in `A005315of0` and `A005315of2`.
+- `A005315of3` through `A005315of11` use `numerator` and `denominator` polynomial
+  coefficients and `crunchCoefficients`, a rational generating-function recurrence.
+- `x` is the input row; `次n` translates the input origin. `A005315ofN` selects a
+  fixed formula. These names do not expose the chosen representation.
+- `numerator`, `denominator`, and `次coefficient` describe polynomial or series
+  coefficients. They are not scalar nCr arguments and do not need ambiguity prefixes.
+- The former binomial and cyclic archived representations have been deleted.
 
 ### Basis Sequences, Multipliers And Evaluators
 
@@ -241,7 +277,7 @@ callables; their names do not denote stored numeric reference tables.
 
 Original Catalan-linear coefficient rows:
 
-- theCoefficients.csv; 工theCoefficients; lookupTheCoefficients; lookupCoefficients;
+- Z0Z_theCoefficients.csv; 工theCoefficients; lookupTheCoefficients; lookupCoefficients;
 - lookupX / lookupXTerms; c_{k,i} / c_{k,s}; boxOfTheCoefficients.
 - The table row index is the original triangle column, while its entries weight
 - a descending Catalan basis across the triangle row argument.
@@ -262,7 +298,7 @@ Whole growth polynomials:
 Growth residual coefficients:
 
 - lookupResidual, lookupGrowthResiduals, lookupResidualByDegree;
-- binomialMultiplyThis.csv, BinomialMultiplyThis, getBinomialMultiplyThis.
+- Z0Z_binomialMultiplyThis.csv, BinomialMultiplyThis, getBinomialMultiplyThis.
 - growthFormulaToResidual and growthResidualToFormula remove/restore the shared
 - growth scaffolding. These residuals depend on which explicit contributions
 - remain in 工growthBinomial; their identity is not the whole growth polynomial.
@@ -272,7 +308,7 @@ Growth residual coefficients:
 Laws Across Polynomial Degrees:
 
 - `lookupDegreeFormulas[parityEven,less][position]`, `lookupGrowthDegreeFormulas`,
-- degreeFormula; b_{less,q} in explain/A CoefficientAnalysis.md.
+- degreeFormula; b_{less,q} in explain/Z0Z_A CoefficientAnalysis.md.
 - These weight binomial(degree-less,q), not the original binomial growth basis.
 - analyze.py:198,215 fits/evaluates these laws. order in the symbolic notebook
 - analysis is this lower binomial argument q, not the original growth degree.
@@ -289,11 +325,11 @@ Anti-Catalan correction MULTIPLIERS:
 
 - catalanCoefficients / binomialCoefficients (CSV header and getter locals);
 - CatalanMultiplyThis / CatalanAddThis (mapping type aliases);
-- catalanMultiplyThis.csv / catalanAddThis.csv (different stored artifacts).
+- Z0Z_catalanMultiplyThis.csv / Y7Y_catalanAddThis.csv (different stored artifacts).
 - The latter is a finite table of additive values, not Catalan-basis weights.
 - coefficientsCatalan in archReducePrototype.py:138 is an original-row result
 - after converting Lobb coefficients; it is not the same family as the residual
-- catalanCoefficients in catalanMultiplyThis.csv.
+- catalanCoefficients in Z0Z_catalanMultiplyThis.csv.
 
 Lobb multipliers:
 
@@ -304,14 +340,12 @@ Lobb multipliers:
 - The solver variable label is lobbCoefficient[n,archesOffset] (:112), reversing
 - the word order of coefficientLobb. The weighted-sum label includes literal Lobb.
 
-Cyclic/quasipolynomial binomial multipliers:
+Historical cyclic/quasipolynomial binomial multipliers:
 
-- archiveTriangle/createPolynomialCyclicForm.py:102 _binomialCoefficients returns
-- forward-difference-derived multipliers. ast_exprBinomialBasis (:171) represents
-- an AST expression for one basis value. boxOfCoefficients contains its weights.
-- translateToBinomial.py:20-24 uses labels (period,shift,degree) or ('constant',0,0)
-- and basis(offset,label) = comb((offset+shift)//period,degree).
-- These are a separate binomial-basis representation of A005315 formulas.
+- The deleted cyclic-form generator used forward differences to obtain binomial-basis
+  multipliers. The deleted translation module used period, shift, and degree labels.
+- Those represented weights of nCr values, rather than the nCr values themselves.
+  There is no current module in `archiveTriangle` to rename or regenerate.
 
 ### Coordinates And Control Labels
 
@@ -325,8 +359,6 @@ degree
 - Lower n-choose-r argument in binomial(top,degree).
 - Highest lower argument / polynomial degree in dotProductBinomial and growth.
 - Derived property IndexColumn_k.degree = (次k-1)//2.
-- Degree of a residue polynomial in the cyclic-form generator.
-- Lower argument for a chosen period/shift in translateToBinomial labels.
 
 degreeLess; less; binomialDegree; position; order
 
@@ -334,8 +366,8 @@ degreeLess; less; binomialDegree; position; order
 - less counts downward from the highest growth degree (zero-based position).
 - binomialDegree is a lower argument in the Lobb-to-Catalan conversion.
 - position indexes a mixed basis in 工basisAntiCatalan, or a degree-law weight.
-- order is the lower argument in symbolic degree-law expansion, but also denotes
-- a cyclotomic order/period in the cyclic-form generator. It is not one global unit.
+- order is the lower argument in symbolic degree-law expansion, but also denoted
+- a cyclotomic order/period in the deleted cyclic-form generator. It is not one global unit.
 
 ordinal; ordinalCatalan; cardinality; j
 
@@ -398,9 +430,9 @@ formulasAntiCatalan; totalCatalan; totalBasis; totalCoefficients
 
 ### Persisted Files, Column Labels, Types And Notebook State
 
-All nine research CSVs live under Z0Z_research/catalanArches/data.
+All nine research CSVs live under `Z0Z_research/Y7Y_catalanArches/data`.
 
-binomialMultiplyThis.csv
+Z0Z_binomialMultiplyThis.csv
 
 - Headerless rows: parity, degree, then descending-binomial residual weights.
 - readBinomialMultiplyThis -> `dict[parity][degree]` -> tuple of weights.
@@ -410,7 +442,7 @@ binomialMultiplyThis.csv
 - to this artifact. There is no module-level variable binomialMultiplyThis;
 - the bare spelling occurs in filenames, prose and diagnostic strings.
 
-catalanMultiplyThis.csv
+Z0Z_catalanMultiplyThis.csv
 
 - Explicit header: 次antiCatalan,catalanCoefficients,binomialCoefficients.
 - readCatalanMultiplyThis -> dict[a] -> (tupleCatalan,tupleBinomial).
@@ -420,7 +452,7 @@ catalanMultiplyThis.csv
 - binomial coefficients (descending).
 - writeCatalanMultiplyThis and pathFilenameCatalanMultiplyThis retain the name.
 
-catalanAddThis.csv
+Y7Y_catalanAddThis.csv
 
 - Headerless rows: a, then additive corrections indexed by zero-based j.
 - readCatalanAddThis -> dict[a] -> tuple of values; getCatalanAddThis(a,j)
@@ -428,14 +460,14 @@ catalanAddThis.csv
 - HTML headers are 次antiCatalan and j = 0, j = 1, ... .
 - writeCatalanAddThis and pathFilenameCatalanAddThis identify the same artifact.
 
-coefficientsLobb.csv
+Z0Z_coefficientsLobb.csv
 
-- Headerless k,h_(k,0),...,h_(k,k-1), as documented in explain/lobb.md.
+- Headerless k,h_(k,0),...,h_(k,k-1), as documented in explain/Y7Y_lobb.md.
 - pathFilenameCoefficientsLobb is defined/re-exported. The current Python source
 - contains no read call using that path; do not mistake the path name for an
 - actively loaded lookupLobbX table.
 
-theCoefficients.csv / theCoefficients_incomplete.csv
+Z0Z_theCoefficients.csv / Z0Z_theCoefficients_incomplete.csv
 
 - Complete and sparse/incomplete original Catalan-linear coefficient rows.
 - Paths: pathFilenameTheCoefficients / pathFilenameTheCoefficientsIncomplete.
@@ -474,7 +506,7 @@ Other output labels:
 
 ### Mathematical Notation In Local Explanations
 
-explain/A CoefficientAnalysis.md
+explain/Z0Z_A CoefficientAnalysis.md
 
 - s = fixed coefficient position (次k); k = varying coefficient-row coordinate.
 - d = floor((s-1)/2); K_s = max(s,2s-4); sigma_s = growth sign.
@@ -484,7 +516,7 @@ explain/A CoefficientAnalysis.md
 - epsilon_s = parity-dependent shift sign.
 - r_ell(d) = residual law across degree; b_(ell,q) = its binomial weights.
 
-explain/anti catalan.md
+explain/Y7Y_anti catalan.md
 
 - C(j) / C(j+t) = scalar Catalan values; D(j,a) = correction family.
 - r_a(j) = rational factor after dividing by C(j); P_a(j) = polynomial part.
@@ -492,7 +524,7 @@ explain/anti catalan.md
 - The historical paper quantities M-bar and m-bar describe another statistic;
 - the note itself distinguishes them from A287548's T(n,k).
 
-explain/lobb.md
+explain/Y7Y_lobb.md
 
 - L(m,r) = Lobb number, A039599; C_m = Catalan number.
 - F_k(n) = Catalan-linear evaluation of coefficient row k.
@@ -530,7 +562,7 @@ Additional representations:
 
 ### Documentation-Only Or Historical Spellings
 
-explain/A CoefficientAnalysis.md contains names not defined by current Python:
+explain/Z0Z_A CoefficientAnalysis.md contains names not defined by current Python:
 
 - 工lookupAntiCatalan, 工lookupGrowth, 工direction,
 - reproduceCoefficientExtensions, verifyCoefficientAnalysis.
@@ -540,7 +572,7 @@ explain/A CoefficientAnalysis.md contains names not defined by current Python:
 - _工antiToLookup, growthFormulaToTerms and inline correction-table construction;
 - they are related operations, not automatically interchangeable replacements.
 
-explain/anti catalan.md mentions verifyFormulas, inner5 and historical finite rows.
+explain/Y7Y_anti catalan.md mentions verifyFormulas, inner5 and historical finite rows.
 Those are documentary references rather than current bindings in formulasReduce.py.
 The statement in A CoefficientAnalysis.md that discovery uses correction rows 0-8
 also does not match generate.py's current range(formulasAntiCatalan), where the
@@ -550,15 +582,17 @@ performed in this naming review.
 
 ### Boundary Cases That Should Not Be Merged Into One Concept
 
-The test ID cancel-part-of-binomial at test_Z0Z_generatingFunction.py:36,69 refers
-to cancellation involving a two-term polynomial (1+x), rather than an n-choose-r
-value. It is a second mathematical use of the word binomial.
+The test ID `Z0Z_cancel-part-of-binomial` in
+`mapFolding/tests/testsNeedAHome/test_generatingFunction.py` refers to cancellation
+involving a two-term polynomial (1+x), rather than an n-choose-r value. It is a
+second mathematical use of the word binomial.
 
 Ordinary factorial/permutation counts and factorial ratios occur in OEIS formulas,
 elimination symmetry multipliers and easyRun/pinning.py. They are related
 combinatorics, but they are not necessarily n-choose-r formulas. Their locations
-are listed separately below. No separate Pascal, ballot, Narayana, nCr or nCk
-API/binding was found in current source. Lobb formulas and combinations enumeration
+are listed separately below. No separate Pascal, ballot, Narayana or nCk
+API/binding was found in the original scan. `nCr` now names the `math.comb` alias
+described above. Lobb formulas and combinations enumeration
 are the principal additional explicit families beyond binomial and Catalan.
 
 The remaining appendices provide the exact spellings and all matched locations.
@@ -566,4 +600,4 @@ Line ranges compress consecutive matching lines; gaps are never filled in.
 
 ## Exact-Spelling Index
 
-Continued in development/nChooseR-inventoryAnnex.md
+Continued in [the inventory annex](n-choose-r%20inventoryAnnex.md).

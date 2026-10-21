@@ -105,6 +105,7 @@ banned-aliases = { numpy = ["np"], pandas = ["pd"], regex = ["re"] }
 "humpy_cytoolz.curry" = "syntacticCurry"
 "humpy_cytoolz.groupby" = "toolz_groupby"
 "itertools.product" = "CartesianProduct"
+"math.comb" = "nCr"
 "more_itertools.all_unique" = "allUnique吗"
 "numpy" = "numpy"
 "pandas" = "pandas"
