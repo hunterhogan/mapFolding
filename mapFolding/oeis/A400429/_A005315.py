@@ -101,7 +101,7 @@ References
 from __future__ import annotations
 
 from itertools import chain, repeat
-from math import comb as nCr
+from sympy import binomial as sympy_binomial
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -162,11 +162,10 @@ def A005315of0(x: int, 次n: int = 0) -> int:
 	This is the separate base case; there is no D_0 diagonal in the stated triangle.
 	Later inputs still return 1 and do not extend the A005315 sequence.
 
-	`次n` translates the input origin without changing the expression. The
-	nonnegative shifted-input precondition is not explicitly checked; a negative
-	shifted input raises `ValueError` through `nCr`.
+	`次n` translates the input origin without changing the expression. SymPy's
+	`binomial` also returns 1 for a negative upper argument when the lower argument is 0.
 	"""
-	return nCr(x - 2 * 次n, 0)
+	return int(sympy_binomial(x - 2 * 次n, 0))  # pyright: ignore[reportArgumentType]
 
 def A005315of1(x: int, 次n: int = 1) -> int:
 	"""Return A005315(1) = 1 at `x = 2` and A005315(2) = 2 at `x = 3`.
@@ -194,16 +193,16 @@ def A005315of2(x: int, 次n: int = 2) -> int:
 
 		D_2(x) = (x*x + 2*x + (x % 2) - 20) / 2.
 
-	The `nCr` expression below is exactly equivalent on that domain. The
+	The `sympy_binomial` expression below is exactly equivalent on that domain. The
 	quasipolynomial has degree 2 and minimal period 2; the independent cut proof
 	and its reported Lean formalization are described in reference [3].
 
 	Use `x >= 2*次n`. Changing `次n` only translates the same expression.
-	The intended domain is not checked; some smaller inputs still evaluate, and
-	sufficiently small inputs raise `ValueError` through `nCr`.
+	The intended domain is not checked. Smaller inputs also evaluate using
+	SymPy's extension of `binomial` to negative upper arguments.
 	"""
 	x -= 2 * 次n
-	return 2 * ((nCr((x + 6) // 2, 2) + nCr((x + 7) // 2, 2)) - 5)
+	return 2 * ((int(sympy_binomial((x + 6) // 2, 2)) + int(sympy_binomial((x + 7) // 2, 2))) - 5)  # pyright: ignore[reportArgumentType]
 
 def A005315of3(x: int, 次n: int = 3) -> int:
 	"""Return A005315(3) at `x = 6` and A005315(4) at `x = 7`.
