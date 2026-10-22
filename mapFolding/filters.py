@@ -31,7 +31,7 @@ Filtering functions
 from __future__ import annotations
 
 from gmpy2 import bit_test as isBit1吗
-from mapFolding.semiotics import 零
+from mapFolding import 零
 from mapFolding.theTypes import ChoicesLeaf, DimensionIndex, Leaf, LeafSpace
 from operator import attrgetter
 from typing import TYPE_CHECKING, TypeIs
@@ -257,7 +257,7 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 
 	References
 	----------
-	[1] `mapFolding.semiotics.零`
+	[1] `mapFolding._semiotics.零`
 	"""
 	return 零 < leaf
 

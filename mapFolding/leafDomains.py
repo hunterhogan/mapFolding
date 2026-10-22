@@ -36,10 +36,9 @@ from __future__ import annotations
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive, raiseIfNone
-from mapFolding import leafOrigin
+from mapFolding import dimensionIndex, leafOrigin, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.measure import 工dimensionTail, 工dimension首一, 工dimension首三, 工dimension首二, 工dimension首零, 工totalDimensionsOdd
-from mapFolding.semiotics import dimensionIndex, 一, 三, 二, 四, 零, 首一, 首一二, 首三, 首二, 首零, 首零一, 首零一二, 首零二
 from more_itertools import all_unique as allUnique吗, loops
 from operator import add, sub
 from typing import TYPE_CHECKING
@@ -217,7 +216,7 @@ def getDomainDimension一(state: StateElimination) -> tuple[tuple[int, int, int,
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -293,7 +292,7 @@ def getDomainDimension二(state: StateElimination) -> tuple[tuple[int, int, int,
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -436,7 +435,7 @@ def getDomainDimension首二(state: StateElimination) -> tuple[tuple[int, int, i
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -556,7 +555,7 @@ def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -600,7 +599,7 @@ def getDomain二一零and二一(state: StateElimination) -> tuple[tuple[int, int
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -768,7 +767,7 @@ def getDomain首零二and首二(state: StateElimination) -> tuple[tuple[int, int
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -887,7 +886,7 @@ def getDomain首零一二and首一二(state: StateElimination) -> tuple[tuple[in
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
@@ -1022,7 +1021,7 @@ def getDomainLeaf首零Plus零(state: StateElimination, leaf: Leaf | None = None
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 
 	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""

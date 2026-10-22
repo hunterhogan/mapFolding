@@ -21,12 +21,12 @@ from collections import defaultdict
 from functools import cache
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, inclusive
-from mapFolding.beDRYElimination import getMapShape首ProductsSums
-from mapFolding.measure import leafInSubHyperplane, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
-from mapFolding.semiotics import 一, 零, 首一, 首零, 首零一
-from mapFolding.leafDomains import getLookupDomainsLeaves
+from mapFolding import 一, 零, 首一, 首零, 首零一
 from mapFolding.beDRY import mapShapeIs2上nDimensions
+from mapFolding.beDRYElimination import getMapShape首ProductsSums
 from mapFolding.dataBaskets import StateElimination
+from mapFolding.leafDomains import getLookupDomainsLeaves
+from mapFolding.measure import leafInSubHyperplane, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from operator import neg
 from typing import TYPE_CHECKING
 

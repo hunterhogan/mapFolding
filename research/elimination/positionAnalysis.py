@@ -5,13 +5,12 @@ from __future__ import annotations
 
 from gmpy2 import bit_mask
 from hunterMakesPy import ansiColor, ansiColorReset, raiseIfNone
-from mapFolding import pileOrigin
+from mapFolding import pileOrigin, 零
 from mapFolding.conditionalOrdering import getLeafPredecessors, getLeafSuccessors
-from mapFolding.measure import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
-from mapFolding.semiotics import 零
-from mapFolding.leafDomains import getDomainLeaf
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
+from mapFolding.leafDomains import getDomainLeaf
+from mapFolding.measure import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from pprint import pprint
 from typing import TYPE_CHECKING
 import numpy

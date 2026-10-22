@@ -29,7 +29,7 @@ from __future__ import annotations
 
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import inclusive, raiseIfNone
-from mapFolding.semiotics import dimensionIndex, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一
+from mapFolding import dimensionIndex, 一, 三, 二, 五, 四, 零, 首一, 首零, 首零一
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.measure import leafInSubHyperplane, ptount, 工dimensionTail, 工dimension首零
 from operator import add, neg, sub

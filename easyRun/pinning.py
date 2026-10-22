@@ -3,7 +3,7 @@ from __future__ import annotations
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_toolz.curried import map as toolz_map
-from mapFolding import pinIt
+from mapFolding import pinIt, 首一
 from mapFolding.algorithms.eliminationCrease import doTheNeedful
 from mapFolding.algorithms.insertion2上nDimensional import makeAlbum2上nDimensional, recordAlbum2上nDimensional
 from mapFolding.beDRYElimination import getIteratorOfLeaves, lengthChoicesLeaf
@@ -13,7 +13,6 @@ from mapFolding.dataBaskets import StateElimination
 from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
 from mapFolding.pileOptions import getChoicesLeaf, getLookupChoicesLeaf
 from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional
-from mapFolding.semiotics import 首一
 from math import prod
 from operator import methodcaller
 from pprint import pprint

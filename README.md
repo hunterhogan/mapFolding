@@ -130,7 +130,8 @@ constructs and inspects `ChoicesLeaf` values. [`pinIt.py`](https://github.com/hu
 restricts assignments and relative leaf order; [`reduceIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reduceIt.py)
 propagates constraints through the search spaces. Specialized rules for maps whose dimension lengths
 are all two use `conditionalOrdering`, `creases`, `measure`, `pinByCrease`, `pinByDomain`, and the
-positional-numeral notation in `semiotics`.
+positional-numeral notation documented in
+[`_semiotics.md`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/_semiotics.md).
 
 Counting entry points accept a `flow` preference. Omit it to use the default route. Available variants and dispatch rules change as the research develops; [`basecamp.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/basecamp.py) and the relevant `easyRun` runner show the current choices.
 
@@ -243,6 +244,18 @@ pytest mapFolding/tests/test_algorithms.py
 ```
 
 The tests compare algorithm variants with known OEIS values and exercise generated jobs. When adding a counting implementation, extend the relevant test cases in [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py). Triangle conversions, OEIS updates, and sequence formulas have dedicated checks in `test_dataStructures.py`, `test_oeis.py`, and `test_oeis_byFormula.py`; supporting behavior has its own tests in `mapFolding/tests`.
+
+## The supplemental guides explain the notation and how to type it
+
+- [Read spatial coordinates through the notation](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/_semiotics.md)
+  explains the coordinate model for maps whose dimensions all have length two, including
+  tail/head indexing and the distinction between a coordinate and its stored integer.
+- [Recognize and type the glyphs](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/_symbols.md)
+  provides meanings, memory aids, the VS Code snippets, and fonts for consistent spacing in code.
+
+Both guides ship with the PyPI package, inside the installed `mapFolding` directory beside
+`_semiotics.py`. To locate them, run `print(mapFolding.__file__)` after `import mapFolding`.
+The coordinate symbols are available through `from mapFolding import ...`.
 
 ## Computation targets
 

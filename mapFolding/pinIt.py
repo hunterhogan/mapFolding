@@ -52,7 +52,7 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from functools import partial
 from hunterMakesPy.parseParameters import intInnit
-from mapFolding import leafDomains, leafOrigin, pileOrigin
+from mapFolding import leafDomains, leafOrigin, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.filters import leafInChoicesLeaf吗, 是valid
@@ -62,7 +62,6 @@ from mapFolding.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding.pinByDomain import pinPile零Ante首零AfterDepth4
 from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional
-from mapFolding.semiotics import 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二
 from mapFolding.theTypes import ChoicesLeaf, Leaf, Pile
 from more_itertools import partition
 from operator import getitem, neg
@@ -352,7 +351,7 @@ def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpa
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 
@@ -636,7 +635,7 @@ def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit =
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 	"""
@@ -685,7 +684,7 @@ def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: ConcurrencyLimit 
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 
@@ -781,7 +780,7 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 
@@ -883,7 +882,7 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 
@@ -939,7 +938,7 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 
@@ -996,7 +995,7 @@ def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) ->
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 
@@ -1052,7 +1051,7 @@ def pin首beans(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -
 	----------
 	[1] `mapFolding.beDRY.defineProcessorLimit`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 
 	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 

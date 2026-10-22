@@ -64,7 +64,7 @@ def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 	"""
 	return iter(_getCreases(state, leaf, increase=False))
 
@@ -106,7 +106,7 @@ def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 	"""
 	return iter(_getCreases(state, leaf, increase=True))
 

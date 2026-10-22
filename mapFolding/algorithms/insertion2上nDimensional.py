@@ -24,17 +24,16 @@ from __future__ import annotations
 from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import keyfilter as filterPile
 from itertools import pairwise
-from mapFolding.beDRYElimination import makeAntiChoicesLeaf
-from mapFolding.semiotics import 一, 二, 零
-from mapFolding.leafDomains import getDomainLeaf
-from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional
-from mapFolding.reduceIt import reduceLeafSpace
+from mapFolding import 一, 二, 零
 from mapFolding.algorithms.insertion import pathAlbum
+from mapFolding.beDRYElimination import makeAntiChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.filters import 是valid
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
+from mapFolding.leafDomains import getDomainLeaf
 from mapFolding.oeis import makeMapShape
 from mapFolding.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k, pinLeavesDimension二, pinPilesAtEnds
+from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional, reduceLeafSpace
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems
@@ -42,8 +41,7 @@ from Z0Z_tools import DOTitems
 if TYPE_CHECKING:
 	from collections.abc import Iterable
 	from concurrent.futures import Future
-	from mapFolding.theTypes import ChoicesLeaf
-	from mapFolding.theTypes import Folding, Leaf, Pile
+	from mapFolding.theTypes import ChoicesLeaf, Folding, Leaf, Pile
 	from pathlib import Path
 
 def makeDescendants(folding: Folding, state: StateElimination, position: int) -> StateElimination:

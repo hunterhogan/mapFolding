@@ -1,9 +1,9 @@
-# Static test data for mapFolding/_semiotics.py and mapFolding/semiotics.py
+# Static test data for mapFolding/_semiotics.py
 # This module contains only static data—dictionaries, boxOfs, tuples, constants, and type aliases.
 
 from typing import Final
 
-#======== Expected values from mapFolding/semiotics.py =======
+#======== Expected values from mapFolding/_semiotics.py =======
 
 # Dimension index constants (powers of 2)
 expected零: Final[int] = 1

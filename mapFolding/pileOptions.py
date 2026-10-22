@@ -28,11 +28,10 @@ from __future__ import annotations
 
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask
-from mapFolding import leafOrigin
+from mapFolding import leafOrigin, 零, 首零
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.beDRYElimination import makeChoicesLeaf
 from mapFolding.measure import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
-from mapFolding.semiotics import 零, 首零
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -180,7 +179,7 @@ def filterDoubleParity(pile: Pile, totalDimensions: int, leaf: Leaf) -> bool:
 	----------
 	[1] `mapFolding.leafDomains.getDomainLeaf`
 
-	[2] `mapFolding.semiotics`
+	[2] `mapFolding._semiotics`
 	"""
 	if leaf != 首零(totalDimensions) + 零:
 		return True

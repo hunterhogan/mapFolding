@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from mapFolding import pileOrigin
-from mapFolding.measure import 工dimensionTail
-from mapFolding.semiotics import 零
-from mapFolding.leafDomains import getDomainLeaf
+from mapFolding import pileOrigin, 零
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
+from mapFolding.leafDomains import getDomainLeaf
+from mapFolding.measure import 工dimensionTail
 from typing import Any, TYPE_CHECKING
 import numpy
 import pandas

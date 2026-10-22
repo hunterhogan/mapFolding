@@ -5,6 +5,8 @@
 		}
 	],
 	"settings": {
+		"editor.fontFamily": "\"Integrated Code 火 简化字\", \"Integrated Code 火 한국인\", \"Integrated Code 火 日本\", \"Integrated Code 火 台灣\", \"Integrated Code 火 香港\", \"Sarasa Mono SC\", \"Sarasa Mono K\", \"Sarasa Mono J\", \"Sarasa Mono TC\", \"Sarasa Mono HC\", \"Sarasa Mono CL\", \"Maple Mono\", \"Maple Mono NF\", \"Maple Mono CN\", \"Maple Mono NF CN\", monospace",
+		"editor.fontLigatures": true,
 		"workbench.editorAssociations": {
 			"*.copilotmd": "vscode.markdown.preview.editor",
 		},
@@ -26,11 +28,11 @@
 	},
 	"extensions": {
 		"recommendations": [
+			"streetsidesoftware.code-spell-checker",
+			"editorconfig.editorconfig",
 			"charliermarsh.ruff",
 			"DavidAnson.vscode-markdownlint",
-			"editorconfig.editorconfig",
 			"ms-python.isort",
-			"streetsidesoftware.code-spell-checker",
 			"tombi-toml.tombi",
 		]
 	}

@@ -10,13 +10,11 @@ from gmpy2 import bit_flip, bit_mask, is_even as isEven吗, is_odd as isOdd吗
 from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
-from mapFolding import leafOrigin
-from mapFolding.beDRYElimination import makeChoicesLeaf
-from mapFolding.beDRYElimination import getIteratorOfLeaves
-from mapFolding.measure import invertLeafIn2上nDimensions, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
-from mapFolding.semiotics import 零, 首一, 首二, 首零, 首零一
+from mapFolding import leafOrigin, 零, 首一, 首二, 首零, 首零一
 from mapFolding.beDRY import mapShapeIs2上nDimensions
+from mapFolding.beDRYElimination import getIteratorOfLeaves, makeChoicesLeaf
 from mapFolding.dataBaskets import StateElimination
+from mapFolding.measure import invertLeafIn2上nDimensions, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from mapFolding.pileOptions import getChoicesLeaf
 from more_itertools import flatten
 from pprint import pprint
@@ -25,8 +23,7 @@ from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
-	from mapFolding.theTypes import ChoicesLeaf
-	from mapFolding.theTypes import Leaf, Pile
+	from mapFolding.theTypes import ChoicesLeaf, Leaf, Pile
 	import pandas
 
 #======== Boolean filters ======================================

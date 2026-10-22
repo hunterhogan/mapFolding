@@ -7,13 +7,13 @@ from bisect import bisect_left
 from functools import partial
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import raiseIfNone
+from mapFolding import 零, 首一, 首二, 首零, 首零一
 from mapFolding.beDRYElimination import getIteratorOfLeaves
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
-from mapFolding.measure import invertLeafIn2上nDimensions, 工dimension首零
-from mapFolding.semiotics import 零, 首一, 首二, 首零, 首零一
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from mapFolding.leafDomains import getLookupDomainsLeaves
+from mapFolding.measure import invertLeafIn2上nDimensions, 工dimension首零
 from mapFolding.pileOptions import getChoicesLeaf, getLookupChoicesLeaf
 from more_itertools import flatten
 from operator import add, iadd, isub, mul

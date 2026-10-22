@@ -78,6 +78,7 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
 
 [project.urls]
 Context7 = "https://context7.com/hunterhogan/mapfolding"
+Documentation = "https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/_semiotics.md"
 Donate = "https://www.patreon.com/integrated"
 Download = "https://pypi.org/project/mapFolding"
 Homepage = "https://github.com/hunterhogan/mapFolding"
@@ -113,7 +114,7 @@ NUMBA_JIT_COVERAGE = "1"  # This does not work, whether it is 0 or 1.
 # NUMBA_DISABLE_JIT = "1" # This is the only way to get coverage data
 
 [tool.setuptools]
-package-data = { "*" = ["py.typed"] }
+package-data = { "*" = ["py.typed"], mapFolding = ["_semiotics.md", "_symbols.md"] }
 packages = { find = {} }
 
 [tool.updateCitation]

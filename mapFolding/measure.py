@@ -4,7 +4,7 @@
 
 You can locate digits with value `1`, count digits with value `1`, and project or invert leaf
 values. The positional-numeral system lives in
-`mapFolding.semiotics` [1].
+`mapFolding._semiotics` [1].
 
 Contents
 --------
@@ -32,14 +32,14 @@ Functions
 
 References
 ----------
-[1] `mapFolding.semiotics`
+[1] `mapFolding._semiotics`
 """
 from __future__ import annotations
 
 from functools import cache
 from gmpy2 import bit_flip, bit_mask, bit_scan1, f_mod_2exp
 from hunterMakesPy import raiseIfNone
-from mapFolding.semiotics import 一, 零
+from mapFolding import 一, 零
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -104,7 +104,7 @@ def 工dimension首零(integerNonnegative: int, /) -> int:
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 	"""
 	return max(0, integerNonnegative.bit_length() - 1)
 
@@ -131,7 +131,7 @@ def 工dimension首一(integerNonnegative: int, /) -> int | None:
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 	"""
 	anotherInteger: int = int(bit_flip(integerNonnegative, 工dimension首零(integerNonnegative)))
 	if anotherInteger == 0:
@@ -163,7 +163,7 @@ def 工dimension首二(integerNonnegative: int, /) -> int | None:
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 	"""
 	dimensionNearest: int = 工dimension首零(integerNonnegative)
 	dimensionSecondNearest: int | None = 工dimension首一(integerNonnegative)
@@ -201,7 +201,7 @@ def 工dimension首三(integerNonnegative: int, /) -> int | None:
 
 	References
 	----------
-	[1] `mapFolding.semiotics`
+	[1] `mapFolding._semiotics`
 	"""
 	dimensionNearest: int = 工dimension首零(integerNonnegative)
 	dimensionSecondNearest: int | None = 工dimension首一(integerNonnegative)

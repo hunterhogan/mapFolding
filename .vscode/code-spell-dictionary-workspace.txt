@@ -2,8 +2,6 @@
 Abelian
 addopts
 Adham
-aefrvkyjbnbknjyerwfgvvbnjkyetwrsgjbynketwrg
-Afunction
 aggfunc
 Aichholzer
 Alcover
@@ -55,7 +53,6 @@ boolop
 boundscheck
 bsgs
 bsolute
-byugknykugnkuytnbvktvyubknutybvknutyvnkyutgvbnkyugvnuykbmv
 CAPSLOCK
 carmichaels
 Cassio
@@ -71,7 +68,6 @@ Chevauchements
 chil
 Chilton
 chunksize
-cjtrbycjrbtycrtbyvjbctbcjtyrvbcthrj
 Claudes
 clikuhnm
 clkuihfcmnlw
@@ -233,16 +229,12 @@ jitclass
 jitted
 joeis
 juxt
-jynvtjvyntbjtvyhnbjytvbnjbyntvjybvtnjytbvn
 Kaboozle
 Kahlo
 Kaseorg
-kbjngyknbjygkyjnbkynbujnykbjuyuknbkyunb
 keyfilter
-klbminyukmlbyuknubymnukybmknuybknubynhk
 Koehler
 Kplus
-kvbnutnkvutybnkutvbkntuvybkntuvtu
 kwarguments
 kwatatype
 kwonlyargs
@@ -318,7 +310,6 @@ nilpotent
 nishat
 niversal
 njit
-nkbuymknbuykbuynknbyuknbyukbnuyknuby
 nmax
 nogil
 nomnom
@@ -334,7 +325,6 @@ noqa
 Nout
 ntheory
 nthroot
-ntjyvghtvyhjnbmvhtjvthyhtyjvnbyvbjtnjytbnv
 Nucl
 nuitka
 numba
@@ -383,7 +373,6 @@ pider
 pᵢmax
 pipx
 platformdirs
-pleasedonotcrashwhileimportingtypes
 Plouffe
 polyfuncs
 polymul
@@ -544,11 +533,9 @@ vararg
 VEECH
 Villars
 visualised
-vjtbnyjtvbnyjvtynjvtbynjtyvbnjvtybnj
 Vlamos
 voidptr
 vtail
-vytnbjytvjbnjvtybnjvbtnyhjbvytjvtbyrjtbyvb
 wanbku
 Weisstein's
 Wenlin
@@ -567,7 +554,6 @@ yada
 yapf
 yeong
 Yiyang
-yjtbnivvytbnjyvjtnbjvytnjyvntjyntv
 ylabel
 ZOGRAF
 ZORICH
