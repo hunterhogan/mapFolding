@@ -6,12 +6,12 @@ from mapFolding.dataBaskets import StateMeanders
 from operator import neg
 
 @cache
-def Y7Y_walkDyckPath(intWithExtra_0b1: int) -> int:
-    """Locate the first Y7Y_Dyck-balance failure bit in `intWithExtra_0b1`.
+def walkDyckPath(intWithExtra_0b1: int) -> int:
+    """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
 
     (AI generated docstring)
 
-    You can use `Y7Y_walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
+    You can use `walkDyckPath` to find the bit that must be toggled when an arc-joining transition in
     the meander transfer matrix closes a mismatched pair [1]. The `intWithExtra_0b1` value stores one
     side of the packed boundary state with parity bits at even positions.
 
@@ -29,7 +29,7 @@ def Y7Y_walkDyckPath(intWithExtra_0b1: int) -> int:
     ----------
     The scan advances by shifting `flipExtra_0b1_Here` left by `2` each step. The scan adds `1` when
     the bit is `0` and subtracts `1` when the bit is `1`. The function returns immediately at the
-    first index where the running balance is negative in the Y7Y_Dyck-prefix sense [2].
+    first index where the running balance is negative in the Dyck-prefix sense [2].
 
     Mathematics
     -----------
@@ -46,7 +46,7 @@ def Y7Y_walkDyckPath(intWithExtra_0b1: int) -> int:
     [1] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
         Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
         https://dx.doi.org/10.1088/0305-4470/33/34/301
-    [2] Y7Y_Dyck language and balanced-parenthesis paths.
+    [2] Dyck language and balanced-parenthesis paths.
         https://en.wikipedia.org/wiki/Dyck_language
     """
     findTheExtra_0b1: int = 0
@@ -66,7 +66,7 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
     `state.lookupMeanders` in place [1]. The transition set includes new-arc insertion, left-right
-    crossing moves, and Y7Y_Dyck-path-based arc joining through `Y7Y_walkDyckPath` [2].
+    crossing moves, and Dyck-path-based arc joining through `walkDyckPath` [2].
 
     Parameters
     ----------
@@ -81,14 +81,14 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
     Transfer Steps
     --------------
     The function decrements `state.boundary`, consumes each previous `arcCode`, and accumulates the
-    next boundary dictionary. The transition for joining arches conditionally flips one Y7Y_Dyck-matched
+    next boundary dictionary. The transition for joining arches conditionally flips one Dyck-matched
     endpoint bit before packing the next `arcCode`.
 
     References
     ----------
     [1] `mapFolding.dataBaskets.StateMeanders`
 
-    [2] `Y7Y_walkDyckPath`
+    [2] `walkDyckPath`
     """
     state = prune(state)
     while 0 < state.boundary and integersWide吗(state):
@@ -113,9 +113,9 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders
             if bitsAlfaHasArcs and bitsZuluHasArcs and (bitsAlfaIsEven or bitsZuluIsEven):
                 if bitsAlfaIsEven and (not bitsZuluIsEven):
-                    bitsAlfa ^= Y7Y_walkDyckPath(bitsAlfa)
+                    bitsAlfa ^= walkDyckPath(bitsAlfa)
                 elif bitsZuluIsEven and (not bitsAlfaIsEven):
-                    bitsZulu ^= Y7Y_walkDyckPath(bitsZulu)
+                    bitsZulu ^= walkDyckPath(bitsZulu)
                 arcCodeAnalysis = (bitsZulu >> 2 << 3 | bitsAlfa) >> 2
                 if arcCodeAnalysis < state.arcCodeMaximum:
                     state.lookupMeanders[arcCodeAnalysis] = state.lookupMeanders.get(arcCodeAnalysis, 0) + meanders

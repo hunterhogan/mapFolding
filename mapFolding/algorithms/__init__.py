@@ -32,7 +32,7 @@ permutationsBilateral
 	Count bilateral stamp-folding and meander arrangements.
 permutationsBilateralConcurrent
 	Count bilateral arrangements with concurrent tasks.
-Y7Y_catalanArch
+catalanArch
 	Enumerate arch codes and count successive endpoint removals.
 """
 

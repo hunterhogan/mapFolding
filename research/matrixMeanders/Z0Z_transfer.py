@@ -1,7 +1,7 @@
 # ruff: file-ignore[print,undocumented-public-function,ambiguous-variable-name,loop-iterator-mutation]
 """Exact fixed-deficit arch transfer, using safe premature rainbow closure.
 
-No conjectured Z0Z_coefficients enter the transfer.  See note.tex for its proof.
+No conjectured coefficients enter the transfer.  See note.tex for its proof.
 State: (left closes used, right closes used, left stack size, pairing).
 The pairing lists partners on left bottom-to-top then right bottom-to-top.
 """

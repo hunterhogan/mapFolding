@@ -155,7 +155,7 @@ References
 defaultMatrixMeanders['function'].update({
     'bigInt': 'countBigInt'
     , 'bigIntTest': 'integersWide吗'
-    , 'Y7Y_Dyck': 'Y7Y_walkDyckPath'
+    , 'Dyck': 'walkDyckPath'
     , 'aggregateArcCodes': 'aggregateArcCodes'
     , 'prune': 'prune'
 })

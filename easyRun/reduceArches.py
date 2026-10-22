@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from itertools import chain
-from mapFolding.algorithms.Y7Y_catalanArch import doTheNeedful
+from mapFolding.algorithms.catalanArch import doTheNeedful
 from mapFolding.kitFilesystem import writeStringToHere, writeTriangle
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
 from pathlib import Path

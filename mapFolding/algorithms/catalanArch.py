@@ -6,13 +6,13 @@ from operator import neg
 
 def count(n: int) -> list[int]:
 	archCodeMaximum: int = ((1 << n) - 1) << n
-	Z0Z_calibrator: int = ((1 << (2 * n)) - 1) // 3 * 2
+	archCodeAlternating: int = ((1 << (2 * n)) - 1) // 3 * 2
 	bitEndpointFirst: int = 1 << (2 * n - 1)
-	archCode: int = Z0Z_calibrator
+	archCode: int = archCodeAlternating
 	histogram: list[int] = [0] * (n + 1)
 	while archCode <= archCodeMaximum:  # C(n) iterations.
 		histogram[generations(archCode, bitEndpointFirst)] += 1
-		archCode = Y7Y_advanceDyck(archCode, Z0Z_calibrator)
+		archCode = advanceDyck(archCode, archCodeAlternating)
 	return histogram[1:None]
 
 def generations(archCode: int, bitEndpointFirst: int) -> int:
@@ -40,7 +40,7 @@ def findPartnerLast(archCode: int) -> int:
 		depth += 1 - 2 * bool(archCode & bitEndpointLast)
 	return bitEndpointLast
 
-def Y7Y_advanceDyck(archCode: int, archCodeAlternating: int) -> int:
+def advanceDyck(archCode: int, archCodeAlternating: int) -> int:
 	bitPivot: int = archCode & neg(archCode)
 	archCodePivoted: int = archCode + bitPivot
 	pairsReset: int = (((archCode ^ archCodePivoted) // bitPivot) >> 2) + 1
@@ -68,5 +68,4 @@ jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True, loc
 	'index': oneByte,
 	'n': oneByte,
 	'pairsReset': two_n_bits,
-	'Z0Z_calibrator': two_n_bits,
 })

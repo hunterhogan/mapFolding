@@ -21,7 +21,7 @@ Functions
 	makePrunePandas
 		Generate a dataframe meander module with formula pruning.
 	makeShare
-		Write the extracted Y7Y_Dyck-path function with explicit Numba signatures.
+		Write the extracted Dyck-path function with explicit Numba signatures.
 """
 from __future__ import annotations
 
@@ -485,11 +485,11 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Write the extracted Y7Y_Dyck-path function with explicit Numba signatures.
+	"""Write the extracted Dyck-path function with explicit Numba signatures.
 
 	(AI generated docstring)
 
-	You can use this function to extract the configured Y7Y_Dyck-path callable from `astModule`,
+	You can use this function to extract the configured Dyck-path callable from `astModule`,
 	remove source decorators, and attach Numba compilation [1] with explicit signed-integer
 	and arc-code signatures. The generated module retains the callable body and adds datatype
 	imports. The writer resolves the output filename and returns the written path.
@@ -533,7 +533,7 @@ def makeShare(astModule: ast.Module, identifiers: Default | None = None, **overr
 	[4] `mapFolding.kitAST.matrixMeanders.makeModules`
 	"""
 	identifiers = identifiers or defaultMatrixMeanders
-	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Y7Y_Dyck'])
+	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
 	ingredients.astFunctionDef.decorator_list.clear()
 	parametersNumba: ParametersNumba = parametersNumbaLight
 	parametersNumba['signature_or_function'] = ("int64(int64)", f"{形ArcCode.__name__}({形ArcCode.__name__})")
@@ -552,7 +552,7 @@ def makeModulesMeanders() -> None:
 	(AI generated docstring)
 
 	You can use this function to write width-guarded counting, state pruning, array pruning,
-	dataframe pruning, and the compiled shared Y7Y_Dyck-path function.
+	dataframe pruning, and the compiled shared Dyck-path function.
 	Generation uses `mapFolding.kitAST.theSSOT.defaultMatrixMeanders` [1]. Dependent variants
 	load preceding generated files. The function writes the configured output modules.
 

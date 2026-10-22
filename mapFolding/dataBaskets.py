@@ -59,7 +59,7 @@ from gmpy2 import bit_mask
 from humpy_cytoolz import (
 	assoc as associateKeyValue, compose, dissoc as dissociatePile, first, groupby as toolz_groupby, merge, valfilter as filterLeaf)
 from hunterMakesPy import CallableFunction, raiseIfNone
-from itertools import combinations as Y7Y_combinations, filterfalse
+from itertools import combinations, filterfalse
 from mapFolding.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
 from mapFolding.beDRY import getTotalLeaves, validateMapShape
 from mapFolding.dataStructures import makeConnectionGraph, makeDataContainer
@@ -940,15 +940,15 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return deconstructedPermutationSpace
 
 	def deconstructDomainsCombined(self, leaves: Sequence[Leaf], leavesDomain: Iterable[Sequence[Pile]]) -> list[PermutationSpace]:
-		"""Create branches for compatible Z0Z_combinations of leaf pile positions.
+		"""Create branches for compatible combinations of leaf pile positions.
 
 		You can match each leaf in `leaves` with the corresponding pile position in each item of
 		`leavesDomain` and create a new pinned branch for each compatible combination. If every requested
-		leaf is already pinned, you receive the original object without checking the Z0Z_combinations.
+		leaf is already pinned, you receive the original object without checking the combinations.
 
 		Source normalization
 		--------------------
-		You normalize the source permutation space before testing Z0Z_combinations. Replace the source with the
+		You normalize the source permutation space before testing combinations. Replace the source with the
 		returned branches when maintaining a disjoint search-space collection.
 
 		Parameters
@@ -961,7 +961,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		Returns
 		-------
 		deconstructedPermutationSpace : list[PermutationSpace]
-			New branches for compatible Z0Z_combinations, or the original object when all requested leaves are
+			New branches for compatible combinations, or the original object when all requested leaves are
 			pinned.
 		"""
 		deconstructedPermutationSpace: list[PermutationSpace] = []
@@ -1559,7 +1559,7 @@ class StateElimination:
 						boxOfPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
 			for groupedParity in boxOfPileCreaseByParity:
 				if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
-					for (pile, pileCrease), (pileComparand, pileComparandCrease) in Y7Y_combinations(sorted(groupedParity), 2)):
+					for (pile, pileCrease), (pileComparand, pileComparandCrease) in combinations(sorted(groupedParity), 2)):
 					return True
 		return False
 

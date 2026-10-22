@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this package to regenerate width-guarded counting, pruning variants, width tests,
-and the shared compiled Y7Y_Dyck-path function.
+and the shared compiled Dyck-path function.
 
 Modules
 -------
