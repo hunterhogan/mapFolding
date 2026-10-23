@@ -36,22 +36,23 @@ from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.transformationTools import unparseFindReplace
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
+from inspect import get_annotations
 from mapFolding.kitAST import IfThis
 from typing import cast, TYPE_CHECKING
 import ast
 import dataclasses
 
 if TYPE_CHECKING:
-	from collections.abc import Callable
+	from _typeshed import AnnotationForm
+	from collections.abc import Callable, Iterable
 	from typing import Any, Literal
 
-# DEVELOPMENT `astToolkit` was created after these dataclasses specifically to make all of this
-# easier. That's why they don't use `astToolkit` idioms very often. Try to apply some of these
-# concepts https://github.com/python/typing/discussions/2092.
+# DEVELOPMENT Try to apply more of these concepts https://github.com/python/typing/discussions/2092.
 
 # TODO Figure out how to deconstruct dataclasses with `astToolkit`. It's your effing package, Hunter.
 # The downstream code is difficult to change. Hell, the UPSTREAM dataclasses are difficult to change
-# because a change can break the ast transformations.
+# because a change can break the ast transformations. `astToolkit` was created after these dataclasses
+# specifically to make all of this easier. That's why they don't use `astToolkit` idioms very often.
 @dataclasses.dataclass(slots=True)
 class ShatteredDataclass:
 	"""Store field syntax for removing and reconstructing a dataclass.
@@ -282,9 +283,8 @@ class DeReConstructField2ast:
 		(AI generated docstring)
 
 		This method records settings from `field`, locates the source annotation in
-		`dataclassClassDef`,
-		and initializes the reusable syntax and import ledger. Array construction uses NumPy [1]
-		when `field.metadata` supplies a truthy `dtype`.
+		`dataclassClassDef`, and initializes the reusable syntax and import ledger. Array construction
+		uses NumPy [1] when `field.metadata` supplies a truthy `dtype`.
 
 		Parameters
 		----------
@@ -348,7 +348,8 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	(AI generated docstring)
 
 	You can use this function to import the dataclass identified by `logicalPathDataclass` and
-	`identifierDataclass`, then obtain syntax for each field in declaration order. The result
+	`identifierDataclass`, then obtain syntax for each field in dataclass order, including inherited
+	fields. Each annotation and its imports come from the class that declares the field. The result
 	supports replacing access through `identifierDataclassInstance` with individual field names.
 	The returned container is a `ShatteredDataclass` [1].
 
@@ -384,37 +385,34 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 		```python
 		shatterDataclass(*findDataclass(ingredientsFunction))
 		```
-
-	References
-	----------
-	[1] `ShatteredDataclass`
-
-	[2] Python dataclass fields and initialization.
-		https://docs.python.org/3/library/dataclasses.html
-	[3] `mapFolding.kitAST.mapFolding._count`
 	"""
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), identifierDataclass)
-	if not dataclassClassDef:
-		message: str = f"I could not find `{identifierDataclass = }` in `{logicalPathDataclass = }`."
-		raise ValueError(message)
+	dataclass: type = importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)
+	boxOfFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(dataclass)  # ty: ignore[invalid-argument-type]
+	matryoshkas: Iterable[type] = filter(dataclasses.is_dataclass, dataclass.__mro__)  # ty: ignore[invalid-assignment]
+	for dataclass in matryoshkas:
+		astClassDef: ast.ClassDef = raiseIfNone(extractClassDef(parseLogicalPath2astModule(dataclass.__module__), dataclass.__name__))
+		annotations: dict[str, AnnotationForm] = get_annotations(dataclass)
+		for aField in dataclasses.fields(dataclass):  # ty: ignore[invalid-argument-type]
+			if aField.name in annotations and aField in boxOfFields:
+				dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(dataclass.__module__, astClassDef, identifierDataclassInstance, aField)
 
 	countingVariable: str | None = None
-	for aField in dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)):
+	for aField in boxOfFields:
 		Official_fieldOrder.append(aField.name)
-		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
 		if aField.metadata.get('theCountingIdentifier', False):
-			countingVariable = dictionaryDeReConstruction[aField.name].name
+			countingVariable = aField.name
+
 	if countingVariable is None:
-		message = f"I could not find the counting variable in `{identifierDataclass = }` in `{logicalPathDataclass = }`."
+		message: str = f"I could not find the counting variable in `{identifierDataclass = }` in `{logicalPathDataclass = }`."
 		raise ValueError(message)
 
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
 		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
-		lookupFields=dictionaryDeReConstruction,
+		lookupFields={field: dictionaryDeReConstruction[field] for field in Official_fieldOrder},
 		boxOf_argAnnotated=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
 		boxOf_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
 		boxOfStaticArrays=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].constructor == 'array' and not dictionaryDeReConstruction[field].init)],

@@ -273,6 +273,7 @@ mathbb
 MATHEMATICA
 Mathématiques
 mathrm
+matryoshkas
 maxdeg
 mcpu
 meandric

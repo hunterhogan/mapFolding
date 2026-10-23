@@ -27,20 +27,16 @@ References
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
-from astToolkit.changeDef import extractClassDef, inlineFunctionDef
+from astToolkit.changeDef import inlineFunctionDef
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
-from astToolkit.filesystem import parseLogicalPath2astModule
 from hunterMakesPy import raiseIfNone
-from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import IfThis, toDisk
-from mapFolding.kitAST.dataclasses import (
-	DeReConstructField2ast, findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass)
+from mapFolding.kitAST.dataclasses import findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.paths import getLogicalPath
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
 from typing import TYPE_CHECKING
 import ast
-import dataclasses
 import operator
 
 if TYPE_CHECKING:
@@ -488,47 +484,8 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
 
-	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
-
-#-START add the parallel state fields to the count function ------------------------------------------------
-	dataclassBaseFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass))
 	名dataclassParallel: identifierDotAttribute = identifierDataclass + 'Parallel'
-	dataclassFieldsParallel: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(importLogicalPath2Identifier(logicalPathDataclass, 名dataclassParallel))
-	onlyParallelFields: list[dataclasses.Field[Any]] = [field for field in dataclassFieldsParallel if field.name not in [fieldBase.name for fieldBase in dataclassBaseFields]]
-
-	Official_fieldOrder: list[str] = []
-	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
-
-	dataclassClassDef: ast.ClassDef | None = extractClassDef(parseLogicalPath2astModule(logicalPathDataclass), 名dataclassParallel)
-	if not dataclassClassDef:
-		message = f"I could not find `{名dataclassParallel = }` in `{logicalPathDataclass = }`."
-		raise ValueError(message)
-
-	for aField in onlyParallelFields:
-		Official_fieldOrder.append(aField.name)
-		dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(logicalPathDataclass, dataclassClassDef, identifierDataclassInstance, aField)
-
-	shatteredDataclassParallel = ShatteredDataclass(
-		countingVariableAnnotation=shatteredDataclass.countingVariableAnnotation,
-		countingVariableName=shatteredDataclass.countingVariableName,
-		lookupFields={**shatteredDataclass.lookupFields, **dictionaryDeReConstruction},
-		boxOf_argAnnotated=shatteredDataclass.boxOf_argAnnotated + [dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
-		boxOf_keyword_field__field4init=shatteredDataclass.boxOf_keyword_field__field4init + [dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
-		boxOfAnnotations=shatteredDataclass.boxOfAnnotations + [dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
-		boxOfName4Parameters=shatteredDataclass.boxOfName4Parameters + [dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
-		boxOfUnpack=shatteredDataclass.boxOfUnpack + [Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
-		map_stateDOTfield2Name={**shatteredDataclass.map_stateDOTfield2Name, **{dictionaryDeReConstruction[field].ast_nameDOTname: dictionaryDeReConstruction[field].astName for field in Official_fieldOrder}},
-		)
-	shatteredDataclassParallel.fragments4AssignmentOrParameters = Make.Tuple(shatteredDataclassParallel.boxOfName4Parameters, Make.Store())
-	shatteredDataclassParallel.repack = Make.Assign([Make.Name(identifierDataclassInstance)], value=Make.Call(Make.Name(名dataclassParallel), list_keyword=shatteredDataclassParallel.boxOf_keyword_field__field4init))
-	shatteredDataclassParallel.signatureReturnAnnotation = Make.Subscript(Make.Name('tuple'), Make.Tuple(shatteredDataclassParallel.boxOfAnnotations))
-
-	shatteredDataclassParallel.imports.update(*(dictionaryDeReConstruction[field].ledger for field in Official_fieldOrder))
-	shatteredDataclassParallel.imports.addImportFrom_asStr(logicalPathDataclass, 名dataclassParallel)
-	shatteredDataclassParallel.imports.update(shatteredDataclass.imports)
-	shatteredDataclassParallel.imports.removeImportFrom(logicalPathDataclass, identifierDataclass)
-
-#-END add the parallel state fields to the count function ------------------------------------------------
+	shatteredDataclassParallel: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名dataclassParallel, identifierDataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclassParallel)

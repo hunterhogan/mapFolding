@@ -240,11 +240,12 @@ class StateMapFolding:
 			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 
 @dataclasses.dataclass(slots=True)
-class StateMapFoldingSymmetric:
+class StateMapFoldingSymmetric(StateMapFolding):
 	"""Store mutable insertion-search state for symmetric map foldings.
 
 	(AI generated docstring)
 
+	Shared fields and array initialization are inherited from `StateMapFolding`.
 	You can use this class to carry a folding search between initialization and algorithm execution.
 	Construction derives the dimension count, leaf count, and connection graph from the supplied
 	dimension lengths. Counting algorithms update the counters, cursors, and leaf-neighbor arrays.
@@ -319,50 +320,14 @@ class StateMapFoldingSymmetric:
 
 	"""
 
-	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True)
-	"""Dimensions of the map being analyzed for folding patterns."""
-
 	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
 	"""Current count of symmetric folds."""
 
-	gap1ndex: 形Elephino = 形Elephino(0)
-	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
-	gap1ndexCeiling: 形Elephino = 形Elephino(0)
-	"""The upper bound of `gap1ndex`."""
-	次Dimension: 形TotalLeaves = 形TotalLeaves(0)
-	"""The current 0-indexed position of the dimension during computation."""
-	次Leaf: 形TotalLeaves = 形TotalLeaves(0)
-	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
-	次MiniGap: 形Elephino = 形Elephino(0)
-	"""The current 0-indexed position of a 'gap' in a loop during computation."""
-	leaf1ndex: 形TotalLeaves = 形TotalLeaves(1)
-	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
-	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
-	"""Target leaf for connection operations."""
-	dimensionsUnconstrained: 形TotalLeaves = 形TotalLeaves(0)
-	"""Count of dimensions not subject to folding constraints."""
-
-	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array tracking computed number of dimensions with gaps."""
-	gapRangeStart: 形ArrayElephino1D = dataclasses.field(default_factory=lambda: 形ArrayElephino1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayElephino1D)[1])[0]})
-	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array tracking the leaves above the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array tracking the leaves below the current leaf, `leaf1ndex`, during computation."""
 	leafComparison: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
 	"""Array for finding symmetric folds."""
 
-	connectionGraph: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
-	"""Unchanging array representing connections between all leaves."""
-	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
-	"""Unchanging total number of dimensions in the map."""
 	indices: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
 	"""Precomputed index pairs for symmetric fold checking."""
-	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
-	"""Unchanging total number of leaves in the map."""
 
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value.
@@ -373,27 +338,14 @@ class StateMapFoldingSymmetric:
 		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
 
 		"""
-		self.totalDimensions = 形TotalLeaves(len(self.mapShape))
-		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
-
+		super(StateMapFoldingSymmetric, self).__post_init__()
 		totalLeavesAsInt = int(self.totalLeaves)
-		self.connectionGraph = makeConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
 		arrayIndexCoordinates: 形ArraySelector = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2))
 		self.indices = numpy.stack(((arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1)
 							, (-2 - arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1))
 							, axis=2).astype(self.__dataclass_fields__['indices'].metadata['dtype'], copy=False)
 
-		if not self.gapsWhere.shape:
-			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
-		if not self.countDimensionsGapped.shape:
-			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if not self.gapRangeStart.shape:
-			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if not self.leafAbove.shape:
-			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if not self.leafBelow.shape:
-			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
 		if not self.leafComparison.shape:
 			self.leafComparison = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
 
