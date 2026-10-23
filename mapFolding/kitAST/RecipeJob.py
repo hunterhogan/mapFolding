@@ -347,7 +347,7 @@ def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheor
 	Field Initialization
 	--------------------
 	Scalar values become integers, optionally wrapped in their datatype constructor. Array values
-	become array-constructor arguments. Tuple construction uses the map dimensions.
+	become array-constructor arguments. Tuple construction uses the field's annotated element type.
 	Used field values are inserted at the start of the body in reverse parameter order.
 	Recognized field parameters are removed from the signature.
 
@@ -385,29 +385,32 @@ def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheor
 	boxOfIdentifiersNotUsed: list[str] = list(set(boxOf_arg_arg) - set(boxOfIdentifiers))
 
 	for ast_arg in boxOf_argCuzMyBrainRefusesToThink:
-		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).lookupAnnAssignWithConstructor:
+		if ast_arg.arg in raiseIfNone(job.shatteredDataclass).lookupFields:
 			if ast_arg.arg in boxOfIdentifiersNotUsed:
 				pass
 			else:
-				ImaAnnAssign, elementConstructor = raiseIfNone(job.shatteredDataclass).Z0Z_field2AnnAssign[ast_arg.arg]
-				match elementConstructor:
+				field = raiseIfNone(job.shatteredDataclass).lookupFields[ast_arg.arg]
+				match field.constructor:
 					case 'scalar':
 						if job.initializationConstructor:
-							cast('ast.Constant', cast('ast.Call', ImaAnnAssign.value).args[0]).value = int(eval(f"job.state.{ast_arg.arg}"))  # ruff: ignore[suspicious-eval-usage]
+							ImaAnnAssign: ast.AnnAssign | ast.Assign = Make.AnnAssign(Make.Name(field.name, Make.Store()), field.astAnnotation,
+								Make.Call(field.astConstructor, [Make.Constant(int(getattr(job.state, field.name)))]))
 						else:
-							ImaAnnAssign = Make.Assign([Make.Name(ast_arg.arg, Make.Store())], Make.Constant(int(eval(f"job.state.{ast_arg.arg}"))))  # ruff: ignore[suspicious-eval-usage]
+							ImaAnnAssign = Make.Assign([Make.Name(field.name, Make.Store())], Make.Constant(int(getattr(job.state, field.name))))
 					case 'array':
-						dataAsStrRLE: str = autoDecodingRLE(eval(f"job.state.{ast_arg.arg}"), assumeAddSpaces=True)  # ruff: ignore[suspicious-eval-usage]
+						dataAsStrRLE: str = autoDecodingRLE(getattr(job.state, field.name), assumeAddSpaces=True)
 						dataAs_astExpr: ast.expr = cast('ast.Expr', ast.parse(dataAsStrRLE).body[0]).value
-						cast('ast.Call', ImaAnnAssign.value).args = [dataAs_astExpr]
-					case _:
+						ImaAnnAssign = Make.Assign([Make.Name(field.name, Make.Store())], Make.Call(field.astConstructor,
+							[dataAs_astExpr], [Make.keyword('dtype', field.astAnnotation)]))
+					case 'tuple':
 						boxOf_exprDOTannotation: list[ast.expr] = []
 						boxOf_exprDOTvalue: list[ast.expr] = []
-						for dimension in job.state.mapShape:
-							boxOf_exprDOTannotation.append(Make.Name(elementConstructor))
-							boxOf_exprDOTvalue.append(Make.Call(Make.Name(elementConstructor), [Make.Constant(dimension)]))
-						cast('ast.Tuple', cast('ast.Subscript', cast('ast.AnnAssign', ImaAnnAssign).annotation).slice).elts = boxOf_exprDOTannotation
-						cast('ast.Tuple', ImaAnnAssign.value).elts = boxOf_exprDOTvalue
+						for dimension in getattr(job.state, field.name):
+							boxOf_exprDOTannotation.append(field.astConstructor)
+							boxOf_exprDOTvalue.append(Make.Call(field.astConstructor, [Make.Constant(dimension)]))
+						ImaAnnAssign = Make.AnnAssign(Make.Name(field.name, Make.Store()),
+							Make.Subscript(cast('ast.Subscript', field.astAnnotation).value, Make.Tuple(boxOf_exprDOTannotation)),
+							Make.Tuple(boxOf_exprDOTvalue))
 
 				ingredientsFunction.astFunctionDef.body.insert(0, ImaAnnAssign)
 

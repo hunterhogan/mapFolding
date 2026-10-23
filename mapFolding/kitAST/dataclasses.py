@@ -34,17 +34,16 @@ from astToolkit.changeDef import extractClassDef
 from astToolkit.containers import IngredientsFunction, LedgerOfImports
 from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.transformationTools import unparseFindReplace
-from copy import deepcopy
-from hunterMakesPy import errorL33T, raiseIfNone
+from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from mapFolding.kitAST import IfThis
-from typing import TYPE_CHECKING
+from typing import cast, TYPE_CHECKING
 import ast
 import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from typing import Any
+	from typing import Any, Literal
 
 # DEVELOPMENT `astToolkit` was created after these dataclasses specifically to make all of this
 # easier. That's why they don't use `astToolkit` idioms very often. Try to apply some of these
@@ -69,10 +68,8 @@ class ShatteredDataclass:
 		Type annotation for the counting variable extracted from the dataclass.
 	countingVariableName : ast.Name
 		AST name node representing the counting variable identifier.
-	lookupAnnAssignWithConstructor : dict[str, ast.AnnAssign | ast.Assign]
-		Maps field names to their corresponding AST assignment expressions for initialization.
-	Z0Z_field2AnnAssign : dict[str, tuple[ast.AnnAssign | ast.Assign, str]]
-		Field identifiers mapped to initialization syntax and constructor classification.
+	lookupFields : dict[str, DeReConstructField2ast]
+		Field identifiers mapped to their annotations, construction settings, and imports.
 	fragments4AssignmentOrParameters : ast.Tuple
 		Ordered field tuple reused in result expressions and tuple assignment targets.
 	imports : LedgerOfImports
@@ -112,11 +109,7 @@ class ShatteredDataclass:
 	countingVariableName: ast.Name
 	"""AST name node representing the counting variable identifier."""
 
-	lookupAnnAssignWithConstructor: dict[str, ast.AnnAssign | ast.Assign] = dataclasses.field(default_factory=dict[str, ast.AnnAssign | ast.Assign])
-	"""Maps field names to their corresponding AST assignment expressions for initialization."""
-
-	Z0Z_field2AnnAssign: dict[str, tuple[ast.AnnAssign | ast.Assign, str]] = dataclasses.field(default_factory=dict[str, tuple[ast.AnnAssign | ast.Assign, str]])
-	"""Temporary mapping for field assignments with constructor type information."""
+	lookupFields: dict[str, DeReConstructField2ast] = dataclasses.field(default_factory=dict[str, 'DeReConstructField2ast'])
 
 	fragments4AssignmentOrParameters: ast.Tuple = dataclasses.field(default_factory=lambda: Make.Tuple([Make.Name("dummyElement")]))
 	"""AST tuple used as target for assignment to capture returned field values."""
@@ -173,7 +166,7 @@ class DeReConstructField2ast:
 	Constructor Selection
 	---------------------
 	Truthy `dtype` metadata selects array construction. A simple name annotation selects scalar
-	construction. A subscript annotation selects tuple syntax with an optional `elementConstructor`.
+	construction. A tuple annotation supplies its element constructor without resolving its alias.
 
 	Attributes
 	----------
@@ -209,10 +202,10 @@ class DeReConstructField2ast:
 		Source annotation syntax extracted for the field.
 	ast_argAnnotated : ast.arg
 		AST function argument with type annotation for parameter specification.
-	astAnnAssignConstructor : ast.AnnAssign | ast.Assign
-		Field initialization syntax selected from annotation shape and metadata.
-	Z0Z_hack : tuple[ast.AnnAssign | ast.Assign, str]
-		Initialization syntax paired with its scalar, array, or element-constructor classification.
+	constructor : Literal['scalar', 'array', 'tuple']
+		Construction selected from the source annotation and field metadata.
+	astConstructor : ast.expr
+		Constructor syntax for scalar values, arrays, or individual tuple elements.
 
 	References
 	----------
@@ -280,11 +273,8 @@ class DeReConstructField2ast:
 	ast_argAnnotated: ast.arg = dataclasses.field(init=False)
 	"""AST function argument with type annotation for parameter specification."""
 
-	astAnnAssignConstructor: ast.AnnAssign | ast.Assign = dataclasses.field(init=False)
-	"""AST assignment statement for field initialization with appropriate constructor."""
-
-	Z0Z_hack: tuple[ast.AnnAssign | ast.Assign, str] = dataclasses.field(init=False)
-	"""Temporary tuple containing assignment statement and constructor type information."""
+	constructor: Literal['scalar', 'array', 'tuple'] = dataclasses.field(init=False)
+	astConstructor: ast.expr = dataclasses.field(init=False)
 
 	def __post_init__(self, dataclassesDOTdataclassLogicalPathModule: identifierDotAttribute, dataclassClassDef: ast.ClassDef, dataclassesDOTdataclassInstanceIdentifier: str, field: dataclasses.Field[Any]) -> None:
 		"""I use this to prepare field syntax during dataclass decomposition.
@@ -327,7 +317,7 @@ class DeReConstructField2ast:
 		self.ast_keyword_field__field = Make.keyword(self.name, self.astName)
 		self.ast_nameDOTname = Make.Attribute(Make.Name(dataclassesDOTdataclassInstanceIdentifier), self.name)
 
-		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.Name](
+		self.astAnnotation = raiseIfNone(NodeTourist[ast.AnnAssign, ast.expr](
 			findThis=Be.AnnAssign.targetIs(IfThis.isNameIdentifier(self.name))
 			, doThat=Then.extractIt(DOT.annotation)
 		).captureLastMatch(dataclassClassDef))
@@ -336,36 +326,21 @@ class DeReConstructField2ast:
 
 		dtype = self.metadata.get('dtype', None)
 		if dtype:
-			moduleWithLogicalPath: identifierDotAttribute = 'numpy'
-			annotationType = 'ndarray'
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, annotationType)
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, 'dtype')
-			axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Name('uint8'))
-			dtype_asnameName: ast.Name = self.astAnnotation
-			if dtype_asnameName.id == '形ArrayTotalLeaves3D':
-				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8'), Make.Name('uint8')]))
-			if dtype_asnameName.id == '形ArrayTotalLeaves2D':
-				axesSubscript = Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('uint8'), Make.Name('uint8')]))
-			ast_expr = Make.Subscript(Make.Name(annotationType), Make.Tuple([axesSubscript, Make.Subscript(Make.Name('dtype'), dtype_asnameName)]))
-			constructor = 'array'
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, constructor)
-			dtypeIdentifier: str = dtype.__name__
-			self.ledger.addImportFrom_asStr(moduleWithLogicalPath, dtypeIdentifier, dtype_asnameName.id)
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, ast_expr, Make.Call(Make.Name(constructor), list_keyword=[Make.keyword('dtype', dtype_asnameName)]))
-			self.astAnnAssignConstructor = Make.Assign([self.astName], Make.Call(Make.Name(constructor), list_keyword=[Make.keyword('dtype', dtype_asnameName)]))
-			self.Z0Z_hack = (self.astAnnAssignConstructor, 'array')
+			self.constructor = 'array'
+			self.astConstructor = Make.Name('array')
+			self.ledger.addImportFrom_asStr('numpy', 'array')
 		elif isinstance(self.astAnnotation, ast.Name):
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, Make.Call(self.astAnnotation, [Make.Constant(-errorL33T)]))
-			self.Z0Z_hack = (self.astAnnAssignConstructor, 'scalar')
+			self.constructor = 'scalar'
+			self.astConstructor = self.astAnnotation
 		elif isinstance(self.astAnnotation, ast.Subscript):
-			elementConstructor: str = self.metadata.get('elementConstructor', 'generic')
-			if elementConstructor != 'generic':
-				self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, elementConstructor)
-			takeTheTuple = deepcopy(self.astAnnotation.slice)
-			self.astAnnAssignConstructor = Make.AnnAssign(self.astName, self.astAnnotation, takeTheTuple)
-			self.Z0Z_hack = (self.astAnnAssignConstructor, elementConstructor)
+			self.constructor = 'tuple'
+			self.astConstructor = cast('ast.Tuple', self.astAnnotation.slice).elts[0]
+			if isinstance(self.astConstructor, ast.Name):
+				self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astConstructor.id)
 		if isinstance(self.astAnnotation, ast.Name):
 			self.ledger.addImportFrom_asStr(dataclassesDOTdataclassLogicalPathModule, self.astAnnotation.id)
+			if dtype:
+				self.ledger.addImportFrom_asStr('numpy', dtype.__name__, self.astAnnotation.id)
 
 def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDataclass: str, identifierDataclassInstance: str) -> ShatteredDataclass:
 	"""Decompose a source dataclass into field and reconstruction syntax.
@@ -380,8 +355,8 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	Field Metadata
 	--------------
 	The last field with truthy `theCountingIdentifier` metadata supplies the counting identifier.
-	Array fields use `dtype` metadata, and tuple fields may
-	use `elementConstructor`. Fields with `init=False` are excluded from constructor keywords [2].
+	Array fields use `dtype` metadata. Tuple element constructors retain the source annotation's
+	alias names. Fields with `init=False` are excluded from constructor keywords [2].
 
 	Parameters
 	----------
@@ -439,12 +414,11 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	shatteredDataclass = ShatteredDataclass(
 		countingVariableAnnotation=dictionaryDeReConstruction[countingVariable].astAnnotation,
 		countingVariableName=dictionaryDeReConstruction[countingVariable].astName,
-		lookupAnnAssignWithConstructor={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].astAnnAssignConstructor for field in Official_fieldOrder},
-		Z0Z_field2AnnAssign={dictionaryDeReConstruction[field].name: dictionaryDeReConstruction[field].Z0Z_hack for field in Official_fieldOrder},
+		lookupFields=dictionaryDeReConstruction,
 		boxOf_argAnnotated=[dictionaryDeReConstruction[field].ast_argAnnotated for field in Official_fieldOrder],
 		boxOf_keyword_field__field4init=[dictionaryDeReConstruction[field].ast_keyword_field__field for field in Official_fieldOrder if dictionaryDeReConstruction[field].init],
-		boxOfStaticArrays=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'array' and not dictionaryDeReConstruction[field].init)],
-		boxOfStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].Z0Z_hack[1] == 'scalar' and not dictionaryDeReConstruction[field].init)],
+		boxOfStaticArrays=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].constructor == 'array' and not dictionaryDeReConstruction[field].init)],
+		boxOfStaticScalars=[dictionaryDeReConstruction[field].name for field in Official_fieldOrder if (dictionaryDeReConstruction[field].constructor == 'scalar' and not dictionaryDeReConstruction[field].init)],
 		boxOfAnnotations=[dictionaryDeReConstruction[field].astAnnotation for field in Official_fieldOrder],
 		boxOfName4Parameters=[dictionaryDeReConstruction[field].astName for field in Official_fieldOrder],
 		boxOfUnpack=[Make.AnnAssign(dictionaryDeReConstruction[field].astName, dictionaryDeReConstruction[field].astAnnotation, dictionaryDeReConstruction[field].ast_nameDOTname) for field in Official_fieldOrder],
