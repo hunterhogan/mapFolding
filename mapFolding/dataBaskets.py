@@ -1,10 +1,9 @@
 # TODO `StateMapFolding` restructure https://github.com/python/typing/discussions/2092
-# pyright: reportUnnecessaryComparison=false, reportAssignmentType=false, reportAttributeAccessIssue=false
+# pyright: reportUnnecessaryComparison=false
 #=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
 #pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false
 #=SIN= Ruff suppression: Numba StructRef integration requires its private payload utilities and native value accessor.
 #ruff: file-ignore[function-call-in-dataclass-default-argument]
-#ty: ignore[invalid-assignment]
 # ty: ignore[redundant-condition]
 """Store folding and meander computation state and named array layouts.
 
@@ -176,8 +175,7 @@ class StateMapFolding:
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
 	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
 	"""Target leaf for connection operations."""
-
-	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
+	dimensionsUnconstrained: 形TotalLeaves = 形TotalLeaves(0)
 	"""Count of dimensions not subject to folding constraints."""
 
 	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
@@ -230,8 +228,6 @@ class StateMapFolding:
 
 		self.connectionGraph = makeConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
 
-		if self.dimensionsUnconstrained is None:
-			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
 		if not self.gapsWhere.shape:
 			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
 		if not self.countDimensionsGapped.shape:
@@ -343,8 +339,7 @@ class StateMapFoldingSymmetric:
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
 	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
 	"""Target leaf for connection operations."""
-
-	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=None, init=True)
+	dimensionsUnconstrained: 形TotalLeaves = 形TotalLeaves(0)
 	"""Count of dimensions not subject to folding constraints."""
 
 	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
@@ -389,8 +384,6 @@ class StateMapFoldingSymmetric:
 							, (-2 - arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1))
 							, axis=2).astype(self.__dataclass_fields__['indices'].metadata['dtype'], copy=False)
 
-		if self.dimensionsUnconstrained is None:
-			self.dimensionsUnconstrained = 形TotalLeaves(int(self.totalDimensions))
 		if not self.gapsWhere.shape:
 			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
 		if not self.countDimensionsGapped.shape:

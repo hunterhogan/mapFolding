@@ -5,6 +5,7 @@ This is a generated file; edit the source file.
 from __future__ import annotations
 
 from itertools import chain
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
 from typing import Literal, LiteralString
@@ -1093,19 +1094,15 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     return countTotal
 
 def _A000136(n: int) -> int:
-    from mapFolding.basecamp import countFolds
     return countFolds(makeMapShape('A000136', n))
 
 def _A000682(n: int) -> int:
-    from mapFolding.basecamp import countMeanders
     state = countMeanders('semi', n)
     return state.totalMeanders
 
 def _A007822(n: int) -> int:
-    from mapFolding.basecamp import countFoldsSymmetric
     return countFoldsSymmetric(makeMapShape('A007822', n))
 
 def _A005316(n: int) -> int:
-    from mapFolding.basecamp import countMeanders
     state = countMeanders('meanders', n)
     return state.totalMeanders
