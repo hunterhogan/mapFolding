@@ -32,12 +32,11 @@ from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFun
 from astToolkit.filesystem import parseLogicalPath2astModule
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
-from mapFolding.kitAST import IfThis
+from mapFolding.kitAST import IfThis, toDisk
 from mapFolding.kitAST.dataclasses import (
 	DeReConstructField2ast, findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass)
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.paths import getLogicalPath
-from mapFolding.kitAST.prefab import toDisk
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
 from typing import TYPE_CHECKING
 import ast

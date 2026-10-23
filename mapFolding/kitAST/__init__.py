@@ -64,4 +64,8 @@ from mapFolding.kitAST._toolIfThis import IfThis as IfThis
 # isort: split
 from mapFolding.kitAST._containers import Settings形 as Settings形
 
+# isort: split
+from mapFolding.kitAST._prefab import (
+	removeFunctionDef as removeFunctionDef, renameFunctionDef as renameFunctionDef, renameName as renameName, toDisk as toDisk)
+
 # TODO Problem: `LedgerOfImports` from `astToolkit` does not handle TYPE_CHECKING blocks very well.

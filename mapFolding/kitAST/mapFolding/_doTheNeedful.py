@@ -16,9 +16,8 @@ from __future__ import annotations
 from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
 from astToolkit.changeDef import inlineFunctionDef
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
-from mapFolding.kitAST import IfThis
+from mapFolding.kitAST import IfThis, toDisk
 from mapFolding.kitAST.dataclasses import findDataclass
-from mapFolding.kitAST.prefab import toDisk
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 import ast

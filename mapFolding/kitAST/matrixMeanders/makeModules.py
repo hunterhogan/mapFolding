@@ -29,10 +29,9 @@ from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis
+from mapFolding.kitAST import IfThis, removeFunctionDef, renameFunctionDef, toDisk
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
-from mapFolding.kitAST.prefab import removeFunctionDef, renameFunctionDef, toDisk
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from mapFolding.theTypes import 形ArcCode
 from operator import getitem
