@@ -1,10 +1,3 @@
-# TODO `StateMapFolding` restructure https://github.com/python/typing/discussions/2092
-# pyright: reportUnnecessaryComparison=false
-#=SIN= Pyright suppression: Numba extension hooks lack stable public annotations for their low-level code-generation types.
-#pyright: reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownLambdaType=false
-#=SIN= Ruff suppression: Numba StructRef integration requires its private payload utilities and native value accessor.
-#ruff: file-ignore[function-call-in-dataclass-default-argument]
-# ty: ignore[redundant-condition]
 """Store folding and meander computation state and named array layouts.
 
 (AI generated docstring)
@@ -82,6 +75,7 @@ if TYPE_CHECKING:
 	from types import EllipsisType
 	from typing import Literal, LiteralString, Self
 
+# TODO `StateMapFolding` continue to learn from https://github.com/python/typing/discussions/2092
 @dataclasses.dataclass(slots=True)
 class StateMapFolding:
 	"""Store mutable insertion-search state for a map-folding computation.
@@ -161,21 +155,21 @@ class StateMapFolding:
 	groupsOfFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
 	"""Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings."""
 
-	gap1ndex: 形Elephino = 形Elephino(0)
+	gap1ndex: 形Elephino = dataclasses.field(default=形Elephino(0))
 	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
-	gap1ndexCeiling: 形Elephino = 形Elephino(0)
+	gap1ndexCeiling: 形Elephino = dataclasses.field(default=形Elephino(0))
 	"""The upper bound of `gap1ndex`."""
-	次Dimension: 形TotalLeaves = 形TotalLeaves(0)
+	次Dimension: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
 	"""The current 0-indexed position of the dimension during computation."""
-	次Leaf: 形TotalLeaves = 形TotalLeaves(0)
+	次Leaf: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
 	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
-	次MiniGap: 形Elephino = 形Elephino(0)
+	次MiniGap: 形Elephino = dataclasses.field(default=形Elephino(0))
 	"""The current 0-indexed position of a 'gap' in a loop during computation."""
-	leaf1ndex: 形TotalLeaves = 形TotalLeaves(1)
+	leaf1ndex: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(1))
 	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
-	leafConnectee: 形TotalLeaves = 形TotalLeaves(0)
+	leafConnectee: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
 	"""Target leaf for connection operations."""
-	dimensionsUnconstrained: 形TotalLeaves = 形TotalLeaves(0)
+	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
 	"""Count of dimensions not subject to folding constraints."""
 
 	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
@@ -377,7 +371,7 @@ class StateMapFoldingParallel(StateMapFolding):
 
 	"""
 
-	taskDivisions: 形TotalLeaves = 形TotalLeaves(0)
+	taskDivisions: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
 	"""Select the number of computation tasks.
 
 	(AI generated docstring)
@@ -386,7 +380,7 @@ class StateMapFoldingParallel(StateMapFolding):
 	can overcount foldings; construction does not validate the upper bound.
 	"""
 
-	task次: 形TotalLeaves = 形TotalLeaves(0)
+	task次: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
 	"""Select the zero-based task represented by this state.
 
 	(AI generated docstring)
@@ -649,11 +643,14 @@ class StateMeanders:
 		self.setBitsLocator()
 		self.set_arcCodeMaximum()
 
+		bytesToBits: int = 8
 		if self.bitWidthLimitArcCode is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * 8  # bits
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * bytesToBits
 
-			offsetNecessary_: int = 3  # For example, `bitsZulu << 3`.
-			offsetSafety_: int = 1  # I don't have mathematical proof of how many extra bits I need.
+			#=For example, `bitsZulu << 3`.
+			offsetNecessary_: int = 3
+			#=I don't have mathematical proof of how many extra bits I need.
+			offsetSafety_: int = 1
 			offset_: int = offsetNecessary_ + offsetSafety_
 
 			self.bitWidthLimitArcCode = bitWidthOfFixedSizeInteger_ - offset_
@@ -661,10 +658,12 @@ class StateMeanders:
 			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
 
 		if self.bitWidthLimitMeanders is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Meanders).itemsize * 8  # bits
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Meanders).itemsize * bytesToBits
 
-			offsetNecessary_: int = 0  # I don't know of any.
-			offsetEstimation_: int = 3  # See 'reference' directory.
+			#=I don't know of any.
+			offsetNecessary_: int = 0
+			#=See 'research' directory.
+			offsetEstimation_: int = 3
 			offsetSafety_: int = 1
 			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
 
@@ -1210,7 +1209,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def _solidifyLeafSpaceAtPile(self, pile: Pile) -> None:
 		rangeOfPile: LeafSpace | None = self[pile]
 		if choicesLeaf吗(rangeOfPile):
-			# If the range size of `pile` is 0 or 1, convert to None or `Leaf`.
 			rangeOfPile = mapFolding.beDRYElimination.distinguishChoicesLeaf(rangeOfPile)
 			if rangeOfPile is None:
 				self.valid = False
@@ -1221,7 +1219,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			else:
 				self[pile] = rangeOfPile
 
-	# Does it matter whether this is a property or a method?
+	# TODO Does it matter whether this is a property or a method?
 	def pinnedLeaves(self) -> PinnedLeaves:
 		"""Extract the pile assignments already represented as pinned leaves.
 
@@ -1272,8 +1270,10 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		"""
 		#=EndNotes##sorted=
 		self = PermutationSpace(sorted(DOTitems(merge(missing, self))))
-		#=Wrong= It is necessary to assign to self before returning.
-		return self  # ruff: ignore[unnecessary-assign]
+		#ruff: ignore[unnecessary-assign] #=Wrong= It is necessary to assign to self before returning.
+		# OR, there is a better way for me to program this functionality.
+		# TODO learn ^^^^^
+		return self
 
 	valid: bool = True
 
