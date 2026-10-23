@@ -153,6 +153,8 @@ def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denomina
 
 #================== A005315 formulas and diagonal extensions =========================================================
 
+# TODO integrate
+
 def A005315of0(x: int, 次n: int = 0) -> int:
 	"""Return the special base value 1 when `x >= 2*次n`.
 

@@ -1,7 +1,5 @@
 #=Sin= ast source module.
 #ruff: file-ignore[undocumented-public-function]
-#=Sin= Don't remove `typing.Literal`.
-#pyright: reportUnusedImport=false
 #=Do= Run makeDocstrings.py
 """Compute a(n) for an OEIS ID by computing other OEIS IDs."""
 
@@ -11,10 +9,14 @@ from itertools import chain
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getValuesKnown, makeMapShape
 from math import factorial, isqrt
+#=Sin= Don't remove `typing.Literal`.
+#pyright: reportUnusedImport=false
 from typing import Literal, LiteralString
 
-# TODO Think of a non-arbitrary way to determine which `f` ought to be the default.
-# - Prefer formulas with terms that are "not formulas".
+# TODO This formula system is not commutative for `n`, so `n + 1` gets boosted too much in A005315. I
+# think I need a totally different paradigm. Should I use sympy? Would that fix the described problem?
+# And might it expand the ways I can use this information?
+# A085973 = A005315(n + 1) + _A005316((2 * n) + 1)  # ruff: ignore[commented-out-code]
 
 # TODO Standardize the formatting of the formulas.
 # - Use A000682 instead of A000136, except in A000682 and A000136.
@@ -23,12 +25,8 @@ from typing import Literal, LiteralString
 # - Put positive terms to the left of negative terms.
 # - Put "dominant" terms to the left of "subordinate" terms.
 
-# TODO Learn if there are other algorithms to directly compute other sequences.
-# Yes, Sawada and Li. 'A000136', 'A000560', 'A001011', 'A077055'.
-
-# TODO For each sequence,
-# 1. All formulas that exclusively use the terms `n` and the "Not formulas".
-# 2. All formulas that use only `n` and one other sequence.
+# TODO Add other algorithms to directly compute more sequences.
+# E.g., Sawada and Li. 'A000136', 'A000560', 'A001011', 'A077055'.
 
 def A000136(n: int, f: LiteralString | None = None) -> int:
 	if n in {1, 2}:
@@ -227,7 +225,7 @@ def A077054(n: int, f: LiteralString | None = None) -> int:
 				countTotal = _A005316(2 * n)
 	return countTotal
 
-# A223096: need a formula or algorithm.
+# TODO A223096: need a formula or algorithm.
 # ruff: ignore[commented-out-code]
 # def A077055(n: int, f: LiteralString | None = None) -> int:
 # 	match f:

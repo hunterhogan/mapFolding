@@ -9,7 +9,7 @@ from mapFolding.basecamp import countMeanders
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameCount, writeDiagonal
 from mapFolding.oeis import getValuesKnown, updateBFile
-from mapFolding.oeis.A400429 import boxOfDiagonals
+from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
 from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
 

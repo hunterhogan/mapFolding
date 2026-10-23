@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import StateMeanders
-from mapFolding.oeis.A400429 import boxOfDiagonals
+from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import walkDyckPath
 from mapFolding.theTypes import 形ArcCode
 from numba import int64, vectorize  # pyright: ignore[reportUnknownVariableType]

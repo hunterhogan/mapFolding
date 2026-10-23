@@ -6,7 +6,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
 from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap
-from mapFolding.oeis.A400429 import boxOfDiagonals
+from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode
 from numpy import (

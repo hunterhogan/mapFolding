@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from mapFolding.oeis.A400429._A005315 import (
+from mapFolding.oeis.A400429oeisByFormula._A005315 import (
 	A005315of1, A005315of2, A005315of3, A005315of4, A005315of5, A005315of6, A005315of7, A005315of8, A005315of9, A005315of10, A005315of11)
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
+
+# TODO integrate
 
 def 工diagonal1(n: int) -> int:
 	return A005315of1(n)
