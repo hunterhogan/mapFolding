@@ -4,7 +4,8 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
-from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMapFolding, StateMapFoldingSymmetric
+from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
+from mapFolding.dataStructures import ShapeArray, ShapeSlicer
 from numba import typeof, types as numba_types  # pyright: ignore[reportUnknownVariableType]
 from numba.core import cgutils
 from numba.experimental import structref

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
+from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import byFormula, getMetadata, makeMapShape, oeisIDsMapFoldingImplemented
 from mapFolding.oeis._beDRY import formatOEISid
 from typing import TYPE_CHECKING
@@ -63,7 +64,6 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 		https://oeis.org/
 	[2] mapFolding.basecamp.countFolds
 	"""
-	from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 	oeisID = formatOEISid(oeisID)
 
 	#=EndNotes##unambiguousInput=

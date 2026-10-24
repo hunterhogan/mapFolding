@@ -148,7 +148,6 @@ def getDomainLeaf(state: StateElimination, leaf: int) -> range:
 	return workhorse(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 """
 
-
 def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	"""Compute the possible pile range for a leaf in the state's map.
 
@@ -1128,7 +1127,6 @@ def _getDomainLeaf首零Plus零(domain首零Plus零: tuple[Pile, ...], pileOfLea
 			boxOfIndicesPilesExcluded.extend([0])
 
 	return tuple(exclude(domain首零Plus零, boxOfIndicesPilesExcluded))
-
 
 def getLookupDomainsLeaves(state: StateElimination) -> dict[int, range]:
 	"""Dictionary of `Leaf` to `range` of `Pile` in which `Leaf` may be found in a `Folding`.

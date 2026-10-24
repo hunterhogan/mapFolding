@@ -4,11 +4,12 @@ from functools import cache, partial
 from humpy_cytoolz import dissoc, get_in, merge
 from hunterMakesPy import errorL33T
 from itertools import count, takewhile
+from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
 from mapFolding.kitFilesystem import getCacheOrURL, readText, writeText
 from mapFolding.oeis._beDRY import formatBFile, formatOEISid, parse_bFile
 from mapFolding.oeis._dataBaskets import MetadataOEISid
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
-from oeis_tools import oeis_bfile, oeis_url  # pyright: ignore[reportMissingTypeStubs] https://github.com/oeistools/oeis-tools/pull/12
+from oeis_tools import oeis_bfile, oeis_url
 from operator import add
 from typing import TYPE_CHECKING
 import warnings
@@ -172,7 +173,6 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 	[5] `mapFolding.oeis.A400429.checkFormulas`
 
 	"""
-	from mapFolding.dataStructures import makeTriangle
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None
@@ -218,7 +218,6 @@ def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
 
 	[2] `mapFolding.dataStructures.lookupToTriangle`
 	"""
-	from mapFolding.dataStructures import lookupToTriangle
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
 	rowLengths: Iterable[int] | None = None
@@ -261,7 +260,6 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = T
 
 	[2] `mapFolding.dataStructures.getLookupDiagonal`
 	"""
-	from mapFolding.dataStructures import getLookupDiagonal
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return getLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
 		getGroupLength=metadata.get('rowLength', partial(add, 1 - metadata.get('rowStart', metadata['offset']))))
@@ -300,7 +298,6 @@ def getTriangleIndices(oeisID: OEISid, n: int) -> range:
 
 	[2] `mapFolding.dataStructures.makeGroupKeys`
 	"""
-	from mapFolding.dataStructures import makeGroupKeys
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return makeGroupKeys(n, keyGroupFirst=metadata.get('rowStart', metadata['offset']), keyFlatFirst=metadata['offset'],
 		getGroupLength=metadata.get('rowLength'))
@@ -414,7 +411,6 @@ def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mappin
 
 	[2] `updateBFile`
 	"""
-	from mapFolding.dataStructures import triangleToLookup
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return updateBFile(oeisID, triangleToLookup(triangle, keyGroupFirst=metadata.get('rowStart', metadata['offset']),
 		keyFlatFirst=metadata['offset'], getGroupLength=metadata.get('rowLength')))

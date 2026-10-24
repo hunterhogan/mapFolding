@@ -227,7 +227,6 @@ def 是valid(boxOfPermutationSpace: list[PermutationSpace]) -> list[PermutationS
 	"""
 	return list(filter(attrgetter('valid'), boxOfPermutationSpace))
 
-
 def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 	"""Test whether `leaf` is greater than the first non-origin leaf.
 
@@ -260,7 +259,6 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 	[1] `mapFolding._semiotics.零`
 	"""
 	return 零 < leaf
-
 
 def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
 	"""Test whether the coordinate bit at `dimension` is set in `leaf`.

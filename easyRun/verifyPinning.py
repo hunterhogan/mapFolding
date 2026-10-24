@@ -63,49 +63,48 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 	def getPermutationSpaceWithLeafValuesOnly(permutationSpace: PermutationSpace) -> PinnedLeaves:
 		return permutationSpace.pinnedLeaves()
 	arrayFoldings = getDataFrameFoldings(state)
-	if arrayFoldings is not None:
-		arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
-		pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.boxOfPermutationSpace)
+	arrayFoldings = arrayFoldings.to_numpy(dtype=numpy.uint8, copy=False)
+	pinningCoverage: PermutationSpaceStatus = detectPermutationSpaceErrors(arrayFoldings, state.boxOfPermutationSpace)
 
-		boxOfSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.boxOfSurplusDictionaries
-		boxOfDictionaryPinned: list[PinnedLeaves] = [permutationSpace.pinnedLeaves() for permutationSpace in boxOfSurplusDictionariesOriginal]
-		if boxOfDictionaryPinned:
-			sys.stdout.write(ansiColor.YellowOnBlack)
-			sys.stdout.write(pformat(boxOfDictionaryPinned[0:5], width=200) + '\n')
-		else:
-			sys.stdout.write(ansiColor.GreenOnBlack)
-		sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
-		sys.stdout.write(ansiColorReset)
+	boxOfSurplusDictionariesOriginal: list[PermutationSpace] = pinningCoverage.boxOfSurplusDictionaries
+	boxOfDictionaryPinned: list[PinnedLeaves] = [permutationSpace.pinnedLeaves() for permutationSpace in boxOfSurplusDictionariesOriginal]
+	if boxOfDictionaryPinned:
+		sys.stdout.write(ansiColor.YellowOnBlack)
+		sys.stdout.write(pformat(boxOfDictionaryPinned[0:5], width=200) + '\n')
+	else:
+		sys.stdout.write(ansiColor.GreenOnBlack)
+	sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
+	sys.stdout.write(ansiColorReset)
 
-		pathFilename = (settingsPackage.pathPackage.parent / 'research' / 'elimination' / 'excel'
-			/ f"p2d{state.totalDimensions}SurplusDictionaries.csv")
+	pathFilename = (settingsPackage.pathPackage.parent / 'research' / 'elimination' / 'excel'
+		/ f"p2d{state.totalDimensions}SurplusDictionaries.csv")
 
-		if boxOfDictionaryPinned:
-			surplusDictionaries: list[Folding] = [tuple(range(state.totalLeaves))]
-			surplusDictionaries.extend(tuple(DOTvalues(dict(sorted(permutationSpace.items())))) for permutationSpace in boxOfDictionaryPinned)
-			writeAlbum(surplusDictionaries, pathFilename)
+	if boxOfDictionaryPinned:
+		surplusDictionaries: list[Folding] = [tuple(range(state.totalLeaves))]
+		surplusDictionaries.extend(tuple(DOTvalues(dict(sorted(permutationSpace.items())))) for permutationSpace in boxOfDictionaryPinned)
+		writeAlbum(surplusDictionaries, pathFilename)
 
-		if pinningCoverage.indicesOverlappingPermutationSpace:
-			sys.stdout.write(f"{ansiColor.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
-			for 次Dictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
-				sys.stdout.write(pformat(filterLeaf(leaf吗, state.boxOfPermutationSpace[次Dictionary]), width=140) + '\n')
+	if pinningCoverage.indicesOverlappingPermutationSpace:
+		sys.stdout.write(f"{ansiColor.RedOnWhite}{len(pinningCoverage.indicesOverlappingPermutationSpace)} overlapping dictionaries{ansiColorReset}\n")
+		for 次Dictionary in sorted(pinningCoverage.indicesOverlappingPermutationSpace)[0:2]:
+			sys.stdout.write(pformat(filterLeaf(leaf吗, state.boxOfPermutationSpace[次Dictionary]), width=140) + '\n')
 
-		beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
-		boxOfBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.boxOfPermutationSpace))
-		if boxOfBeans:
-			sys.stdout.write(f"{ansiColor.MagentaOnBlack}{len(boxOfBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")
-			sys.stdout.write(pformat(getPermutationSpaceWithLeafValuesOnly(boxOfBeans[0]), width=140) + '\n')
+	beansOrCornbread: Callable[[PermutationSpace], bool] = partial(beansWithoutCornbread, state)
+	boxOfBeans: list[PermutationSpace] = list(filter(beansOrCornbread, state.boxOfPermutationSpace))
+	if boxOfBeans:
+		sys.stdout.write(f"{ansiColor.MagentaOnBlack}{len(boxOfBeans)} dictionaries with beans but no cornbread.{ansiColorReset}\n")
+		sys.stdout.write(pformat(getPermutationSpaceWithLeafValuesOnly(boxOfBeans[0]), width=140) + '\n')
 
-		maskUnion: numpy.ndarray = pinningCoverage.maskUnion
-		rowsRequired: int = pinningCoverage.rowsRequired
-		rowsTotal: int = pinningCoverage.rowsTotal
-		color = ansiColorReset
-		if rowsRequired < rowsTotal:
-			color = ansiColor.RedOnWhite
-			indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
-			for 次Row in indicesMissingRows[0:2]:
-				sys.stdout.write(f"{color}{arrayFoldings[次Row, :]}\n")
-		sys.stdout.write(f"{color}Required rows: {rowsRequired}/{rowsTotal}{ansiColorReset}\n")
+	maskUnion: numpy.ndarray = pinningCoverage.maskUnion
+	rowsRequired: int = pinningCoverage.rowsRequired
+	rowsTotal: int = pinningCoverage.rowsTotal
+	color = ansiColorReset
+	if rowsRequired < rowsTotal:
+		color = ansiColor.RedOnWhite
+		indicesMissingRows: numpy.ndarray = numpy.flatnonzero(~maskUnion)
+		for 次Row in indicesMissingRows[0:2]:
+			sys.stdout.write(f"{color}{arrayFoldings[次Row, :]}\n")
+	sys.stdout.write(f"{color}Required rows: {rowsRequired}/{rowsTotal}{ansiColorReset}\n")
 
 def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKnown: Sequence[tuple[int, ...]], *, printResults: bool = True) -> dict[str, list[tuple[int, ...]]]:
 	"""Compare a computed domain against known verification data.

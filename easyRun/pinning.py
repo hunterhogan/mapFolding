@@ -44,7 +44,7 @@ if __name__ == '__main__':
 		state = makeAlbum2上nDimensional(state, 14)
 		print(f"{time.perf_counter() - timeStart:.2f}\tpinning")
 
-		from mapFolding.needsAHome.verify import verifyPinning2Dn
+		from easyRun.verifyPinning import verifyPinning2Dn
 		verifyPinning2Dn(state)
 		print(f"{time.perf_counter() - timeStart:.2f}\tverifyPinning2Dn")
 

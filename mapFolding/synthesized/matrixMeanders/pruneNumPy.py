@@ -4,8 +4,8 @@ from contextlib import suppress
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗, prune
-from mapFolding.dataBaskets import ShapeArray, ShapeSlicer, StateMeanders
-from mapFolding.dataStructures import extendArray, make_memmap
+from mapFolding.dataBaskets import StateMeanders
+from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
 from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.pruneBigInt import countBigInt
 from mapFolding.theTypes import 形ArcCode

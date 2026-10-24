@@ -202,7 +202,6 @@ def _getChoicesLeaf(pile: Pile, totalDimensions: int, mapShape: tuple[int, ...],
 
 	return makeChoicesLeaf(totalLeaves, choicesLeaf)
 
-
 def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	"""Compute possible leaves for a pile in the state's map.
 
@@ -233,9 +232,7 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	----------
 	[1] `mapFolding.pileOptions._getChoicesLeaf`
 	"""
-	from mapFolding.pileOptions import _getChoicesLeaf  # ruff: ignore[import-outside-top-level]
 	return _getChoicesLeaf(pile, state.totalDimensions, state.mapShape, state.totalLeaves)
-
 
 def getLookupChoicesLeaf(state: StateElimination) -> UndeterminedPiles:
 	"""At `pile`, which `leaf` values may be found in a `folding`: the mathematical range, not a Python `range` object.

@@ -1137,7 +1137,7 @@ def readTriangleSparse(pathFilename: Path) -> dict[int, dict[int, int]]:
 
 	[3] `mapFolding.dataStructures.stringsToLookup`
 	"""
-	from mapFolding.dataStructures import getBoxWithGaps, stringsToLookup
+	from mapFolding.dataStructures import stringsToLookup
 	streamKeys, streamGroups = tee(streamCSV(pathFilename))
 	return dict(zip(
 		map(int, map(itemgetter(0), streamKeys))
