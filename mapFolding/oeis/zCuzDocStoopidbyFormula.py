@@ -22,11 +22,10 @@ from typing import Literal, LiteralString
 # - Use A000682 instead of A000136, except in A000682 and A000136.
 # - Use modulo to modulate by parity instead of bitwise AND.
 # - ONLY because these are Python expressions, use `//` for integer division instead of `/`.
-# - Put positive terms to the left of negative terms.
-# - Put "dominant" terms to the left of "subordinate" terms.
 
 # TODO Add other algorithms to directly compute more sequences.
-# E.g., Sawada and Li. 'A000136', 'A000560', 'A001011', 'A077055'.
+# Sawada and Li. 'A000136', 'A000560', 'A001011', 'A077055'.
+# Sade, insertion.
 
 def A000136(n: int, f: LiteralString | None = None) -> int:
 	if n in {1, 2}:

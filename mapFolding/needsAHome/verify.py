@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from functools import partial
 from humpy_cytoolz import valfilter as filterLeaf
 from hunterMakesPy import ansiColor, ansiColorReset
-from mapFolding.dataBaskets import PermutationSpace
 from mapFolding.filters import leaf吗
 from mapFolding.kitFilesystem import getDataFrameFoldings, writeAlbum
 from mapFolding.tests.test_pinning import beansWithoutCornbread
@@ -17,7 +16,7 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
-	from mapFolding.dataBaskets import StateElimination
+	from mapFolding.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding.theTypes import Folding, PinnedLeaves
 
 @dataclass

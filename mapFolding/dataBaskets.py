@@ -75,602 +75,6 @@ if TYPE_CHECKING:
 	from types import EllipsisType
 	from typing import Literal, LiteralString, Self
 
-# TODO `StateMapFolding` continue to learn from https://github.com/python/typing/discussions/2092
-@dataclasses.dataclass(slots=True)
-class StateMapFolding:
-	"""Store mutable insertion-search state for a map-folding computation.
-
-	(AI generated docstring)
-
-	You can use this class to carry a folding search between initialization and algorithm execution.
-	Construction derives the dimension count, leaf count, and connection graph from the supplied
-	dimension lengths. Counting algorithms update the counters, cursors, and leaf-neighbor arrays.
-
-	Array Initialization
-	--------------------
-	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
-	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
-	signs. Positive dimensions are expected.
-
-	An array whose `shape` tuple is empty is replaced with storage allocated by
-	`mapFolding.dataStructures.makeDataContainer` [3]. An ordinary empty array with shape `(0,)` is
-	retained because its shape tuple is not empty. Leaf-neighbor and gap-range arrays normally have
-	one entry per leaf plus a zero sentinel. The gap workspace normally has the square of the leaf
-	count plus one entry. Explicit arrays are retained without shape validation.
-
-	Attributes
-	----------
-	mapShape : tuple[形TotalLeaves, ...]
-		Inspect dimension lengths in their supplied order.
-	groupsOfFolds : 形TotalFolds = 形TotalFolds(0)
-		Accumulate folding groups, each contributing one folding per leaf.
-	gap1ndex : 形Elephino = 形Elephino(0)
-		Track the one-based cursor within the gap workspace.
-	gap1ndexCeiling : 形Elephino = 形Elephino(0)
-		Track the upper bound of the gap-workspace cursor.
-	次Dimension : 形TotalLeaves = 形TotalLeaves(0)
-		Track the zero-based dimension cursor.
-	次Leaf : 形TotalLeaves = 形TotalLeaves(0)
-		Track a zero-based leaf cursor within a search loop.
-	次MiniGap : 形Elephino = 形Elephino(0)
-		Track a zero-based cursor within a candidate gap range.
-	leaf1ndex : 形TotalLeaves = 形TotalLeaves(1)
-		Track the one-based leaf label currently being inserted.
-	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
-		Track the leaf label selected for a connection.
-	dimensionsUnconstrained : 形TotalLeaves
-		Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count.
-	countDimensionsGapped : 形ArrayTotalLeaves1D
-		Track the number of dimensions admitting each candidate gap.
-	gapRangeStart : 形ArrayElephino1D
-		Track starting offsets of candidate gap ranges.
-	gapsWhere : 形ArrayTotalLeaves1D
-		Store candidate gap positions in the search workspace.
-	leafAbove : 形ArrayTotalLeaves1D
-		Map each leaf label to the neighboring leaf above.
-	leafBelow : 形ArrayTotalLeaves1D
-		Map each leaf label to the neighboring leaf below.
-	connectionGraph : 形ArrayTotalLeaves3D
-		Inspect the connection lookup derived during initialization.
-	totalDimensions : 形TotalLeaves
-		Inspect the dimension count derived from `mapShape`.
-	totalLeaves : 形TotalLeaves
-		Inspect the leaf count derived from `mapShape`.
-	totalFolds : 形TotalFolds
-		Inspect the computed count obtained by multiplying the group count by the leaf count.
-
-	References
-	----------
-	[1] `mapFolding.beDRY.getTotalLeaves`
-
-	[2] `mapFolding.dataStructures.makeConnectionGraph`
-
-	[3] `mapFolding.dataStructures.makeDataContainer`
-
-	"""
-
-	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True)
-	"""Dimensions of the map being analyzed for folding patterns."""
-
-	groupsOfFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
-	"""Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings."""
-
-	gap1ndex: 形Elephino = dataclasses.field(default=形Elephino(0))
-	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
-	gap1ndexCeiling: 形Elephino = dataclasses.field(default=形Elephino(0))
-	"""The upper bound of `gap1ndex`."""
-	次Dimension: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
-	"""The current 0-indexed position of the dimension during computation."""
-	次Leaf: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
-	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
-	次MiniGap: 形Elephino = dataclasses.field(default=形Elephino(0))
-	"""The current 0-indexed position of a 'gap' in a loop during computation."""
-	leaf1ndex: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(1))
-	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
-	leafConnectee: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
-	"""Target leaf for connection operations."""
-	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
-	"""Count of dimensions not subject to folding constraints."""
-
-	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array tracking computed number of dimensions with gaps."""
-	gapRangeStart: 形ArrayElephino1D = dataclasses.field(default_factory=lambda: 形ArrayElephino1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayElephino1D)[1])[0]})
-	"""Array tracking computed starting positions of gap ranges."""
-	gapsWhere: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array indicating locations of gaps in the folding pattern."""
-	leafAbove: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array tracking the leaves above the current leaf, `leaf1ndex`, during computation."""
-	leafBelow: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array tracking the leaves below the current leaf, `leaf1ndex`, during computation."""
-
-	connectionGraph: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
-	"""Unchanging array representing connections between all leaves."""
-	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
-	"""Unchanging total number of dimensions in the map."""
-	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
-	"""Unchanging total number of leaves in the map."""
-
-	@property
-	def totalFolds(self) -> 形TotalFolds:
-		"""Compute the folding count represented by the current group count.
-
-		(AI generated docstring)
-
-		You can use this property to convert the accumulated group count to the number of foldings.
-		The property reflects the current search progress and is zero before any group has been counted.
-
-		Returns
-		-------
-		totalFolds : 形TotalFolds
-			Product of `self.totalLeaves` and `self.groupsOfFolds`.
-		"""
-		return 形TotalFolds(self.totalLeaves) * self.groupsOfFolds
-
-	def __post_init__(self) -> None:
-		"""Ensure all fields have a value.
-
-		Notes
-		-----
-		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
-		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
-
-		"""
-		self.totalDimensions = 形TotalLeaves(len(self.mapShape))
-		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
-
-		totalLeavesAsInt = int(self.totalLeaves)
-
-		self.connectionGraph = makeConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
-
-		if not self.gapsWhere.shape:
-			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
-		if not self.countDimensionsGapped.shape:
-			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
-		if not self.gapRangeStart.shape:
-			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
-		if not self.leafAbove.shape:
-			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
-		if not self.leafBelow.shape:
-			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
-
-@dataclasses.dataclass(slots=True)
-class StateMapFoldingSymmetric(StateMapFolding):
-	"""Store mutable insertion-search state for symmetric map foldings.
-
-	(AI generated docstring)
-
-	Shared fields and array initialization are inherited from `StateMapFolding`.
-	You can use this class to carry a folding search between initialization and algorithm execution.
-	Construction derives the dimension count, leaf count, and connection graph from the supplied
-	dimension lengths. Counting algorithms update the counters, cursors, and leaf-neighbor arrays.
-
-	Array Initialization
-	--------------------
-	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
-	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
-	signs. Positive dimensions are expected.
-
-	An array whose `shape` tuple is empty is replaced with storage allocated by
-	`mapFolding.dataStructures.makeDataContainer` [3]. An ordinary empty array with shape `(0,)` is
-	retained because its shape tuple is not empty. Leaf-neighbor and gap-range arrays normally have
-	one entry per leaf plus a zero sentinel. The gap workspace normally has the square of the leaf
-	count plus one entry. Explicit arrays are retained without shape validation.
-
-	Symmetry Index Layout
-	---------------------
-	`indices` has shape `(totalLeaves + 1, totalLeaves // 2, 2)`. The last axis stores pairs of
-	positions used to compare a leaf sequence with its reversed cyclic alignment.
-
-	Attributes
-	----------
-	mapShape : tuple[形TotalLeaves, ...]
-		Inspect dimension lengths in their supplied order.
-	symmetricFolds : 形TotalFolds = 形TotalFolds(0)
-		Accumulate foldings that satisfy the symmetry constraint.
-	gap1ndex : 形Elephino = 形Elephino(0)
-		Track the one-based cursor within the gap workspace.
-	gap1ndexCeiling : 形Elephino = 形Elephino(0)
-		Track the upper bound of the gap-workspace cursor.
-	次Dimension : 形TotalLeaves = 形TotalLeaves(0)
-		Track the zero-based dimension cursor.
-	次Leaf : 形TotalLeaves = 形TotalLeaves(0)
-		Track a zero-based leaf cursor within a search loop.
-	次MiniGap : 形Elephino = 形Elephino(0)
-		Track a zero-based cursor within a candidate gap range.
-	leaf1ndex : 形TotalLeaves = 形TotalLeaves(1)
-		Track the one-based leaf label currently being inserted.
-	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
-		Track the leaf label selected for a connection.
-	dimensionsUnconstrained : 形TotalLeaves
-		Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count.
-	countDimensionsGapped : 形ArrayTotalLeaves1D
-		Track the number of dimensions admitting each candidate gap.
-	gapRangeStart : 形ArrayElephino1D
-		Track starting offsets of candidate gap ranges.
-	gapsWhere : 形ArrayTotalLeaves1D
-		Store candidate gap positions in the search workspace.
-	leafAbove : 形ArrayTotalLeaves1D
-		Map each leaf label to the neighboring leaf above.
-	leafBelow : 形ArrayTotalLeaves1D
-		Map each leaf label to the neighboring leaf below.
-	connectionGraph : 形ArrayTotalLeaves3D
-		Inspect the connection lookup derived during initialization.
-	totalDimensions : 形TotalLeaves
-		Inspect the dimension count derived from `mapShape`.
-	totalLeaves : 形TotalLeaves
-		Inspect the leaf count derived from `mapShape`.
-	leafComparison : 形ArrayTotalLeaves1D
-		Store the leaf sequence used for symmetric-fold comparisons.
-	indices : 形ArrayTotalLeaves3D
-		Inspect precomputed pairs of positions for symmetric-fold comparisons.
-
-	References
-	----------
-	[1] `mapFolding.beDRY.getTotalLeaves`
-
-	[2] `mapFolding.dataStructures.makeConnectionGraph`
-
-	[3] `mapFolding.dataStructures.makeDataContainer`
-
-	"""
-
-	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
-	"""Current count of symmetric folds."""
-
-	leafComparison: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	"""Array for finding symmetric folds."""
-
-	indices: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
-	"""Precomputed index pairs for symmetric fold checking."""
-
-	def __post_init__(self) -> None:
-		"""Ensure all fields have a value.
-
-		Notes
-		-----
-		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
-		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
-
-		"""
-		super(StateMapFoldingSymmetric, self).__post_init__()
-		totalLeavesAsInt = int(self.totalLeaves)
-
-		arrayIndexCoordinates: 形ArraySelector = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2))
-		self.indices = numpy.stack(((arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1)
-							, (-2 - arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1))
-							, axis=2).astype(self.__dataclass_fields__['indices'].metadata['dtype'], copy=False)
-
-		if not self.leafComparison.shape:
-			self.leafComparison = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
-
-@dataclasses.dataclass
-class StateMapFoldingParallel(StateMapFolding):
-	"""Extend map-folding state with task-division fields.
-
-	(AI generated docstring)
-
-	You can use this class to construct a task-specific folding search. This class inherits the
-	arrays, search cursors, and counting property of `StateMapFolding` [1] and adds task selection.
-
-	Task Preconditions
-	------------------
-	Use task counts no greater than the leaf count and task indices within the selected count.
-	Construction does not validate these constraints. A count greater than the leaf count can
-	overcount foldings.
-
-	Attributes
-	----------
-	taskDivisions : 形TotalLeaves = 形TotalLeaves(0)
-		Number of tasks. Initialization replaces zero with the derived leaf count.
-	task次 : 形TotalLeaves = 形TotalLeaves(0)
-		Zero-based task index selecting this state within the divided computation.
-
-	References
-	----------
-	[1] `StateMapFolding`
-
-	"""
-
-	taskDivisions: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
-	"""Select the number of computation tasks.
-
-	(AI generated docstring)
-
-	Initialization replaces zero with the derived leaf count. Values greater than the leaf count
-	can overcount foldings; construction does not validate the upper bound.
-	"""
-
-	task次: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
-	"""Select the zero-based task represented by this state.
-
-	(AI generated docstring)
-
-	Use an index from zero through one less than the selected task count. Construction does not
-	validate the index.
-	"""
-
-	def __post_init__(self) -> None:
-		"""Initialize parallel-specific state after base initialization.
-
-		(AI generated docstring)
-
-		This method calls the parent initialization to set up all base
-		computational arrays, then configures the task division
-		parameters. If `taskDivisions` is 0, it automatically sets the
-		value to `totalLeaves` for optimal parallelization.
-
-		"""
-		super().__post_init__()
-		if self.taskDivisions == 0:
-			self.taskDivisions = 形TotalLeaves(int(self.totalLeaves))
-
-@dataclasses.dataclass(slots=True)
-class StateMeanders:
-	"""Store transfer counts and boundary progress for a meander computation.
-
-	(AI generated docstring)
-
-	You can use this class to start or continue a meander computation. Construction fills an empty
-	count lookup, selects a starting boundary when the supplied boundary is zero, and derives bit
-	limits for fixed-width storage.
-
-	Initialization
-	--------------
-	A falsy `boundary` is replaced with `n - 1`. An empty `lookupMeanders` is replaced using
-	`mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders` [1]. A supplied nonempty lookup
-	is retained, and the bit width and locator mask are recomputed from its largest key.
-	Initialization requires a nonempty lookup after this setup.
-
-	Missing width limits are derived from `mapFolding.theTypes.形ArcCode` [2] and
-	`mapFolding.theTypes.形Meanders` [3]. Each derived limit reserves four bits relative to the
-	corresponding NumPy storage width [4]. Supplied limits are retained.
-
-	Attributes
-	----------
-	n : int
-		Computation index used to initialize the transfer problem.
-	kind : Literal['semi', 'meanders'] | LiteralString
-		Meander family used by lookup initialization.
-	boundary : int = 0
-		Current transfer boundary; initialization replaces zero with `n - 1`.
-	lookupMeanders : dict[int, int]
-		Arch codes mapped to active counts, using Python integers without a fixed-width limit.
-	bitWidth : int = 0
-		Number of bits in the largest active arch code, recomputed during initialization.
-	bitsLocator : int = 0
-		Mask selecting bit positions zero, two, four, and so on below the current width.
-	arcCodeMaximum : int = 0
-		Power-of-two threshold derived from the current boundary.
-	bitWidthLimitArcCode : int | None = None
-		Arc-code width limit used when selecting fixed-width computation.
-	bitWidthLimitMeanders : int | None = None
-		Count width limit used when selecting fixed-width computation.
-	次Target : int = 0
-		Mutable target cursor whose interpretation depends on the algorithm.
-	countAddend : int = 0
-		Completed counting contributions removed from the active lookup.
-	totalMeanders : int
-		Sum of active counts and completed contributions; the sequence term after counting finishes.
-
-	Examples
-	--------
-	`mapFolding.basecamp.countMeanders` [5] initializes a state from a family and sequence index.
-
-		```python
-		state = StateMeanders(n, kind)
-		```
-
-	References
-	----------
-	[1] `mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders`
-
-	[2] `mapFolding.theTypes.形ArcCode`
-
-	[3] `mapFolding.theTypes.形Meanders`
-
-	[4] NumPy datatype reference.
-		https://numpy.org/doc/stable/reference/index.html
-	[5] `mapFolding.basecamp.countMeanders`
-
-	"""
-
-	n: int
-	"""The index of the meanders problem being solved."""
-	kind: Literal['semi', 'meanders'] | LiteralString
-	"""'semi' for semi-meanders or 'meanders' for meanders."""
-
-	boundary: int = 0
-	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
-	lookupMeanders: dict[int, int] = dataclasses.field(default_factory=dict[int, int])
-	"""A Python `dict` (*dict*ionary) of `arcCode` to `meanders`. The values are stored as Python `int`
-	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
-	'bigint' (big *int*eger).
-	"""
-
-	bitWidth: int = 0
-	"""Track the bit length of the largest active arch code.
-
-	(AI generated docstring)
-	"""
-	bitsLocator: int = 0
-	"""An odd-parity bit-mask with `bitWidth` bits."""
-	arcCodeMaximum: int = 0
-	"""Track the boundary-derived power-of-two threshold for arch codes.
-
-	(AI generated docstring)
-	"""
-
-	bitWidthLimitArcCode: int | None = None
-	"""Select the arch-code width limit for fixed-width computation.
-
-	(AI generated docstring)
-	"""
-	bitWidthLimitMeanders: int | None = None
-	"""Select the count width limit for fixed-width computation.
-
-	(AI generated docstring)
-	"""
-
-	次Target: int = 0
-	"""What is being indexed depends on the algorithm flavor."""
-	countAddend: int = 0
-	"""Retain completed counting contributions removed from the active computation."""
-
-	def reduceBoundary(self) -> None:
-		"""Advance to the next transfer step by reducing the boundary.
-
-		(AI generated docstring)
-
-		This method subtracts one from `self.boundary` and recomputes the stored bit width, locator mask,
-		and arch-code threshold. This method returns `None`. The active lookup must be nonempty.
-		"""
-		self.boundary -= 1
-		self._setBitWidth()
-		self.setBitsLocator()
-		self.set_arcCodeMaximum()
-
-	def setBitsLocator(self) -> None:
-		"""Compute an odd-parity bit-mask with `bitWidth` bits.
-
-		Semiotics
-		---------
-		In binary, `bitsLocator` has alternating 0s and 1s and ends with a 1, such as '101',
-		'0101', and '10101'. The last digit is in the 1's column, but programmers usually call it the
-		"least significant bit" (LSB). If we count the columns from the right, the 1's column is
-		column 1, the 2's column is column 2, the 4's column is column 3, and so on. When counting
-		this way, `bitsLocator` has 1s in the columns with odd index numbers. Mathematicians and
-		programmers, therefore, tend to call `bitsLocator` something like the "odd bit-mask", the
-		"odd-parity numbers", or simply "odd mask" or "odd numbers". In addition to "odd" being
-		inherently ambiguous in this context, this algorithm also segregates odd numbers from even
-		numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
-		"""
-		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
-
-	def _setBitWidth(self) -> None:
-		"""I use this to refresh the arch-code bit width during initialization and boundary reduction.
-
-		(AI generated docstring)
-
-		This method updates `self.bitWidth` from the largest key in `self.lookupMeanders` and returns
-		`None`. An empty lookup propagates `ValueError` from the maximum-key calculation.
-
-		See Also
-		--------
-		`StateMeanders.setBitWidthNumPy`
-			Derive the width from an array instead of the stored lookup.
-		"""
-		self.bitWidth = max(self.lookupMeanders.keys()).bit_length()
-
-	def setBitWidthNumPy(self, arrayMeanders: 形ArrayArcCode) -> None:
-		"""Set the stored bit width from the largest value in `arrayMeanders`.
-
-		(AI generated docstring)
-
-		This method finds the maximum value across the entire supplied NumPy array [1], converts the
-		maximum to a Python integer, and stores its bit length in `self.bitWidth`. This method returns
-		`None`. Callers must supply the values whose maximum should determine the width.
-
-		Parameters
-		----------
-		arrayMeanders : 形ArrayArcCode
-			Nonempty array of encoded arch values, or an array selection containing those values.
-
-		See Also
-		--------
-		`StateMeanders._setBitWidth`
-			Derive the width from the stored lookup instead of an array.
-
-		References
-		----------
-		[1] NumPy array reference.
-			https://numpy.org/doc/stable/reference/index.html
-		"""
-		self.bitWidth = int(arrayMeanders.max()).bit_length()
-
-	def set_arcCodeMaximum(self) -> None:
-		"""Set the arch-code threshold from the current transfer boundary.
-
-		(AI generated docstring)
-
-		This method stores `1 << (2 * self.boundary + 4)` in `self.arcCodeMaximum` and returns `None`.
-		This method does not inspect or change the count lookup.
-		"""
-		self.arcCodeMaximum = 1 << (2 * self.boundary + 4)
-
-	@property
-	def totalMeanders(self) -> int:
-		"""Inspect the total represented by the current meander state.
-
-		(AI generated docstring)
-
-		You can use this property to read the sequence term after counting finishes. Before completion,
-		`totalMeanders` combines active transfer counts with completed contributions and does not
-		represent the final sequence term. The property reflects changes to `self.lookupMeanders` and
-		`self.countAddend` whenever accessed.
-
-		Returns
-		-------
-		totalMeanders : int
-			Sum of `self.lookupMeanders.values()` and `self.countAddend`, using Python integers.
-
-		Examples
-		--------
-		`mapFolding.basecamp.countMeanders` [1] reads the completed total for saving.
-
-			```python
-			countTotal: int = state.totalMeanders
-			```
-
-		References
-		----------
-		[1] `mapFolding.basecamp.countMeanders`
-
-		"""
-		return sum(self.lookupMeanders.values()) + self.countAddend
-
-	def __post_init__(self) -> None:
-		"""Post init."""
-		if not self.boundary:
-			self.boundary = self.n - 1
-
-		if not self.lookupMeanders:
-			#=SIN= Avoid "circular import".
-			#ruff: ignore[import-outside-top-level]
-			from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders
-			self.lookupMeanders = makeLookupMeanders(self.kind, self.n, self.boundary)
-
-		self._setBitWidth()
-		self.setBitsLocator()
-		self.set_arcCodeMaximum()
-
-		bytesToBits: int = 8
-		if self.bitWidthLimitArcCode is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * bytesToBits
-
-			#=For example, `bitsZulu << 3`.
-			offsetNecessary_: int = 3
-			#=I don't have mathematical proof of how many extra bits I need.
-			offsetSafety_: int = 1
-			offset_: int = offsetNecessary_ + offsetSafety_
-
-			self.bitWidthLimitArcCode = bitWidthOfFixedSizeInteger_ - offset_
-
-			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
-
-		if self.bitWidthLimitMeanders is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Meanders).itemsize * bytesToBits
-
-			#=I don't know of any.
-			offsetNecessary_: int = 0
-			#=See 'research' directory.
-			offsetEstimation_: int = 3
-			offsetSafety_: int = 1
-			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
-
-			self.bitWidthLimitMeanders = bitWidthOfFixedSizeInteger_ - offset_
-
-			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
-
 class PermutationSpace(dict[Pile, LeafSpace]):
 	"""Store pinned leaves and leaf sets keyed by pile index.
 
@@ -1200,8 +604,8 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
 			leavesPinned: PinnedLeaves = self.pinnedLeaves()
 			antiChoicesLeaf: ChoicesLeaf = mapFolding.beDRYElimination.makeAntiChoicesLeaf(len(self), leavesPinned.values())
-			for pile in filterfalse(leavesPinned.__contains__, self):
-				self[pile] &= antiChoicesLeaf  # ty: ignore[invalid-argument-type]
+			for pile in filterfalse(leavesPinned.__contains__, self.keys()):
+				self[pile] &= antiChoicesLeaf
 			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
 			if count < self.leafCount:
 				self._solidifyLeafSpace()
@@ -1219,7 +623,6 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			else:
 				self[pile] = rangeOfPile
 
-	# TODO Does it matter whether this is a property or a method?
 	def pinnedLeaves(self) -> PinnedLeaves:
 		"""Extract the pile assignments already represented as pinned leaves.
 
@@ -1269,11 +672,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 			New permutation space with merged assignments and the default validity flag.
 		"""
 		#=EndNotes##sorted=
-		self = PermutationSpace(sorted(DOTitems(merge(missing, self))))
-		#ruff: ignore[unnecessary-assign] #=Wrong= It is necessary to assign to self before returning.
-		# OR, there is a better way for me to program this functionality.
-		# TODO learn ^^^^^
-		return self
+		return PermutationSpace(sorted(DOTitems(merge(missing, self))))
 
 	valid: bool = True
 
@@ -1610,6 +1009,601 @@ class StateElimination:
 		self.mapShape首ProductsSums = mapFolding.beDRYElimination.getMapShape首ProductsSums(
 			self.mapShapeProducts, self.totalDimensions, self.totalDimensions
 		)
+
+@dataclasses.dataclass(slots=True)
+class StateMapFolding:
+	"""Store mutable insertion-search state for a map-folding computation.
+
+	(AI generated docstring)
+
+	You can use this class to carry a folding search between initialization and algorithm execution.
+	Construction derives the dimension count, leaf count, and connection graph from the supplied
+	dimension lengths. Counting algorithms update the counters, cursors, and leaf-neighbor arrays.
+
+	Array Initialization
+	--------------------
+	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
+	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
+	signs. Positive dimensions are expected.
+
+	An array whose `shape` tuple is empty is replaced with storage allocated by
+	`mapFolding.dataStructures.makeDataContainer` [3]. An ordinary empty array with shape `(0,)` is
+	retained because its shape tuple is not empty. Leaf-neighbor and gap-range arrays normally have
+	one entry per leaf plus a zero sentinel. The gap workspace normally has the square of the leaf
+	count plus one entry. Explicit arrays are retained without shape validation.
+
+	Attributes
+	----------
+	mapShape : tuple[形TotalLeaves, ...]
+		Inspect dimension lengths in their supplied order.
+	groupsOfFolds : 形TotalFolds = 形TotalFolds(0)
+		Accumulate folding groups, each contributing one folding per leaf.
+	gap1ndex : 形Elephino = 形Elephino(0)
+		Track the one-based cursor within the gap workspace.
+	gap1ndexCeiling : 形Elephino = 形Elephino(0)
+		Track the upper bound of the gap-workspace cursor.
+	次Dimension : 形TotalLeaves = 形TotalLeaves(0)
+		Track the zero-based dimension cursor.
+	次Leaf : 形TotalLeaves = 形TotalLeaves(0)
+		Track a zero-based leaf cursor within a search loop.
+	次MiniGap : 形Elephino = 形Elephino(0)
+		Track a zero-based cursor within a candidate gap range.
+	leaf1ndex : 形TotalLeaves = 形TotalLeaves(1)
+		Track the one-based leaf label currently being inserted.
+	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
+		Track the leaf label selected for a connection.
+	dimensionsUnconstrained : 形TotalLeaves
+		Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count.
+	countDimensionsGapped : 形ArrayTotalLeaves1D
+		Track the number of dimensions admitting each candidate gap.
+	gapRangeStart : 形ArrayElephino1D
+		Track starting offsets of candidate gap ranges.
+	gapsWhere : 形ArrayTotalLeaves1D
+		Store candidate gap positions in the search workspace.
+	leafAbove : 形ArrayTotalLeaves1D
+		Map each leaf label to the neighboring leaf above.
+	leafBelow : 形ArrayTotalLeaves1D
+		Map each leaf label to the neighboring leaf below.
+	connectionGraph : 形ArrayTotalLeaves3D
+		Inspect the connection lookup derived during initialization.
+	totalDimensions : 形TotalLeaves
+		Inspect the dimension count derived from `mapShape`.
+	totalLeaves : 形TotalLeaves
+		Inspect the leaf count derived from `mapShape`.
+	totalFolds : 形TotalFolds
+		Inspect the computed count obtained by multiplying the group count by the leaf count.
+
+	References
+	----------
+	[1] `mapFolding.beDRY.getTotalLeaves`
+
+	[2] `mapFolding.dataStructures.makeConnectionGraph`
+
+	[3] `mapFolding.dataStructures.makeDataContainer`
+
+	"""
+
+	mapShape: tuple[形TotalLeaves, ...] = dataclasses.field(init=True)
+	"""Dimensions of the map being analyzed for folding patterns."""
+
+	groupsOfFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
+	"""Current count of distinct folding pattern groups: each group has `totalLeaves`-many foldings."""
+
+	gap1ndex: 形Elephino = dataclasses.field(default=形Elephino(0))
+	"""The current 1-indexed position of the 'gap' during computation: 1-indexed as opposed to 0-indexed."""
+	gap1ndexCeiling: 形Elephino = dataclasses.field(default=形Elephino(0))
+	"""The upper bound of `gap1ndex`."""
+	次Dimension: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
+	"""The current 0-indexed position of the dimension during computation."""
+	次Leaf: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
+	"""The current 0-indexed position of a leaf in a loop during computation: not to be confused with `leaf1ndex`."""
+	次MiniGap: 形Elephino = dataclasses.field(default=形Elephino(0))
+	"""The current 0-indexed position of a 'gap' in a loop during computation."""
+	leaf1ndex: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(1))
+	"""The current 1-indexed position of the leaf during computation: 1-indexed as opposed to 0-indexed."""
+	leafConnectee: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
+	"""Target leaf for connection operations."""
+	dimensionsUnconstrained: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
+	"""Count of dimensions not subject to folding constraints."""
+
+	countDimensionsGapped: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
+	"""Array tracking computed number of dimensions with gaps."""
+	gapRangeStart: 形ArrayElephino1D = dataclasses.field(default_factory=lambda: 形ArrayElephino1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayElephino1D)[1])[0]})
+	"""Array tracking computed starting positions of gap ranges."""
+	gapsWhere: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
+	"""Array indicating locations of gaps in the folding pattern."""
+	leafAbove: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
+	"""Array tracking the leaves above the current leaf, `leaf1ndex`, during computation."""
+	leafBelow: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
+	"""Array tracking the leaves below the current leaf, `leaf1ndex`, during computation."""
+
+	connectionGraph: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
+	"""Unchanging array representing connections between all leaves."""
+	totalDimensions: 形TotalLeaves = dataclasses.field(init=False)
+	"""Unchanging total number of dimensions in the map."""
+	totalLeaves: 形TotalLeaves = dataclasses.field(init=False)
+	"""Unchanging total number of leaves in the map."""
+
+	@property
+	def totalFolds(self) -> 形TotalFolds:
+		"""Compute the folding count represented by the current group count.
+
+		(AI generated docstring)
+
+		You can use this property to convert the accumulated group count to the number of foldings.
+		The property reflects the current search progress and is zero before any group has been counted.
+
+		Returns
+		-------
+		totalFolds : 形TotalFolds
+			Product of `self.totalLeaves` and `self.groupsOfFolds`.
+		"""
+		return 形TotalFolds(self.totalLeaves) * self.groupsOfFolds
+
+	def __post_init__(self) -> None:
+		"""Ensure all fields have a value.
+
+		Notes
+		-----
+		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
+		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
+
+		"""
+		self.totalDimensions = 形TotalLeaves(len(self.mapShape))
+		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
+
+		totalLeavesAsInt = int(self.totalLeaves)
+
+		self.connectionGraph = makeConnectionGraph(self.mapShape, totalLeavesAsInt, self.__dataclass_fields__['connectionGraph'].metadata['dtype'])
+
+		if self.gapsWhere.ndim == 0:
+			self.gapsWhere = makeDataContainer(totalLeavesAsInt * totalLeavesAsInt + 1, self.__dataclass_fields__['gapsWhere'].metadata['dtype'])
+		if self.countDimensionsGapped.ndim == 0:
+			self.countDimensionsGapped = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['countDimensionsGapped'].metadata['dtype'])
+		if self.gapRangeStart.ndim == 0:
+			self.gapRangeStart = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['gapRangeStart'].metadata['dtype'])
+		if self.leafAbove.ndim == 0:
+			self.leafAbove = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafAbove'].metadata['dtype'])
+		if self.leafBelow.ndim == 0:
+			self.leafBelow = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafBelow'].metadata['dtype'])
+
+@dataclasses.dataclass(slots=True)
+class StateMapFoldingParallel(StateMapFolding):
+	"""Extend map-folding state with task-division fields.
+
+	(AI generated docstring)
+
+	You can use this class to construct a task-specific folding search. This class inherits the
+	arrays, search cursors, and counting property of `StateMapFolding` [1] and adds task selection.
+
+	Task Preconditions
+	------------------
+	Use task counts no greater than the leaf count and task indices within the selected count.
+	Construction does not validate these constraints. A count greater than the leaf count can
+	overcount foldings.
+
+	Attributes
+	----------
+	taskDivisions : 形TotalLeaves = 形TotalLeaves(0)
+		Number of tasks. Initialization replaces zero with the derived leaf count.
+	task次 : 形TotalLeaves = 形TotalLeaves(0)
+		Zero-based task index selecting this state within the divided computation.
+
+	References
+	----------
+	[1] `StateMapFolding`
+
+	"""
+
+	taskDivisions: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
+	"""Select the number of computation tasks.
+
+	(AI generated docstring)
+
+	Initialization replaces zero with the derived leaf count. Values greater than the leaf count
+	can overcount foldings; construction does not validate the upper bound.
+	"""
+
+	task次: 形TotalLeaves = dataclasses.field(default=形TotalLeaves(0))
+	"""Select the zero-based task represented by this state.
+
+	(AI generated docstring)
+
+	Use an index from zero through one less than the selected task count. Construction does not
+	validate the index.
+	"""
+
+	def __post_init__(self) -> None:
+		"""Initialize parallel-specific state after base initialization.
+
+		(AI generated docstring)
+
+		This method calls the parent initialization to set up all base
+		computational arrays, then configures the task division
+		parameters. If `taskDivisions` is 0, it automatically sets the
+		value to `totalLeaves` for optimal parallelization.
+
+		"""
+		super().__post_init__()
+		if self.taskDivisions == 0:
+			self.taskDivisions = 形TotalLeaves(int(self.totalLeaves))
+
+@dataclasses.dataclass(slots=True)
+class StateMapFoldingSymmetric(StateMapFolding):
+	"""Store mutable insertion-search state for symmetric map foldings.
+
+	(AI generated docstring)
+
+	Shared fields and array initialization are inherited from `StateMapFolding`.
+	You can use this class to carry a folding search between initialization and algorithm execution.
+	Construction derives the dimension count, leaf count, and connection graph from the supplied
+	dimension lengths. Counting algorithms update the counters, cursors, and leaf-neighbor arrays.
+
+	Array Initialization
+	--------------------
+	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
+	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
+	signs. Positive dimensions are expected.
+
+	An array whose `shape` tuple is empty is replaced with storage allocated by
+	`mapFolding.dataStructures.makeDataContainer` [3]. An ordinary empty array with shape `(0,)` is
+	retained because its shape tuple is not empty. Leaf-neighbor and gap-range arrays normally have
+	one entry per leaf plus a zero sentinel. The gap workspace normally has the square of the leaf
+	count plus one entry. Explicit arrays are retained without shape validation.
+
+	Symmetry Index Layout
+	---------------------
+	`indices` has shape `(totalLeaves + 1, totalLeaves // 2, 2)`. The last axis stores pairs of
+	positions used to compare a leaf sequence with its reversed cyclic alignment.
+
+	Attributes
+	----------
+	mapShape : tuple[形TotalLeaves, ...]
+		Inspect dimension lengths in their supplied order.
+	symmetricFolds : 形TotalFolds = 形TotalFolds(0)
+		Accumulate foldings that satisfy the symmetry constraint.
+	gap1ndex : 形Elephino = 形Elephino(0)
+		Track the one-based cursor within the gap workspace.
+	gap1ndexCeiling : 形Elephino = 形Elephino(0)
+		Track the upper bound of the gap-workspace cursor.
+	次Dimension : 形TotalLeaves = 形TotalLeaves(0)
+		Track the zero-based dimension cursor.
+	次Leaf : 形TotalLeaves = 形TotalLeaves(0)
+		Track a zero-based leaf cursor within a search loop.
+	次MiniGap : 形Elephino = 形Elephino(0)
+		Track a zero-based cursor within a candidate gap range.
+	leaf1ndex : 形TotalLeaves = 形TotalLeaves(1)
+		Track the one-based leaf label currently being inserted.
+	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
+		Track the leaf label selected for a connection.
+	dimensionsUnconstrained : 形TotalLeaves
+		Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count.
+	countDimensionsGapped : 形ArrayTotalLeaves1D
+		Track the number of dimensions admitting each candidate gap.
+	gapRangeStart : 形ArrayElephino1D
+		Track starting offsets of candidate gap ranges.
+	gapsWhere : 形ArrayTotalLeaves1D
+		Store candidate gap positions in the search workspace.
+	leafAbove : 形ArrayTotalLeaves1D
+		Map each leaf label to the neighboring leaf above.
+	leafBelow : 形ArrayTotalLeaves1D
+		Map each leaf label to the neighboring leaf below.
+	connectionGraph : 形ArrayTotalLeaves3D
+		Inspect the connection lookup derived during initialization.
+	totalDimensions : 形TotalLeaves
+		Inspect the dimension count derived from `mapShape`.
+	totalLeaves : 形TotalLeaves
+		Inspect the leaf count derived from `mapShape`.
+	leafComparison : 形ArrayTotalLeaves1D
+		Store the leaf sequence used for symmetric-fold comparisons.
+	indices : 形ArrayTotalLeaves3D
+		Inspect precomputed pairs of positions for symmetric-fold comparisons.
+
+	References
+	----------
+	[1] `mapFolding.beDRY.getTotalLeaves`
+
+	[2] `mapFolding.dataStructures.makeConnectionGraph`
+
+	[3] `mapFolding.dataStructures.makeDataContainer`
+
+	"""
+
+	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
+	"""Current count of symmetric folds."""
+
+	leafComparison: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
+	"""Array for finding symmetric folds."""
+
+	indices: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
+	"""Precomputed index pairs for symmetric fold checking."""
+
+	def __post_init__(self) -> None:
+		"""Ensure all fields have a value.
+
+		Notes
+		-----
+		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
+		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
+
+		"""
+		super(StateMapFoldingSymmetric, self).__post_init__()
+		totalLeavesAsInt = int(self.totalLeaves)
+
+		arrayIndexCoordinates: 形ArraySelector = numpy.indices((totalLeavesAsInt + 1, totalLeavesAsInt // 2))
+		self.indices = numpy.stack(((arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1)
+							, (-2 - arrayIndexCoordinates[1] + arrayIndexCoordinates[0]) % (totalLeavesAsInt + 1))
+							, axis=2).astype(self.__dataclass_fields__['indices'].metadata['dtype'], copy=False)
+
+		if self.leafComparison.ndim == 0:
+			self.leafComparison = makeDataContainer(totalLeavesAsInt + 1, self.__dataclass_fields__['leafComparison'].metadata['dtype'])
+
+@dataclasses.dataclass(slots=True)
+class StateMeanders:
+	"""Store transfer counts and boundary progress for a meander computation.
+
+	(AI generated docstring)
+
+	You can use this class to start or continue a meander computation. Construction fills an empty
+	count lookup, selects a starting boundary when the supplied boundary is zero, and derives bit
+	limits for fixed-width storage.
+
+	Initialization
+	--------------
+	A falsy `boundary` is replaced with `n - 1`. An empty `lookupMeanders` is replaced using
+	`mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders` [1]. A supplied nonempty lookup
+	is retained, and the bit width and locator mask are recomputed from its largest key.
+	Initialization requires a nonempty lookup after this setup.
+
+	Missing width limits are derived from `mapFolding.theTypes.形ArcCode` [2] and
+	`mapFolding.theTypes.形Meanders` [3]. Each derived limit reserves four bits relative to the
+	corresponding NumPy storage width [4]. Supplied limits are retained.
+
+	Attributes
+	----------
+	n : int
+		Computation index used to initialize the transfer problem.
+	kind : Literal['semi', 'meanders'] | LiteralString
+		Meander family used by lookup initialization.
+	boundary : int = 0
+		Current transfer boundary; initialization replaces zero with `n - 1`.
+	lookupMeanders : dict[int, int]
+		Arch codes mapped to active counts, using Python integers without a fixed-width limit.
+	bitWidth : int = 0
+		Number of bits in the largest active arch code, recomputed during initialization.
+	bitsLocator : int = 0
+		Mask selecting bit positions zero, two, four, and so on below the current width.
+	arcCodeMaximum : int = 0
+		Power-of-two threshold derived from the current boundary.
+	bitWidthLimitArcCode : int | None = None
+		Arc-code width limit used when selecting fixed-width computation.
+	bitWidthLimitMeanders : int | None = None
+		Count width limit used when selecting fixed-width computation.
+	次Target : int = 0
+		Mutable target cursor whose interpretation depends on the algorithm.
+	countAddend : int = 0
+		Completed counting contributions removed from the active lookup.
+	totalMeanders : int
+		Sum of active counts and completed contributions; the sequence term after counting finishes.
+
+	Examples
+	--------
+	`mapFolding.basecamp.countMeanders` [5] initializes a state from a family and sequence index.
+
+		```python
+		state = StateMeanders(n, kind)
+		```
+
+	References
+	----------
+	[1] `mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders`
+
+	[2] `mapFolding.theTypes.形ArcCode`
+
+	[3] `mapFolding.theTypes.形Meanders`
+
+	[4] NumPy datatype reference.
+		https://numpy.org/doc/stable/reference/index.html
+	[5] `mapFolding.basecamp.countMeanders`
+
+	"""
+
+	n: int
+	"""The index of the meanders problem being solved."""
+	kind: Literal['semi', 'meanders'] | LiteralString
+	"""'semi' for semi-meanders or 'meanders' for meanders."""
+
+	boundary: int = 0
+	"""The algorithm analyzes `n` boundaries starting at `boundary = n - 1`."""
+	lookupMeanders: dict[int, int] = dataclasses.field(default_factory=dict[int, int])
+	"""A Python `dict` (*dict*ionary) of `arcCode` to `meanders`. The values are stored as Python `int`
+	(*int*eger), which may be arbitrarily large. Because of that property, `int` may also be called a 'bignum' (big *num*ber) or
+	'bigint' (big *int*eger).
+	"""
+
+	bitWidth: int = 0
+	"""Track the bit length of the largest active arch code.
+
+	(AI generated docstring)
+	"""
+	bitsLocator: int = 0
+	"""An odd-parity bit-mask with `bitWidth` bits."""
+	arcCodeMaximum: int = 0
+	"""Track the boundary-derived power-of-two threshold for arch codes.
+
+	(AI generated docstring)
+	"""
+
+	bitWidthLimitArcCode: int | None = None
+	"""Select the arch-code width limit for fixed-width computation.
+
+	(AI generated docstring)
+	"""
+	bitWidthLimitMeanders: int | None = None
+	"""Select the count width limit for fixed-width computation.
+
+	(AI generated docstring)
+	"""
+
+	次Target: int = 0
+	"""What is being indexed depends on the algorithm flavor."""
+	countAddend: int = 0
+	"""Retain completed counting contributions removed from the active computation."""
+
+	def reduceBoundary(self) -> None:
+		"""Advance to the next transfer step by reducing the boundary.
+
+		(AI generated docstring)
+
+		This method subtracts one from `self.boundary` and recomputes the stored bit width, locator mask,
+		and arch-code threshold. This method returns `None`. The active lookup must be nonempty.
+		"""
+		self.boundary -= 1
+		self._setBitWidth()
+		self.setBitsLocator()
+		self.set_arcCodeMaximum()
+
+	def setBitsLocator(self) -> None:
+		"""Compute an odd-parity bit-mask with `bitWidth` bits.
+
+		Semiotics
+		---------
+		In binary, `bitsLocator` has alternating 0s and 1s and ends with a 1, such as '101',
+		'0101', and '10101'. The last digit is in the 1's column, but programmers usually call it the
+		"least significant bit" (LSB). If we count the columns from the right, the 1's column is
+		column 1, the 2's column is column 2, the 4's column is column 3, and so on. When counting
+		this way, `bitsLocator` has 1s in the columns with odd index numbers. Mathematicians and
+		programmers, therefore, tend to call `bitsLocator` something like the "odd bit-mask", the
+		"odd-parity numbers", or simply "odd mask" or "odd numbers". In addition to "odd" being
+		inherently ambiguous in this context, this algorithm also segregates odd numbers from even
+		numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
+		"""
+		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
+
+	def _setBitWidth(self) -> None:
+		"""I use this to refresh the arch-code bit width during initialization and boundary reduction.
+
+		(AI generated docstring)
+
+		This method updates `self.bitWidth` from the largest key in `self.lookupMeanders` and returns
+		`None`. An empty lookup propagates `ValueError` from the maximum-key calculation.
+
+		See Also
+		--------
+		`StateMeanders.setBitWidthNumPy`
+			Derive the width from an array instead of the stored lookup.
+		"""
+		self.bitWidth = max(self.lookupMeanders.keys()).bit_length()
+
+	def setBitWidthNumPy(self, arrayMeanders: 形ArrayArcCode) -> None:
+		"""Set the stored bit width from the largest value in `arrayMeanders`.
+
+		(AI generated docstring)
+
+		This method finds the maximum value across the entire supplied NumPy array [1], converts the
+		maximum to a Python integer, and stores its bit length in `self.bitWidth`. This method returns
+		`None`. Callers must supply the values whose maximum should determine the width.
+
+		Parameters
+		----------
+		arrayMeanders : 形ArrayArcCode
+			Nonempty array of encoded arch values, or an array selection containing those values.
+
+		See Also
+		--------
+		`StateMeanders._setBitWidth`
+			Derive the width from the stored lookup instead of an array.
+
+		References
+		----------
+		[1] NumPy array reference.
+			https://numpy.org/doc/stable/reference/index.html
+		"""
+		self.bitWidth = int(arrayMeanders.max()).bit_length()
+
+	def set_arcCodeMaximum(self) -> None:
+		"""Set the arch-code threshold from the current transfer boundary.
+
+		(AI generated docstring)
+
+		This method stores `1 << (2 * self.boundary + 4)` in `self.arcCodeMaximum` and returns `None`.
+		This method does not inspect or change the count lookup.
+		"""
+		self.arcCodeMaximum = 1 << (2 * self.boundary + 4)
+
+	@property
+	def totalMeanders(self) -> int:
+		"""Inspect the total represented by the current meander state.
+
+		(AI generated docstring)
+
+		You can use this property to read the sequence term after counting finishes. Before completion,
+		`totalMeanders` combines active transfer counts with completed contributions and does not
+		represent the final sequence term. The property reflects changes to `self.lookupMeanders` and
+		`self.countAddend` whenever accessed.
+
+		Returns
+		-------
+		totalMeanders : int
+			Sum of `self.lookupMeanders.values()` and `self.countAddend`, using Python integers.
+
+		Examples
+		--------
+		`mapFolding.basecamp.countMeanders` [1] reads the completed total for saving.
+
+			```python
+			countTotal: int = state.totalMeanders
+			```
+
+		References
+		----------
+		[1] `mapFolding.basecamp.countMeanders`
+
+		"""
+		return sum(self.lookupMeanders.values()) + self.countAddend
+
+	def __post_init__(self) -> None:
+		"""Post init."""
+		if not self.boundary:
+			self.boundary = self.n - 1
+
+		if not self.lookupMeanders:
+			#=SIN= Avoid "circular import".
+			#ruff: ignore[import-outside-top-level]
+			from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders
+			self.lookupMeanders = makeLookupMeanders(self.kind, self.n, self.boundary)
+
+		self._setBitWidth()
+		self.setBitsLocator()
+		self.set_arcCodeMaximum()
+
+		bytesToBits: int = 8
+		if self.bitWidthLimitArcCode is None:
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * bytesToBits
+
+			#=For example, `bitsZulu << 3`.
+			offsetNecessary_: int = 3
+			#=I don't have mathematical proof of how many extra bits I need.
+			offsetSafety_: int = 1
+			offset_: int = offsetNecessary_ + offsetSafety_
+
+			self.bitWidthLimitArcCode = bitWidthOfFixedSizeInteger_ - offset_
+
+			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
+
+		if self.bitWidthLimitMeanders is None:
+			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Meanders).itemsize * bytesToBits
+
+			#=I don't know of any.
+			offsetNecessary_: int = 0
+			#=See 'research' directory.
+			offsetEstimation_: int = 3
+			offsetSafety_: int = 1
+			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
+
+			self.bitWidthLimitMeanders = bitWidthOfFixedSizeInteger_ - offset_
+
+			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
 
 #================== Managing data structures in `matrixMeandersNumPy` algorithm ===================
 
