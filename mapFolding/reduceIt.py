@@ -35,8 +35,7 @@ from humpy_cytoolz import dissoc, get, groupby as toolz_groupby, keyfilter as fi
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations
 from mapFolding.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding.beDRY import mapShapeIs2上nDimensions
-from mapFolding.beDRYElimination import makeAntiChoicesLeaf
+from mapFolding.beDRY import makeAntiChoicesLeaf, mapShapeIs2上nDimensions
 from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.filters import (
@@ -46,7 +45,7 @@ from mapFolding.theTypes import ChoicesLeaf, Leaf, Pile
 from more_itertools import extract, first, one, pairwise, triplewise
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTvalues, reverseLookup
-import mapFolding.beDRYElimination
+import mapFolding.beDRY
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable, Iterator, Sequence
@@ -84,7 +83,7 @@ def reduceLeafSpace(permutationSpace: PermutationSpace, pilesToUpdate: Iterable[
 		failure.
 	"""
 	for pile, choicesLeaf in pilesToUpdate:
-		leafSpace: LeafSpace | None = mapFolding.beDRYElimination.distinguishChoicesLeaf(mapFolding.beDRYElimination.choicesLeafAND(antiChoicesLeaf, choicesLeaf))
+		leafSpace: LeafSpace | None = mapFolding.beDRY.distinguishChoicesLeaf(mapFolding.beDRY.choicesLeafAND(antiChoicesLeaf, choicesLeaf))
 		if leafSpace is None:
 			#=SIN= Early return.
 			permutationSpace.valid = False
@@ -149,7 +148,7 @@ def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace)
 						pileOf_rCrease = raiseIfNone(reverseLookup(leavesPinnedParityOpposite, leaf_rCrease))
 
 					if leaf_kCreaseIsPinned and not leaf_rCreaseIsPinned:
-						antiChoicesLeaf: ChoicesLeaf = mapFolding.beDRYElimination.makeAntiChoicesLeaf(state.totalLeaves, (leaf_rCrease,))
+						antiChoicesLeaf: ChoicesLeaf = mapFolding.beDRY.makeAntiChoicesLeaf(state.totalLeaves, (leaf_rCrease,))
 
 						if pileOf_k < pileOf_r < pileOf_kCrease:
 							pilesForbidden = frozenset([*range(pileOf_k), *range(pileOf_kCrease + 1, state.pileLast + inclusive)])
@@ -161,7 +160,7 @@ def _crossedCreases(state: StateElimination, permutationSpace: PermutationSpace)
 							pilesForbidden = range(pileOf_k + 1, pileOf_kCrease)
 
 					elif not leaf_kCreaseIsPinned and leaf_rCreaseIsPinned:
-						antiChoicesLeaf = mapFolding.beDRYElimination.makeAntiChoicesLeaf(state.totalLeaves, (leaf_kCrease,))
+						antiChoicesLeaf = mapFolding.beDRY.makeAntiChoicesLeaf(state.totalLeaves, (leaf_kCrease,))
 
 						if pileOf_rCrease < pileOf_k < pileOf_r:
 							pilesForbidden = frozenset([*range(pileOf_rCrease), *range(pileOf_r + 1, state.pileLast + inclusive)])
@@ -221,7 +220,7 @@ def reducePermutationSpace_LeafIsPinned(state: StateElimination, permutationSpac
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
 		permutationSpaceHasNewLeaf = False
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
-		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), mapFolding.beDRYElimination.makeAntiChoicesLeaf(state.totalLeaves, DOTvalues(leavesPinned)))
+		permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(pilesUndetermined), mapFolding.beDRY.makeAntiChoicesLeaf(state.totalLeaves, DOTvalues(leavesPinned)))
 		if len(leavesPinned) < permutationSpace.leafCount:
 			permutationSpaceHasNewLeaf = True
 
@@ -269,10 +268,10 @@ def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace
 
 		groupByChoicesLeaf = filterValue(lambda boxOfPiles: 1 < len(boxOfPiles), groupByChoicesLeaf)
 		for choicesLeaf, boxOfPiles in groupByChoicesLeaf.items():
-			if mapFolding.beDRYElimination.lengthChoicesLeaf(choicesLeaf) == len(boxOfPiles):
+			if mapFolding.beDRY.lengthChoicesLeaf(choicesLeaf) == len(boxOfPiles):
 
 				permutationSpace = reduceLeafSpace(permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles))
-					, mapFolding.beDRYElimination.makeAntiChoicesLeaf(state.totalLeaves, mapFolding.beDRYElimination.getIteratorOfLeaves(choicesLeaf))
+					, mapFolding.beDRY.makeAntiChoicesLeaf(state.totalLeaves, mapFolding.beDRY.getIteratorOfLeaves(choicesLeaf))
 				)
 
 		if permutationSpace.leafCount < leafCount:
@@ -308,7 +307,7 @@ def reducePermutationSpace_leafDomainOf0or1(state: StateElimination, permutation
 
 		leavesPinned, pilesUndetermined = permutationSpace.bifurcate()
 
-		countDomainSizes: Counter[Leaf] = Counter(chain(chain.from_iterable(map(mapFolding.beDRYElimination.getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
+		countDomainSizes: Counter[Leaf] = Counter(chain(chain.from_iterable(map(mapFolding.beDRY.getIteratorOfLeaves, DOTvalues(pilesUndetermined))), DOTvalues(leavesPinned)))
 
 		if set(range(state.totalLeaves)).difference(countDomainSizes.keys()):
 			permutationSpace.valid = False

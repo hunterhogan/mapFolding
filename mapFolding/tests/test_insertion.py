@@ -5,7 +5,6 @@ from mapFolding.algorithms.iff import foldingValid吗 as diagramValid吗
 from mapFolding.beDRY import getTotalLeaves
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
 from typing import TYPE_CHECKING
-
 import pytest
 
 if TYPE_CHECKING:

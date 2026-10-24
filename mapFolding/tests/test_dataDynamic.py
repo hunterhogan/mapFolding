@@ -15,7 +15,7 @@ and the tests will automatically pick them up via parametrization.
 
 from __future__ import annotations
 
-from mapFolding.beDRYElimination import getIteratorOfLeaves
+from mapFolding.beDRY import getIteratorOfLeaves
 from mapFolding.leafDomains import (
 	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二)
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost

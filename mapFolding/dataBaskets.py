@@ -64,7 +64,7 @@ from operator import attrgetter, methodcaller
 from typing import cast, get_args, NamedTuple, overload, TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
-import mapFolding.beDRYElimination
+import mapFolding.beDRY
 import mapFolding.leafDomains
 import numpy
 
@@ -366,7 +366,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		if (choicesLeaf := self.getChoicesLeaf(pile)) is None:
 			deconstructed: Iterable[PermutationSpace] = [self]
 		else:
-			leavesToPin = leavesToPin or mapFolding.beDRYElimination.getIteratorOfLeaves(choicesLeaf)
+			leavesToPin = leavesToPin or mapFolding.beDRY.getIteratorOfLeaves(choicesLeaf)
 			deconstructed = map(partial(self.atPilePinLeaf, pile), filter(self.leafNotPinned吗, leavesToPin))
 		return deconstructed
 
@@ -603,7 +603,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		if count < len(self):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
 			leavesPinned: PinnedLeaves = self.pinnedLeaves()
-			antiChoicesLeaf: ChoicesLeaf = mapFolding.beDRYElimination.makeAntiChoicesLeaf(len(self), leavesPinned.values())
+			antiChoicesLeaf: ChoicesLeaf = mapFolding.beDRY.makeAntiChoicesLeaf(len(self), leavesPinned.values())
 			for pile in filterfalse(leavesPinned.__contains__, self.keys()):
 				self[pile] &= antiChoicesLeaf
 			tuple(map(self._solidifyLeafSpaceAtPile, leavesPinned))
@@ -613,7 +613,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	def _solidifyLeafSpaceAtPile(self, pile: Pile) -> None:
 		rangeOfPile: LeafSpace | None = self[pile]
 		if choicesLeaf吗(rangeOfPile):
-			rangeOfPile = mapFolding.beDRYElimination.distinguishChoicesLeaf(rangeOfPile)
+			rangeOfPile = mapFolding.beDRY.distinguishChoicesLeaf(rangeOfPile)
 			if rangeOfPile is None:
 				self.valid = False
 			elif choicesLeaf吗(rangeOfPile):
@@ -1004,9 +1004,9 @@ class StateElimination:
 		self.pilesTotal = self.totalLeaves
 		self.pileLast = self.pilesTotal - 1
 		self.首 = self.totalLeaves
-		self.mapShapeProducts = mapFolding.beDRYElimination.getMapShapeProducts(self.mapShape)
-		self.mapShapeProductsSums = mapFolding.beDRYElimination.getMapShapeProductsSums(self.mapShape)
-		self.mapShape首ProductsSums = mapFolding.beDRYElimination.getMapShape首ProductsSums(
+		self.mapShapeProducts = mapFolding.beDRY.getMapShapeProducts(self.mapShape)
+		self.mapShapeProductsSums = mapFolding.beDRY.getMapShapeProductsSums(self.mapShape)
+		self.mapShape首ProductsSums = mapFolding.beDRY.getMapShape首ProductsSums(
 			self.mapShapeProducts, self.totalDimensions, self.totalDimensions
 		)
 

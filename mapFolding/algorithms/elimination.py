@@ -29,7 +29,7 @@ from functools import partial
 from itertools import chain, pairwise, product as CartesianProduct, repeat, starmap
 from mapFolding import leafOrigin, pileOrigin
 from mapFolding.algorithms.iff import foldingValid吗
-from mapFolding.beDRYElimination import getIteratorOfLeaves, mapShapeLengthsAreEqual
+from mapFolding.beDRY import getIteratorOfLeaves, mapShapeLengthsAreEqual
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.pileOptions import getLookupChoicesLeaf
 from mapFolding.pinIt import excludeLeaf_rBeforeLeaf_k

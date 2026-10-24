@@ -6,7 +6,7 @@ from humpy_toolz.curried import map as toolz_map
 from mapFolding import pinIt, 首一
 from mapFolding.algorithms.eliminationCrease import doTheNeedful
 from mapFolding.algorithms.insertion2上nDimensional import makeAlbum2上nDimensional, recordAlbum2上nDimensional
-from mapFolding.beDRYElimination import getIteratorOfLeaves, lengthChoicesLeaf
+from mapFolding.beDRY import getIteratorOfLeaves, lengthChoicesLeaf
 from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination

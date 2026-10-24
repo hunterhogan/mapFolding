@@ -8,7 +8,7 @@ from functools import partial
 from gmpy2 import is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import raiseIfNone
 from mapFolding import 零, 首一, 首二, 首零, 首零一
-from mapFolding.beDRYElimination import getIteratorOfLeaves
+from mapFolding.beDRY import getIteratorOfLeaves
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings

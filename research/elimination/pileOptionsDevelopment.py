@@ -11,8 +11,7 @@ from humpy_toolz.curried.operator import add, iadd, mul
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
 from mapFolding import leafOrigin, 零, 首一, 首二, 首零, 首零一
-from mapFolding.beDRY import mapShapeIs2上nDimensions
-from mapFolding.beDRYElimination import getIteratorOfLeaves, makeChoicesLeaf
+from mapFolding.beDRY import getIteratorOfLeaves, makeChoicesLeaf, mapShapeIs2上nDimensions
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.measure import invertLeafIn2上nDimensions, 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from mapFolding.pileOptions import getChoicesLeaf

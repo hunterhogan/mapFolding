@@ -29,8 +29,7 @@ from __future__ import annotations
 from functools import cache, partial
 from gmpy2 import bit_flip, bit_mask
 from mapFolding import leafOrigin, 零, 首零
-from mapFolding.beDRY import mapShapeIs2上nDimensions
-from mapFolding.beDRYElimination import makeChoicesLeaf
+from mapFolding.beDRY import makeChoicesLeaf, mapShapeIs2上nDimensions
 from mapFolding.measure import 工dimensionTail, 工dimension首零, 工totalDimensionsOdd
 from typing import TYPE_CHECKING
 

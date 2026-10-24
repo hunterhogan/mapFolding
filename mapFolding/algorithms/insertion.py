@@ -26,8 +26,7 @@ from hunterMakesPy import decreasing
 from itertools import chain
 from mapFolding import leafOrigin, pileOrigin
 from mapFolding.algorithms.iff import creaseViolation吗 as archesCross吗, getCreasePost as getArchPost, oddLeaf吗
-from mapFolding.beDRY import defineProcessorLimit, getTotalLeaves, validateMapShape
-from mapFolding.beDRYElimination import getMapShapeProducts
+from mapFolding.beDRY import defineProcessorLimit, getMapShapeProducts, getTotalLeaves, validateMapShape
 from mapFolding.kitFilesystem import makePathFilenameFolds, writeAlbum
 from mapFolding.oeis import getValuesKnown
 from mapFolding.theSSOT import settingsPackage
