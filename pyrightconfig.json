@@ -13,7 +13,7 @@
 		".vAnalysis"
 	],
 	"reportConstantRedefinition": false,
-	// "reportInvalidTypeVarUse": false,
+	"reportInvalidTypeVarUse": false,
 	"reportPrivateUsage": false,
 	"reportReturnType": "warning",
 	"reportUnnecessaryIsInstance": false,

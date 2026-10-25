@@ -38,8 +38,8 @@ ignore = [
   "docstring-in-stub",
   "docstring-missing-exception",
   "docstring-missing-returns",
-  "docstring-tab-indentation",
   "docstring-missing-yields",
+  "docstring-tab-indentation",
   "explicit-f-string-type-conversion",
   "FIX",
   "I",
@@ -93,7 +93,7 @@ task-tags = ["DEVELOPMENT", "FailEarly", "NOTE", "SEMIOTICS", "TODO"]
 allow-dict-calls-with-keyword-arguments = true
 
 [lint.flake8-import-conventions]
-banned-aliases = { numpy = ["np"], pandas = ["pd"], regex = ["re"] }
+banned-aliases = { numpy = ["np"], optype = ["op"], pandas = ["pd"], polars = ["pl"], regex = ["re"] }
 
 [lint.flake8-import-conventions.aliases]
 "accelerate.utils.dataclasses" = "accelerate_dataclasses"
@@ -107,8 +107,6 @@ banned-aliases = { numpy = ["np"], pandas = ["pd"], regex = ["re"] }
 "itertools.product" = "CartesianProduct"
 "math.comb" = "nCr"
 "more_itertools.all_unique" = "allUnique吗"
-"numpy" = "numpy"
-"pandas" = "pandas"
 "regex" = "regex"
 "scipy" = "scipy"
 "sympy.binomial" = "sympy_binomial"
@@ -119,6 +117,10 @@ banned-aliases = { numpy = ["np"], pandas = ["pd"], regex = ["re"] }
 "torch.autograd.grad" = "torch_grad"
 "torch.nn.functional" = "F"
 "torch.nn.parallel.DistributedDataParallel" = "DDP"
+numpy = "numpy"
+pandas = "pandas"
+polars = "polars"
+re = "regex"
 
 [lint.flake8-quotes]
 inline-quotes = "single"
@@ -127,15 +129,15 @@ inline-quotes = "single"
 "__init__.py" = ["useless-import-alias"]
 "*test*.py" = [
   "ARG",
+  "assert",
   "BLE",
   "D",
+  "docstring-missing-returns",
   "DTZ",
   "FBT",
   "PT",
-  "assert",
   "suspicious-non-cryptographic-random-usage",
   "TRY",
-  "docstring-missing-returns",
 ]
 
 [lint.pydocstyle]
