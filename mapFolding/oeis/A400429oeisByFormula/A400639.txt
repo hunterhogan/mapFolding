@@ -16,7 +16,7 @@
 %F a(n) = T(n,floor(n/2)-10), where T is the triangle A400429.
 %F More generally, if D_j is the j-th diagonal of A400429, then 2*j is its least index.
 %F For this sequence, j = 11 and 2*j = 22.
-%F D_j(2*j) = a(22) = A005315(j) = A005316(2*j-1).
+%F D_j(2*j)   = a(22) = A005315(j)   = A005316(2*j-1).
 %F D_j(2*j+1) = a(23) = A005315(j+1) = A005316(2*j+1) = D_{j+1}(2*j+2).
 %e Row n=26 of A400429 is 6405031050,30145730504,36155933236,24677860682,11051733878,3396104098,722325334,105008654,10109160,610100,21076,354,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18,20,22,24. Since n-22=4, a(26)=36155933236, which is the eleventh-to-last value.
 %Y Eleventh diagonal of A400429. Cf. A005315, A005316, A400630, A400631, A400632, A400633, A400634, A400635, A400636, A400637, A400638.

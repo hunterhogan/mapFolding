@@ -1,4 +1,4 @@
-%I #6 Oct 14 2026 17:40:04
+%I #12 Oct 25 2026 19:51:31
 %S 8,42,100,200,340,546,810,1170,1610,2180,2856,3702,4682,5878,7240,
 %T 8868,10698,12850,15242,18018,21076,24584,28420,32778,37512,42846,
 %U 48608,55052,61980,69678,77918,87022,96730,107400,118740,131146,144290,158610,173740,190160,207466,226182,245862,267078,289340
@@ -9,6 +9,7 @@
 %C Equivalent to a closed curve (a loop) transversely crossing a ray, considered up to continuous deformation fixing the ray, with a winding number equal to the number of crossings that would be created if the fixed end of the ray were extended to form a line.
 %C Analogized to a river (a semi-meander, meander, or loop) crossing a road (a ray, line, or line segment).
 %C The third diagonal of A400429, reading diagonals from the maximal-winding edge.
+%H Hunter Hogan, <a href="/A400631/b400631_2.txt">Table of n, a(n) for n = 6..10005</a>
 %H Hunter Hogan, <a href="/A400631/b400631_1.txt">Table of n, a(n) for n = 6..300</a>
 %H Philippe Di Francesco, Olivier Golinelli and Emmanuel Guitter, <a href="https://arxiv.org/abs/hep-th/9607039">Meanders: A Direct Enumeration Approach</a>, arXiv:hep-th/9607039, 1996 (preprint).
 %H Philippe Di Francesco, Olivier Golinelli and Emmanuel Guitter, <a href="https://doi.org/10.1016/S0550-3213(96)00505-6">Meanders: A Direct Enumeration Approach</a>, Nuclear Physics B 482 (1996), no. 3, 497-535.
@@ -18,7 +19,7 @@
 %F a(n) = T(n,floor(n/2)-2), where T is the triangle A400429.
 %F More generally, if D_j is the j-th diagonal of A400429, then 2*j is its least index.
 %F For this sequence, j = 3 and 2*j = 6.
-%F D_j(2*j) = a(6) = A005315(j) = A005316(2*j-1).
+%F D_j(2*j)   = a(6) = A005315(j)   = A005316(2*j-1).
 %F D_j(2*j+1) = a(7) = A005315(j+1) = A005316(2*j+1) = D_{j+1}(2*j+2) = A400632(8).
 %F a(n) = P(n) + (-1)^n*E(n) + C_3(n).
 %F P(n) = (78*n^4 + 144*n^3 - 1650*n^2 - 27576*n + 107959) / 1728.

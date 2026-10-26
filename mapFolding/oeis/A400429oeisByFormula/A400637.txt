@@ -16,7 +16,7 @@
 %F a(n) = T(n,floor(n/2)-8), where T is the triangle A400429.
 %F More generally, if D_j is the j-th diagonal of A400429, then 2*j is its least index.
 %F For this sequence, j = 9 and 2*j = 18.
-%F D_j(2*j) = a(18) = A005315(j) = A005316(2*j-1).
+%F D_j(2*j)   = a(18) = A005315(j)   = A005316(2*j-1).
 %F D_j(2*j+1) = a(19) = A005315(j+1) = A005316(2*j+1) = D_{j+1}(2*j+2) = A400638(20).
 %e Row n=22 of A400429 is 73424650,325703336,349184078,202174358,72489674,16648452,2426888,215332,10698,254,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18,20. Since n-18=4, a(22)=349184078, which is the ninth-to-last value.
 %Y Ninth diagonal of A400429. Cf. A005315, A005316, A400630, A400631, A400632, A400633, A400634, A400635, A400636, A400638, A400639.
