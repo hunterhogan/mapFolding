@@ -8,7 +8,7 @@ and the shared compiled Dyck-path function.
 Modules
 -------
 makeModules
-	Coordinate matrix-meander generation and array transformations.
+	Transform and assemble the shared algorithm and complete pruning variants.
 """
 
 from __future__ import annotations

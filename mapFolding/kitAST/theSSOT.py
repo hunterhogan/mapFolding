@@ -19,10 +19,6 @@ Variables
 		Access identifier and output defaults for matrix-meander modules.
 	lookupMapFoldingEstimates
 		Look up selected fold-count estimates for expensive map shapes.
-	sherpa
-		Inspect the temporary pruning-name prefix used to build identifier defaults.
-	suffix
-		Inspect derived pruning identifiers used to extend the default mapping.
 """
 from __future__ import annotations
 
@@ -153,49 +149,34 @@ References
 [1] `mapFolding.theTypes.Default`
 """
 defaultMatrixMeanders['function'].update({
-    'bigInt': 'countBigInt'
-    , 'bigIntTest': 'integersWide吗'
-    , 'Dyck': 'walkDyckPath'
-    , 'aggregateArcCodes': 'aggregateArcCodes'
-    , 'prune': 'prune'
+	'bigInt': 'countBigInt'
+	, 'bigIntTest': 'integersWide吗'
+	, 'bigIntTestNumPy': 'integersWideNumPy吗'
+	, 'bigIntTestPandas': 'integersWidePandas吗'
+	, 'Dyck': 'walkDyckPath'
+	, 'flipDyckEndpoint': 'flipDyckEndpoint'
+	, 'aggregateArcCodes': 'aggregateArcCodes'
+	, 'prune': 'prune'
+	, 'pruneArray': 'pruneArray'
+	, 'pruneDataFrame': 'pruneDataFrame'
 })
-sherpa: str = defaultMatrixMeanders['function']['prune']
-"""Inspect the temporary pruning-name prefix used to build identifier defaults.
-
-(AI generated docstring)
-"""
-suffix: tuple[str, ...] = tuple(map(sherpa.__add__, ('Array', 'DataFrame')))
-"""Inspect derived pruning identifiers used to extend the default mapping.
-
-(AI generated docstring)
-"""
-defaultMatrixMeanders['function'].update(dict(zip(suffix, suffix, strict=True)))
 defaultMatrixMeanders['logicalPath']['synthetic'] += '.matrixMeanders'
 defaultMatrixMeanders['module'].update({
-    'algorithm': 'matrixMeanders'
-    , 'bigInt': 'bigInt'
-    , 'chop': 'chop'
-    , 'prune': 'prune'
+	'algorithm': 'matrixMeanders'
+	, 'bigInt': 'matrixMeandersShare'
+	, 'chop': 'chop'
+	, 'prune': 'prune'
+	, 'pruneNumPy': 'pruneNumPy'
+	, 'prunePandas': 'prunePandas'
+	, 'numpy': 'matrixMeandersNumPy'
+	, 'pandas': 'matrixMeandersPandas'
+	, 'common': 'matrixMeandersShare'
+	, 'share': 'matrixMeandersShare'
 })
-sherpa: str = defaultMatrixMeanders['module']['prune']
-"""Inspect the temporary pruning-name prefix used to build identifier defaults.
-
-(AI generated docstring)
-"""
-suffix = tuple(map(sherpa.__add__, ('BigInt', 'NumPy', 'Pandas')))
-"""Inspect derived pruning identifiers used to extend the default mapping.
-
-(AI generated docstring)
-"""
-defaultMatrixMeanders['module'].update(dict(zip(suffix, suffix, strict=True)))
-defaultMatrixMeanders['module']['numpy'] = defaultMatrixMeanders['module']['algorithm'] + 'NumPy'
-defaultMatrixMeanders['module']['pandas'] = defaultMatrixMeanders['module']['algorithm'] + 'Pandas'
-defaultMatrixMeanders['module']['share'] = defaultMatrixMeanders['module']['algorithm'] + 'Share'
-defaultMatrixMeanders['module']['bigIntTest'] = defaultMatrixMeanders['module']['share']
 defaultMatrixMeanders['variable'].update({
-    'arrayMeanders': 'arrayMeanders'
-    , 'dataframeAnalyzed': 'dataframeAnalyzed'
-    , 'tqdmBoundary': 'tqdmBoundary'
+	'arrayMeanders': 'arrayMeanders'
+	, 'dataframeAnalyzed': 'dataframeAnalyzed'
+	, 'tqdmBoundary': 'tqdmBoundary'
 })
 defaultMatrixMeanders['logicalPath']['default'] = defaultMatrixMeanders['logicalPath']['algorithm']
 defaultMatrixMeanders['module']['default'] = defaultMatrixMeanders['module']['algorithm']

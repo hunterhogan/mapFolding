@@ -1,40 +1,21 @@
-"""Generate width tests, counting variants, and pruning variants for meanders.
+"""Synthesize complete matrix-meander modules and their shared algorithm functions.
 
 (AI generated docstring)
-
-You can use this module to derive matrix-meander variants from complete source modules and
-write the configured output modules.
-
-Contents
---------
-Functions
-	makeCountBigInt
-		Write a meander counting variant guarded by the configured integer-width test.
-	makeModulesMeanders
-		Regenerate the configured matrix-meander counting variants and shared modules.
-	makeNumPyChopItUp
-		Write a NumPy counting variant with selected control flow removed.
-	makePrune
-		Write a meander counting variant with state-pruning assignments.
-	makePruneNumPy
-		Generate an array meander module with formula pruning.
-	makePrunePandas
-		Generate a dataframe meander module with formula pruning.
-	makeShare
-		Write the extracted Dyck-path function with explicit Numba signatures.
 """
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
-from astToolkit.filesystem import write_astModule
+from astToolkit.filesystem import parsePathFilename2astModule
 from hunterMakesPy import raiseIfNone
+from inspect import cleandoc
+from itertools import filterfalse
 from mapFolding.kitAST import IfThis, removeFunctionDef, renameFunctionDef, toDisk
-from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from mapFolding.theTypes import 形ArcCode
-from operator import getitem
+from operator import getitem, not_
+from textwrap import indent
 from typing import TYPE_CHECKING
 import ast
 
@@ -43,6 +24,151 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 	from typing import Any
+
+def expandDocstring(astConstant: ast.Constant) -> ast.Constant:
+	"""Expand docstring indentation to match the AST writer's four-space blocks.
+
+	(AI generated docstring)
+	"""
+	return Make.Constant(str(astConstant.value).expandtabs(4))
+
+
+def combineModules(astModule: ast.Module, astModuleAdditions: ast.Module) -> IngredientsModule:
+	"""Combine module definitions and consolidate their top-level imports.
+
+	(AI generated docstring)
+
+	Nested imports retain their scope. The supplied modules must have distinct definitions
+	for their non-import bindings.
+	"""
+	astModule = Make.Module([*astModule.body, *astModuleAdditions.body], [*astModule.type_ignores, *astModuleAdditions.type_ignores])
+	NodeChanger(Be.FunctionDef, Grab.bodyAttribute(Grab.index(0,
+		NodeChanger(Be.Expr.valueIs(Be.Constant), NodeChanger(Be.Constant, expandDocstring).visit).visit))).visit(astModule)
+	findImport = IfThis.isAnyOf(Be.Import, Be.ImportFrom)
+	ingredientsModule = IngredientsModule(imports=LedgerOfImports(Make.Module(list(filter(findImport, astModule.body)))))
+	ingredientsModule.appendEpilogue(statement=list(filterfalse(findImport, astModule.body)))
+	return ingredientsModule
+
+
+def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
+	"""Generate array width checks and the vectorized Dyck-endpoint operation.
+
+	(AI generated docstring)
+	"""
+	identifiers = identifiers or defaultMatrixMeanders
+	名Callable: str = override.get('名Callable') or identifiers['function']['bigIntTest']
+	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名Callable)
+	ingredients.imports = LedgerOfImports(Make.Module(list(filter(IfThis.isAnyOf(Be.Import, Be.ImportFrom), astModule.body))))
+	名CallableWide: str = override.get('名CallableWide') or identifiers['function']['bigIntTestNumPy']
+	名DataclassInstance: str = ingredients.astFunctionDef.args.args[0].arg
+	名ArrayMeanders: str = override.get('名ArrayMeanders') or identifiers['variable']['arrayMeanders']
+	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableWide))).visit(ingredients.astFunctionDef)
+	ast_arguments: ast.arguments = Make.arguments(list_arg=[
+		ingredients.astFunctionDef.args.args[0], Make.arg(名ArrayMeanders, Make.Name('形ArrayArcCode'))])
+	NodeChanger(Be.FunctionDef, Grab.argsAttribute(Then.replaceWith(ast_arguments))).visit(ingredients.astFunctionDef)
+	astCall: ast.Call = Make.Call(Make.Name('max'), [Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders')]
+		, list_keyword=[Make.keyword('default', Make.Constant(0))])
+	astSubscript: ast.Subscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(0)]))
+	astCallMaximum: ast.Call = Make.Call(Make.Name('int'), [Make.Call(Make.Attribute(astSubscript, 'max')
+		, list_keyword=[Make.keyword('initial', Make.Constant(0))])])
+	NodeChanger(IfThis.astIs(astCall), Then.replaceWith(astCallMaximum)).visit(ingredients.astFunctionDef)
+	astCall = Make.Call(Make.Name('sum'), [Make.Call(Make.Attribute(Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders'), 'values'))])
+	astSubscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(1)]))
+	astCallTotal: ast.Call = Make.Call(Make.Name('int'), [Make.Call(Make.Attribute(astSubscript, 'sum')
+		, list_keyword=[Make.keyword('dtype', Make.Name('object'))])])
+	NodeChanger(IfThis.astIs(astCall), Then.replaceWith(astCallTotal)).visit(ingredients.astFunctionDef)
+	astConstant: ast.Constant = raiseIfNone(NodeTourist(Be.Constant, Then.extractIt).captureLastMatch(ingredients.astFunctionDef.body[0]))
+	NodeChanger(IfThis.astIs(astConstant), Then.replaceWith(Make.Constant(
+		indent(cleandoc(str(astConstant.value)), '    ').lstrip() + '\n    '))).visit(ingredients.astFunctionDef)
+	ingredients.imports.addImportFrom_asStr('mapFolding.theTypes', '形ArrayArcCode')
+	ingredientsModule = IngredientsModule(ingredients)
+
+	ingredients = astModuleToIngredientsFunction(astModuleDyck, override.get('名CallableDyck') or identifiers['function']['Dyck'])
+	名CallableFlip: str = override.get('名CallableFlip') or identifiers['function']['flipDyckEndpoint']
+	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableFlip))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.decorator_listAttribute(Then.replaceWith([
+		Make.Call(Make.Name('vectorize'), [Make.List([Make.Constant('int64(int64)'), Make.Constant(f'{形ArcCode.__name__}({形ArcCode.__name__})')])]
+			, list_keyword=[Make.keyword('cache', Make.Constant(value=True)), Make.keyword('nopython', Make.Constant(value=True))])
+	]))).visit(ingredients.astFunctionDef)
+	ast_exprReturn: ast.expr = raiseIfNone(NodeTourist(Be.Return, DOT.value).captureLastMatch(ingredients.astFunctionDef))
+	NodeChanger(Be.Return, Grab.valueAttribute(Then.replaceWith(Make.BitXor.join([
+		Make.Name(ingredients.astFunctionDef.args.args[0].arg), ast_exprReturn])))).visit(ingredients.astFunctionDef)
+	NodeChanger(IfThis.astIs(ingredients.astFunctionDef.body[0]), Then.replaceWith(Make.Expr(Make.Constant(
+		'Flip the matched endpoint in each unbalanced Dyck path.\n\n'
+		'        (AI generated docstring)\n\n'
+		'        Every input must contain a matching endpoint. The generated NumPy ufunc accepts\n'
+		'        signed and unsigned 64-bit scalars and arrays, including pandas columns.\n        ')))).visit(ingredients.astFunctionDef)
+	ingredientsModule.imports.addImportFrom_asStr('typing', 'TYPE_CHECKING')
+	ingredientsModule.imports.update(ingredients.imports)
+	ingredientsModule.appendEpilogue(statement=Make.If(Make.Name('TYPE_CHECKING'), [
+		Make.ImportFrom('numpy', [Make.alias('ufunc')])
+		, Make.AnnAssign(Make.Name(名CallableFlip, Make.Store()), Make.Name('ufunc'))
+	], [Make.ImportFrom('numba', [Make.alias('vectorize')]), ingredients.astFunctionDef
+		, Make.Assign([Make.Name(名CallableFlip, Make.Store())], Make.Attribute(Make.Name(名CallableFlip), 'ufunc'))]))
+	return ingredientsModule
+
+
+def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
+	"""Generate dataframe width checks and pruning from existing algorithm functions.
+
+	(AI generated docstring)
+	"""
+	identifiers = identifiers or defaultMatrixMeanders
+	名Callable: str = override.get('名Callable') or identifiers['function']['bigIntTestNumPy']
+	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModuleNumPy, 名Callable)
+	ingredients.imports = LedgerOfImports(Make.Module(list(filter(IfThis.isAnyOf(Be.Import, Be.ImportFrom), astModuleNumPy.body))))
+	名CallableWide: str = override.get('名CallableWide') or identifiers['function']['bigIntTestPandas']
+	名DataclassInstance: str = ingredients.astFunctionDef.args.args[0].arg
+	名ArrayMeanders: str = ingredients.astFunctionDef.args.args[1].arg
+	名DataframeAnalyzed: str = override.get('名DataframeAnalyzed') or identifiers['variable']['dataframeAnalyzed']
+	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableWide))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.argsAttribute(Then.replaceWith(Make.arguments(list_arg=[
+		ingredients.astFunctionDef.args.args[0], Make.arg(名DataframeAnalyzed, Make.Attribute(Make.Name('pandas'), 'DataFrame'))
+	])))).visit(ingredients.astFunctionDef)
+	astSubscript: ast.Subscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(0)]))
+	astCall: ast.Call = Make.Call(Make.Attribute(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('arcCodeAnalysis')), 'to_numpy'))
+	NodeChanger(IfThis.astIs(astSubscript), Then.replaceWith(astCall)).visit(ingredients.astFunctionDef)
+	astSubscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(1)]))
+	astCall = Make.Call(Make.Attribute(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('meanders')), 'to_numpy'))
+	NodeChanger(IfThis.astIs(astSubscript), Then.replaceWith(astCall)).visit(ingredients.astFunctionDef)
+	ingredientsModule = IngredientsModule(ingredients)
+	ingredientsModule.imports.addImportFrom_asStr('typing', 'TYPE_CHECKING')
+	ingredientsModule.appendPrologue(statement=Make.If(Make.Name('TYPE_CHECKING'), [Make.Import('pandas')]))
+
+	ingredients = astModuleToIngredientsFunction(astModule, override.get('名CallablePruneSource') or identifiers['function']['prune'])
+	ingredients.imports = LedgerOfImports(Make.Module(list(filter(IfThis.isAnyOf(Be.Import, Be.ImportFrom), astModule.body))))
+	名DataclassInstance = ingredients.astFunctionDef.args.args[0].arg
+	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['pruneDataFrame']
+	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallablePrune))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.argsAttribute(Then.replaceWith(Make.arguments(list_arg=[
+		ingredients.astFunctionDef.args.args[0], Make.arg(名DataframeAnalyzed, Make.Attribute(Make.Name('pandas'), 'DataFrame'))
+	])))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.returnsAttribute(Then.replaceWith(Make.Subscript(Make.Name('tuple'), Make.Tuple([
+		raiseIfNone(ingredients.astFunctionDef.args.args[0].annotation), Make.Attribute(Make.Name('pandas'), 'DataFrame')
+	]))))).visit(ingredients.astFunctionDef)
+	astCall = Make.Call(Make.Attribute(Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders'), 'pop'), [Make.Name('arcCode'), Make.Constant(0)])
+	astCompare: ast.Compare = Make.Compare(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('arcCodeAnalysis')), [Make.Eq()], [Make.Name('arcCode')])
+	astSubscript = Make.Subscript(Make.Attribute(Make.Name(名DataframeAnalyzed), 'loc'), Make.Tuple([astCompare, Make.Constant('meanders')]))
+	astCallTotal: ast.Call = Make.Call(Make.Name('int'), [Make.Call(Make.Attribute(Make.Call(Make.Attribute(astSubscript, 'to_numpy')), 'sum')
+		, list_keyword=[Make.keyword('dtype', Make.Name('object'))])])
+	NodeChanger(IfThis.astIs(astCall), Then.replaceWith(astCallTotal)).visit(ingredients.astFunctionDef)
+	astAssign: ast.Assign = Make.Assign([Make.Name(名DataframeAnalyzed, Make.Store())], Make.Subscript(
+		Make.Attribute(Make.Name(名DataframeAnalyzed), 'loc'), Make.Compare(
+			Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('arcCodeAnalysis')), [Make.NotEq()], [Make.Name('arcCode')])))
+	NodeChanger(Be.AnnAssign.targetIs(IfThis.isNameIdentifier('subtotalMeanders')), Then.insertThisBelow([astAssign])).visit(ingredients.astFunctionDef)
+	NodeChanger(IfThis.astIs(Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders')), Then.replaceWith(
+		Make.Call(Make.Name('len'), [Make.Attribute(Make.Name(名DataframeAnalyzed), 'index')]))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Tuple([Make.Name(名DataclassInstance), Make.Call(
+		Make.Attribute(Make.Name(名DataframeAnalyzed), 'reset_index'), list_keyword=[Make.keyword('drop', Make.Constant(value=True))])])))).visit(ingredients.astFunctionDef)
+	NodeChanger(IfThis.astIs(ingredients.astFunctionDef.body[0]), Then.replaceWith(Make.Expr(Make.Constant(
+		'Accumulate known diagonal contributions and retain the remaining dataframe rows.\n\n'
+		'    (AI generated docstring)\n\n'
+		'    Repeated arc codes contribute all their counts, summed as Python integers.\n'
+		'    The returned dataframe preserves row order and has a fresh consecutive index.\n'
+		'    The state retains completed contributions in `countAddend`; an empty dataframe\n'
+		'    sets `boundary` to zero. Retain both returned objects.\n    ')))).visit(ingredients.astFunctionDef)
+	ingredientsModule.appendIngredientsFunction(ingredients)
+	return ingredientsModule
 
 def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a meander counting variant guarded by the configured integer-width test.
@@ -57,9 +183,8 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	Loop Guard
 	----------
 	The transformation matches the literal `0 < state.boundary` comparison using the configured
-	state identifier. The generated width-test import uses the configured algorithm path.
-	The physical output root remains the default used by `mapFolding.kitAST.paths.getPathFilename`
-	[1].
+	state identifier. The width predicate and shared definitions remain in the generated module.
+	The output location follows the identifier defaults and writer overrides [1].
 
 	Parameters
 	----------
@@ -87,12 +212,11 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 
 	References
 	----------
-	[1] `mapFolding.kitAST.paths.getPathFilename`
+	[1] `mapFolding.kitAST.toDisk`
 
 	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
 	"""
 	identifiers = identifiers or defaultMatrixMeanders
-	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	名Callable: str = override.get('名Callable') or identifiers['function']['bigInt']
 	名CallableCounting: str = override.get('名CallableCounting') or identifiers['function']['counting']
@@ -100,30 +224,29 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
 	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
 	名Module: str = override.get('名Module') or identifiers['module']['bigInt']
-	名ModuleBigIntTest: str = override.get('名ModuleBigIntTest') or identifiers['module']['bigIntTest']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
 
 	renameFunctionDef(名CallableCounting, 名Callable, astModule)
 
 	removeFunctionDef(名CallableDispatcher, astModule)
 
 	# while (0 < state.boundary) and bigIntTest(state):
-	Call_bigIntTest: ast.Call = Make.Call(Make.Name(名CallableBigIntTest), listParameters=[Make.Name(名DataclassInstance)])
+	astCallBigIntTest: ast.Call = Make.Call(Make.Name(名CallableBigIntTest), listParameters=[Make.Name(名DataclassInstance)])
 	astCompare: ast.Compare = raiseIfNone(NodeTourist(
 		IfThis.is0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
 		, Then.extractIt
 	).captureLastMatch(astModule))
-	testNew: ast.expr = Make.And.join([astCompare, Call_bigIntTest])
+	testNew: ast.expr = Make.And.join([astCompare, astCallBigIntTest])
 
 	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
 				, Grab.testAttribute(Then.replaceWith(testNew))
 	).visit(astModule)
 
-	astModule.body.insert(0, Make.ImportFrom(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleBigIntTest), list_alias=[Make.alias(名CallableBigIntTest)]))
-
-	pathFilename: PurePath = getPathFilename(logicalPathInfix=logicalPathInfix, identifierModule=名Module)
-
-	return write_astModule(astModule, pathFilename, identifierPackage=名Package)
+	astModuleShare: ast.Module = parsePathFilename2astModule(getPathFilename(
+		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
+	removeFunctionDef(名Callable, astModuleShare)
+	ingredientsModule = combineModules(astModuleShare, astModule)
+	return toDisk(ingredientsModule, identifiers, override, 名Module, logicalPathInfix=logicalPathInfix)
 
 def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a meander counting variant with state-pruning assignments.
@@ -133,7 +256,8 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	You can use this function to insert calls to the configured state-pruning function before
 	matching active-boundary loops and after selected tuple expressions in the counting function.
 	Each generated call assigns the returned state back to the state identifier. The pruning
-	implementation is imported from the configured shared algorithm module.
+	implementation and shared definitions remain in the generated module. Both counting
+	functions retain pruning between transfer steps.
 
 	Parameters
 	----------
@@ -165,13 +289,17 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	"""
 	if identifiers is None:
 		identifiers = defaultMatrixMeanders
-	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
+	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	名CallableCounting: str = override.get('名CallableCounting') or identifiers['function']['counting']
+	名CallableBigInt: str = override.get('名CallableBigInt') or identifiers['function']['bigInt']
 	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['prune']
 	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
 	名Module: str = override.get('名Module') or identifiers['module']['prune']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	astModuleShare: ast.Module = parsePathFilename2astModule(getPathFilename(
+		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
+	removeFunctionDef(identifiers['function']['Dyck'], astModuleShare)
+	astModule = Make.Module(combineModules(astModuleShare, astModule).body)
 
 	astAssign_shortcut: ast.Assign = Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
 		, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))
@@ -180,12 +308,12 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 		, Then.insertThisAbove([astAssign_shortcut])).visit(astModule)
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableCounting))
 		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(astModule)
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableBigInt))
+		, NodeChanger(Be.While, Then.insertThisAbove([astAssign_shortcut])).visit).visit(astModule)
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableBigInt))
+		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(astModule)
 
-	ingredientsModule = IngredientsModule(imports=LedgerOfImports(astModule))
-	ingredientsModule.imports.addImportFrom_asStr(
-		getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePrune)
-	ingredientsModule.appendEpilogue(astModule)
-	return toDisk(ingredientsModule, identifiers, override, 名Module)
+	return toDisk(IngredientsModule(epilogue=astModule), identifiers, override, 名Module)
 
 def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Generate an array meander module with formula pruning.
@@ -226,8 +354,8 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	the whole module and supplies the boundary display as the replacement argument.
 
 	The dispatcher assigns `state = prune(state)` [6] before each matched `while` statement.
-	The generated module imports this state-pruning function and redirects imports of the
-	configured `bigInt` module to `pruneBigInt` [7], preserving imported names and aliases.
+	The generated module includes the shared definitions and Python-integer counting function
+	from the dictionary pruning module [7], so these algorithm functions remain local.
 
 	Examples
 	--------
@@ -254,7 +382,7 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 		https://tqdm.github.io/docs/tqdm/
 	[6] `mapFolding.algorithms.matrixMeandersShare.prune`
 
-	[7] `mapFolding.synthesized.matrixMeanders.pruneBigInt`
+	[7] `mapFolding.synthesized.matrixMeanders.prune`
 
 	[8] `makeModulesMeanders`
 
@@ -272,9 +400,9 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
 	名TqdmBoundary: str = override.get('名TqdmBoundary') or identifiers['variable']['tqdmBoundary']
 	名Module: str = override.get('名Module') or identifiers['module']['pruneNumPy']
-	名ModuleBigInt: str = override.get('名ModuleBigInt') or identifiers['module']['bigInt']
-	名ModulePruneBigInt: str = override.get('名ModulePruneBigInt') or identifiers['module']['pruneBigInt']
+	名ModulePrune: str = override.get('名ModulePrune') or identifiers['module']['prune']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
+	名ModuleCommon: str = override.get('名ModuleCommon') or identifiers['module']['common']
 	名Package: str = override.get('package') or identifiers['module']['package']
 
 	astAssign_shortcutNumPy: ast.Assign = Make.Assign([
@@ -289,13 +417,16 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher))
 		, NodeChanger(Be.While, Then.insertThisAbove([Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
 			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
-	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleBigInt)))
-		, Grab.moduleAttribute(Then.replaceWith(getLogicalPath(名Package, logicalPathInfix, 名ModulePruneBigInt)))).visit(astModule)
-
-	ledger = LedgerOfImports()
-	ledger.addImportFrom_asStr(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePrune)
-
-	ingredientsModule = IngredientsModule(imports=ledger, epilogue=astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleCommon))), Then.removeIt).visit(astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleShare))), Then.removeIt).visit(astModule)
+	NodeChanger(Be.If.testIs(IfThis.isNameIdentifier('TYPE_CHECKING')),
+		NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('mapFolding.theTypes')),
+			NodeChanger(Be.alias.nameIs(IfThis.isIdentifier('形ArrayArcCode')), Then.removeIt).visit).visit).visit(astModule)
+	astModulePrune: ast.Module = parsePathFilename2astModule(getPathFilename(
+		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
+	removeFunctionDef(名CallableCounting, astModulePrune)
+	removeFunctionDef(名CallableDispatcher, astModulePrune)
+	ingredientsModule = combineModules(astModulePrune, astModule)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
@@ -338,8 +469,8 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	adds a missing declaration nor preserves other names in an existing declaration.
 
 	The dispatcher assigns `state = prune(state)` [6] before each matched `while` statement.
-	The generated module imports both pruning functions and redirects imports of the
-	configured `bigInt` module to `pruneBigInt` [7], preserving imported names and aliases.
+	The generated module includes the shared definitions and Python-integer counting function
+	from the dictionary pruning module [7], so these algorithm functions remain local.
 
 	Examples
 	--------
@@ -360,13 +491,13 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 
 	[3] `mapFolding.kitAST.prefab.toDisk`
 
-	[4] `mapFolding.algorithms.matrixMeandersShare.pruneDataFrame`
+	[4] `mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
 
 	[5] Python `nonlocal` statement and enclosing bindings.
 		https://docs.python.org/3/reference/simple_stmts.html#the-nonlocal-statement
 	[6] `mapFolding.algorithms.matrixMeandersShare.prune`
 
-	[7] `mapFolding.synthesized.matrixMeanders.pruneBigInt`
+	[7] `mapFolding.synthesized.matrixMeanders.prune`
 
 	[8] `makeModulesMeanders`
 
@@ -377,15 +508,16 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	logicalPathAlgorithm: identifierDotAttribute = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	名CallableAggregateArcCodes: str = override.get('名CallableAggregateArcCodes') or identifiers['function']['aggregateArcCodes']
+	名CallableCounting: str = override.get('名CallableCounting') or identifiers['function']['counting']
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
 	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['prune']
 	名CallablePruneDataFrame: str = override.get('名CallablePruneDataFrame') or identifiers['function']['pruneDataFrame']
 	名DataframeAnalyzed: str = override.get('名DataframeAnalyzed') or identifiers['variable']['dataframeAnalyzed']
 	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
 	名Module: str = override.get('名Module') or identifiers['module']['prunePandas']
-	名ModuleBigInt: str = override.get('名ModuleBigInt') or identifiers['module']['bigInt']
-	名ModulePruneBigInt: str = override.get('名ModulePruneBigInt') or identifiers['module']['pruneBigInt']
+	名ModulePrune: str = override.get('名ModulePrune') or identifiers['module']['prune']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
+	名ModuleCommon: str = override.get('名ModuleCommon') or identifiers['module']['common']
 	名Package: str = override.get('package') or identifiers['module']['package']
 
 	astAssign_shortcutPandas: ast.Assign = Make.Assign([
@@ -400,14 +532,22 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 		, NodeChanger(Be.While, Then.insertThisAbove([Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
 			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
 
-	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleBigInt)))
-		, Grab.moduleAttribute(Then.replaceWith(getLogicalPath(名Package, logicalPathInfix, 名ModulePruneBigInt)))).visit(astModule)
-
-	ledger = LedgerOfImports()
-	ledger.addImportFrom_asStr(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePrune)
-	ledger.addImportFrom_asStr(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleShare), 名CallablePruneDataFrame)
-
-	ingredientsModule = IngredientsModule(imports=ledger, epilogue=astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleCommon))), Then.removeIt).visit(astModule)
+	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleShare))), Then.removeIt).visit(astModule)
+	NodeChanger(Be.If.testIs(IfThis.isNameIdentifier('TYPE_CHECKING')),
+		NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('mapFolding.dataBaskets')),
+			NodeChanger(Be.alias.nameIs(IfThis.isIdentifier('StateMeanders')), Then.removeIt).visit).visit).visit(astModule)
+	NodeChanger(Be.ImportFrom.namesIs(not_), Then.removeIt).visit(astModule)
+	NodeChanger(IfThis.astIs(Make.If(Make.Name('TYPE_CHECKING'), [])), Then.removeIt).visit(astModule)
+	astModulePrune: ast.Module = parsePathFilename2astModule(getPathFilename(
+		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
+	NodeChanger(Be.If.testIs(IfThis.isNameIdentifier('TYPE_CHECKING')),
+		NodeChanger(Be.Import, NodeChanger(Be.alias.nameIs(IfThis.isIdentifier('pandas')), Then.removeIt).visit).visit).visit(astModulePrune)
+	NodeChanger(Be.Import.namesIs(not_), Then.removeIt).visit(astModulePrune)
+	NodeChanger(IfThis.astIs(Make.If(Make.Name('TYPE_CHECKING'), [])), Then.removeIt).visit(astModulePrune)
+	removeFunctionDef(名CallableCounting, astModulePrune)
+	removeFunctionDef(名CallableDispatcher, astModulePrune)
+	ingredientsModule = combineModules(astModulePrune, astModule)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
@@ -483,99 +623,26 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 	名Module: str = override.get('名Module') or identifiers['module']['chop']
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makeShare(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
-	"""Write the extracted Dyck-path function with explicit Numba signatures.
-
-	(AI generated docstring)
-
-	You can use this function to extract the configured Dyck-path callable from `astModule`,
-	remove source decorators, and attach Numba compilation [1] with explicit signed-integer
-	and arc-code signatures. The generated module retains the callable body and adds datatype
-	imports. The writer resolves the output filename and returns the written path.
-
-	Shared Compiler Configuration
-	-----------------------------
-	The function assigns `signature_or_function` on the shared `parametersNumbaLight` mapping [2].
-	The signatures use `int64` and `mapFolding.theTypes.形ArcCode` [3].
-
-	Parameters
-	----------
-	astModule : ast.Module
-		Source module syntax expected by this transformation; generation may modify the supplied
-		nodes.
-	identifiers : Default | None = None
-		Identifier and output defaults; a falsy value selects matrix-meander defaults.
-	**override : Any
-		Overrides for the output module identifier and settings forwarded to the module writer.
-
-	Returns
-	-------
-	pathFilename : PurePath
-		Path to the generated Python module written by the transformation.
-
-	Examples
-	--------
-	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [4].
-
-		```python
-		makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-		```
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
-	[2] `mapFolding.kitAST.numba.kitNumba.parametersNumbaLight`
-
-	[3] `mapFolding.theTypes.形ArcCode`
-
-	[4] `mapFolding.kitAST.matrixMeanders.makeModules`
-	"""
-	identifiers = identifiers or defaultMatrixMeanders
-	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, identifiers['function']['Dyck'])
-	ingredients.astFunctionDef.decorator_list.clear()
-	parametersNumba: ParametersNumba = parametersNumbaLight
-	parametersNumba['signature_or_function'] = ("int64(int64)", f"{形ArcCode.__name__}({形ArcCode.__name__})")
-	ingredients = decorateCallableWithNumba(ingredients, parametersNumba)
-	ingredients.imports.addImportFrom_asStr('mapFolding.theTypes', '形ArcCode')
-	ingredients.imports.addImportFrom_asStr('numba', 'int64')
-	ingredientsModule = IngredientsModule(ingredients)
-
-	名Module: str = override.get('名Module') or identifiers['module']['share']
-
-	return toDisk(ingredientsModule, identifiers, override, 名Module)
-
 def makeModulesMeanders() -> None:
-	"""Regenerate the configured matrix-meander counting variants and shared modules.
+	"""Regenerate the shared algorithm and complete dictionary, NumPy, and pandas variants.
 
 	(AI generated docstring)
-
-	You can use this function to write width-guarded counting, state pruning, array pruning,
-	dataframe pruning, and the compiled shared Dyck-path function.
-	Generation uses `mapFolding.kitAST.theSSOT.defaultMatrixMeanders` [1]. Dependent variants
-	load preceding generated files. The function writes the configured output modules.
-
-	Examples
-	--------
-	The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
-
-		```python
-		makeModulesMeanders()
-		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.theSSOT.defaultMatrixMeanders`
-
-	[2] `mapFolding.kitAST.matrixMeanders.makeModules`
 	"""
-	makeCountBigInt(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makePrune(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makeCountBigInt(getModule(defaultMatrixMeanders['module']['prune'], defaultMatrixMeanders['logicalPath']['synthetic']
-		, identifiers=defaultMatrixMeanders), defaultMatrixMeanders, 名Module=defaultMatrixMeanders['module']['pruneBigInt'])
-	makePruneNumPy(getModule(defaultMatrixMeanders['module']['numpy'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makePrunePandas(getModule(defaultMatrixMeanders['module']['pandas'], identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
-	makeShare(getModule(identifiers=defaultMatrixMeanders), defaultMatrixMeanders)
+	identifiers: Default = defaultMatrixMeanders
+	名ModuleShare: str = identifiers['module']['share']
+	ingredientsModule: IngredientsModule = makeCommonNumPy(
+		getModule(identifiers['module']['common'], identifiers=identifiers), getModule(identifiers=identifiers), identifiers)
+	ingredientsModule = combineModules(getModule(identifiers['module']['common'], identifiers=identifiers), Make.Module(ingredientsModule.body))
+	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
+	pathFilenameShare: PurePath = makeCountBigInt(getModule(identifiers=identifiers), identifiers)
+	ingredientsModule = makeCommonPandas(getModule(identifiers['module']['common'], identifiers=identifiers)
+		, parsePathFilename2astModule(pathFilenameShare), identifiers)
+	ingredientsModule = combineModules(parsePathFilename2astModule(pathFilenameShare), Make.Module(ingredientsModule.body))
+	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
+	makePrune(getModule(identifiers=identifiers), identifiers)
+	makePruneNumPy(getModule(identifiers['module']['numpy'], identifiers=identifiers), identifiers)
+	makePrunePandas(getModule(identifiers['module']['pandas'], identifiers=identifiers), identifiers)
+
 
 if __name__ == '__main__':
 	makeModulesMeanders()

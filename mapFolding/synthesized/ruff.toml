@@ -13,4 +13,5 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-"matrixMeanders/pruneNumPy.py" = ["extraneous-parentheses"]
+# NumPy's UniqueInverseResult.values is unrelated to pandas Series.values.
+"matrixMeanders/pruneNumPy.py" = ["extraneous-parentheses", "pandas-use-of-dot-values"]

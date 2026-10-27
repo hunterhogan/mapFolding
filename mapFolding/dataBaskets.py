@@ -71,7 +71,7 @@ import numpy
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding.theTypes import ChoicesLeaf, Leaf, PinnedLeaves, UndeterminedPiles, 形ArrayArcCode, 形ArraySelector
+	from mapFolding.theTypes import ChoicesLeaf, Leaf, PinnedLeaves, UndeterminedPiles, 形ArraySelector
 	from typing import Literal, LiteralString, Self
 
 class PermutationSpace(dict[Pile, LeafSpace]):
@@ -1354,9 +1354,10 @@ class StateMeanders:
 	is retained, and the bit width and locator mask are recomputed from its largest key.
 	Initialization requires a nonempty lookup after this setup.
 
-	Missing width limits are derived from `mapFolding.theTypes.形ArcCode` [2] and
-	`mapFolding.theTypes.形Meanders` [3]. Each derived limit reserves four bits relative to the
-	corresponding NumPy storage width [4]. Supplied limits are retained.
+	The default capacity is the usable nonnegative value bits shared by
+	`mapFolding.theTypes.形ArcCode` [2] and `mapFolding.theTypes.形Meanders` [3], using NumPy
+	datatype limits [4]. A supplied `bitWidthLimit` replaces that capacity. Transfer-step
+	intermediate values and count aggregation are accounted for by the width predicates.
 
 	Attributes
 	----------
@@ -1368,16 +1369,14 @@ class StateMeanders:
 		Current transfer boundary; initialization replaces zero with `n - 1`.
 	lookupMeanders : dict[int, int]
 		Arch codes mapped to active counts, using Python integers without a fixed-width limit.
-	bitWidth : int = 0
+	bitWidthArcCode : int = 0
 		Number of bits in the largest active arch code, recomputed during initialization.
 	bitsLocator : int = 0
 		Mask selecting bit positions zero, two, four, and so on below the current width.
 	arcCodeMaximum : int = 0
 		Power-of-two threshold derived from the current boundary.
-	bitWidthLimitArcCode : int | None = None
-		Arc-code width limit used when selecting fixed-width computation.
-	bitWidthLimitMeanders : int | None = None
-		Count width limit used when selecting fixed-width computation.
+	bitWidthLimit : int
+		Usable nonnegative value bits, defaulting to the capacity shared by the fixed-width datatypes.
 	次Target : int = 0
 		Mutable target cursor whose interpretation depends on the algorithm.
 	countAddend : int = 0
@@ -1420,30 +1419,24 @@ class StateMeanders:
 	'bigint' (big *int*eger).
 	"""
 
-	bitWidth: int = 0
+	bitWidthArcCode: int = 0
 	"""Track the bit length of the largest active arch code.
 
 	(AI generated docstring)
 	"""
 	bitsLocator: int = 0
-	"""An odd-parity bit-mask with `bitWidth` bits."""
+	"""An odd-parity bit-mask with `bitWidthArcCode` bits."""
 	arcCodeMaximum: int = 0
 	"""Track the boundary-derived power-of-two threshold for arch codes.
 
 	(AI generated docstring)
 	"""
 
-	bitWidthLimitArcCode: int | None = None
-	"""Select the arch-code width limit for fixed-width computation.
+	bitWidthLimit: int = min(int(numpy.iinfo(形ArcCode).max).bit_length(), int(numpy.iinfo(形Meanders).max).bit_length())
+	"""Select the usable nonnegative value bits for fixed-width computation.
 
 	(AI generated docstring)
 	"""
-	bitWidthLimitMeanders: int | None = None
-	"""Select the count width limit for fixed-width computation.
-
-	(AI generated docstring)
-	"""
-
 	次Target: int = 0
 	"""What is being indexed depends on the algorithm flavor."""
 	countAddend: int = 0
@@ -1463,7 +1456,7 @@ class StateMeanders:
 		self.set_arcCodeMaximum()
 
 	def setBitsLocator(self) -> None:
-		"""Compute an odd-parity bit-mask with `bitWidth` bits.
+		"""Compute an odd-parity bit-mask with `bitWidthArcCode` bits.
 
 		Semiotics
 		---------
@@ -1477,48 +1470,18 @@ class StateMeanders:
 		inherently ambiguous in this context, this algorithm also segregates odd numbers from even
 		numbers, so I avoid using "odd" and "even" in the names of these bit-masks.
 		"""
-		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidth, 2))
+		self.bitsLocator = sum(1 << one for one in range(0, self.bitWidthArcCode, 2))
 
 	def _setBitWidth(self) -> None:
 		"""I use this to refresh the arch-code bit width during initialization and boundary reduction.
 
 		(AI generated docstring)
 
-		This method updates `self.bitWidth` from the largest key in `self.lookupMeanders` and returns
+		This method updates `self.bitWidthArcCode` from the largest key in `self.lookupMeanders` and returns
 		`None`. An empty lookup propagates `ValueError` from the maximum-key calculation.
 
-		See Also
-		--------
-		`StateMeanders.setBitWidthNumPy`
-			Derive the width from an array instead of the stored lookup.
 		"""
-		self.bitWidth = max(self.lookupMeanders.keys()).bit_length()
-
-	def setBitWidthNumPy(self, arrayMeanders: 形ArrayArcCode) -> None:
-		"""Set the stored bit width from the largest value in `arrayMeanders`.
-
-		(AI generated docstring)
-
-		This method finds the maximum value across the entire supplied NumPy array [1], converts the
-		maximum to a Python integer, and stores its bit length in `self.bitWidth`. This method returns
-		`None`. Callers must supply the values whose maximum should determine the width.
-
-		Parameters
-		----------
-		arrayMeanders : 形ArrayArcCode
-			Nonempty array of encoded arch values, or an array selection containing those values.
-
-		See Also
-		--------
-		`StateMeanders._setBitWidth`
-			Derive the width from the stored lookup instead of an array.
-
-		References
-		----------
-		[1] NumPy array reference.
-			https://numpy.org/doc/stable/reference/index.html
-		"""
-		self.bitWidth = int(arrayMeanders.max()).bit_length()
+		self.bitWidthArcCode = max(self.lookupMeanders.keys()).bit_length()
 
 	def set_arcCodeMaximum(self) -> None:
 		"""Set the arch-code threshold from the current transfer boundary.
@@ -1575,34 +1538,6 @@ class StateMeanders:
 		self._setBitWidth()
 		self.setBitsLocator()
 		self.set_arcCodeMaximum()
-
-		bytesToBits: int = 8
-		if self.bitWidthLimitArcCode is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形ArcCode).itemsize * bytesToBits
-
-			#=For example, `bitsZulu << 3`.
-			offsetNecessary_: int = 3
-			#=I don't have mathematical proof of how many extra bits I need.
-			offsetSafety_: int = 1
-			offset_: int = offsetNecessary_ + offsetSafety_
-
-			self.bitWidthLimitArcCode = bitWidthOfFixedSizeInteger_ - offset_
-
-			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetSafety_, offset_
-
-		if self.bitWidthLimitMeanders is None:
-			bitWidthOfFixedSizeInteger_: int = numpy.dtype(形Meanders).itemsize * bytesToBits
-
-			#=I don't know of any.
-			offsetNecessary_: int = 0
-			#=See 'research' directory.
-			offsetEstimation_: int = 3
-			offsetSafety_: int = 1
-			offset_: int = offsetNecessary_ + offsetEstimation_ + offsetSafety_
-
-			self.bitWidthLimitMeanders = bitWidthOfFixedSizeInteger_ - offset_
-
-			del bitWidthOfFixedSizeInteger_, offsetNecessary_, offsetEstimation_, offsetSafety_, offset_
 
 #================== `numba` types =================================================================
 

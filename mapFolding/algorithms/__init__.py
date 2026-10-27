@@ -25,7 +25,7 @@ matrixMeandersNumPy
 matrixMeandersPandas
 	Count meanders with Pandas table storage.
 matrixMeandersShare
-	Share arch-code operations and integer-width checks between meander algorithms.
+	Initialize meander states, check integer capacity, and prune dictionary states.
 permutations
 	Generate stamp-folding and meander permutations.
 permutationsBilateral

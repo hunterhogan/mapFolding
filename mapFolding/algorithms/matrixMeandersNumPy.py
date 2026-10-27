@@ -3,11 +3,11 @@ from __future__ import annotations
 from contextlib import suppress
 from gc import collect as goByeBye
 from hunterMakesPy import raiseIfNone
-from mapFolding.algorithms.matrixMeandersShare import flipTheExtra_0b1, getTotalBuckets, integersWide吗
+from mapFolding.algorithms.matrixMeandersShare import getTotalBuckets, integersWide吗
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
 from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
-from mapFolding.synthesized.matrixMeanders.bigInt import countBigInt
+from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import countBigInt, flipDyckEndpoint, integersWideNumPy吗
 from mapFolding.theTypes import 形ArcCode
 from numpy import (
 	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
@@ -18,13 +18,10 @@ import numpy
 import pathlib
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
     from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
     from numpy import dtype, ndarray
     from numpy.lib._arraysetops_impl import UniqueInverseResult
     from typing import Any
-
-bitsLocator: int = sum(1 << twoMore for twoMore in range(0, numpy.dtype(形ArcCode).itemsize * 8, 2))
 
 indexesAnalyzed: int = 2
 次ArcCode, 次Meanders = range(indexesAnalyzed)
@@ -37,20 +34,17 @@ slicerPrepArea: ShapeSlicer = ShapeSlicer(length=..., at=次PrepArea)
 slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., at=次Alfa)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., at=次Zulu)
 
-# Improvement: refactor everything about this: `boxOfDiagonals`, not vectorized.
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
     boundary: int = state.boundary + 1
-
-    def removeKnownValue(次diagonal: int, 工: Callable[[int], int]) -> int:
+    次diagonal: int = 1
+    while 次diagonal <= min(boundary // 2, len(boxOfDiagonals)):
         arcCode: int = (1 << (2 * (boundary - 2 * 次diagonal) + 2)) - 1
         次Known: int = int(numpy.searchsorted(arrayMeanders[slicerArcCode], arcCode))
-        subtotalMeanders: int = 0
         if 次Known < len(arrayMeanders[slicerArcCode]) and int(arrayMeanders[slicerArcCode][次Known]) == arcCode:
-            subtotalMeanders = 工(boundary) * int(arrayMeanders[slicerMeanders][次Known])
+            state.countAddend += boxOfDiagonals[次diagonal - 1](boundary) * int(arrayMeanders[slicerMeanders][次Known])
             arrayMeanders[slicerMeanders][次Known] = 0
-        return subtotalMeanders
+        次diagonal += 1
 
-    state.countAddend += sum(map(removeKnownValue, range(1, boundary // 2 + 1), boxOfDiagonals))
     selectorRemaining: 形ArraySelector1D = numpy.flatnonzero(arrayMeanders[slicerMeanders])
     arrayMeanders[slicerArcCode][0:len(selectorRemaining)] = arrayMeanders[slicerArcCode][selectorRemaining]
     arrayMeanders[slicerMeanders][0:len(selectorRemaining)] = arrayMeanders[slicerMeanders][selectorRemaining]
@@ -89,8 +83,9 @@ def count(state: StateMeanders) -> StateMeanders:
     state.lookupMeanders = {}
 
     tqdmBoundary: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=state.n < 28)
-    while 0 < state.boundary and not integersWide吗(state, arrayMeanders=arrayMeanders):
-        state.setBitWidthNumPy(arrayMeanders)
+    while 0 < state.boundary and not integersWideNumPy吗(state, arrayMeanders):
+        state.bitWidthArcCode = int(arrayMeanders[slicerArcCode].max(initial=0)).bit_length()
+        state.setBitsLocator()
         shape = ShapeArray(length=getTotalBuckets(state, len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)
         arrayAnalyzed: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
         del shape
@@ -104,9 +99,9 @@ def count(state: StateMeanders) -> StateMeanders:
         bitsAlfa: 形ArrayArcCode1D = arrayWorkbench[slicerAlfa].view()
         bitsZulu: 形ArrayArcCode1D = arrayWorkbench[slicerZulu].view()
 
-        Xand(arrayMeanders[slicerArcCode], bitsLocator, out=bitsAlfa)
+        Xand(arrayMeanders[slicerArcCode], state.bitsLocator, out=bitsAlfa)
         XshiftRight(arrayMeanders[slicerArcCode], 1, out=bitsZulu)
-        Xand(bitsZulu, bitsLocator, out=bitsZulu)
+        Xand(bitsZulu, state.bitsLocator, out=bitsZulu)
 
         if isinstance(arrayMeanders, memmap) and 2**32 < arrayMeanders.nbytes:
             cast('memmap', arrayWorkbench).flush()
@@ -126,7 +121,7 @@ def count(state: StateMeanders) -> StateMeanders:
         selectorGreaterThan1: 形ArrayBoolean1D = numpy.empty_like(toPrepArea, dtype=numpy_bool)
         moreThan(toPrepArea, 1, out=selectorGreaterThan1)
 
-#-------- if bitsAlfaAtEven and not bitsZuluAtEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
+#-------- if bitsAlfaIsEven and not bitsZuluIsEven ------ #-------- ^ & | ^ & bitsZulu 1 1 bitsAlfa 1 1 ------------
         Xand(bitsZulu, 1, out=toPrepArea)
 
         Xxor(toPrepArea, 1, out=toPrepArea)
@@ -138,10 +133,10 @@ def count(state: StateMeanders) -> StateMeanders:
         arraySelectors: 形ArraySelector1D = numpy.flatnonzero(toPrepArea)
 
         bitsAlfaStack: 形ArrayArcCode1D = bitsAlfa.copy()
-        bitsAlfaStack[arraySelectors] = flipTheExtra_0b1(bitsAlfaStack[arraySelectors])
+        bitsAlfaStack[arraySelectors] = flipDyckEndpoint(bitsAlfaStack[arraySelectors])
         del arraySelectors
 
-#-------- if bitsZuluAtEven and not bitsAlfaAtEven ------ #-------- ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ------------
+#-------- if bitsZuluIsEven and not bitsAlfaIsEven ------ #-------- ^ & | ^ & bitsAlfa 1 1 bitsZulu 1 1 ------------
         Xand(bitsAlfa, 1, out=toPrepArea)
         Xxor(toPrepArea, 1, out=toPrepArea)
         X_or(bitsZulu, toPrepArea, out=toPrepArea)
@@ -150,7 +145,7 @@ def count(state: StateMeanders) -> StateMeanders:
         Xand(selectorGreaterThan1, toPrepArea, out=toPrepArea)
         arraySelectors: 形ArraySelector1D = numpy.flatnonzero(toPrepArea)
 
-#-------- bitsAlfaAtEven or bitsZuluAtEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
+#-------- bitsAlfaIsEven or bitsZuluIsEven -------------- #-------- ^ & & bitsAlfa 1 bitsZulu 1 --------------------
         Xand(bitsZulu, bitsAlfa, out=toPrepArea)
         Xxor(toPrepArea, 1, out=toPrepArea)
 
@@ -160,7 +155,7 @@ def count(state: StateMeanders) -> StateMeanders:
         selectorDisqualified: 形ArraySelector1D = numpy.flatnonzero(toPrepArea)
 
         toPrepArea[:] = bitsZulu.copy()
-        toPrepArea[arraySelectors] = flipTheExtra_0b1(toPrepArea[arraySelectors])
+        toPrepArea[arraySelectors] = flipDyckEndpoint(toPrepArea[arraySelectors])
         del arraySelectors
         XshiftRight(toPrepArea, 2, out=toPrepArea)
 
@@ -298,8 +293,8 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
     """
     return make_memmap(shape, datatype, raiseIfNone(name))
 
-def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMAXIMUM: int) -> tuple[形ArrayArcCode, int]:
-    """Record retained `arcCode` values and their counts in a possibly extended `arrayAnalyzed`.
+def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCodeAnalysis: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMaximum: int) -> tuple[形ArrayArcCode, int]:
+    """Record retained `arcCodeAnalysis` values and their counts in a possibly extended `arrayAnalyzed`.
 
     (AI generated docstring)
 
@@ -313,12 +308,12 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形Ar
         Two-axis output buffer containing arch codes and counts in the configured columns.
     次start : int
         First output record position to write.
-    arcCode : 形ArrayArcCode1D
+    arcCodeAnalysis : 形ArrayArcCode1D
         Candidate arch codes aligned with the records in `arrayMeanders`. This array is
-        modified in place to zero codes greater than `arcCodeMAXIMUM`.
+        modified in place to zero codes greater than `arcCodeMaximum`.
     arrayMeanders : 形ArrayArcCode
         Source records containing the counts associated with each candidate arch code.
-    arcCodeMAXIMUM : int
+    arcCodeMaximum : int
         Largest retained code. Codes equal to this value remain eligible.
 
     Returns
@@ -342,10 +337,10 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形Ar
     [2] NumPy `numpy.flatnonzero`.
         https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html
     """
-    selectorOverLimit: 形ArrayBoolean1D = arcCodeMAXIMUM < arcCode
-    arcCode[selectorOverLimit] = 0
+    selectorOverLimit: 形ArrayBoolean1D = arcCodeMaximum < arcCodeAnalysis
+    arcCodeAnalysis[selectorOverLimit] = 0
 
-    selectorAnalysis: 形ArraySelector1D = numpy.flatnonzero(arcCode)
+    selectorAnalysis: 形ArraySelector1D = numpy.flatnonzero(arcCodeAnalysis)
 
     次Stop: int = 次start + len(selectorAnalysis)
     if len(arrayAnalyzed) < 次Stop:
@@ -355,7 +350,7 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCode: 形Ar
     slicerArcCodeAnalysis = ShapeSlicer(length=sliceAnalysis, at=次ArcCode)
     slicerMeandersAnalysis = ShapeSlicer(length=sliceAnalysis, at=次Meanders)
 
-    arrayAnalyzed[slicerArcCodeAnalysis] = arcCode[selectorAnalysis]
+    arrayAnalyzed[slicerArcCodeAnalysis] = arcCodeAnalysis[selectorAnalysis]
     arrayAnalyzed[slicerMeandersAnalysis] = arrayMeanders[slicerMeanders][selectorAnalysis]
 
     return arrayAnalyzed, 次Stop
