@@ -1,7 +1,6 @@
-# ruff: file-ignore[print,undocumented-public-function,ambiguous-variable-name,loop-iterator-mutation]
+# ruff: file-ignore[print,undocumented-public-function,ambiguous-variable-name,loop-iterator-mutation,assert]
 """Exact fixed-deficit arch transfer, using safe premature rainbow closure.
 
-No conjectured coefficients enter the transfer.  See note.tex for its proof.
 State: (left closes used, right closes used, left stack size, pairing).
 The pairing lists partners on left bottom-to-top then right bottom-to-top.
 """
@@ -152,17 +151,9 @@ def main() -> None:
 		json.dump({'j': args.j, 'states': states, 'edges': edges}, f)
 	for n in range(2 * args.j, min(args.nmax, args.brute_max) + 1):
 		v: int = brute(n, args.j)
-		assert v == values[n], (n, v, values[n])  # ruff: ignore[assert]
+		assert v == values[n], (n, v, values[n])
 		print(f'brute n={n}: {v}', flush=True)
 	print(f'finished {time.time() - start:.3f}s', flush=True)
 
 if __name__ == '__main__':
-	# A000682(n) = sum j(n), j = 1..n//2
-	# if D_j is the j-th diagonal of A400429, then 2*j is its least index.
-	# j(2*j  ) = A005315(j  ) = A005316(2*j-1).
-	# j(2*j+1) = A005315(j+1) = A005316(2*j+1).
-
-	# main()
-	j = 7
-	for j in range(1, 12):
-		print(counts(automaton(j)[1], 2 * j)[2 * j])
+	main()
