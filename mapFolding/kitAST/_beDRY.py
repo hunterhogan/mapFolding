@@ -14,6 +14,8 @@ Functions
 		Rename a function definition in `node` when the function name matches `identifier`.
 	renameName
 		Rename matching name nodes in the supplied syntax tree.
+	setDatatypeViaImport
+		Replace datatype import aliases in generated function and module containers.
 	toDisk
 		Write a generated module to the resolved output filename.
 
@@ -31,8 +33,9 @@ from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from astToolkit.containers import IngredientsModule
+	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from hunterMakesPy import identifierDotAttribute
+	from mapFolding.kitAST import Settings形
 	from mapFolding.theTypes import Any, Default
 	from os import PathLike
 	from pathlib import PurePath
@@ -146,6 +149,32 @@ def renameName(identifier: str, identifierNew: str, node: ast.AST) -> None:
 		https://docs.python.org/3/library/ast.html
 	"""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(identifier)), Grab.idAttribute(Then.replaceWith(identifierNew))).visit(node)
+
+# TODO Use this concept in general modules, not just custom jobs.
+def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
+	"""Customize data types in the given ingredients by adjusting imports.
+
+	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
+	preserving _abstract_ names for datatypes, such as `形ArrayTotalLeaves1D` and `形TotalFolds`. This function well
+	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
+	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
+	for example, `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` or its equivalent), ought to still have the abstract
+	names, this function gives you the power to change the datatype from numpy to numba and/or from 8-bits to 16-bits merely by
+	changing the import statements. You shouldn't need to change any "business" logic.
+
+	This will not remove potentially conflicting existing imports from other modules.
+
+	Returns
+	-------
+	datatypesIngredientsObjects : tuple[IngredientsFunction, IngredientsModule]
+		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
+	"""
+	for datatypeConfig in boxOfSettings形:
+		ingredientsFunction.imports.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
+		ingredientsModule.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
+		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
+
+	return ingredientsFunction, ingredientsModule
 
 def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords: dict[str, Any], identifierModule: str, **override: Any) -> PurePath:
 	"""Write a generated module to the resolved output filename.

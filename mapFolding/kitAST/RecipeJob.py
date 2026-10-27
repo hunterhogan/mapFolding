@@ -2,8 +2,8 @@
 
 (AI generated docstring)
 
-You can use this module to create recipes, embed state values, replace datatype imports,
-and append counting launchers to source containers from `astToolkit` [1].
+You can use this module to create recipes, embed state values, and append counting launchers
+to source containers from `astToolkit` [1].
 
 Contents
 --------
@@ -26,10 +26,6 @@ Launchers
 	addLauncher
 		Append a standalone counting launcher and result-file writer.
 
-Datatypes
-	setDatatypeViaImport
-		Replace datatype import aliases in generated function and module containers.
-
 References
 ----------
 [1] astToolkit tree visitors and source containers.
@@ -42,7 +38,7 @@ from astToolkit.filesystem import parseLogicalPath2astModule
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
-from mapFolding.kitAST import IfThis, Settings形
+from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import shatterDataclass
 from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMapFolding, lookupMapFoldingEstimates
@@ -608,31 +604,3 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		, Make.Expr(Make.Call(Make.Attribute(Make.Name('writeStream'), 'close')))])
 	ingredientsModule.appendLauncher(statement=Make.If(
 		Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')]), boxOfLauncherBody))
-
-#================== Datatypes =======================================================================
-
-# TODO Use this concept in general modules, not just custom jobs.
-def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
-	"""Customize data types in the given ingredients by adjusting imports.
-
-	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to
-	preserving _abstract_ names for datatypes, such as `形ArrayTotalLeaves1D` and `形TotalFolds`. This function well
-	illustrates why I put so much effort into preserving the abstract names. (Normally, Python will _immediately_ replace an alias
-	name with the type for which it is a proxy.) Because transformed code, even if it has been through 10 transformations (see,
-	for example, `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` or its equivalent), ought to still have the abstract
-	names, this function gives you the power to change the datatype from numpy to numba and/or from 8-bits to 16-bits merely by
-	changing the import statements. You shouldn't need to change any "business" logic.
-
-	This will not remove potentially conflicting existing imports from other modules.
-
-	Returns
-	-------
-	datatypesIngredientsObjects : tuple[IngredientsFunction, IngredientsModule]
-		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
-	"""
-	for datatypeConfig in boxOfSettings形:
-		ingredientsFunction.imports.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
-		ingredientsModule.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
-		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
-
-	return ingredientsFunction, ingredientsModule

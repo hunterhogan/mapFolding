@@ -24,10 +24,9 @@ from __future__ import annotations
 from astToolkit import Be, Grab, Make, NodeTourist, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, Settings形
+from mapFolding.kitAST import IfThis, setDatatypeViaImport, Settings形
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, parametersNumbaLight, SpicesJobNumba
-from mapFolding.kitAST.RecipeJob import (
-	addLauncher, fromMapShape, move_argToBody, moveStaticArrays, RecipeJobTheorem2, replaceStaticScalars, setDatatypeViaImport)
+from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, moveStaticArrays, RecipeJobTheorem2, replaceStaticScalars
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

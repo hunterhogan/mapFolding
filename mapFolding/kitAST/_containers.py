@@ -29,7 +29,7 @@ class Settings形(NamedTuple):
 
 	You can use this tuple to map a datatype identifier in generated source to an imported type.
 	The configuration records the original identifier, replacement module, type, and import alias.
-	`mapFolding.kitAST.RecipeJob.setDatatypeViaImport` applies the configuration [1].
+	`mapFolding.kitAST.setDatatypeViaImport` applies the configuration [1].
 
 	Attributes
 	----------
@@ -44,7 +44,7 @@ class Settings形(NamedTuple):
 
 	References
 	----------
-	[1] `mapFolding.kitAST.RecipeJob.setDatatypeViaImport`
+	[1] `mapFolding.kitAST.setDatatypeViaImport`
 	"""
 
 	datatypeIdentifier: str

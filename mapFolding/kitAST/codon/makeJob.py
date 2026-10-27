@@ -25,15 +25,15 @@ from __future__ import annotations
 from astToolkit import Be, Grab, Make, NodeChanger, Then
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, Settings形
-from mapFolding.kitAST.RecipeJob import (
-	addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, replaceStaticScalars, setDatatypeViaImport)
+from mapFolding.kitAST import IfThis, setDatatypeViaImport, Settings形
+from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, replaceStaticScalars
 from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from typing import cast, TYPE_CHECKING
 import sys
 
 if TYPE_CHECKING:
+	from pathlib import PurePosixPath
 	import ast
 
 boxOfSettings形: list[Settings形] = [
@@ -162,7 +162,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 			, IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
 							, Be.Assign.valueIs(Be.Constant))
 			)
-			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
+			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # pyright: ignore[reportArgumentType, reportUnknownArgumentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty: ignore[unresolved-attribute]
 		).visit(ingredientsFunction.astFunctionDef)
 
 	#-------- `identifier` - 1. ----------------------------------------------
@@ -178,7 +178,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 	#-------- `identifier` has exactly one index value. -----------------------
 		NodeChanger(IfThis.isAllOf(Be.Subscript.valueIs(IfThis.isNestedNameIdentifier(identifier))
 			, lambda node: not Be.Subscript.sliceIs(Be.Tuple)(node))
-			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)  # ty:ignore[unresolved-attribute, invalid-argument-type] # pyright: ignore[reportUnknownMemberType,reportUnknownArgumentType,reportArgumentType,reportAttributeAccessIssue]
+			, doThat=lambda node: Grab.sliceAttribute(Then.replaceWith(Make.Call(Make.Name('int'), listParameters=[node.slice])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
 	#-------- `identifier` has multiple index values. -------------------------
