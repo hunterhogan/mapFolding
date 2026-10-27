@@ -13,8 +13,6 @@ Classes
 	ShatteredDataclass
 		Store field syntax for removing and reconstructing a dataclass.
 Functions
-	findDataclass
-		Extract the source module, type, and instance name of a function parameter.
 	removeDataclass
 		Replace a dataclass parameter with individual field parameters.
 	shatterDataclass
@@ -29,7 +27,7 @@ References
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractClassDef
 from astToolkit.containers import IngredientsFunction, LedgerOfImports
 from astToolkit.filesystem import parseLogicalPath2astModule
@@ -380,7 +378,7 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	The module `mapFolding.kitAST.mapFolding._count` uses this call [3].
 
 		```python
-		shatterDataclass(*findDataclass(ingredientsFunction))
+		shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 		```
 	"""
 	Official_fieldOrder: list[str] = []
@@ -518,31 +516,3 @@ def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisAbove(shatteredDataclass.boxOfUnpack)).visit(ingredients.astFunctionDef)
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredients.astFunctionDef)
 	return ingredients
-
-def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, identifierDotAttribute]:
-	"""Extract the source module, type, and instance name of a function parameter.
-
-	(AI generated docstring)
-
-	You can use this function to identify the state dataclass assumed by a function container.
-	The function inspects the last argument annotation, finds the last name inside that annotation,
-	and resolves the name through the import ledger. The result also includes the last argument name.
-
-	Parameters
-	----------
-	ingredientsFunction : IngredientsFunction
-		Function container with an annotated state argument and a matching import record.
-	"""
-	returnMe: list[identifierDotAttribute | str] = []
-	NodeTourist(
-		Be.arg.annotationIs(Be.Name)
-		, Grab.annotationAttribute(Grab.idAttribute(Then.appendTo(returnMe)))
-	).visit(ingredientsFunction.astFunctionDef.args)
-
-	for moduleWithLogicalPath, boxOfNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
-		if set(returnMe[0]).intersection(boxOfNameTuples):
-			returnMe.insert(0, moduleWithLogicalPath)
-
-	NodeTourist(Be.arg, Grab.argAttribute(Then.appendTo(returnMe))).visit(ingredientsFunction.astFunctionDef.args)
-
-	return tuple(returnMe)  # pyright: ignore[reportReturnType]  # ty: ignore[invalid-return-type]

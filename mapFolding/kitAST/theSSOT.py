@@ -94,6 +94,7 @@ defaultMapFolding['module'].update({
 defaultMapFolding['variable'].update({
 	'counting': 'groupsOfFolds'
 	, 'stateDataclass': 'StateMapFolding'
+	, 'stateDataclassParallel': 'StateMapFoldingParallel'
 })
 defaultMapFolding['logicalPath']['default'] = defaultMapFolding['logicalPath']['algorithm']
 defaultMapFolding['module']['default'] = defaultMapFolding['module']['algorithm']

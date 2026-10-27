@@ -31,7 +31,7 @@ from astToolkit.changeDef import inlineFunctionDef
 from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis, toDisk
-from mapFolding.kitAST.dataclasses import findDataclass, removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass
+from mapFolding.kitAST.dataclasses import removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
 from mapFolding.kitAST.paths import getLogicalPath
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
@@ -63,8 +63,8 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
 	**override : Any
-		Overrides for source and target callable identifiers, dispatcher source, compiler options,
-		module name, and writer settings.
+		Overrides for source and target callable identifiers, dispatcher source, dataclass module,
+		class and instance identifiers, compiler options, module name, and writer settings.
 
 	Returns
 	-------
@@ -85,7 +85,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 	[2] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
-	identifiers = identifiers or default
+	identifiers = identifiers or defaultMapFolding
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('inlineNumba') or 名CallableSource
 	名CallableDispatcherSource: str | None = override.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
@@ -94,8 +94,13 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
-	_identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
-	shatteredDataclass: ShatteredDataclass = shatterDataclass(*findDataclass(ingredientsFunction))
+	logicalPathDataclass: identifierDotAttribute = (
+		override.get('logicalPathDataclass')
+		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
+	)
+	identifierDataclass: str = override.get('identifierDataclass') or identifiers['variable']['stateDataclass']
+	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
+	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
@@ -282,8 +287,8 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
 	**override : Any
-		Overrides for source and target callable identifiers, dispatcher source, compiler options,
-		module name, and writer settings.
+		Overrides for source and target callable identifiers, dispatcher source, dataclass module,
+		class and instance identifiers, compiler options, module name, and writer settings.
 
 	Returns
 	-------
@@ -304,7 +309,7 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 	[2] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
-	identifiers = identifiers or default
+	identifiers = identifiers or defaultMapFolding
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('theorem2Trimmed') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('theorem2Numba') or 名CallableSource
 	名CallableDispatcherSource: str | None = override.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
@@ -313,8 +318,12 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
+	logicalPathDataclass: identifierDotAttribute = (
+		override.get('logicalPathDataclass')
+		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
+	)
+	identifierDataclass: str = override.get('identifierDataclass') or identifiers['variable']['stateDataclass']
 	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
-	logicalPathDataclass, identifierDataclass, _identifierDataclassInstance = findDataclass(ingredientsFunction)
 
 	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 
@@ -449,8 +458,8 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
 	**override : Any
-		Overrides for source and target counting and dispatcher identifiers, counting field, compiler
-		options, module name, and writer settings.
+		Overrides for source and target counting and dispatcher identifiers, dataclass module and
+		parallel class, state instance, counting field, compiler options, module name, and writer settings.
 
 	Returns
 	-------
@@ -484,10 +493,13 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
+	logicalPathDataclass: identifierDotAttribute = (
+		override.get('logicalPathDataclass')
+		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
+	)
 	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
-	logicalPathDataclass, identifierDataclass, _identifierDataclassInstance = findDataclass(ingredientsFunction)
 
-	名dataclassParallel: identifierDotAttribute = identifierDataclass + 'Parallel'
+	名dataclassParallel: identifierDotAttribute = override.get('名dataclassParallel') or identifiers['variable']['stateDataclassParallel']
 	shatteredDataclassParallel: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名dataclassParallel, identifierDataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
