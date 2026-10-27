@@ -10,14 +10,10 @@ Contents
 Functions
 	doTheNeedful
 		Generate arch-diagram representatives and write an album.
-Output paths
-	pathAlbum
-		Locate the default directory for generated arch-diagram albums.
 """
 
 # DEVELOPMENT module.
 # pyright: reportUnusedVariable=false, reportUnusedImport=false
-# ruff: file-ignore[print]
 from __future__ import annotations
 
 from contextlib import ExitStack
@@ -28,10 +24,8 @@ from mapFolding import leafOrigin, pileOrigin
 from mapFolding.algorithms.iff import creaseViolation吗 as archesCross吗, getCreasePost as getArchPost, oddLeaf吗
 from mapFolding.beDRY import defineProcessorLimit, getMapShapeProducts, getTotalLeaves, validateMapShape
 from mapFolding.kitFilesystem import makePathFilenameFolds, writeAlbum
-from mapFolding.oeis import getValuesKnown
 from mapFolding.theSSOT import settingsPackage
 from multiprocessing.pool import Pool
-from time import perf_counter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -39,14 +33,6 @@ if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import Folding, Leaf, Pile
 	from pathlib import Path
-
-pathAlbum: Path = settingsPackage.pathPackage / 'needsAHome' / 'albums'
-"""Locate the default directory for generated arch-diagram albums.
-
-(AI generated docstring)
-
-You can locate the research album directory within the package. Use the insertion entry point to
-derive album filenames from the map shape."""
 
 def _makeDescendants(diagram: Folding, mapShape: tuple[int, ...]) -> tuple[Folding, ...]:
 	inserting: Iterable[Folding] = map(partial(_insertLeaf, diagram, len(diagram)), range(len(diagram), pileOrigin, decreasing))
@@ -92,7 +78,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 
 	You can insert leaves in label order, retain diagrams whose new arches do not cross existing
 	arches on the same side of the axis, and save them with `mapFolding.kitFilesystem.writeAlbum` [1]. You use the
-	module's `pathAlbum` [2] as the output directory.
+	shared `settingsPackage.pathAlbum` [2] as the output directory.
 
 	Representative selection
 	------------------------
@@ -123,7 +109,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 
 	Examples
 	--------
-	The module's execution block generates an album for the connections of a rectangular map.
+	The `easyRun.insertion` module generates albums for the connections of a rectangular map.
 
 		```python
 		mapShape = (2, 3)
@@ -134,7 +120,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 	----------
 	[1] `mapFolding.kitFilesystem.writeAlbum`
 
-	[2] `pathAlbum`
+	[2] `mapFolding.theSSOT.settingsPackage.pathAlbum`
 
 	[3] `mapFolding.beDRY.defineProcessorLimit`
 	"""
@@ -146,7 +132,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 
 	leavesInserted: int = 1
 	diagramsAtDepth: Iterable[Folding] = ((leafOrigin,),)
-	pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, pathAlbum, suffix='.album')
+	pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, settingsPackage.pathAlbum, suffix='.album')
 	if pathFilenameAlbum.exists():
 		message = f'Album already exists: {pathFilenameAlbum}.'
 		raise FileExistsError(message)
@@ -167,15 +153,6 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 		writeAlbum(diagramsAtDepth, pathFilenameAlbum)
 
 	return pathFilenameAlbum
-
-if __name__ == '__main__':
-	mapShape: tuple[int, ...] = (2, 3)
-	start: float = perf_counter()
-	pathFilenameAlbum: Path = doTheNeedful(mapShape, -2)
-	print(f"{perf_counter() - start:.2f}")
-	countTotal: int = len(pathFilenameAlbum.read_text(encoding='utf-8').splitlines()) * 2 * getTotalLeaves(mapShape)
-	valuesKnown: dict[int, int] = getValuesKnown('A001415')
-	print(countTotal == valuesKnown[3], countTotal, valuesKnown[3])
 
 # DEVELOPMENT Changes:
 # TODO to make the files smaller, use a truncated notation. The graph notation I created is very

@@ -94,6 +94,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
+	_identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
 	shatteredDataclass: ShatteredDataclass = shatterDataclass(*findDataclass(ingredientsFunction))
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
@@ -312,7 +313,8 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
-	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
+	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
+	logicalPathDataclass, identifierDataclass, _identifierDataclassInstance = findDataclass(ingredientsFunction)
 
 	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
 
@@ -482,7 +484,8 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
-	logicalPathDataclass, identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
+	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
+	logicalPathDataclass, identifierDataclass, _identifierDataclassInstance = findDataclass(ingredientsFunction)
 
 	名dataclassParallel: identifierDotAttribute = identifierDataclass + 'Parallel'
 	shatteredDataclassParallel: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名dataclassParallel, identifierDataclassInstance)
@@ -514,7 +517,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + 名dataclassParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	NodeChanger(
-			findThis=Be.arg.annotationIs(Be.Name.idIs(lambda thisAttribute: thisAttribute == identifierDataclass))
+			findThis=IfThis.is_argIdentifier(identifierDataclassInstance)
 			, doThat=Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(名dataclassParallel)))
 		).visit(unRepackDataclass.astFunctionDef)
 	unRepackDataclass.astFunctionDef.returns = Make.Name(名dataclassParallel)

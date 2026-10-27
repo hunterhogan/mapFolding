@@ -29,11 +29,11 @@ References
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, Grab, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractClassDef
 from astToolkit.containers import IngredientsFunction, LedgerOfImports
 from astToolkit.filesystem import parseLogicalPath2astModule
-from astToolkit.transformationTools import unparseFindReplace
+from astToolkit.ohWow import unparseFindReplace
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
 from inspect import get_annotations
@@ -50,9 +50,6 @@ if TYPE_CHECKING:
 # DEVELOPMENT Try to apply more of these concepts https://github.com/python/typing/discussions/2092.
 
 # TODO Figure out how to deconstruct dataclasses with `astToolkit`. It's your effing package, Hunter.
-# The downstream code is difficult to change. Hell, the UPSTREAM dataclasses are difficult to change
-# because a change can break the ast transformations. `astToolkit` was created after these dataclasses
-# specifically to make all of this easier. That's why they don't use `astToolkit` idioms very often.
 @dataclasses.dataclass(slots=True)
 class ShatteredDataclass:
 	"""Store field syntax for removing and reconstructing a dataclass.
@@ -522,7 +519,7 @@ def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.insertThisBelow([shatteredDataclass.repack])).visit(ingredients.astFunctionDef)
 	return ingredients
 
-def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, str]:
+def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierDotAttribute, str, identifierDotAttribute]:
 	"""Extract the source module, type, and instance name of a function parameter.
 
 	(AI generated docstring)
@@ -535,33 +532,17 @@ def findDataclass(ingredientsFunction: IngredientsFunction) -> tuple[identifierD
 	----------
 	ingredientsFunction : IngredientsFunction
 		Function container with an annotated state argument and a matching import record.
-
-	Returns
-	-------
-	dataclassIdentifiers : tuple[identifierDotAttribute, str, str]
-		Dotted source module path, class identifier, and instance parameter identifier, in that order.
-
-	Examples
-	--------
-	The module `mapFolding.kitAST.mapFolding._count` uses this call [1].
-
-		```python
-		findDataclass(ingredientsFunction)
-		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding._count`
 	"""
-	dataclassName: ast.expr = raiseIfNone(NodeTourist[ast.arg, ast.expr](Be.arg, Then.extractIt(DOT.annotation)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	identifierDataclass: str = raiseIfNone(NodeTourist[ast.Name, str](Be.Name, Then.extractIt(DOT.id)).captureLastMatch(dataclassName))
-	logicalPathDataclass = None
+	returnMe: list[identifierDotAttribute | str] = []
+	NodeTourist(
+		Be.arg.annotationIs(Be.Name)
+		, Grab.annotationAttribute(Grab.idAttribute(Then.appendTo(returnMe)))
+	).visit(ingredientsFunction.astFunctionDef.args)
+
 	for moduleWithLogicalPath, boxOfNameTuples in ingredientsFunction.imports._dictionaryImportFrom.items():  # ruff: ignore[private-member-access]
-		for nameTuple in boxOfNameTuples:
-			if nameTuple[0] == identifierDataclass:
-				logicalPathDataclass = moduleWithLogicalPath
-				break
-		if logicalPathDataclass:
-			break
-	identifierDataclassInstance: identifierDotAttribute = raiseIfNone(NodeTourist[ast.arg, identifierDotAttribute](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
-	return raiseIfNone(logicalPathDataclass), identifierDataclass, identifierDataclassInstance
+		if set(returnMe[0]).intersection(boxOfNameTuples):
+			returnMe.insert(0, moduleWithLogicalPath)
+
+	NodeTourist(Be.arg, Grab.argAttribute(Then.appendTo(returnMe))).visit(ingredientsFunction.astFunctionDef.args)
+
+	return tuple(returnMe)  # pyright: ignore[reportReturnType]  # ty: ignore[invalid-return-type]

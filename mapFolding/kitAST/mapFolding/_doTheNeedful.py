@@ -17,7 +17,6 @@ from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
 from astToolkit.changeDef import inlineFunctionDef
 from astToolkit.containers import IngredientsFunction, IngredientsModule, LedgerOfImports
 from mapFolding.kitAST import IfThis, toDisk
-from mapFolding.kitAST.dataclasses import findDataclass
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 import ast
@@ -74,7 +73,7 @@ def makeInitializeState(astModule: ast.Module, identifiers: Default | None = Non
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = override.get('identifierCallable') or identifiers['function'].get('initializeState') or 名CallableSource
 
-	_logicalPathDataclass, _identifierDataclass, identifierDataclassInstance = findDataclass(ingredientsFunction)
+	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
 	名Counting: identifierDotAttribute = override.get('名Counting') or identifiers['variable']['counting']
 
 	NodeChanger(findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'leaf1ndex')

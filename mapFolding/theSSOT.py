@@ -45,6 +45,8 @@ class mapFoldingPackageSettings(PackageSettings):
 	pathDataSamples : Path
 		Derived directory `pathPackage / 'tests' / 'dataSamples'`. Initialization does not create
 		the directory.
+	pathAlbum : Path
+		Directory `pathPackage / 'albums'` shared by album readers and writers.
 
 	Examples
 	--------
@@ -69,6 +71,8 @@ class mapFoldingPackageSettings(PackageSettings):
 	(AI generated docstring)
 	"""
 
+	pathAlbum: Path = dataclasses.field(init=False, default=Path())
+
 	def __post_init__(self, identifierPackageFALLBACK: str) -> None:
 		"""Finish package initialization from `identifierPackageFALLBACK` and derive `pathDataSamples`.
 
@@ -87,6 +91,7 @@ class mapFoldingPackageSettings(PackageSettings):
 		"""
 		super().__post_init__(identifierPackageFALLBACK)
 		self.pathDataSamples = self.pathPackage / 'tests' / 'dataSamples'
+		self.pathAlbum = self.pathPackage / 'albums'
 
 settingsPackage = mapFoldingPackageSettings('mapFolding')
 """Global package settings."""

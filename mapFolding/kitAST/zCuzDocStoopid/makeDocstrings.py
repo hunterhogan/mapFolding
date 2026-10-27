@@ -26,7 +26,7 @@ from __future__ import annotations
 from astToolkit import Be, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import makeDictionaryFunctionDef
 from astToolkit.filesystem import parsePathFilename2astModule
-from astToolkit.transformationTools import unjoinBinOP
+from astToolkit.ohWow import unjoinBinOP
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.filesystemToolkit import writePython
 from mapFolding.oeis import getMetadata

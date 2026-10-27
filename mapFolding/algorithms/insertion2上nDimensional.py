@@ -25,7 +25,6 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import keyfilter as filterPile
 from itertools import pairwise
 from mapFolding import 一, 二, 零
-from mapFolding.algorithms.insertion import pathAlbum
 from mapFolding.beDRY import makeAntiChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.filters import 是valid
@@ -34,6 +33,7 @@ from mapFolding.leafDomains import getDomainLeaf
 from mapFolding.oeis import makeMapShape
 from mapFolding.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k, pinLeavesDimension二, pinPilesAtEnds
 from mapFolding.reduceIt import boxOfFunctionsReduction2上nDimensional, reduceLeafSpace
+from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 from Z0Z_tools import DOTitems
@@ -115,7 +115,7 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 
 	(AI generated docstring)
 
-	You can read the previous-dimension album from `mapFolding.algorithms.insertion.pathAlbum` [1],
+	You can read the previous-dimension album from `settingsPackage.pathAlbum` [1],
 	process each source folding with `makeDescendants` [2], and gather worker permutation spaces and
 	folding collections.
 
@@ -139,7 +139,7 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 
 	Examples
 	--------
-	The pinning script prepares target-map search spaces from the preceding album.
+	The insertion script prepares target-map search spaces from the preceding album.
 
 		```python
 		state = makeAlbum2上nDimensional(state, 14)
@@ -147,14 +147,14 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 
 	References
 	----------
-	[1] `mapFolding.algorithms.insertion.pathAlbum`
+	[1] `mapFolding.theSSOT.settingsPackage.pathAlbum`
 
 	[2] `makeDescendants`
 
 	[3] Python concurrent.futures.ProcessPoolExecutor.
 		https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor
 	"""
-	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.totalDimensions - 1), pathAlbum, suffix='.album'))
+	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.totalDimensions - 1), settingsPackage.pathAlbum, suffix='.album'))
 
 	with ProcessPoolExecutor(workersMaximum) as concurrencyManager:
 		boxOfClaimTickets: list[Future[StateElimination]] = []
@@ -194,7 +194,7 @@ def recordAlbum2上nDimensional(state: StateElimination) -> Path:
 
 	Examples
 	--------
-	The pinning script records its collected foldings.
+	The insertion script records its collected foldings.
 
 		```python
 		recordAlbum2上nDimensional(state)
@@ -204,8 +204,8 @@ def recordAlbum2上nDimensional(state: StateElimination) -> Path:
 	----------
 	[1] `mapFolding.kitFilesystem.writeAlbum`
 
-	[2] `mapFolding.algorithms.insertion.pathAlbum`
+	[2] `mapFolding.theSSOT.settingsPackage.pathAlbum`
 	"""
-	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, pathAlbum, suffix='.album')
+	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, settingsPackage.pathAlbum, suffix='.album')
 	writeAlbum(sorted(state.boxOfFolding), pathFilenameAlbum)
 	return pathFilenameAlbum

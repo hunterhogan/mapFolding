@@ -988,9 +988,7 @@ def getLookupSelected(
 #======== Array storage ============================================================================
 
 # TODO The make_memmap API must be in data structures, but it has filesystem components. Resolve the tension.
-def make_memmap(
-	shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str
-) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
+def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
 	"""Open file-backed array storage named from `name`.
 
 	(AI generated docstring)
