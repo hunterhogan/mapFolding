@@ -2,8 +2,7 @@
 from __future__ import annotations
 
 from astToolkit import Be, Grab, NodeTourist, Then
-from astToolkit.changeDef import makeDictionaryFunctionDef, makeDictionaryMosDef
-from astToolkit.containers import makeDictionaryClassDef
+from astToolkit.changeDef import makeDictionaryClassDef, makeDictionaryFunctionDef, makeDictionaryMosDef
 from astToolkit.filesystem import parsePathFilename2astModule
 from collections import Counter
 from humpy_cytoolz import concat

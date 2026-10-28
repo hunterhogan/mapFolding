@@ -4,7 +4,7 @@ from mapFolding.dataBaskets import (
 	StateMapFolding, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形Elephino, 形TotalFolds, 形TotalLeaves)
 from numba import jit
 
-@jit(cache=True, error_model='numpy', fastmath=True, forceinline=True, locals={})
+@jit(cache=True, error_model='numpy', fastmath=True, forceinline=True)
 def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形TotalLeaves, 次Leaf: 形TotalLeaves, 次MiniGap: 形Elephino, leaf1ndex: 形TotalLeaves, leafConnectee: 形TotalLeaves, dimensionsUnconstrained: 形TotalLeaves, countDimensionsGapped: 形ArrayTotalLeaves1D, gapRangeStart: 形ArrayElephino1D, gapsWhere: 形ArrayTotalLeaves1D, leafAbove: 形ArrayTotalLeaves1D, leafBelow: 形ArrayTotalLeaves1D, connectionGraph: 形ArrayTotalLeaves3D, totalDimensions: 形TotalLeaves, totalLeaves: 形TotalLeaves) -> tuple[形TotalFolds, 形Elephino, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形ArrayTotalLeaves1D, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形TotalLeaves, 形TotalLeaves]:
     while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:

@@ -29,7 +29,7 @@ from __future__ import annotations
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders, enumerateSequences
 from mapFolding.dataBaskets import StateMapFolding
-from mapFolding.kitAST.numba.kitNumba import parametersNumbaLight
+from mapFolding.kitAST.numba.kitNumba import parametersNumbaDefault
 from mapFolding.kitAST.numba.makeJob import makeJobNumba
 from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
 from mapFolding.kitFilesystem import readAlbum, writeAlbum
@@ -144,7 +144,7 @@ def test_writeJobNumba(mapShape: tuple[int, ...], useNumbaProgressBar: bool, pat
 
 	recipeJobTheorem2 = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), identifierModule=pathFilenameModule.stem
 		, pathFilenameTotalFolds=PurePosixPath(pathFilenameTotalFolds), totalFoldsMultiplier=state.totalLeaves)
-	makeJobNumba(recipeJobTheorem2, useNumbaProgressBar=useNumbaProgressBar, parametersNumba=parametersNumbaLight)
+	makeJobNumba(recipeJobTheorem2, useNumbaProgressBar=useNumbaProgressBar, parametersNumba=parametersNumbaDefault)
 
 	runpy.run_path(str(pathFilenameModule), run_name='__main__')
 

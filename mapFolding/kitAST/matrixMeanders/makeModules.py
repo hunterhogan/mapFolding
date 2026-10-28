@@ -5,13 +5,15 @@
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
-from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from astToolkit.filesystem import parsePathFilename2astModule
 from hunterMakesPy import raiseIfNone
 from inspect import cleandoc
 from itertools import filterfalse
-from mapFolding.kitAST import IfThis, removeFunctionDef, renameFunctionDef, toDisk
-from mapFolding.kitAST.paths import getLogicalPath, getModule, getPathFilename
+from mapFolding.kitAST import (
+	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, removeFunctionDef, renameFunctionDef,
+	toDisk)
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba
+from mapFolding.kitAST.paths import getLogicalPath, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from mapFolding.theTypes import 形ArcCode
 from operator import getitem, not_
@@ -21,6 +23,7 @@ import ast
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
+	from mapFolding.kitAST.numba.kitNumba import ParametersNumba
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 	from typing import Any
@@ -31,7 +34,6 @@ def expandDocstring(astConstant: ast.Constant) -> ast.Constant:
 	(AI generated docstring)
 	"""
 	return Make.Constant(str(astConstant.value).expandtabs(4))
-
 
 def combineModules(astModule: ast.Module, astModuleAdditions: ast.Module) -> IngredientsModule:
 	"""Combine module definitions and consolidate their top-level imports.
@@ -49,7 +51,19 @@ def combineModules(astModule: ast.Module, astModuleAdditions: ast.Module) -> Ing
 	ingredientsModule.appendEpilogue(statement=list(filterfalse(findImport, astModule.body)))
 	return ingredientsModule
 
+# TODO Will parallel increase vectorize?
+# TODO I strongly dislike placing a FunctionDef in `if TYPE_CHECKING:/else:`
+"""
+if TYPE_CHECKING:
+    from numpy import ufunc
+    flipDyckEndpoint: ufunc
+else:
+    from numba import vectorize
 
+    @vectorize(['int64(int64)', 'uint64(uint64)'], cache=True, nopython=True)
+    def flipDyckEndpoint(intWithExtra_0b1: int) -> int:
+
+"""
 def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
 	"""Generate array width checks and the vectorized Dyck-endpoint operation.
 
@@ -84,12 +98,19 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 	ingredientsModule = IngredientsModule(ingredients)
 
 	ingredients = astModuleToIngredientsFunction(astModuleDyck, override.get('名CallableDyck') or identifiers['function']['Dyck'])
+	ingredientsModule.imports.update(ingredients.imports)
 	名CallableFlip: str = override.get('名CallableFlip') or identifiers['function']['flipDyckEndpoint']
+	logicalPathNumba: identifierDotAttribute = override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
+	名CallableDecorator: str = override.get('名CallableDecorator', identifiers['function']['numbaVectorize'])
+	parametersNumba: ParametersNumba = override.get('parametersNumba', {
+		'cache': True, 'nopython': True
+		, 'signature_or_function': ('int64(int64)', f'{形ArcCode.__name__}({形ArcCode.__name__})')
+	})
 	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableFlip))).visit(ingredients.astFunctionDef)
-	NodeChanger(Be.FunctionDef, Grab.decorator_listAttribute(Then.replaceWith([
-		Make.Call(Make.Name('vectorize'), [Make.List([Make.Constant('int64(int64)'), Make.Constant(f'{形ArcCode.__name__}({形ArcCode.__name__})')])]
-			, list_keyword=[Make.keyword('cache', Make.Constant(value=True)), Make.keyword('nopython', Make.Constant(value=True))])
-	]))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.decorator_listAttribute(Then.replaceWith(list(filterfalse(
+		IfThis.isNameIdentifier('cache'), ingredients.astFunctionDef.decorator_list))))).visit(ingredients.astFunctionDef)
+	ingredients = decorateCallableWithNumba(ingredients, identifiers, parametersNumba=parametersNumba
+		, logicalPathNumba=logicalPathNumba, 名CallableDecorator=名CallableDecorator)
 	ast_exprReturn: ast.expr = raiseIfNone(NodeTourist(Be.Return, DOT.value).captureLastMatch(ingredients.astFunctionDef))
 	NodeChanger(Be.Return, Grab.valueAttribute(Then.replaceWith(Make.BitXor.join([
 		Make.Name(ingredients.astFunctionDef.args.args[0].arg), ast_exprReturn])))).visit(ingredients.astFunctionDef)
@@ -99,14 +120,12 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 		'        Every input must contain a matching endpoint. The generated NumPy ufunc accepts\n'
 		'        signed and unsigned 64-bit scalars and arrays, including pandas columns.\n        ')))).visit(ingredients.astFunctionDef)
 	ingredientsModule.imports.addImportFrom_asStr('typing', 'TYPE_CHECKING')
-	ingredientsModule.imports.update(ingredients.imports)
 	ingredientsModule.appendEpilogue(statement=Make.If(Make.Name('TYPE_CHECKING'), [
 		Make.ImportFrom('numpy', [Make.alias('ufunc')])
 		, Make.AnnAssign(Make.Name(名CallableFlip, Make.Store()), Make.Name('ufunc'))
-	], [Make.ImportFrom('numba', [Make.alias('vectorize')]), ingredients.astFunctionDef
+	], [Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)]), ingredients.astFunctionDef
 		, Make.Assign([Make.Name(名CallableFlip, Make.Store())], Make.Attribute(Make.Name(名CallableFlip), 'ufunc'))]))
 	return ingredientsModule
-
 
 def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
 	"""Generate dataframe width checks and pruning from existing algorithm functions.
@@ -585,19 +604,24 @@ def makeModulesMeanders() -> None:
 	"""
 	identifiers: Default = defaultMatrixMeanders
 	名ModuleShare: str = identifiers['module']['share']
+	pathRoot: PurePath = identifiers['filesystem']['sourcePackage']
+	logicalPathAlgorithm: identifierDotAttribute = identifiers['logicalPath']['algorithm']
+	pathFilenameCommon: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['common'])
+	pathFilenameDyck: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])
+	pathFilenameNumPy: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])
+	pathFilenamePandas: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['pandas'])
 	ingredientsModule: IngredientsModule = makeCommonNumPy(
-		getModule(identifiers['module']['common'], identifiers=identifiers), getModule(identifiers=identifiers), identifiers)
-	ingredientsModule = combineModules(getModule(identifiers['module']['common'], identifiers=identifiers), Make.Module(ingredientsModule.body))
+		parsePathFilename2astModule(pathFilenameCommon), parsePathFilename2astModule(pathFilenameDyck), identifiers)
+	ingredientsModule = combineModules(parsePathFilename2astModule(pathFilenameCommon), Make.Module(ingredientsModule.body))
 	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
-	pathFilenameShare: PurePath = makeCountBigInt(getModule(identifiers=identifiers), identifiers)
-	ingredientsModule = makeCommonPandas(getModule(identifiers['module']['common'], identifiers=identifiers)
+	pathFilenameShare: PurePath = makeCountBigInt(parsePathFilename2astModule(pathFilenameDyck), identifiers)
+	ingredientsModule = makeCommonPandas(parsePathFilename2astModule(pathFilenameCommon)
 		, parsePathFilename2astModule(pathFilenameShare), identifiers)
 	ingredientsModule = combineModules(parsePathFilename2astModule(pathFilenameShare), Make.Module(ingredientsModule.body))
 	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
-	makePrune(getModule(identifiers=identifiers), identifiers)
-	makePruneNumPy(getModule(identifiers['module']['numpy'], identifiers=identifiers), identifiers)
-	makePrunePandas(getModule(identifiers['module']['pandas'], identifiers=identifiers), identifiers)
-
+	makePrune(parsePathFilename2astModule(pathFilenameDyck), identifiers)
+	makePruneNumPy(parsePathFilename2astModule(pathFilenameNumPy), identifiers)
+	makePrunePandas(parsePathFilename2astModule(pathFilenamePandas), identifiers)
 
 if __name__ == '__main__':
 	makeModulesMeanders()

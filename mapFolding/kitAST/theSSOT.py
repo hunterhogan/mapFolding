@@ -40,6 +40,7 @@ default = Default(
 		, 'dispatcher': 'doTheNeedful'
 		, 'numbaDecorator': 'jit'
 		, 'numbaModule': 'jit_module'
+		, 'numbaVectorize': 'vectorize'
 	}
 	, logicalPath={
 		'algorithm': 'algorithms'

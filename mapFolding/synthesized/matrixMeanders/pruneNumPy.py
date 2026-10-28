@@ -117,26 +117,6 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int=0) -> int:
     -------
     totalBuckets : int
         The exact or estimated number of non-unique `arcCode` rows to allocate.
-
-    Notes
-    -----
-    TODO remake `getTotalBuckets` from scratch.
-
-    Factors:
-        - The starting quantity of `arcCode`.
-        - The value(s) of the starting `arcCode`.
-        - n
-        - parity of n
-        - boundary
-        - parity of boundary
-        - Whether this totalBuckets is increasing, as compared to all of the prior totalBuckets.
-        - If increasing, is it exponential or logarithmic?
-        - The maximum value.
-        - If decreasing, I don't really know the factors.
-        - If I know the actual value or if I must estimate it.
-        - Intentionally incomplete arcCode to total meanders dictionaries sometimes require more buckets. Crazy, but true.
-
-    Figure out an intelligent flow for so many factors.
     """
     totalBuckets: int = (355 * totalArcCodes + 99) // 100
     return max(totalBuckets, totalBucketsMaximumBy_boundary.get(state.boundary, totalBuckets))
@@ -203,7 +183,7 @@ def prune(state: StateMeanders) -> StateMeanders:
     --------
     `mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`
         Inspect the known diagonal formulas used to complete selected dictionary entries.
-    `pruneDataFrame`
+    `mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
         Prune an active table stored as a dataframe instead of a dictionary.
 
     Diagonal Selection
@@ -226,7 +206,6 @@ def prune(state: StateMeanders) -> StateMeanders:
         ```python
         state = prune(state)
         ```
-
     """
     boundary: int = state.boundary + 1
     次diagonal: int = 1

@@ -53,6 +53,7 @@ dependencies = [
   "platformdirs",
   "sympy",
   "tqdm",
+  "typing_extensions>=4.10.0",
   "urllib3",
 ]
 optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'"], development = [

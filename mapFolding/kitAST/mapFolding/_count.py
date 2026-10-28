@@ -24,11 +24,10 @@ from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import inlineFunctionDef
-from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule, LedgerOfImports
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, toDisk
+from mapFolding.kitAST import astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, toDisk
 from mapFolding.kitAST.dataclasses import removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass
-from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaLight
+from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaDefault
 from mapFolding.kitAST.paths import getLogicalPath
 from mapFolding.kitAST.theSSOT import default, defaultMapFolding
 from typing import TYPE_CHECKING
@@ -79,7 +78,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('inlineNumba') or 名CallableSource
 	名CallableDispatcherSource: str | None = override.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
-	parametersNumba: ParametersNumba = override.get('parametersNumba') or parametersNumbaLight
+	parametersNumba: ParametersNumba = override.get('parametersNumba', parametersNumbaDefault)
 
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
@@ -95,7 +94,9 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, **(override | {'parametersNumba': parametersNumba}))
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, parametersNumba=parametersNumba
+		, logicalPathNumba=override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
+		, 名CallableDecorator=override.get('名CallableDecorator', identifiers['function']['numbaDecorator']))
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
@@ -291,7 +292,7 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('theorem2Trimmed') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
 	名Callable: str = override.get('名Callable') or identifiers['function'].get('theorem2Numba') or 名CallableSource
 	名CallableDispatcherSource: str | None = override.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
-	parametersNumba: ParametersNumba = override.get('parametersNumba') or parametersNumbaLight
+	parametersNumba: ParametersNumba = override.get('parametersNumba', parametersNumbaDefault)
 
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
@@ -308,7 +309,9 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, **(override | {'parametersNumba': parametersNumba}))
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, parametersNumba=parametersNumba
+		, logicalPathNumba=override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
+		, 名CallableDecorator=override.get('名CallableDecorator', identifiers['function']['numbaDecorator']))
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 	ingredientsModule.removeImportFromModule('numpy')
@@ -454,7 +457,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	名CallableDispatcherSource: str = override.get('名CallableDispatcherSource') or identifiers['function']['dispatcher']
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function'].get('inlineParallelDispatcher') or 名CallableDispatcherSource
 	名Counting: str = override.get('名Counting') or identifiers['variable']['counting']
-	parametersNumba: ParametersNumba = override.get('parametersNumba') or parametersNumbaLight
+	parametersNumba: ParametersNumba = override.get('parametersNumba', parametersNumbaDefault)
 
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
@@ -488,7 +491,9 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 	ingredientsFunction.removeUnusedParameters()
 
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, **(override | {'parametersNumba': parametersNumba}))
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, parametersNumba=parametersNumba
+		, logicalPathNumba=override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
+		, 名CallableDecorator=override.get('名CallableDecorator', identifiers['function']['numbaDecorator']))
 
 #-START unpack/repack the dataclass function ------------------------------------------------
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)

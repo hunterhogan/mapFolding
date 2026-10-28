@@ -16,10 +16,9 @@ Functions
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
-from astToolkit.containers import LedgerOfImports
 from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis
+from mapFolding.kitAST import IfThis, LedgerOfImports
 from mapFolding.kitAST.paths import getModule, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
@@ -163,7 +162,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	del astFunctionDefDispatcher
 
 	imports = LedgerOfImports(astModule)
-	removeImports = NodeChanger(IfThis.isAnyOf(Be.ImportFrom, Be.Import), Then.removeIt)
+	removeImports: NodeChanger[ast.AST, None] = NodeChanger(IfThis.isAnyOf(Be.ImportFrom, Be.Import), Then.removeIt)
 	removeImports.visit(astModule)
 
 	astModuleAsynchronousAnnex: ast.Module = getModule(名ModuleAsynchronousAnnex, logicalPathAssembly, 名PackageSource)

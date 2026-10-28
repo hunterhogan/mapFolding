@@ -106,6 +106,25 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254
 	, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
 
+# TODO remake `getTotalBuckets` from scratch.
+
+# Factors:
+# 	[ ] Intentionally incomplete arcCode to total meanders dictionaries sometimes require more
+# 		buckets. Crazy, but true. Can `research/matrixMeanders/fixed_deficit_semimeanders.py` help
+# 		me find a formula for this?
+# 	- The starting quantity of `arcCode`.
+# 	- The value(s) of the starting `arcCode`.
+# 	- n
+# 	- parity of n
+# 	- boundary
+# 	- parity of boundary
+# 	- Whether this totalBuckets is increasing, as compared to all of the prior totalBuckets.
+# 	- If increasing, is it exponential or logarithmic?
+# 	- The maximum value.
+# 	- If decreasing, I don't really know the factors.
+# 	- If I know the actual value or if I must estimate it.
+
+# Figure out an intelligent flow for so many factors.
 def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	"""Estimate the output allocation length for one transfer-matrix step.
 
@@ -126,32 +145,11 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	-------
 	totalBuckets : int
 		The exact or estimated number of non-unique `arcCode` rows to allocate.
-
-	Notes
-	-----
-	TODO remake `getTotalBuckets` from scratch.
-
-	Factors:
-		- [ ] Intentionally incomplete arcCode to total meanders dictionaries sometimes require more
-			buckets. Crazy, but true. Can `research/matrixMeanders/fixed_deficit_semimeanders.py` help
-			me find a formula for this?
-		- The starting quantity of `arcCode`.
-		- The value(s) of the starting `arcCode`.
-		- n
-		- parity of n
-		- boundary
-		- parity of boundary
-		- Whether this totalBuckets is increasing, as compared to all of the prior totalBuckets.
-		- If increasing, is it exponential or logarithmic?
-		- The maximum value.
-		- If decreasing, I don't really know the factors.
-		- If I know the actual value or if I must estimate it.
-
-	Figure out an intelligent flow for so many factors.
 	"""
 	totalBuckets: int = (355 * totalArcCodes + 99) // 100
 	return max(totalBuckets, totalBucketsMaximumBy_boundary.get(state.boundary, totalBuckets))
 
+# SEMIOTICS
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	"""Prepare a semi-meander state for counting diagonal `次diagonal` at row `n`.
 
@@ -237,7 +235,6 @@ def prune(state: StateMeanders) -> StateMeanders:
 		```python
 		state = prune(state)
 		```
-
 	"""
 	boundary: int = state.boundary + 1
 

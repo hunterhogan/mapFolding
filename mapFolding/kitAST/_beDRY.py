@@ -28,9 +28,8 @@ from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding.kitAST import Settings形
+	from mapFolding.kitAST import IngredientsFunction, IngredientsModule, Settings形
 	from mapFolding.theTypes import Any, Default
 	from os import PathLike
 	from pathlib import PurePath

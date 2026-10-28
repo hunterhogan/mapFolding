@@ -346,29 +346,6 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCodeAnalysi
 
     return arrayAnalyzed, 次Stop
 
-# ruff: ignore[commented-out-code]
-# def consolidateAnalyzed(arrayAnalyzed: 形ArrayArcCode, 次Stop: int) -> tuple[形ArrayArcCode, int]:
-#     # PAINFULLY slow.
-#     indexAnalyzed: int = 0
-#     indexConsolidated: int = 0
-#     #Custom compaction avoids the full-size index arrays required by NumPy's `unique`.
-#     while indexAnalyzed < 次Stop:
-#         arcCode: int = arrayAnalyzed[indexAnalyzed, 次ArcCode]
-#         meanders: int = 0
-#         while indexAnalyzed < 次Stop and arrayAnalyzed[indexAnalyzed, 次ArcCode] == arcCode:
-#             meanders += arrayAnalyzed[indexAnalyzed, 次Meanders]
-#             indexAnalyzed += 1
-#         arrayAnalyzed[indexConsolidated, 次ArcCode] = arcCode
-#         arrayAnalyzed[indexConsolidated, 次Meanders] = meanders
-#         indexConsolidated += 1
-#     return arrayAnalyzed, indexConsolidated
-#         arrayAnalyzed, state.次Target = consolidateAnalyzed(arrayAnalyzed, state.次Target)
-#         shape = ShapeArray(length=state.次Target, indexes=indexesAnalyzed)
-#         arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
-#         del shape
-#         arrayMeanders[:] = arrayAnalyzed[0:state.次Target]
-
-
 def doTheNeedful(state: StateMeanders) -> StateMeanders:
     """Compute `meanders` with a transfer matrix algorithm implemented in NumPy.
 

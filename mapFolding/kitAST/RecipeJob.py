@@ -28,7 +28,7 @@ Launchers
 """
 from __future__ import annotations
 
-from astToolkit import Be, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.filesystem import parseLogicalPath2astModule
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import autoDecodingRLE
@@ -48,9 +48,9 @@ import dataclasses
 
 if TYPE_CHECKING:
 	from astToolkit import identifierDotAttribute
-	from astToolkit.containers import IngredientsFunction, IngredientsModule
 	from collections.abc import Callable
 	from mapFolding.dataBaskets import StateMapFoldingSymmetric
+	from mapFolding.kitAST import IngredientsFunction, IngredientsModule
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass
 	from mapFolding.theTypes import Default, 形TotalLeaves
 	from typing import Any, TypeIs
@@ -513,19 +513,20 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		[Make.Name('timeStart', Make.Store())]
 		, Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')))]
 
-	if override.get('useNumbaProgressBar', False):
+	if override.get('useNumbaProgressBar'):
 		名ProgressBar: str = override.get('名ProgressBar', identifiers['variable']['numbaProgressBar'])
 		identifierStatusUpdate: str = 'statusUpdate'
 		ingredientsModule.imports.addImportFrom_asStr('numba_progress', 'ProgressBar')
-		ingredientsFunction.astFunctionDef.args.args.append(
-			Make.arg(名ProgressBar, annotation=Make.Name('ProgressBar')))
+		NodeChanger(Be.arguments, Grab.argsAttribute(Then.replaceWith([
+			*ingredientsFunction.astFunctionDef.args.args, Make.arg(名ProgressBar, annotation=Make.Name('ProgressBar'))
+		]))).visit(ingredientsFunction.astFunctionDef.args)
 		NodeChanger(
 			findThis=Be.AugAssign.targetIs(IfThis.isNameIdentifier(raiseIfNone(job.shatteredDataclass).countingVariableName.id))
 			, doThat=Then.replaceWith(Make.Expr(Make.Call(
 				Make.Attribute(Make.Name(名ProgressBar), 'update'), [Make.Constant(2)])))
 		).visit(ingredientsFunction.astFunctionDef)
 		NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
-		ingredientsFunction.astFunctionDef.returns = Make.Constant(None)
+		NodeChanger(Be.FunctionDef, Grab.returnsAttribute(Then.replaceWith(Make.Constant(None)))).visit(ingredientsFunction.astFunctionDef)
 		boxOfLauncherBody.extend([
 			Make.With([Make.withitem(Make.Call(Make.Name('ProgressBar'), list_keyword=[
 				Make.keyword('total', Make.Constant(job.totalFoldsEstimated // job.totalFoldsMultiplier))
@@ -537,7 +538,8 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 	else:
 		NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Name(
 			raiseIfNone(job.shatteredDataclass).countingVariableName.id)))).visit(ingredientsFunction.astFunctionDef)
-		ingredientsFunction.astFunctionDef.returns = raiseIfNone(job.shatteredDataclass).countingVariableAnnotation
+		NodeChanger(Be.FunctionDef, Grab.returnsAttribute(Then.replaceWith(
+			raiseIfNone(job.shatteredDataclass).countingVariableAnnotation))).visit(ingredientsFunction.astFunctionDef)
 		boxOfLauncherBody.append(Make.Assign([Make.Name('totalFolds', Make.Store())]
 			, Make.Mult().join([Make.Call(Make.Name(job.identifierCallable))
 				, Make.Call(raiseIfNone(job.shatteredDataclass).countingVariableAnnotation, [Make.Constant(job.totalFoldsMultiplier)])

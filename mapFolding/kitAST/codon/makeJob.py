@@ -19,9 +19,9 @@ Variables
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, Then
-from astToolkit.containers import astModuleToIngredientsFunction, IngredientsFunction, IngredientsModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, setDatatypeViaImport, Settings形
+from mapFolding.kitAST import (
+	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, setDatatypeViaImport, Settings形)
 from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, replaceStaticScalars
 from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
 from pathlib import Path

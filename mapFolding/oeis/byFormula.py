@@ -14,8 +14,8 @@ def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A0
     """
     Compute A000136(n) as a function of A000560 or A001011 and A001010 or A223094 and A000682 or A223095, A077014, and A000682 or A227167 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136 is "Number of ways
-    of folding a strip of n labeled stamps." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136
+    is "Number of ways of folding a strip of n labeled stamps.".
 
     The domain of A000136 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 50.
@@ -30,9 +30,9 @@ def A000136(n: int, f: Literal['A000560', 'A001011 and A001010', 'A223094 and A0
     a(n) : int
         Number of ways of folding a strip of n labeled stamps.
 
-    References
-    ----------
-    [1] OEIS A000136.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A000136
     """
     if n in {1, 2}:
@@ -57,8 +57,8 @@ def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None = No
     """
     Compute A000560(n) as a function of A000136 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is "Number of
-    symmetric ways of folding a strip of n labeled stamps." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560
+    is "Number of symmetric ways of folding a strip of n labeled stamps.".
 
     The domain of A000560 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 49.
@@ -73,9 +73,9 @@ def A000560(n: int, f: Literal['A000136', 'A000682'] | LiteralString | None = No
     a(n) : int
         Number of symmetric ways of folding a strip of n labeled stamps.
 
-    References
-    ----------
-    [1] OEIS A000560.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A000560
     """
     match f:
@@ -89,8 +89,8 @@ def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301
     """
     Compute A000682(n) as a function of A000560 or A001010 or A223094 or A259689 or A301620 or A337581 or A077460, A005316, and A223093 or A223093 and A005316 or A223093 and A077014 or A000136, A077014, and A223095 or A223094 and A000682 or A259702 and A000682 or A333971 and A000682 or A334615 and A000682 or A060206 and A000560 or A000136.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682 is "Semi-meanders:
-    number of ways a semi-infinite directed curve can cross a straight line n times." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682
+    is "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times.".
 
     The domain of A000682 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 50.
@@ -105,9 +105,9 @@ def A000682(n: int, f: Literal['A000560', 'A001010', 'A223094', 'A259689', 'A301
     a(n) : int
         Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times.
 
-    References
-    ----------
-    [1] OEIS A000682.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A000682
     """
     if n in {1, 2}:
@@ -162,8 +162,8 @@ def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | L
     """
     Compute A001010(n) as a function of A001011 and A000682 or A007822 and A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is "Number of
-    symmetric foldings of a strip of n blank stamps." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010
+    is "Number of symmetric foldings of a strip of n blank stamps.".
 
     The domain of A001010 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 53.
@@ -178,9 +178,9 @@ def A001010(n: int, f: Literal['A001011 and A000682', 'A007822 and A000682'] | L
     a(n) : int
         Number of symmetric foldings of a strip of n blank stamps.
 
-    References
-    ----------
-    [1] OEIS A001010.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A001010
     """
     if n == 1:
@@ -200,8 +200,8 @@ def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None = N
     """
     Compute A001011(n) as a function of A001010 and A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001011 is "Number of ways
-    to fold a strip of n blank stamps." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001011
+    is "Number of ways to fold a strip of n blank stamps.".
 
     The domain of A001011 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 50.
@@ -216,9 +216,9 @@ def A001011(n: int, f: Literal['A001010 and A000682'] | LiteralString | None = N
     a(n) : int
         Number of ways to fold a strip of n blank stamps.
 
-    References
-    ----------
-    [1] OEIS A001011.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A001011
     """
     match f:
@@ -233,8 +233,8 @@ def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085
     """
     Compute A005315(n) as a function of A077460, A005316, and A060206 or A078591 or A085973 and A077054 or A208357 or A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005315 is "Closed meandric
-    numbers (or meanders): number of ways a loop can cross a road 2n times." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005315
+    is "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times.".
 
     The domain of A005315 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 29.
@@ -249,9 +249,9 @@ def A005315(n: int, f: Literal['A077460, A005316, and A060206', 'A078591', 'A085
     a(n) : int
         Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times.
 
-    References
-    ----------
-    [1] OEIS A005315.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A005315
     """
     if 0 <= n < 2:
@@ -277,8 +277,8 @@ def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A0053
     """
     Compute A005316(n) as a function of A077014 or A077054 and A005315 or A077460, A005315, and A060206 or A078592 and A005315 or A227167, A217310, and A217318 or A000682 and A223093.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316 is "Meandric
-    numbers: number of ways a river can cross a road n times." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316
+    is "Meandric numbers: number of ways a river can cross a road n times.".
 
     The domain of A005316 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 56.
@@ -293,9 +293,9 @@ def A005316(n: int, f: Literal['A077014', 'A077054 and A005315', 'A077460, A0053
     a(n) : int
         Meandric numbers: number of ways a river can cross a road n times.
 
-    References
-    ----------
-    [1] OEIS A005316.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A005316
     """
     if 0 <= n < 2:
@@ -329,8 +329,8 @@ def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
     """
     Compute A007822(n) as a function of A001010.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007822 is "Number of
-    symmetric foldings of 2n+1 stamps." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007822
+    is "Number of symmetric foldings of 2n+1 stamps.".
 
     The domain of A007822 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 27.
@@ -345,9 +345,9 @@ def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
     a(n) : int
         Number of symmetric foldings of 2n+1 stamps.
 
-    References
-    ----------
-    [1] OEIS A007822.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A007822
     """
     match f:
@@ -362,8 +362,8 @@ def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | Lit
     """
     Compute A060206(n) as a function of A077460, A005315, and A005316 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206 is "Number of
-    rotationally symmetric closed meanders of length 4n+2." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206
+    is "Number of rotationally symmetric closed meanders of length 4n+2.".
 
     The domain of A060206 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 25.
@@ -378,9 +378,9 @@ def A060206(n: int, f: Literal['A077460, A005315, and A005316', 'A000682'] | Lit
     a(n) : int
         Number of rotationally symmetric closed meanders of length 4n+2.
 
-    References
-    ----------
-    [1] OEIS A060206.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A060206
     """
     match f:
@@ -397,9 +397,8 @@ def A077014(n: int, f: Literal['A000682 and A223093', 'A223095 and A000682', 'A0
     """
     Compute A077014(n) as a function of A000682 and A223093 or A223095 and A000682 or A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077014 is "Number of ways
-    that a directed line (or river) that starts in the south can cross an east-west road n times."
-    [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077014
+    is "Number of ways that a directed line (or river) that starts in the south can cross an east-west road n times.".
 
     The domain of A077014 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 56.
@@ -414,9 +413,9 @@ def A077014(n: int, f: Literal['A000682 and A223093', 'A223095 and A000682', 'A0
     a(n) : int
         Number of ways that a directed line (or river) that starts in the south can cross an east-west road n times.
 
-    References
-    ----------
-    [1] OEIS A077014.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A077014
     """
     if n == 0:
@@ -438,8 +437,8 @@ def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString
     """
     Compute A077054(n) as a function of A085973 and A005315 or A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077054 is "Number of ways a
-    river can cross a road 2n times." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077054
+    is "Number of ways a river can cross a road 2n times.".
 
     The domain of A077054 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 28.
@@ -454,9 +453,9 @@ def A077054(n: int, f: Literal['A085973 and A005315', 'A005316'] | LiteralString
     a(n) : int
         Number of ways a river can cross a road 2n times.
 
-    References
-    ----------
-    [1] OEIS A077054.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A077054
     """
     if n == 0:
@@ -473,9 +472,8 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A00
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206 or A000682 and A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is "Number of closed
-    meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation."
-    [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460
+    is "Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.".
 
     The domain of A077460 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 29.
@@ -490,9 +488,9 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206', 'A000682 and A00
     a(n) : int
         Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.
 
-    References
-    ----------
-    [1] OEIS A077460.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A077460
     """
     if 0 <= n < 2:
@@ -515,8 +513,8 @@ def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None = No
     """
     Compute A078591(n) as a function of A005316 or A005315.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078591 is "Number of
-    nonisomorphic ways a loop can cross a road (running East-West) 2n times." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078591
+    is "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.".
 
     The domain of A078591 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 29.
@@ -531,9 +529,9 @@ def A078591(n: int, f: Literal['A005316', 'A005315'] | LiteralString | None = No
     a(n) : int
         Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.
 
-    References
-    ----------
-    [1] OEIS A078591.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A078591
     """
     if 0 <= n < 2:
@@ -550,9 +548,8 @@ def A078592(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
     """
     Compute A078592(n) as a function of A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078592 is "Call two
-    meanders from A005316 with 2n crossings equivalent if they differ by reflections in the X or Y
-    axes. Sequence gives number of inequivalent meanders." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078592
+    is "Call two meanders from A005316 with 2n crossings equivalent if they differ by reflections in the X or Y axes. Sequence gives number of inequivalent meanders.".
 
     The domain of A078592 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 28.
@@ -567,9 +564,9 @@ def A078592(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
     a(n) : int
         Call two meanders from A005316 with 2n crossings equivalent if they differ by reflections in the X or Y axes. Sequence gives number of inequivalent meanders.
 
-    References
-    ----------
-    [1] OEIS A078592.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A078592
     """
     match f:
@@ -584,8 +581,8 @@ def A085973(n: int, f: Literal['A077054 and A005315', 'A005316'] | LiteralString
     """
     Compute A085973(n) as a function of A077054 and A005315 or A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A085973 is "Number of ways a
-    loop can cross two parallel roads 2n times." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A085973
+    is "Number of ways a loop can cross two parallel roads 2n times.".
 
     The domain of A085973 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 28.
@@ -600,9 +597,9 @@ def A085973(n: int, f: Literal['A077054 and A005315', 'A005316'] | LiteralString
     a(n) : int
         Number of ways a loop can cross two parallel roads 2n times.
 
-    References
-    ----------
-    [1] OEIS A085973.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A085973
     """
     if n == 0:
@@ -619,8 +616,8 @@ def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None = No
     """
     Compute A208357(n) as a function of A005315 or A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A208357 is "Number of
-    meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A208357
+    is "Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut.".
 
     The domain of A208357 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 28.
@@ -635,9 +632,9 @@ def A208357(n: int, f: Literal['A005315', 'A005316'] | LiteralString | None = No
     a(n) : int
         Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut.
 
-    References
-    ----------
-    [1] OEIS A208357.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A208357
     """
     match f:
@@ -651,8 +648,8 @@ def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000
     """
     Compute A217310(n) as a function of A223093 or A227167, A217318, and A005316 or A000682 and A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310 is "The number of
-    meandering curves of order n with only one extremity covered by their arcs." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310
+    is "The number of meandering curves of order n with only one extremity covered by their arcs.".
 
     The domain of A217310 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 49.
@@ -667,9 +664,9 @@ def A217310(n: int, f: Literal['A223093', 'A227167, A217318, and A005316', 'A000
     a(n) : int
         The number of meandering curves of order n with only one extremity covered by their arcs.
 
-    References
-    ----------
-    [1] OEIS A217310.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A217310
     """
     match f:
@@ -685,8 +682,8 @@ def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005
     """
     Compute A217318(n) as a function of A223095 or A227167, A217310, and A005316 or A005316 and A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318 is "The number of
-    meandering curves of order n with both extremities covered by their arcs." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318
+    is "The number of meandering curves of order n with both extremities covered by their arcs.".
 
     The domain of A217318 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 49.
@@ -701,9 +698,9 @@ def A217318(n: int, f: Literal['A223095', 'A227167, A217310, and A005316', 'A005
     a(n) : int
         The number of meandering curves of order n with both extremities covered by their arcs.
 
-    References
-    ----------
-    [1] OEIS A217318.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A217318
     """
     match f:
@@ -719,9 +716,8 @@ def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A0
     """
     Compute A223093(n) as a function of A217310 or A223094 and A223095 or A000682 and A077014 or A000682 and A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093 is "Number of
-    foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards
-    and leaf n inwards)." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093
+    is "Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards).".
 
     The domain of A223093 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 49.
@@ -736,9 +732,9 @@ def A223093(n: int, f: Literal['A217310', 'A223094 and A223095', 'A000682 and A0
     a(n) : int
         Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards).
 
-    References
-    ----------
-    [1] OEIS A223093.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A223093
     """
     match f:
@@ -756,8 +752,8 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A0
     """
     Compute A223094(n) as a function of A223094 and A000682 or A223093 and A223095 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is "Number of
-    foldings of n labeled stamps in which leaf n is inwards." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094
+    is "Number of foldings of n labeled stamps in which leaf n is inwards.".
 
     The domain of A223094 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 49.
@@ -772,9 +768,9 @@ def A223094(n: int, f: Literal['A223094 and A000682', 'A223093 and A223095', 'A0
     a(n) : int
         Number of foldings of n labeled stamps in which leaf n is inwards.
 
-    References
-    ----------
-    [1] OEIS A223094.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A223094
     """
     match f:
@@ -794,8 +790,8 @@ def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A
     """
     Compute A223095(n) as a function of A077014, and A000682 or A223094 and A223093 or A217318 or A000682 and A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095 is "Number of
-    foldings of n labeled stamps in which both end leaves are inwards." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095
+    is "Number of foldings of n labeled stamps in which both end leaves are inwards.".
 
     The domain of A223095 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 49.
@@ -810,9 +806,9 @@ def A223095(n: int, f: Literal['A077014, and A000682', 'A223094 and A223093', 'A
     a(n) : int
         Number of foldings of n labeled stamps in which both end leaves are inwards.
 
-    References
-    ----------
-    [1] OEIS A223095.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A223095
     """
     match f:
@@ -830,8 +826,8 @@ def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | Lit
     """
     Compute A227167(n) as a function of A217310, A217318, and A005316 or A000136.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A227167 is "The number of
-    meandering curves of order n." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A227167
+    is "The number of meandering curves of order n.".
 
     The domain of A227167 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 50.
@@ -846,9 +842,9 @@ def A227167(n: int, f: Literal['A217310, A217318, and A005316', 'A000136'] | Lit
     a(n) : int
         The number of meandering curves of order n.
 
-    References
-    ----------
-    [1] OEIS A227167.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A227167
     """
     match f:
@@ -862,10 +858,8 @@ def A259689(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A259689(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259689 is "Irregular
-    triangle read by rows: T(n,k) is the number of degree-n permutations without overlaps which
-    furnish k new permutations without overlaps upon the addition of an (n+1)st element, 2 <= k <= 1 +
-    floor(n/2)." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259689
+    is "Irregular triangle read by rows: T(n,k) is the number of degree-n permutations without overlaps which furnish k new permutations without overlaps upon the addition of an (n+1)st element, 2 <= k <= 1 + floor(n/2).".
 
     The domain of A259689 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 171.
@@ -880,9 +874,9 @@ def A259689(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     a(n) : int
         Irregular triangle read by rows: T(n,k) is the number of degree-n permutations without overlaps which furnish k new permutations without overlaps upon the addition of an (n+1)st element, 2 <= k <= 1 + floor(n/2).
 
-    References
-    ----------
-    [1] OEIS A259689.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A259689
     """
     nFlattenedZeroBased: int = n - 2
@@ -908,8 +902,8 @@ def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None = No
     """
     Compute A259702(n) as a function of A301620 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702 is "Row sums of
-    A259701 except first column." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702
+    is "Row sums of A259701 except first column.".
 
     The domain of A259702 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 50.
@@ -924,9 +918,9 @@ def A259702(n: int, f: Literal['A301620', 'A000682'] | LiteralString | None = No
     a(n) : int
         Row sums of A259701 except first column.
 
-    References
-    ----------
-    [1] OEIS A259702.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A259702
     """
     if n == 2:
@@ -943,9 +937,8 @@ def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259
     """
     Compute A301620(n) as a function of A334615, A301620, and A000682 or A259689 or A259702 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620 is "a(n) is the
-    total number of top arches with exactly one covering arch for semi-meanders with n top arches."
-    [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620
+    is "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches.".
 
     The domain of A301620 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 48.
@@ -960,9 +953,9 @@ def A301620(n: int, f: Literal['A334615, A301620, and A000682', 'A259689', 'A259
     a(n) : int
         a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches.
 
-    References
-    ----------
-    [1] OEIS A301620.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A301620
     """
     match f:
@@ -983,9 +976,8 @@ def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A333971(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A333971 is "a(n) is the
-    number of semi-meanders with n top arches that have at least one arch with length 1 adjacent to
-    the center of the top arch configuration or at either end of the arch configuration." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A333971
+    is "a(n) is the number of semi-meanders with n top arches that have at least one arch with length 1 adjacent to the center of the top arch configuration or at either end of the arch configuration.".
 
     The domain of A333971 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 51.
@@ -1000,9 +992,9 @@ def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     a(n) : int
         a(n) is the number of semi-meanders with n top arches that have at least one arch with length 1 adjacent to the center of the top arch configuration or at either end of the arch configuration.
 
-    References
-    ----------
-    [1] OEIS A333971.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A333971
     """
     match f:
@@ -1017,9 +1009,8 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
     """
     Compute A334615(n) as a function of A000560 or A001010 or A259702 or A337581 or A227167 or A223094 or A301620 or A005316 and A223093 or A005316 and A217310 or A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A334615 is "a(n) is the
-    number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch
-    configuration and no arch of length 1 adjacent to the center of the top arch configuration." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A334615
+    is "a(n) is the number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch configuration and no arch of length 1 adjacent to the center of the top arch configuration.".
 
     The domain of A334615 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 50.
@@ -1034,9 +1025,9 @@ def A334615(n: int, f: Literal['A000560', 'A001010', 'A259702', 'A337581', 'A227
     a(n) : int
         a(n) is the number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch configuration and no arch of length 1 adjacent to the center of the top arch configuration.
 
-    References
-    ----------
-    [1] OEIS A334615.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A334615
     """
     match f:
@@ -1101,10 +1092,8 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A337581(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A337581 is "a(n) is the
-    number of semi-meanders with n top arches that have both an arch of length 1 adjacent to the
-    center of the top arch configuration and an arch of length 1 starting or ending the top arch
-    configuration." [1].
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A337581
+    is "a(n) is the number of semi-meanders with n top arches that have both an arch of length 1 adjacent to the center of the top arch configuration and an arch of length 1 starting or ending the top arch configuration.".
 
     The domain of A337581 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is 52.
@@ -1119,9 +1108,9 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     a(n) : int
         a(n) is the number of semi-meanders with n top arches that have both an arch of length 1 adjacent to the center of the top arch configuration and an arch of length 1 starting or ending the top arch configuration.
 
-    References
-    ----------
-    [1] OEIS A337581.
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
         https://oeis.org/A337581
     """
     match f:

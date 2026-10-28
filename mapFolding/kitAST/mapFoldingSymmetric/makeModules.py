@@ -17,10 +17,9 @@ from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractFunctionDef
-from astToolkit.containers import LedgerOfImports
 from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis
+from mapFolding.kitAST import IfThis, LedgerOfImports
 from mapFolding.kitAST.mapFolding._count import makeTheorem2, makeTheorem2Numba, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
