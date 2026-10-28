@@ -284,12 +284,9 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
     Returns
     -------
     container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-        File-backed array created by `mapFolding.dataStructures.make_memmap` [1]. Existing
+        File-backed array created by `mapFolding.dataStructures.make_memmap`. Existing
         storage with the same filename is replaced.
 
-    References
-    ----------
-    [1] `mapFolding.dataStructures.make_memmap`
     """
     return make_memmap(shape, datatype, raiseIfNone(name))
 
@@ -319,23 +316,17 @@ def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCodeAnalysi
     Returns
     -------
     arrayAnalyzed : 形ArrayArcCode
-        Updated output buffer, extended with `mapFolding.dataStructures.extendArray` [1]
+        Updated output buffer, extended with `mapFolding.dataStructures.extendArray`
         when the retained records exceed the current allocation.
     次Stop : int
         Position immediately after the last written output record.
 
     Record Selection
     ----------------
-    After disallowed codes are zeroed, `numpy.flatnonzero` [2] selects all remaining nonzero
+    After disallowed codes are zeroed, `numpy.flatnonzero` selects all remaining nonzero
     codes. Zero codes are omitted. Each selected code and its source count are copied to
     consecutive output records without aggregation.
 
-    References
-    ----------
-    [1] `mapFolding.dataStructures.extendArray`
-
-    [2] NumPy `numpy.flatnonzero`.
-        https://numpy.org/doc/stable/reference/generated/numpy.flatnonzero.html
     """
     selectorOverLimit: 形ArrayBoolean1D = arcCodeMaximum < arcCodeAnalysis
     arcCodeAnalysis[selectorOverLimit] = 0

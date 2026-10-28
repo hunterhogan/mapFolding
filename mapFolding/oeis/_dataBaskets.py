@@ -12,7 +12,7 @@ class MetadataOEISid(TypedDict):
 	(AI generated docstring)
 
 	You can use this dictionary schema to inspect the metadata returned by
-	`mapFolding.oeis.getMetadata` [1]. The schema uses `typing.TypedDict` [2] to describe fields;
+	`mapFolding.oeis.getMetadata`. The schema uses `typing.TypedDict` to describe fields;
 	instances remain ordinary dictionaries without runtime field validation.
 
 	Attributes
@@ -30,13 +30,6 @@ class MetadataOEISid(TypedDict):
 		Optional callable that maps a row number to the expected complete row length.
 	rowStart : NotRequired[int]
 		Optional first row number. Triangle utilities use `offset` when this field is absent.
-
-	References
-	----------
-	[1] `mapFolding.oeis.getMetadata`
-
-	[2] typing.TypedDict - Python standard library.
-		https://docs.python.org/3/library/typing.html#typing.TypedDict
 	"""
 
 	description: str
@@ -46,7 +39,7 @@ class MetadataOEISid(TypedDict):
 	valuesKnown: dict[int, int]
 	"""Dictionary of sequence indices, 'n', to their known values, `totalFolds`."""
 	valueUnknown: int
-	"""The smallest value of 'n' for for which `totalFolds` is unknown."""
+	"""One greater than the largest stored sequence index; gaps below this index remain possible."""
 
 	rowLength: NotRequired[Callable[[int], int]]
 	"""Obtain the expected complete row length from a row number.

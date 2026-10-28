@@ -29,7 +29,7 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	(AI generated docstring)
 
 	You can use this function to transform the module at `pathFilenameSource` into a sibling lookup
-	module. The generated lookup functions use `mapFolding.oeis.getValuesKnown` [1].
+	module. The generated lookup functions use `mapFolding.oeis.getValuesKnown`.
 
 	Function Transformation
 	-----------------------
@@ -50,17 +50,11 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 
 	Examples
 	--------
-	The module `easyRun.synthesizeModules` uses this call [2].
+	The module `easyRun.synthesizeModules` uses this call.
 
 		```python
 		makeOEISidByFormulaLookup(pathFilenameSource)
 		```
-
-	References
-	----------
-	[1] `mapFolding.oeis.getValuesKnown`
-
-	[2] `easyRun.synthesizeModules`
 	"""
 	pathFilenameWrite: Path = pathFilenameSource.with_stem('_' + pathFilenameSource.stem + 'Lookup')
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource, optimize=2)

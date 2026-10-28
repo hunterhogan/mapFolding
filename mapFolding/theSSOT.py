@@ -26,7 +26,7 @@ class mapFoldingPackageSettings(PackageSettings):
 
 	(AI generated docstring)
 
-	You can use this class to extend `hunterMakesPy.PackageSettings` [1] with settings required by
+	You can use this class to extend `hunterMakesPy.PackageSettings` with settings required by
 	folding computations. Construction resolves package metadata through the inherited initializer
 	and derives the bundled sample-data directory.
 
@@ -56,10 +56,6 @@ class mapFoldingPackageSettings(PackageSettings):
 		settingsPackage = mapFoldingPackageSettings('mapFolding')
 		```
 
-	References
-	----------
-	[1] hunterMakesPy `PackageSettings`.
-		https://context7.com/hunterhogan/huntermakespy
 	"""
 
 	concurrencyPackage: str = 'multiprocessing'

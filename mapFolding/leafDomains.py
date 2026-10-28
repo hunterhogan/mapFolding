@@ -154,7 +154,7 @@ def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	(AI generated docstring)
 
 	You can use the map shape in `state` to locate possible piles for `leaf`. You receive a restricted
-	domain from the cached shape-based calculation [1] for supported maps whose dimension lengths
+	domain from the cached shape-based calculation for supported maps whose dimension lengths
 	are all two, or every pile index for other shapes.
 
 	Parameters
@@ -173,10 +173,6 @@ def getDomainLeaf(state: StateElimination, leaf: Leaf) -> range:
 	--------
 	`getLookupDomainsLeaves`
 		Compute the possible range for every leaf.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains._getDomainLeaf`
 	"""
 	return _getDomainLeaf(leaf, state.totalDimensions, state.mapShape, state.totalLeaves)
 
@@ -201,23 +197,22 @@ def getDomainDimension一(state: StateElimination) -> tuple[tuple[int, int, int,
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain一零: tuple[int, ...] = tuple(getDomainLeaf(state, 一 + 零))
 	domain首一: tuple[int, ...] = tuple(getDomainLeaf(state, 首一(state.totalDimensions)))
@@ -277,23 +272,22 @@ def getDomainDimension二(state: StateElimination) -> tuple[tuple[int, int, int,
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(二 + 一, 二 + 一 + 零, 二 + 零, 二)
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain二零and二: tuple[tuple[int, int], ...] = getDomain二零and二(state)
 	domain二一零and二一: tuple[tuple[int, int], ...] = getDomain二一零and二一(state)
@@ -420,23 +414,22 @@ def getDomainDimension首二(state: StateElimination) -> tuple[tuple[int, int, i
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain首零二and首二: tuple[tuple[int, int], ...] = getDomain首零二and首二(state)
 	domain首零一二and首一二: tuple[tuple[int, int], ...] = getDomain首零一二and首一二(state)
@@ -540,23 +533,22 @@ def getDomain二零and二(state: StateElimination) -> tuple[tuple[int, int], ...
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(二 + 零, 二)
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain二零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 零))
 	domain二: tuple[int, ...] = tuple(getDomainLeaf(state, 二))
@@ -584,23 +576,22 @@ def getDomain二一零and二一(state: StateElimination) -> tuple[tuple[int, int
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(二 + 一 + 零, 二 + 一)
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain二一零: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一 + 零))
 	domain二一: tuple[int, ...] = tuple(getDomainLeaf(state, 二 + 一))
@@ -752,23 +743,22 @@ def getDomain首零二and首二(state: StateElimination) -> tuple[tuple[int, int
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(首零二(state.totalDimensions), 首二(state.totalDimensions))
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain首零二: tuple[int, ...] = tuple(getDomainLeaf(state, 首零二(state.totalDimensions)))
 	domain首二: tuple[int, ...] = tuple(getDomainLeaf(state, 首二(state.totalDimensions)))
@@ -871,23 +861,22 @@ def getDomain首零一二and首一二(state: StateElimination) -> tuple[tuple[in
 		Possible pile assignments in the leaf order described below. Each assignment
 		contains a pile index for each selected leaf.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the selected leaves.
+
 	Leaf Order
 	----------
-	The positional-numeral system [1] identifies the leaves
+	The positional-numeral system identifies the leaves
 	in the following order.
 
 		```python
 		(首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 		```
 
-	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf` [2]. Check the
+	You obtain individual pile ranges from `mapFolding.leafDomains.getDomainLeaf`. Check the
 	combined assignments against other folding constraints.
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	domain首零一二: tuple[int, ...] = tuple(getDomainLeaf(state, 首零一二(state.totalDimensions)))
 	domain首一二: tuple[int, ...] = tuple(getDomainLeaf(state, 首一二(state.totalDimensions)))
@@ -1012,17 +1001,16 @@ def getDomainLeaf首零Plus零(state: StateElimination, leaf: Leaf | None = None
 		Possible pile indices, with conditional exclusions when both reference leaves are
 		pinned. You leave `state` unchanged.
 
+	See Also
+	--------
+	`getDomainLeaf`
+		Obtain the shape-based domain without restrictions from pinned neighbors.
+
 	Reference Leaves
 	----------------
 	The default leaf is `零 + 首零(state.totalDimensions)`.
 	The reference leaves are `一 + 零` and `首零一(state.totalDimensions)`, using the coordinate
-	vocabulary [1]. The initial domain comes from `mapFolding.leafDomains.getDomainLeaf` [2].
-
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.leafDomains.getDomainLeaf`
+	vocabulary. The initial domain comes from `mapFolding.leafDomains.getDomainLeaf`.
 	"""
 	if leaf is None:
 		leaf = (零) + 首零(state.totalDimensions)

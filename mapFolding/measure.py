@@ -4,7 +4,7 @@
 
 You can locate digits with value `1`, count digits with value `1`, and project or invert leaf
 values. The positional-numeral system lives in
-`mapFolding._semiotics` [1].
+`mapFolding._semiotics`.
 
 Contents
 --------
@@ -30,9 +30,10 @@ Functions
 	工totalDimensionsTail
 		Measure trailing set bits in `integerNonnegative` within the map width.
 
-References
-----------
-[1] `mapFolding._semiotics`
+See Also
+--------
+`mapFolding._semiotics`
+	Inspect the positional-numeral system and its coordinate symbols.
 """
 from __future__ import annotations
 
@@ -69,16 +70,9 @@ def 工totalDimensionsTail(state: StateElimination, integerNonnegative: int) -> 
 
 	Bit Scan
 	--------
-	You invert the map-width bits with `invertLeafIn2上nDimensions` [1], scan the result with
-	`gmpy2.bit_scan1` [2], and replace `None` with `0`. You preserve bits above the map width during
+	You invert the map-width bits with `invertLeafIn2上nDimensions`, scan the result with
+	`gmpy2.bit_scan1`, and replace `None` with `0`. You preserve bits above the map width during
 	inversion.
-
-	References
-	----------
-	[1] `invertLeafIn2上nDimensions`
-
-	[2] gmpy2 integer operations.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return bit_scan1(invertLeafIn2上nDimensions(state.totalDimensions, integerNonnegative)) or 0
 
@@ -90,7 +84,7 @@ def 工dimension首零(integerNonnegative: int, /) -> int:
 
 	You can inspect the dimension index of the most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the positional-numeral system [1].
+	The head convention is defined in the positional-numeral system.
 
 	Parameters
 	----------
@@ -102,9 +96,10 @@ def 工dimension首零(integerNonnegative: int, /) -> int:
 	dimensionIndexNearest首 : int
 		Zero-based position of the most significant set bit. The input `0` returns `0`.
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional-numeral system and its head-relative symbols.
 	"""
 	return max(0, integerNonnegative.bit_length() - 1)
 
@@ -116,7 +111,7 @@ def 工dimension首一(integerNonnegative: int, /) -> int | None:
 
 	You can inspect the dimension index of the second most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the positional-numeral system [1].
+	The head convention is defined in the positional-numeral system.
 
 	Parameters
 	----------
@@ -129,9 +124,10 @@ def 工dimension首一(integerNonnegative: int, /) -> int | None:
 		Zero-based position of the second most significant set bit. A positive input
 		with fewer than two set bits returns `None`. The input `0` returns `0`.
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional-numeral system and its head-relative symbols.
 	"""
 	anotherInteger: int = int(bit_flip(integerNonnegative, 工dimension首零(integerNonnegative)))
 	if anotherInteger == 0:
@@ -148,7 +144,7 @@ def 工dimension首二(integerNonnegative: int, /) -> int | None:
 
 	You can inspect the dimension index of the third most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the positional-numeral system [1].
+	The head convention is defined in the positional-numeral system.
 
 	Parameters
 	----------
@@ -161,9 +157,10 @@ def 工dimension首二(integerNonnegative: int, /) -> int | None:
 		Zero-based position of the third most significant set bit. An input with
 		fewer than three set bits returns `None`.
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional-numeral system and its head-relative symbols.
 	"""
 	dimensionNearest: int = 工dimension首零(integerNonnegative)
 	dimensionSecondNearest: int | None = 工dimension首一(integerNonnegative)
@@ -186,7 +183,7 @@ def 工dimension首三(integerNonnegative: int, /) -> int | None:
 
 	You can inspect the dimension index of the fourth most significant set bit in
 	`integerNonnegative`. Dimension indices count from zero at the least significant end.
-	The head convention is defined in the positional-numeral system [1].
+	The head convention is defined in the positional-numeral system.
 
 	Parameters
 	----------
@@ -199,9 +196,10 @@ def 工dimension首三(integerNonnegative: int, /) -> int | None:
 		Zero-based position of the fourth most significant set bit. An input with
 		fewer than four set bits returns `None`.
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional-numeral system and its head-relative symbols.
 	"""
 	dimensionNearest: int = 工dimension首零(integerNonnegative)
 	dimensionSecondNearest: int | None = 工dimension首一(integerNonnegative)
@@ -241,7 +239,7 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 
 	Remainder Calculation
 	---------------------
-	You use the index returned by `工dimension首零` [1] as the exponent in `gmpy2.f_mod_2exp` [2].
+	You use the index returned by `工dimension首零` as the exponent in `gmpy2.f_mod_2exp`.
 
 	Examples
 	--------
@@ -251,12 +249,6 @@ def leafInSubHyperplane(notLeafOrigin: int, /) -> int:
 		boxOfRemoveLeaves.extend([leafInSubHyperplane(leafAt二Ante首)])
 		```
 
-	References
-	----------
-	[1] `工dimension首零`
-
-	[2] gmpy2 integer operations.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return int(f_mod_2exp(notLeafOrigin, 工dimension首零(notLeafOrigin)))
 
@@ -281,12 +273,7 @@ def 工dimensionTail(integerNonnegative: int, /) -> int:
 
 	Bit Scan
 	--------
-	You scan the input with `gmpy2.bit_scan1` [1] and receive `0` when the scan returns `None`.
-
-	References
-	----------
-	[1] gmpy2 integer operations.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
+	You scan the input with `gmpy2.bit_scan1` and receive `0` when the scan returns `None`.
 	"""
 	return bit_scan1(integerNonnegative) or 0
 
@@ -334,13 +321,8 @@ def invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int) -
 
 	Inversion Mask
 	--------------
-	You apply XOR with the all-set mask returned by `gmpy2.bit_mask` [1], preserving input bits above the
+	You apply XOR with the all-set mask returned by `gmpy2.bit_mask`, preserving input bits above the
 	mask width.
-
-	References
-	----------
-	[1] gmpy2 integer operations.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return int(integerNonnegative ^ bit_mask(totalDimensions))
 
@@ -366,7 +348,7 @@ def ptount(integerAbove3: int, /) -> int:
 
 	Coordinate Projection
 	---------------------
-	The projection uses `leafInSubHyperplane` [1]
+	The projection uses `leafInSubHyperplane`
 	on the value after subtraction.
 
 	Examples
@@ -377,8 +359,5 @@ def ptount(integerAbove3: int, /) -> int:
 		boxOfCreaseIndicesExcluded.extend([*range(工dimension首零(leafAt一零), 5), ptount(leafAt一零)])
 		```
 
-	References
-	----------
-	[1] `leafInSubHyperplane`
 	"""
 	return leafInSubHyperplane(integerAbove3 - (一 + 零)).bit_count()

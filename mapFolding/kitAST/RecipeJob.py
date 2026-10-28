@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this module to create recipes, embed state values, and append counting launchers
-to source containers from `astToolkit` [1].
+to source containers from `astToolkit`.
 
 Contents
 --------
@@ -25,11 +25,6 @@ Bulk Changes
 Launchers
 	addLauncher
 		Append a standalone counting launcher and result-file writer.
-
-References
-----------
-[1] astToolkit tree visitors and source containers.
-	https://context7.com/hunterhogan/asttoolkit
 """
 from __future__ import annotations
 
@@ -57,8 +52,7 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from mapFolding.dataBaskets import StateMapFoldingSymmetric
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass
-	from mapFolding.kitAST.numba.kitNumba import SpicesJobNumba
-	from mapFolding.theTypes import 形TotalLeaves
+	from mapFolding.theTypes import Default, 形TotalLeaves
 	from typing import Any, TypeIs
 
 @dataclasses.dataclass(slots=True)
@@ -71,7 +65,7 @@ class RecipeJobTheorem2:
 	and identifiers into job generation. Construction fills missing result and module filenames,
 	decomposes the target dataclass when enough identifiers are supplied, and loads the default
 	source module when `source_astModule` is `None`.
-	`fromMapShape` creates a recipe from dimensions [1].
+	`fromMapShape` creates a recipe from dimensions.
 
 	Attributes
 	----------
@@ -122,9 +116,10 @@ class RecipeJobTheorem2:
 	initializationConstructor : bool = True
 		Whether embedded scalar values retain their datatype constructor.
 
-	References
-	----------
-	[1] `fromMapShape`
+	See Also
+	--------
+	`fromMapShape`
+		Create a recipe from map dimensions with initialized computation state.
 	"""
 
 	state: StateMapFolding | StateMapFoldingSymmetric
@@ -193,7 +188,7 @@ class RecipeJobTheorem2:
 
 		(AI generated docstring)
 
-		This method builds a path using `mapFolding.kitAST.paths.getPathFilename` [1]. Falsy explicit
+		This method builds a path using `mapFolding.kitAST.paths.getPathFilename`. Falsy explicit
 		components fall back to recipe values. The root falls back to the current working directory
 		when `self.pathPackage` is also falsy.
 
@@ -212,10 +207,6 @@ class RecipeJobTheorem2:
 		-------
 		pathFilename : PurePosixPath
 			Resolved output path expressed with POSIX path syntax.
-
-		References
-		----------
-		[1] `mapFolding.kitAST.paths.getPathFilename`
 		"""
 		pathRoot = pathRoot or self.pathPackage or PurePosixPath(Path.cwd())
 		identifierModule = filenameStem or raiseIfNone(self.identifierModule)
@@ -248,20 +239,11 @@ class RecipeJobTheorem2:
 		(AI generated docstring)
 
 		This method derives a result filename from `self.state.mapShape` with
-		`mapFolding.kitFilesystem.makePathFilenameFolds` [1]. Missing module identifiers use the
+		`mapFolding.kitFilesystem.makePathFilenameFolds`. Missing module identifiers use the
 		result
 		filename stem. Missing field metadata uses `mapFolding.kitAST.dataclasses.shatterDataclass`
-		[2]
 		when the target identifiers are truthy. Missing source syntax loads the generated
-		`mapFolding.synthesized.theorem2Numba` module [3].
-
-		References
-		----------
-		[1] `mapFolding.kitFilesystem.makePathFilenameFolds`
-
-		[2] `mapFolding.kitAST.dataclasses.shatterDataclass`
-
-		[3] `mapFolding.synthesized.theorem2Numba`
+		`mapFolding.synthesized.theorem2Numba` module.
 		"""
 		pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(self.state.mapShape))
 
@@ -282,14 +264,14 @@ def fromMapShape(mapShape: tuple[形TotalLeaves, ...], **keywordArguments: Any) 
 
 	(AI generated docstring)
 
-	You can use this function to prepare a `RecipeJobTheorem2` [1] for a specific map shape.
+	You can use this function to prepare a `RecipeJobTheorem2` for a specific map shape.
 	The function advances the state to grouped counting, selects a known fold total or an estimate,
 	and sets job paths. The returned recipe supplies configuration to the job generators.
 
 	Count Estimate
 	--------------
-	The estimate uses `mapFolding.oeis.getTotalFoldsKnown` [2], then
-	`mapFolding.kitAST.theSSOT.lookupMapFoldingEstimates` [3], then zero.
+	The estimate uses `mapFolding.oeis.getTotalFoldsKnown`, then
+	`mapFolding.kitAST.theSSOT.lookupMapFoldingEstimates`, then zero.
 	The total-fold multiplier is the initialized state leaf count.
 
 	Parameters
@@ -306,21 +288,11 @@ def fromMapShape(mapShape: tuple[形TotalLeaves, ...], **keywordArguments: Any) 
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [4].
+	The module `mapFolding.kitAST.codon.makeJob` uses this call.
 
 		```python
 		fromMapShape(mapShape)
 		```
-
-	References
-	----------
-	[1] `RecipeJobTheorem2`
-
-	[2] `mapFolding.oeis.getTotalFoldsKnown`
-
-	[3] `mapFolding.kitAST.theSSOT.lookupMapFoldingEstimates`
-
-	[4] `mapFolding.kitAST.codon.makeJob`
 	"""
 	state: StateMapFolding = transitionOnGroupsOfFolds(StateMapFolding(mapShape))
 	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or lookupMapFoldingEstimates.get(state.mapShape, 0)
@@ -361,15 +333,11 @@ def move_argToBody(ingredientsFunction: IngredientsFunction, job: RecipeJobTheor
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [1].
+	The module `mapFolding.kitAST.codon.makeJob` uses this call.
 
 		```python
 		move_argToBody(ingredientsCount, job)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.codon.makeJob`
 	"""
 	ingredientsFunction.imports.update(raiseIfNone(job.shatteredDataclass).imports)
 
@@ -420,28 +388,28 @@ def moveStaticArrays(job: RecipeJobTheorem2, ingredientsFunction: IngredientsFun
 
 	(AI generated docstring)
 
-	This function relocates array assignments identified by `job.shatteredDataclass` [1]
+	This function relocates array assignments identified by `job.shatteredDataclass`
 	from `ingredientsFunction` into the epilogue of `ingredientsModule`. The generated
 	module initializes these arrays at module scope so function calls can reuse the arrays.
 	Both containers are modified in place and returned together.
 
 	Assignment Selection
 	--------------------
-	The traversal selects `ast.Assign` nodes by the first target [2]. For each array identifier,
+	The traversal selects `ast.Assign` nodes by the first target. For each array identifier,
 	the last matching assignment is appended to the module epilogue, and matching assignments
 	are removed from the function.
 
 	Parameters
 	----------
 	job : RecipeJobTheorem2
-		Recipe with initialized shattered-dataclass metadata. `boxOfStaticArrays` [1]
+		Recipe with initialized shattered-dataclass metadata. `boxOfStaticArrays`
 		identifies array fields whose dataclass initialization setting is `init=False`.
 	ingredientsFunction : IngredientsFunction
-		Function container from `astToolkit` [3] containing a plain assignment for every
+		Function container from `astToolkit` containing a plain assignment for every
 		static array identifier, with the array name as the first assignment target.
 	ingredientsModule : IngredientsModule
-		Module container from `astToolkit` [3] that receives the relocated assignments in
-		the order given by `boxOfStaticArrays` [1].
+		Module container from `astToolkit` that receives the relocated assignments in
+		the order given by `boxOfStaticArrays`.
 
 	Returns
 	-------
@@ -454,24 +422,13 @@ def moveStaticArrays(job: RecipeJobTheorem2, ingredientsFunction: IngredientsFun
 	Examples
 	--------
 	The computation job generator calls this function after moving arguments into the
-	function body [4].
+	function body.
 
 		```python
 		ingredientsFunction = move_argToBody(ingredientsFunction, job)
 		ingredientsFunction, ingredientsModule = moveStaticArrays(
 			job, ingredientsFunction, ingredientsModule)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.dataclasses.ShatteredDataclass`
-
-	[2] `mapFolding.kitAST.IfThis.isAssignAndTargets0Is`
-
-	[3] astToolkit containers and tree visitors.
-		https://context7.com/hunterhogan/asttoolkit
-
-	[4] `mapFolding.kitAST.numba.makeJob.makeJobNumba`
 	"""
 	for identifier in raiseIfNone(job.shatteredDataclass).boxOfStaticArrays:
 		findThis: Callable[[ast.AST], TypeIs[ast.Assign]] = IfThis.isAssignAndTargets0Is(IfThis.isNameIdentifier(identifier))
@@ -498,15 +455,11 @@ def replaceStaticScalars(job: RecipeJobTheorem2, ingredientsCount: IngredientsFu
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [1].
+	The module `mapFolding.kitAST.codon.makeJob` uses this call.
 
 		```python
 		replaceStaticScalars(job, ingredientsCount)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.codon.makeJob`
 	"""
 	for identifier in raiseIfNone(job.shatteredDataclass).boxOfStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
@@ -515,7 +468,7 @@ def replaceStaticScalars(job: RecipeJobTheorem2, ingredientsCount: IngredientsFu
 
 #================== Launchers =======================================================================
 
-def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, spices: SpicesJobNumba | None = None) -> None:
+def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, identifiers: Default | None = None, **override: Any) -> None:
 	"""Append a standalone counting launcher and result-file writer.
 
 	(AI generated docstring)
@@ -528,7 +481,7 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 	Progress Counting
 	-----------------
 	When progress is enabled, matching count increments become updates of two through
-	`numba_progress.ProgressBar` [1]. Returns are removed and a progress argument is appended.
+	`numba_progress.ProgressBar`. Returns are removed and a progress argument is appended.
 	The launcher multiplies the progress count by `job.totalFoldsMultiplier`.
 	Otherwise, returns are replaced with the counting variable and the launcher multiplies that value.
 
@@ -540,37 +493,36 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		Counting function whose returns and optional progress argument will change.
 	job : RecipeJobTheorem2
 		Recipe supplying state, counting metadata, estimate, multiplier, and result path.
-	spices : SpicesJobNumba | None = None
-		Optional progress configuration; omission uses the count returned by the function.
+	identifiers : Default | None = None
+		Identifier defaults from `mapFolding.kitAST.theSSOT.defaultMapFolding` when omitted.
+	**override : Any
+		`useNumbaProgressBar` enables progress counting and defaults to `False`.
+		`名ProgressBar` overrides the configured progress argument identifier.
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [2].
+	The module `mapFolding.kitAST.codon.makeJob` uses this call.
 
 		```python
 		addLauncher(ingredientsModule, ingredientsCount, job)
 		```
-
-	References
-	----------
-	[1] numba_progress progress tracking.
-		https://github.com/mortacious/numba-progress
-	[2] `mapFolding.kitAST.codon.makeJob`
 	"""
+	identifiers = defaultMapFolding if identifiers is None else identifiers
 	ingredientsModule.imports.addImport_asStr('time')
 	boxOfLauncherBody: list[ast.stmt] = [Make.Assign(
 		[Make.Name('timeStart', Make.Store())]
 		, Make.Call(Make.Attribute(Make.Name('time'), 'perf_counter')))]
 
-	if spices is not None and spices.useNumbaProgressBar:
+	if override.get('useNumbaProgressBar', False):
+		名ProgressBar: str = override.get('名ProgressBar', identifiers['variable']['numbaProgressBar'])
 		identifierStatusUpdate: str = 'statusUpdate'
 		ingredientsModule.imports.addImportFrom_asStr('numba_progress', 'ProgressBar')
 		ingredientsFunction.astFunctionDef.args.args.append(
-			Make.arg(spices.numbaProgressBarIdentifier, annotation=Make.Name('ProgressBar')))
+			Make.arg(名ProgressBar, annotation=Make.Name('ProgressBar')))
 		NodeChanger(
 			findThis=Be.AugAssign.targetIs(IfThis.isNameIdentifier(raiseIfNone(job.shatteredDataclass).countingVariableName.id))
 			, doThat=Then.replaceWith(Make.Expr(Make.Call(
-				Make.Attribute(Make.Name(spices.numbaProgressBarIdentifier), 'update'), [Make.Constant(2)])))
+				Make.Attribute(Make.Name(名ProgressBar), 'update'), [Make.Constant(2)])))
 		).visit(ingredientsFunction.astFunctionDef)
 		NodeChanger(Be.Return, Then.removeIt).visit(ingredientsFunction.astFunctionDef)
 		ingredientsFunction.astFunctionDef.returns = Make.Constant(None)

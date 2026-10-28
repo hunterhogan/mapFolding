@@ -4,7 +4,7 @@
 
 This module generates sequential, parallel, and Theorem 2 counting variants. The transforms
 expect the source structures and state metadata configured by
-`mapFolding.kitAST.theSSOT.defaultMapFolding` [1].
+`mapFolding.kitAST.theSSOT.defaultMapFolding`.
 
 Contents
 --------
@@ -19,10 +19,6 @@ Functions
 		Write a Numba counting module from a Theorem 2 source variant.
 	trimTheorem2
 		Write a Theorem 2 variant with unconstrained-dimension branches removed.
-
-References
-----------
-[1] `mapFolding.kitAST.theSSOT.defaultMapFolding`
 """
 from __future__ import annotations
 
@@ -51,7 +47,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	(AI generated docstring)
 
 	You can use this function to inline the source counting function, replace dataclass state
-	with individual field parameters, and attach Numba compilation [1]. A configured dispatcher
+	with individual field parameters, and attach Numba compilation. A configured dispatcher
 	is adapted to extract fields, call the generated function, and reconstruct the state.
 
 	Parameters
@@ -73,17 +69,11 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		makeInlineNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
-	[2] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or defaultMapFolding
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
@@ -105,7 +95,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumba)
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, **(override | {'parametersNumba': parametersNumba}))
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 
@@ -147,7 +137,7 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 	Source Pattern
 	--------------
 	The transformation rewrites the active-leaf comparisons and loop structure used by
-	`mapFolding.algorithms.daoOfMapFolding` [1].
+	`mapFolding.algorithms.daoOfMapFolding`.
 
 	Parameters
 	----------
@@ -168,17 +158,11 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		makeTheorem2(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] `mapFolding.algorithms.daoOfMapFolding`
-
-	[2] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or default
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
@@ -275,7 +259,7 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	(AI generated docstring)
 
 	You can use this function to inline a Theorem 2 counting function, replace the state object
-	with individual field parameters, remove unused parameters, and add Numba compilation [1].
+	with individual field parameters, remove unused parameters, and add Numba compilation.
 	A configured dispatcher is adapted to the field argument and return contract.
 
 	Parameters
@@ -297,17 +281,11 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		makeTheorem2Numba(parsePathFilename2astModule(pathFilename), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
-	[2] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or defaultMapFolding
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('theorem2Trimmed') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
@@ -330,7 +308,7 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
 	ingredientsFunction.removeUnusedParameters()
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumba)
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, **(override | {'parametersNumba': parametersNumba}))
 
 	ingredientsModule = IngredientsModule(ingredientsFunction)
 	ingredientsModule.removeImportFromModule('numpy')
@@ -388,15 +366,11 @@ def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [1].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or default
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('theorem2') or identifiers['function']['counting']
@@ -438,8 +412,8 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	(AI generated docstring)
 
 	You can use this function to derive counting workers that accept individual fields and
-	compile through Numba [1]. The generated dispatcher creates one state per task division,
-	submits each state to a process executor [2], gathers results, and returns the total fold
+	compile through Numba. The generated dispatcher creates one state per task division,
+	submits each state to a process executor, gathers results, and returns the total fold
 	count with the completed states.
 
 	Parallel State
@@ -468,19 +442,11 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [3].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		makeInlineParallelNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
-	[2] Python process executor.
-		https://docs.python.org/3/library/concurrent.futures.html#processpoolexecutor
-	[3] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or defaultMapFolding
 	名CallableSource: str = override.get('名CallableSource') or identifiers['function']['counting']
@@ -522,7 +488,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 	ingredientsFunction.removeUnusedParameters()
 
-	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, parametersNumba)
+	ingredientsFunction = decorateCallableWithNumba(ingredientsFunction, identifiers, **(override | {'parametersNumba': parametersNumba}))
 
 #-START unpack/repack the dataclass function ------------------------------------------------
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)

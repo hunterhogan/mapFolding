@@ -132,7 +132,6 @@ def creaseViolation吗(pile: Pile, pileComparand: Pile, pileCrease: Pile, pileCo
 	Kahlo and Rivera, of course.)
 
 	² "increase" from Latin *in-* "in" + *crescere* "to grow" (from PIE root ⋆ker- "to grow").
-	https://www.etymonline.com/word/increase
 	"""
 	if pile < pileComparand:
 		if pileComparandCrease < pile:
@@ -153,8 +152,8 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	(AI generated docstring)
 
 	You can validate a constructed `Folding` at the leaf level, including complete arrangements
-	produced by `mapFolding.algorithms.eliminationCrease` [1]. The function converts the supplied
-	pile order to a pinned-leaf mapping and checks it with `leavesPinnedValid吗` [2].
+	produced by `mapFolding.algorithms.eliminationCrease`. The function converts the supplied
+	pile order to a pinned-leaf mapping and checks it with `leavesPinnedValid吗`.
 
 	Mathematics
 	-----------
@@ -167,7 +166,7 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	------------------
 	You can treat each dimension of `mapShape` as a one-dimensional strip projection and check that no
 	pair of potentially crossing creases violates the forbidden inequalities encoded by
-	`creaseViolation吗` [3].
+	`creaseViolation吗`.
 
 	For each dimension, `leavesPinnedValid吗` obtains connected leaf pairs, groups their pile positions
 	by leaf parity, and compares crease pairs within each group. It stops at the first crossing.
@@ -184,13 +183,10 @@ def foldingValid吗(folding: Folding, mapShape: tuple[int, ...]) -> bool:
 	isValid : bool
 		`True` when `folding` contains no crease crossing in any `dimension`.
 
-	References
-	----------
-	[1] mapFolding.algorithms.eliminationCrease
-
-	[2] mapFolding.algorithms.iff.leavesPinnedValid吗
-
-	[3] mapFolding.algorithms.iff.creaseViolation吗
+	See Also
+	--------
+	`leavesPinnedValid吗`
+		Check leaf assignments supplied as a pile-to-leaf mapping.
 	"""
 	return leavesPinnedValid吗(dict(enumerate(folding)), mapShape)
 
@@ -237,7 +233,7 @@ def _totalDimensions(mapShape: tuple[int, ...]) -> int:
 
 	(AI generated docstring)
 
-	You can obtain the dimension count for code that iterates over each dimension of `mapShape` [1].
+	You can obtain the dimension count for code that iterates over each dimension of `mapShape`.
 
 	Parameters
 	----------
@@ -249,9 +245,6 @@ def _totalDimensions(mapShape: tuple[int, ...]) -> int:
 	totalDimensions : int
 		The number of dimensions in `mapShape`.
 
-	References
-	----------
-	[1] mapFolding.algorithms.iff.foldingValid吗
 	"""
 	return len(mapShape)
 
@@ -262,8 +255,8 @@ def _totalLeaves(mapShape: tuple[int, ...]) -> int:
 	(AI generated docstring)
 
 	You can reuse leaf counts in frequent validation paths such as `foldingValid吗`. With
-	`functools.cache` [1], you receive a result memoized per `mapShape` value from
-	`mapFolding.beDRY.getTotalLeaves` [2].
+	`functools.cache`, you receive a result memoized per `mapShape` value from
+	`mapFolding.beDRY.getTotalLeaves`.
 
 	Parameters
 	----------
@@ -275,11 +268,6 @@ def _totalLeaves(mapShape: tuple[int, ...]) -> int:
 	totalLeaves : int
 		The total number of leaves for `mapShape`.
 
-	References
-	----------
-	[1] functools.cache
-		https://docs.python.org/3/library/functools.html#functools.cache
-	[2] mapFolding.beDRY.getTotalLeaves
 	"""
 	return getTotalLeaves(mapShape)
 

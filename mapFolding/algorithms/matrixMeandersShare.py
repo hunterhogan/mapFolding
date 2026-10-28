@@ -132,6 +132,9 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	TODO remake `getTotalBuckets` from scratch.
 
 	Factors:
+		- [ ] Intentionally incomplete arcCode to total meanders dictionaries sometimes require more
+			buckets. Crazy, but true. Can `research/matrixMeanders/fixed_deficit_semimeanders.py` help
+			me find a formula for this?
 		- The starting quantity of `arcCode`.
 		- The value(s) of the starting `arcCode`.
 		- n
@@ -143,7 +146,6 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 		- The maximum value.
 		- If decreasing, I don't really know the factors.
 		- If I know the actual value or if I must estimate it.
-		- Intentionally incomplete arcCode to total meanders dictionaries sometimes require more buckets. Crazy, but true.
 
 	Figure out an intelligent flow for so many factors.
 	"""
@@ -156,7 +158,7 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	(AI generated docstring)
 
 	You can use this function to initialize the transfer calculation for one triangle cell.
-	The returned `StateMeanders` [1] starts with one arch code and count one. Counting has not
+	The returned `StateMeanders` starts with one arch code and count one. Counting has not
 	yet run.
 
 	Parameters
@@ -170,7 +172,12 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	-------
 	state : StateMeanders
 		Initial state for the selected diagonal term, ready for
-		`mapFolding.basecamp.countMeanders` [2].
+		`mapFolding.basecamp.countMeanders`.
+
+	See Also
+	--------
+	`mapFolding.basecamp.countMeanders`
+		Run the prepared diagonal state's counting calculation.
 
 	Examples
 	--------
@@ -180,11 +187,6 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 		state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
 		```
 
-	References
-	----------
-	[1] `mapFolding.dataBaskets.StateMeanders`
-
-	[2] `mapFolding.basecamp.countMeanders`
 	"""
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
 	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
@@ -195,8 +197,8 @@ def prune(state: StateMeanders) -> StateMeanders:
 	(AI generated docstring)
 
 	You can use this function between counting iterations to remove entries whose remaining work
-	can be evaluated by `mapFolding.oeis.A400429.boxOfDiagonals` [1]. The function preserves each
-	removed entry's final contribution in `state.countAddend` [2] and returns the updated state.
+	can be evaluated by `mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`. The function preserves
+	each removed entry's final contribution in `state.countAddend` and returns the updated state.
 
 	Parameters
 	----------
@@ -210,8 +212,10 @@ def prune(state: StateMeanders) -> StateMeanders:
 
 	See Also
 	--------
+	`mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`
+		Inspect the known diagonal formulas used to complete selected dictionary entries.
 	`mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
-		Prune an active table stored as a dataframe instead of a dictionary [3].
+		Prune an active table stored as a dataframe instead of a dictionary.
 
 	Diagonal Selection
 	------------------
@@ -227,22 +231,12 @@ def prune(state: StateMeanders) -> StateMeanders:
 
 	Examples
 	--------
-	`mapFolding.synthesized.matrixMeanders.prune.count` [4] prunes before iteration and after each
+	`mapFolding.synthesized.matrixMeanders.prune.count` prunes before iteration and after each
 	transfer step.
 
 		```python
 		state = prune(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.oeis.A400429.boxOfDiagonals`
-
-	[2] `mapFolding.dataBaskets.StateMeanders.countAddend`
-
-	[3] `mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
-
-	[4] `mapFolding.synthesized.matrixMeanders.prune.count`
 
 	"""
 	boundary: int = state.boundary + 1

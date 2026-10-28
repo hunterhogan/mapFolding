@@ -48,9 +48,14 @@ def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 		Iterator over leaf indices in increasing order of the flipped dimension
 		index. An origin leaf has no predecessor choice.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the coordinate symbols and their dimension-index convention.
+
 	Dimension Order
 	---------------
-	The binary positional-numeral system [1] assigns one
+	The binary positional-numeral system assigns one
 	dimension to each bit. Possible leaves differ from `leaf` by one bit. Leaf labels
 	need not increase with the flipped dimension index.
 
@@ -62,9 +67,6 @@ def getLeavesCreaseAnte(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 		print(*getLeavesCreaseAnte(state, 53))
 		```
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
 	"""
 	return iter(_getCreases(state, leaf, increase=False))
 
@@ -90,9 +92,14 @@ def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 		Iterator over leaf indices in increasing order of the flipped dimension
 		index. An origin leaf has only leaf `1` as a successor choice.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the coordinate symbols and their dimension-index convention.
+
 	Dimension Order
 	---------------
-	The binary positional-numeral system [1] assigns one
+	The binary positional-numeral system assigns one
 	dimension to each bit. Possible leaves differ from `leaf` by one bit. Leaf labels
 	need not increase with the flipped dimension index.
 
@@ -104,9 +111,6 @@ def getLeavesCreasePost(state: StateElimination, leaf: Leaf) -> Iterator[Leaf]:
 		print(*getLeavesCreasePost(state, 22))
 		```
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
 	"""
 	return iter(_getCreases(state, leaf, increase=True))
 

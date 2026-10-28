@@ -140,7 +140,7 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
     (AI generated docstring)
 
     You can use this function to initialize the transfer calculation for one triangle cell.
-    The returned `StateMeanders` [1] starts with one arch code and count one. Counting has not
+    The returned `StateMeanders` starts with one arch code and count one. Counting has not
     yet run.
 
     Parameters
@@ -154,7 +154,12 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
     -------
     state : StateMeanders
         Initial state for the selected diagonal term, ready for
-        `mapFolding.basecamp.countMeanders` [2].
+        `mapFolding.basecamp.countMeanders`.
+
+    See Also
+    --------
+    `mapFolding.basecamp.countMeanders`
+        Run the prepared diagonal state's counting calculation.
 
     Examples
     --------
@@ -164,11 +169,6 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
         state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
         ```
 
-    References
-    ----------
-    [1] `mapFolding.dataBaskets.StateMeanders`
-
-    [2] `mapFolding.basecamp.countMeanders`
     """
     arcCode: int = (1 << 2 * (n - 2 * 次diagonal) + 2) - 1
     return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
@@ -179,8 +179,8 @@ def prune(state: StateMeanders) -> StateMeanders:
     (AI generated docstring)
 
     You can use this function between counting iterations to remove entries whose remaining work
-    can be evaluated by `mapFolding.oeis.A400429.boxOfDiagonals` [1]. The function preserves each
-    removed entry's final contribution in `state.countAddend` [2] and returns the updated state.
+    can be evaluated by `mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`. The function preserves
+    each removed entry's final contribution in `state.countAddend` and returns the updated state.
 
     Parameters
     ----------
@@ -194,8 +194,10 @@ def prune(state: StateMeanders) -> StateMeanders:
 
     See Also
     --------
-    `mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
-        Prune an active table stored as a dataframe instead of a dictionary [3].
+    `mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`
+        Inspect the known diagonal formulas used to complete selected dictionary entries.
+    `pruneDataFrame`
+        Prune an active table stored as a dataframe instead of a dictionary.
 
     Diagonal Selection
     ------------------
@@ -211,22 +213,12 @@ def prune(state: StateMeanders) -> StateMeanders:
 
     Examples
     --------
-    `mapFolding.synthesized.matrixMeanders.prune.count` [4] prunes before iteration and after each
+    `mapFolding.synthesized.matrixMeanders.prune.count` prunes before iteration and after each
     transfer step.
 
         ```python
         state = prune(state)
         ```
-
-    References
-    ----------
-    [1] `mapFolding.oeis.A400429.boxOfDiagonals`
-
-    [2] `mapFolding.dataBaskets.StateMeanders.countAddend`
-
-    [3] `mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
-
-    [4] `mapFolding.synthesized.matrixMeanders.prune.count`
 
     """
     boundary: int = state.boundary + 1
@@ -289,8 +281,8 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
     (AI generated docstring)
 
     You can use `count` to apply all transition rules for each boundary layer in `state` and update
-    `state.lookupMeanders` in place [1]. The transition set includes new-arc insertion, left-right
-    crossing moves, and Dyck-path-based arc joining through `walkDyckPath` [2].
+    `state.lookupMeanders` in place. The transition set includes new-arc insertion, left-right
+    crossing moves, and Dyck-path-based arc joining through `walkDyckPath`.
 
     Parameters
     ----------
@@ -308,11 +300,6 @@ def countBigInt(state: StateMeanders) -> StateMeanders:
     next boundary dictionary. The transition for joining arches conditionally flips one Dyck-matched
     endpoint bit before packing the next `arcCode`.
 
-    References
-    ----------
-    [1] `mapFolding.dataBaskets.StateMeanders`
-
-    [2] `walkDyckPath`
     """
     state = prune(state)
     while 0 < state.boundary and integersWide吗(state):
@@ -414,7 +401,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
     ----------
     The scan advances by shifting `flipExtra_0b1_Here` left by `2` each step. The scan adds `1` when
     the bit is `0` and subtracts `1` when the bit is `1`. The function returns immediately at the
-    first index where the running balance is negative in the Dyck-prefix sense [2].
+    first index where the running balance is negative in the Dyck-prefix sense.
 
     Mathematics
     -----------
@@ -431,8 +418,6 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
     [1] Jensen, I. (2000). A transfer matrix approach to the enumeration of plane meanders.
         Journal of Physics A: Mathematical and General, 33(34), 5953-5963.
         https://dx.doi.org/10.1088/0305-4470/33/34/301
-    [2] Dyck language and balanced-parenthesis paths.
-        https://en.wikipedia.org/wiki/Dyck_language
     """
     findTheExtra_0b1: int = 0
     flipExtra_0b1_Here: int = 1

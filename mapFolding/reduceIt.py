@@ -237,8 +237,8 @@ def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace
 	Subset coverage
 	---------------
 	You compare identical `ChoicesLeaf` values rather than arbitrary unions of leaf sets. The current repeat condition
-	requires the pinned-leaf count to decrease, so use the state's repeated reduction method [1] for
-	further propagation.
+	requires the pinned-leaf count to decrease, so use `StateElimination.reduceAllPermutationSpace`
+	for further propagation.
 
 	Parameters
 	----------
@@ -252,9 +252,6 @@ def reducePermutationSpace_nakedSubset(state: StateElimination, permutationSpace
 	permutationSpace : PermutationSpace
 		The same object with reduced leaf sets or a false validity flag.
 
-	References
-	----------
-	[1] `mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace`
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 	while permutationSpaceHasNewLeaf and permutationSpace.valid:
@@ -329,12 +326,13 @@ boxOfFunctionsReductionDEFAULT: Sequence[Callable[[StateElimination, Permutation
 (AI generated docstring)
 
 You can restrict matching leaf sets, pin leaves with a single pile domain, remove crease crossings,
-and propagate pinned leaves. With the state reduction method [1], you apply the sequence in reverse
+and propagate pinned leaves. With the state reduction method, you apply the sequence in reverse
 order and restart when dictionary values change.
 
-References
-----------
-[1] `mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace`
+See Also
+--------
+`mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace`
+	Apply this reduction sequence repeatedly to the state's permutation spaces.
 """
 
 #======== Reducing `ChoicesLeaf` ===============================
@@ -557,11 +555,11 @@ def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace:
 	-----------------
 	For each pinned leaf:
 
-	1. Compute `工dimension首零(leaf)` [1] to identify the dimension with the smallest coordinate
+	1. Compute `工dimension首零(leaf)` to identify the dimension with the smallest coordinate
 		magnitude from the head.
 	2. If nonzero, remove all leaves with larger coordinates in that dimension from piles before
 		`pile`.
-	3. Compute `工dimensionTail(leaf)` [2] to identify the dimension with the smallest coordinate
+	3. Compute `工dimensionTail(leaf)` to identify the dimension with the smallest coordinate
 		magnitude from the tail.
 	4. If nonzero, remove all leaves with smaller coordinates in that dimension from piles after
 		`pile`.
@@ -578,11 +576,6 @@ def _headsBeforeTails2上nDimensional(state: StateElimination, permutationSpace:
 	updatedPermutationSpace : PermutationSpace | None
 		The updated `permutationSpace` if valid; otherwise `None`.
 
-	References
-	----------
-	[1] mapFolding.measure.工dimension首零
-
-	[2] mapFolding.measure.工dimensionTail
 	"""
 	permutationSpaceHasNewLeaf: bool = True
 
@@ -694,15 +687,20 @@ boxOfFunctionsReduction2上nDimensional: Sequence[Callable[[StateElimination, Pe
 (AI generated docstring)
 
 You can pass this sequence to
-`mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace` [1] to refine choice
+`mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace` to refine choice
 foldings. Each function accepts an elimination state and one permutation space and returns the
 resulting permutation space.
+
+See Also
+--------
+`mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace`
+	Apply this reduction sequence repeatedly to the state's permutation spaces.
 
 Reduction Order
 ---------------
 The sequence checks consecutive dimensions, crossed creases, conditional predecessors, and
-head-before-tail order, then applies naked-subset reduction [2], empty or singleton leaf domains
-[3], crease constraints, and pinned-leaf propagation [4]. The order affects current results.
+head-before-tail order, then applies naked-subset reduction, empty or singleton leaf domains,
+crease constraints, and pinned-leaf propagation. The order affects current results.
 
 Examples
 --------
@@ -714,13 +712,4 @@ From `easyRun/pinning.py`.
 	)
 	```
 
-References
-----------
-[1] `mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace`
-
-[2] `mapFolding.reduceIt.reducePermutationSpace_nakedSubset`
-
-[3] `mapFolding.reduceIt.reducePermutationSpace_leafDomainOf0or1`
-
-[4] `mapFolding.reduceIt.reducePermutationSpace_LeafIsPinned`
 """

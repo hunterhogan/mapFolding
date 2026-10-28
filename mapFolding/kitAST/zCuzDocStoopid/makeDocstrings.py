@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this module to enrich sequence-formula source with descriptions and literal
-selector values from `mapFolding.oeis.getMetadata` [1]. The generator writes source to a
+selector values from `mapFolding.oeis.getMetadata`. The generator writes source to a
 filename derived by removing the configured prefix.
 
 Contents
@@ -16,10 +16,6 @@ Variables
 		Access the generated-file notice appended to the output module docstring.
 	sourcePrefix
 		Inspect the filename prefix removed when writing documented formula source.
-
-References
-----------
-[1] `mapFolding.oeis.getMetadata`
 """
 from __future__ import annotations
 
@@ -56,9 +52,9 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
     (AI generated docstring)
 
     You can use this function to read formula source, obtain sequence metadata through
-    `mapFolding.oeis.getMetadata` [1], insert function docstrings, and expand selector annotations
-    with discovered literal values. The output filename removes `sourcePrefix` [2] from the stem.
-    The function appends `moduleWarning` [3] to the module docstring and writes the resulting source.
+    `mapFolding.oeis.getMetadata`, insert function docstrings, and expand selector annotations
+    with discovered literal values. The output filename removes `sourcePrefix` from the stem.
+    The function appends `moduleWarning` to the module docstring and writes the resulting source.
 
     Sequence Function Selection
     ---------------------------
@@ -78,21 +74,11 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
 
     Examples
     --------
-    The module `easyRun.synthesizeModules` uses this call [4].
+    The module `easyRun.synthesizeModules` uses this call.
 
         ```python
         transformOEISidByFormula(pathFilenameSource)
         ```
-
-    References
-    ----------
-    [1] `mapFolding.oeis.getMetadata`
-
-    [2] `sourcePrefix`
-
-    [3] `moduleWarning`
-
-    [4] `easyRun.synthesizeModules`
     """
     pathFilenameWrite: Path = pathFilenameSource.with_stem(pathFilenameSource.stem.removeprefix(sourcePrefix))
     astModule: ast.Module = parsePathFilename2astModule(pathFilenameSource)
@@ -119,7 +105,8 @@ def transformOEISidByFormula(pathFilenameSource: Path) -> Path:
             ImaDocstring: str = f"""
     Compute {oeisID}(n) as a function of {functionOf}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is: "{metadata['description']}"
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID}
+    is "{metadata['description']}".
 
     The domain of {oeisID} starts at {metadata['offset']}, therefore for values of `n` < {metadata['offset']}, a(n) is undefined. The smallest value of n for which a(n)
     has not yet been computed is {metadata['valueUnknown']}.

@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can refine possible foldings by pinning selected piles or selected leaf groups. The state-based
-functions update permutation spaces in `mapFolding.dataBaskets.StateElimination` [1] and return the
+functions update permutation spaces in `mapFolding.dataBaskets.StateElimination` and return the
 supplied state. `atPileExcludeLeaf` updates and returns a list of permutation spaces.
 The dimension-specific pinning functions use rules for maps whose axis lengths are two. The
 exclusion functions also support other map shapes.
@@ -42,10 +42,6 @@ Functions
 			Pin the four head-relative dimension-two leaves using combined pile domains.
 		pin首beans
 			Pin the head-relative one and zero-one leaves to consecutive piles.
-
-References
-----------
-[1] `mapFolding.dataBaskets.StateElimination`
 """
 from __future__ import annotations
 
@@ -85,12 +81,12 @@ def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pi
 	You can process each `pile` in `pileProcessingOrder` by partitioning `state.boxOfPermutationSpace`
 	into dictionaries that are open at that pile and dictionaries that are not.
 
-	You compute the partition with `partition` [1] and `PermutationSpace.pileUndetermined吗` [2]. You
-	concurrently deconstruct open `PermutationSpace` dictionaries with `ProcessPoolExecutor` [3] and
-	track progress with `tqdm` [4].
+	You compute the partition with `partition` and `PermutationSpace.pileUndetermined吗`. You
+	concurrently deconstruct open `PermutationSpace` dictionaries with `ProcessPoolExecutor` and
+	track progress with `tqdm`.
 
 	You retain closed `PermutationSpace` dictionaries and concurrently deconstruct each open dictionary
-	at `pile` with `PermutationSpace.deconstructPile` [5].
+	at `pile` with `PermutationSpace.deconstructPile`.
 
 	Parameters
 	----------
@@ -101,26 +97,12 @@ def _pinPiles(state: StateElimination, maximumSizeBoxOfPermutationSpace: int, pi
 	pileProcessingOrder : list[Pile]
 		Processing order for `pile` values.
 	CPUlimit : bool | float | int | None = None
-		Optional limit for worker processes as accepted by `defineProcessorLimit` [6].
+		Optional limit for worker processes as accepted by `defineProcessorLimit`.
 
 	Returns
 	-------
 	state : StateElimination
 		Updated state with an updated `state.boxOfPermutationSpace`.
-
-	References
-	----------
-	[1] more-itertools `partition`.
-		https://more-itertools.readthedocs.io/en/stable/api.html#more_itertools.partition
-	[2] mapFolding.dataBaskets.PermutationSpace.pileUndetermined吗.
-
-	[3] Python `concurrent.futures` documentation.
-		https://docs.python.org/3/library/concurrent.futures.html
-	[4] tqdm documentation.
-		https://tqdm.github.io/
-	[5] mapFolding.dataBaskets.PermutationSpace.deconstructPile.
-
-	[6] mapFolding.beDRY.defineProcessorLimit.
 	"""
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
 	pileProcessingOrder.reverse()
@@ -147,8 +129,8 @@ def _pinPilesConcurrentTask(state: StateElimination) -> StateElimination:
 
 	(AI generated docstring)
 
-	You can call `PermutationSpace.deconstructPile` [1] with `leavesToPin` selected by
-	`_getLeavesAtPile` [2].
+	You can call `PermutationSpace.deconstructPile` with `leavesToPin` selected by
+	`_getLeavesAtPile`.
 
 	Parameters
 	----------
@@ -159,12 +141,6 @@ def _pinPilesConcurrentTask(state: StateElimination) -> StateElimination:
 	-------
 	statePinned : StateElimination
 		The supplied state containing branches after crease validation and reduction.
-
-	References
-	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructPile.
-
-	[2] mapFolding.pinIt._getLeavesAtPile.
 	"""
 	state.boxOfPermutationSpace.extend(state.permutationSpace.deconstructPile(state.pile, filter(state.pinAt_pile吗, _getLeavesAtPile(state))))
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
@@ -174,11 +150,11 @@ def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 
 	(AI generated docstring)
 
-	You can select `leavesToPin` based on `state.pile`, using `operator.neg` [1] to compare pile values.
+	You can select `leavesToPin` based on `state.pile`, using `operator.neg` to compare pile values.
 
 	For certain `pile` values, `leavesToPin` is a fixed singleton set. For other `pile` values,
-	`leavesToPin` is computed by a crease-based pinning function [2] or a domain-based post-depth
-	function [3].
+	`leavesToPin` is computed by a crease-based pinning function or a domain-based post-depth
+	function.
 
 	Parameters
 	----------
@@ -189,14 +165,6 @@ def _getLeavesAtPile(state: StateElimination) -> Iterable[Leaf]:
 	-------
 	leavesToPin : Iterable[Leaf]
 		Leaves that should be used by `PermutationSpace.deconstructPile`.
-
-	References
-	----------
-	[1] Python `operator` module documentation.
-		https://docs.python.org/3/library/operator.html
-	[2] mapFolding.pinByCrease.
-
-	[3] mapFolding.pinByDomain.pinPile零Ante首零AfterDepth4.
 	"""
 	leavesToPin: Iterable[Leaf] = frozenset()
 	if state.pile == pileOrigin:
@@ -243,7 +211,7 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 		Stop before processing the next pile when the number of permutation spaces reaches this
 		threshold. Processing one pile can exceed the threshold.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -253,13 +221,13 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 
 	Pile Selection
 	--------------
-	The map-shape predicate [2] requires at least three
+	The map-shape predicate requires at least three
 	axes, all of length `2`. Depth `0` selects the origin pile. Depths `1`, `2`, and `3` also
 	select the respective piles at both ends. Depth `4` additionally selects pile `4` for at
 	least five dimensions and pile `state.首 - 4` for at least six dimensions.
 
 	Worker tasks split permutation spaces and apply the reduction sequence
-	`mapFolding.reduceIt.boxOfFunctionsReduction2上nDimensional` [3].
+	`mapFolding.reduceIt.boxOfFunctionsReduction2上nDimensional`.
 
 	Examples
 	--------
@@ -268,14 +236,6 @@ def pinPilesAtEnds(state: StateElimination, pileDepth: int = 4, maximumSizeBoxOf
 		```python
 		state = pinIt.pinPilesAtEnds(state, 0)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[3] `mapFolding.reduceIt.boxOfFunctionsReduction2上nDimensional`
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -321,7 +281,7 @@ def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpa
 		Threshold checked before processing each additional pile. Processing one pile can exceed
 		the threshold.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -329,12 +289,17 @@ def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpa
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`pinPilesAtEnds`
+		Pin the end piles without the additional interior-pile selection.
+
 	Pinning Sequence
 	----------------
 	The target pile is `首零(state.totalDimensions) - 零`,
-	using the positional-numeral system [2]. The map-shape predicate [3] requires every axis length
+	using the positional-numeral system. The map-shape predicate requires every axis length
 	to be `2`. Maps with fewer than three dimensions return unchanged. Maps with three through
-	five dimensions receive only the depth-four step of `pinPilesAtEnds` [4].
+	five dimensions receive only the depth-four step of `pinPilesAtEnds`.
 
 	The preparation calls to `pinPilesAtEnds` use the default worker limit. `CPUlimit` applies
 	to the additional interior-pile step.
@@ -346,16 +311,6 @@ def pinPile零Ante首零(state: StateElimination, maximumSizeBoxOfPermutationSpa
 		```python
 		state = pinIt.pinPile零Ante首零(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `pinPilesAtEnds`
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape):
 		return state
@@ -381,16 +336,15 @@ def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDo
 	(AI generated docstring)
 
 	You can deconstruct each dictionary in `state.boxOfPermutationSpace` into a refined list with
-	`PermutationSpace.deconstructDomainsCombined` [1]. You run tasks concurrently with
-	`ProcessPoolExecutor` [2], aggregate results with `as_completed` [2], and track progress with `tqdm`
-	[3].
+	`PermutationSpace.deconstructDomainsCombined`. You run tasks concurrently with
+	`ProcessPoolExecutor`, aggregate results with `as_completed`, and track progress with `tqdm`.
 
-	You initialize an empty `state.boxOfPermutationSpace` with `pinPilesAtEnds(state, 0)` [4]. You pass
+	You initialize an empty `state.boxOfPermutationSpace` with `pinPilesAtEnds(state, 0)`. You pass
 	`leaves` and `leavesDomain` to each worker.
 
-	You receive `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails [5].
+	You receive `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails.
 
-	You configure the worker limit by passing `CPUlimit` to `defineProcessorLimit` [6].
+	You configure the worker limit by passing `CPUlimit` to `defineProcessorLimit`.
 
 	Parameters
 	----------
@@ -409,20 +363,6 @@ def _pinLeavesByDomain(state: StateElimination, leaves: Sequence[Leaf], leavesDo
 	-------
 	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
-
-	References
-	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainsCombined.
-
-	[2] Python `concurrent.futures` documentation.
-		https://docs.python.org/3/library/concurrent.futures.html
-	[3] tqdm documentation.
-		https://tqdm.github.io/
-	[4] mapFolding.pinIt.pinPilesAtEnds.
-
-	[5] mapFolding.beDRY.mapShapeIs2上nDimensions.
-
-	[6] mapFolding.beDRY.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=youMustBeDimensionsTallToRideThis):
 		return state
@@ -450,8 +390,8 @@ def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[L
 	"""Deconstruct `state.permutationSpace` by `leaves` and `leavesDomain` into `state.boxOfPermutationSpace`.
 
 	You can build `state.boxOfPermutationSpace` with
-	`PermutationSpace.deconstructDomainsCombined` [1], then remove crease violations with
-	`removeCreaseViolations` [2] and apply `reduceAllPermutationSpace` [3].
+	`PermutationSpace.deconstructDomainsCombined`, then remove crease violations with
+	`removeCreaseViolations` and apply `reduceAllPermutationSpace`.
 
 	Parameters
 	----------
@@ -466,14 +406,6 @@ def _pinLeavesByDomainConcurrentTask(state: StateElimination, leaves: Sequence[L
 	-------
 	state : StateElimination
 		Updated state with a populated `state.boxOfPermutationSpace`.
-
-	References
-	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainsCombined.
-
-	[2] mapFolding.dataBaskets.StateElimination.removeCreaseViolations.
-
-	[3] mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace.
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainsCombined(leaves, leavesDomain)
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
@@ -486,15 +418,15 @@ def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[P
 	(AI generated docstring)
 
 	You can deconstruct each input dictionary using the supplied `leaf` and `leafDomain` with
-	`PermutationSpace.deconstructDomainOfLeaf` [1].
-	You run tasks concurrently with `ProcessPoolExecutor` [2], aggregate results with `as_completed` [2],
-	and track progress with `tqdm` [3].
+	`PermutationSpace.deconstructDomainOfLeaf`.
+	You run tasks concurrently with `ProcessPoolExecutor`, aggregate results with `as_completed`,
+	and track progress with `tqdm`.
 
-	You initialize an empty `state.boxOfPermutationSpace` with `pinPilesAtEnds(state, 0)` [4].
+	You initialize an empty `state.boxOfPermutationSpace` with `pinPilesAtEnds(state, 0)`.
 
-	You receive `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails [5].
+	You receive `state` unchanged when `mapShapeIs2上nDimensions(state.mapShape, ...)` fails.
 
-	You configure the worker limit by passing `CPUlimit` to `defineProcessorLimit` [6].
+	You configure the worker limit by passing `CPUlimit` to `defineProcessorLimit`.
 
 	Parameters
 	----------
@@ -513,20 +445,6 @@ def _pinLeafByDomain(state: StateElimination, leaf: Leaf, leafDomain: Sequence[P
 	-------
 	state : StateElimination
 		Updated state with a refined `state.boxOfPermutationSpace`.
-
-	References
-	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainOfLeaf.
-
-	[2] Python `concurrent.futures` documentation.
-		https://docs.python.org/3/library/concurrent.futures.html
-	[3] tqdm documentation.
-		https://tqdm.github.io/
-	[4] mapFolding.pinIt.pinPilesAtEnds.
-
-	[5] mapFolding.beDRY.mapShapeIs2上nDimensions.
-
-	[6] mapFolding.beDRY.defineProcessorLimit.
 	"""
 	if not mapShapeIs2上nDimensions(state.mapShape, youMustBeDimensionsTallToRideThis=youMustBeDimensionsTallToRideThis):
 		return state
@@ -560,8 +478,8 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 	(AI generated docstring)
 
 	You can build `state.boxOfPermutationSpace` with
-	`PermutationSpace.deconstructDomainOfLeaf` [1], then remove crease violations with
-	`removeCreaseViolations` [2] and apply `reduceAllPermutationSpace` [3].
+	`PermutationSpace.deconstructDomainOfLeaf`, then remove crease violations with
+	`removeCreaseViolations` and apply `reduceAllPermutationSpace`.
 
 	Parameters
 	----------
@@ -576,15 +494,6 @@ def _pinLeafByDomainConcurrentTask(state: StateElimination, leaves: Leaf, leaves
 	-------
 	state : StateElimination
 		Updated state with a populated `state.boxOfPermutationSpace`.
-
-	References
-	----------
-	[1] mapFolding.dataBaskets.PermutationSpace.deconstructDomainOfLeaf.
-
-	[2] mapFolding.dataBaskets.StateElimination.removeCreaseViolations.
-
-	[3] mapFolding.dataBaskets.StateElimination.reduceAllPermutationSpace.
-
 	"""
 	state.boxOfPermutationSpace = state.permutationSpace.deconstructDomainOfLeaf(leaves, leavesDomain)
 	return state.removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReduction2上nDimensional)
@@ -605,7 +514,7 @@ def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit =
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -613,15 +522,20 @@ def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit =
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(0, 首零(state.totalDimensions))
 		```
 
-	The map-shape predicate [3] requires at least 3 axes, all of length `2`. If the
+	The map-shape predicate requires at least 3 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
 	The fixed assignment places the origin leaf at pile `0` and the head-origin leaf at
@@ -630,14 +544,6 @@ def pinLeavesDimension0(state: StateElimination, *, CPUlimit: ConcurrencyLimit =
 	Examples
 	--------
 	No usage outside tests was found in the codebase.
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
 	"""
 	leaves: tuple[Leaf, Leaf] = (leafOrigin, 首零(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, leavesDomain=((pileOrigin, state.pileLast),), CPUlimit=CPUlimit)
@@ -656,7 +562,7 @@ def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: ConcurrencyLimit 
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -664,31 +570,26 @@ def pinLeaf首零Plus零(state: StateElimination, *, CPUlimit: ConcurrencyLimit 
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(零 + 首零(state.totalDimensions),)
 		```
 
-	The map-shape predicate [3] requires at least 3 axes, all of length `2`. If the
+	The map-shape predicate requires at least 3 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
-	The domain function [4] supplies the possible pile assignments.
+	The domain function supplies the possible pile assignments.
 
 	You compute the domain from `state.permutationSpace` before splitting `state.boxOfPermutationSpace`.
 	You use the same domain for every permutation space.
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `mapFolding.leafDomains.getDomainLeaf首零Plus零`
 	"""
 	leaf: Leaf = (零) + 首零(state.totalDimensions)
 	return _pinLeafByDomain(state, leaf, getDomainLeaf首零Plus零(state, leaf), CPUlimit=CPUlimit)
@@ -706,7 +607,7 @@ def pinLeavesDimension零(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -716,19 +617,9 @@ def pinLeavesDimension零(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 
 	Pinning Sequence
 	----------------
-	You pin the origin pile with `pinPilesAtEnds(state, 0)` [2], then call `pinLeaf首零Plus零` [3]. You use
+	You pin the origin pile with `pinPilesAtEnds(state, 0)`, then call `pinLeaf首零Plus零`. You use
 	the default worker limit for the origin-pile step and `CPUlimit` for the leaf-pinning step. Supply at
-	least three axes, all of length `2`, to satisfy the map-shape predicate [4] in each step.
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `pinPilesAtEnds`
-
-	[3] `pinLeaf首零Plus零`
-
-	[4] `mapFolding.beDRY.mapShapeIs2上nDimensions`
+	least three axes, all of length `2`, to satisfy the map-shape predicate in each step.
 	"""
 	state = pinPilesAtEnds(state, 0)
 	return pinLeaf首零Plus零(state, CPUlimit=CPUlimit)
@@ -747,7 +638,7 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -755,18 +646,23 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
 		```
 
-	The map-shape predicate [3] requires at least 3 axes, all of length `2`. If the
+	The map-shape predicate requires at least 3 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
-	The domain function [4] supplies the possible pile assignments.
+	The domain function supplies the possible pile assignments.
 
 	Examples
 	--------
@@ -775,16 +671,6 @@ def pinLeavesDimension一(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 		```python
 		state = pinIt.pinLeavesDimension一(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `mapFolding.leafDomains.getDomainDimension一`
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (一 + 零, 一, 首一(state.totalDimensions), 首零一(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension一(state), CPUlimit=CPUlimit)
@@ -802,7 +688,7 @@ def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Concurrency
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -812,7 +698,7 @@ def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Concurrency
 
 	Pinning Sequence
 	----------------
-	You call `pinLeavesDimension一` [2], then `pinLeavesDimension零` [3]. You pass `CPUlimit` to both
+	You call `pinLeavesDimension一`, then `pinLeavesDimension零`. You pass `CPUlimit` to both
 	functions, while using the default worker limit for the origin-pile step within
 	`pinLeavesDimension零`.
 
@@ -823,14 +709,6 @@ def pinLeavesDimensions0零一(state: StateElimination, *, CPUlimit: Concurrency
 		```python
 		state = pinIt.pinLeavesDimensions0零一(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `pinLeavesDimension一`
-
-	[3] `pinLeavesDimension零`
 	"""
 	state = pinLeavesDimension一(state, CPUlimit=CPUlimit)
 	return pinLeavesDimension零(state, CPUlimit=CPUlimit)
@@ -849,7 +727,7 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -857,18 +735,23 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(二 + 一, 二 + 一 + 零, 二 + 零, 二)
 		```
 
-	The map-shape predicate [3] requires at least 5 axes, all of length `2`. If the
+	The map-shape predicate requires at least 5 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
-	The domain function [4] supplies the possible pile assignments.
+	The domain function supplies the possible pile assignments.
 
 	Examples
 	--------
@@ -877,16 +760,6 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 		```python
 		state = pinIt.pinLeavesDimension二(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `mapFolding.leafDomains.getDomainDimension二`
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二 + 一, 二 + 一 + 零, 二 + 零, 二)
 	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
@@ -905,7 +778,7 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -913,18 +786,23 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 		```
 
-	The map-shape predicate [3] requires at least 5 axes, all of length `2`. If the
+	The map-shape predicate requires at least 5 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
-	The domain function [4] supplies the possible pile assignments.
+	The domain function supplies the possible pile assignments.
 
 	Examples
 	--------
@@ -933,16 +811,6 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 		```python
 		state = pinIt.pinLeavesDimension首二(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `mapFolding.leafDomains.getDomainDimension首二`
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
@@ -961,7 +829,7 @@ def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) ->
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -969,18 +837,23 @@ def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) ->
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(一 + 零, 一)
 		```
 
-	The map-shape predicate [3] requires at least 3 axes, all of length `2`. If the
+	The map-shape predicate requires at least 3 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
-	You obtain possible piles for the first leaf from the individual domain function [4] and assign the
+	You obtain possible piles for the first leaf from the individual domain function and assign the
 	second leaf to the next pile.
 
 	Examples
@@ -990,16 +863,6 @@ def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) ->
 		```python
 		state = pinIt.pin3beans2(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	return _pinLeavesByDomain(state, (一 + 零, 一), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 一 + 零)), CPUlimit=CPUlimit)
 
@@ -1017,7 +880,7 @@ def pin首beans(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -
 	state : StateElimination
 		Elimination state whose `state.boxOfPermutationSpace` is refined in place.
 	CPUlimit : ConcurrencyLimit = None
-		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit` [1].
+		Worker-process limit accepted by `mapFolding.beDRY.defineProcessorLimit`.
 
 	Returns
 	-------
@@ -1025,18 +888,23 @@ def pin首beans(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -
 		The supplied state with refined `state.boxOfPermutationSpace`. Each retained permutation
 		space satisfies the applied pinning and reduction constraints.
 
+	See Also
+	--------
+	`mapFolding._semiotics`
+		Inspect the positional coordinate symbols that identify the leaves being pinned.
+
 	Leaf Assignments
 	----------------
-	The positional-numeral system [2] identifies the leaves in the following order.
+	The positional-numeral system identifies the leaves in the following order.
 
 		```python
 		(首一(state.totalDimensions), 首零一(state.totalDimensions))
 		```
 
-	The map-shape predicate [3] requires at least 3 axes, all of length `2`. If the
+	The map-shape predicate requires at least 3 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
-	You obtain possible piles for the first leaf from the individual domain function [4] and assign the
+	You obtain possible piles for the first leaf from the individual domain function and assign the
 	second leaf to the next pile.
 
 	Examples
@@ -1046,16 +914,6 @@ def pin首beans(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -
 		```python
 		state = pinIt.pin首beans(state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.beDRY.defineProcessorLimit`
-
-	[2] `mapFolding._semiotics`
-
-	[3] `mapFolding.beDRY.mapShapeIs2上nDimensions`
-
-	[4] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	return _pinLeavesByDomain(state, (首一(state.totalDimensions), 首零一(state.totalDimensions)), tuple((pile, pile + 1) for pile in getDomainLeaf(state, 首一(state.totalDimensions))), CPUlimit=CPUlimit)
 
@@ -1113,17 +971,13 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	pile_k : Pile
 		Pile at which the ordering restriction is conditioned.
 	domainOf_leaf_r : Iterable[Pile] | None = None
-		Pile positions to examine for `leaf_r`. `None` computes the shape-based domain [1]; an empty iterable
+		Pile positions to examine for `leaf_r`. `None` computes the shape-based domain; an empty iterable
 		applies no leaf exclusions.
 
 	Returns
 	-------
 	state : StateElimination
 		The same state containing restricted branches and retained alternatives.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	boxOfPermutationSpace: list[PermutationSpace] = state.boxOfPermutationSpace
 	state.boxOfPermutationSpace = []
@@ -1173,7 +1027,7 @@ def excludeLeaf_rBeforeLeaf_k(state: StateElimination, leaf_k: Leaf, leaf_r: Lea
 
 	You can require `leaf_k` to occur before `leaf_r` across the supplied pile domains. You replace the
 	state's active permutation-space list with branches satisfying the restriction. Omit a domain to use
-	`mapFolding.leafDomains.getDomainLeaf` [1].
+	`mapFolding.leafDomains.getDomainLeaf`.
 
 	Domain coverage
 	---------------
@@ -1198,10 +1052,6 @@ def excludeLeaf_rBeforeLeaf_k(state: StateElimination, leaf_k: Leaf, leaf_r: Lea
 	-------
 	state : StateElimination
 		The same state with updated permutation-space branches.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	if domain_k is None:
 		domain_k = leafDomains.getDomainLeaf(state, leaf_k)

@@ -28,8 +28,8 @@ def getMetadata(oeisID: OEISid) -> MetadataOEISid:
 	(AI generated docstring)
 
 	You can use this function to inspect a registered sequence's description, starting index, and
-	known values. This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` [1]
-	and returns the corresponding entry from `dictionaryOEIS` [2].
+	known values. This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid`
+	and returns the corresponding entry from `dictionaryOEIS`.
 
 	Parameters
 	----------
@@ -39,7 +39,7 @@ def getMetadata(oeisID: OEISid) -> MetadataOEISid:
 	Returns
 	-------
 	metadata : MetadataOEISid
-		Shared metadata dictionary described by `mapFolding.oeis._dataBaskets.MetadataOEISid` [3].
+		Shared metadata dictionary described by `mapFolding.oeis._dataBaskets.MetadataOEISid`.
 		The result is not copied.
 
 	Unknown Sequences
@@ -49,19 +49,8 @@ def getMetadata(oeisID: OEISid) -> MetadataOEISid:
 
 	Caching
 	-------
-	Metadata is loaded during module import. `functools.cache` [4] retains lookup results for each
+	Metadata is loaded during module import. `functools.cache` retains lookup results for each
 	argument; this function does not refresh cached files or request new sequence data.
-
-	References
-	----------
-	[1] `mapFolding.oeis._beDRY.formatOEISid`
-
-	[2] `dictionaryOEIS`
-
-	[3] `mapFolding.oeis._dataBaskets.MetadataOEISid`
-
-	[4] functools.cache - Python standard library.
-		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
 	return dictionaryOEIS[formatOEISid(oeisID)]
 
@@ -72,8 +61,8 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 	(AI generated docstring)
 
 	You can use this function to look up the values loaded for `oeisID` during module import. This
-	function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` [1] and accesses
-	`dictionaryOEIS` [2] without fetching new data.
+	function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` and accesses
+	`dictionaryOEIS` without fetching new data.
 
 	Parameters
 	----------
@@ -84,7 +73,7 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 	-------
 	valuesKnown : dict[int, int]
 		Shared index-to-value dictionary, or `{-errorL33T: -errorL33T}` when the metadata entry or
-		its `valuesKnown` field is absent. The sentinel uses `hunterMakesPy.errorL33T` [3]. A stored
+		its `valuesKnown` field is absent. The sentinel uses `hunterMakesPy.errorL33T`. A stored
 		empty dictionary remains empty.
 
 	See Also
@@ -94,19 +83,8 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 
 	Caching
 	-------
-	`functools.cache` [4] retains lookup results for each argument. Returned dictionaries are not
+	`functools.cache` retains lookup results for each argument. Returned dictionaries are not
 	copied; mutations remain visible to later lookups using the same stored result.
-
-	References
-	----------
-	[1] `mapFolding.oeis._beDRY.formatOEISid`
-
-	[2] `dictionaryOEIS`
-
-	[3] hunterMakesPy - Official repository.
-		https://github.com/hunterhogan/hunterMakesPy
-	[4] functools.cache - Python standard library.
-		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
 	return get_in((str(formatOEISid(oeisID)),), dictionaryOEIS, dict[str, dict[int, int]]()).get(
 		'valuesKnown', dict[int, int]([(-errorL33T, -errorL33T)]))
@@ -117,22 +95,22 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 	(AI generated docstring)
 
 	You can use this function to access a supported sequence as rows for further analysis. This
-	function obtains the sequence metadata through `mapFolding.oeis.getMetadata` [1] and returns
+	function obtains the sequence metadata through `mapFolding.oeis.getMetadata` and returns
 	a new dictionary mapping row numbers to lists of known values.
 
 	Row Boundaries
 	--------------
-	`mapFolding.oeis._dataBaskets.MetadataOEISid` [2] supplies the starting row through `rowStart`,
+	`mapFolding.oeis._dataBaskets.MetadataOEISid` supplies the starting row through `rowStart`,
 	falling back to `offset`. When metadata supplies `rowLength`, the function evaluates `rowLength`
 	for successive row numbers. Otherwise, requested row lengths begin at one and increase by one,
 	regardless of the starting row number.
 
-	`mapFolding.dataStructures.makeTriangle` [3] groups consecutive known indices starting at
+	`mapFolding.dataStructures.makeTriangle` groups consecutive known indices starting at
 	`offset`. Grouping ends at the first missing sequence index. A
 	partially known final row is retained. Grouping stops at the first empty row, including an empty
 	row caused by a requested length of zero. The function does not check whether the sequence
 	represents a triangle.
-	Use `getTriangleTerms` [4] to preserve known values beyond gaps in the flat indices.
+	Use `getTriangleTerms` to preserve known values beyond gaps in the flat indices.
 
 	Parameters
 	----------
@@ -145,6 +123,11 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 	triangleRows : 形Triangle
 		Consecutive row numbers mapped to newly allocated lists of known sequence values.
 
+	See Also
+	--------
+	`getTriangleTerms`
+		Preserve available cells beyond gaps in the flat sequence indices.
+
 	Unknown Sequences
 	-----------------
 	This function propagates `KeyError` from the metadata lookup if the normalized `oeisID` is
@@ -152,26 +135,13 @@ def getTriangleRows(oeisID: OEISid) -> 形Triangle:
 
 	Examples
 	--------
-	`mapFolding.oeis.A400429.checkFormulas` [5] obtains the stored semi-meander rows.
+	`mapFolding.oeis.A400429oeisByFormula.checkFormulas` obtains the stored semi-meander rows.
 
 		```python
 		from mapFolding.oeis import getTriangleRows
 
 		triangleRows = getTriangleRows('A400429')
 		```
-
-	References
-	----------
-	[1] `mapFolding.oeis.getMetadata`
-
-	[2] `mapFolding.oeis._dataBaskets.MetadataOEISid`
-
-	[3] `mapFolding.dataStructures.makeTriangle`
-
-	[4] `getTriangleTerms`
-
-	[5] `mapFolding.oeis.A400429.checkFormulas`
-
 	"""
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
@@ -187,8 +157,8 @@ def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
 	(AI generated docstring)
 
 	You can use this function to inspect known triangle cells even when some flat sequence indices
-	are missing. This function uses `getMetadata` [1] for the row layout and
-	`mapFolding.dataStructures.lookupToTriangle` [2] to preserve each available cell's column.
+	are missing. This function uses `getMetadata` for the row layout and
+	`mapFolding.dataStructures.lookupToTriangle` to preserve each available cell's column.
 
 	Parameters
 	----------
@@ -200,23 +170,17 @@ def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
 	triangleTerms : 形TriangleSparse
 		New dictionaries mapping row numbers to available columns, with columns starting at one.
 
+	See Also
+	--------
+	`getTriangleRows`
+		Read dense rows from the consecutive prefix of known sequence indices.
+
 	Row Layout
 	----------
 	The first row uses `rowStart`, or `offset` when `rowStart` is absent. Flat indices start at
 	`offset`. A supplied `rowLength` determines each complete row length; otherwise lengths start
 	at one and increase by one. Rows through the largest stored flat index are retained, including
 	empty rows caused by gaps. A partial final row keeps the original column keys.
-
-	See Also
-	--------
-	`getTriangleRows`
-		Read dense rows from the consecutive prefix of known sequence indices.
-
-	References
-	----------
-	[1] `getMetadata`
-
-	[2] `mapFolding.dataStructures.lookupToTriangle`
 	"""
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	rowStart: int = metadata.get('rowStart', metadata['offset'])
@@ -231,8 +195,8 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = T
 	(AI generated docstring)
 
 	You can use this function to compare one diagonal with a formula or independently computed
-	counts. This function obtains sparse rows from `getTriangleTerms` [1] and selects cells with
-	`mapFolding.dataStructures.getLookupDiagonal` [2].
+	counts. This function obtains sparse rows from `getTriangleTerms` and selects cells with
+	`mapFolding.dataStructures.getLookupDiagonal`.
 
 	Parameters
 	----------
@@ -253,12 +217,6 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = T
 	Right-edge selection uses the metadata `rowLength`, or the default lengths starting at one.
 	Missing cells therefore retain their positions relative to the complete row's edge.
 	Selection propagates `ValueError` from the diagonal selector if `次diagonal` is negative.
-
-	References
-	----------
-	[1] `getTriangleTerms`
-
-	[2] `mapFolding.dataStructures.getLookupDiagonal`
 	"""
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return getLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
@@ -270,8 +228,8 @@ def getTriangleIndices(oeisID: OEISid, n: int) -> range:
 	(AI generated docstring)
 
 	You can use this function to match a row calculation with b-file indices. This function reads
-	the row layout from `getMetadata` [1] and delegates index calculation to
-	`mapFolding.dataStructures.makeGroupKeys` [2].
+	the row layout from `getMetadata` and delegates index calculation to
+	`mapFolding.dataStructures.makeGroupKeys`.
 
 	Parameters
 	----------
@@ -291,12 +249,6 @@ def getTriangleIndices(oeisID: OEISid, n: int) -> range:
 	A supplied `rowLength` determines row lengths. Otherwise lengths start at one and increase
 	by one, independently of the first row number.
 	Index calculation propagates `ValueError` if `n` precedes the first metadata row.
-
-	References
-	----------
-	[1] `getMetadata`
-
-	[2] `mapFolding.dataStructures.makeGroupKeys`
 	"""
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return makeGroupKeys(n, keyGroupFirst=metadata.get('rowStart', metadata['offset']), keyFlatFirst=metadata['offset'],
@@ -308,7 +260,7 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	(AI generated docstring)
 
 	You can use this function to retain computed terms between research runs. This function merges
-	`sequence` with the known values from `getMetadata` [1] and the existing local b-file [2],
+	`sequence` with the known values from `getMetadata` and the existing local b-file,
 	then returns the local path. This function does not submit data to OEIS.
 
 	Parameters
@@ -322,18 +274,18 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	Returns
 	-------
 	pathFilename : Path
-		B-file path under `pathCache` [3]. The path may remain absent when there are no terms to add.
+		B-file path under `pathCache`. The path may remain absent when there are no terms to add.
 
 	Merge and Persistence
 	---------------------
 	Existing file values take precedence over metadata values. Metadata values take precedence
-	over `sequence`. The negative `hunterMakesPy.errorL33T` sentinel [4] is excluded from additions.
+	over `sequence`. The negative `hunterMakesPy.errorL33T` sentinel is excluded from additions.
 	When missing indices are added, comment lines are retained before all terms and
-	`mapFolding.oeis.formatBFile` [5] writes the terms in ascending index order. No rewrite occurs
+	`mapFolding.oeis.formatBFile` writes the terms in ascending index order. No rewrite occurs
 	when there are no missing indices.
 
 	The shared `valuesKnown` dictionary is cleared and updated in place from the merged local
-	values, in index order. Existing references returned by `getValuesKnown` [6] observe this
+	values, in index order. Existing references returned by `getValuesKnown` observe this
 	update. `valueUnknown` becomes one greater than the largest stored index, or `offset` when
 	there are no terms. Gaps below that index remain possible.
 
@@ -344,20 +296,6 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 		```python
 		updateBFile('A400429', {nT: aOFn下k})
 		```
-
-	References
-	----------
-	[1] `getMetadata`
-
-	[2] OEIS b-files.
-		https://oeis.org/wiki/B-files
-	[3] `mapFolding.oeis._theSSOT.pathCache`
-
-	[4] hunterMakesPy.
-		https://github.com/hunterhogan/hunterMakesPy
-	[5] `mapFolding.oeis.formatBFile`
-
-	[6] `getValuesKnown`
 	"""
 	oeisID = formatOEISid(oeisID)
 	metadata: MetadataOEISid = getMetadata(oeisID)
@@ -383,8 +321,8 @@ def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mappin
 
 	You can use this function to save row computations without converting column positions to
 	flat indices yourself. This function flattens `triangle` using
-	`mapFolding.dataStructures.triangleToLookup` [1], then delegates persistence and shared-value
-	updates to `updateBFile` [2].
+	`mapFolding.dataStructures.triangleToLookup`, then delegates persistence and shared-value
+	updates to `updateBFile`.
 
 	Parameters
 	----------
@@ -404,12 +342,6 @@ def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mappin
 	The metadata `offset` selects the first flat index; `rowStart` selects the first row, falling
 	back to `offset`. A supplied `rowLength` sets each complete row length. Otherwise lengths
 	start at one and increase by one. Missing rows and columns keep their flat index positions.
-
-	References
-	----------
-	[1] `mapFolding.dataStructures.triangleToLookup`
-
-	[2] `updateBFile`
 	"""
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	return updateBFile(oeisID, triangleToLookup(triangle, keyGroupFirst=metadata.get('rowStart', metadata['offset']),
@@ -423,8 +355,8 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 
 	(AI generated docstring)
 
-	This function obtains OEIS b-file text [1] through `mapFolding.kitFilesystem.getCacheOrURL` [2]
-	and parses the text with `mapFolding.oeis._beDRY.parse_bFile` [3].
+	This function obtains OEIS b-file text through `mapFolding.kitFilesystem.getCacheOrURL`
+	and parses the text with `mapFolding.oeis._beDRY.parse_bFile`.
 
 	Parameters
 	----------
@@ -440,15 +372,6 @@ def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
 	-----
 	UserWarning
 		If retrieval returns empty text.
-
-	References
-	----------
-	[1] B-files - OEIS Wiki.
-		https://oeis.org/wiki/B-files
-	[2] `mapFolding.kitFilesystem.getCacheOrURL`
-
-	[3] `mapFolding.oeis._beDRY.parse_bFile`
-
 	"""
 	filename: str = oeis_bfile(oeisID)
 	pathFilenameCache: Path = pathCache / filename
@@ -467,8 +390,8 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 
 	(AI generated docstring)
 
-	This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` [1] and retrieves
-	the sequence's text record through `mapFolding.kitFilesystem.getCacheOrURL` [2]. The result
+	This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` and retrieves
+	the sequence's text record through `mapFolding.kitFilesystem.getCacheOrURL`. The result
 	contains the sequence description and starting index.
 
 	Parameters
@@ -481,7 +404,7 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	description : str
 		Sequence description, or a diagnostic message when no description is found.
 	offset : int
-		Starting sequence index, or `hunterMakesPy.errorL33T` [3] when no offset is found.
+		Starting sequence index, or `hunterMakesPy.errorL33T` when no offset is found.
 
 	Warns
 	-----
@@ -491,18 +414,12 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 	Text Fields
 	-----------
 	The parser reads `%N` descriptions and the first comma-separated `%O` offset from matching
-	sequence records in the OEIS internal format [4]. Later matching fields replace earlier values.
+	sequence records in the OEIS internal format [1]. Later matching fields replace earlier values.
 	Invalid offset text propagates `ValueError` from integer conversion.
 
 	References
 	----------
-	[1] `mapFolding.oeis._beDRY.formatOEISid`
-
-	[2] `mapFolding.kitFilesystem.getCacheOrURL`
-
-	[3] hunterMakesPy - Official repository.
-		https://github.com/hunterhogan/hunterMakesPy
-	[4] Internal Format Used in the OEIS.
+	[1] Internal Format Used in the OEIS.
 		https://oeis.org/eishelp1.html
 	"""
 	oeisID = formatOEISid(oeisID)
@@ -543,7 +460,7 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	(AI generated docstring)
 
 	This function loads descriptions, offsets, and b-file values for each identifier in
-	`mapFolding.oeis._theSSOT.oeisIDsImplemented` [1]. The result also supplies row settings for
+	`mapFolding.oeis._theSSOT.oeisIDsImplemented`. The result also supplies row settings for
 	`A259689` and `A400429`, with rows starting at two and complete lengths equal to half the row
 	number rounded down.
 
@@ -557,11 +474,6 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	------------
 	An empty `valuesKnown` dictionary propagates `ValueError` from `max` and prevents completion
 	of the registry.
-
-	References
-	----------
-	[1] `mapFolding.oeis._theSSOT.oeisIDsImplemented`
-
 	"""
 	dictionary: dict[str, MetadataOEISid] = {}
 	for oeisID in oeisIDsImplemented:

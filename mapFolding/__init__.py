@@ -4,7 +4,7 @@
 
 You can use this package to count folding patterns and meander sequence terms, inspect
 computational state, and experiment with generated algorithm variants. Counting entry points are
-available in `mapFolding.basecamp` [1].
+available in `mapFolding.basecamp`.
 
 Elimination algorithms share the state containers in `dataBaskets`. Leaf-domain, pile-choice,
 pinning, and reduction operations are available in the modules listed below, including specialized
@@ -71,9 +71,6 @@ synthesized
 tests
 	Provide package tests and sample data.
 
-References
-----------
-[1] `mapFolding.basecamp`
 """
 
 from __future__ import annotations

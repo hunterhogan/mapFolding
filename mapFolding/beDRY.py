@@ -65,7 +65,7 @@ def distinguishChoicesLeaf(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | 
 	Distinguishing leaf choices
 	--------------------------
 	You can inspect the set-bit count and first set bit with `gmpy2.mpz.bit_count` and
-	`gmpy2.mpz.bit_scan1` [1]. Two set bits identify one leaf plus the sentinel. One set bit identifies
+	`gmpy2.mpz.bit_scan1`. Two set bits identify one leaf plus the sentinel. One set bit identifies
 	the sentinel alone.
 
 	Parameters
@@ -78,10 +78,6 @@ def distinguishChoicesLeaf(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | 
 	leafSpaceOrNone : ChoicesLeaf | Leaf | None
 		The only remaining leaf, `None` for a sentinel-only `ChoicesLeaf`, or the unchanged value.
 
-	References
-	----------
-	[1] gmpy2 integer operations and the mpz type.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	whoAmI: ChoicesLeaf | Leaf | None = choicesLeaf
 	if choicesLeaf吗(choicesLeaf):
@@ -119,8 +115,8 @@ def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
 	(AI generated docstring)
 
 	You can enumerate the leaves represented by `choicesLeaf` in ascending order without changing the
-	input `ChoicesLeaf`. You iterate over the remaining set bits after copying `choicesLeaf` to `gmpy2.xmpz` [1]
-	and clearing the highest bit as the sentinel.
+	input `ChoicesLeaf`. You iterate over the remaining set bits after copying `choicesLeaf` to
+	`gmpy2.xmpz` and clearing the highest bit as the sentinel.
 
 	Parameters
 	----------
@@ -142,10 +138,6 @@ def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
 		)
 		```
 
-	References
-	----------
-	[1] gmpy2 mutable integers and set-bit iteration.
-		https://gmpy2.readthedocs.io/en/latest/advmpz.html
 	"""
 	iteratorOfLeaves: xmpz = xmpz(choicesLeaf)
 	iteratorOfLeaves[-1] = 0
@@ -157,7 +149,7 @@ def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
 	(AI generated docstring)
 
 	You can count the leaf indices represented by `choicesLeaf`, excluding the sentinel from the set-bit
-	count provided by `gmpy2.mpz.bit_count` [1].
+	count provided by `gmpy2.mpz.bit_count`.
 
 	Parameters
 	----------
@@ -181,10 +173,6 @@ def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
 			)
 		```
 
-	References
-	----------
-	[1] gmpy2 integer operations and the mpz type.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return choicesLeaf.bit_count() - 1
 
@@ -194,7 +182,7 @@ def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf
 	(AI generated docstring)
 
 	You can obtain a `ChoicesLeaf` containing every leaf index below `totalLeaves` except the indices in
-	`leaves`. You retain the sentinel while clearing excluded bits with `gmpy2.bit_clear` [1].
+	`leaves`. You retain the sentinel while clearing excluded bits with `gmpy2.bit_clear`.
 
 	Parameters
 	----------
@@ -216,10 +204,6 @@ def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf
 		antiChoicesLeaf = mapFolding.beDRYElimination.makeAntiChoicesLeaf(len(self), leavesPinned.values())
 		```
 
-	References
-	----------
-	[1] gmpy2 integer operations and the mpz type.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return reduce(bit_clear, leaves, bit_mask(totalLeaves + inclusive))
 
@@ -229,7 +213,7 @@ def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 	(AI generated docstring)
 
 	You can encode `leaves` as a `ChoicesLeaf` with a sentinel at `totalLeaves`. You set the leaf bits with
-	`gmpy2.bit_set` [1].
+	`gmpy2.bit_set`.
 
 	Parameters
 	----------
@@ -251,10 +235,6 @@ def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
 		return makeChoicesLeaf(totalLeaves, choicesLeaf)
 		```
 
-	References
-	----------
-	[1] gmpy2 integer operations and the mpz type.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return reduce(bit_set, leaves, bit_set(0, totalLeaves))
 
@@ -293,7 +273,7 @@ def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 
 	(AI generated docstring)
 
-	You can sum the cumulative products from `getMapShapeProducts` [1]. You receive a tuple that includes
+	You can sum the cumulative products from `getMapShapeProducts`. You receive a tuple that includes
 	the initial empty sum and the sum including the total leaf count.
 
 	Parameters
@@ -306,9 +286,6 @@ def getMapShapeProductsSums(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	mapShapeProductsSums : tuple[int, ...]
 		Cumulative sums beginning with `0`, with length `len(mapShape) + 2`.
 
-	References
-	----------
-	[1] `getMapShapeProducts`
 	"""
 	return tuple(accumulate(getMapShapeProducts(mapShape), add, initial=0))
 
@@ -417,15 +394,11 @@ def mapShapeIs2上nDimensions(mapShape: tuple[int, ...], *, youMustBeDimensionsT
 
 	Examples
 	--------
-	`mapFolding.basecamp.countFolds` [1] uses a minimum of two dimensions during algorithm selection.
+	`mapFolding.basecamp.countFolds` uses a minimum of two dimensions during algorithm selection.
 
 		```python
 		mapShapeIs2上nDimensions(mapShape, youMustBeDimensionsTallToRideThis=2)
 		```
-
-	References
-	----------
-	[1] `mapFolding.basecamp.countFolds`
 
 	"""
 	return (youMustBeDimensionsTallToRideThis <= len(mapShape)) and all(map((2).__eq__, mapShape))
@@ -467,13 +440,14 @@ def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | N
 	(AI generated docstring)
 
 	You can use this function to convert a processor-usage preference into a worker count. This
-	function delegates limit interpretation to `hunterMakesPy.parseParameters.defineConcurrencyLimit` [1]. Selecting `'numba'` also changes the active Numba thread limit [2].
+	function delegates limit interpretation to `hunterMakesPy.parseParameters.defineConcurrencyLimit`.
+	Selecting `'numba'` also changes the active Numba thread limit [1].
 
 	Processor Bounds
 	----------------
-	The delegated resolver enforces at least one worker and at most 61 workers on Windows [1].
+	The delegated resolver enforces at least one worker and at most 61 workers on Windows [2].
 	An explicit positive count can exceed the available processor count. With `'numba'`, an
-	unsupported thread count propagates `ValueError` from the Numba setter [2]. Repeated Numba
+	unsupported thread count propagates `ValueError` from the Numba setter [1]. Repeated Numba
 	calls use the currently active thread count as the basis for fractions and reservations.
 
 	Parameters
@@ -492,7 +466,7 @@ def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | N
 
 	Examples
 	--------
-	`mapFolding.basecamp.countFolds` [3] resolves resources before task division.
+	`mapFolding.basecamp.countFolds` resolves resources before task division.
 
 		```python
 		concurrencyLimit = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
@@ -500,11 +474,10 @@ def defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | N
 
 	References
 	----------
-	[1] hunterMakesPy `defineConcurrencyLimit`.
-		https://context7.com/hunterhogan/huntermakespy
-	[2] Numba thread-count controls.
-		https://numba.readthedocs.io/en/stable/user/threading-layer.html
-	[3] `mapFolding.basecamp.countFolds`
+	[1] Numba thread-count controls: Setting the Number of Threads.
+		https://numba.readthedocs.io/en/stable/user/threading-layer.html#setting-the-number-of-threads
+	[2] Python `concurrent.futures.ProcessPoolExecutor`, Windows worker limit.
+		https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor
 
 	"""
 	match concurrencyPackage:
@@ -527,7 +500,7 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	Task Counting
 	-------------
 	Counts greater than `totalLeaves` would count some foldings more than once.
-	`mapFolding.basecamp.countFolds` [1] uses parallel execution only when the resolved count exceeds
+	`mapFolding.basecamp.countFolds` uses parallel execution only when the resolved count exceeds
 	one.
 
 	Parameters
@@ -551,10 +524,6 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 	ValueError
 		If `computationDivisions` has an unsupported value or type, or the selected count exceeds
 		`totalLeaves`.
-
-	References
-	----------
-	[1] `mapFolding.basecamp.countFolds`
 
 	"""
 	taskDivisions = 0
@@ -592,7 +561,7 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 
 	You can use this function to normalize dimension values before counting foldings. This function
 	returns a nonempty tuple in the supplied order and rejects negative dimensions. Zero dimensions
-	are accepted for the special case handled by `mapFolding.basecamp.countFolds` [1].
+	are accepted for the special case handled by `mapFolding.basecamp.countFolds`.
 
 	Dimension Order
 	---------------
@@ -603,7 +572,7 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 	----------
 	mapShape : Sequence[int]
 		Dimension lengths. Integer-compatible values are converted by
-		`hunterMakesPy.parseParameters.intInnit` [2]; boolean elements are rejected.
+		`hunterMakesPy.parseParameters.intInnit`; boolean elements are rejected.
 
 	Returns
 	-------
@@ -617,18 +586,12 @@ def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:
 
 	Examples
 	--------
-	`mapFolding.basecamp.countFolds` [1] validates the supplied dimensions before choosing an algorithm.
+	`mapFolding.basecamp.countFolds` validates the supplied dimensions before choosing an algorithm.
 
 		```python
 		mapShape = validateMapShape(mapShape)
 		```
 
-	References
-	----------
-	[1] `mapFolding.basecamp.countFolds`
-
-	[2] hunterMakesPy `intInnit`.
-		https://context7.com/hunterhogan/huntermakespy
 	"""
 	mapShapeAsList: list[int] = intInnit(mapShape, 'mapShape', Sequence[int])
 	if not mapShapeAsList or any(map((0).__gt__, mapShapeAsList)):

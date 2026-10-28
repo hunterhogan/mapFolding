@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this package to calculate supported terms from the On-Line Encyclopedia of Integer
-Sequences (OEIS) [1], inspect known values, and compare computed results with stored values.
+Sequences (OEIS), inspect known values, and compare computed results with stored values.
 The package exposes sequence dispatch, map-shape conversion, b-file formatting, triangle
 lookups, and the `OEIS_for_n` and `getOEISids` console entry points.
 
@@ -54,13 +54,7 @@ Variables
 Modules
 -------
 byFormula
-	Compute sequence terms from related sequences using the generated formula module [2].
-
-References
-----------
-[1] The On-Line Encyclopedia of Integer Sequences.
-	https://oeis.org/
-[2] `mapFolding.oeis.byFormula`
+	Compute sequence terms from related sequences using the generated formula module.
 """
 from __future__ import annotations
 

@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this module to remove or rename function definitions, rename matching name nodes,
-and resolve output settings before writing source containers from `astToolkit` [1].
+and resolve output settings before writing source containers from `astToolkit`.
 
 Contents
 --------
@@ -18,11 +18,6 @@ Functions
 		Replace datatype import aliases in generated function and module containers.
 	toDisk
 		Write a generated module to the resolved output filename.
-
-References
-----------
-[1] astToolkit tree visitors and source containers.
-	https://context7.com/hunterhogan/asttoolkit
 """
 from __future__ import annotations
 
@@ -47,9 +42,9 @@ def removeFunctionDef(identifier: str, node: ast.AST) -> None:
 	(AI generated docstring)
 
 	You can use this function to delete a `FunctionDef` from a parsed AST subtree without writing
-	the `NodeChanger` traversal inline [1]. The function mutates `node` in place and returns
+	the `NodeChanger` traversal inline. The function mutates `node` in place and returns
 	`None`. The function targets each `FunctionDef.name` value that matches `identifier` through
-	`IfThis.isIdentifier` [2].
+	`IfThis.isIdentifier`.
 
 	Parameters
 	----------
@@ -66,19 +61,11 @@ def removeFunctionDef(identifier: str, node: ast.AST) -> None:
 	Examples
 	--------
 	In `mapFolding.kitAST.matrixMeanders.makeModules.makeCountBigInt`, the generated dispatcher
-	function is removed with the following call [3].
+	function is removed with the following call.
 
 		```python
 		removeFunctionDef(名CallableDispatcher, astModule)
 		```
-
-	References
-	----------
-	[1] astToolkit - Context7
-		https://context7.com/hunterhogan/asttoolkit
-	[2] `mapFolding.kitAST.IfThis`
-
-	[3] `mapFolding.kitAST.matrixMeanders.makeModules.makeCountBigInt`
 	"""
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(identifier)), Then.removeIt).visit(node)
 
@@ -88,9 +75,9 @@ def renameFunctionDef(identifier: str, identifierNew: str, node: ast.AST) -> Non
 	(AI generated docstring)
 
 	You can use this function to retitle a `FunctionDef` inside a parsed AST subtree without
-	writing the `NodeChanger` traversal inline [1]. The function mutates `node` in place and
+	writing the `NodeChanger` traversal inline. The function mutates `node` in place and
 	returns `None`. The function only rewrites `FunctionDef.name` values that match `identifier`
-	through `IfThis.isIdentifier` [2].
+	through `IfThis.isIdentifier`.
 
 	Parameters
 	----------
@@ -109,19 +96,11 @@ def renameFunctionDef(identifier: str, identifierNew: str, node: ast.AST) -> Non
 	Examples
 	--------
 	In `mapFolding.kitAST.matrixMeanders.makeModules.makeCountBigInt`, the source counting
-	function is renamed before the generated module is written [3].
+	function is renamed before the generated module is written.
 
 		```python
 		renameFunctionDef(defaultMatrixMeanders['function']['counting'], 名Callable, astModule)
 		```
-
-	References
-	----------
-	[1] astToolkit - Context7
-		https://context7.com/hunterhogan/asttoolkit
-	[2] `mapFolding.kitAST.IfThis`
-
-	[3] `mapFolding.kitAST.matrixMeanders.makeModules.makeCountBigInt`
 	"""
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(identifier)), Grab.nameAttribute(Then.replaceWith(identifierNew))).visit(node)
 
@@ -130,7 +109,7 @@ def renameName(identifier: str, identifierNew: str, node: ast.AST) -> None:
 
 	(AI generated docstring)
 
-	You can use this function to change each matching `ast.Name.id` [1] in `node` from
+	You can use this function to change each matching `ast.Name.id` in `node` from
 	`identifier` to `identifierNew`. The function updates the supplied tree in place and returns
 	`None`. Attribute names and function-definition names are outside this selection.
 
@@ -142,11 +121,6 @@ def renameName(identifier: str, identifierNew: str, node: ast.AST) -> None:
 		Replacement name identifier.
 	node : ast.AST
 		Syntax tree or subtree to traverse and modify.
-
-	References
-	----------
-	[1] Python abstract syntax tree node definitions.
-		https://docs.python.org/3/library/ast.html
 	"""
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(identifier)), Grab.idAttribute(Then.replaceWith(identifierNew))).visit(node)
 
@@ -189,7 +163,7 @@ def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords:
 	------------------
 	`fileExtension` and `pathFilename` are read only from `override`, not from `keywords`.
 	An explicit truthy `pathFilename` bypasses filename construction. Otherwise,
-	`mapFolding.kitAST.paths.getPathFilename` constructs the destination [1].
+	`mapFolding.kitAST.paths.getPathFilename` constructs the destination.
 
 	Parameters
 	----------
@@ -212,17 +186,11 @@ def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords:
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding._count` uses this call [2].
+	The module `mapFolding.kitAST.mapFolding._count` uses this call.
 
 		```python
 		toDisk(ingredientsModule, identifiers, override, 名Module)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.paths.getPathFilename`
-
-	[2] `mapFolding.kitAST.mapFolding._count`
 	"""
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or keywords.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
 	pathRoot: PathLike[str] = override.get('pathRoot') or keywords.get('pathRoot') or identifiers['filesystem']['pathRoot']

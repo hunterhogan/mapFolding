@@ -32,15 +32,9 @@ Matrix-meander array layouts
 		Name the record selection and field selection of an array index.
 Numba types
 	形DataclassNumba
-		Re-export the compiled-state adapter from `mapFolding.dataBasketsAnnex` [1].
+		Re-export the compiled-state adapter from `mapFolding.dataBasketsAnnex`.
 	形StateMapFoldingNumba
-		Re-export the compiled map-folding state type from `mapFolding.dataBasketsAnnex` [2].
-
-References
-----------
-[1] `mapFolding.dataBasketsAnnex.形DataclassNumba`
-
-[2] `mapFolding.dataBasketsAnnex.形StateMapFoldingNumba`
+		Re-export the compiled map-folding state type from `mapFolding.dataBasketsAnnex`.
 
 """
 from __future__ import annotations
@@ -839,7 +833,7 @@ class StateElimination:
 		Crease comparison
 		-----------------
 		You group crease endpoint pairs by coordinate parity and check matching-parity pairs with
-		`mapFolding.algorithms.iff.creaseViolation吗` [1]. Normalize leaf sets and test other assignment
+		`mapFolding.algorithms.iff.creaseViolation吗`. Normalize leaf sets and test other assignment
 		constraints separately.
 
 		Parameters
@@ -852,9 +846,6 @@ class StateElimination:
 		hasViolation : bool
 			`True` when a tested pair of pinned creases crosses.
 
-		References
-		----------
-		[1] `mapFolding.algorithms.iff.creaseViolation吗`
 		"""
 		leafToPile: dict[Leaf, Pile] = {leafValue: pileKey for pileKey, leafValue in DOTitems(permutationSpace.pinnedLeaves())}
 
@@ -878,7 +869,8 @@ class StateElimination:
 		(AI generated docstring)
 
 		You can check that `leaf` is not already pinned, that `self.pile` remains undetermined, and that
-		`self.pile` belongs to the shape-based leaf domain [1]. Check membership in the pile's current leaf
+		`self.pile` belongs to the shape-based leaf domain from
+		`mapFolding.leafDomains.getDomainLeaf`. Check membership in the pile's current leaf
 		`ChoicesLeaf` separately.
 
 		Workbench requirements
@@ -896,9 +888,6 @@ class StateElimination:
 		canConsiderPinning : bool
 			`True` when all three eligibility checks pass.
 
-		References
-		----------
-		[1] `mapFolding.leafDomains.getDomainLeaf`
 		"""
 		return all((
 			self.permutationSpace.leafNotPinned吗(leaf)
@@ -924,17 +913,15 @@ class StateElimination:
 		Parameters
 		----------
 		boxOfFunctionsReduction : Sequence[Callable[[StateElimination, PermutationSpace], PermutationSpace]] | None = None
-			Reduction sequence to apply. A false-valued argument uses the state's preferred sequence, then the
-			default sequence [1] if the preferred sequence is also false-valued.
+			Reduction sequence to apply. A false-valued argument uses the state's preferred
+			sequence, then `mapFolding.reduceIt.boxOfFunctionsReductionDEFAULT` if the preferred
+			sequence is also false-valued.
 
 		Returns
 		-------
 		state : Self
 			The same state with active spaces replaced by the valid reduced results.
 
-		References
-		----------
-		[1] `mapFolding.reduceIt.boxOfFunctionsReductionDEFAULT`
 		"""
 		from mapFolding.reduceIt import boxOfFunctionsReductionDEFAULT  # ruff: ignore[import-outside-top-level]
 		boxOfFunctionsReduction = boxOfFunctionsReduction or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
@@ -971,17 +958,14 @@ class StateElimination:
 
 		(AI generated docstring)
 
-		You can filter the active spaces with `StateElimination.permutationSpaceCreaseViolation吗` [1]. Apply
-		other validity checks or leaf-set reductions separately.
+		You can filter the active spaces with `StateElimination.permutationSpaceCreaseViolation吗`.
+		Apply other validity checks or leaf-set reductions separately.
 
 		Returns
 		-------
 		state : Self
 			The same state with crease-crossing spaces removed from the active list.
 
-		References
-		----------
-		[1] `StateElimination.permutationSpaceCreaseViolation吗`
 		"""
 		boxOfPermutationSpace: list[PermutationSpace] = self.boxOfPermutationSpace.copy()
 		self.boxOfPermutationSpace = []
@@ -1021,12 +1005,12 @@ class StateMapFolding:
 
 	Array Initialization
 	--------------------
-	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
-	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
+	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves`, and the graph is built by
+	`mapFolding.dataStructures.makeConnectionGraph`. Construction does not validate dimension
 	signs. Positive dimensions are expected.
 
 	An array whose `shape` tuple is empty is replaced with storage allocated by
-	`mapFolding.dataStructures.makeDataContainer` [3]. An ordinary empty array with shape `(0,)` is
+	`mapFolding.dataStructures.makeDataContainer`. An ordinary empty array with shape `(0,)` is
 	retained because its shape tuple is not empty. Leaf-neighbor and gap-range arrays normally have
 	one entry per leaf plus a zero sentinel. The gap workspace normally has the square of the leaf
 	count plus one entry. Explicit arrays are retained without shape validation.
@@ -1071,14 +1055,6 @@ class StateMapFolding:
 		Inspect the leaf count derived from `mapShape`.
 	totalFolds : 形TotalFolds
 		Inspect the computed count obtained by multiplying the group count by the leaf count.
-
-	References
-	----------
-	[1] `mapFolding.beDRY.getTotalLeaves`
-
-	[2] `mapFolding.dataStructures.makeConnectionGraph`
-
-	[3] `mapFolding.dataStructures.makeDataContainer`
 
 	"""
 
@@ -1173,7 +1149,7 @@ class StateMapFoldingParallel(StateMapFolding):
 	(AI generated docstring)
 
 	You can use this class to construct a task-specific folding search. This class inherits the
-	arrays, search cursors, and counting property of `StateMapFolding` [1] and adds task selection.
+	arrays, search cursors, and counting property of `StateMapFolding` and adds task selection.
 
 	Task Preconditions
 	------------------
@@ -1187,10 +1163,6 @@ class StateMapFoldingParallel(StateMapFolding):
 		Number of tasks. Initialization replaces zero with the derived leaf count.
 	task次 : 形TotalLeaves = 形TotalLeaves(0)
 		Zero-based task index selecting this state within the divided computation.
-
-	References
-	----------
-	[1] `StateMapFolding`
 
 	"""
 
@@ -1240,12 +1212,12 @@ class StateMapFoldingSymmetric(StateMapFolding):
 
 	Array Initialization
 	--------------------
-	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves` [1], and the graph is built by
-	`mapFolding.dataStructures.makeConnectionGraph` [2]. Construction does not validate dimension
+	The leaf count is calculated by `mapFolding.beDRY.getTotalLeaves`, and the graph is built by
+	`mapFolding.dataStructures.makeConnectionGraph`. Construction does not validate dimension
 	signs. Positive dimensions are expected.
 
 	An array whose `shape` tuple is empty is replaced with storage allocated by
-	`mapFolding.dataStructures.makeDataContainer` [3]. An ordinary empty array with shape `(0,)` is
+	`mapFolding.dataStructures.makeDataContainer`. An ordinary empty array with shape `(0,)` is
 	retained because its shape tuple is not empty. Leaf-neighbor and gap-range arrays normally have
 	one entry per leaf plus a zero sentinel. The gap workspace normally has the square of the leaf
 	count plus one entry. Explicit arrays are retained without shape validation.
@@ -1298,14 +1270,6 @@ class StateMapFoldingSymmetric(StateMapFolding):
 	indices : 形ArrayTotalLeaves3D
 		Inspect precomputed pairs of positions for symmetric-fold comparisons.
 
-	References
-	----------
-	[1] `mapFolding.beDRY.getTotalLeaves`
-
-	[2] `mapFolding.dataStructures.makeConnectionGraph`
-
-	[3] `mapFolding.dataStructures.makeDataContainer`
-
 	"""
 
 	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
@@ -1350,13 +1314,13 @@ class StateMeanders:
 	Initialization
 	--------------
 	A falsy `boundary` is replaced with `n - 1`. An empty `lookupMeanders` is replaced using
-	`mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders` [1]. A supplied nonempty lookup
+	`mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders`. A supplied nonempty lookup
 	is retained, and the bit width and locator mask are recomputed from its largest key.
 	Initialization requires a nonempty lookup after this setup.
 
 	The default capacity is the usable nonnegative value bits shared by
-	`mapFolding.theTypes.形ArcCode` [2] and `mapFolding.theTypes.形Meanders` [3], using NumPy
-	datatype limits [4]. A supplied `bitWidthLimit` replaces that capacity. Transfer-step
+	`mapFolding.theTypes.形ArcCode` and `mapFolding.theTypes.形Meanders`, using NumPy
+	datatype limits [1]. A supplied `bitWidthLimit` replaces that capacity. Transfer-step
 	intermediate values and count aggregation are accounted for by the width predicates.
 
 	Attributes
@@ -1386,7 +1350,7 @@ class StateMeanders:
 
 	Examples
 	--------
-	`mapFolding.basecamp.countMeanders` [5] initializes a state from a family and sequence index.
+	`mapFolding.basecamp.countMeanders` initializes a state from a family and sequence index.
 
 		```python
 		state = StateMeanders(n, kind)
@@ -1394,15 +1358,8 @@ class StateMeanders:
 
 	References
 	----------
-	[1] `mapFolding.algorithms.matrixMeandersShare.makeLookupMeanders`
-
-	[2] `mapFolding.theTypes.形ArcCode`
-
-	[3] `mapFolding.theTypes.形Meanders`
-
-	[4] NumPy datatype reference.
-		https://numpy.org/doc/stable/reference/index.html
-	[5] `mapFolding.basecamp.countMeanders`
+	[1] NumPy `numpy.iinfo`, integer datatype limits.
+		https://numpy.org/doc/stable/reference/generated/numpy.iinfo.html
 
 	"""
 
@@ -1511,15 +1468,11 @@ class StateMeanders:
 
 		Examples
 		--------
-		`mapFolding.basecamp.countMeanders` [1] reads the completed total for saving.
+		`mapFolding.basecamp.countMeanders` reads the completed total for saving.
 
 			```python
 			countTotal: int = state.totalMeanders
 			```
-
-		References
-		----------
-		[1] `mapFolding.basecamp.countMeanders`
 
 		"""
 		return sum(self.lookupMeanders.values()) + self.countAddend

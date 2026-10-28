@@ -24,13 +24,8 @@ Functions
 Module Execution
 ----------------
 Executing this module displays sequence identifiers, descriptions, and usage examples through
-`mapFolding.oeis.getOEISids` [1]. The installed `getOEISids` console command provides the same
+`mapFolding.oeis.getOEISids`. The installed `getOEISids` console command provides the same
 listing.
-
-References
-----------
-[1] `mapFolding.oeis.getOEISids`
-
 """
 from __future__ import annotations
 
@@ -59,7 +54,7 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	(AI generated docstring)
 
 	You can use this function to compare a map shape with the known totals assembled by
-	`makeLookupTotalFoldsKnown` [1]. This function returns the stored total for `mapShape`, or
+	`makeLookupTotalFoldsKnown`. This function returns the stored total for `mapShape`, or
 	`None` when the lookup contains no matching shape.
 
 	Parameters
@@ -80,7 +75,7 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 
 	Examples
 	--------
-	`mapFolding.kitAST.RecipeJob.fromMapShape` [2] queries the known total before estimating a
+	`mapFolding.kitAST.RecipeJob.fromMapShape` queries the known total before estimating a
 	job's size.
 
 		```python
@@ -88,13 +83,6 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 
 		getTotalFoldsKnown(state.mapShape)
 		```
-
-	References
-	----------
-	[1] `makeLookupTotalFoldsKnown`
-
-	[2] `mapFolding.kitAST.RecipeJob.fromMapShape`
-
 	"""
 	lookupTotalFolds: dict[tuple[int, ...], int] = makeLookupTotalFoldsKnown()
 	return lookupTotalFolds.get(tuple(mapShape))
@@ -105,9 +93,9 @@ def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 	(AI generated docstring)
 
 	You can use this function to inspect known folding totals for every map shape represented by
-	`mapFolding.oeis._theSSOT.oeisIDsMapFoldingImplemented` [1]. This function retrieves known
-	values with `mapFolding.oeis.getValuesKnown` [2] and converts sequence indices to dimensions
-	with `makeMapShape` [3].
+	`mapFolding.oeis._theSSOT.oeisIDsMapFoldingImplemented`. This function retrieves known
+	values with `mapFolding.oeis.getValuesKnown` and converts sequence indices to dimensions
+	with `makeMapShape`.
 
 	Returns
 	-------
@@ -119,15 +107,6 @@ def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 	----------
 	Only registered map-folding sequences contribute values. `A007822`, which counts symmetric
 	foldings, is excluded. This function does not filter retrieval sentinels before shape conversion.
-
-	References
-	----------
-	[1] `mapFolding.oeis._theSSOT.oeisIDsMapFoldingImplemented`
-
-	[2] `mapFolding.oeis.getValuesKnown`
-
-	[3] `makeMapShape`
-
 	"""
 	return merge(*[keymap(partial(makeMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in oeisIDsMapFoldingImplemented])
 
@@ -137,8 +116,8 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 	(AI generated docstring)
 
 	You can use this function to obtain the map shape corresponding to `n` for one of the supported
-	folding sequences. This function checks the offset in `mapFolding.oeis._metadata.dictionaryOEIS`
-	[1], then returns the sequence's dimension tuple.
+	folding sequences. This function checks the offset in `mapFolding.oeis._metadata.dictionaryOEIS`,
+	then returns the sequence's dimension tuple.
 
 	Shape Conversion
 	----------------
@@ -173,11 +152,6 @@ def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416'
 
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 		```
-
-	References
-	----------
-	[1] `mapFolding.oeis._metadata.dictionaryOEIS`
-
 	"""
 	if dictionaryOEIS[oeisID]['offset'] <= n:
 		match oeisID:
@@ -209,7 +183,7 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	(AI generated docstring)
 
 	You can use this function to compare `computed` with the stored value at index `n` from
-	`mapFolding.oeis.getValuesKnown` [1]. This function writes the index, a colored match flag,
+	`mapFolding.oeis.getValuesKnown`. This function writes the index, a colored match flag,
 	elapsed seconds, computed value, known value, and optional ratio to standard output.
 
 	Parameters
@@ -221,14 +195,14 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 	computed : int
 		The computed value to compare against the known OEIS value.
 	timeStart : float
-		Start time from `time.perf_counter` [2] for elapsed time calculation.
+		Start time from `time.perf_counter` for elapsed time calculation.
 	ratio : int = 0
 		Number of decimal places for the known-to-computed ratio. Zero hides the ratio.
 
 	Output Fields
 	-------------
 	The index precedes a space; subsequent fields are separated by tabs. Matching values use
-	`hunterMakesPy.ansiColor.GreenOnBlack` [3], and mismatches use `YellowOnRed`. An absent term
+	`hunterMakesPy.ansiColor.GreenOnBlack`, and mismatches use `YellowOnRed`. An absent term
 	uses `-errorL33T` as the known value. When requested, the ratio uses the match color if the
 	float result is an integer and the mismatch color otherwise.
 
@@ -241,15 +215,6 @@ def printEasyRunBenchmark(oeisID: str, n: int, computed: int, timeStart: float, 
 
 		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=0)
 		```
-
-	References
-	----------
-	[1] `mapFolding.oeis.getValuesKnown`
-
-	[2] time.perf_counter - Python standard library.
-		https://docs.python.org/3/library/time.html#time.perf_counter
-	[3] hunterMakesPy - Official repository.
-		https://github.com/hunterhogan/hunterMakesPy
 	"""
 	known: int = getValuesKnown(oeisID).get(n, -errorL33T)
 	match: bool = computed == known
@@ -269,8 +234,8 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 	(AI generated docstring)
 
 	You can use this function to inspect a row computation with its elapsed time. This function
-	uses `mapFolding.oeis.getTriangleIndices` [1] to locate the complete row and
-	`mapFolding.oeis.getValuesKnown` [2] to obtain the reference cells. The function prints the
+	uses `mapFolding.oeis.getTriangleIndices` to locate the complete row and
+	`mapFolding.oeis.getValuesKnown` to obtain the reference cells. The function prints the
 	comparison and returns `None`.
 
 	Parameters
@@ -282,36 +247,25 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 	computed : Sequence[int]
 		Computed cells in column order, starting with the first column.
 	timeStart : float
-		Starting value from `time.perf_counter` [3] for the elapsed-time display.
+		Starting value from `time.perf_counter` for the elapsed-time display.
 	ratio : int = 0
 		Decimal places for known-to-computed ratios on a differing row. Zero hides ratios.
-
-	Output Layout
-	-------------
-	The first line contains the row number, an exact-match flag, elapsed seconds, and `computed`.
-	A match requires equal lengths and equal corresponding values. A differing row prints the
-	known cells on a second aligned line. Missing positions in the shorter row display `'?'`.
-	An unavailable reference value uses the negative `hunterMakesPy.errorL33T` sentinel [4].
-
-	Ratios are printed only for differing rows and only for paired cells. Zero computed cells
-	display `'-'`; integer ratios use the success color even when the ratio differs from
-	one. This function does not calculate sequence terms or save results.
 
 	See Also
 	--------
 	`printEasyRunBenchmark`
 		Compare a single computed sequence term with its known value.
 
-	References
-	----------
-	[1] `mapFolding.oeis.getTriangleIndices`
+	Output Layout
+	-------------
+	The first line contains the row number, an exact-match flag, elapsed seconds, and `computed`.
+	A match requires equal lengths and equal corresponding values. A differing row prints the
+	known cells on a second aligned line. Missing positions in the shorter row display `'?'`.
+	An unavailable reference value uses the negative `hunterMakesPy.errorL33T` sentinel.
 
-	[2] `mapFolding.oeis.getValuesKnown`
-
-	[3] Python `time.perf_counter`.
-		https://docs.python.org/3/library/time.html#time.perf_counter
-	[4] hunterMakesPy.
-		https://github.com/hunterhogan/hunterMakesPy
+	Ratios are printed only for differing rows and only for paired cells. Zero computed cells
+	display `'-'`; integer ratios use the success color even when the ratio differs from
+	one. This function does not calculate sequence terms or save results.
 	"""
 	#=SIN= Intermediate tuple: comparison, aligned output, and ratios consume the known cells separately.
 	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
@@ -338,7 +292,7 @@ def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
 
 	You can use this function to label a benchmark run with `title` and `subtitle`. This function
 	writes the original labels to standard output and selects each color from the corresponding
-	ASCII transliteration supplied by `anyascii` [1].
+	ASCII transliteration supplied by `anyascii`.
 
 	Parameters
 	----------
@@ -354,8 +308,8 @@ def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
 
 	Color Selection
 	---------------
-	Each transliterated label is converted with `int` using base 36 [2]. The result modulo the
-	number of entries in `hunterMakesPy.ansiColor` [3] selects the color. Labels can select the same
+	Each transliterated label is converted with `int` using base 36. The result modulo the
+	number of entries in `hunterMakesPy.ansiColor` selects the color. Labels can select the same
 	color. This function resets terminal colors after printing both labels and a newline.
 
 	Examples
@@ -367,15 +321,6 @@ def printEasyRunHeader(title: str | int, subtitle: str | int) -> None:
 
 		printEasyRunHeader(oeisID, flow)
 		```
-
-	References
-	----------
-	[1] AnyAscii - Official repository.
-		https://github.com/anyascii/anyascii
-	[2] int - Python standard library.
-		https://docs.python.org/3/library/functions.html#int
-	[3] hunterMakesPy - Official repository.
-		https://github.com/hunterhogan/hunterMakesPy
 	"""
 	sys.stdout.write(f"{ansiColor[int(anyascii.anyascii(str(title)), 36) % len(ansiColor)]}{title} ")
 	sys.stdout.write(f"{ansiColor[int(anyascii.anyascii(str(subtitle)), 36) % len(ansiColor)]} {subtitle} ")

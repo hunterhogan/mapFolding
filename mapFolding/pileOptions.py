@@ -65,15 +65,16 @@ def filterCeiling(pile: Pile, totalDimensions: int, leaf: Leaf) -> bool:
 	pileBelowCeiling : bool
 		`True` when `pile` is below the exclusive upper bound.
 
+	See Also
+	--------
+	`mapFolding.leafDomains.getDomainLeaf`
+		Obtain the complete pile domain instead of testing an individual restriction.
+
 	Domain Bounds
 	-------------
 	Supply a map whose axis lengths are `2`. You can obtain the pile domain from
-	`mapFolding.leafDomains.getDomainLeaf` [1]. Combine the predicates to check membership in the
+	`mapFolding.leafDomains.getDomainLeaf`. Combine the predicates to check membership in the
 	complete domain.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	return pile < int(bit_mask(totalDimensions) ^ bit_mask(totalDimensions - 工dimension首零(leaf))) - 工totalDimensionsOdd(leaf) + 2 - (leaf == leafOrigin)
 
@@ -96,15 +97,16 @@ def filterFloor(pile: Pile, leaf: Leaf) -> bool:
 	pileAboveFloor : bool
 		`True` when `pile` is at or above the inclusive lower bound.
 
+	See Also
+	--------
+	`mapFolding.leafDomains.getDomainLeaf`
+		Obtain the complete pile domain instead of testing an individual restriction.
+
 	Domain Bounds
 	-------------
 	Supply a map whose axis lengths are `2`. You can obtain the pile domain from
-	`mapFolding.leafDomains.getDomainLeaf` [1]. Combine the predicates to check membership in the
+	`mapFolding.leafDomains.getDomainLeaf`. Combine the predicates to check membership in the
 	complete domain.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	return int(bit_flip(0, 工dimensionTail(leaf) + 1)) + 工totalDimensionsOdd(leaf) - 1 - (leaf == leafOrigin) <= pile
 
@@ -128,15 +130,16 @@ def filterParity(pile: Pile, leaf: Leaf) -> bool:
 	parityMatches : bool
 		`True` when the pile parity matches the domain start.
 
+	See Also
+	--------
+	`mapFolding.leafDomains.getDomainLeaf`
+		Obtain the complete pile domain instead of testing an individual restriction.
+
 	Domain Bounds
 	-------------
 	Supply a map whose axis lengths are `2`. You can obtain the pile domain from
-	`mapFolding.leafDomains.getDomainLeaf` [1]. Combine the predicates to check membership in the
+	`mapFolding.leafDomains.getDomainLeaf`. Combine the predicates to check membership in the
 	complete domain.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains.getDomainLeaf`
 	"""
 	return (pile & 1) == ((int(bit_flip(0, 工dimensionTail(leaf) + 1)) + 工totalDimensionsOdd(leaf) - 1 - (leaf == leafOrigin)) & 1)
 
@@ -162,23 +165,22 @@ def filterDoubleParity(pile: Pile, totalDimensions: int, leaf: Leaf) -> bool:
 	secondBitMatches : bool
 		`True` when the extra spacing test passes or does not apply.
 
+	See Also
+	--------
+	`mapFolding.leafDomains.getDomainLeaf`
+		Obtain the complete pile domain instead of testing an individual restriction.
+
 	Domain Bounds
 	-------------
 	Supply a map whose axis lengths are `2`. You can obtain the pile domain from
-	`mapFolding.leafDomains.getDomainLeaf` [1]. Combine the predicates to check membership in the
+	`mapFolding.leafDomains.getDomainLeaf`. Combine the predicates to check membership in the
 	complete domain.
 
 	Second Bit
 	----------
-	You can identify the special leaf as `首零(totalDimensions) + 零` with the positional-numeral system [2].
+	You can identify the special leaf as `首零(totalDimensions) + 零` with the positional-numeral system.
 	You compare bit `1` of `pile` with bit `1` of the domain start. Combine this predicate with
 	`filterParity` to enforce spacing of four piles.
-
-	References
-	----------
-	[1] `mapFolding.leafDomains.getDomainLeaf`
-
-	[2] `mapFolding._semiotics`
 	"""
 	if leaf != 首零(totalDimensions) + 零:
 		return True
@@ -208,7 +210,7 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	(AI generated docstring)
 
 	You can use the map shape in `state` to compute possible leaves at `pile`. You receive bounds and
-	parity restrictions from the cached shape-based calculation [1] for supported maps whose dimension
+	parity restrictions from the cached shape-based calculation for supported maps whose dimension
 	lengths are all two, or every leaf for other shapes.
 
 	Parameters
@@ -227,10 +229,6 @@ def getChoicesLeaf(state: StateElimination, pile: Pile) -> ChoicesLeaf:
 	--------
 	`getLookupChoicesLeaf`
 		Compute `ChoicesLeaf` values for every pile.
-
-	References
-	----------
-	[1] `mapFolding.pileOptions._getChoicesLeaf`
 	"""
 	return _getChoicesLeaf(pile, state.totalDimensions, state.mapShape, state.totalLeaves)
 

@@ -197,17 +197,11 @@ def getLeafSuccessors(state: StateElimination) -> dict[Leaf, dict[Pile, list[Lea
 
 	Cached Requirements
 	-------------------
-	You derive requirements from `mapFolding.leafDomains.getLookupDomainsLeaves` [1]. You require
+	You derive requirements from `mapFolding.leafDomains.getLookupDomainsLeaves`. You require
 	relative order without requiring adjacent piles. For supported map shapes, you reuse mutable
-	dictionaries through `functools.cache` [2]. Treat returned dictionaries and nested lists as
+	dictionaries through `functools.cache`. Treat returned dictionaries and nested lists as
 	read-only.
 
-	References
-	----------
-	[1] `mapFolding.leafDomains.getLookupDomainsLeaves`
-
-	[2] Python `functools.cache`.
-		https://docs.python.org/3/library/functools.html#functools.cache
 	"""
 	return _getDictionaryConditionalLeafSuccessors(state.mapShape)
 @cache

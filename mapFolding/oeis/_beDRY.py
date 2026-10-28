@@ -16,7 +16,7 @@ def formatBFile(sequence: Mapping[int, int]) -> str:
 
 	(AI generated docstring)
 
-	You can use this function to prepare integer sequence terms for OEIS b-file storage [1].
+	You can use this function to prepare integer sequence terms for OEIS b-file storage.
 	Each record contains an index, a space, a value, and a newline. No header or comments are added.
 
 	Parameters
@@ -28,11 +28,6 @@ def formatBFile(sequence: Mapping[int, int]) -> str:
 	-------
 	contents : str
 		Sorted b-file records, or an empty string when no terms are supplied.
-
-	References
-	----------
-	[1] OEIS b-files.
-		https://oeis.org/wiki/B-files
 	"""
 	return ''.join(map(lambda term: f"{term[0]} {term[1]}\n", sorted(sequence.items())))  # ruff: ignore[unnecessary-map]
 
@@ -50,7 +45,7 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 
 	(AI generated docstring)
 
-	You can use this function to convert downloaded or cached OEIS b-file text [1] into integer
+	You can use this function to convert downloaded or cached OEIS b-file text into integer
 	index-value pairs. This function returns the parsed dictionary, with a sentinel entry when
 	`oeisData` is the empty string.
 
@@ -59,9 +54,9 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 	Each line is stripped before empty lines and lines starting with `'#'` are removed. Indented
 	comments and whitespace-only lines are therefore ignored.
 
-	Each remaining line is split on whitespace [2]. Only the first two fields are converted to
+	Each remaining line is split on whitespace. Only the first two fields are converted to
 	integers; additional fields are ignored. Repeated indices keep the last value at the first
-	occurrence's dictionary position [3]. The function does not sort indices or check that indices
+	occurrence's dictionary position. The function does not sort indices or check that indices
 	are consecutive.
 
 	Parameters
@@ -73,7 +68,7 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 	-------
 	sequence : dict[int, int]
 		Parsed integer pairs. The empty string returns `{-errorL33T: -errorL33T}`, using
-		`hunterMakesPy.errorL33T` [4]. Nonempty text that leaves no data lines after filtering,
+		`hunterMakesPy.errorL33T`. Nonempty text that leaves no data lines after filtering,
 		including whitespace-only input or recognized comment-only input, returns an empty
 		dictionary instead.
 
@@ -82,18 +77,6 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 	This function propagates `ValueError` from dictionary construction if a retained line has
 	fewer than two fields, or from integer conversion if either of the first two fields cannot
 	be converted to an integer.
-
-	References
-	----------
-	[1] B-files - OEIS Wiki.
-		https://oeis.org/wiki/B-files
-	[2] str.split - Python standard library.
-		https://docs.python.org/3/library/stdtypes.html#str.split
-	[3] Dictionary insertion order - Python standard library.
-		https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
-	[4] hunterMakesPy - Official repository.
-		https://github.com/hunterhogan/hunterMakesPy
-
 	"""
 	n_aOFn: dict[int, int] = {-errorL33T: -errorL33T}
 	if oeisData:

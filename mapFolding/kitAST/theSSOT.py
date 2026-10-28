@@ -38,20 +38,25 @@ default = Default(
 	, function={
 		'counting': 'count'
 		, 'dispatcher': 'doTheNeedful'
+		, 'numbaDecorator': 'jit'
+		, 'numbaModule': 'jit_module'
 	}
 	, logicalPath={
 		'algorithm': 'algorithms'
 		, 'default': ''
 		, 'synthetic': 'synthesized'
+		, 'numba': 'numba'
 	}
 	, module={
 		'dataBasket': 'dataBaskets'
+		, 'algorithmNumba': 'algorithmNumba'
 		, 'default': ''
 		, 'package': settingsPackage.identifierPackage
 		, 'initializeState': 'initializeState'
 	}
 	, variable={
 		'counting': 'groupsOfFolds'
+		, 'numbaProgressBar': 'ProgressBarGroupsOfFolds'
 		, 'stateInstance': 'state'
 	}
 )
@@ -60,11 +65,7 @@ default = Default(
 (AI generated docstring)
 
 This mapping supplies package roots, source and generated logical paths, state names,
-and base counting and dispatcher names. The specialized defaults copy this mapping [1].
-
-References
-----------
-[1] `mapFolding.theTypes.Default`
+and base counting and dispatcher names. The specialized defaults copy this mapping.
 """
 
 defaultMapFolding: Default = deepcopy(default)
@@ -73,11 +74,7 @@ defaultMapFolding: Default = deepcopy(default)
 (AI generated docstring)
 
 This mapping extends the base defaults with state initialization, Theorem 2 variants,
-compilation variants, and the source algorithm identifiers [1].
-
-References
-----------
-[1] `mapFolding.theTypes.Default`
+compilation variants, and the source algorithm identifiers.
 """
 defaultMapFolding['function'].update({
 	'initializeState': 'transitionOnGroupsOfFolds'
@@ -105,11 +102,7 @@ defaultMapFoldingSymmetric: Default = deepcopy(defaultMapFolding)
 (AI generated docstring)
 
 This mapping extends the map-folding defaults with symmetric state, filtering, worker
-management, and synchronous and asynchronous generation identifiers [1].
-
-References
-----------
-[1] `mapFolding.theTypes.Default`
+management, and synchronous and asynchronous generation identifiers.
 """
 defaultMapFoldingSymmetric['function'].update({
 	'_processCompletedFutures': '_processCompletedFutures'
@@ -143,11 +136,7 @@ defaultMatrixMeanders: Default = deepcopy(default)
 (AI generated docstring)
 
 This mapping extends the base defaults with shared counting, width tests, pruning
-variants, data containers, and generated matrix-meander paths [1].
-
-References
-----------
-[1] `mapFolding.theTypes.Default`
+variants, data containers, and generated matrix-meander paths.
 """
 defaultMatrixMeanders['function'].update({
 	'bigInt': 'countBigInt'

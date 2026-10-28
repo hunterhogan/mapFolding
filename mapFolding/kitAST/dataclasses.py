@@ -2,7 +2,7 @@
 
 (AI generated docstring)
 
-You can use this module to extract field syntax from Python dataclasses [1], replace
+You can use this module to extract field syntax from Python dataclasses, replace
 state-object parameters with field parameters, and reconstruct state after generated calls.
 
 Contents
@@ -19,11 +19,6 @@ Functions
 		Decompose a source dataclass into field and reconstruction syntax.
 	toFieldsToCallToDataclass
 		Adapt assigned calls to unpack fields and reconstruct a dataclass.
-
-References
-----------
-[1] Python dataclass fields and initialization.
-	https://docs.python.org/3/library/dataclasses.html
 """
 from __future__ import annotations
 
@@ -55,7 +50,7 @@ class ShatteredDataclass:
 	(AI generated docstring)
 
 	You can use this container to carry the field declarations, imports, and reconstruction syntax
-	produced by `shatterDataclass` [1]. Transformations reuse these nodes to replace a state object
+	produced by `shatterDataclass`. Transformations reuse these nodes to replace a state object
 	with individual parameters and a tuple of returned field values.
 
 	Attributes
@@ -94,9 +89,10 @@ class ShatteredDataclass:
 	signatureReturnAnnotation : ast.Subscript
 		Tuple-based return type annotation for functions returning decomposed field values.
 
-	References
-	----------
-	[1] `shatterDataclass`
+	See Also
+	--------
+	`shatterDataclass`
+		Create the field syntax stored in this container.
 	"""
 
 	countingVariableAnnotation: ast.expr
@@ -151,12 +147,12 @@ class DeReConstructField2ast:
 
 	You can use this container to inspect one source field and obtain declarations, parameters,
 	attribute access, and constructor syntax for generated functions. The container copies field
-	settings from Python dataclass metadata [1] and retains required imports.
+	settings from Python dataclass metadata and retains required imports.
 
 	Construction
 	------------
 	The generated initializer accepts `dataclassesDOTdataclassLogicalPathModule`, `dataclassClassDef`,
-	`dataclassesDOTdataclassInstanceIdentifier`, and `field` as initialization-only values [1].
+	`dataclassesDOTdataclassInstanceIdentifier`, and `field` as initialization-only values.
 	The source annotation is read from the assignment for `field.name`.
 
 	Constructor Selection
@@ -202,11 +198,6 @@ class DeReConstructField2ast:
 		Construction selected from the source annotation and field metadata.
 	astConstructor : ast.expr
 		Constructor syntax for scalar values, arrays, or individual tuple elements.
-
-	References
-	----------
-	[1] Python dataclass fields and initialization.
-		https://docs.python.org/3/library/dataclasses.html
 	"""
 
 	dataclassesDOTdataclassLogicalPathModule: dataclasses.InitVar[identifierDotAttribute]
@@ -279,7 +270,7 @@ class DeReConstructField2ast:
 
 		This method records settings from `field`, locates the source annotation in
 		`dataclassClassDef`, and initializes the reusable syntax and import ledger. Array construction
-		uses NumPy [1] when `field.metadata` supplies a truthy `dtype`.
+		uses NumPy when `field.metadata` supplies a truthy `dtype`.
 
 		Parameters
 		----------
@@ -291,11 +282,6 @@ class DeReConstructField2ast:
 			Instance identifier used in generated attribute access.
 		field : dataclasses.Field[Any]
 			Dataclass field supplying its name, settings, defaults, and construction metadata.
-
-		References
-		----------
-		[1] NumPy array construction.
-			https://numpy.org/doc/stable/reference/generated/numpy.array.html
 		"""
 		self.compare = field.compare
 		self.default = field.default if field.default is not dataclasses.MISSING else None
@@ -346,13 +332,13 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	`identifierDataclass`, then obtain syntax for each field in dataclass order, including inherited
 	fields. Each annotation and its imports come from the class that declares the field. The result
 	supports replacing access through `identifierDataclassInstance` with individual field names.
-	The returned container is a `ShatteredDataclass` [1].
+	The returned container is a `ShatteredDataclass`.
 
 	Field Metadata
 	--------------
 	The last field with truthy `theCountingIdentifier` metadata supplies the counting identifier.
 	Array fields use `dtype` metadata. Tuple element constructors retain the source annotation's
-	alias names. Fields with `init=False` are excluded from constructor keywords [2].
+	alias names. Fields with `init=False` are excluded from constructor keywords.
 
 	Parameters
 	----------
@@ -375,7 +361,7 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding._count` uses this call [3].
+	The module `mapFolding.kitAST.mapFolding._count` uses this call.
 
 		```python
 		shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
@@ -454,15 +440,11 @@ def removeDataclass(ingredients: IngredientsFunction, shatteredDataclass: Shatte
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding._count` uses this call [1].
+	The module `mapFolding.kitAST.mapFolding._count` uses this call.
 
 		```python
 		removeDataclass(ingredientsFunction, shatteredDataclass)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding._count`
 	"""
 	ingredients.astFunctionDef.args = Make.arguments(list_arg=shatteredDataclass.boxOf_argAnnotated)
 	ingredients.astFunctionDef.returns = shatteredDataclass.signatureReturnAnnotation
@@ -501,15 +483,11 @@ def toFieldsToCallToDataclass(ingredients: IngredientsFunction, identifierCallee
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding._count` uses this call [1].
+	The module `mapFolding.kitAST.mapFolding._count` uses this call.
 
 		```python
 		toFieldsToCallToDataclass(unRepackDataclass, 名CallableTarget, shatteredDataclassParallel)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding._count`
 	"""
 	AssignAndCall: ast.Assign = Make.Assign([shatteredDataclass.fragments4AssignmentOrParameters], value=Make.Call(Make.Name(identifierCallee), shatteredDataclass.boxOfName4Parameters))
 	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(identifierCallee)), Then.replaceWith(AssignAndCall)).visit(ingredients.astFunctionDef)

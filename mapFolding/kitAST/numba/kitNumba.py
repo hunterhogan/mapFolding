@@ -114,11 +114,6 @@ class ParametersNumba(TypedDict):
 		Explicit signature strings to pass as a list to the generated decorator.
 	target : NotRequired[str]
 		Compiler target name forwarded when supplied as a string.
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 	"""
 
 	_dbg_extend_lifetimes: NotRequired[bool]
@@ -155,11 +150,6 @@ parametersNumbaDefault: Final[ParametersNumba] = {'_nrt': True, 'boundscheck': F
 This mapping requests caching, numeric error handling, relaxed floating-point transformations,
 inlining, and compilation without Python object mode through Numba [1]. Bounds checking and
 automatic parallel transformations are disabled.
-
-References
-----------
-[1] Numba compilation options and signatures.
-	https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 """
 
 parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'numpy', 'fastmath': True, 'forceinline': True}
@@ -169,11 +159,6 @@ parametersNumbaLight: Final[ParametersNumba] = {'cache': True, 'error_model': 'n
 
 This mapping requests caching, the `numpy` error model, relaxed floating-point transformations,
 and LLVM inlining through Numba [1]. Omitted options use compiler defaults.
-
-References
-----------
-[1] Numba compilation options and signatures.
-	https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 """
 
 名moduleNumbaDataType: identifierDotAttribute = 'numba'
@@ -183,11 +168,6 @@ References
 
 The decorator generator imports compilation functions and discovered datatype names from
 this module. The initial value is `numba` [1].
-
-References
-----------
-[1] Numba compilation options and signatures.
-	https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 """
 
 名callableDecorator: str = 'jit'
@@ -198,10 +178,6 @@ References
 The decorator generator uses this identifier for both the import and decorator call.
 The initial value selects Numba `jit` [1].
 
-References
-----------
-[1] Numba compilation options and signatures.
-	https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 """
 
 def _bool_str吗(parameterValue: Any) -> TypeIs[bool | str]:
@@ -262,14 +238,6 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		```python
 		decorateCallableWithNumba(ingredientsFunction, parametersNumba)
 		```
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
-	[2] `parametersNumbaDefault`
-
-	[3] `mapFolding.kitAST.mapFolding._count`
 	"""
 	def unhandledDecorators(astCallable: ast.FunctionDef) -> ast.FunctionDef:
 		"""Remove existing decorators and warn once for each removed decorator.
@@ -318,11 +286,6 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, paramete
 		-------
 		signatureSyntax : ast.Subscript | ast.Name | None
 			Scalar name, array subscript, or `None` when no supported translation exists.
-
-		References
-		----------
-		[1] Numba compilation options and signatures.
-			https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
 		"""
 		returnMe: ast.Subscript | ast.Name | None = None
 		if isinstance(signatureElement.annotation, ast.Subscript) and isinstance(signatureElement.annotation.slice, ast.Tuple):
@@ -407,12 +370,6 @@ class SpicesJobNumba:
 		Argument identifier used for the progress object in generated code.
 	parametersNumba : ParametersNumba
 		Compiler options; each default instance receives a copy of `parametersNumbaDefault` [2].
-
-	References
-	----------
-	[1] `mapFolding.kitAST.numba.makeJob.makeJobNumba`
-
-	[2] `parametersNumbaDefault`
 	"""
 
 	useNumbaProgressBar: bool = True
@@ -461,14 +418,6 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 		```python
 		make_jit_module(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] Numba compilation options and signatures.
-		https://numba.readthedocs.io/en/stable/reference/jit-compilation.html
-	[2] `parametersNumbaLight`
-
-	[3] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or default
 	parametersNumba: ParametersNumba = keywordArguments.get('parametersNumba') or parametersNumbaLight

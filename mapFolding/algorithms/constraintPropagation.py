@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can model pile assignments, leaf ordering, and forbidden crease crossings with the OR-Tools CP-SAT
-solver [1]. Use the entry point to distribute disjoint permutation spaces across worker processes.
+solver. Use the entry point to distribute disjoint permutation spaces across worker processes.
 
 Contents
 --------
@@ -13,10 +13,6 @@ Functions
 	doTheNeedful
 		Count folding representatives across concurrently solved permutation spaces.
 
-References
-----------
-[1] Google OR-Tools CP-SAT solver and solution enumeration.
-	https://developers.google.com/optimization/cp/cp_solver
 """
 
 from __future__ import annotations
@@ -51,7 +47,7 @@ def count(state: StateElimination) -> StateElimination:
 
 	(AI generated docstring)
 
-	You can enumerate solutions of `state.permutationSpace` with the OR-Tools CP-SAT solver [1]. You
+	You can enumerate solutions of `state.permutationSpace` with the OR-Tools CP-SAT solver. You
 	receive the same `state` with its representative count and folding collection replaced by the solver
 	results and its symmetry multipliers recorded.
 
@@ -77,10 +73,6 @@ def count(state: StateElimination) -> StateElimination:
 	state : StateElimination
 		The same state with `groupsOfFolds`, `boxOfFolding`, and symmetry multipliers updated.
 
-	References
-	----------
-	[1] Google OR-Tools CP-SAT solver and solution enumeration.
-		https://developers.google.com/optimization/cp/cp_solver
 	"""
 	model = cp_model.CpModel()
 
@@ -224,19 +216,19 @@ def count(state: StateElimination) -> StateElimination:
 def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateElimination:
 	"""Count folding representatives across concurrently solved permutation spaces.
 
-	You can submit each active permutation space to `count` [1] in a separate task and accumulate task
+	You can submit each active permutation space to `count` in a separate task and accumulate task
 	counts in `state.groupsOfFolds`. When you supply no active spaces, you start with origin pinning and
-	default reductions [2].
+	default reductions.
 
 	Result collection
 	-----------------
 	You receive a reset workbench permutation space, with worker folding collections excluded from
 	`state.boxOfFolding`. For seven dimensions, you also save nonempty task results to temporary research
-	CSV files with `mapFolding.kitFilesystem.writeAlbum` [3].
+	CSV files with `mapFolding.kitFilesystem.writeAlbum`.
 
 	Concurrency
 	-----------
-	You run tasks through `concurrent.futures.ProcessPoolExecutor` [4] and wait for every task to finish.
+	You run tasks through `concurrent.futures.ProcessPoolExecutor` and wait for every task to finish.
 	You receive any task failure as an exception.
 
 	Parameters
@@ -252,16 +244,6 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		The same state with task counts accumulated, multipliers copied from task results, and active spaces
 		cleared.
 
-	References
-	----------
-	[1] `count`
-
-	[2] `mapFolding.reduceIt.boxOfFunctionsReductionDEFAULT`
-
-	[3] `mapFolding.kitFilesystem.writeAlbum`
-
-	[4] Python concurrent.futures.ProcessPoolExecutor.
-		https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor
 	"""
 	if not state.boxOfPermutationSpace:
 		"""Lunnon Theorem 2(a): `totalFolds` is divisible by `totalLeaves`; pin `leafOrigin` at `pileOrigin`, which eliminates other leaves at `pileOrigin`."""

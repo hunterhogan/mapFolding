@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this module to embed state values and insert datatype conversions for generated
-counting jobs. On Linux, generation also calls `mapFolding.kitAST.linux.toCodon` [1].
+counting jobs. On Linux, generation also calls `mapFolding.kitAST.linux.toCodon`.
 
 Contents
 --------
@@ -15,10 +15,6 @@ Functions
 Variables
 	boxOfSettings形
 		Access the fixed datatype substitutions used during source preparation.
-
-References
-----------
-[1] `mapFolding.kitAST.linux.toCodon`
 """
 from __future__ import annotations
 
@@ -60,7 +56,7 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 	You can use this function to specialize `job` by embedding state values, inserting datatype
 	conversions, replacing datatype imports, and adding a standalone launcher.
 	The function writes the Python source. On Linux, the function also calls
-	`mapFolding.kitAST.linux.toCodon` [1], which rewrites that source and builds an executable.
+	`mapFolding.kitAST.linux.toCodon`, which rewrites that source and builds an executable.
 	The function returns the configured source path on every platform.
 
 	Parameters
@@ -75,17 +71,11 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [2].
+	The module `mapFolding.kitAST.codon.makeJob` uses this call.
 
 		```python
 		makeJob(fromMapShape(mapShape))
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.linux.toCodon`
-
-	[2] `mapFolding.kitAST.codon.makeJob`
 	"""
 	ingredientsCount: IngredientsFunction = astModuleToIngredientsFunction(raiseIfNone(job.source_astModule), job.identifierCallableSource)
 	ingredientsCount.astFunctionDef.decorator_list = []
@@ -140,15 +130,11 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.codon.makeJob` uses this call [1].
+	The module `mapFolding.kitAST.codon.makeJob` uses this call.
 
 		```python
 		variableCompatibility(ingredientsCount, job)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.codon.makeJob`
 	"""
 	for ast_arg in raiseIfNone(job.shatteredDataclass).boxOf_argAnnotated:
 		identifier: str = ast_arg.arg

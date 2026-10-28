@@ -39,7 +39,14 @@ The cause is a Numba implementation gap:
 3. During lowering—the conversion from typed Numba IR to machine-level operations—Numba needs to cast the original NamedTuple to that anonymous tuple.
 4. Numba’s tuple cast explicitly rejects `BaseNamedTuple`, producing the reported `NotImplementedError`.
 
-`ShapeArray` is a separate typing limitation: Numba’s shape parser accepts integer, `Tuple`, and `UniTuple`, but not `BaseNamedTuple`. A jitclass or `locals` declaration would not change that consumer whitelist. The overload follows Numba’s documented [high-level extension API](https://numba.readthedocs.io/en/stable/extending/index.html).
+`ShapeArray` is a separate typing limitation: Numba’s shape parser accepts integer, `Tuple`, and
+`UniTuple`, but not `BaseNamedTuple`. A jitclass or `locals` declaration would not change that
+consumer whitelist. The overload follows Numba’s documented high-level extension API [1].
+
+References
+----------
+[1] Numba, High-level extension API: Implementing functions.
+	https://numba.readthedocs.io/en/stable/extending/high-level.html#implementing-functions
 """
 def _numbaTypeRepresentsPythonType(numbaType: numba_types.BaseNamedTuple, pythonType: type[tuple[Any, ...]]) -> bool:
 	#=SIN= Pyright suppression: Numba's `BaseNamedTuple` stub omits its runtime `instance_class` attribute.
@@ -105,34 +112,20 @@ class 形DataclassNumba(numba_types.StructRef):
 	(AI generated docstring)
 
 	You can use this type to bridge Python dataclasses to Numba's type system. This
-	`StructRef` [1] subclass enables Numba-compiled functions to manipulate dataclass
-	instances by converting Python dataclass fields to Numba struct fields. The type
-	preprocessing converts Numba literal types [2] to their unliteral equivalents,
-	which allows Numba to generate efficient compiled code for dataclass operations.
-
-	Numba Behavior
-	--------------
-	Numba requires type preprocessing for `StructRef` subclasses because Numba's type
-	inference can produce literal types that must be normalized before compilation.
-	This class applies `numba.types.unliteral` [3] to each field type during
-	preprocessing. The unliteral transformation converts compile-time constant types
-	to their runtime equivalents.
+	`StructRef` subclass enables Numba-compiled functions to manipulate dataclass
+	instances by representing Python dataclass fields as Numba struct fields. The type
+	preprocessing converts Numba literal types to their unliteral equivalents [1],
+	so field types do not retain particular compile-time values.
 
 	See Also
 	--------
 	`_typeofDataclass`
-		Register `StateMapFolding` and `StateMapFoldingSymmetric` to this type.
+		Determine the Numba field types for `StateMapFolding` and `StateMapFoldingSymmetric`.
 
 	References
 	----------
-	[1] `numba.experimental.structref.StructRef`
-		https://numba.readthedocs.io/en/stable/reference/pysupported.html#structref
-
-	[2] Numba literal types - Numba documentation
-		https://numba.readthedocs.io/en/stable/reference/types.html#literal-types
-
-	[3] `numba.types.unliteral`
-		https://numba.readthedocs.io/en/stable/reference/types.html
+	[1] Numba, High-level extension API: Defining a StructRef.
+		https://numba.readthedocs.io/en/stable/extending/high-level.html#defining-a-structref
 	"""
 
 	@override

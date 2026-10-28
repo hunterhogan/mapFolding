@@ -2,21 +2,14 @@
 
 (AI generated docstring)
 
-This module defines comparison and control-flow predicates on Python syntax [1].
-The exported class extends `astToolkit.IfThis` [2] with state-attribute patterns.
+This module defines comparison and control-flow predicates on Python syntax.
+The exported class extends `astToolkit.IfThis` with state-attribute patterns.
 
 Contents
 --------
 Classes
 	IfThis
 		Build predicates for state comparisons and control-flow syntax.
-
-References
-----------
-[1] Python abstract syntax tree node definitions.
-	https://docs.python.org/3/library/ast.html
-[2] astToolkit tree visitors and source containers.
-	https://context7.com/hunterhogan/asttoolkit
 """
 from __future__ import annotations
 
@@ -34,12 +27,7 @@ class IfThis(astToolkit_IfThis):
 
 	You can use these static methods to recognize comparisons involving a named state attribute,
 	or conditional and loop statements using those comparisons. The class extends the predicates
-	in `astToolkit.IfThis` [1] with patterns used by the module generators.
-
-	References
-	----------
-	[1] astToolkit tree visitors and source containers.
-		https://context7.com/hunterhogan/asttoolkit
+	in `astToolkit.IfThis` with patterns used by the module generators.
 	"""
 
 	@staticmethod
@@ -48,7 +36,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.Compare` node [1] with the literal
+		You can use this method to recognize an `ast.Compare` node with the literal
 		comparison orientation shown in the summary.
 
 		Comparison Selection
@@ -69,17 +57,11 @@ class IfThis(astToolkit_IfThis):
 
 		Examples
 		--------
-		The module `mapFolding.kitAST._toolIfThis` uses this call [2].
+		The module `mapFolding.kitAST._toolIfThis` uses this call.
 
 			```python
 			IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier)
 			```
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
-		[2] `mapFolding.kitAST._toolIfThis`
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isConstant_value(0))
 					, Be.Compare.opsIs(Be.at(0, Be.Lt))
@@ -92,7 +74,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.Compare` node [1] whose left operand is the named
+		You can use this method to recognize an `ast.Compare` node whose left operand is the named
 		attribute and whose first operator is `<=`.
 
 		Parameters
@@ -106,11 +88,6 @@ class IfThis(astToolkit_IfThis):
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.Compare]]
 			Callable returning `True` for the required left operand and first operator.
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))
 					, Be.Compare.opsIs(Be.at(0, Be.LtE))
@@ -122,7 +99,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.Compare` node [1] with the literal
+		You can use this method to recognize an `ast.Compare` node with the literal
 		comparison orientation shown in the summary.
 
 		Comparison Selection
@@ -143,17 +120,11 @@ class IfThis(astToolkit_IfThis):
 
 		Examples
 		--------
-		The module `mapFolding.kitAST._toolIfThis` uses this call [2].
+		The module `mapFolding.kitAST._toolIfThis` uses this call.
 
 			```python
 			IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier)
 			```
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
-		[2] `mapFolding.kitAST._toolIfThis`
 		"""
 		return IfThis.isAllOf(Be.Compare.leftIs(IfThis.isAttributeNamespaceIdentifier(namespace, identifier))
 					, Be.Compare.opsIs(Be.at(0, Be.Gt))
@@ -166,7 +137,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.If` node [1] with the literal
+		You can use this method to recognize an `ast.If` node with the literal
 		comparison orientation shown in the summary.
 
 		Comparison Selection
@@ -184,11 +155,6 @@ class IfThis(astToolkit_IfThis):
 		-------
 		predicate : CallableFunction[[ast.AST], TypeIs[ast.If]]
 			Callable returning `True` when the inspected node matches the required syntax.
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
 		"""
 		return Be.If.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty: ignore[invalid-return-type]
 
@@ -198,7 +164,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.If` node [1] with the literal
+		You can use this method to recognize an `ast.If` node with the literal
 		comparison orientation shown in the summary.
 
 		Comparison Selection
@@ -219,17 +185,11 @@ class IfThis(astToolkit_IfThis):
 
 		Examples
 		--------
-		The module `mapFolding.kitAST.mapFolding._count` uses this call [2].
+		The module `mapFolding.kitAST.mapFolding._count` uses this call.
 
 			```python
 			IfThis.isIfAttributeNamespaceIdentifierGreaterThan0(名dataclassInstance, 'leaf1ndex')
 			```
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
-		[2] `mapFolding.kitAST.mapFolding._count`
 		"""
 		return Be.If.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty: ignore[invalid-return-type]
 
@@ -239,7 +199,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.While` node [1] with the literal
+		You can use this method to recognize an `ast.While` node with the literal
 		comparison orientation shown in the summary.
 
 		Comparison Selection
@@ -260,17 +220,11 @@ class IfThis(astToolkit_IfThis):
 
 		Examples
 		--------
-		The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call [2].
+		The module `mapFolding.kitAST.matrixMeanders.makeModules` uses this call.
 
 			```python
 			IfThis.isWhile0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
 			```
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
-		[2] `mapFolding.kitAST.matrixMeanders.makeModules`
 		"""
 		return Be.While.testIs(IfThis.is0LessThanAttributeNamespaceIdentifier(namespace, identifier))  # ty: ignore[invalid-return-type]
 
@@ -280,7 +234,7 @@ class IfThis(astToolkit_IfThis):
 
 		(AI generated docstring)
 
-		You can use this method to recognize an `ast.While` node [1] with the literal
+		You can use this method to recognize an `ast.While` node with the literal
 		comparison orientation shown in the summary.
 
 		Comparison Selection
@@ -301,16 +255,10 @@ class IfThis(astToolkit_IfThis):
 
 		Examples
 		--------
-		The module `mapFolding.kitAST.mapFolding._count` uses this call [2].
+		The module `mapFolding.kitAST.mapFolding._count` uses this call.
 
 			```python
 			IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(名dataclassInstance, 'leaf1ndex')
 			```
-
-		References
-		----------
-		[1] Python abstract syntax tree node definitions.
-			https://docs.python.org/3/library/ast.html
-		[2] `mapFolding.kitAST.mapFolding._count`
 		"""
 		return Be.While.testIs(IfThis.isAttributeNamespaceIdentifierGreaterThan0(namespace, identifier))  # ty: ignore[invalid-return-type]

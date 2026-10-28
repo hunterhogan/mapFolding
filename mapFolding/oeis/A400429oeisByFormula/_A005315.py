@@ -26,8 +26,8 @@ Its winding number is n - 2*j, and its domain is n >= 2*j.
 
 For j = 1, ..., 4, f_j(n) = D_j(n) is proved throughout that domain. The j = 1
 formula has the exceptional first value D_1(2) = 1, followed by the constant 2.
-The second diagonal has an independent cut proof. The third and fourth formulas
-are proved by the exact finite-transfer certificates of Zhang and Ma [3, 4].
+The second diagonal has an independent cut proof [3]. The third and fourth formulas
+are proved by the exact finite-transfer certificates of Zhang and Ma [4].
 For j = 5, ..., 11, the A005315 anchor values agree with the known sequence,
 but equality with the entire counting diagonal remains conjectural. The general
 fixed-j theorem proves eventual quasipolynomiality; it does not certify every
@@ -197,11 +197,16 @@ def A005315of2(x: int, 次n: int = 2) -> int:
 
 	The `sympy_binomial` expression below is exactly equivalent on that domain. The
 	quasipolynomial has degree 2 and minimal period 2; the independent cut proof
-	and its reported Lean formalization are described in reference [3].
+	and its reported Lean formalization are described in reference [1].
 
 	Use `x >= 2*次n`. Changing `次n` only translates the same expression.
 	The intended domain is not checked. Smaller inputs also evaluate using
 	SymPy's extension of `binomial` to negative upper arguments.
+
+	References
+	----------
+	[1] Wenlin Zhang and Haobo Ma, The second semi-meander diagonal: a cut proof,
+		manuscript dated 1 October 2026; supplied as A400429 diagonal 2 proof.pdf.
 	"""
 	x -= 2 * 次n
 	return 2 * ((int(sympy_binomial((x + 6) // 2, 2)) + int(sympy_binomial((x + 7) // 2, 2))) - 5)  # pyright: ignore[reportArgumentType]
@@ -217,7 +222,7 @@ def A005315of3(x: int, 次n: int = 3) -> int:
 	`crunchCoefficients` consumes all coefficients of `numerator` in order, then zeros.
 
 	The identity with D_3(x) is proved for every `x >= 6` by Zhang and Ma,
-	Theorem 1. The stored rational function agrees exactly with `certificate3.json`.
+	Theorem 1 [1]. The stored rational function agrees exactly with `certificate3.json`.
 
 	Parameters
 	----------
@@ -233,6 +238,11 @@ def A005315of3(x: int, 次n: int = 3) -> int:
 	countTotal : int
 		Twice the rational-series coefficient at `x - 2*次n`.
 
+	References
+	----------
+	[1] Wenlin Zhang and Haobo Ma, Semi-meanders with a fixed winding deficit:
+		the third and fourth diagonals of A400429, manuscript dated 6 October 2026;
+		supplied as A400429 diagonals 3 and 4 proof.pdf, Theorem 1.
 	"""
 	numerator: tuple[int, ...] = (4, 17, 17, -5, -22, -13, 6, 9, 1, -1)
 	denominator: tuple[int, ...] = (1, -1, -3, 2, 4, 0, -4, -2, 3, 1, -1)
@@ -249,7 +259,7 @@ def A005315of4(x: int, 次n: int = 4) -> int:
 	`crunchCoefficients` consumes all coefficients of `numerator` in order, then zeros.
 
 	The identity with D_4(x) is proved for every `x >= 8` by Zhang and Ma,
-	Theorem 1. The stored rational function agrees exactly with `certificate4.json`.
+	Theorem 1 [1]. The stored rational function agrees exactly with `certificate4.json`.
 
 	Parameters
 	----------
@@ -265,6 +275,11 @@ def A005315of4(x: int, 次n: int = 4) -> int:
 	countTotal : int
 		Twice the rational-series coefficient at `x - 2*次n`.
 
+	References
+	----------
+	[1] Wenlin Zhang and Haobo Ma, Semi-meanders with a fixed winding deficit:
+		the third and fourth diagonals of A400429, manuscript dated 6 October 2026;
+		supplied as A400429 diagonals 3 and 4 proof.pdf, Theorem 1.
 	"""
 	numerator: tuple[int, ...] = (21, 131, 292, 320, 118, -102, -89, 107, 193, 37, -196, -226, -8, 217, 199, 5, -106, -58, 14, 19, -2, -4)
 	denominator: tuple[int, ...] = (1, 0, -4, -2, 6, 8, -3, -12, -4, 8, 10, 0, -10, -8, 4, 12, 3, -8, -6, 2, 4, 0, -1)

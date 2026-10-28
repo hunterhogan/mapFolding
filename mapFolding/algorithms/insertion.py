@@ -11,9 +11,6 @@ Functions
 	doTheNeedful
 		Generate arch-diagram representatives and write an album.
 """
-
-# DEVELOPMENT module.
-# pyright: reportUnusedVariable=false, reportUnusedImport=false
 from __future__ import annotations
 
 from contextlib import ExitStack
@@ -77,8 +74,8 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 	(AI generated docstring)
 
 	You can insert leaves in label order, retain diagrams whose new arches do not cross existing
-	arches on the same side of the axis, and save them with `mapFolding.kitFilesystem.writeAlbum` [1]. You use the
-	shared `settingsPackage.pathAlbum` [2] as the output directory.
+	arches on the same side of the axis, and save them with `mapFolding.kitFilesystem.writeAlbum`. You
+	use the shared `settingsPackage.pathAlbum` as the output directory.
 
 	Representative selection
 	------------------------
@@ -91,7 +88,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 	mapShape : tuple[int, ...]
 		Nonempty tuple of nonnegative dimension lengths defining leaf connections, with at least one leaf.
 	CPUlimit : ConcurrencyLimit = None
-		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit` [3]. `None`, `False`, and `0`
+		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit`. `None`, `False`, and `0`
 		use available processors; `True` selects one. Positive values limit usage and negative values reserve
 		processors.
 
@@ -116,25 +113,18 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 		pathFilenameAlbum = doTheNeedful(mapShape, -2)
 		```
 
-	References
-	----------
-	[1] `mapFolding.kitFilesystem.writeAlbum`
-
-	[2] `mapFolding.theSSOT.settingsPackage.pathAlbum`
-
-	[3] `mapFolding.beDRY.defineProcessorLimit`
 	"""
 	mapShape = validateMapShape(mapShape)
 	totalLeaves: int = getTotalLeaves(mapShape)
 	if totalLeaves == 0:
-		message: str = f'`mapShape` must have at least one leaf: {mapShape!r}.'
+		message: str = f'I received `{mapShape = }` with `{totalLeaves = }`, but I need at least one leaf.'
 		raise ValueError(message)
 
 	leavesInserted: int = 1
 	diagramsAtDepth: Iterable[Folding] = ((leafOrigin,),)
 	pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, settingsPackage.pathAlbum, suffix='.album')
 	if pathFilenameAlbum.exists():
-		message = f'Album already exists: {pathFilenameAlbum}.'
+		message: str = f'I found that `{pathFilenameAlbum = }` already exists.'
 		raise FileExistsError(message)
 	workersMaximum: int = defineProcessorLimit(CPUlimit)
 
@@ -156,7 +146,7 @@ def doTheNeedful(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit = None) -
 
 # DEVELOPMENT Changes:
 # TODO to make the files smaller, use a truncated notation. The graph notation I created is very
-# compact: one delimiter and one `Leaf` represents one `Folding`, if the diagrams are sorted. An
+# compact: one delimiter and one `Leaf` represents one `Folding`, if the diagrams are sorted. A
 # `Folding` is a permutation, and there is a special notation for permutations, but it's opaque to
 # me. However, there are packages that implement it, so that would likely be more robust, even if
 # it is not more compact.

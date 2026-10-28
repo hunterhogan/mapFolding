@@ -42,7 +42,7 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 	(AI generated docstring)
 
 	You can use this function to adapt a map-folding source module to symmetric state and insert
-	the filter from `mapFolding.algorithms.foldsSymmetric` [1]. Count increments become assigned
+	the filter from `mapFolding.algorithms.foldsSymmetric`. Count increments become assigned
 	filter calls. Before each return, the generated count is adjusted by adding one and dividing
 	by two with integer division. The supplied module syntax is modified and written.
 
@@ -64,17 +64,11 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModules` uses this call [2].
+	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModules` uses this call.
 
 		```python
 		addSymmetryCheck(astModule, defaultMapFoldingSymmetric)
 		```
-
-	References
-	----------
-	[1] `mapFolding.algorithms.foldsSymmetric`
-
-	[2] `mapFolding.kitAST.mapFoldingSymmetric.makeModules`
 	"""
 	identifiers = identifiers or defaultMapFoldingSymmetric
 	名DataclassSource: str = keywordArguments.get('名DataclassSource') or identifiers['variable'].get('stateDataclassSource') or defaultMapFolding['variable']['stateDataclass']
@@ -194,22 +188,16 @@ def makeModulesFoldsSymmetric() -> None:
 
 	You can use this function to generate symmetry filtering, module-level compilation,
 	state initialization, and the Theorem 2 variants using
-	`mapFolding.kitAST.theSSOT.defaultMapFoldingSymmetric` [1]. The function reads generated
+	`mapFolding.kitAST.theSSOT.defaultMapFoldingSymmetric`. The function reads generated
 	files between dependent transformations and overwrites configured output modules.
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModules` uses this call [2].
+	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModules` uses this call.
 
 		```python
 		makeModulesFoldsSymmetric()
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.theSSOT.defaultMapFoldingSymmetric`
-
-	[2] `mapFolding.kitAST.mapFoldingSymmetric.makeModules`
 	"""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultMapFolding['logicalPath']['algorithm'], identifierModule=defaultMapFolding['module']['algorithm'])
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultMapFoldingSymmetric)

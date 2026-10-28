@@ -4,8 +4,8 @@
 
 You can use this package to derive counting variants, specialize jobs for individual map
 shapes, and create lookup and documentation source for sequence formulas. The transformations
-use `astToolkit` [1] to inspect and assemble Python syntax. The package exposes state-pattern
-predicates through `IfThis` [2] and datatype-import configuration through `Settings形` [3].
+use `astToolkit` to inspect and assemble Python syntax. The package exposes state-pattern
+predicates through `IfThis` and datatype-import configuration through `Settings形`.
 
 Modules
 -------
@@ -45,14 +45,6 @@ IfThis
 	Build comparison and control-flow predicates.
 Settings形
 	Configure datatype import substitutions.
-
-References
-----------
-[1] astToolkit tree visitors and source containers.
-	https://context7.com/hunterhogan/asttoolkit
-[2] `mapFolding.kitAST._toolIfThis.IfThis`
-
-[3] `mapFolding.kitAST._containers.Settings形`
 """
 
 # isort: split

@@ -4,7 +4,7 @@
 
 You can use this module to assemble dotted module paths, load source modules from those paths,
 and derive filesystem destinations for generated modules. The module centralizes fallback rules
-from `mapFolding.kitAST.theSSOT.default` [1] and `mapFolding.theSSOT.settingsPackage` [2] so
+from `mapFolding.kitAST.theSSOT.default` and `mapFolding.theSSOT.settingsPackage` so
 the code-generation subpackage can resolve imports and output filenames consistently.
 
 Contents
@@ -16,12 +16,6 @@ Functions
 		Parse a resolved logical module path into an `ast.Module`.
 	getPathFilename
 		Construct a module filename from logical path components.
-
-References
-----------
-[1] `mapFolding.kitAST.theSSOT.default`
-
-[2] `mapFolding.theSSOT.settingsPackage`
 """
 from __future__ import annotations
 
@@ -64,7 +58,7 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 	Examples
 	--------
 	In `mapFolding.kitAST.mapFolding._count.makeTheorem2`, the import path for the generated
-	initializer module is assembled with the following call [1].
+	initializer module is assembled with the following call.
 
 		```python
 		dotModule: identifierDotAttribute = getLogicalPath(
@@ -73,10 +67,6 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 			名ModuleInitializeState,
 		)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding._count.makeTheorem2`
 	"""
 	return '.'.join(filter(None, [identifierPackage, logicalPathInfix, *identifierModule]))
 
@@ -91,13 +81,13 @@ def getModule(
 	(AI generated docstring)
 
 	You can use this function to resolve a dotted source path from `identifierPackage`,
-	`logicalPathInfix`, and `identifierModule`, then parse the source with `astToolkit` [1].
+	`logicalPathInfix`, and `identifierModule`, then parse the source with `astToolkit`.
 	The function returns module syntax for subsequent inspection or transformation.
 
 	Fallback Order
 	--------------
 	Each component uses its explicit argument first, then the matching entry in `identifiers`,
-	then `mapFolding.kitAST.theSSOT.default` [2]. Selection uses truthiness, so an empty string
+	then `mapFolding.kitAST.theSSOT.default`. Selection uses truthiness, so an empty string
 	cannot suppress a nonempty fallback. The resolved module identifier must not be `None`.
 
 	Parameters
@@ -118,19 +108,11 @@ def getModule(
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [3].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		getModule(identifiers=defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] astToolkit tree visitors and source containers.
-		https://context7.com/hunterhogan/asttoolkit
-	[2] `mapFolding.kitAST.theSSOT.default`
-
-	[3] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifierPackage = identifierPackage or get_in(('module', 'package'), identifiers or {}) or default['module']['package']
 	logicalPathInfix = logicalPathInfix or get_in(('logicalPath', 'default'), identifiers or {}) or default['logicalPath']['default']
@@ -182,16 +164,11 @@ def getPathFilename(
 	Examples
 	--------
 	In `mapFolding.kitAST.numba.kitNumba.make_jit_module`, the destination filename for a generated
-	Numba module is derived with the following call [1].
+	Numba module is derived with the following call.
 
 		```python
 		pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, identifierModule)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.numba.kitNumba.make_jit_module`
-
 	"""
 	pathFilename = PurePath(identifierModule + fileExtension)
 	if logicalPathInfix:

@@ -70,6 +70,11 @@ def pinPile一ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		Iterator over leaf indices after exclusions, in the original
 		crease order.
 
+	See Also
+	--------
+	`mapFolding.pinIt.pinPilesAtEnds`
+		Prepare the required pinned piles and apply the end-pile selections in order.
+
 	Pinned Piles
 	------------
 	Pile `state.pile - 1` must contain a pinned leaf.
@@ -77,14 +82,8 @@ def pinPile一ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	You select leaves with `mapFolding.creases.getLeavesCreasePost` [1]. Follow the
-	pinning order used by `mapFolding.pinIt.pinPilesAtEnds` [2].
-
-	References
-	----------
-	[1] `mapFolding.creases.getLeavesCreasePost`
-
-	[2] `mapFolding.pinIt.pinPilesAtEnds`
+	You select leaves with `mapFolding.creases.getLeavesCreasePost`. Follow the
+	pinning order used by `mapFolding.pinIt.pinPilesAtEnds`.
 	"""
 	direction: CallableFunction[[int, int], int] = sub
 
@@ -119,6 +118,11 @@ def pinPile一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		Iterator over leaf indices after exclusions, in the original
 		crease order.
 
+	See Also
+	--------
+	`mapFolding.pinIt.pinPilesAtEnds`
+		Prepare the required pinned piles and apply the end-pile selections in order.
+
 	Pinned Piles
 	------------
 	Pile `state.pile + 1` must contain a pinned leaf.
@@ -126,14 +130,8 @@ def pinPile一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	You select leaves with `mapFolding.creases.getLeavesCreaseAnte` [1]. Follow the
-	pinning order used by `mapFolding.pinIt.pinPilesAtEnds` [2].
-
-	References
-	----------
-	[1] `mapFolding.creases.getLeavesCreaseAnte`
-
-	[2] `mapFolding.pinIt.pinPilesAtEnds`
+	You select leaves with `mapFolding.creases.getLeavesCreaseAnte`. Follow the
+	pinning order used by `mapFolding.pinIt.pinPilesAtEnds`.
 	"""
 	direction: CallableFunction[[int, int], int] = add
 
@@ -169,6 +167,11 @@ def pinPile一零ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		Iterator over leaf indices after exclusions, in the original
 		crease order.
 
+	See Also
+	--------
+	`mapFolding.pinIt.pinPilesAtEnds`
+		Prepare the required pinned piles and apply the end-pile selections in order.
+
 	Pinned Piles
 	------------
 	Pile `state.pile - 1` must contain a pinned leaf.
@@ -176,14 +179,8 @@ def pinPile一零ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	You select leaves with `mapFolding.creases.getLeavesCreasePost` [1]. Follow the
-	pinning order used by `mapFolding.pinIt.pinPilesAtEnds` [2].
-
-	References
-	----------
-	[1] `mapFolding.creases.getLeavesCreasePost`
-
-	[2] `mapFolding.pinIt.pinPilesAtEnds`
+	You select leaves with `mapFolding.creases.getLeavesCreasePost`. Follow the
+	pinning order used by `mapFolding.pinIt.pinPilesAtEnds`.
 	"""
 	direction: CallableFunction[[int, int], int] = sub
 
@@ -221,6 +218,11 @@ def pinPile零一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		Iterator over leaf indices after exclusions, in the original
 		crease order.
 
+	See Also
+	--------
+	`mapFolding.pinIt.pinPilesAtEnds`
+		Prepare the required pinned piles and apply the end-pile selections in order.
+
 	Pinned Piles
 	------------
 	Pile `state.pile + 1` must contain a pinned leaf.
@@ -228,14 +230,8 @@ def pinPile零一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	You select leaves with `mapFolding.creases.getLeavesCreaseAnte` [1]. Follow the
-	pinning order used by `mapFolding.pinIt.pinPilesAtEnds` [2].
-
-	References
-	----------
-	[1] `mapFolding.creases.getLeavesCreaseAnte`
-
-	[2] `mapFolding.pinIt.pinPilesAtEnds`
+	You select leaves with `mapFolding.creases.getLeavesCreaseAnte`. Follow the
+	pinning order used by `mapFolding.pinIt.pinPilesAtEnds`.
 	"""
 	direction: CallableFunction[[int, int], int] = add
 
@@ -274,6 +270,11 @@ def pinPile二ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		Iterator over leaf indices after exclusions, in the original
 		crease order.
 
+	See Also
+	--------
+	`mapFolding.pinIt.pinPilesAtEnds`
+		Prepare the required pinned piles and apply the end-pile selections in order.
+
 	Pinned Piles
 	------------
 	Pile `state.pile - 1` must contain a pinned leaf.
@@ -281,14 +282,8 @@ def pinPile二ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	You select leaves with `mapFolding.creases.getLeavesCreasePost` [1]. Follow the
-	pinning order used by `mapFolding.pinIt.pinPilesAtEnds` [2].
-
-	References
-	----------
-	[1] `mapFolding.creases.getLeavesCreasePost`
-
-	[2] `mapFolding.pinIt.pinPilesAtEnds`
+	You select leaves with `mapFolding.creases.getLeavesCreasePost`. Follow the
+	pinning order used by `mapFolding.pinIt.pinPilesAtEnds`.
 	"""
 	direction: CallableFunction[[int, int], int] = sub
 
@@ -337,6 +332,11 @@ def pinPile二Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		Iterator over leaf indices after exclusions, in the original
 		crease order.
 
+	See Also
+	--------
+	`mapFolding.pinIt.pinPilesAtEnds`
+		Prepare the required pinned piles and apply the end-pile selections in order.
+
 	Pinned Piles
 	------------
 	Pile `state.pile + 1` must contain a pinned leaf.
@@ -344,14 +344,8 @@ def pinPile二Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	You select leaves with `mapFolding.creases.getLeavesCreaseAnte` [1]. Follow the
-	pinning order used by `mapFolding.pinIt.pinPilesAtEnds` [2].
-
-	References
-	----------
-	[1] `mapFolding.creases.getLeavesCreaseAnte`
-
-	[2] `mapFolding.pinIt.pinPilesAtEnds`
+	You select leaves with `mapFolding.creases.getLeavesCreaseAnte`. Follow the
+	pinning order used by `mapFolding.pinIt.pinPilesAtEnds`.
 	"""
 	direction: CallableFunction[[int, int], int] = add
 

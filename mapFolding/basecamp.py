@@ -62,8 +62,8 @@ def countFolds(mapShape: Sequence[int]
 
 	Output Files
 	------------
-	`saveTotalFAILearly` [1] writes and reads a test value before counting. The test file remains
-	in place until the count is saved. `saveTotal` [2] attempts fallback output if the final write
+	`saveTotalFAILearly` writes and reads a test value before counting. The test file remains
+	in place until the count is saved. `saveTotal` attempts fallback output if the final write
 	fails.
 
 	Parameters
@@ -199,8 +199,8 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 
 	Output Files
 	------------
-	`mapFolding.kitFilesystem.saveTotalFAILearly` [2] leaves a test file before counting.
-	`mapFolding.kitFilesystem.saveTotal` [3] replaces the test value with the completed count and
+	`mapFolding.kitFilesystem.saveTotalFAILearly` leaves a test file before counting.
+	`mapFolding.kitFilesystem.saveTotal` replaces the test value with the completed count and
 	attempts fallback output if the final write fails.
 
 	Parameters
@@ -214,7 +214,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	pathLikeWrite : PathLike[str] | None = None
 		Optional output file or existing directory. `None` disables saving.
 	CPUlimit : ConcurrencyLimit = None
-		Processor preference interpreted by `mapFolding.beDRY.defineProcessorLimit` [4] only for
+		Processor preference interpreted by `mapFolding.beDRY.defineProcessorLimit` only for
 		`'asynchronous'`.
 	suffix : str = ".totalFolds"
 		Filename suffix when saving is enabled.
@@ -236,12 +236,6 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	----------
 	[1] OEIS A007822, number of symmetric foldings of an odd-length stamp strip.
 		https://oeis.org/A007822
-	[2] `mapFolding.kitFilesystem.saveTotalFAILearly`
-
-	[3] `mapFolding.kitFilesystem.saveTotal`
-
-	[4] `mapFolding.beDRY.defineProcessorLimit`
-
 	"""
 	mapShape = validateMapShape(mapShape)
 
@@ -300,15 +294,15 @@ def countMeanders(
 
 	You can use this function to count meanders or semi-meanders and inspect the completed computation
 	state. An existing `state` takes precedence over `kind` and `n`. This function returns
-	`mapFolding.dataBaskets.StateMeanders` [1]; read the completed count from `state.totalMeanders`.
+	`mapFolding.dataBaskets.StateMeanders`; read the completed count from `state.totalMeanders`.
 
 	State and Output
 	----------------
-	This function constructs `mapFolding.dataBaskets.StateMeanders` [1] when `state` is absent.
+	This function constructs `mapFolding.dataBaskets.StateMeanders` when `state` is absent.
 	The semi-meander case at index one returns the initialized state without running a counting
 	algorithm. Providing a save path performs a test write with
-	`mapFolding.kitFilesystem.saveTotalFAILearly` [2] before counting and writes the completed total
-	through `mapFolding.kitFilesystem.saveTotal` [3].
+	`mapFolding.kitFilesystem.saveTotalFAILearly` before counting and writes the completed total
+	through `mapFolding.kitFilesystem.saveTotal`.
 
 	Parameters
 	----------
@@ -347,14 +341,6 @@ def countMeanders(
 		```python
 		state = countMeanders(kind, n, flow, pathLikeWrite, state=state)
 		```
-
-	References
-	----------
-	[1] `mapFolding.dataBaskets.StateMeanders`
-
-	[2] `mapFolding.kitFilesystem.saveTotalFAILearly`
-
-	[3] `mapFolding.kitFilesystem.saveTotal`
 
 	"""
 #-------- memorialization instructions ---------------------------------------------
@@ -424,18 +410,18 @@ def eliminateFolds(
 	mapShape : tuple[int, ...] | None = None
 		Nonempty tuple of nonnegative dimension lengths. Required when `state` is absent.
 	state : StateElimination | None = None
-		Existing elimination state [1]. The selected algorithm can mutate `state`.
+		Existing elimination state. The selected algorithm can mutate `state`.
 	pathLikeWrite : PathLike[str] | None = None
 		Filename or destination directory for the count. `None` disables writing. A directory receives a
-		filename derived from the map shape [2].
+		filename derived from the map shape.
 	CPUlimit : ConcurrencyLimit = None
-		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit` [3]. `None`, `False`, and `0`
+		Processor limit interpreted by `mapFolding.beDRY.defineProcessorLimit`. `None`, `False`, and `0`
 		use available processors; `True` selects one. Positive integers cap usage, negative integers reserve
 		processors, and fractions specify the proportion to use or reserve.
 	flow : str | None = None
-		Algorithm selector. `None`, `'elimination'`, and unrecognized strings select elimination [4].
-		`'constraintPropagation'` selects the constraint solver [5]. `'crease'` selects the specialized
-		crease algorithm [6].
+		Algorithm selector. `None`, `'elimination'`, and unrecognized strings select elimination.
+		`'constraintPropagation'` selects the constraint solver. `'crease'` selects the specialized
+		crease algorithm.
 	suffix : str = '.totalFolds'
 		Suffix used when creating the output filename.
 
@@ -452,6 +438,11 @@ def eliminateFolds(
 	NotImplementedError
 		If `flow` is `'crease'` and the nonzero shape is not `(2,) * n` for `n >= 4`.
 
+	See Also
+	--------
+	`mapFolding.dataBaskets.StateElimination`
+		Prepare a state for continuing or restricting an elimination search.
+
 	Examples
 	--------
 	The computation script passes both input and output options.
@@ -462,19 +453,6 @@ def eliminateFolds(
 		)
 		```
 
-	References
-	----------
-	[1] `mapFolding.dataBaskets.StateElimination`
-
-	[2] `mapFolding.kitFilesystem.makePathFilenameFolds`
-
-	[3] `mapFolding.beDRY.defineProcessorLimit`
-
-	[4] `mapFolding.algorithms.elimination.doTheNeedful`
-
-	[5] `mapFolding.algorithms.constraintPropagation.doTheNeedful`
-
-	[6] `mapFolding.algorithms.eliminationCrease.doTheNeedful`
 	"""
 	if not state:
 		if not mapShape:
@@ -532,8 +510,8 @@ def enumerateSequences(
 	(AI generated docstring)
 
 	You can use this function to obtain the permutations for a selected sequence, or count
-	semi-meanders without retaining the permutations. The permutation algorithm [1] returns a list.
-	Either bilateral algorithm [2, 3] returns an integer count. Providing `pathLikeWrite` also saves
+	semi-meanders without retaining the permutations. The permutation algorithm returns a list.
+	Either bilateral algorithm returns an integer count. Providing `pathLikeWrite` also saves
 	the list or count to a new file.
 
 	Parameters
@@ -548,13 +526,13 @@ def enumerateSequences(
 	pathLikeWrite : PathLike[str] | None = None
 		New output filename or existing output directory. `None` skips all file output. An existing
 		directory receives a filename formed from the canonical family name, `n`, and `suffix`.
-		Relative file paths resolve under the default job directory [5].
+		Relative file paths resolve under the default job directory.
 	CPUlimit : ConcurrencyLimit = None
 		Processor preference used only by `'bilateralConcurrent'`. `None`, `False`, and zero use the
 		default processor count; `True` selects one worker. Positive integers request a worker
 		count; negative integers reserve processors. Fractions between zero and one request a share
 		of processors; fractions between minus one and zero reserve a share. Other floats truncate
-		to integers. Resolution follows `mapFolding.beDRY.defineProcessorLimit` [6].
+		to integers. Resolution follows `mapFolding.beDRY.defineProcessorLimit`.
 	suffix : str = '.album'
 		Suffix for a generated filename. An explicit filename keeps its supplied suffix. This
 		parameter does not select the output format.
@@ -568,13 +546,13 @@ def enumerateSequences(
 
 	Output Files
 	------------
-	Path resolution creates missing parent directories [5]. Before computation,
-	`mapFolding.kitFilesystem.saveTotalFAILearly` [7] rejects an existing output file with
+	Path resolution creates missing parent directories. Before computation,
+	`mapFolding.kitFilesystem.saveTotalFAILearly` rejects an existing output file with
 	`FileExistsError`, then writes and reads a test integer for a new file. The test integer
 	remains in the output file if subsequent computation fails. Successful permutation
 	enumeration replaces the test integer with one comma-separated record per folding through
-	`mapFolding.kitFilesystem.writeAlbum` [8]. Bilateral counting writes the integer count through
-	`mapFolding.kitFilesystem.saveTotal` [9], even when the filename ends in `'.album'`.
+	`mapFolding.kitFilesystem.writeAlbum`. Bilateral counting writes the integer count through
+	`mapFolding.kitFilesystem.saveTotal`, even when the filename ends in `'.album'`.
 
 	Examples
 	--------
@@ -585,26 +563,6 @@ def enumerateSequences(
 		album = enumerateSequences(n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit)
 		total: int = album if isinstance(album, int) else len(album)
 		```
-
-	References
-	----------
-	[1] `mapFolding.algorithms.permutations.doTheNeedful`
-
-	[2] `mapFolding.algorithms.permutationsBilateral.doTheNeedful`
-
-	[3] `mapFolding.algorithms.permutationsBilateralConcurrent.doTheNeedful`
-
-	[4] `mapFolding.oeis.getMetadata`
-
-	[5] `mapFolding.kitFilesystem.makePathFilenameCount`
-
-	[6] `mapFolding.beDRY.defineProcessorLimit`
-
-	[7] `mapFolding.kitFilesystem.saveTotalFAILearly`
-
-	[8] `mapFolding.kitFilesystem.writeAlbum`
-
-	[9] `mapFolding.kitFilesystem.saveTotal`
 
 	"""
 	lookupParameterKind: dict[LiteralString | str | None, LiteralString | None] = {'a000136': 'stamps', 'A000136': 'stamps'

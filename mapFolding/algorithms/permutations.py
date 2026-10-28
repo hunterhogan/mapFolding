@@ -525,21 +525,21 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 
 	You can use this function to obtain the complete list of permutations for a canonical family
 	name. This function creates fresh enumeration state for every call. The public entry point
-	`mapFolding.basecamp.enumerateSequences` [1] resolves family aliases and optionally saves the
+	`mapFolding.basecamp.enumerateSequences` resolves family aliases and optionally saves the
 	result. This function expects an already resolved `kind` and does not validate `n` or `kind`.
 
 	Sequence Indexing
 	-----------------
-	The enumeration core follows the permutation construction of Sawada and Li [2]. For `'semi'`,
+	The enumeration core follows the permutation construction of Sawada and Li [1]. For `'semi'`,
 	the core uses one fewer leaf than `n`; saving adds the fixed first leaf. For
 	`'meanders symmetric'`, the core uses one more leaf than `n`. Other families use `n` directly.
 	The blank stamp-folding and symmetric open-meander choices retain equivalence-class
-	representatives [2].
+	representatives [1].
 
 	Parameters
 	----------
 	n : int
-		Sequence index in the domain documented by the public entry point [1].
+		Sequence index in the domain documented by the public entry point.
 	kind : LiteralString
 		Canonical family name. Supported values are `'stamps'`, `'stamps blank'`, `'meanders'`,
 		`'meanders symmetric'`, `'semi'`, and `'semi-meanders symmetric'`. OEIS identifiers and
@@ -552,9 +552,14 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 		Each tuple contains `n` leaves, except `'meanders symmetric'`, which contains one additional
 		leaf. The list retains every generated representative in memory.
 
+	See Also
+	--------
+	`mapFolding.basecamp.enumerateSequences`
+		Resolve family aliases and optionally save the generated permutations.
+
 	Examples
 	--------
-	The public entry point [1] calls this function after resolving `kind`.
+	The public entry point calls this function after resolving `kind`.
 
 		```python
 		album: list[Folding] = doTheNeedful(n, kind)
@@ -562,9 +567,7 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 
 	References
 	----------
-	[1] `mapFolding.basecamp.enumerateSequences`
-
-	[2] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-Meanders, and Open Meanders:
+	[1] Sawada, J., and Li, R. (2012). Stamp Foldings, Semi-Meanders, and Open Meanders:
 		Fast Generation Algorithms. The Electronic Journal of Combinatorics, 19(2), P43.
 		https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43
 	"""

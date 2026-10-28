@@ -3,7 +3,7 @@
 (AI generated docstring)
 
 You can use this package to specialize counting source for a map shape. The job generator
-also compiles and strips an executable on Linux through Codon [1].
+also compiles and strips an executable on Linux through Codon.
 
 Modules
 -------

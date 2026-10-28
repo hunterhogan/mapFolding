@@ -110,27 +110,20 @@ def getPathRootJobDEFAULT() -> Path:
 	(AI generated docstring)
 
 	You can use this function to obtain a writable job-directory location using the package name from
-	`mapFolding.theSSOT.settingsPackage` [1]. This function creates the selected directory and missing
+	`mapFolding.theSSOT.settingsPackage`. This function creates the selected directory and missing
 	parent directories.
 
 	Directory Selection
 	-------------------
 	When `'google.colab'` is present in the imported-module registry, the directory is
 	`'/content/drive/MyDrive'` followed by the package name. Otherwise, `platformdirs.user_data_dir`
-	[2] supplies the user-data directory with the author directory disabled. This function does not
+	supplies the user-data directory with the author directory disabled. This function does not
 	mount a drive or verify that a Colab drive is mounted.
 
 	Returns
 	-------
 	pathJobDEFAULT : Path
 		Default job directory.
-
-	References
-	----------
-	[1] `mapFolding.theSSOT.settingsPackage`
-
-	[2] platformdirs directory API.
-		https://platformdirs.readthedocs.io/en/latest/api.html
 	"""
 	if 'google.colab' in sysModules:
 		pathJobDEFAULT: Path = Path("/content/drive/MyDrive") / settingsPackage.identifierPackage
@@ -145,7 +138,7 @@ def makeFilenameArrayFoldings(totalDimensions: int, suffix: str = '.pkl') -> str
 	(AI generated docstring)
 
 	You can use this function to name sampled folding data for a map with length two in every
-	dimension. `makePathFilenameArrayFoldings` [1] combines this filename with a sample-data directory.
+	dimension. `makePathFilenameArrayFoldings` combines this filename with a sample-data directory.
 
 	Parameters
 	----------
@@ -159,10 +152,10 @@ def makeFilenameArrayFoldings(totalDimensions: int, suffix: str = '.pkl') -> str
 	filenameArrayFoldings : str
 		`f'arrayFoldings2上{totalDimensions}Dimensional{suffix}'`.
 
-	References
-	----------
-	[1] `makePathFilenameArrayFoldings`
-
+	See Also
+	--------
+	`makePathFilenameArrayFoldings`
+		Combine the filename with a sample-data directory.
 	"""
 	return makeFilenameCount(f'arrayFoldings2上{totalDimensions}Dimensional', suffix=suffix)
 
@@ -231,7 +224,7 @@ def makePathFilenameArrayFoldings(
 	(AI generated docstring)
 
 	You can use this function to combine a sample-data directory with the filename produced by
-	`makeFilenameArrayFoldings` [1]. This function returns a path without creating directories.
+	`makeFilenameArrayFoldings`. This function returns a path without creating directories.
 
 	Parameters
 	----------
@@ -239,7 +232,7 @@ def makePathFilenameArrayFoldings(
 		Dimension count encoded in the filename.
 	pathRoot : PathLike[str] = settingsPackage.pathDataSamples
 		Root directory for sampled-folding data. The default is captured from the shared package
-		settings [2] when this module is imported.
+		settings when this module is imported.
 	suffix : str = '.pkl'
 		Suffix appended to the filename stem.
 
@@ -247,13 +240,6 @@ def makePathFilenameArrayFoldings(
 	-------
 	pathFilenameArrayFoldings : Path
 		Sample-data path under `pathRoot`, preserving a relative root when supplied.
-
-	References
-	----------
-	[1] `makeFilenameArrayFoldings`
-
-	[2] `mapFolding.theSSOT.settingsPackage`
-
 	"""
 	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
 
@@ -266,8 +252,8 @@ def makePathFilenameCount(
 	(AI generated docstring)
 
 	You can use this function to choose an output filename from `pathLikeWrite` and computation
-	labels. Existing directories receive a filename from `makeFilenameCount` [1]; `None` selects
-	the default directory from `getPathRootJobDEFAULT` [2].
+	labels. Existing directories receive a filename from `makeFilenameCount`; `None` selects
+	the default directory from `getPathRootJobDEFAULT`.
 
 	Path Interpretation
 	-------------------
@@ -292,13 +278,6 @@ def makePathFilenameCount(
 	-------
 	pathFilename : Path
 		Resolved output path. Missing parent directories are created.
-
-	References
-	----------
-	[1] `makeFilenameCount`
-
-	[2] `getPathRootJobDEFAULT`
-
 	"""
 	filename: str = makeFilenameCount(*underscore, suffix=suffix, **dash)
 	if pathLikeWrite is None:
@@ -321,8 +300,8 @@ def makePathFilenameFolds(
 
 	(AI generated docstring)
 
-	You can use this function to combine the filename from `makeFilenameFolds` [1] with an output
-	location. Path interpretation and directory creation follow `makePathFilenameCount` [2].
+	You can use this function to combine the filename from `makeFilenameFolds` with an output
+	location. Path interpretation and directory creation follow `makePathFilenameCount`.
 
 	Parameters
 	----------
@@ -339,12 +318,10 @@ def makePathFilenameFolds(
 		Output path after creating missing parent directories. An existing relative directory can
 		produce a relative result.
 
-	References
-	----------
-	[1] `makeFilenameFolds`
-
-	[2] `makePathFilenameCount`
-
+	See Also
+	--------
+	`makePathFilenameCount`
+		Resolve an output path using general positional and named filename components.
 	"""
 	filename: str = makeFilenameFolds(mapShape, suffix)
 	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
@@ -362,8 +339,8 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 
 	Test File Lifetime
 	------------------
-	This function writes through `hunterMakesPy.filesystemToolkit.writeStringToHere` [1].
-	A later call to `saveTotal` [2] normally replaces the test integer with the computed count.
+	This function writes through `hunterMakesPy.filesystemToolkit.writeStringToHere`.
+	A later call to `saveTotal` normally replaces the test integer with the computed count.
 	This function does not reserve the path against concurrent writers or remove the test file
 	when subsequent computation fails.
 
@@ -384,13 +361,6 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 	FileNotFoundError
 		If the parent directory is absent, the test file is absent after writing, or the
 		integer read back differs from the test integer.
-
-	References
-	----------
-	[1] hunterMakesPy filesystem toolkit.
-		https://context7.com/hunterhogan/huntermakespy
-	[2] `saveTotal`
-
 	"""
 	if Path(pathFilename).exists():
 		message: str = f"`{pathFilename = }` exists: a battle of overwriting might cause tears."
@@ -417,7 +387,7 @@ def appendTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
 
 	(AI generated docstring)
 
-	This function delegates to `writeTriangle` [1] with appending enabled. Existing group keys
+	This function delegates to `writeTriangle` with appending enabled. Existing group keys
 	are not checked, so a file can contain repeated groups after appending.
 
 	Parameters
@@ -432,9 +402,10 @@ def appendTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
 	pathFilenameWritten : Path
 		The supplied path after appending completes.
 
-	References
-	----------
-	[1] `writeTriangle`
+	See Also
+	--------
+	`writeTriangle`
+		Write numbered groups with an explicit choice between replacing and appending.
 	"""
 	return writeTriangle(triangle, pathFilename, append=True)
 
@@ -444,7 +415,7 @@ def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, ap
 	(AI generated docstring)
 
 	You can use this function to save groups as UTF-8 comma-separated records using the default
-	Python `csv.writer` dialect [1]. This function creates missing parent directories and returns
+	Python `csv.writer` dialect. This function creates missing parent directories and returns
 	the supplied path after closing the file.
 
 	Parameters
@@ -463,18 +434,11 @@ def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, ap
 
 	Examples
 	--------
-	`writeAlbum` [2] writes each folding as a CSV record.
+	`writeAlbum` writes each folding as a CSV record.
 
 		```python
 		return iterableToCSV(album, pathFilename)
 		```
-
-	References
-	----------
-	[1] Python `csv.writer`.
-		https://docs.python.org/3/library/csv.html#csv.writer
-	[2] `writeAlbum`
-
 	"""
 	pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	with pathFilename.open(encoding="utf-8", mode="a" if append else "w", newline="") as streamWrite:
@@ -488,7 +452,7 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	(AI generated docstring)
 
 	You can use this function to persist a completed integer count. This function first writes to
-	`pathFilename` using `hunterMakesPy.filesystemToolkit.writeStringToHere` [1]. If that attempt
+	`pathFilename` using `hunterMakesPy.filesystemToolkit.writeStringToHere`. If that attempt
 	fails, this function prints the count and attempts a file in the working directory.
 
 	Fallback Output
@@ -510,11 +474,6 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	pathFilenameWritten : PurePosixPath
 		Path representation of the successful output location. If the fallback also fails,
 		the result is `PurePosixPath('')`, which renders as `'.'`.
-
-	References
-	----------
-	[1] hunterMakesPy filesystem toolkit.
-		https://context7.com/hunterhogan/huntermakespy
 	"""
 	try:
 		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
@@ -546,7 +505,7 @@ def saveTriangleGroup(
 	(AI generated docstring)
 
 	You can use this function to keep the result of one row calculation. This function resolves
-	the output path with `makePathFilenameCount` [1], then writes the group with `writeTriangle` [2].
+	the output path with `makePathFilenameCount`, then writes the group with `writeTriangle`.
 
 	Parameters
 	----------
@@ -563,12 +522,6 @@ def saveTriangleGroup(
 	-------
 	pathFilenameWritten : Path
 		Resolved path of the saved group. Existing contents are replaced.
-
-	References
-	----------
-	[1] `makePathFilenameCount`
-
-	[2] `writeTriangle`
 	"""
 	return writeTriangle({keyGroup: boxOfIntegers}, makePathFilenameCount(pathLikeWrite, nameTriangle, str(keyGroup), suffix='.csv'))
 
@@ -577,8 +530,8 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 
 	(AI generated docstring)
 
-	You can use this function to persist a collection of foldings for `readAlbum` [1] or
-	`streamAlbum` [2]. This function delegates writing to `iterableToCSV` [3], which creates missing
+	You can use this function to persist a collection of foldings for `readAlbum` or
+	`streamAlbum`. This function delegates writing to `iterableToCSV`, which creates missing
 	parent directories and replaces existing file contents.
 
 	Parameters
@@ -593,14 +546,12 @@ def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	pathFilenameWritten : Path
 		The supplied path after all records have been written.
 
-	References
-	----------
-	[1] `readAlbum`
-
-	[2] `streamAlbum`
-
-	[3] `iterableToCSV`
-
+	See Also
+	--------
+	`readAlbum`
+		Load the saved folding records into a tuple.
+	`streamAlbum`
+		Read saved folding records without loading the complete album.
 	"""
 	return iterableToCSV(album, pathFilename)
 
@@ -610,7 +561,7 @@ def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diag
 	(AI generated docstring)
 
 	You can use this function to save one diagonal in the three-column format accepted by
-	`readDiagonal` [1]. Writing uses `iterableToCSV` [2].
+	`readDiagonal`. Writing uses `iterableToCSV`.
 
 	CSV Layout
 	----------
@@ -637,7 +588,7 @@ def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diag
 	Examples
 	--------
 	The runner in `easyRun/triangleSemiMake.py` appends a completed count from
-	`mapFolding.dataBaskets.StateMeanders.totalMeanders` [3] to a diagonal file.
+	`mapFolding.dataBaskets.StateMeanders.totalMeanders` to a diagonal file.
 
 		```python
 		writeDiagonal(
@@ -646,15 +597,6 @@ def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diag
 			次diagonal, append=True
 		)
 		```
-
-	References
-	----------
-	[1] `readDiagonal`
-
-	[2] `iterableToCSV`
-
-	[3] `mapFolding.dataBaskets.StateMeanders.totalMeanders`
-
 	"""
 	keysGroups, keysContents = tee(sorted(lookupDiagonal))
 	return iterableToCSV(
@@ -668,7 +610,7 @@ def writeText(contents: str, pathFilename: Path) -> Path:
 	(AI generated docstring)
 
 	This function creates the parent directory tree and delegates writing to
-	`hunterMakesPy.filesystemToolkit.writeStringToHere` [1]. Existing contents are replaced.
+	`hunterMakesPy.filesystemToolkit.writeStringToHere`. Existing contents are replaced.
 
 	Parameters
 	----------
@@ -681,11 +623,6 @@ def writeText(contents: str, pathFilename: Path) -> Path:
 	-------
 	pathFilenameWritten : Path
 		The supplied path after writing completes.
-
-	References
-	----------
-	[1] hunterMakesPy filesystem toolkit.
-		https://github.com/hunterhogan/hunterMakesPy
 	"""
 	writeStringToHere(contents, pathFilename)
 	return pathFilename
@@ -695,8 +632,8 @@ def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path,
 
 	(AI generated docstring)
 
-	You can use this function to persist a triangle for later loading with `readTriangle` [1] or
-	`readTriangleSparse` [2]. This function writes the groups to `pathFilename` and returns
+	You can use this function to persist a triangle for later loading with `readTriangle` or
+	`readTriangleSparse`. This function writes the groups to `pathFilename` and returns
 	`pathFilename` after closing the file.
 
 	CSV Layout
@@ -705,9 +642,9 @@ def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path,
 	appear in ascending group-key order. Dense groups retain their supplied cell order, and empty
 	dense groups contain only the group key. Sparse groups use column keys starting at one and
 	write empty fields for missing cells, extending through at least the group key or the largest
-	stored column key. `mapFolding.dataStructures.getBoxWithGaps` [3] supplies this sparse layout.
+	stored column key. `mapFolding.dataStructures.getBoxWithGaps` supplies this sparse layout.
 
-	The file uses UTF-8 and the default `csv.writer` dialect [4]. `iterableToCSV` [5] creates
+	The file uses UTF-8 and the default `csv.writer` dialect. `iterableToCSV` creates
 	missing parent directories and replaces existing contents unless `append=True`. An empty
 	`triangle` produces an empty file when replacing, or appends no records when appending.
 	Group lengths are not validated.
@@ -741,19 +678,6 @@ def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path,
 
 		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
 		```
-
-	References
-	----------
-	[1] `readTriangle`
-
-	[2] `readTriangleSparse`
-
-	[3] `mapFolding.dataStructures.getBoxWithGaps`
-
-	[4] csv.writer - Python standard library.
-		https://docs.python.org/3/library/csv.html#csv.writer
-	[5] `iterableToCSV`
-
 	"""
 	from mapFolding.dataStructures import getBoxWithGaps
 	return iterableToCSV(
@@ -766,8 +690,8 @@ def writeTriangleSparse(triangleSparse: 形TriangleSparse, pathFilename: Path) -
 
 	(AI generated docstring)
 
-	This function uses the sparse layout of `writeTriangle` [1] and replaces existing contents.
-	Read the result with `readTriangleSparse` [2] to preserve the original column keys.
+	This function uses the sparse layout of `writeTriangle` and replaces existing contents.
+	Read the result with `readTriangleSparse` to preserve the original column keys.
 
 	Parameters
 	----------
@@ -781,11 +705,10 @@ def writeTriangleSparse(triangleSparse: 形TriangleSparse, pathFilename: Path) -
 	pathFilenameWritten : Path
 		The supplied path after writing completes.
 
-	References
-	----------
-	[1] `writeTriangle`
-
-	[2] `readTriangleSparse`
+	See Also
+	--------
+	`readTriangleSparse`
+		Recover the saved values while preserving their column keys.
 	"""
 	return writeTriangle(triangleSparse, pathFilename)
 
@@ -797,14 +720,14 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 	(AI generated docstring)
 
 	You can use this function to retrieve UTF-8 text while reusing `pathFilenameCache`. A recent
-	cache returns immediately. A stale or missing cache triggers an HTTP request with urllib3 [1].
+	cache returns immediately. A stale or missing cache triggers an HTTP request with urllib3.
 	Suppressed request failures leave the previously read text unchanged.
 
 	Cache Refresh
 	-------------
-	A stale cache adds the HTTP `If-Modified-Since` header [2]. Status 304 updates the cache
+	A stale cache adds the HTTP `If-Modified-Since` header [1]. Status 304 updates the cache
 	modification time; status 200 decodes the response and writes the new text using
-	`hunterMakesPy.filesystemToolkit.writeStringToHere` [3]. Other statuses retain the earlier text.
+	`hunterMakesPy.filesystemToolkit.writeStringToHere`. Other statuses retain the earlier text.
 	The request disables retries. This function suppresses urllib3 `HTTPError` and `AttributeError`,
 	but filesystem and text-decoding errors can propagate.
 
@@ -829,12 +752,8 @@ def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
 
 	References
 	----------
-	[1] urllib3 documentation.
-		https://urllib3.readthedocs.io/en/stable/
-	[2] RFC 9110, HTTP `If-Modified-Since`.
+	[1] RFC 9110, HTTP If-Modified-Since.
 		https://www.rfc-editor.org/rfc/rfc9110.html#name-if-modified-since
-	[3] hunterMakesPy filesystem toolkit.
-		https://context7.com/hunterhogan/huntermakespy
 	"""
 	preferCache: bool = False
 	contents: str = ''
@@ -873,8 +792,8 @@ def getDataFrameFoldings(state: StateElimination) -> DataFrame:
 	(AI generated docstring)
 
 	You can use this function to obtain sample data for an elimination state. This function resolves
-	the standard sample-data path with `makePathFilenameArrayFoldings` [1] and loads the file with
-	`readDataFrame` [2]. Loading errors propagate to the caller.
+	the standard sample-data path with `makePathFilenameArrayFoldings` and loads the file with
+	`readDataFrame`. Loading errors propagate to the caller.
 
 	Parameters
 	----------
@@ -884,21 +803,12 @@ def getDataFrameFoldings(state: StateElimination) -> DataFrame:
 	Returns
 	-------
 	dataframeFoldings : DataFrame
-		Sample data as a pandas dataframe [3].
+		Sample data as a pandas dataframe.
 
 	See Also
 	--------
 	`readDataFrame`
 		Load a dataframe from an explicitly chosen file.
-
-	References
-	----------
-	[1] `makePathFilenameArrayFoldings`
-
-	[2] `readDataFrame`
-
-	[3] pandas `DataFrame`.
-		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
 	"""
 	return readDataFrame(makePathFilenameArrayFoldings(state.totalDimensions))
 
@@ -907,8 +817,8 @@ def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
 
 	(AI generated docstring)
 
-	You can use this function to read an album saved by `writeAlbum` [1]. This function converts each
-	nonempty CSV record [2] to a tuple of integers and loads every record into memory.
+	You can use this function to read an album saved by `writeAlbum`. This function converts each
+	nonempty CSV record to a tuple of integers and loads every record into memory.
 
 	Parameters
 	----------
@@ -924,13 +834,6 @@ def readAlbum(pathFilename: Path) -> tuple[Folding, ...]:
 	--------
 	`streamAlbum`
 		Iterate over folding records as the file is read.
-
-	References
-	----------
-	[1] `writeAlbum`
-
-	[2] Python `csv.reader`.
-		https://docs.python.org/3/library/csv.html#csv.reader
 	"""
 	return tuple(streamAlbum(pathFilename))
 
@@ -939,8 +842,8 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 
 	(AI generated docstring)
 
-	You can use this function to load stored folding data into a pandas dataframe [1].
-	This function reads the file with `pandas.read_pickle` [2] and passes the loaded object to the
+	You can use this function to load stored folding data into a pandas dataframe.
+	This function reads the file with `pandas.read_pickle` and passes the loaded object to the
 	dataframe constructor. Loading and construction errors propagate to the caller.
 
 	Parameters
@@ -957,13 +860,6 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 	--------
 	`getDataFrameFoldings`
 		Load sample data using the dimension count in an elimination state.
-
-	References
-	----------
-	[1] pandas `DataFrame`.
-		https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html
-	[2] pandas `read_pickle`.
-		https://pandas.pydata.org/docs/reference/api/pandas.read_pickle.html
 	"""
 	#=Sin= `pandas` is optional.
 	#ruff: ignore[import-outside-top-level]
@@ -975,7 +871,7 @@ def readDiagonal(pathFilename: Path, 次diagonal: int) -> dict[int, int]:
 
 	(AI generated docstring)
 
-	You can use this function to load counts saved by `writeDiagonal` [1]. Each nonempty record
+	You can use this function to load counts saved by `writeDiagonal`. Each nonempty record
 	contains a group key, a diagonal offset, and a value. This function selects records with the
 	requested offset and returns the values in ascending group-key order.
 
@@ -997,9 +893,10 @@ def readDiagonal(pathFilename: Path, 次diagonal: int) -> dict[int, int]:
 		If any nonempty record has a field count other than three, a field cannot be parsed as
 		an integer, or selected records repeat a group key. Malformed unselected records also fail.
 
-	References
-	----------
-	[1] `writeDiagonal`
+	See Also
+	--------
+	`writeDiagonal`
+		Save a diagonal in the three-field format accepted by this reader.
 	"""
 	#=SIN= Intermediate tuple: duplicate-row validation needs the selected record count after dictionary construction.
 	boxOfBoxes: tuple[tuple[int, ...], ...] = tuple(streamCSVintegers(pathFilename))
@@ -1035,16 +932,11 @@ def readText(pathFilename: Path, *, default: str | None = None) -> str:
 
 	Examples
 	--------
-	`mapFolding.oeis.updateBFile` [1] reads an existing b-file or starts with empty contents.
+	`mapFolding.oeis.updateBFile` reads an existing b-file or starts with empty contents.
 
 		```python
 		contents = readText(pathFilename, default='')
 		```
-
-	References
-	----------
-	[1] `mapFolding.oeis.updateBFile`
-
 	"""
 	try:
 		return pathFilename.read_text(encoding='utf-8')
@@ -1059,17 +951,17 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 
 	(AI generated docstring)
 
-	You can use this function to load groups previously saved by `writeTriangle` [1]. This function
+	You can use this function to load groups previously saved by `writeTriangle`. This function
 	streams the records from `pathFilename` and returns a dictionary mapping group keys to tuples
 	of values.
 
 	CSV Layout
 	----------
-	The file must contain UTF-8 text with no header. Each CSV record [2] begins with an integer group
-	number followed by integer values. `streamCSVintegers` [3] ignores empty
+	The file must contain UTF-8 text with no header. Each CSV record begins with an integer group
+	number followed by integer values. `streamCSVintegers` ignores empty
 	records and preserves the supplied group order. A record containing only a group key produces an
 	empty tuple. Repeated group keys keep the last values at the first occurrence's dictionary
-	position [4]. An empty file produces an empty dictionary. Group lengths and consecutive numbering
+	position [1]. An empty file produces an empty dictionary. Group lengths and consecutive numbering
 	are not validated.
 
 	Parameters
@@ -1091,13 +983,7 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 
 	References
 	----------
-	[1] `writeTriangle`
-
-	[2] csv.reader - Python standard library.
-		https://docs.python.org/3/library/csv.html#csv.reader
-	[3] `streamCSVintegers`
-
-	[4] Dictionary insertion order - Python standard library.
+	[1] Python dictionary insertion order.
 		https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
 	"""
 	return dict(map(itemgetter(0, slice(oneIndexed, None)), streamCSVintegers(pathFilename)))
@@ -1107,9 +993,9 @@ def readTriangleSparse(pathFilename: Path) -> dict[int, dict[int, int]]:
 
 	(AI generated docstring)
 
-	You can use this function to recover sparse cells saved by `writeTriangleSparse` [1] or
-	`writeTriangle` [2]. Empty cell fields are omitted while later cells retain their original
-	column keys. `mapFolding.dataStructures.stringsToLookup` [3] converts the cell fields.
+	You can use this function to recover sparse cells saved by `writeTriangleSparse` or
+	`writeTriangle`. Empty cell fields are omitted while later cells retain their original
+	column keys. `mapFolding.dataStructures.stringsToLookup` converts the cell fields.
 
 	Parameters
 	----------
@@ -1128,14 +1014,6 @@ def readTriangleSparse(pathFilename: Path) -> dict[int, dict[int, int]]:
 	--------
 	`readTriangle`
 		Read dense integer records when every cell field contains an integer.
-
-	References
-	----------
-	[1] `writeTriangleSparse`
-
-	[2] `writeTriangle`
-
-	[3] `mapFolding.dataStructures.stringsToLookup`
 	"""
 	from mapFolding.dataStructures import stringsToLookup
 	streamKeys, streamGroups = tee(streamCSV(pathFilename))
@@ -1152,13 +1030,8 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 
 	(AI generated docstring)
 
-	You can use this function to process an album saved by `writeAlbum` [1] without loading all
-	records into memory. Each nonempty CSV record [2] becomes a tuple of integers.
-
-	Open File Lifetime
-	------------------
-	The file is opened when iteration starts and remains open until the generator finishes or is
-	closed. Retain and close the generator if iteration stops before exhausting the file.
+	You can use this function to process an album saved by `writeAlbum` without loading all
+	records into memory. Each nonempty CSV record becomes a tuple of integers.
 
 	Parameters
 	----------
@@ -1175,12 +1048,10 @@ def streamAlbum(pathFilename: Path) -> Iterable[Folding]:
 	`readAlbum`
 		Load all folding records into a tuple.
 
-	References
-	----------
-	[1] `writeAlbum`
-
-	[2] Python `csv.reader`.
-		https://docs.python.org/3/library/csv.html#csv.reader
+	Open File Lifetime
+	------------------
+	The file is opened when iteration starts and remains open until the generator finishes or is
+	closed. Retain and close the generator if iteration stops before exhausting the file.
 	"""
 	yield from streamCSVintegers(pathFilename)
 
@@ -1189,7 +1060,7 @@ def streamCSV(pathFilename: Path) -> Iterable[list[str]]:
 
 	(AI generated docstring)
 
-	This function reads UTF-8 records using the default Python `csv.reader` dialect [1]. Empty
+	This function reads UTF-8 records using the default Python `csv.reader` dialect. Empty
 	records are skipped; records containing empty fields are retained. Headers and comments
 	receive no special treatment.
 
@@ -1207,11 +1078,6 @@ def streamCSV(pathFilename: Path) -> Iterable[list[str]]:
 	------------------
 	The file opens when iteration begins and remains open until the generator finishes or is
 	closed. Close the generator if iteration ends before the file is exhausted.
-
-	References
-	----------
-	[1] Python `csv.reader`.
-		https://docs.python.org/3/library/csv.html#csv.reader
 	"""
 	with pathFilename.open(encoding='utf-8', mode='r', newline='') as streamRead:
 		yield from filter(bool, csv_reader(streamRead))
@@ -1221,7 +1087,7 @@ def streamCSVintegers(pathFilename: Path) -> Iterable[tuple[int, ...]]:
 
 	(AI generated docstring)
 
-	This function converts every field read by `streamCSV` [1] using `int`. Headers, comments,
+	This function converts every field read by `streamCSV` using `int`. Headers, comments,
 	and empty fields are not skipped and must be absent for conversion to succeed.
 
 	Parameters
@@ -1234,8 +1100,9 @@ def streamCSVintegers(pathFilename: Path) -> Iterable[tuple[int, ...]]:
 	boxOfIntegers : tuple[int, ...]
 		One nonempty record in file order.
 
-	References
-	----------
-	[1] `streamCSV`
+	See Also
+	--------
+	`streamCSV`
+		Read parsed field strings without converting the fields to integers.
 	"""
 	yield from map(lambda boxOfStrings: tuple(map(int, boxOfStrings)), streamCSV(pathFilename))  # ruff: ignore[unnecessary-map]

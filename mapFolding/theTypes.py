@@ -4,7 +4,7 @@
 
 You can use this module to annotate domain values and select integer storage for counting
 algorithms. Type aliases describe intended roles; type aliases do not validate values at runtime.
-Array aliases use NumPy [1].
+Array aliases use NumPy.
 
 Contents
 --------
@@ -86,11 +86,6 @@ Function signatures
 Managing values with defaults
 	Default
 		Group default configuration values by role.
-
-References
-----------
-[1] NumPy reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 from __future__ import annotations
 
@@ -129,14 +124,9 @@ type OEISid = LiteralString
 
 (AI generated docstring)
 
-This alias uses `typing.LiteralString` [1] for sequence identifiers such as `'A000682'`.
+This alias uses `typing.LiteralString` for sequence identifiers such as `'A000682'`.
 The annotation does not validate identifier syntax or establish that a sequence is registered
 with the package.
-
-References
-----------
-[1] Python `typing.LiteralString`.
-	https://docs.python.org/3/library/typing.html#typing.LiteralString
 """
 
 type 形Triangle = Mapping[int, Sequence[int]]
@@ -162,84 +152,54 @@ type 形Array1Dint64 = ndarray[tuple[int], dtype[numpy_int64]]
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing signed 64-bit integers.
+This alias describes a NumPy array containing signed 64-bit integers.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 type 形Array2Dint64 = ndarray[tuple[int, int], dtype[numpy_int64]]
 """Describe an array with two axes containing signed 64-bit integers.
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing signed 64-bit integers.
+This alias describes a NumPy array containing signed 64-bit integers.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 type 形ArrayBoolean1D = ndarray[tuple[int], dtype[numpy_bool]]
 """Describe an array with one axis containing boolean values.
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing boolean values.
+This alias describes a NumPy array containing boolean values.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 type 形ArrayInteger = ndarray[tuple[Any, ...], dtype[integer]]
 """Describe an array with any number of axes containing integer values.
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing integer values.
+This alias describes a NumPy array containing integer values.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 type 形ArraySelector = ndarray[tuple[Any, ...], dtype[numpy_intp]]
 """Describe an array with any number of axes containing platform-sized indexing integers.
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing platform-sized indexing integers.
+This alias describes a NumPy array containing platform-sized indexing integers.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 type 形ArraySelector1D = ndarray[tuple[int], dtype[numpy_intp]]
 """Describe an array with one axis containing platform-sized indexing integers.
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing platform-sized indexing integers.
+This alias describes a NumPy array containing platform-sized indexing integers.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
 """
 
 # Change to generic class? "The preferred way to construct a type variable is via the dedicated syntax
@@ -266,32 +226,18 @@ type 形ArrayArcCode = ndarray[tuple[Any, ...], dtype[形ArcCode]]
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing `形ArcCode` [2].
+This alias describes a NumPy array containing `形ArcCode`.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形ArcCode`
-
 """
 type 形ArrayArcCode1D = ndarray[tuple[int], dtype[形ArcCode]]
 """Describe an array with one axis containing `形ArcCode` values.
 
 (AI generated docstring)
 
-This alias describes a NumPy array [1] containing `形ArcCode` [2].
+This alias describes a NumPy array containing `形ArcCode`.
 The annotation
 does not enforce axis lengths or validate values at runtime.
-
-References
-----------
-[1] NumPy array and datatype reference.
-	https://numpy.org/doc/stable/reference/index.html
-[2] `形ArcCode`
-
 """
 
 #================== Flexible `TypeAlias` for granular control over fixed-width integers ===========
@@ -359,8 +305,8 @@ class 形KeywordArgumentsCount(TypedDict, total=False):
 
 	(AI generated docstring)
 
-	This record describes optional keyword arguments accepted by `mapFolding.basecamp` [1].
-	Every key may be omitted because the record is declared with `total=False` [2].
+	This record describes optional keyword arguments accepted by `mapFolding.basecamp`.
+	Every key may be omitted because the record is declared with `total=False`.
 
 	Attributes
 	----------
@@ -372,13 +318,6 @@ class 形KeywordArgumentsCount(TypedDict, total=False):
 		Processor preference interpreted when the selected counting method uses concurrency.
 	suffix : str
 		Filename suffix for saved counts.
-
-	References
-	----------
-	[1] `mapFolding.basecamp`
-
-	[2] Python `typing.TypedDict`.
-		https://docs.python.org/3/library/typing.html#typing.TypedDict
 	"""
 
 	flow: LiteralString
@@ -395,7 +334,7 @@ class Default(TypedDict):
 
 	This record groups filesystem locations, function names, import targets, module names, and
 	variable names. Each category is required by the record declaration.
-	`mapFolding.kitAST.theSSOT.default` [1] constructs the base record used during module generation.
+	`mapFolding.kitAST.theSSOT.default` constructs the base record used during module generation.
 
 	Attributes
 	----------
@@ -409,11 +348,6 @@ class Default(TypedDict):
 		Configuration labels mapped to module names.
 	variable : dict[str, str]
 		Configuration labels mapped to variable names.
-
-	References
-	----------
-	[1] `mapFolding.kitAST.theSSOT.default`
-
 	"""
 
 	filesystem: dict[str, PurePosixPath]
@@ -433,7 +367,7 @@ ChoicesLeaf: TypeAlias = mpz
 
 (AI generated docstring)
 
-You can record which leaves may occupy a pile using the binary digits of a `gmpy2.mpz` [1].
+You can record which leaves may occupy a pile using the binary digits of a `gmpy2.mpz`.
 Assign `1` to position `leaf` when that leaf is a possible choice, and `0` when that leaf is
 excluded. The position of the digit identifies the leaf; the integer's value is not a leaf index.
 
@@ -444,22 +378,10 @@ value with the sentinel and one other digit set represents exactly one possible 
 The Python type distinguishes `ChoicesLeaf` (`gmpy2.mpz`) from `Leaf` (`int`). Clearing the sentinel
 does not change an object's Python type.
 
-You can construct sets with `mapFolding.beDRYElimination.makeChoicesLeaf` [2] or
-`mapFolding.beDRYElimination.makeAntiChoicesLeaf` [3], enumerate leaves with
-`mapFolding.beDRYElimination.getIteratorOfLeaves` [4], and distinguish empty or singleton choices with
-`mapFolding.beDRYElimination.distinguishChoicesLeaf` [5].
-
-References
-----------
-[1] gmpy2 integer operations and the mpz type.
-	https://gmpy2.readthedocs.io/en/latest/mpz.html
-[2] `mapFolding.beDRYElimination.makeChoicesLeaf`
-
-[3] `mapFolding.beDRYElimination.makeAntiChoicesLeaf`
-
-[4] `mapFolding.beDRYElimination.getIteratorOfLeaves`
-
-[5] `mapFolding.beDRYElimination.distinguishChoicesLeaf`
+You can construct sets with `mapFolding.beDRY.makeChoicesLeaf` or
+`mapFolding.beDRY.makeAntiChoicesLeaf`, enumerate leaves with
+`mapFolding.beDRY.getIteratorOfLeaves`, and distinguish empty or singleton choices with
+`mapFolding.beDRY.distinguishChoicesLeaf`.
 """
 
 type LeafSpace = Leaf | ChoicesLeaf

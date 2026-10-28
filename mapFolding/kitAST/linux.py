@@ -2,8 +2,8 @@
 
 (AI generated docstring)
 
-You can use this module to prepare generated source for Codon [1], build an executable,
-and rewrite the executable with LIEF [2]. Source preparation and binary stripping replace
+You can use this module to prepare generated source for Codon, build an executable,
+and rewrite the executable with LIEF. Source preparation and binary stripping replace
 the supplied files. Compilation requires Linux and an installed `codon` command.
 
 Contents
@@ -13,13 +13,6 @@ Functions
 		Strip a supported binary in place and return the original path.
 	toCodon
 		Rewrite generated source, compile on Linux, and print launch commands.
-
-References
-----------
-[1] Codon compiler.
-	https://github.com/exaloop/codon
-[2] LIEF binary rewriting API.
-	https://lief.re/doc/latest/formats/elf/python.html
 """
 from __future__ import annotations
 
@@ -38,13 +31,13 @@ def binaryStrip(pathFilename: Path) -> Path:
 
 	(AI generated docstring)
 
-	This function asks LIEF [1] to parse and strip the supplied binary, then writes the
+	This function asks LIEF to parse and strip the supplied binary, then writes the
 	modified binary over `pathFilename`.
 
 	Parameters
 	----------
 	pathFilename : Path
-		Existing binary that LIEF can parse, strip, and rewrite [1]. The compilation flow
+		Existing binary that LIEF can parse, strip, and rewrite. The compilation flow
 		uses this function for its Linux executable.
 
 	Returns
@@ -54,17 +47,11 @@ def binaryStrip(pathFilename: Path) -> Path:
 
 	Examples
 	--------
-	`toCodon` [2] strips the output whose filename is the source path without its suffix.
+	`toCodon` strips the output whose filename is the source path without its suffix.
 
 		```python
 		pathFilenameBinary: Path = binaryStrip(pathFilenamePython.with_suffix(''))
 		```
-
-	References
-	----------
-	[1] LIEF binary parsing, stripping, and rewriting API.
-		https://lief.re/doc/latest/formats/elf/python.html
-	[2] `toCodon`
 	"""
 	binary: lief.OAT.Binary | lief.ELF.Binary = raiseIfNone(lief.parse(pathFilename))
 	binary.strip()
@@ -76,20 +63,21 @@ def toCodon(pathFilenamePython: Path) -> Path:
 
 	(AI generated docstring)
 
-	This function prepares a generated computation job for Codon [1], compiles the job,
-	and strips the executable with `binaryStrip` [2]. The function returns the executable
+	This function prepares a generated computation job for Codon, compiles the job,
+	and strips the executable with `binaryStrip`. The function returns the executable
 	path and prints two launch commands.
 
 	Source Rewriting
 	----------------
 	The function removes the first 36 decoded characters, transliterates the remainder with
-	`anyascii` [3], and writes the source using ASCII encoding.
+	`anyascii`, and writes the source using ASCII encoding.
 
 	Compilation and Launch Output
 	-----------------------------
 	The function invokes `codon` through the process search path. The build requests
-	an executable in release mode, targets the native CPU, enables fast and unsafe floating
-	point optimization, and disables exceptions [1]. `subprocess.run` uses `check=False` [4].
+	an executable in release mode and targets the native CPU. The build passes
+	`--fast-math` [1], `--enable-unsafe-fp-math`, and `--disable-exceptions` [2].
+	`subprocess.run` uses `check=False`.
 
 	Parameters
 	----------
@@ -109,7 +97,7 @@ def toCodon(pathFilenamePython: Path) -> Path:
 
 	Examples
 	--------
-	The job writer calls this function after writing its source and checking for Linux [5].
+	The job writer calls this function after writing its source and checking for Linux.
 
 		```python
 		toCodon(Path(job.pathFilenameModule))
@@ -117,15 +105,10 @@ def toCodon(pathFilenamePython: Path) -> Path:
 
 	References
 	----------
-	[1] Codon compiler and executable builds.
-		https://github.com/exaloop/codon
-	[2] `binaryStrip`
-
-	[3] AnyAscii transliteration.
-		https://github.com/anyascii/anyascii
-	[4] Python `subprocess.run` and exit status handling.
-		https://docs.python.org/3/library/subprocess.html#subprocess.run
-	[5] `mapFolding.kitAST.codon.makeJob.makeJob`
+	[1] Codon command-line options: fast math.
+		https://docs.exaloop.io/start/options/#-fast-math
+	[2] Codon command-line options: disabling exceptions.
+		https://docs.exaloop.io/start/options/#-disable-exceptions
 	"""
 	pathFilenamePython.write_text(anyascii.anyascii(pathFilenamePython.read_text(encoding='utf-8')[36:None]), encoding='ascii')
 	if sys.platform == 'linux':

@@ -2,8 +2,8 @@
 
 (AI generated docstring)
 
-You can use this module to obtain reusable Python syntax nodes [1]. Importing the module
-loads and extracts `mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds` [2]
+You can use this module to obtain reusable Python syntax nodes. Importing the module
+loads and extracts `mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds`
 and creates call and assignment nodes using the configured state identifiers.
 
 Contents
@@ -21,12 +21,6 @@ Variables
 		Access an assignment that updates state through the symmetry filter.
 	FunctionDef_filterAsymmetricFolds
 		Access the extracted symmetry-filter function definition.
-
-References
-----------
-[1] Python abstract syntax tree node definitions.
-	https://docs.python.org/3/library/ast.html
-[2] `mapFolding.algorithms.foldsSymmetric.filterAsymmetricFolds`
 """
 from __future__ import annotations
 

@@ -58,15 +58,11 @@ def makeInitializeState(astModule: ast.Module, identifiers: Default | None = Non
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [1].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		makeInitializeState(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	identifiers = identifiers or default
 	名CallableSource: identifierDotAttribute = override.get('名CallableSource') or identifiers['function']['counting']

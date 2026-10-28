@@ -2,7 +2,7 @@
 
 (AI generated docstring)
 
-The positional symbols and head-relative constructors use positional notation [1] in base two.
+The positional symbols and head-relative constructors use positional notation in base two.
 The accompanying `_semiotics.md` explains the coordinate notation; `_symbols.md` provides a
 symbol reference.
 Both guides are installed beside this module.
@@ -72,10 +72,6 @@ Variables
 		零
 			Assign `1` to `dimensionIndex = 0`.
 
-References
-----------
-[1] Positional notation.
-	https://en.wikipedia.org/wiki/Positional_notation
 """
 from __future__ import annotations
 

@@ -89,22 +89,15 @@ def pinPile零Ante首零AfterDepth4(state: StateElimination) -> list[int]:
 	Pinned Piles
 	------------
 	The target pile is `首零(state.totalDimensions) - 零`,
-	using the positional-numeral system [1]. Piles `2`, `3`, `4`, `state.首 - 2`, `state.首 - 3`,
+	using the positional-numeral system. Piles `2`, `3`, `4`, `state.首 - 2`, `state.首 - 3`,
 	and `state.首 - 4` must contain pinned leaves. The public orchestration function
-	`mapFolding.pinIt.pinPile零Ante首零` [2] prepares these piles.
+	`mapFolding.pinIt.pinPile零Ante首零` prepares these piles.
 
 	A required pile without a pinned leaf causes `ValueError`.
 
-	Initial leaf choices come from `mapFolding.pileOptions.getLookupChoicesLeaf` [3].
+	Initial leaf choices come from `mapFolding.pileOptions.getLookupChoicesLeaf`.
 	The exclusions are experimental and do not establish a complete folding.
 
-	References
-	----------
-	[1] `mapFolding._semiotics`
-
-	[2] `mapFolding.pinIt.pinPile零Ante首零`
-
-	[3] `mapFolding.pileOptions.getLookupChoicesLeaf`
 	"""
 	leafAt一:			Leaf = raiseIfNone(state.permutationSpace.getLeaf(一))
 	leafAt一Ante首:		Leaf = raiseIfNone(state.permutationSpace.getLeaf(neg(一) + state.首))

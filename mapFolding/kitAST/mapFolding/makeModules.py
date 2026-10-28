@@ -31,23 +31,17 @@ def makeModulesMapFolding() -> None:
 
 	You can use this function to write module-level compilation, sequential and parallel counting,
 	state initialization, and the Theorem 2 variants. The function uses
-	`mapFolding.kitAST.theSSOT.defaultMapFolding` [1] for source and output identifiers.
+	`mapFolding.kitAST.theSSOT.defaultMapFolding` for source and output identifiers.
 	Each dependent Theorem 2 transformation loads the preceding generated file.
 	The function writes the configured output modules.
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call [2].
+	The module `mapFolding.kitAST.mapFolding.makeModules` uses this call.
 
 		```python
 		makeModulesMapFolding()
 		```
-
-	References
-	----------
-	[1] `mapFolding.kitAST.theSSOT.defaultMapFolding`
-
-	[2] `mapFolding.kitAST.mapFolding.makeModules`
 	"""
 	make_jit_module(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 	makeInlineNumba(getModule(identifiers=defaultMapFolding), defaultMapFolding)

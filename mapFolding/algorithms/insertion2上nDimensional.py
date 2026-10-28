@@ -115,13 +115,13 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 
 	(AI generated docstring)
 
-	You can read the previous-dimension album from `settingsPackage.pathAlbum` [1],
-	process each source folding with `makeDescendants` [2], and gather worker permutation spaces and
+	You can read the previous-dimension album from `settingsPackage.pathAlbum`,
+	process each source folding with `makeDescendants`, and gather worker permutation spaces and
 	folding collections.
 
 	Concurrency
 	-----------
-	Tasks run through `concurrent.futures.ProcessPoolExecutor` [3]. Each task receives a new elimination
+	Tasks run through `concurrent.futures.ProcessPoolExecutor`. Each task receives a new elimination
 	state initialized with a shallow copy of the supplied permutation-space list.
 
 	Parameters
@@ -137,6 +137,11 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 	state : StateElimination
 		The same state with active spaces replaced by worker results and worker folding collections appended.
 
+	See Also
+	--------
+	`makeDescendants`
+		Build target-map branches from one source folding instead of a complete album.
+
 	Examples
 	--------
 	The insertion script prepares target-map search spaces from the preceding album.
@@ -145,14 +150,6 @@ def makeAlbum2上nDimensional(state: StateElimination, workersMaximum: int) -> S
 		state = makeAlbum2上nDimensional(state, 14)
 		```
 
-	References
-	----------
-	[1] `mapFolding.theSSOT.settingsPackage.pathAlbum`
-
-	[2] `makeDescendants`
-
-	[3] Python concurrent.futures.ProcessPoolExecutor.
-		https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ProcessPoolExecutor
 	"""
 	album: Iterable[Folding] = readAlbum(makePathFilenameFolds(makeMapShape('A001417', state.totalDimensions - 1), settingsPackage.pathAlbum, suffix='.album'))
 
@@ -179,7 +176,7 @@ def recordAlbum2上nDimensional(state: StateElimination) -> Path:
 	(AI generated docstring)
 
 	You can sort `state.boxOfFolding` and save the collection with `mapFolding.kitFilesystem.writeAlbum`
-	[1] to the album directory [2]. You save only collected foldings, without enumerating unresolved
+	to the album directory. You save only collected foldings, without enumerating unresolved
 	permutation spaces.
 
 	Parameters
@@ -200,11 +197,6 @@ def recordAlbum2上nDimensional(state: StateElimination) -> Path:
 		recordAlbum2上nDimensional(state)
 		```
 
-	References
-	----------
-	[1] `mapFolding.kitFilesystem.writeAlbum`
-
-	[2] `mapFolding.theSSOT.settingsPackage.pathAlbum`
 	"""
 	pathFilenameAlbum: Path = makePathFilenameFolds(state.mapShape, settingsPackage.pathAlbum, suffix='.album')
 	writeAlbum(sorted(state.boxOfFolding), pathFilenameAlbum)

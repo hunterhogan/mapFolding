@@ -11,9 +11,9 @@ Diagonal Formula Status
 -----------------------
 The first four fixed-diagonal formulas are proved on their stated domains. The formulas for
 diagonals five through eleven agree with known counts but remain conjectural as complete
-diagonal formulas. `mapFolding.oeis.A400429._A005315` [2] records domains, initial exceptions,
-coefficient representations, and proof references. Agreement printed by `checkFormulas` is a
-comparison with available data, not an additional proof.
+diagonal formulas. `mapFolding.oeis.A400429oeisByFormula._A005315` records domains,
+initial exceptions, coefficient representations, and proof references. Agreement printed by
+`checkFormulas` is a comparison with available data, not an additional proof.
 
 Contents
 --------
@@ -91,11 +91,15 @@ Variables
 	boxOfDiagonals
 		Select a fixed-diagonal function, with the first diagonal at position zero.
 
+See Also
+--------
+`mapFolding.oeis.A400429oeisByFormula._A005315`
+	Inspect the formula domains, initial exceptions, coefficient representations, and proof sources.
+
 References
 ----------
 [1] OEIS A400429, semi-meanders by crossings and winding number.
 	https://oeis.org/A400429
-[2] `mapFolding.oeis.A400429._A005315`
 """
 from __future__ import annotations
 

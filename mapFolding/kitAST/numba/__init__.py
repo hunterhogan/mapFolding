@@ -2,7 +2,7 @@
 
 (AI generated docstring)
 
-You can use this package to configure and emit Numba compilation [1] for counting functions
+You can use this package to configure and emit Numba compilation for counting functions
 and modules. The package also assembles standalone jobs from initialized computation state.
 
 Modules

@@ -92,9 +92,6 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 		)
 		```
 
-	References
-	----------
-	[1] `mapFolding.algorithms.iff.foldingValid吗`
 	"""
 	return sum(map(foldingValid吗, map(permutationSpace.makeFolding, filter(allUnique吗
 			, CartesianProduct(*(tuple(getIteratorOfLeaves(choicesLeaf))
@@ -107,7 +104,7 @@ def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: Permutat
 	(AI generated docstring)
 
 	You can reduce `permutationSpace` in a new elimination state by removing crease violations and
-	applying the default reductions [1]. You receive unresolved branches and fully assigned branches in
+	applying the default reductions. You receive unresolved branches and fully assigned branches in
 	separate state collections. Reductions can mutate `permutationSpace`.
 
 	Parameters
@@ -122,9 +119,6 @@ def reducePermutationSpace(mapShape: tuple[int, ...], permutationSpace: Permutat
 	state : StateElimination
 		New state containing unresolved spaces and completed folding representatives.
 
-	References
-	----------
-	[1] `mapFolding.reduceIt.boxOfFunctionsReductionDEFAULT`
 	"""
 	return StateElimination(mapShape, boxOfPermutationSpace=[permutationSpace]
 		).removeCreaseViolations().reduceAllPermutationSpace(boxOfFunctionsReductionDEFAULT).moveToBoxOfFolding()
@@ -134,7 +128,7 @@ def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpac
 
 	(AI generated docstring)
 
-	You can combine the branches returned by each permutation space's `deconstructPile` method [1].
+	You can combine the branches returned by each permutation space's `deconstructPile` method.
 	Supply inputs with an undetermined pile and consume the lazy expansion before changing their
 	assignments.
 
@@ -148,9 +142,6 @@ def deconstructPermutationSpaces(boxOfPermutationSpace: Iterable[PermutationSpac
 	deconstructedPermutationSpaces : Iterator[PermutationSpace]
 		Iterator over branches from all supplied permutation spaces.
 
-	References
-	----------
-	[1] `mapFolding.dataBaskets.PermutationSpace.deconstructPile`
 	"""
 	return chain.from_iterable(map(PermutationSpace.deconstructPile, boxOfPermutationSpace))
 
@@ -161,7 +152,7 @@ def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Q
 
 	You can consume tasks from `queuePermutationSpace` and place one reduced state in `queueStates` for
 	each task. Use an empty permutation space as the stop marker. You wait on queue reads until a task or
-	stop marker is available [1].
+	stop marker is available.
 
 	Parameters
 	----------
@@ -172,10 +163,6 @@ def consumePermutationSpaces(mapShape: tuple[int, ...], queuePermutationSpace: Q
 	queueStates : Queue[StateElimination]
 		Output queue receiving one reduction result per input task.
 
-	References
-	----------
-	[1] Python multiprocessing queues.
-		https://docs.python.org/3/library/multiprocessing.html#pipes-and-queues
 	"""
 	tuple(map(queueStates.put, map(partial(reducePermutationSpace, mapShape), iter(queuePermutationSpace.get, PermutationSpace()))))
 
@@ -260,7 +247,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 
 	You can reduce and expand `state.boxOfPermutationSpace` until no unresolved branches remain. If you
 	supply no active spaces, you start a search with the origin leaf pinned at the origin pile and the
-	symmetry restrictions from `theorem4` [1] and `theorem2b` [2] applied.
+	symmetry restrictions from `theorem4` and `theorem2b` applied.
 
 	Count storage
 	-------------
@@ -270,7 +257,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 
 	Concurrency
 	-----------
-	You exchange work with worker processes through `multiprocessing` queues [3]. You receive the final
+	You exchange work with worker processes through `multiprocessing` queues. You receive the final
 	state after every submitted branch finishes and the worker processes have joined.
 
 	Parameters
@@ -285,14 +272,12 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 	state : StateElimination
 		The same state with the folding representative count in `groupsOfFolds` and no active spaces.
 
-	References
-	----------
-	[1] `theorem4`
-
-	[2] `theorem2b`
-
-	[3] Python multiprocessing queues.
-		https://docs.python.org/3/library/multiprocessing.html#pipes-and-queues
+	See Also
+	--------
+	`theorem4`
+		Apply the dimension-symmetry restrictions used to initialize the search.
+	`theorem2b`
+		Apply the additional leaf-order restriction when its symmetry factor is available.
 	"""
 	if state.totalLeaves == 0:
 		state.groupsOfFolds = 1

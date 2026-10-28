@@ -45,24 +45,18 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 	ArithmeticError
 		If `n` is below the sequence's defined offset.
 
+	See Also
+	--------
+	`mapFolding.basecamp.countMeanders`
+		Compute A000682 and A005316 with native meander algorithms.
+	`mapFolding.basecamp.countFolds`
+		General multidimensional map-folding computation.
+
 	Examples
 	--------
 	>>> from mapFolding.oeis import oeisIDfor_n
 	>>> oeisIDfor_n('A001415', 19)
 	87811001880539136
-
-	See Also
-	--------
-	mapFolding.basecamp.countMeanders
-		Compute A000682 and A005316 with native meander algorithms.
-	mapFolding.basecamp.countFolds
-		General multidimensional map-folding computation.
-
-	References
-	----------
-	[1] OEIS - The On-Line Encyclopedia of Integer Sequences
-		https://oeis.org/
-	[2] mapFolding.basecamp.countFolds
 	"""
 	oeisID = formatOEISid(oeisID)
 

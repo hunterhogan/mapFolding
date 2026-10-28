@@ -47,7 +47,7 @@ def leafInChoicesLeaf吗(leaf: Leaf, choicesLeaf: ChoicesLeaf) -> bool:
 
 	(AI generated docstring)
 
-	You can check the bit at `leaf` in `choicesLeaf` with `gmpy2.mpz.bit_test` [1]. Supply a leaf index
+	You can check the bit at `leaf` in `choicesLeaf` with `gmpy2.mpz.bit_test`. Supply a leaf index
 	below the sentinel position.
 
 	Parameters
@@ -62,10 +62,6 @@ def leafInChoicesLeaf吗(leaf: Leaf, choicesLeaf: ChoicesLeaf) -> bool:
 	leafIsPresent : bool
 		`True` when the bit for `leaf` is set.
 
-	References
-	----------
-	[1] gmpy2 integer operations and the mpz type.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return choicesLeaf.bit_test(leaf)
 
@@ -121,7 +117,7 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	(AI generated docstring)
 
 	You can identify the integer type used for pinned leaves and use a positive result for
-	`typing.TypeIs` narrowing [1] without validating index bounds. You also accept integer subclasses,
+	`typing.TypeIs` narrowing without validating index bounds. You also accept integer subclasses,
 	including `bool`.
 
 	Parameters
@@ -141,10 +137,6 @@ def leaf吗(leafSpace: LeafSpace | None) -> TypeIs[Leaf]:
 	`mapFolding.dataBaskets.PermutationSpace.pilePinned吗`
 		Check the assignment at a pile and normalize the leaf set.
 
-	References
-	----------
-	[1] Python typing.TypeIs and type narrowing.
-		https://docs.python.org/3/library/typing.html#typing.TypeIs
 	"""
 	return isinstance(leafSpace, Leaf)
 
@@ -153,8 +145,8 @@ def choicesLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[ChoicesLeaf]:
 
 	(AI generated docstring)
 
-	You can identify the `ChoicesLeaf` type and use a positive result for `typing.TypeIs` narrowing [1] without
-	checking the sentinel or leaf count.
+	You can identify the `ChoicesLeaf` type and use a positive result for `typing.TypeIs` narrowing
+	without checking the sentinel or leaf count.
 
 	Parameters
 	----------
@@ -173,10 +165,6 @@ def choicesLeaf吗(leafSpace: LeafSpace | None) -> TypeIs[ChoicesLeaf]:
 	`mapFolding.dataBaskets.PermutationSpace.pileUndetermined吗`
 		Check the assignment at a pile and normalize the leaf set.
 
-	References
-	----------
-	[1] Python typing.TypeIs and type narrowing.
-		https://docs.python.org/3/library/typing.html#typing.TypeIs
 	"""
 	return isinstance(leafSpace, ChoicesLeaf)
 
@@ -186,7 +174,7 @@ def pileChoicesLeaf吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pi
 	(AI generated docstring)
 
 	You can check that `pileLeafSpace` contains an integer pile index and a `ChoicesLeaf`, then use a positive
-	result for `typing.TypeIs` narrowing [1]. Validate index bounds and the sentinel separately.
+	result for `typing.TypeIs` narrowing. Validate index bounds and the sentinel separately.
 
 	Parameters
 	----------
@@ -198,10 +186,6 @@ def pileChoicesLeaf吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pi
 	pileHasChoicesLeaf : TypeIs[tuple[Pile, ChoicesLeaf]]
 		`True` when the pile is an integer and the second item is a `ChoicesLeaf`.
 
-	References
-	----------
-	[1] Python typing.TypeIs and type narrowing.
-		https://docs.python.org/3/library/typing.html#typing.TypeIs
 	"""
 	return isinstance(pileLeafSpace[0], int) and choicesLeaf吗(pileLeafSpace[1])
 
@@ -233,7 +217,7 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 	(AI generated docstring)
 
 	You can exclude the origin leaf and the leaf numbered `1` from a sequence of leaf indices by
-	comparing the numeric value directly with `零` [1]. You do not distinguish a leaf index from an
+	comparing the numeric value directly with `零`. You do not distinguish a leaf index from an
 	encoded domain in this comparison.
 
 	Parameters
@@ -254,9 +238,6 @@ def moreThanLeaf零吗(leaf: LeafSpace) -> bool:
 		filter(moreThanLeaf零吗, mapShape首ProductsSumsInSubSubHyperplane)
 		```
 
-	References
-	----------
-	[1] `mapFolding._semiotics.零`
 	"""
 	return 零 < leaf
 
@@ -266,7 +247,7 @@ def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
 	(AI generated docstring)
 
 	You can inspect whether `leaf` has coordinate `1` on the axis indexed by
-	`dimension`. The bit test uses `gmpy2.bit_test` [1].
+	`dimension`. The bit test uses `gmpy2.bit_test`.
 
 	Parameters
 	----------
@@ -280,9 +261,5 @@ def oddLeaf2上nDimensional吗(dimension: DimensionIndex, leaf: Leaf) -> bool:
 	isOddLeaf : bool
 		`True` when the bit at `dimension` is set in `leaf`.
 
-	References
-	----------
-	[1] gmpy2 integer operations.
-		https://gmpy2.readthedocs.io/en/latest/mpz.html
 	"""
 	return isBit1吗(leaf, dimension)

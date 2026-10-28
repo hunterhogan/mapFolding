@@ -237,7 +237,7 @@ def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
 	(AI generated docstring)
 
 	You can use this function to load the configured symmetric source module and pass that module
-	to `addSymmetryCheckAsynchronous` [1]. The generated file uses the configured worker template
+	to `addSymmetryCheckAsynchronous`. The generated file uses the configured worker template
 	and output identifiers. An existing output file is overwritten.
 
 	Returns
@@ -247,17 +247,11 @@ def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
 
 	Examples
 	--------
-	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous` uses this call [2].
+	The module `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous` uses this call.
 
 		```python
 		makeModulesFoldsSymmetricAsynchronous()
 		```
-
-	References
-	----------
-	[1] `addSymmetryCheckAsynchronous`
-
-	[2] `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous`
 	"""
 	return addSymmetryCheckAsynchronous(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 

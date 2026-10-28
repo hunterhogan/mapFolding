@@ -29,7 +29,7 @@ from __future__ import annotations
 from itertools import product as CartesianProduct
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders, enumerateSequences
 from mapFolding.dataBaskets import StateMapFolding
-from mapFolding.kitAST.numba.kitNumba import parametersNumbaLight, SpicesJobNumba
+from mapFolding.kitAST.numba.kitNumba import parametersNumbaLight
 from mapFolding.kitAST.numba.makeJob import makeJobNumba
 from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
 from mapFolding.kitFilesystem import readAlbum, writeAlbum
@@ -115,7 +115,8 @@ def test_meanders(kind: LiteralString, n: int, flow: LiteralString, monkeypatch:
 	assertEqualTo(actual, expected, countMeanders.__name__, kind, n, flow, None)
 
 @pytest.mark.parametrize('mapShape', [pytest.param((2, 4), id='p2x4')])
-def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Path) -> None:
+@pytest.mark.parametrize('useNumbaProgressBar', (False, True))
+def test_writeJobNumba(mapShape: tuple[int, ...], useNumbaProgressBar: bool, pathRootJobDEFAULTTesting: Path) -> None:
 	"""Test dynamic code generation and execution for computational modules.
 
 	(AI generated docstring)
@@ -143,8 +144,7 @@ def test_writeJobNumba(mapShape: tuple[int, ...], pathRootJobDEFAULTTesting: Pat
 
 	recipeJobTheorem2 = RecipeJobTheorem2(state, pathModule=PurePosixPath(pathFilenameModule.parent), identifierModule=pathFilenameModule.stem
 		, pathFilenameTotalFolds=PurePosixPath(pathFilenameTotalFolds), totalFoldsMultiplier=state.totalLeaves)
-	spicesJobNumba = SpicesJobNumba(useNumbaProgressBar=False, parametersNumba=parametersNumbaLight)
-	makeJobNumba(recipeJobTheorem2, spicesJobNumba)
+	makeJobNumba(recipeJobTheorem2, useNumbaProgressBar=useNumbaProgressBar, parametersNumba=parametersNumbaLight)
 
 	runpy.run_path(str(pathFilenameModule), run_name='__main__')
 

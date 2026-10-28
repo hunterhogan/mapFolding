@@ -19,8 +19,7 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
 
     You can use this function in a generated module to reset shared worker state and start
     `maxWorkers` daemon threads. Each thread consumes the shared queue and accumulates filter
-    results. The source template contains a placeholder filter; generation supplies the real filter
-    [1].
+    results. The source template contains a placeholder filter; generation supplies the real filter.
 
     Parameters
     ----------
@@ -31,17 +30,11 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
 
     Examples
     --------
-    The module `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` uses this call [2].
+    The module `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` uses this call.
 
     ```python
     initializeConcurrencyManager(maxWorkers)
     ```
-
-    References
-    ----------
-    [1] `mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous.addSymmetryCheckAsynchronous`
-
-    [2] `mapFolding.synthesized.mapFoldingSymmetric.asynchronous`
     """
     global boxOfThreads, symmetricTotalFolds, queueFutures
     boxOfThreads = []
@@ -78,7 +71,7 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
     (AI generated docstring)
 
     You can use this function to submit a snapshot of `state` without waiting for filtering.
-    The function copies `state` with `deepcopy` [1], enqueues the copy, and returns `None`.
+    The function copies `state` with `deepcopy`, enqueues the copy, and returns `None`.
 
     Parameters
     ----------
@@ -87,17 +80,11 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
 
     Examples
     --------
-    The module `mapFolding.synthesized.mapFoldingSymmetric.algorithm` uses this call [2].
+    The module `mapFolding.synthesized.mapFoldingSymmetric.algorithm` uses this call.
 
     ```python
     filterAsymmetricFolds(state)
     ```
-
-    References
-    ----------
-    [1] Python recursive object copying.
-    https://docs.python.org/3/library/copy.html#copy.deepcopy
-    [2] `mapFolding.synthesized.mapFoldingSymmetric.algorithm`
     """
     queueFutures.put_nowait(deepcopy(state))
 
@@ -116,15 +103,11 @@ def getSymmetricTotalFolds() -> 形TotalFolds:
 
     Examples
     --------
-    The module `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` uses this call [1].
+    The module `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` uses this call.
 
     ```python
     getSymmetricTotalFolds()
     ```
-
-    References
-    ----------
-    [1] `mapFolding.synthesized.mapFoldingSymmetric.asynchronous`
     """
     for _thread in boxOfThreads:
         queueFutures.put(STOPsignal)

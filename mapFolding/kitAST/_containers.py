@@ -2,7 +2,7 @@
 
 (AI generated docstring)
 
-This module defines the `Settings形` tuple exported by `mapFolding.kitAST` [1].
+This module defines the `Settings形` tuple exported by `mapFolding.kitAST`.
 Job generation uses these records to replace abstract datatype imports.
 
 Contents
@@ -10,10 +10,6 @@ Contents
 Classes
 	Settings形
 		Specify a replacement import for an abstract datatype.
-
-References
-----------
-[1] `mapFolding.kitAST`
 """
 from __future__ import annotations
 
@@ -29,7 +25,7 @@ class Settings形(NamedTuple):
 
 	You can use this tuple to map a datatype identifier in generated source to an imported type.
 	The configuration records the original identifier, replacement module, type, and import alias.
-	`mapFolding.kitAST.setDatatypeViaImport` applies the configuration [1].
+	`mapFolding.kitAST.setDatatypeViaImport` applies the configuration.
 
 	Attributes
 	----------
@@ -41,10 +37,6 @@ class Settings形(NamedTuple):
 		Datatype identifier imported from the replacement module.
 	type_asname : str | None = None
 		Optional alias written on the replacement import.
-
-	References
-	----------
-	[1] `mapFolding.kitAST.setDatatypeViaImport`
 	"""
 
 	datatypeIdentifier: str
