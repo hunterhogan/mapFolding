@@ -3,6 +3,8 @@
 # ruff: file-ignore[missing-type-function-argument]
 """Semi-meanders with n crossings and winding number n - 2h, for a FIXED h.
 
+Contributed by Alper Ferudun, October 2026.
+
 Picture: fold the semi-meander along the ray.  Positions 1..n on the ray; each
 position joins its top half-edge to its bottom half-edge.  On each side (top,
 bottom) there is a noncrossing partial matching with exactly h arches; the

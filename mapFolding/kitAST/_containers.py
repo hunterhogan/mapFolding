@@ -84,7 +84,7 @@ class Settings形(NamedTuple):
 	typeIdentifier: str
 	type_asname: str | None = None
 
-# TODO Problem: `LedgerOfImports` from `astToolkit` does not handle TYPE_CHECKING blocks very well.
+# TODO Problem: `LedgerOfImports` does not handle TYPE_CHECKING blocks very well.
 # TODO Python 3.15 `is_lazy`. fml.
 
 class LedgerOfImports:
@@ -157,8 +157,6 @@ class LedgerOfImports:
 				for alias in astImport____.names:
 					self._listImport.append((alias.name, alias.asname))
 			case ast.ImportFrom():
-				# TODO fix the mess created by `None` means '.'. I need a `identifierDotAttribute` to replace '.',
-				# of course this involves the same package/module context problem as above.
 				if astImport____.module is None:
 					astImport____.module = '.'
 				elif 0 < astImport____.level:
