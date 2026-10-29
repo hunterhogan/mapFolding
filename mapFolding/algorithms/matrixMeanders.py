@@ -122,7 +122,7 @@ def count(state: StateMeanders) -> StateMeanders:
         lookupArcCodeMeanders: dict[int, int] = state.lookupMeanders.copy()
         state.lookupMeanders = {}
 
-        tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values()))
+        tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values(), strict=True))
 
     return state
 

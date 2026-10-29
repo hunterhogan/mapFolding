@@ -2,7 +2,6 @@
 
 `mapFolding` is a typed Python research package for exact enumeration of map foldings, stamp foldings, semi-meanders, and meanders. It provides counting algorithms, access to their computation states, and tools for transforming readable algorithm source into specialized implementations.
 
-[![Install](https://img.shields.io/badge/Install-mapFolding-2ea44f?style=for-the-badge)](#installation)
 [![PyPI](https://img.shields.io/pypi/v/mapFolding.svg)](https://pypi.org/project/mapFolding/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mapFolding.svg)](https://pypi.org/project/mapFolding/)
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml)
@@ -184,10 +183,11 @@ To cite this software, use [`CITATION.cff`](https://github.com/hunterhogan/mapFo
 - **The On-Line Encyclopedia of Integer Sequences.** Sequence definitions, known values, formulas, and computation records. [OEIS](https://oeis.org/) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/oeis.bib).
 - **jOEIS: Java Online Encyclopedia of Integer Sequences.** [Repository](https://github.com/archmageirvine/joeis) · [Sean A. Irvine's A001415 implementation](https://github.com/archmageirvine/joeis/blob/9e2bd5f6b5a51bc40833c19ca04555ec12044edc/src/irvine/oeis/a001/A001415.java) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/jOEIS.bib).
 - **Andrew Howroyd's meander implementation.** [C# source and description](https://oeis.org/A005316/a005316.cs.txt) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Howroyd.bib).
+- **Alper Ferudun (2026), _fixed_deficit_semimeanders.py: Semi-meanders with Winding Number n-2h for Fixed h_.** Transfer matrix with a bounded number of states for each diagonal of [A400429](https://oeis.org/A400429). [OEIS user page](https://oeis.org/wiki/User:Alper_Ferudun) · [BibTeX](https://github.com/hunterhogan/mapFolding/blob/main/citations/Ferudun.bib).
 
 ## Installation
 
-`mapFolding` requires Python 3.13 or newer. Install the published package from [PyPI](https://pypi.org/project/mapFolding/):
+`mapFolding` requires Python 3.14 or newer. Install the published package from [PyPI](https://pypi.org/project/mapFolding/):
 
 ```console
 pip install mapFolding
@@ -284,27 +284,20 @@ This is my ongoing to-do list across this package and related projects. It recor
 2. Remote execution
     1. Google Colab: memmap causes everything to go to "disk" and the physical memory is unused.
     2. GitHub Codespaces: ignores memmap and terminates on OOM.
-3. astToolkit: figure out a better container system than Ingredients Module, Ingredients Function, etc.
-4. Dao of map folding
-    1. Overhaul how I store and access type metadata for ndarray and other containers. Affects:
-        1. StateMapFolding
-        2. Shatter dataclass
-        3. ast transformations
-5. Symmetric 1xn
+3. Symmetric 1xn
     1. Symmetry algorithm is too slow.
     2. Asynchronous + accelerated doesn't work yet.
-6. Matrix Meanders
+4. Matrix Meanders
     1. Rebuild the Polars meander implementation because it's broken.
-    2. I need a lot more tools in kitAST.
-    3. I hate `getTotalBuckets` but it _should_ be a brilliant function.
-7. Permutations
+    2. I hate `getTotalBuckets` but it _should_ be a brilliant function.
+5. Permutations
     1. The base algorithm is a dumpster fire.
     2. Bilateral concurrent can't produce a folding, but uses too much memory and is too slow to count folds.
-8. Reduce arches: slower than counting by hand.
-9. Constraint propagation or SAT
+6. Reduce arches: slower than counting by hand.
+7. Constraint propagation or SAT
     1. ortools won't apply concurrency, and I don't know how to think about divisions of the problem space that actually reduce computation time.
     2. Understanding other packages is harder than a self-enema with a firehouse.
-10. 2^n-dimensional (aka elimination by crease)
+8. 2^n-dimensional (aka elimination by crease)
     1. Computation algorithms needed for: conditional predecessors, conditional successors,
      DomainLeaf首零Plus零 in dimension零, the range of a pile (aka pile options, aka choices
      leaf), pinPile二ByCrease, pinPile二Ante首ByCrease, and pinPile零Ante首零AfterDepth4.
@@ -314,8 +307,8 @@ This is my ongoing to-do list across this package and related projects. It recor
     5. Fastest algorithm for 2^5. Can't complete 2^6. I mean, wtf?
     6. `PermutationSpace` and its OOP structure: I don't really know what I am doing.
     7. The reduce-it concept is strong: reorient more code around it. Resolve the tension with `PermutationSpace._solidifyLeafSpace()`.
-11. Elimination: atrophied.
-12. Insert leaves: But for the data storage, it would be powerful. IDK anything about data compression. I lost the code I wrote for the notation I created to store graphs, and it seems I am too stupid to recreate or reverse engineer my own code from my own files AND OTHER FUNCTIONS. fml. Ironically, LLMs can't figure it out either because I guess my idea was novel. F.M.L.
+9. Elimination: atrophied.
+10. Insert leaves: But for the data storage, it would be powerful. IDK anything about data compression. I lost the code I wrote for the notation I created to store graphs, and it seems I am too stupid to recreate or reverse engineer my own code from my own files AND OTHER FUNCTIONS. fml. Ironically, LLMs can't figure it out either because I guess my idea was novel. F.M.L.
 
 Hunter, this list is incomplete: you quit writing after you got upset. Resume at mapFolding.kitAST.
 
