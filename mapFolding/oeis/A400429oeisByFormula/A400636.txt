@@ -21,5 +21,4 @@
 %e Row n=20 of A400429 is 8152860,34816270,34717772,18057566,5588308,1053446,117744,7240,210,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18. Since n-16=4, a(20)=34717772, which is the eighth-to-last value.
 %Y Eighth diagonal of A400429. Cf. A005315, A005316, A400630, A400631, A400632, A400633, A400634, A400635, A400637, A400638, A400639.
 %K nonn,new
-%O 16,1
-%A _Hunter Hogan_, Oct 14 2026
+%O 16

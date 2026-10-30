@@ -1377,10 +1377,7 @@ class StateMeanders:
 	"""
 
 	bitWidthArcCode: int = 0
-	"""Track the bit length of the largest active arch code.
-
-	(AI generated docstring)
-	"""
+	"""The bit length of the largest active arch code."""
 	bitsLocator: int = 0
 	"""An odd-parity bit-mask with `bitWidthArcCode` bits."""
 	arcCodeMaximum: int = 0

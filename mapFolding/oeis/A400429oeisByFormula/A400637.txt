@@ -21,5 +21,4 @@
 %e Row n=22 of A400429 is 73424650,325703336,349184078,202174358,72489674,16648452,2426888,215332,10698,254,2, corresponding to winding numbers 0,2,4,6,8,10,12,14,16,18,20. Since n-18=4, a(22)=349184078, which is the ninth-to-last value.
 %Y Ninth diagonal of A400429. Cf. A005315, A005316, A400630, A400631, A400632, A400633, A400634, A400635, A400636, A400638, A400639.
 %K nonn,new
-%O 18,1
-%A _Hunter Hogan_, Oct 14 2026
+%O 18
