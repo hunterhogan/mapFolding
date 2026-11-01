@@ -3,10 +3,10 @@ from __future__ import annotations
 from mapFolding import leafOrigin, pileOrigin, pinIt
 from mapFolding.algorithms.elimination import theorem2b
 from mapFolding.basecamp import eliminateFolds
+from mapFolding.choicesLeaf import getLookupChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from mapFolding.oeis._byFormulaLookup import _A000682
-from mapFolding.pileOptions import getLookupChoicesLeaf
 from mapFolding.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from typing import TYPE_CHECKING
 import time

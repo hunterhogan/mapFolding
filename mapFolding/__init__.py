@@ -44,7 +44,7 @@ leafDomains
 measure
 	Measure positional-numeral features of leaf and pile labels.
 pileOptions
-	Compute possible leaf choices for piles and test domain restrictions.
+	Compute possible leaf choices for piles.
 pinByCrease
 	Select leaves for end piles using crease restrictions.
 pinByDomain

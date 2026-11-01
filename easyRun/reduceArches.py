@@ -21,7 +21,7 @@ def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], lis
 		triangle[n] = counter(n)
 		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
 		writeStringToHere(''.join(map('{} {}\n'.format, range(1, sum(map(len, triangle.values())) + 1),
-			chain.from_iterable(triangle.values()))), pathFilename)
+			chain.from_iterable(triangle.values()), strict=True)), pathFilename)
 	return pathFilename
 
 if __name__ == '__main__':

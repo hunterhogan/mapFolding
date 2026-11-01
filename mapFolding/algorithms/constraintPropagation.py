@@ -21,12 +21,12 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import last
 from itertools import pairwise, product as CartesianProduct, repeat
 from mapFolding import leafOrigin, pileOrigin
-from mapFolding.beDRY import getIteratorOfLeaves, mapShapeIs2上nDimensions, mapShapeLengthsAreEqual
+from mapFolding.beDRY import mapShapeIs2上nDimensions, mapShapeLengthsAreEqual
+from mapFolding.choicesLeaf import getIteratorOfLeaves, getLookupChoicesLeaf
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.leafDomains import getDomainLeaf
 from mapFolding.measure import 工dimensionTail, 工dimension首零
-from mapFolding.pileOptions import getLookupChoicesLeaf
 from mapFolding.reduceIt import boxOfFunctionsReductionDEFAULT
 from mapFolding.theSSOT import settingsPackage
 from math import factorial, prod

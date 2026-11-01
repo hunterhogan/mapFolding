@@ -378,10 +378,10 @@ value with the sentinel and one other digit set represents exactly one possible 
 The Python type distinguishes `ChoicesLeaf` (`gmpy2.mpz`) from `Leaf` (`int`). Clearing the sentinel
 does not change an object's Python type.
 
-You can construct sets with `mapFolding.beDRY.makeChoicesLeaf` or
-`mapFolding.beDRY.makeAntiChoicesLeaf`, enumerate leaves with
-`mapFolding.beDRY.getIteratorOfLeaves`, and distinguish empty or singleton choices with
-`mapFolding.beDRY.distinguishChoicesLeaf`.
+You can construct sets with `mapFolding.choicesLeaf.makeChoicesLeaf` or
+`mapFolding.choicesLeaf.makeAntiChoicesLeaf`, enumerate leaves with
+`mapFolding.choicesLeaf.getIteratorOfLeaves`, and distinguish empty or singleton choices with
+`mapFolding.choicesLeaf.distinguishChoicesLeaf`.
 """
 
 type LeafSpace = Leaf | ChoicesLeaf

@@ -162,4 +162,4 @@ def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
 def doTheNeedful(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state = count(state)
     return state
-jit_module(cache=True, error_model='numpy', fastmath=True, forceinline=True)
+jit_module(boundscheck=False, cache=True, error_model='numpy', forceinline=True, inline='always', nopython=True, parallel=False)

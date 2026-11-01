@@ -269,7 +269,7 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 	"""
 	#=SIN= Intermediate tuple: comparison, aligned output, and ratios consume the known cells separately.
 	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
-	match: bool = len(computed) == len(known) and all(map(eq, computed, known))
+	match: bool = len(computed) == len(known) and all(map(eq, computed, known, strict=True))
 	timeElapsed: float = time.perf_counter() - timeStart
 
 	sys.stdout.write(f"{n:2} {(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[match]}{match}{ansiColorReset}\t{timeElapsed:5.2f}\t")
@@ -279,7 +279,7 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 
 	if not match:
 		if ratio:
-			sys.stdout.write('\t' + ' '.join(map(partial(formatBenchmarkRatio, ratio=ratio), known, computed)))
+			sys.stdout.write('\t' + ' '.join(map(partial(formatBenchmarkRatio, ratio=ratio), known, computed, strict=False)))
 		sys.stdout.write('\n' + ' ' * len(f"{n:2} {match}\t{timeElapsed:5.2f}\t".expandtabs()))
 		sys.stdout.write(' '.join(map(str.rjust, chain(map(str, known), repeat('?', max(0, len(computed) - len(known)))), repeat(width))))
 

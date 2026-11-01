@@ -35,8 +35,8 @@ from humpy_cytoolz import dissoc, get, groupby as toolz_groupby, keyfilter as fi
 from hunterMakesPy import errorL33T, inclusive, raiseIfNone
 from itertools import chain, combinations
 from mapFolding.algorithms.iff import creaseViolation吗, getCreasePost, oddLeaf吗
-from mapFolding.beDRY import (
-	choicesLeafAND, distinguishChoicesLeaf, getIteratorOfLeaves, lengthChoicesLeaf, makeAntiChoicesLeaf, mapShapeIs2上nDimensions)
+from mapFolding.beDRY import mapShapeIs2上nDimensions
+from mapFolding.choicesLeaf import choicesLeafAND, distinguishChoicesLeaf, getIteratorOfLeaves, lengthChoicesLeaf, makeAntiChoicesLeaf
 from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.filters import (

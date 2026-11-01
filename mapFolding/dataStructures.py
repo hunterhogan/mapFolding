@@ -486,7 +486,7 @@ def subtractLookups(lookupMinuend: Mapping[int, int], lookupSubtrahend: Mapping[
 	keysDifference, keysMinuend, keysSubtrahend = tee(filter(lookupSubtrahend.__contains__, lookupMinuend), 3)
 	return dict(zip(
 		keysDifference
-		, map(sub, map(lookupMinuend.__getitem__, keysMinuend), map(lookupSubtrahend.__getitem__, keysSubtrahend))
+		, map(sub, map(lookupMinuend.__getitem__, keysMinuend), map(lookupSubtrahend.__getitem__, keysSubtrahend), strict=True)
 		, strict=True
 	))
 

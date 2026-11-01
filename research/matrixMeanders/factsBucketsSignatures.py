@@ -1,8 +1,6 @@
 """buckets and signatures."""
 from __future__ import annotations
 
-from mapFolding.algorithms.matrixMeandersShare import totalBucketsMaximumBy_boundary
-
 n_boundary_bucketsSemi: dict[int, dict[int, int]] = {
 	2: {1: 1},
 	3: {2: 3, 1: 2},
@@ -4134,3 +4132,5 @@ semiMeanders_nToInitialArcCodes: dict[int, dict[int, int]] = {
     43: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1, 0xfffffffffffffffffff: 1, 0xffffffffffffffffffff: 1, 0xfffffffffffffffffffff: 1},
     45: {0xf: 1, 0xff: 1, 0xfff: 1, 0xffff: 1, 0xfffff: 1, 0xffffff: 1, 0xfffffff: 1, 0xffffffff: 1, 0xfffffffff: 1, 0xffffffffff: 1, 0xfffffffffff: 1, 0xffffffffffff: 1, 0xfffffffffffff: 1, 0xffffffffffffff: 1, 0xfffffffffffffff: 1, 0xffffffffffffffff: 1, 0xfffffffffffffffff: 1, 0xffffffffffffffffff: 1, 0xfffffffffffffffffff: 1, 0xffffffffffffffffffff: 1, 0xfffffffffffffffffffff: 1, 0xffffffffffffffffffffff: 1},
 }
+totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254
+	, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}

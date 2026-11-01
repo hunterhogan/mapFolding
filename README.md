@@ -298,9 +298,9 @@ This is my ongoing to-do list across this package and related projects. It recor
     1. ortools won't apply concurrency, and I don't know how to think about divisions of the problem space that actually reduce computation time.
     2. Understanding other packages is harder than a self-enema with a firehouse.
 8. 2^n-dimensional (aka elimination by crease)
-    1. Computation algorithms needed for: conditional predecessors, conditional successors,
-     DomainLeaf首零Plus零 in dimension零, the range of a pile (aka pile options, aka choices
-     leaf), pinPile二ByCrease, pinPile二Ante首ByCrease, and pinPile零Ante首零AfterDepth4.
+    1. Computation algorithms needed for: conditional predecessors, conditional successors, DomainLeaf
+     首零Plus零 in dimension零, the range of a pile (aka pile options, aka choices leaf), pinPile二
+     ByCrease, pinPile二Ante首ByCrease, and pinPile零Ante首零AfterDepth4.
     2. Acceleration.
     3. Bug in `boxOfFunctionsReduction2上nDimensional`.
     4. Finish collecting 2^7 data.

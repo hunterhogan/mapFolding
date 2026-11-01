@@ -113,8 +113,8 @@ def _numbaCall(名Callable: str, parametersNumba: ParametersNumba) -> ast.Call:
 	listParameters: list[ast.expr] = []
 	if signature_or_function is not None:
 		listParameters.append(_numbaExpression(signature_or_function))
-	list_keyword: list[ast.keyword] = list(starmap(Make.keyword,
-		zip(parametersNumba, map(_numbaExpression, parametersNumba.values()), strict=True)))
+	list_keyword: list[ast.keyword] = list(map(Make.keyword,
+		parametersNumba, map(_numbaExpression, parametersNumba.values()), strict=True))
 	return Make.Call(Make.Name(名Callable), listParameters, list_keyword)
 
 def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifiers: Default | None = None, **override: Any) -> IngredientsFunction:

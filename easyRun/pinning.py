@@ -2,14 +2,13 @@ from __future__ import annotations
 
 from gmpy2 import fac
 from humpy_cytoolz import compose
-from humpy_toolz.curried import map as toolz_map
+from humpy_cytoolz.curried import map as toolz_map
 from mapFolding import pinIt, 首一
-from mapFolding.beDRY import getIteratorOfLeaves, lengthChoicesLeaf
+from mapFolding.choicesLeaf import getChoicesLeaf, getIteratorOfLeaves, getLookupChoicesLeaf, lengthChoicesLeaf
 from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
-from mapFolding.pileOptions import getChoicesLeaf, getLookupChoicesLeaf
 from math import prod
 from operator import methodcaller
 from pprint import pprint

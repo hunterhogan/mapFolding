@@ -43,7 +43,7 @@ def checkFormula(description: str, formula: Callable[[int], FormulaValue], value
 		computed: FormulaValue = formula(n)
 		return computed == known, f"{description}\t{n}\t{computed}\t{known}"
 
-	checks: tuple[Report, ...] = tuple(map(checkTerm, valuesKnown.keys(), valuesKnown.values()))
+	checks: tuple[Report, ...] = tuple(map(checkTerm, valuesKnown.keys(), valuesKnown.values(), strict=True))
 	failures: tuple[Report, ...] = tuple(filterfalse(itemgetter(0), checks))
 	return ((not failures, f"{description}: {len(checks) - len(failures)}/{len(checks)}."), *failures)
 
@@ -123,7 +123,7 @@ def checkFormulas() -> None:
 			, dict(zip(triangle, map(int.__floordiv__, triangle, repeat(2)), strict=True)))
 		, checkTriangle(triangle)
 		, checkA005315(triangle)
-		, chain.from_iterable(map(checkDiagonal, range(1, len(boxOfDiagonals) + 1), boxOfDiagonals))
+		, chain.from_iterable(map(checkDiagonal, range(1, len(boxOfDiagonals) + 1), boxOfDiagonals, strict=True))
 	))
 	printReports(reports)
 	if not all(map(itemgetter(0), reports)):

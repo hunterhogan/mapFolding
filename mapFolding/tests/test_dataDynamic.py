@@ -15,18 +15,17 @@ and the tests will automatically pick them up via parametrization.
 
 from __future__ import annotations
 
-from mapFolding.beDRY import getIteratorOfLeaves
-from mapFolding.leafDomains import (
-	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二, getDomain首零二and首二)
+from mapFolding.choicesLeaf import getChoicesLeaf, getIteratorOfLeaves, getLookupChoicesLeaf
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
+from mapFolding.dataBaskets import StateElimination
+from mapFolding.leafDomains import (
+	getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomainLeaf, getDomain二一零and二一, getDomain二零and二, getDomain首零一二and首一二,
+	getDomain首零二and首二, getLookupDomainsLeaves)
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples import (
 	A001417, p2上nDimensionalDomain3_2_首一_首零一, p2上nDimensionalDomain3_首一, p2上nDimensionalDomain5_4, p2上nDimensionalDomain6_5,
 	p2上nDimensionalDomain6_7_5_4, p2上nDimensionalDomain7_6, p2上nDimensionalDomain首二_首零一二, p2上nDimensionalDomain首二_首零二_首零一二_首一二,
 	p2上nDimensionalDomain首零一二_首一二, p2上nDimensionalDomain首零二_首二)
-from mapFolding.dataBaskets import StateElimination
-from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
-from mapFolding.pileOptions import getChoicesLeaf, getLookupChoicesLeaf
 from more_itertools import all_unique as allUnique吗, unique_to_each
 from operator import itemgetter
 from typing import cast, TYPE_CHECKING
@@ -35,8 +34,7 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Sequence
 	from hunterMakesPy import CallableFunction
-	from mapFolding.theTypes import ChoicesLeaf
-	from mapFolding.theTypes import Pile
+	from mapFolding.theTypes import ChoicesLeaf, Pile
 	from types import ModuleType
 
 @pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])

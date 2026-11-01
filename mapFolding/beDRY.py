@@ -1,25 +1,12 @@
-"""Access shared `ChoicesLeaf` operations and map-shape arithmetic without state imports.
+"""Access shared map-shape arithmetic without state imports.
 
 (AI generated docstring)
 
-You can construct and inspect leaf sets and compute dimension products and sums. Pass values directly
+You can compute dimension products and sums. Pass values directly
 to use these operations in modules that define elimination state without introducing circular imports.
 
 Contents
 --------
-ChoicesLeaf functions
-	choicesLeafAND
-		Intersect two `ChoicesLeaf` values.
-	distinguishChoicesLeaf
-		Distinguish `ChoicesLeaf`, its only `Leaf`, or `None`.
-	getIteratorOfLeaves
-		Enumerate leaf indices from a sentinel-bearing `ChoicesLeaf`.
-	lengthChoicesLeaf
-		Count the possible leaves in `ChoicesLeaf`.
-	makeAntiChoicesLeaf
-		Build a `ChoicesLeaf` by excluding the specified leaf indices.
-	makeChoicesLeaf
-		Build a `ChoicesLeaf` from the specified leaf indices.
 Be DRY functions
 	getMapShapeProducts
 		Compute cumulative products of the dimension lengths in a map shape.
@@ -33,210 +20,41 @@ Flow control
 """
 from __future__ import annotations
 
-from collections.abc import Sequence
-from functools import cache, partial, reduce
-from gmpy2 import bit_clear, bit_mask, bit_set, xmpz
+from collections.abc import Iterable, Sequence
+from functools import cache, partial
 from humpy_cytoolz import unique
-from hunterMakesPy import inclusive, raiseIfNone, zeroIndexed
+from hunterMakesPy import decreasing, zeroIndexed
 from hunterMakesPy.parseParameters import defineConcurrencyLimit, intInnit
 from itertools import accumulate
-from mapFolding.filters import choicesLeaf吗
 from more_itertools import iter_index
 from numba import get_num_threads, set_num_threads
 from operator import add, mul
+from sympy import catalan as sympy_catalan
 from sys import maxsize as sysMaxsize
-from typing import TYPE_CHECKING
+from typing import SupportsIndex, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Iterable, Iterator
+	from collections.abc import Iterator
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import ChoicesLeaf, Leaf
 
-#======== `ChoicesLeaf` functions ================================================
+def 工boxOfBasisCatalan(start: SupportsIndex, stop: SupportsIndex | None = None, step: SupportsIndex = 1) -> Iterable[int]:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	if stop is None:
+		stop = start
+		start = 0
+	return map(catalan, range(start, stop, step))
 
-def distinguishChoicesLeaf(choicesLeaf: ChoicesLeaf, /) -> ChoicesLeaf | Leaf | None:
-	"""Distinguish `ChoicesLeaf`, its only `Leaf`, or `None`.
+def catalan(n: int) -> int:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return int(sympy_catalan(n))  # pyright: ignore[reportArgumentType]
 
-	(AI generated docstring)
+def dotProduct(boxOfMultiplicands: Iterable[int], boxOfMultipliers: Iterable[int]) -> int:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return sum(map(mul, boxOfMultiplicands, boxOfMultipliers, strict=True))
 
-	You can distinguish an empty leaf set from a forced leaf assignment. You receive a `ChoicesLeaf` when
-	several leaves remain, or the unchanged input when its value is not an instance of the `ChoicesLeaf` type.
-
-	Distinguishing leaf choices
-	--------------------------
-	You can inspect the set-bit count and first set bit with `gmpy2.mpz.bit_count` and
-	`gmpy2.mpz.bit_scan1`. Two set bits identify one leaf plus the sentinel. One set bit identifies
-	the sentinel alone.
-
-	Parameters
-	----------
-	choicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` with a sentinel above all leaf bits.
-
-	Returns
-	-------
-	leafSpaceOrNone : ChoicesLeaf | Leaf | None
-		The only remaining leaf, `None` for a sentinel-only `ChoicesLeaf`, or the unchanged value.
-
-	"""
-	whoAmI: ChoicesLeaf | Leaf | None = choicesLeaf
-	if choicesLeaf吗(choicesLeaf):
-		if choicesLeaf.bit_count() == 2:
-			whoAmI = raiseIfNone(choicesLeaf.bit_scan1())
-		elif choicesLeaf.bit_count() == 1:
-			whoAmI = None
-	return whoAmI
-
-def choicesLeafAND(choicesLeafDISPOSABLE: ChoicesLeaf, choicesLeaf: ChoicesLeaf) -> ChoicesLeaf:
-	"""Intersect two `ChoicesLeaf` values.
-
-	(AI generated docstring)
-
-	You can keep leaf indices present in both `choicesLeafDISPOSABLE` and `choicesLeaf`. You receive a
-	new `ChoicesLeaf` with both arguments unchanged.
-
-	Parameters
-	----------
-	choicesLeafDISPOSABLE : ChoicesLeaf
-		Leaf mask containing allowed leaf bits and the sentinel.
-	choicesLeaf : ChoicesLeaf
-		Leaf set to restrict.
-
-	Returns
-	-------
-	maskedChoicesLeaf : ChoicesLeaf
-		Intersection retaining the sentinel when both inputs contain the sentinel.
-	"""
-	return choicesLeaf & choicesLeafDISPOSABLE
-
-def getIteratorOfLeaves(choicesLeaf: ChoicesLeaf) -> Iterator[Leaf]:
-	"""Enumerate leaf indices from a sentinel-bearing `ChoicesLeaf`.
-
-	(AI generated docstring)
-
-	You can enumerate the leaves represented by `choicesLeaf` in ascending order without changing the
-	input `ChoicesLeaf`. You iterate over the remaining set bits after copying `choicesLeaf` to
-	`gmpy2.xmpz` and clearing the highest bit as the sentinel.
-
-	Parameters
-	----------
-	choicesLeaf : ChoicesLeaf
-		Nonnegative `ChoicesLeaf` whose highest set bit is the sentinel.
-
-	Returns
-	-------
-	iteratorOfLeaves : Iterator[Leaf]
-		Iterator of leaf indices, excluding the sentinel.
-
-	Examples
-	--------
-	The constraint solver builds allowed assignments from a leaf set.
-
-		```python
-		model.add_allowed_assignments(
-			[boxOfLeavesInPileOrder[aPile]], list(zip(getIteratorOfLeaves(choicesLeaf)))
-		)
-		```
-
-	"""
-	iteratorOfLeaves: xmpz = xmpz(choicesLeaf)
-	iteratorOfLeaves[-1] = 0
-	return iteratorOfLeaves.iter_set()
-
-def lengthChoicesLeaf(choicesLeaf: ChoicesLeaf) -> int:
-	"""Count the possible leaves in `ChoicesLeaf`.
-
-	(AI generated docstring)
-
-	You can count the leaf indices represented by `choicesLeaf`, excluding the sentinel from the set-bit
-	count provided by `gmpy2.mpz.bit_count`.
-
-	Parameters
-	----------
-	choicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` with one sentinel bit above all leaf bits.
-
-	Returns
-	-------
-	leavesCount : int
-		Number of possible leaves, excluding the sentinel.
-
-	Examples
-	--------
-	The subset reducer compares leaf count with the number of matching piles.
-
-		```python
-		if mapFolding.beDRYElimination.lengthChoicesLeaf(choicesLeaf) == len(boxOfPiles):
-			permutationSpace = reduceLeafSpace(
-				permutationSpace, DOTitems(dissoc(pilesUndetermined, *boxOfPiles)),
-				mapFolding.beDRYElimination.makeAntiChoicesLeaf(state.totalLeaves, mapFolding.beDRYElimination.getIteratorOfLeaves(choicesLeaf))
-			)
-		```
-
-	"""
-	return choicesLeaf.bit_count() - 1
-
-def makeAntiChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
-	"""Build a `ChoicesLeaf` by excluding the specified leaf indices.
-
-	(AI generated docstring)
-
-	You can obtain a `ChoicesLeaf` containing every leaf index below `totalLeaves` except the indices in
-	`leaves`. You retain the sentinel while clearing excluded bits with `gmpy2.bit_clear`.
-
-	Parameters
-	----------
-	totalLeaves : int
-		Total number of leaves and index of the sentinel bit.
-	leaves : Iterable[Leaf]
-		Leaf indices to exclude. Each index must be below `totalLeaves`.
-
-	Returns
-	-------
-	antiChoicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` containing the remaining leaves and the sentinel.
-
-	Examples
-	--------
-	State normalization excludes leaves already pinned in the permutation space.
-
-		```python
-		antiChoicesLeaf = mapFolding.beDRYElimination.makeAntiChoicesLeaf(len(self), leavesPinned.values())
-		```
-
-	"""
-	return reduce(bit_clear, leaves, bit_mask(totalLeaves + inclusive))
-
-def makeChoicesLeaf(totalLeaves: int, leaves: Iterable[Leaf]) -> ChoicesLeaf:
-	"""Build a `ChoicesLeaf` from the specified leaf indices.
-
-	(AI generated docstring)
-
-	You can encode `leaves` as a `ChoicesLeaf` with a sentinel at `totalLeaves`. You set the leaf bits with
-	`gmpy2.bit_set`.
-
-	Parameters
-	----------
-	totalLeaves : int
-		Total number of leaves and index of the sentinel bit.
-	leaves : Iterable[Leaf]
-		Leaf indices to include. Each index must be below `totalLeaves`.
-
-	Returns
-	-------
-	choicesLeaf : ChoicesLeaf
-		`ChoicesLeaf` containing the requested leaves and the sentinel.
-
-	Examples
-	--------
-	The pile-options implementation encodes the leaves that pass its filters.
-
-		```python
-		return makeChoicesLeaf(totalLeaves, choicesLeaf)
-		```
-
-	"""
-	return reduce(bit_set, leaves, bit_set(0, totalLeaves))
+def dotProductCatalan(ordinal: int, boxOfMultipliers: Sequence[int], shift: int = 0) -> int:  # ruff: ignore[undocumented-public-function]
+	# DOCUMENT
+	return dotProduct(工boxOfBasisCatalan(ordinal + shift, ordinal - len(boxOfMultipliers), decreasing), boxOfMultipliers)
 
 #======== maps and leaves ================================================
 

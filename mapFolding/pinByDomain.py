@@ -16,12 +16,12 @@ from __future__ import annotations
 from gmpy2 import bit_flip, bit_mask, bit_test as isBit1吗, is_even as isEven吗, is_odd as isOdd吗
 from hunterMakesPy import decreasing, raiseIfNone, zeroIndexed
 from mapFolding import dimensionIndex, 一, 三, 二, 五, 四, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二
-from mapFolding.beDRY import getIteratorOfLeaves, getMapShape首ProductsSums
+from mapFolding.beDRY import getMapShape首ProductsSums
+from mapFolding.choicesLeaf import getIteratorOfLeaves, getLookupChoicesLeaf
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.filters import moreThanLeaf零吗
 from mapFolding.measure import (
 	leafInSubHyperplane, ptount, 工dimensionTail, 工dimension首一, 工dimension首零, 工totalDimensionsOdd, 工totalDimensionsTail)
-from mapFolding.pileOptions import getLookupChoicesLeaf
 from more_itertools import last
 from operator import getitem, neg
 from typing import TYPE_CHECKING

@@ -27,13 +27,13 @@ if __name__ == '__main__':
 	flow = 'matrixPandas'
 	flow = 'matrixMeanders'
 	flow = 'prune'
-	flow = 'matrixNumPy'
 	flow = 'prunePandas'
 	flow = 'pruneNumPy'
+	flow = 'matrixNumPy'
 
 	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
-			# ('A005315', 'closed'),
-			# ('A005316', 'meanders'),
+			('A005315', 'closed'),
+			('A005316', 'meanders'),
 			('A000682', 'semi'),
 		]
 

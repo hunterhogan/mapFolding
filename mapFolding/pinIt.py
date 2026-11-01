@@ -50,10 +50,10 @@ from functools import partial
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding import leafDomains, leafOrigin, pileOrigin, 一, 二, 零, 首一, 首一二, 首二, 首零, 首零一, 首零一二, 首零二
 from mapFolding.beDRY import defineProcessorLimit, mapShapeIs2上nDimensions
+from mapFolding.choicesLeaf import getLookupChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.filters import leafInChoicesLeaf吗, 是valid
 from mapFolding.leafDomains import getDomainDimension一, getDomainDimension二, getDomainDimension首二, getDomainLeaf, getDomainLeaf首零Plus零
-from mapFolding.pileOptions import getLookupChoicesLeaf
 from mapFolding.pinByCrease import (
 	pinPile一Ante首ByCrease, pinPile一ByCrease, pinPile一零ByCrease, pinPile二Ante首ByCrease, pinPile二ByCrease, pinPile零一Ante首ByCrease)
 from mapFolding.pinByDomain import pinPile零Ante首零AfterDepth4

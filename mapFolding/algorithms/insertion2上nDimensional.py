@@ -25,7 +25,7 @@ from concurrent.futures import as_completed, ProcessPoolExecutor
 from humpy_cytoolz import keyfilter as filterPile
 from itertools import pairwise
 from mapFolding import 一, 二, 零
-from mapFolding.beDRY import makeAntiChoicesLeaf
+from mapFolding.choicesLeaf import makeAntiChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
 from mapFolding.filters import 是valid
 from mapFolding.kitFilesystem import makePathFilenameFolds, readAlbum, writeAlbum
