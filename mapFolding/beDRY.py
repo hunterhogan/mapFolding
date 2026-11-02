@@ -50,7 +50,7 @@ def catalan(n: int) -> int:  # ruff: ignore[undocumented-public-function]
 
 def dotProduct(boxOfMultiplicands: Iterable[int], boxOfMultipliers: Iterable[int]) -> int:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT
-	return sum(map(mul, boxOfMultiplicands, boxOfMultipliers, strict=True))
+	return sum(map(mul, boxOfMultiplicands, boxOfMultipliers, strict=False))
 
 def dotProductCatalan(ordinal: int, boxOfMultipliers: Sequence[int], shift: int = 0) -> int:  # ruff: ignore[undocumented-public-function]
 	# DOCUMENT

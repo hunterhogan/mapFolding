@@ -16,11 +16,15 @@ from __future__ import annotations
 from astToolkit import Be, Grab, IfThis, Make, NodeChanger, Then
 from astToolkit.changeDef import makeDictionaryFunctionDef
 from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
+from mapFolding.kitAST import IngredientsFunction
 from mapFolding.theSSOT import settingsPackage
+from sympy import Add, Integer, Mul, Pow, Rational
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+	from mapFolding.theTypes import OEISid
 	from pathlib import Path
+	from sympy import Expr
 	import ast
 
 def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
@@ -75,3 +79,27 @@ def makeOEISidByFormulaLookup(pathFilenameSource: Path) -> Path:
 	pathFilename: Path = write_astModule(astModule, pathFilenameWrite, identifierPackage=settingsPackage.identifierPackage)
 
 	return pathFilename
+
+def make_ast_exprSymbolic(expression: Expr) -> ast.expr:
+	match expression:
+		case Integer():
+			return Make.Constant(int(expression))
+		case Rational():
+			return Make.Call(Make.Name('Rational'), listParameters=[Make.Constant(int(expression.p)), Make.Constant(int(expression.q))])
+		case Add():
+			return Make.Add.join(map(make_ast_exprSymbolic, expression.args))
+		case Mul():
+			return Make.Mult.join(map(make_ast_exprSymbolic, expression.args))
+		case Pow():
+			return Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args)))
+		case _:
+			return Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(expression.func.__name__)]),
+				slice=Make.Constant(int(Integer(expression.args[0]))))
+
+def makeSymbolicFormula(oeisID: OEISid, expression: Expr) -> IngredientsFunction:
+	ingredientsFunction: IngredientsFunction = IngredientsFunction(Make.FunctionDef(str(oeisID), Make.arguments(),
+		body=[Make.Return(Make.Call(Make.Name('int'), listParameters=[make_ast_exprSymbolic(expression)]))], returns=Make.Name('int')))
+	ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'getValuesKnown')
+	ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Rational')
+	ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Pow')
+	return ingredientsFunction

@@ -4,6 +4,7 @@ from hunterMakesPy.parseParameters import intInnit
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import byFormula, getMetadata, makeMapShape, oeisIDsMapFoldingImplemented
 from mapFolding.oeis._beDRY import formatOEISid
+from mapFolding.oeis._symbolic import getValueSymbolic
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -19,6 +20,8 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 	This function computes every implemented OEIS sequence by dispatching to a map-folding, meander,
 	symmetric-folding, or formula implementation. For small values or trivial cases, the function
 	returns known values from cached OEIS data.
+	Symbolic relationships supply exact values when their prerequisites are known. Native counting
+	implementations retain their default dispatch when `f` is `None`.
 
 	Parameters
 	----------
@@ -26,7 +29,7 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 		The identifier of the OEIS sequence to evaluate.
 	n : int
 		A non-negative integer index for which to calculate the sequence value.
-	f : str = ''
+	f : str | None = None
 		The formula selector. A nonempty value selects a formula for sequences that also have a native
 		counting implementation.
 	**keywordArguments
@@ -77,8 +80,11 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 		message: str = f"I received `{n = }`, but OEIS sequence `{oeisID = }` is not defined for values below `offset = {metadata['offset']}`."
 		raise ArithmeticError(message)
 
-	if n == metadata['offset']:
-		totalFolds: int = metadata['valuesKnown'][n]
+	if ((f or (oeisID not in oeisIDsMapFoldingImplemented and oeisID not in {'A000682', 'A005316', 'A007822'}))
+		and (valueSymbolic := getValueSymbolic(oeisID, n, f)) is not None):
+		totalFolds: int = valueSymbolic
+	elif n == metadata['offset']:
+		totalFolds = metadata['valuesKnown'][n]
 	elif not f and oeisID in oeisIDsMapFoldingImplemented:
 		totalFolds = countFolds(mapShape=makeMapShape(oeisID, n), **keywordArguments)
 	else:
