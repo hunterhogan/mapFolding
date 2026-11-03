@@ -1,22 +1,46 @@
-"""Access shared map-shape arithmetic without state imports.
+"""Compute Catalan numbers, dot products, and map-shape arithmetic.
 
 (AI generated docstring)
 
-You can compute dimension products and sums. Pass values directly
-to use these operations in modules that define elimination state without introducing circular imports.
+You can compute Catalan numbers and dot products, including weighted sums of Catalan numbers. You
+can compute dimension products and sums for a map shape. You can also validate map dimensions and
+resolve processor limits and task divisions without importing computation-state containers.
 
 Contents
 --------
-Be DRY functions
+Catalan numbers and dot products
+	catalan
+		Compute the Catalan number at an ordinal as a Python integer.
+	dotProduct
+		Sum the products of paired integers from two iterables.
+	dotProductCatalan
+		Sum integer multipliers against Catalan numbers in decreasing ordinal order.
+	工boxOfBasisCatalan
+		Iterate over Catalan numbers at ordinals selected with range bounds.
+
+Maps and leaves
 	getMapShapeProducts
 		Compute cumulative products of the dimension lengths in a map shape.
 	getMapShapeProductsSums
 		Compute cumulative sums of a map shape's dimension products.
 	getMapShape首ProductsSums
 		Compute cumulative dimension-product sums from the head of a map.
+	getTotalLeaves
+		Compute the definitive total number of leaves for a map shape.
+
 Flow control
+	mapShapeIs2上nDimensions
+		Check that a map has enough dimensions and every dimension length is two.
 	mapShapeLengthsAreEqual
 		Group dimension indices that share a repeated length greater than one.
+
+Parse parameters
+	defineProcessorLimit
+		Resolve the processor count from a resource preference and concurrency backend.
+	getTaskDivisions
+		Resolve the number of computation tasks within the total leaf count.
+	validateMapShape
+		Convert supplied dimensions to ordered, nonnegative integers.
 """
 from __future__ import annotations
 
@@ -37,24 +61,193 @@ if TYPE_CHECKING:
 	from collections.abc import Iterator
 	from hunterMakesPy import ConcurrencyLimit
 
-def 工boxOfBasisCatalan(start: SupportsIndex, stop: SupportsIndex | None = None, step: SupportsIndex = 1) -> Iterable[int]:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
+def 工boxOfBasisCatalan(start: SupportsIndex, stop: SupportsIndex | None = None, step: SupportsIndex = 1) -> Iterable[int]:
+	"""Iterate over Catalan numbers at ordinals selected with range bounds.
+
+	(AI generated docstring)
+
+	You can obtain a Catalan basis for a dot product. The ordinal bounds follow `range`: one bound
+	selects ordinals from zero up to that bound, excluding the bound. Catalan numbers are evaluated as
+	you consume the returned iterator.
+
+	Parameters
+	----------
+	start : SupportsIndex
+		First ordinal when `stop` is supplied; otherwise, the exclusive bound after a start of zero.
+	stop : SupportsIndex | None = None
+		Exclusive ordinal bound. `None` uses `start` as the bound and begins at zero.
+	step : SupportsIndex = 1
+		Nonzero ordinal increment. A negative increment selects ordinals in decreasing order.
+
+	Returns
+	-------
+	boxOfBasisCatalan : Iterable[int]
+		Single-use iterator of Python integers. Bounds that select no ordinals give an empty iterator.
+
+	See Also
+	--------
+	`catalan`
+		Evaluate one Catalan number.
+	`dotProductCatalan`
+		Sum multipliers against Catalan numbers in decreasing ordinal order.
+
+	Examples
+	--------
+	`mapFolding.algorithms.matrixMeandersShare` weights the Catalan numbers at ordinals one through
+	`boundary + 1`.
+
+		```python
+		totalStatesMaximum: int = dotProduct(
+			(1 + min(k - (boundary + 1) % 2, boundary + 1 - k) for k in range(1, boundary + 2))
+			, 工boxOfBasisCatalan(1, boundary + 2), strict=True)
+		```
+	"""
 	if stop is None:
 		stop = start
 		start = 0
 	return map(catalan, range(start, stop, step))
 
-def catalan(n: int) -> int:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
-	return int(sympy_catalan(n))  # pyright: ignore[reportArgumentType]
+def catalan(n: int) -> int:
+	"""Compute the Catalan number at ordinal `n` as a Python integer.
 
-def dotProduct(boxOfMultiplicands: Iterable[int], boxOfMultipliers: Iterable[int]) -> int:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
-	return sum(map(mul, boxOfMultiplicands, boxOfMultipliers, strict=False))
+	(AI generated docstring)
 
-def dotProductCatalan(ordinal: int, boxOfMultipliers: Sequence[int], shift: int = 0) -> int:  # ruff: ignore[undocumented-public-function]
-	# DOCUMENT
-	return dotProduct(工boxOfBasisCatalan(ordinal + shift, ordinal - len(boxOfMultipliers), decreasing), boxOfMultipliers)
+	You can use any integer `n`. Negative ordinals give zero.
+
+	Mathematics
+	-----------
+	Catalan number : equation
+
+	```math
+		Let n ≜ `n`
+		n ∈ ℤ
+
+		C(n) = (2n)! / ((n + 1)! n!)    n ≥ 0
+		C(n) = 0                        n < 0
+
+		`catalan` ≜ C(n)
+	```
+
+	Parameters
+	----------
+	n : int
+		Ordinal of the Catalan number.
+
+	Returns
+	-------
+	catalan : int
+		Exact Catalan number converted to a Python integer.
+
+	See Also
+	--------
+	`工boxOfBasisCatalan`
+		Iterate over Catalan numbers at ordinals selected with range bounds.
+
+	Examples
+	--------
+	`mapFolding.algorithms.matrixMeandersShare` subtracts a Catalan count from a bucket bound.
+
+		```python
+		totalBuckets -= 4 * catalan(distance // 2)
+		```
+	"""
+	return int(sympy_catalan(n))
+
+def dotProduct(boxOfMultiplicands: Iterable[int], boxOfMultipliers: Iterable[int], *, strict: bool = False) -> int:
+	"""Sum the products of paired integers from two iterables.
+
+	(AI generated docstring)
+
+	You can compute a dot product of two integer sequences. The first multiplicand pairs with the
+	first multiplier, the second multiplicand pairs with the second multiplier, and so on.
+
+	Parameters
+	----------
+	boxOfMultiplicands : Iterable[int]
+		Integers to multiply, in pairing order.
+	boxOfMultipliers : Iterable[int]
+		Integer weights, in pairing order.
+	strict : bool = False
+		`True` raises `ValueError` when the iterables have different lengths. `False` ignores the
+		unpaired values of the longer iterable.
+
+	Returns
+	-------
+	dotProduct : int
+		Sum of the paired products, or zero when either iterable is empty and `strict` is `False`.
+
+	See Also
+	--------
+	`dotProductCatalan`
+		Sum multipliers against Catalan numbers in decreasing ordinal order.
+
+	Examples
+	--------
+	`mapFolding.algorithms.matrixMeandersShare` evaluates a linear formula in `state.n`.
+
+		```python
+		totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2), strict=True)
+		```
+	"""
+	return sum(map(mul, boxOfMultiplicands, boxOfMultipliers, strict=strict))
+
+def dotProductCatalan(ordinal: int, boxOfMultipliers: Sequence[int], shift: int = 0, *, strict: bool = False) -> int:
+	"""Sum integer multipliers against Catalan numbers in decreasing ordinal order.
+
+	(AI generated docstring)
+
+	You can evaluate a weighted Catalan sum. The first multiplier pairs with the Catalan number at
+	`ordinal + shift`, and each subsequent multiplier pairs with the next lower ordinal. Ordinals
+	below zero contribute zero.
+
+	Mathematics
+	-----------
+	Weighted Catalan sum : equation
+
+	```math
+		Let o ≜ `ordinal`,  s ≜ `shift`,  (b₀, …, bₘ₋₁) ≜ `boxOfMultipliers`
+		o ∈ ℤ,  s ∈ ℕ₀,  b ∈ ℤᵐ
+
+		C(n) = (2n)! / ((n + 1)! n!)    n ≥ 0
+		C(n) = 0                        n < 0
+		S = Σⱼ₌₀ᵐ⁻¹ bⱼ · C(o + s − j)
+
+		`dotProductCatalan` ≜ S
+	```
+
+	Parameters
+	----------
+	ordinal : int
+		Catalan ordinal paired with the first multiplier when `shift` is zero.
+	boxOfMultipliers : Sequence[int]
+		Integer weights in the order to pair with decreasing Catalan ordinals.
+	shift : int = 0
+		Offset added to every Catalan ordinal. A negative `shift` leaves the final `-shift`
+		multipliers unpaired.
+	strict : bool = False
+		`True` raises `ValueError` when `shift` is not zero. `False` permits every `shift`.
+
+	Returns
+	-------
+	dotProductCatalan : int
+		Weighted sum S.
+
+	See Also
+	--------
+	`dotProduct`
+		Sum the products of paired integers from two iterables.
+	`工boxOfBasisCatalan`
+		Select Catalan ordinals with explicit range bounds.
+
+	Examples
+	--------
+	`Z0Z_research.catalanArches.formulasParents` counts a triangle cell from its row coefficients.
+
+		```python
+		return dotProductCatalan(row_n, boxOfCoefficients, strict=True)
+		```
+	"""
+	return dotProduct(工boxOfBasisCatalan(ordinal + shift, ordinal - len(boxOfMultipliers), decreasing), boxOfMultipliers, strict=strict)
 
 #======== maps and leaves ================================================
 
@@ -81,7 +274,7 @@ def getMapShapeProducts(mapShape: tuple[int, ...]) -> tuple[int, ...]:
 	Elimination-state initialization stores the products.
 
 		```python
-		self.mapShapeProducts = mapFolding.beDRYElimination.getMapShapeProducts(self.mapShape)
+		self.mapShapeProducts = mapFolding.beDRY.getMapShapeProducts(self.mapShape)
 		```
 	"""
 	return tuple(accumulate(mapShape, mul, initial=1))
@@ -140,7 +333,7 @@ def getMapShape首ProductsSums(mapShapeProducts: tuple[int, ...], totalDimension
 	Elimination-state initialization requests all dimension strides.
 
 		```python
-		self.mapShape首ProductsSums = mapFolding.beDRYElimination.getMapShape首ProductsSums(
+		self.mapShape首ProductsSums = mapFolding.beDRY.getMapShape首ProductsSums(
 			self.mapShapeProducts, self.totalDimensions, self.totalDimensions
 		)
 		```

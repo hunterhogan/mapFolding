@@ -20,7 +20,6 @@ Test Module Organization (in mapFolding/tests/):
 - test_pinning.py: Pinning and leaf-order restrictions
 - test_semiotics.py: Dimension-position ideographs and head-relative labels
 - test_taskDivisions.py: Task division and work distribution
-- testsNeedAHome/test_generatingFunction.py: Generating-function research checks
 
 For Contributors:
 The test suite follows Domain-Driven Design principles, organizing tests around

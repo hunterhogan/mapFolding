@@ -22,9 +22,9 @@ Modules
 basecamp
 	Select and run folding or meander counting algorithms.
 beDRY
-	Validate map dimensions and resolve computation-resource preferences.
-beDRYElimination
-	Construct and inspect `ChoicesLeaf` values and compute map-shape products.
+	Compute Catalan numbers, dot products, and map-shape arithmetic; resolve computation preferences.
+choicesLeaf
+	Construct and inspect `ChoicesLeaf` values for piles.
 conditionalOrdering
 	Compute conditional predecessor and successor requirements.
 creases

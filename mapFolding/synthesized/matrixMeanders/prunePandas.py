@@ -104,8 +104,8 @@ def countDyckCuts(distance: int) -> int:
 
 @cache
 def getTotalsMaximum(boundary: int) -> tuple[int, int]:
-    totalBucketsMaximum: int = catalan(boundary + 1) + dotProduct((min(3 * k - 1 + boundary % 2, 3 * (boundary + 1 - k), 3 * boundary // 2) for k in range(boundary + 1)), 工boxOfBasisCatalan(boundary + 1))
-    totalStatesMaximum: int = dotProduct((1 + min(k - (boundary + 1) % 2, boundary + 1 - k) for k in range(1, boundary + 2)), 工boxOfBasisCatalan(1, boundary + 2))
+    totalBucketsMaximum: int = catalan(boundary + 1) + dotProduct((min(3 * k - 1 + boundary % 2, 3 * (boundary + 1 - k), 3 * boundary // 2) for k in range(boundary + 1)), 工boxOfBasisCatalan(boundary + 1), strict=True)
+    totalStatesMaximum: int = dotProduct((1 + min(k - (boundary + 1) % 2, boundary + 1 - k) for k in range(1, boundary + 2)), 工boxOfBasisCatalan(1, boundary + 2), strict=True)
     return (totalBucketsMaximum, totalStatesMaximum)
 
 @cache
@@ -152,8 +152,8 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int=0) -> int:
         totalBucketsKnown, totalStatesKnown = getTotalsMeanders(state.n, state.boundary)
     elif state.kind == 'semi' and nLess_boundary <= len(coefficientsGrowthSemi) and (nLess_boundary == 1 or 3 * nLess_boundary <= state.n):
         coefficientsBuckets, coefficientsArcCodes = coefficientsGrowthSemi[nLess_boundary - 1]
-        totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2))
-        totalStatesKnown = dotProduct(coefficientsArcCodes, (state.n // 2, 1, state.n % 2))
+        totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2), strict=True)
+        totalStatesKnown = dotProduct(coefficientsArcCodes, (state.n // 2, 1, state.n % 2), strict=True)
     else:
         return totalBuckets if totalArcCodes else getTotalsMaximum(state.boundary)[0]
     if not totalArcCodes or totalArcCodes == totalStatesKnown:

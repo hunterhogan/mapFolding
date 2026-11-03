@@ -83,6 +83,14 @@ You can also supply an existing `StateMeanders` through the `state` argument to 
 
 `oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or derives the value by chaining the exact relations in [`oeis/_symbolic.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/_symbolic.py). Its `f` argument names the sequences from which to compute the value, such as `'A000682 and A005316'`. [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py), generated from the same relations, has one documented function for each sequence.
 
+Shared arithmetic in [`beDRY.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/beDRY.py)
+provides Python-integer Catalan numbers through `catalan(n)` and a lazy Catalan basis through
+`工boxOfBasisCatalan(start, stop, step)`, with the same index bounds as `range`. `dotProduct` sums
+pairwise integer products up to the shorter input's length by default; `strict=True` requires equal
+input lengths. `dotProductCatalan` accepts the same keyword-only `strict=False` parameter and pairs
+multipliers with Catalan numbers in decreasing index order, beginning at `ordinal + shift`; a negative `shift`
+shortens the non-strict sum as described in its docstring.
+
 The `getOEISids` console command lists registered sequences and usage examples. The registry also includes related sequences used as reference data; consult `oeisIDfor_n` and `byFormula` for computation support. The `OEIS_for_n` command evaluates a supported term from its sequence identifier and index.
 
 OEIS metadata and b-files are loaded when the metadata module is imported. Local files have a 30-day freshness interval; missing or stale entries trigger a request to `oeis.org`, and stale data remains available if a refresh fails.
@@ -91,7 +99,7 @@ OEIS metadata and b-files are loaded when the metadata module is imported. Local
 
 Triangle utilities use the sequence metadata to locate rows, columns, and flat b-file indices. Columns start at one, including when a row is supplied as a Python sequence.
 
-For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/A400429/) exposes triangle-cell identities and fixed-diagonal formulas. Its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven.
+For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429oeisByFormula/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/A400429oeisByFormula/) exposes triangle-cell identities and fixed-diagonal formulas. Its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven.
 
 | Task                         | Interface                                                 | Result                                                    |
 | ---------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
@@ -124,7 +132,7 @@ which groups permutation spaces, folding representatives, and symmetry multiplie
 
 The supporting operations are package modules: [`leafDomains.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/leafDomains.py)
 computes possible piles for leaves, [`pileOptions.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/pileOptions.py)
-computes possible leaves for piles, and [`beDRYElimination.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/beDRYElimination.py)
+computes possible leaves for piles, and [`choicesLeaf.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/choicesLeaf.py)
 constructs and inspects `ChoicesLeaf` values. [`pinIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/pinIt.py)
 restricts assignments and relative leaf order; [`reduceIt.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/reduceIt.py)
 propagates constraints through the search spaces. Specialized rules for maps whose dimension lengths

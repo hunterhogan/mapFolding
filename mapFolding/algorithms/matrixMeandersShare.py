@@ -95,7 +95,6 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 				arcCode = (arcCode << 4) | 0b0101  # e.g., 0b 10000 | 0b 0101 = 0b 10101
 				boxOfArcCodes.append((arcCode << 1) | arcCode)  # e.g., 0b 101010 | 0b 1010101 = 0b 111111 = 0x3f
 				# Thereafter, append 0b1111 or 0xf, so, e.g., 0x3f, 0x3ff, 0x3fff, 0x3ffff, ...
-				# See "research/matrixMeanders/A000682facts.py"
 			lookupMeanders: dict[int, int] = dict.fromkeys(boxOfArcCodes, 1)
 
 	else:
@@ -140,10 +139,10 @@ def countDyckCuts(distance: int) -> int:
 def getTotalsMaximum(boundary: int) -> tuple[int, int]:
 	totalBucketsMaximum: int = catalan(boundary + 1) + dotProduct(
 		(min(3 * k - 1 + boundary % 2, 3 * (boundary + 1 - k), 3 * boundary // 2) for k in range(boundary + 1))
-		, 工boxOfBasisCatalan(boundary + 1))
+		, 工boxOfBasisCatalan(boundary + 1), strict=True)
 	totalStatesMaximum: int = dotProduct(
 		(1 + min(k - (boundary + 1) % 2, boundary + 1 - k) for k in range(1, boundary + 2))
-		, 工boxOfBasisCatalan(1, boundary + 2))
+		, 工boxOfBasisCatalan(1, boundary + 2), strict=True)
 	return totalBucketsMaximum, totalStatesMaximum
 
 @cache
@@ -192,8 +191,8 @@ def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
 	elif (state.kind == 'semi' and nLess_boundary <= len(coefficientsGrowthSemi)
 			and (nLess_boundary == 1 or 3 * nLess_boundary <= state.n)):
 		coefficientsBuckets, coefficientsArcCodes = coefficientsGrowthSemi[nLess_boundary - 1]
-		totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2))
-		totalStatesKnown = dotProduct(coefficientsArcCodes, (state.n // 2, 1, state.n % 2))
+		totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2), strict=True)
+		totalStatesKnown = dotProduct(coefficientsArcCodes, (state.n // 2, 1, state.n % 2), strict=True)
 	else:
 		return totalBuckets if totalArcCodes else getTotalsMaximum(state.boundary)[0]
 
