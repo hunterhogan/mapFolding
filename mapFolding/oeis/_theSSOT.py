@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 	from pathlib import Path
+	from sympy.core.function import AppliedUndef
 	from sympy.sets.sets import Set
 	from typing import LiteralString
 
@@ -41,11 +42,11 @@ pathCache: Path = settingsPackage.pathPackage / 'oeis' / '.cache'
 
 nSymbolic: Symbol = Symbol('n', integer=True, nonnegative=True)
 kSymbolic: Symbol = Symbol('k', integer=True, nonnegative=True)
-domainSymbolic: Set = S.Naturals0  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
+domainSymbolic: Set = S.Naturals0
 
-lookupSymbolic: dict[OEISid, UndefinedFunction] = dict(zip(oeisIDsImplemented
+lookupSymbolic: dict[OEISid, type[AppliedUndef]] = dict(zip(oeisIDsImplemented
 	, map(partial(UndefinedFunction, integer=True, nonnegative=True), oeisIDsImplemented), strict=True)
 )
 
-lookupOEISid: dict[UndefinedFunction, OEISid] = dict(zip(lookupSymbolic.values(), lookupSymbolic, strict=True))
+lookupOEISid: dict[type[AppliedUndef], OEISid] = dict(zip(lookupSymbolic.values(), lookupSymbolic, strict=True))
 lookupColumnStart: dict[OEISid, int] = {'A259689': 2, 'A259698': 1, 'A259701': 1, 'A259703': 1, 'A339179': 2, 'A400429': 1}
