@@ -5,23 +5,11 @@ from mapFolding.kitAST.mapFolding.makeModules import makeModulesMapFolding
 from mapFolding.kitAST.mapFoldingSymmetric.makeModules import makeModulesFoldsSymmetric
 from mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
 from mapFolding.kitAST.matrixMeanders.makeModules import makeModulesMeanders
-from mapFolding.kitAST.oeisIDByFormula import makeOEISidByFormulaLookup
-from mapFolding.kitAST.zCuzDocStoopid.makeDocstrings import sourcePrefix, transformOEISidByFormula
-from mapFolding.theSSOT import settingsPackage
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from pathlib import Path
+from mapFolding.kitAST.oeisIDByFormula import makeOEISidByFormula
 
 makeModulesMapFolding()
-
 makeModulesFoldsSymmetric()
 makeModulesFoldsSymmetricAsynchronous()
-
 makeModulesMeanders()
 
-pathRoot: Path = settingsPackage.pathPackage / "oeis"
-pathFilenameSource: Path = next(iter(pathRoot.glob(f"{sourcePrefix}*.py"))).absolute()
-pathFilenameSource = transformOEISidByFormula(pathFilenameSource)
-
-makeOEISidByFormulaLookup(pathFilenameSource)
+makeOEISidByFormula()

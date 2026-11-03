@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+from functools import partial
+from inspect import get_annotations
 from itertools import chain, product as CartesianProduct, starmap
-from mapFolding.oeis import byFormula, getMetadata
+from mapFolding.oeis import byFormula, getMetadata, oeisIDsImplemented
 from mapFolding.tests import assertEqualTo
-from operator import itemgetter
-from typing import TYPE_CHECKING
+from typing import get_args, TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
@@ -131,8 +132,10 @@ parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n,
 	)))
 )))
 
-@pytest.mark.parametrize('oeisID, n, f', tuple(filter(
-	itemgetter(2), map(itemgetter(0, 1, 2), parametrizeOEISfor_n.args[1])
-)))
+@pytest.mark.parametrize('oeisID, n, f', tuple(chain.from_iterable(map(  # ruff: ignore[unnecessary-map]
+	lambda oeisID: CartesianProduct((oeisID,), (getMetadata(oeisID)['offset'], 3, 7)
+		, get_args(get_args(get_annotations(getattr(byFormula, oeisID), eval_str=True)['f'])[0]))
+	, filter(partial(hasattr, byFormula), oeisIDsImplemented)
+))))
 def test_byFormula(oeisID: OEISid, n: int, f: LiteralString | None, expected: int) -> None:
 	assertEqualTo(getattr(byFormula, oeisID)(n, f), expected, oeisID, n, f)

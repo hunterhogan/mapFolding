@@ -24,17 +24,17 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
     Parameters
     ----------
     maxWorkers : int
-    Number of threads to start; a nonpositive value starts no threads.
+        Number of threads to start; a nonpositive value starts no threads.
     symmetricFolds : int = 0
-    Initial value for the shared accumulated symmetric count.
+        Initial value for the shared accumulated symmetric count.
 
     Examples
     --------
     The module `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` uses this call.
 
-    ```python
-    initializeConcurrencyManager(maxWorkers)
-    ```
+        ```python
+        initializeConcurrencyManager(maxWorkers)
+        ```
     """
     global boxOfThreads, symmetricTotalFolds, queueFutures
     boxOfThreads = []
@@ -76,15 +76,15 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
     Parameters
     ----------
     state : StateMapFoldingSymmetric
-    Current folding state to copy and submit for filtering.
+        Current folding state to copy and submit for filtering.
 
     Examples
     --------
     The module `mapFolding.synthesized.mapFoldingSymmetric.algorithm` uses this call.
 
-    ```python
-    filterAsymmetricFolds(state)
-    ```
+        ```python
+        filterAsymmetricFolds(state)
+        ```
     """
     queueFutures.put_nowait(deepcopy(state))
 
@@ -99,15 +99,15 @@ def getSymmetricTotalFolds() -> 形TotalFolds:
     Returns
     -------
     symmetricTotalFolds : 形TotalFolds
-    Shared accumulated count after all initialized worker threads have exited.
+        Shared accumulated count after all initialized worker threads have exited.
 
     Examples
     --------
     The module `mapFolding.synthesized.mapFoldingSymmetric.asynchronous` uses this call.
 
-    ```python
-    getSymmetricTotalFolds()
-    ```
+        ```python
+        getSymmetricTotalFolds()
+        ```
     """
     for _thread in boxOfThreads:
         queueFutures.put(STOPsignal)

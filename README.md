@@ -81,7 +81,7 @@ You can also supply an existing `StateMeanders` through the `state` argument to 
 
 ### Sequence formulas and reference data
 
-`oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or to an exact formula connecting related sequences. For sequences with selectable identities, its `f` argument chooses a formula. The formulas and their docstrings are in [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py).
+`oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or derives the value by chaining the exact relations in [`oeis/_symbolic.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/_symbolic.py). Its `f` argument names the sequences from which to compute the value, such as `'A000682 and A005316'`. [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py), generated from the same relations, has one documented function for each sequence.
 
 The `getOEISids` console command lists registered sequences and usage examples. The registry also includes related sequences used as reference data; consult `oeisIDfor_n` and `byFormula` for computation support. The `OEIS_for_n` command evaluates a supported term from its sequence identifier and index.
 

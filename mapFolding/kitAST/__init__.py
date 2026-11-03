@@ -3,7 +3,7 @@
 (AI generated docstring, and it's old)
 
 You can use this package to derive counting variants, specialize jobs for individual map
-shapes, and create lookup and documentation source for sequence formulas. The transformations
+shapes, and generate sequence-formula source from symbolic relations. The transformations
 use `astToolkit` to inspect and assemble Python syntax. The package exposes state-pattern
 predicates through `IfThis` and datatype-import configuration through `Settings形`.
 
@@ -14,7 +14,7 @@ dataclasses
 linux
 	Prepare source, compile Linux jobs, and strip binaries.
 oeisIDByFormula
-	Generate known-value lookup variants of formula source.
+	Generate sequence-formula source from the symbolic relations.
 paths
 	Resolve source module identifiers and output filenames.
 prefab
@@ -36,8 +36,6 @@ matrixMeanders
 	Generate matrix-meander counting variants.
 numba
 	Assemble compiler settings, decorators, and counting jobs.
-zCuzDocStoopid
-	Generate documentation from sequence metadata.
 
 Exports
 -------

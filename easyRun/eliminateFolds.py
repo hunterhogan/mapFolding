@@ -5,8 +5,7 @@ from mapFolding.algorithms.elimination import theorem2b
 from mapFolding.basecamp import eliminateFolds
 from mapFolding.choicesLeaf import getLookupChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
-from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
-from mapFolding.oeis._byFormulaLookup import _A000682
+from mapFolding.oeis import getValuesKnown, makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from mapFolding.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from typing import TYPE_CHECKING
 import time
@@ -64,7 +63,7 @@ if __name__ == "__main__":
 		computed: int = eliminateFolds(mapShape=mapShape, state=state, pathLikeWrite=pathLikeWrite, CPUlimit=CPUlimit, flow=flow)
 
 		if oeisID == "A000136" and 3 < n:  # pyright: ignore[reportUnnecessaryComparison]
-			computed += 2 * _A000682(state.totalLeaves - 1) * state.totalLeaves  # pyright: ignore[reportOptionalMemberAccess]
+			computed += 2 * getValuesKnown('A000682')[state.totalLeaves - 1] * state.totalLeaves  # pyright: ignore[reportOptionalMemberAccess]
 
 		printEasyRunBenchmark(oeisID, n, computed, timeStart, ratio=ratio)
 
