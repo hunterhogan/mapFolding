@@ -50,6 +50,7 @@ bitcast
 bitwidths
 bivariate
 Bletionary
+boolalg
 boolop
 boundscheck
 bsgs
@@ -74,6 +75,7 @@ clikuhnm
 clkuihfcmnlw
 cmap
 cmpop
+coeff
 coeffs
 coefs
 Combin

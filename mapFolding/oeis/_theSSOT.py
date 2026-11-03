@@ -21,6 +21,9 @@ cacheDays: int = 30
 oeisIDsMapFoldingImplemented: tuple[LiteralString, ...] = ('A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418')
 """OEIS IDs of multidimensional map-folding algorithms."""
 
+oeisIDsCountingImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented, 'A000682', 'A005316', 'A007822')
+"""OEIS IDs of counting algorithms: map folding, meanders, and symmetric folding."""
+
 oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented
 	, 'A000108', 'A000560', 'A000682', 'A001010', 'A001011'
 	, 'A005315', 'A005316', 'A006661', 'A006662', 'A007822'
@@ -30,6 +33,7 @@ oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented
 	, 'A301620', 'A331499', 'A333971', 'A334615', 'A337581', 'A339179', 'A380367'
 	, 'A400429', 'A400630', 'A400631', 'A400632', 'A400633', 'A400634', 'A400635', 'A400636', 'A400637'
 	#, 'A400638', 'A400639'
+	#, 'A401693', 'A401694'
 )
 """Every implemented OEIS ID."""
 pathCache: Path = settingsPackage.pathPackage / 'oeis' / '.cache'

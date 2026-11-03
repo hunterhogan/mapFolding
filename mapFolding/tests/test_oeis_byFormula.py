@@ -133,7 +133,7 @@ parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n,
 )))
 
 @pytest.mark.parametrize('oeisID, n, f', tuple(chain.from_iterable(map(  # ruff: ignore[unnecessary-map]
-	lambda oeisID: CartesianProduct((oeisID,), (getMetadata(oeisID)['offset'], 3, 7)
+	lambda oeisID: CartesianProduct((oeisID,), (getMetadata(oeisID)['offset'], 3, 4, 7)
 		, get_args(get_args(get_annotations(getattr(byFormula, oeisID), eval_str=True)['f'])[0]))
 	, filter(partial(hasattr, byFormula), oeisIDsImplemented)
 ))))
