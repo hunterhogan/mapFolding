@@ -4,10 +4,9 @@ from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from typing import NotRequired
 
 class MetadataOEISid(TypedDict):
-	"""Describe known sequence values and optional triangle row settings.
+	"""Describe known sequence values.
 
 	(AI generated docstring)
 
@@ -26,10 +25,6 @@ class MetadataOEISid(TypedDict):
 	valueUnknown : int
 		One greater than the largest key in `valuesKnown`, refreshed during metadata loading
 		and local b-file updates. This value does not locate gaps below the largest stored index.
-	rowLength : NotRequired[Callable[[int], int]]
-		Optional callable that maps a row number to the expected complete row length.
-	rowStart : NotRequired[int]
-		Optional first row number. Triangle utilities use `offset` when this field is absent.
 	"""
 
 	description: str
@@ -41,13 +36,20 @@ class MetadataOEISid(TypedDict):
 	valueUnknown: int
 	"""One greater than the largest stored sequence index; gaps below this index remain possible."""
 
-	rowLength: NotRequired[Callable[[int], int]]
-	"""Obtain the expected complete row length from a row number.
+class MetadataOEISidTriangle(MetadataOEISid):
+	"""Describe known sequence values and the row layout of a triangle.
 
 	(AI generated docstring)
-	"""
-	rowStart: NotRequired[int]
-	"""Read the optional first row number used when grouping known values.
 
-	(AI generated docstring)
+	Attributes
+	----------
+	rowLength : Callable[[int], int]
+		Length of each complete row, from the row number.
+	rowStart : int
+		First row number. The first cell of row `rowStart` has index `offset`.
 	"""
+
+	rowLength: Callable[[int], int]
+	"""Length of each complete row, from the row number."""
+	rowStart: int
+	"""First row number. The first cell of row `rowStart` has index `offset`."""

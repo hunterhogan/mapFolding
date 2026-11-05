@@ -26,7 +26,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import (
 	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
-	readDiagonal, readTriangle, readTriangleSparse, saveTotal, writeDiagonal, writeTriangle, writeTriangleSparse)
+	readDiagonal, readTriangle, saveTotal, writeDiagonal, writeTriangle)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.triangleData import (
@@ -34,6 +34,7 @@ from mapFolding.tests.dataSamples.triangleData import (
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
+from Z0Z_research.catalanArches._filesystem import readTriangleSparse, writeTriangleSparse
 import io
 import numpy
 import pandas

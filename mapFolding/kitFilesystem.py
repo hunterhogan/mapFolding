@@ -28,14 +28,10 @@ Functions
 		saveTotalFAILearly
 			Leave a test value at a new output path before counting.
 	Write
-		appendTriangle
-			Append numbered dense groups to a triangle CSV file.
 		iterableToCSV
 			Write groups to CSV with optional appending.
 		saveTotal
 			Save an integer with fallback output on failure.
-		saveTriangleGroup
-			Save one dense group using a generated or supplied filename.
 		writeAlbum
 			Write each folding as one CSV record.
 		writeDiagonal
@@ -43,9 +39,7 @@ Functions
 		writeText
 			Write text and create missing parent directories.
 		writeTriangle
-			Write sorted group keys followed by group values.
-		writeTriangleSparse
-			Write sparse groups with empty fields for missing cells.
+			Write sorted row numbers followed by row cells.
 	Read and write
 		getCacheOrURL
 			Retrieve cached text or request updated text from a URL.
@@ -62,8 +56,6 @@ Functions
 			Read UTF-8 text.
 		readTriangle
 			Read numbered integer groups.
-		readTriangleSparse
-			Read sparse integer groups without shifting missing columns.
 	Stream
 		streamAlbum
 			Yield folding records as the file is read.
@@ -93,10 +85,10 @@ import os
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Iterable, Mapping, Sequence
+	from collections.abc import Iterable, Mapping
 	from io import TextIOWrapper
 	from mapFolding.dataBaskets import StateElimination
-	from mapFolding.theTypes import Folding, 形Triangle, 形TriangleSparse
+	from mapFolding.theTypes import Folding, 形Triangle
 	from os import PathLike
 	from pandas import DataFrame
 	from typing import Any
@@ -244,9 +236,7 @@ def makePathFilenameArrayFoldings(
 	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
 
 # TODO Create a truly generic, but useful, make path filename function.
-def makePathFilenameCount(
-	pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = '.countTotal', **dash: str
-) -> Path:
+def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = '.countTotal', **dash: str) -> Path:
 	"""Resolve a count-output path and create missing parent directories.
 
 	(AI generated docstring)
@@ -264,7 +254,7 @@ def makePathFilenameCount(
 	Parameters
 	----------
 	pathLikeWrite : PathLike[str] | None = None
-		Existing directory, filename, or file path. A relative nondirectory path is placed under
+		Existing directory, filename, or file path. A relative non-directory path is placed under
 		the default job directory. An absolute file path keeps its location. An existing relative
 		directory receives the generated filename and remains relative.
 	*underscore : str
@@ -293,9 +283,7 @@ def makePathFilenameCount(
 		pathFilename.parent.mkdir(parents=True, exist_ok=True)
 	return pathFilename
 
-def makePathFilenameFolds(
-	mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds'
-) -> Path:
+def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds') -> Path:
 	"""Resolve a folding-count output path named from `mapShape`.
 
 	(AI generated docstring)
@@ -381,33 +369,6 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 	return pathFilename
 
 #======== Save =====================================================================================
-
-def appendTriangle(triangle: 形Triangle, pathFilename: Path) -> Path:
-	"""Append the numbered groups in `triangle` to a CSV file.
-
-	(AI generated docstring)
-
-	This function delegates to `writeTriangle` with appending enabled. Existing group keys
-	are not checked, so a file can contain repeated groups after appending.
-
-	Parameters
-	----------
-	triangle : 形Triangle
-		Group keys mapped to dense integer sequences.
-	pathFilename : Path
-		Destination CSV file, created with its parent directories when absent.
-
-	Returns
-	-------
-	pathFilenameWritten : Path
-		The supplied path after appending completes.
-
-	See Also
-	--------
-	`writeTriangle`
-		Write numbered groups with an explicit choice between replacing and appending.
-	"""
-	return writeTriangle(triangle, pathFilename, append=True)
 
 def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, append: bool = False) -> Path:
 	"""Write the records in `boxOfBoxes` to `pathFilename`.
@@ -496,34 +457,6 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 			stdout.write(str(countTotal))
 			pathFilenameWritten = ''
 	return PurePosixPath(pathFilenameWritten)
-
-def saveTriangleGroup(
-	keyGroup: int, boxOfIntegers: Sequence[int], nameTriangle: str, pathLikeWrite: PathLike[str] | None = None
-) -> Path:
-	"""Save one group of `boxOfIntegers` as a numbered triangle CSV record.
-
-	(AI generated docstring)
-
-	You can use this function to keep the result of one row calculation. This function resolves
-	the output path with `makePathFilenameCount`, then writes the group with `writeTriangle`.
-
-	Parameters
-	----------
-	keyGroup : int
-		Group number written as the first CSV field.
-	boxOfIntegers : Sequence[int]
-		Dense group values in column order.
-	nameTriangle : str
-		Triangle name used with the group number in a generated filename.
-	pathLikeWrite : PathLike[str] | None = None
-		Existing directory, explicit filename, or `None` for the default output location.
-
-	Returns
-	-------
-	pathFilenameWritten : Path
-		Resolved path of the saved group. Existing contents are replaced.
-	"""
-	return writeTriangle({keyGroup: boxOfIntegers}, makePathFilenameCount(pathLikeWrite, nameTriangle, str(keyGroup), suffix='.csv'))
 
 def writeAlbum(album: Iterable[Folding], pathFilename: Path) -> Path:
 	"""Write each folding in `album` as one CSV record.
@@ -627,36 +560,33 @@ def writeText(contents: str, pathFilename: Path) -> Path:
 	writeStringToHere(contents, pathFilename)
 	return pathFilename
 
-def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path, *, append: bool = False) -> Path:
+def writeTriangle(triangle: 形Triangle, pathFilename: Path, *, append: bool = False) -> Path:
 	"""Save numbered integer groups from `triangle` to a CSV file.
 
 	(AI generated docstring)
 
-	You can use this function to persist a triangle for later loading with `readTriangle` or
-	`readTriangleSparse`. This function writes the groups to `pathFilename` and returns
-	`pathFilename` after closing the file.
+	You can use this function to persist a triangle for later loading with `readTriangle`. This
+	function writes the rows to `pathFilename` and returns `pathFilename` after closing the file.
 
 	CSV Layout
 	----------
-	Each record contains the group key followed by that group's values, without a header. Records
-	appear in ascending group-key order. Dense groups retain their supplied cell order, and empty
-	dense groups contain only the group key. Sparse groups use column keys starting at one and
-	write empty fields for missing cells, extending through at least the group key or the largest
-	stored column key. `mapFolding.dataStructures.getBoxWithGaps` supplies this sparse layout.
+	Each record contains the row number followed by that row's cells, without a header. Records
+	appear in ascending row-number order. Rows retain their supplied cell order, and an empty row
+	contains only the row number.
 
 	The file uses UTF-8 and the default `csv.writer` dialect. `iterableToCSV` creates
 	missing parent directories and replaces existing contents unless `append=True`. An empty
 	`triangle` produces an empty file when replacing, or appends no records when appending.
-	Group lengths are not validated.
+	Row lengths are not validated.
 
 	Parameters
 	----------
-	triangle : 形Triangle | 形TriangleSparse
-		Group keys mapped to dense integer collections or sparse integer lookups.
+	triangle : 形Triangle
+		Row numbers mapped to the cells of each row.
 	pathFilename : Path
 		Destination file. Existing contents are overwritten unless `append=True`.
 	append : bool = False
-		Append numbered groups when `True`.
+		Append numbered rows when `True`.
 
 	Returns
 	-------
@@ -679,38 +609,7 @@ def writeTriangle(triangle: 形Triangle | 形TriangleSparse, pathFilename: Path,
 		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
 		```
 	"""
-	from mapFolding.dataStructures import getBoxWithGaps
-	return iterableToCSV(
-		map(lambda keyGroup: (keyGroup, *getBoxWithGaps(triangle[keyGroup], keyGroup)), sorted(triangle))  # ruff: ignore[unnecessary-map]
-		, pathFilename, append=append
-	)
-
-def writeTriangleSparse(triangleSparse: 形TriangleSparse, pathFilename: Path) -> Path:
-	"""Save `triangleSparse` as numbered CSV groups with empty fields for missing columns.
-
-	(AI generated docstring)
-
-	This function uses the sparse layout of `writeTriangle` and replaces existing contents.
-	Read the result with `readTriangleSparse` to preserve the original column keys.
-
-	Parameters
-	----------
-	triangleSparse : 形TriangleSparse
-		Group keys mapped to sparse cell lookups with positive column keys.
-	pathFilename : Path
-		Destination CSV file.
-
-	Returns
-	-------
-	pathFilenameWritten : Path
-		The supplied path after writing completes.
-
-	See Also
-	--------
-	`readTriangleSparse`
-		Recover the saved values while preserving their column keys.
-	"""
-	return writeTriangle(triangleSparse, pathFilename)
+	return iterableToCSV(map(lambda n: (n, *triangle[n]), sorted(triangle)), pathFilename, append=append)  # ruff: ignore[unnecessary-map]
 
 #======== Read and save ===========================================================================
 
@@ -932,7 +831,7 @@ def readText(pathFilename: Path, *, default: str | None = None) -> str:
 
 	Examples
 	--------
-	`mapFolding.oeis.updateBFile` reads an existing b-file or starts with empty contents.
+	`mapFolding.oeis.updateValuesKnown` reads an existing b-file or starts with empty contents.
 
 		```python
 		contents = readText(pathFilename, default='')
@@ -987,41 +886,6 @@ def readTriangle(pathFilename: Path) -> dict[int, tuple[int, ...]]:
 		https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
 	"""
 	return dict(map(itemgetter(0, slice(oneIndexed, None)), streamCSVintegers(pathFilename)))
-
-def readTriangleSparse(pathFilename: Path) -> dict[int, dict[int, int]]:
-	"""Load numbered sparse groups from `pathFilename` without shifting missing columns.
-
-	(AI generated docstring)
-
-	You can use this function to recover sparse cells saved by `writeTriangleSparse` or
-	`writeTriangle`. Empty cell fields are omitted while later cells retain their original
-	column keys. `mapFolding.dataStructures.stringsToLookup` converts the cell fields.
-
-	Parameters
-	----------
-	pathFilename : Path
-		UTF-8 CSV file without a header. Each nonempty record starts with an integer group key,
-		followed by integer cell fields or empty fields.
-
-	Returns
-	-------
-	triangleSparse : dict[int, dict[int, int]]
-		Groups mapped to available values with column keys starting at one. Empty records are
-		ignored. Repeated group keys retain the last record's cells, and a record containing only
-		a group key produces an empty dictionary.
-
-	See Also
-	--------
-	`readTriangle`
-		Read dense integer records when every cell field contains an integer.
-	"""
-	from mapFolding.dataStructures import stringsToLookup
-	streamKeys, streamGroups = tee(streamCSV(pathFilename))
-	return dict(zip(
-		map(int, map(itemgetter(0), streamKeys))
-		, map(stringsToLookup, map(itemgetter(slice(oneIndexed, None)), streamGroups))
-		, strict=True
-	))
 
 #======== Stream ===================================================================================
 

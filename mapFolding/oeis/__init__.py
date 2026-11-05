@@ -18,14 +18,10 @@ Functions
 		Print registered sequence descriptions and usage examples.
 	getTotalFoldsKnown
 		Retrieve a known folding total for an exact map shape.
+	getTriangle
+		Group the consecutive known values of a triangle into numbered rows.
 	getTriangleDiagonal
-		Select a diagonal from known values using the metadata row layout.
-	getTriangleIndices
-		Locate a complete row's flat sequence indices.
-	getTriangleRows
-		Group consecutive known sequence values into numbered rows.
-	getTriangleTerms
-		Group available sequence terms into sparse rows without shifting missing cells.
+		Select a diagonal of a triangle using the metadata row layout.
 	getValuesKnown
 		Retrieve shared known values or a sentinel dictionary for an unknown identifier.
 	makeMapShape
@@ -40,10 +36,10 @@ Functions
 		Print benchmark labels with reproducible terminal colors.
 	printEasyRunTriangle
 		Compare a computed row with known cells and align differing rows.
-	updateBFile
-		Add missing terms to a local b-file and refresh shared known values.
 	updateTriangle
-		Add dense or sparse triangle rows to a local b-file.
+		Add triangle rows to a local b-file.
+	updateValuesKnown
+		Add missing terms to a local b-file and refresh shared known values.
 
 Variables
 	oeisIDsImplemented
@@ -63,9 +59,8 @@ from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, o
 
 # isort: split
 from mapFolding.oeis._metadata import (
-	getMetadata as getMetadata, getTriangleDiagonal as getTriangleDiagonal, getTriangleIndices as getTriangleIndices,
-	getTriangleRows as getTriangleRows, getTriangleTerms as getTriangleTerms, getValuesKnown as getValuesKnown, updateBFile as updateBFile,
-	updateTriangle as updateTriangle)
+	getMetadata as getMetadata, getTriangle as getTriangle, getTriangleDiagonal as getTriangleDiagonal, getValuesKnown as getValuesKnown,
+	updateTriangle as updateTriangle, updateValuesKnown as updateValuesKnown)
 
 # isort: split
 from mapFolding.oeis.__main__ import (

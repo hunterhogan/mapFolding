@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from mapFolding.oeis import (
-	_metadata, getMetadata, getOEISids, getTotalFoldsKnown, getTriangleDiagonal, getTriangleRows, getTriangleTerms, getValuesKnown, OEIS_for_n,
-	oeisIDfor_n, updateBFile, updateTriangle)
+	_metadata, getMetadata, getOEISids, getTotalFoldsKnown, getTriangle, getTriangleDiagonal, getValuesKnown, OEIS_for_n, oeisIDfor_n,
+	updateTriangle, updateValuesKnown)
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from mapFolding.tests.dataSamples.triangleData import contentsBFile, sequenceHalf, triangleHalf
@@ -15,8 +15,8 @@ import sys
 
 if TYPE_CHECKING:
 	from _pytest.capture import CaptureResult
-	from collections.abc import Mapping, Sequence
-	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount, 形Triangle, 形TriangleSparse
+	from collections.abc import Mapping
+	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount, 形Triangle
 	from pathlib import Path
 	from typing import LiteralString
 
@@ -113,24 +113,22 @@ def test_OEIS_for_nError(expected: tuple[int, str, str], argv: tuple[str, ...], 
 	pytest.param(contentsBFile, {2: 701, 3: 709}, {2: 719, 4: 727}, '# prime observations\n2 701\n3 709\n4 727\n', id='retain-known'),
 	pytest.param(contentsBFile, {2: 701, 3: 709}, {2: 733}, contentsBFile, id='no-additions'),
 ))
-def test_updateBFile(oeisID: OEISid, sequence: Mapping[int, int], expected: str, contents: str | None, valuesKnown: Mapping[int, int],
+def test_updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], expected: str, contents: str | None, valuesKnown: Mapping[int, int],
 	monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 	monkeypatch.setattr(_metadata, 'pathCache', tmp_path)
 	if contents is not None:
 		(tmp_path / 'b400429.txt').write_text(contents, encoding='utf-8')
 	with patch.dict(getMetadata(oeisID)), patch.dict(getValuesKnown(oeisID), valuesKnown, clear=True):
 		known = getValuesKnown(oeisID)
-		assertEqualTo(updateBFile(oeisID, sequence), tmp_path / 'b400429.txt', updateBFile.__name__, oeisID, sequence)
-		assertEqualTo((tmp_path / 'b400429.txt').read_text(encoding='utf-8'), expected, updateBFile.__name__, oeisID, sequence)
+		assertEqualTo(updateValuesKnown(oeisID, sequence), tmp_path / 'b400429.txt', updateValuesKnown.__name__, oeisID, sequence)
+		assertEqualTo((tmp_path / 'b400429.txt').read_text(encoding='utf-8'), expected, updateValuesKnown.__name__, oeisID, sequence)
 		assert known is getMetadata(oeisID)['valuesKnown']
-		assertEqualTo(getMetadata(oeisID)['valueUnknown'], max(known) + 1, updateBFile.__name__, oeisID, sequence)
+		assertEqualTo(getMetadata(oeisID)['valueUnknown'], max(known) + 1, updateValuesKnown.__name__, oeisID, sequence)
 
 @pytest.mark.parametrize('oeisID, triangle, expected', (
 	pytest.param('A400429', triangleHalf, {2: 503, 3: 509, 4: 521, 5: 523, 6: 541}, id='half-length-rows'),
-	pytest.param('A400429', {4: {2: 19}}, {5: 19}, id='sparse-cell'),
 ))
-def test_updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]],
-	expected: dict[int, int], monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_updateTriangle(oeisID: OEISid, triangle: 形Triangle, expected: dict[int, int], monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
 	monkeypatch.setattr(_metadata, 'pathCache', tmp_path)
 	with patch.dict(getMetadata(oeisID)), patch.dict(getValuesKnown(oeisID), clear=True):
 		updateTriangle(oeisID, triangle)
@@ -142,21 +140,15 @@ def test_updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | M
 	pytest.param({2: 11, 5: 19}, {2: [11]}, id='first-gap'),
 ))
 @pytest.mark.parametrize('oeisID', ('A400429',))
-def test_getTriangleRows(oeisID: OEISid, expected: 形Triangle, valuesKnown: Mapping[int, int]) -> None:
+def test_getTriangle(oeisID: OEISid, expected: 形Triangle, valuesKnown: Mapping[int, int]) -> None:
 	with patch.dict(getValuesKnown(oeisID), valuesKnown, clear=True):
-		assertEqualTo(getTriangleRows(oeisID), expected, getTriangleRows.__name__, oeisID)
+		assertEqualTo(getTriangle(oeisID), expected, getTriangle.__name__, oeisID)
 
-@pytest.mark.parametrize('valuesKnown', ({2: 11, 5: 19},))
-@pytest.mark.parametrize('oeisID, expected', (('A400429', {2: {1: 11}, 3: {}, 4: {2: 19}}),))
-def test_getTriangleTerms(oeisID: OEISid, expected: 形TriangleSparse, valuesKnown: Mapping[int, int]) -> None:
-	with patch.dict(getValuesKnown(oeisID), valuesKnown, clear=True):
-		assertEqualTo(getTriangleTerms(oeisID), expected, getTriangleTerms.__name__, oeisID)
-
-@pytest.mark.parametrize('valuesKnown', ({2: 11, 5: 19, 6: 23},))
-@pytest.mark.parametrize('oeisID, 次diagonal, fromRight, expected', (
-	pytest.param('A400429', 1, True, {2: 11, 4: 19}, id='sparse-right'),
-	pytest.param('A400429', 1, False, {2: 11, 5: 23}, id='sparse-left'),
+@pytest.mark.parametrize('valuesKnown', (sequenceHalf,))
+@pytest.mark.parametrize('oeisID, 次diagonal, expected', (
+	pytest.param('A400429', 1, {2: 601, 3: 607, 4: 617}, id='last-cells'),
+	pytest.param('A400429', 2, {4: 613, 5: 619}, id='partial-row'),
 ))
-def test_getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, fromRight: bool, expected: dict[int, int], valuesKnown: Mapping[int, int]) -> None:
+def test_getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, expected: dict[int, int], valuesKnown: Mapping[int, int]) -> None:
 	with patch.dict(getValuesKnown(oeisID), valuesKnown, clear=True):
-		assertEqualTo(getTriangleDiagonal(oeisID, 次diagonal, fromRight=fromRight), expected, getTriangleDiagonal.__name__, oeisID, 次diagonal)
+		assertEqualTo(getTriangleDiagonal(oeisID, 次diagonal), expected, getTriangleDiagonal.__name__, oeisID, 次diagonal)

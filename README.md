@@ -97,22 +97,27 @@ OEIS metadata and b-files are loaded when the metadata module is imported. Local
 
 ### Triangle data and new terms
 
-Triangle utilities use the sequence metadata to locate rows, columns, and flat b-file indices. Columns start at one, including when a row is supplied as a Python sequence.
+Triangle utilities use the sequence metadata to locate rows and flat b-file indices: `rowStart` is the first row, `offset` is the index of its first cell, and `rowLength` is the length of each complete row.
+
+Use [`dataStructures.py`](mapFolding/dataStructures.py) when you already have values and row
+settings. `makeTriangle` groups consecutive values into rows and keeps a final nonempty partial row.
+`flattenTriangle` restores flat indices for supplied cells, leaving gaps for missing rows or cells.
+`locateIndex` returns a row number and a zero-based column; `locateRow` returns the flat-index range
+of a complete row. `makeLookupDiagonal` selects only known cells, locating the diagonal from each
+complete row's expected length.
 
 For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429oeisByFormula/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/A400429oeisByFormula/) exposes triangle-cell identities and fixed-diagonal formulas. Its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven.
 
-| Task                         | Interface                                                 | Result                                                    |
-| ---------------------------- | --------------------------------------------------------- | --------------------------------------------------------- |
-| Read consecutive known rows  | `getTriangleRows(oeisID)`                                 | Dense rows, stopping at the first missing flat index      |
-| Preserve gaps in known terms | `getTriangleTerms(oeisID)`                                | Rows mapped to dictionaries of available columns          |
-| Select a diagonal            | `getTriangleDiagonal(oeisID, 次diagonal, fromRight=True)` | Available terms keyed by row number; offsets start at one |
-| Locate a row in a b-file     | `getTriangleIndices(oeisID, n)`                           | Range of flat indices for the complete row                |
-| Save newly computed terms    | `updateBFile(oeisID, sequence)`                           | Local b-file path                                         |
-| Save dense or sparse rows    | `updateTriangle(oeisID, triangle)`                        | Local b-file path                                         |
+| Task                        | Interface                                 | Result                                                                   |
+| --------------------------- | ----------------------------------------- | ------------------------------------------------------------------------ |
+| Read consecutive known rows | `getTriangle(oeisID)`                     | Rows, stopping at the first missing flat index                           |
+| Select a diagonal           | `getTriangleDiagonal(oeisID, 次diagonal)` | Known terms keyed by row number; diagonal 1 is the last cell of each row |
+| Save newly computed terms   | `updateValuesKnown(oeisID, sequence)`     | Local b-file path                                                        |
+| Save rows                   | `updateTriangle(oeisID, triangle)`        | Local b-file path                                                        |
 
-`updateBFile` and `updateTriangle` add missing terms to the local cache and update the shared known-value dictionary in place. Existing local b-file values take precedence over metadata values, which take precedence over supplied values. These functions retain b-file comments and write terms in index order; they do not submit edits to OEIS. `valueUnknown` is one greater than the largest stored index, so it can lie beyond gaps in a sparse sequence.
+`updateValuesKnown` and `updateTriangle` add missing terms to the local cache and update the shared known-value dictionary in place. Existing local b-file values take precedence over metadata values, which take precedence over supplied values. These functions retain b-file comments and write terms in index order; they do not submit edits to OEIS. `valueUnknown` is one greater than the largest stored index, so it can lie beyond gaps in a sparse sequence.
 
-For research files, `mapFolding.kitFilesystem` reads and writes triangle CSV records with a row key followed by cell values. `writeTriangle` leaves empty fields for missing sparse cells; use `readTriangleSparse` to preserve their column positions. `readTriangle` expects every cell field to contain an integer. Diagonal CSV files use three fields: row key, diagonal offset, and value.
+For research files, `mapFolding.kitFilesystem` reads and writes triangle CSV records with a row key followed by cell values. `readTriangle` expects every cell field to contain an integer. Diagonal CSV files use three fields: row key, diagonal offset, and value.
 
 `printEasyRunBenchmark` compares one computed term with its known value. `printEasyRunTriangle` compares a computed row with its known cells and aligns differing rows for inspection. Both accept `ratio` as a number of decimal places; `ratio=0` hides ratios.
 

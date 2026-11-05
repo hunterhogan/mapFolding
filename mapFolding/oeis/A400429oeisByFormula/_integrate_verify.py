@@ -5,7 +5,7 @@ from functools import partial
 from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import chain, filterfalse, groupby, repeat
 from mapFolding.kitFilesystem import makePathFilenameCount, readDiagonal
-from mapFolding.oeis import getTriangleDiagonal, getTriangleRows, getValuesKnown
+from mapFolding.oeis import getTriangle, getTriangleDiagonal, getValuesKnown
 from mapFolding.oeis.A400429oeisByFormula._integrate_fromTriangleCells import (
 	A000136, A000682, A005315, A005316, A006661, A076876, A077054, A077460, calculateDiagonal2, calculateDiagonal3)
 from mapFolding.oeis.A400429oeisByFormula._semi import boxOfDiagonals
@@ -111,7 +111,7 @@ def checkTriangle(triangle: 形Triangle) -> tuple[Report, ...]:
 	)
 
 def checkFormulas() -> None:
-	triangleRows: 形Triangle = getTriangleRows('A400429')
+	triangleRows: 形Triangle = getTriangle('A400429')
 	triangle: dict[int, tuple[int, ...]] = dict(zip(triangleRows, map(tuple, triangleRows.values()), strict=True))
 	triangle = dict(filter(lambda row: len(row[1]) == row[0] // 2, triangle.items()))
 	triangleOfficial: dict[int, int] = getValuesKnown('A400429')

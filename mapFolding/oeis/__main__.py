@@ -34,7 +34,7 @@ from humpy_cytoolz import keymap, merge
 from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import chain, repeat
 from mapFolding.oeis._beDRY import formatBenchmarkRatio
-from mapFolding.oeis._metadata import dictionaryOEIS, getTriangleIndices, getValuesKnown
+from mapFolding.oeis._metadata import dictionaryOEIS, getTriangle, getValuesKnown
 from mapFolding.oeis._theSSOT import oeisIDsMapFoldingImplemented
 from more_itertools import loops
 from operator import eq
@@ -234,8 +234,7 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 	(AI generated docstring)
 
 	You can use this function to inspect a row computation with its elapsed time. This function
-	uses `mapFolding.oeis.getTriangleIndices` to locate the complete row and
-	`mapFolding.oeis.getValuesKnown` to obtain the reference cells. The function prints the
+	uses row `n` of `mapFolding.oeis.getTriangle` as the reference cells. The function prints the
 	comparison and returns `None`.
 
 	Parameters
@@ -261,14 +260,13 @@ def printEasyRunTriangle(oeisID: OEISid, n: int, computed: Sequence[int], timeSt
 	The first line contains the row number, an exact-match flag, elapsed seconds, and `computed`.
 	A match requires equal lengths and equal corresponding values. A differing row prints the
 	known cells on a second aligned line. Missing positions in the shorter row display `'?'`.
-	An unavailable reference value uses the negative `hunterMakesPy.errorL33T` sentinel.
+	An unknown row has no reference cells.
 
 	Ratios are printed only for differing rows and only for paired cells. Zero computed cells
 	display `'-'`; integer ratios use the success color even when the ratio differs from
 	one. This function does not calculate sequence terms or save results.
 	"""
-	#=SIN= Intermediate tuple: comparison, aligned output, and ratios consume the known cells separately.
-	known: tuple[int, ...] = tuple(map(getValuesKnown(oeisID).get, getTriangleIndices(oeisID, n), repeat(-errorL33T)))
+	known: Sequence[int] = getTriangle(oeisID).get(n, ())
 	match: bool = len(computed) == len(known) and all(map(eq, computed, known, strict=True))
 	timeElapsed: float = time.perf_counter() - timeStart
 

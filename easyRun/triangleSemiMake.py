@@ -8,7 +8,7 @@ from mapFolding.algorithms.matrixMeandersShare import makeLookupDiagonal
 from mapFolding.basecamp import countMeanders
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.kitFilesystem import makePathFilenameCount, writeDiagonal
-from mapFolding.oeis import getValuesKnown, updateBFile
+from mapFolding.oeis import getValuesKnown, updateValuesKnown
 from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
 from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
@@ -40,7 +40,7 @@ def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None
 				state: StateMeanders = StateMeanders(n, 'semi', lookupMeanders=lookupMeanders)
 				state = doTheNeedful(state)
 				aOFn下k = state.totalMeanders
-			updateBFile('A400429', {nT: aOFn下k})
+			updateValuesKnown('A400429', {nT: aOFn下k})
 
 if __name__ == '__main__':
 	flow = 'rows'

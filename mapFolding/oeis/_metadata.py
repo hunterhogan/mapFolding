@@ -4,10 +4,10 @@ from functools import cache, partial
 from humpy_cytoolz import dissoc, get_in, merge
 from hunterMakesPy import errorL33T
 from itertools import count, takewhile
-from mapFolding.dataStructures import getLookupDiagonal, lookupToTriangle, makeGroupKeys, makeTriangle, triangleToLookup
+from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
 from mapFolding.kitFilesystem import getCacheOrURL, readText, writeText
 from mapFolding.oeis._beDRY import formatBFile, formatOEISid, parse_bFile
-from mapFolding.oeis._dataBaskets import MetadataOEISid
+from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
 from oeis_tools import oeis_bfile, oeis_url
 from operator import add
@@ -15,8 +15,8 @@ from typing import TYPE_CHECKING
 import warnings
 
 if TYPE_CHECKING:
-	from collections.abc import Iterable, Mapping, Sequence
-	from mapFolding.theTypes import OEISid, 形Triangle, 形TriangleSparse
+	from collections.abc import Mapping
+	from mapFolding.theTypes import OEISid, 形Triangle
 	from pathlib import Path
 
 #================== Sausage =======================================================================
@@ -89,172 +89,87 @@ def getValuesKnown(oeisID: OEISid) -> dict[int, int]:
 	return get_in((str(formatOEISid(oeisID)),), dictionaryOEIS, dict[str, dict[int, int]]()).get(
 		'valuesKnown', dict[int, int]([(-errorL33T, -errorL33T)]))
 
-def getTriangleRows(oeisID: OEISid) -> 形Triangle:
-	"""Group known values for `oeisID` into numbered triangle rows.
+@cache
+def getMetadataTriangle(oeisID: OEISid) -> MetadataOEISidTriangle:
+	"""Retrieve metadata, including the row layout, for the triangle `oeisID`.
 
 	(AI generated docstring)
 
-	You can use this function to access a supported sequence as rows for further analysis. This
-	function obtains the sequence metadata through `mapFolding.oeis.getMetadata` and returns
-	a new dictionary mapping row numbers to lists of known values.
-
-	Row Boundaries
-	--------------
-	`mapFolding.oeis._dataBaskets.MetadataOEISid` supplies the starting row through `rowStart`,
-	falling back to `offset`. When metadata supplies `rowLength`, the function evaluates `rowLength`
-	for successive row numbers. Otherwise, requested row lengths begin at one and increase by one,
-	regardless of the starting row number.
-
-	`mapFolding.dataStructures.makeTriangle` groups consecutive known indices starting at
-	`offset`. Grouping ends at the first missing sequence index. A
-	partially known final row is retained. Grouping stops at the first empty row, including an empty
-	row caused by a requested length of zero. The function does not check whether the sequence
-	represents a triangle.
-	Use `getTriangleTerms` to preserve known values beyond gaps in the flat indices.
+	The result is the same shared dictionary that `getMetadata` returns for `oeisID`.
 
 	Parameters
 	----------
 	oeisID : OEISid
-		Identifier of a sequence present in the package metadata. Lookup ignores letter case and
+		Identifier of a triangle in the package metadata. Lookup ignores letter case and surrounding
+		whitespace.
+
+	Returns
+	-------
+	metadata : MetadataOEISidTriangle
+		Shared metadata dictionary described by `mapFolding.oeis._dataBaskets.MetadataOEISidTriangle`.
+	"""
+	return dictionaryTriangle[formatOEISid(oeisID)]
+
+def getTriangle(oeisID: OEISid) -> dict[int, list[int]]:
+	"""Group the known values of the triangle `oeisID` into rows.
+
+	(AI generated docstring)
+
+	The metadata of `oeisID` supplies the row layout: `rowStart` is the first row, `offset` is the
+	index of its first cell, and `rowLength` is the length of each complete row.
+	`mapFolding.dataStructures.makeTriangle` groups the known values with consecutive indices
+	starting at `offset`. Grouping ends at the first missing index, so the final row can be partial.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Identifier of a triangle in the package metadata. Lookup ignores letter case and
 		leading or trailing whitespace.
 
 	Returns
 	-------
-	triangleRows : 形Triangle
-		Consecutive row numbers mapped to newly allocated lists of known sequence values.
-
-	See Also
-	--------
-	`getTriangleTerms`
-		Preserve available cells beyond gaps in the flat sequence indices.
-
-	Unknown Sequences
-	-----------------
-	This function propagates `KeyError` from the metadata lookup if the normalized `oeisID` is
-	absent from the package metadata.
+	triangle : dict[int, list[int]]
+		Consecutive row numbers mapped to newly allocated lists of known values.
 
 	Examples
 	--------
 	`mapFolding.oeis.A400429oeisByFormula.checkFormulas` obtains the stored semi-meander rows.
 
 		```python
-		from mapFolding.oeis import getTriangleRows
+		from mapFolding.oeis import getTriangle
 
-		triangleRows = getTriangleRows('A400429')
+		triangle = getTriangle('A400429')
 		```
 	"""
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	rowStart: int = metadata.get('rowStart', metadata['offset'])
-	rowLengths: Iterable[int] | None = None
-	if 'rowLength' in metadata:
-		rowLengths = map(metadata['rowLength'], count(rowStart))
-	return makeTriangle(map(metadata['valuesKnown'].__getitem__,
-		takewhile(metadata['valuesKnown'].__contains__, count(metadata['offset']))), rowLengths, rowStart)
+	metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+	return makeTriangle(map(metadata['valuesKnown'].__getitem__, takewhile(metadata['valuesKnown'].__contains__, count(metadata['offset'])))
+		, metadata['rowLength'], metadata['rowStart'])
 
-def getTriangleTerms(oeisID: OEISid) -> 形TriangleSparse:
-	"""Group available terms for `oeisID` into sparse triangle rows.
+def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int) -> dict[int, int]:
+	"""Select a diagonal of the triangle `oeisID`.
 
 	(AI generated docstring)
 
-	You can use this function to inspect known triangle cells even when some flat sequence indices
-	are missing. This function uses `getMetadata` for the row layout and
-	`mapFolding.dataStructures.lookupToTriangle` to preserve each available cell's column.
+	Diagonal `次diagonal` contains the cell at distance `次diagonal` from the end of each complete row,
+	so diagonal 1 is the last cell of each row. `mapFolding.dataStructures.makeLookupDiagonal` selects
+	the cells of `getTriangle` using the metadata `rowLength`, so a partial final row contributes a
+	cell only when the cell is known.
 
 	Parameters
 	----------
 	oeisID : OEISid
-		Registered sequence identifier, ignoring letter case and surrounding whitespace.
-
-	Returns
-	-------
-	triangleTerms : 形TriangleSparse
-		New dictionaries mapping row numbers to available columns, with columns starting at one.
-
-	See Also
-	--------
-	`getTriangleRows`
-		Read dense rows from the consecutive prefix of known sequence indices.
-
-	Row Layout
-	----------
-	The first row uses `rowStart`, or `offset` when `rowStart` is absent. Flat indices start at
-	`offset`. A supplied `rowLength` determines each complete row length; otherwise lengths start
-	at one and increase by one. Rows through the largest stored flat index are retained, including
-	empty rows caused by gaps. A partial final row keeps the original column keys.
-	"""
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	rowStart: int = metadata.get('rowStart', metadata['offset'])
-	rowLengths: Iterable[int] | None = None
-	if 'rowLength' in metadata:
-		rowLengths = map(metadata['rowLength'], count(rowStart))
-	return lookupToTriangle(metadata['valuesKnown'], rowLengths, rowStart, metadata['offset'])
-
-def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int, *, fromRight: bool = True) -> dict[int, int]:
-	"""Select an available triangle diagonal for `oeisID` without shifting missing cells.
-
-	(AI generated docstring)
-
-	You can use this function to compare one diagonal with a formula or independently computed
-	counts. This function obtains sparse rows from `getTriangleTerms` and selects cells with
-	`mapFolding.dataStructures.getLookupDiagonal`.
-
-	Parameters
-	----------
-	oeisID : OEISid
-		Registered triangle sequence identifier, ignoring case and surrounding whitespace.
+		Identifier of a triangle in the package metadata, ignoring case and surrounding whitespace.
 	次diagonal : int
-		Offset from the selected row edge, starting at one. Zero selects no ordinary cell.
-	fromRight : bool = True
-		Measure from the complete row's right edge when `True`, or the left edge when `False`.
+		Distance from the end of each complete row, starting at one.
 
 	Returns
 	-------
 	diagonal : dict[int, int]
-		Available selected cells keyed by ascending row number. Missing cells are omitted.
-
-	Complete Row Lengths
-	--------------------
-	Right-edge selection uses the metadata `rowLength`, or the default lengths starting at one.
-	Missing cells therefore retain their positions relative to the complete row's edge.
-	Selection propagates `ValueError` from the diagonal selector if `次diagonal` is negative.
+		Known cells of the diagonal keyed by row number.
 	"""
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	return getLookupDiagonal(getTriangleTerms(oeisID), 次diagonal, fromRight=fromRight,
-		getGroupLength=metadata.get('rowLength', partial(add, 1 - metadata.get('rowStart', metadata['offset']))))
+	return makeLookupDiagonal(getTriangle(oeisID), 次diagonal, getMetadataTriangle(oeisID)['rowLength'])
 
-def getTriangleIndices(oeisID: OEISid, n: int) -> range:
-	"""Locate the complete triangle row `n` in the flat sequence `oeisID`.
-
-	(AI generated docstring)
-
-	You can use this function to match a row calculation with b-file indices. This function reads
-	the row layout from `getMetadata` and delegates index calculation to
-	`mapFolding.dataStructures.makeGroupKeys`.
-
-	Parameters
-	----------
-	oeisID : OEISid
-		Registered triangle sequence identifier, ignoring case and surrounding whitespace.
-	n : int
-		Row number, no smaller than the first row specified by the metadata.
-
-	Returns
-	-------
-	indices : range
-		Flat indices for every column of the complete row, whether or not those terms are known.
-
-	Row Layout
-	----------
-	Flat indices start at `offset`; row numbers start at `rowStart`, falling back to `offset`.
-	A supplied `rowLength` determines row lengths. Otherwise lengths start at one and increase
-	by one, independently of the first row number.
-	Index calculation propagates `ValueError` if `n` precedes the first metadata row.
-	"""
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	return makeGroupKeys(n, keyGroupFirst=metadata.get('rowStart', metadata['offset']), keyFlatFirst=metadata['offset'],
-		getGroupLength=metadata.get('rowLength'))
-
-def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
+def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	"""Add missing terms to the local b-file for `oeisID` and update shared known values.
 
 	(AI generated docstring)
@@ -294,7 +209,7 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	The cell writer in `easyRun/triangleSemiMake.py` saves each computed triangle term.
 
 		```python
-		updateBFile('A400429', {nT: aOFn下k})
+		updateValuesKnown('A400429', {nT: aOFn下k})
 		```
 	"""
 	oeisID = formatOEISid(oeisID)
@@ -314,39 +229,30 @@ def updateBFile(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	metadata['valueUnknown'] = max(known, default=metadata['offset'] - 1) + 1
 	return pathFilename
 
-def updateTriangle(oeisID: OEISid, triangle: Mapping[int, Sequence[int] | Mapping[int, int]]) -> Path:
-	"""Add dense or sparse rows from `triangle` to the local sequence cache for `oeisID`.
+def updateTriangle(oeisID: OEISid, triangle: 形Triangle) -> Path:
+	"""Add the cells of `triangle` to the local b-file for the triangle `oeisID`.
 
 	(AI generated docstring)
 
-	You can use this function to save row computations without converting column positions to
-	flat indices yourself. This function flattens `triangle` using
-	`mapFolding.dataStructures.triangleToLookup`, then delegates persistence and shared-value
-	updates to `updateBFile`.
+	You can use this function to save row computations without converting cells to flat indices
+	yourself. `mapFolding.dataStructures.flattenTriangle` keys each cell by its flat index using the
+	metadata row layout, then `updateValuesKnown` persists the cells and updates the shared values.
 
 	Parameters
 	----------
 	oeisID : OEISid
-		Registered triangle sequence identifier, ignoring case and surrounding whitespace.
-	triangle : Mapping[int, Sequence[int] | Mapping[int, int]]
-		Row numbers mapped to dense cell sequences or sparse dictionaries with columns starting
-		at one. Supplied columns must fit the complete row length defined by the metadata.
+		Identifier of a triangle in the package metadata, ignoring case and surrounding whitespace.
+	triangle : 形Triangle
+		Row numbers mapped to the cells of each row, starting with the first cell. A row can be a
+		prefix of the complete row.
 
 	Returns
 	-------
 	pathFilename : Path
 		Local b-file path. Existing file and metadata values take precedence over supplied cells.
-
-	Row Layout
-	----------
-	The metadata `offset` selects the first flat index; `rowStart` selects the first row, falling
-	back to `offset`. A supplied `rowLength` sets each complete row length. Otherwise lengths
-	start at one and increase by one. Missing rows and columns keep their flat index positions.
 	"""
-	metadata: MetadataOEISid = getMetadata(oeisID)
-	return updateBFile(oeisID, triangleToLookup(triangle, keyGroupFirst=metadata.get('rowStart', metadata['offset']),
-		keyFlatFirst=metadata['offset'], getGroupLength=metadata.get('rowLength')))
-
+	metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+	return updateValuesKnown(oeisID, flattenTriangle(triangle, metadata['rowLength'], metadata['rowStart'], metadata['offset']))
 
 #================== Meat grinders =================================================================
 
@@ -460,9 +366,7 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 	(AI generated docstring)
 
 	This function loads descriptions, offsets, and b-file values for each identifier in
-	`mapFolding.oeis._theSSOT.oeisIDsImplemented`. The result also supplies row settings for
-	`A259689` and `A400429`, with rows starting at two and complete lengths equal to half the row
-	number rounded down.
+	`mapFolding.oeis._theSSOT.oeisIDsImplemented`.
 
 	Returns
 	-------
@@ -481,11 +385,39 @@ def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
 		description, offset = _getMetadataAFile(oeisID)
 		dictionary[oeisID] = MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 
-	dictionary['A259689'].update(rowLength=lambda nRow: nRow // 2, rowStart=2)
-	dictionary['A339179'].update(rowLength=lambda nRow: nRow // 2, rowStart=2)
-	dictionary['A400429'].update(rowLength=lambda nRow: nRow // 2, rowStart=2)
-
 	return dictionary
+
+def _makeDictionaryTriangle(dictionaryOEIS: Mapping[str, MetadataOEISid]) -> dict[str, MetadataOEISidTriangle]:
+	"""I use this to add the row layout of each triangle to its metadata during module import.
+
+	(AI generated docstring)
+
+	Each `rowLength` gives the length of a complete row from its row number, and each `rowStart`
+	gives the first row number.
+
+	Parameters
+	----------
+	dictionaryOEIS : Mapping[str, MetadataOEISid]
+		Metadata registry supplying the description, offset, and known values of each triangle.
+
+	Returns
+	-------
+	dictionaryTriangle : dict[str, MetadataOEISidTriangle]
+		New metadata dictionaries for the triangles.
+	"""
+	return {
+		'A259689': MetadataOEISidTriangle(**dictionaryOEIS['A259689'], rowLength=lambda nRow: nRow // 2, rowStart=2),
+		'A259698': MetadataOEISidTriangle(**dictionaryOEIS['A259698'], rowLength=partial(add, -1), rowStart=2),
+		'A259701': MetadataOEISidTriangle(**dictionaryOEIS['A259701'], rowLength=partial(add, -1), rowStart=2),
+		'A259703': MetadataOEISidTriangle(**dictionaryOEIS['A259703'], rowLength=partial(add, -1), rowStart=2),
+		'A287548': MetadataOEISidTriangle(**dictionaryOEIS['A287548'], rowLength=int, rowStart=1),
+		'A331499': MetadataOEISidTriangle(**dictionaryOEIS['A331499'], rowLength=int, rowStart=1),
+		'A339179': MetadataOEISidTriangle(**dictionaryOEIS['A339179'], rowLength=lambda nRow: nRow // 2, rowStart=2),
+		'A400429': MetadataOEISidTriangle(**dictionaryOEIS['A400429'], rowLength=lambda nRow: nRow // 2, rowStart=2),
+	}
 
 dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
 """Metadata for every implemented OEIS sequence."""
+dictionaryTriangle: dict[str, MetadataOEISidTriangle] = _makeDictionaryTriangle(dictionaryOEIS)
+"""Metadata, including the row layout, for every implemented triangle."""
+dictionaryOEIS.update(dictionaryTriangle)

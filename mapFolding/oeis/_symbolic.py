@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from functools import cache, partial
 from humpy_cytoolz import compose_left, juxt, unique
-from hunterMakesPy import oneIndexed
-from itertools import chain, compress, count, filterfalse, product as CartesianProduct, starmap, takewhile
-from mapFolding.dataStructures import lookupToTriangle
-from mapFolding.oeis._metadata import getMetadata, getTriangleIndices, getValuesKnown
+from itertools import chain, compress, filterfalse, product as CartesianProduct, starmap, takewhile
+from mapFolding.dataStructures import locateIndex, locateRow
+from mapFolding.oeis._metadata import getMetadata, getMetadataTriangle, getValuesKnown
 from mapFolding.oeis._theSSOT import (
 	domainSymbolic, kSymbolic as k, lookupColumnStart, lookupOEISid, lookupSymbolic, nSymbolic as n, oeisIDsCountingImplemented)
-from operator import add, attrgetter, is_not, itemgetter, methodcaller
+from operator import attrgetter, is_not, itemgetter, methodcaller
 from sympy import (
 	And, ceiling, Dummy, Eq, factorial, floor, fraction, Ge, Integer, Le, Mod, oo, Piecewise, piecewise_fold, Range, S, solve, solveset, Sum,
 	sympify, together, true, Tuple, Union)
@@ -20,7 +19,7 @@ import re as regex
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator
-	from mapFolding.oeis._dataBaskets import MetadataOEISid
+	from mapFolding.oeis._dataBaskets import MetadataOEISidTriangle
 	from mapFolding.theTypes import OEISid
 	from sympy import Expr, Symbol
 	from sympy.core.relational import Equality
@@ -117,11 +116,9 @@ def getSequenceCall(oeisID: OEISid, n: int) -> AppliedUndef:
 	"""
 	sequence: type[AppliedUndef] = lookupSymbolic[oeisID]
 	if oeisID in lookupColumnStart:
-		metadata: MetadataOEISid = getMetadata(oeisID)
-		rowStart: int = metadata.get('rowStart', metadata['offset'])
-		boxOfRowLengths: Iterator[int] = map(metadata.get('rowLength', partial(add, 1 - rowStart)), count(rowStart))
-		row, (column,) = lookupToTriangle({n: 0}, boxOfRowLengths, rowStart, metadata['offset']).popitem()
-		call: AppliedUndef = sequence(row, column - oneIndexed + lookupColumnStart[oeisID])
+		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+		row, 次column = locateIndex(n, metadata['rowLength'], metadata['rowStart'], metadata['offset'])
+		call: AppliedUndef = sequence(row, 次column + lookupColumnStart[oeisID])
 	else:
 		call = sequence(n)
 	return call
@@ -133,8 +130,10 @@ def getFlatCall(expression: AppliedUndef) -> AppliedUndef:
 	"""
 	if len(expression.args) == 2:
 		oeisID: OEISid = lookupOEISid[expression.func]
+		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
 		row, column = expression.args
-		expression = expression.func(getTriangleIndices(oeisID, as_int(row))[as_int(column) - lookupColumnStart[oeisID]])
+		expression = expression.func(locateRow(as_int(row), metadata['rowLength'], metadata['rowStart'], metadata['offset'])[
+			as_int(column) - lookupColumnStart[oeisID]])
 	return expression
 
 def getKnownValue(expression: AppliedUndef) -> Expr:

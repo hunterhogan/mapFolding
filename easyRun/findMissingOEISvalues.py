@@ -4,7 +4,7 @@ from ast import fix_missing_locations
 from astToolkit import Make
 from mapFolding.kitAST import IngredientsModule
 from mapFolding.kitAST.oeisIDByFormula import makeSymbolicFormula
-from mapFolding.oeis import getMetadata, updateBFile
+from mapFolding.oeis import getMetadata, updateValuesKnown
 from mapFolding.oeis._symbolic import getMissingFormulas
 from operator import itemgetter
 from types import ModuleType
@@ -21,6 +21,6 @@ if __name__ == '__main__':
 			module = ModuleType(oeisID)
 			exec(compile(fix_missing_locations(Make.Module(IngredientsModule(ingredientsFunction).body)), __file__, 'exec'), module.__dict__)  # ruff: ignore[exec-builtin]
 			countTotal: int = getattr(module, oeisID)()
-			updateBFile(oeisID, {n: countTotal})
+			updateValuesKnown(oeisID, {n: countTotal})
 			keepGoing = True
 			print(oeisID, n, expression, countTotal)

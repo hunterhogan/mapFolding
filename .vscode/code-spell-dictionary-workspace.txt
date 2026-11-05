@@ -457,6 +457,7 @@ shǒu
 signedinteger
 signedness
 sinclude
+solveset
 sorez
 sqrtrem
 squarefree
@@ -553,6 +554,7 @@ Xand
 xdist
 xlabel
 xmpz
+xreplace
 Xshift
 Xxor
 yada
