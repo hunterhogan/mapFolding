@@ -238,14 +238,6 @@ def dotProductCatalan(ordinal: int, boxOfMultipliers: Sequence[int], shift: int 
 		Sum the products of paired integers from two iterables.
 	`工boxOfBasisCatalan`
 		Select Catalan ordinals with explicit range bounds.
-
-	Examples
-	--------
-	`Z0Z_research.catalanArches.formulasParents` counts a triangle cell from its row coefficients.
-
-		```python
-		return dotProductCatalan(row_n, boxOfCoefficients, strict=True)
-		```
 	"""
 	return dotProduct(工boxOfBasisCatalan(ordinal + shift, ordinal - len(boxOfMultipliers), decreasing), boxOfMultipliers, strict=strict)
 

@@ -29,12 +29,10 @@ from mapFolding.kitFilesystem import (
 	readDiagonal, readTriangle, saveTotal, writeDiagonal, writeTriangle)
 from mapFolding.oeis import makeMapShape
 from mapFolding.tests import assertEqualTo
-from mapFolding.tests.dataSamples.triangleData import (
-	triangleBeyondInt64, triangleDense, triangleInt64Edges, triangleSparse, triangleSparseEdges)
+from mapFolding.tests.dataSamples.triangleData import triangleBeyondInt64, triangleDense, triangleInt64Edges
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
-from Z0Z_research.catalanArches._filesystem import readTriangleSparse, writeTriangleSparse
 import io
 import numpy
 import pandas
@@ -128,17 +126,6 @@ def test_writeTriangle(triangle: Mapping[int, Sequence[int]], pathFilename: Path
 	writeTriangle({7: (37,)}, pathFilename)
 	writeTriangle(triangle, pathFilename, append=append)
 	assertEqualTo(readTriangle(pathFilename), expected, writeTriangle.__name__, triangle)
-
-@pytest.mark.parametrize('triangleSparse, expected', (
-	pytest.param(triangleSparse, triangleSparse, id='sparse-primes'),
-	pytest.param({2: {1: 0, 4: 2 ** 100}}, {2: {1: 0, 4: 2 ** 100}}, id='zero-and-missing-cells'),
-	pytest.param(triangleSparseEdges, triangleSparseEdges, id='uint64-1025-bit-values'),
-	pytest.param({}, {}, id='empty'),
-))
-def test_writeTriangleSparse(triangleSparse: Mapping[int, Mapping[int, int]], pathFilename: Path,
-	expected: dict[int, dict[int, int]]) -> None:
-	writeTriangleSparse(triangleSparse, pathFilename)
-	assertEqualTo(readTriangleSparse(pathFilename), expected, writeTriangleSparse.__name__, triangleSparse)
 
 @pytest.mark.parametrize('lookupDiagonal, 次diagonal, append, expected', (
 	pytest.param({3: 11, 5: 2 ** 100}, 2, False, {3: 11, 5: 2 ** 100}, id='replace'),

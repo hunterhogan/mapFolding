@@ -2,14 +2,12 @@ from __future__ import annotations
 
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal
 from mapFolding.tests import assertEqualTo
-from mapFolding.tests.dataSamples.triangleData import (
-	triangleBeyondInt64, triangleDense, triangleInt64Edges, triangleSparse, triangleSparseEdges)
+from mapFolding.tests.dataSamples.triangleData import triangleBeyondInt64, triangleDense, triangleInt64Edges
 from typing import TYPE_CHECKING
-from Z0Z_research.catalanArches._dataStructures import getTriangleComplete
 import pytest
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Mapping
+	from collections.abc import Callable
 	from mapFolding.theTypes import 形Triangle
 
 @pytest.mark.parametrize('triangle, 次diagonal, rowLength, expected', (
@@ -22,16 +20,6 @@ if TYPE_CHECKING:
 ))
 def test_makeLookupDiagonal(triangle: 形Triangle, 次diagonal: int, rowLength: Callable[[int], int], expected: dict[int, int]) -> None:
 	assertEqualTo(makeLookupDiagonal(triangle, 次diagonal, rowLength), expected, makeLookupDiagonal.__name__, triangle, 次diagonal, rowLength)
-
-@pytest.mark.parametrize('triangleSparse, getGroupLength, expected', (
-	pytest.param(triangleSparse, int, {2: (101, 103)}, id='missing-cells'),
-	pytest.param({2: {0: 811, 1: 821}}, int, {}, id='wrong-columns'),
-	pytest.param({2: {2: 0, 1: 823}}, int, {2: (823, 0)}, id='zero-is-known'),
-	pytest.param(triangleSparseEdges, int, {2: (18446744073709551615, 18446744073709551616)}, id='uint64-boundary'),
-))
-def test_getTriangleComplete(triangleSparse: Mapping[int, Mapping[int, int]], getGroupLength: Callable[[int], int],
-	expected: dict[int, tuple[int, ...]]) -> None:
-	assertEqualTo(getTriangleComplete(triangleSparse, getGroupLength=getGroupLength), expected, getTriangleComplete.__name__, triangleSparse)
 
 @pytest.mark.parametrize('triangle, rowLength, rowStart, offset, expected', (
 	pytest.param(triangleDense, int, 2, 1, {1: 11, 2: 13, 3: 17, 4: 19, 5: 23, 10: 29}, id='missing-row'),
