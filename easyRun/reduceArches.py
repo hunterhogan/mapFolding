@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	flow = 'write'
 	flow = 'reduce'
 	nStart: int = 1
-	nStop: int = 20
+	nStop: int = 10
 
 	printEasyRunHeader(oeisID, flow)
 	ratio: int = 0

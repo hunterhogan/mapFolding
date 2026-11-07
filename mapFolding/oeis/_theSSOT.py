@@ -2,19 +2,25 @@ from __future__ import annotations
 
 from functools import partial
 from mapFolding.theSSOT import settingsPackage
+from pathlib import Path
 from sympy import S, Symbol
 from sympy.core.function import UndefinedFunction
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
-	from pathlib import Path
 	from sympy.core.function import AppliedUndef
 	from sympy.sets.sets import Set
 	from typing import LiteralString
 
-cacheDays: int = 30
-"""Number of days to retain cached OEIS data before refreshing from the online source."""
+url_oeisdata: str = 'https://github.com/oeis/oeisdata.git'
+"""Git export of the OEIS: sequence entries in `seq/`, and supporting files, such as b-files, in `files/` through Git LFS."""
+path_oeisdata: Path = Path('C:/clones/oeisdata')
+"""Local sparse clone of `url_oeisdata`. Nothing commits to this clone."""
+pathSnapshot: Path = settingsPackage.pathPackage / 'oeis' / 'oeisdata'
+"""Copy, in the oeisdata directory layout, of the files of `path_oeisdata` for `oeisIDsImplemented`, distributed with the package."""
+pathTerms: Path = settingsPackage.pathPackage / 'oeis' / 'terms'
+"""B-files, in the oeisdata directory layout, of terms computed by this package that oeisdata lacks."""
 
 # TODO Dynamic, but authoritative, discovery of OEIS IDs implemented in mapFolding.
 # TODO Dynamic, but authoritative, discovery of valid parameter values for `f` and `flow`: primarily for testing.
@@ -38,8 +44,6 @@ oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented
 	, 'A401693',  # 'A401694'
 )
 """Every implemented OEIS ID."""
-pathCache: Path = settingsPackage.pathPackage / 'oeis' / '.cache'
-"""Local directory path for storing cached OEIS sequence data and metadata."""
 
 nSymbolic: Symbol = Symbol('n', integer=True, nonnegative=True)
 kSymbolic: Symbol = Symbol('k', integer=True, nonnegative=True)

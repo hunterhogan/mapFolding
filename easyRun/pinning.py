@@ -9,11 +9,13 @@ from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
+from mapFolding.oeis import printEasyRunBenchmark
 from math import prod
 from operator import methodcaller
 from pprint import pprint
 from typing import Any, TYPE_CHECKING
 from Z0Z_tools import DOTvalues
+import time
 
 if TYPE_CHECKING:
 	from collections.abc import Callable, Iterable
@@ -30,24 +32,27 @@ def printStatisticsPermutations(state: StateElimination) -> None:
 
 if __name__ == '__main__':
 	state: StateElimination = StateElimination((2,) * 5)
+	# TODO find the verification function for pinnings.
+	#  FOUND IT! easyRun\verifyPinning.py
+	if True:
+		timeStart: float = time.perf_counter()
+		state = pinIt.pinLeavesDimensions0零一(state)
 
-	# Primary reason for this module: testing pinning functions.
-	state = pinIt.pinPilesAtEnds(state, 0)
-	state = pinIt.pin首beans(state)
-	printStatisticsPermutations(state)
-	state = pinIt.pinLeavesDimension一(state)
-	state = pinIt.pinLeavesDimension二(state)
-	pprint(dictionaryLeafDomains := getLookupDomainsLeaves(state))
-	pprint(dictionaryChoicesLeaf := getLookupChoicesLeaf(state), width=200)
-	pprint(getLeafPredecessors(state), width=260)
-	pprint(state.boxOfFolding)
-	pprint(state.boxOfPermutationSpace)
-	print(*(format(x, '06b') for x in getIteratorOfLeaves(getChoicesLeaf(state, 28))))
-	print(*getLeavesCreaseAnte(state, 53))
-	print(*getLeavesCreasePost(state, 22))
-	print(list(getDomainLeaf(state, 首一(5) + 4)))
-	print(state.mapShape首ProductsSums)
-	state = pinIt.pin3beans2(state)
-	state = pinIt.pinLeavesDimensions0零一(state)
-	state = pinIt.pinLeavesDimension首二(state)
-	state = pinIt.pinPile零Ante首零(state)
+		printStatisticsPermutations(state)
+	else:
+		print(*getLeavesCreaseAnte(state, 53))
+		print(*getLeavesCreasePost(state, 22))
+		print(list(getDomainLeaf(state, 首一(5) + 4)))
+		pprint(dictionaryChoicesLeaf := getLookupChoicesLeaf(state), width=200)
+		pprint(dictionaryLeafDomains := getLookupDomainsLeaves(state))
+		pprint(getLeafPredecessors(state), width=260)
+		pprint(state.boxOfFolding)
+		pprint(state.boxOfPermutationSpace)
+		state = pinIt.pin3beans2(state)
+		state = pinIt.pinLeavesDimension一(state)
+		state = pinIt.pinLeavesDimension二(state)
+		state = pinIt.pinLeavesDimension首二(state)
+		state = pinIt.pinPilesAtEnds(state, 0)
+		state = pinIt.pinPile零Ante首零(state)
+		state = pinIt.pin首beans(state)
+		print(state.mapShape首ProductsSums)

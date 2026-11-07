@@ -345,6 +345,7 @@ objs
 OBJS
 octic
 oeis
+oeisdata
 olute
 onefile
 oneword

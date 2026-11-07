@@ -17,9 +17,9 @@ class MetadataOEISid(TypedDict):
 	Attributes
 	----------
 	description : str
-		Sequence description, or a diagnostic message when the description is unavailable.
+		Sequence description from the `%N` field of the sequence entry.
 	offset : int
-		Starting sequence index, or a fallback sentinel when the offset is unavailable.
+		Starting sequence index from the `%O` field of the sequence entry.
 	valuesKnown : dict[int, int]
 		Sequence indices mapped to known values.
 	valueUnknown : int

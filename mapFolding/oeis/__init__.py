@@ -10,7 +10,7 @@ lookups, and the `OEIS_for_n` and `getOEISids` console entry points.
 Contents
 --------
 Functions
-	formatBFile
+	format_bFile
 		Serialize sequence indices and values as b-file text.
 	getMetadata
 		Retrieve a registered sequence's shared metadata dictionary.

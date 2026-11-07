@@ -37,7 +37,7 @@ if __name__ == "__main__":
 	printEasyRunHeader(oeisID, flow)
 	ratio: int = 0
 
-	for n in range(6, 7):
+	for n in range(5, 6):
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 		timeStart: float = time.perf_counter()
 		if oeisID == "A001417" and 3 < n:  # pyright: ignore[reportUnnecessaryComparison]

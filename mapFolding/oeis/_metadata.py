@@ -1,18 +1,17 @@
 from __future__ import annotations
 
 from functools import cache, partial
-from humpy_cytoolz import dissoc, get_in, merge
+from humpy_cytoolz import dissoc, get_in
 from hunterMakesPy import errorL33T
 from itertools import count, takewhile
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
-from mapFolding.kitFilesystem import getCacheOrURL, readText, writeText
-from mapFolding.oeis._beDRY import format_bFile, formatOEISid, parse_bFile
+from mapFolding.kitFilesystem import readText, writeText
+from mapFolding.oeis._beDRY import format_bFile, formatOEISid, makeValuesKnown, parse_bFile, parseEntry, parseOffset
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
-from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
-from oeis_tools import oeis_bfile, oeis_url
+from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
+from mapFolding.oeis._theSSOT import oeisIDsImplemented, path_oeisdata, pathSnapshot, pathTerms
 from operator import add
 from typing import TYPE_CHECKING
-import warnings
 
 if TYPE_CHECKING:
 	from collections.abc import Mapping
@@ -169,40 +168,41 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int) -> dict[int, int]:
 	"""
 	return makeLookupDiagonal(getTriangle(oeisID), 次diagonal, getMetadataTriangle(oeisID)['rowLength'])
 
-def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
-	"""Add missing terms to the local b-file for `oeisID` and update shared known values.
+def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Path = pathTerms) -> Path:
+	"""Add terms absent from the known values of `oeisID` to the terms b-file and update shared known values.
 
 	(AI generated docstring)
 
-	You can use this function to retain computed terms between research runs. This function merges
-	`sequence` with the known values from `getMetadata` and the existing local b-file,
-	then returns the local path. This function does not submit data to OEIS.
+	You can use this function to retain computed terms between research runs. The terms b-file under
+	`pathTerms` holds only computed terms, never the terms of the OEIS snapshot. This function does
+	not submit data to OEIS.
 
 	Parameters
 	----------
 	oeisID : OEISid
 		Registered sequence identifier, ignoring case and surrounding whitespace.
 	sequence : Mapping[int, int]
-		Computed values keyed by flat sequence index. Existing file and metadata values take
+		Computed values keyed by flat sequence index. Known values and existing terms-file values take
 		precedence over supplied values.
+	pathTerms : Path = `mapFolding.oeis._theSSOT.pathTerms`
+		Directory in the oeisdata directory layout. Supply a directory outside the package for terms
+		that must remain private.
 
 	Returns
 	-------
 	pathFilename : Path
-		B-file path under `pathCache`. The path may remain absent when there are no terms to add.
+		The b-file path under `pathTerms`. The path may remain absent when there are no terms to add.
 
 	Merge and Persistence
 	---------------------
-	Existing file values take precedence over metadata values. Metadata values take precedence
-	over `sequence`. The negative `hunterMakesPy.errorL33T` sentinel is excluded from additions.
-	When missing indices are added, comment lines are retained before all terms and
-	`mapFolding.oeis.formatBFile` writes the terms in ascending index order. No rewrite occurs
-	when there are no missing indices.
+	Known values and existing terms-file values take precedence over `sequence`. When new indices are
+	added, comment lines are retained before all terms and `mapFolding.oeis.format_bFile` writes the
+	terms in ascending index order. No rewrite occurs when there are no new indices.
 
-	The shared `valuesKnown` dictionary is cleared and updated in place from the merged local
-	values, in index order. Existing references returned by `getValuesKnown` observe this
-	update. `valueUnknown` becomes one greater than the largest stored index, or `offset` when
-	there are no terms. Gaps below that index remain possible.
+	The shared `valuesKnown` dictionary is updated in place with terms-file values at indices it lacks,
+	so a private terms directory also adds its existing terms. Existing references returned by
+	`getValuesKnown` observe this update. `valueUnknown` becomes one greater than the largest known
+	index, or `offset` when there are no terms. Gaps below that index remain possible.
 
 	Examples
 	--------
@@ -214,22 +214,21 @@ def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	"""
 	oeisID = formatOEISid(oeisID)
 	metadata: MetadataOEISid = getMetadata(oeisID)
-	pathFilename: Path = pathCache / oeis_bfile(oeisID)
+	pathFilename: Path = makePathFilename_bFile(oeisID, pathTerms)
 	contents: str = readText(pathFilename, default='')
-	known: dict[int, int] = {}
+	terms: dict[int, int] = {}
 	if contents:
-		known = parse_bFile(contents)
-	sequence = dissoc(merge(sequence, metadata['valuesKnown']), -errorL33T, *known)
+		terms = parse_bFile(contents)
+	sequence = dissoc(sequence, *metadata['valuesKnown'], *terms)
 	if sequence:
-		known.update(sequence)
+		terms.update(sequence)
 		contents = ''.join(map('{}\n'.format, filter(lambda record: record.lstrip().startswith('#'), contents.splitlines())))
-		writeText(contents + format_bFile(known), pathFilename)
-	metadata['valuesKnown'].clear()
-	metadata['valuesKnown'].update(sorted(known.items()))
-	metadata['valueUnknown'] = max(known, default=metadata['offset'] - 1) + 1
+		writeText(contents + format_bFile(terms), pathFilename)
+	metadata['valuesKnown'].update(dissoc(terms, *metadata['valuesKnown']))
+	metadata['valueUnknown'] = max(metadata['valuesKnown'], default=metadata['offset'] - 1) + 1
 	return pathFilename
 
-def updateTriangle(oeisID: OEISid, triangle: 形Triangle) -> Path:
+def updateTriangle(oeisID: OEISid, triangle: 形Triangle, pathTerms: Path = pathTerms) -> Path:
 	"""Add the cells of `triangle` to the local b-file for the triangle `oeisID`.
 
 	(AI generated docstring)
@@ -245,125 +244,36 @@ def updateTriangle(oeisID: OEISid, triangle: 形Triangle) -> Path:
 	triangle : 形Triangle
 		Row numbers mapped to the cells of each row, starting with the first cell. A row can be a
 		prefix of the complete row.
+	pathTerms : Path = `mapFolding.oeis._theSSOT.pathTerms`
+		Directory in the oeisdata directory layout, passed to `updateValuesKnown`.
 
 	Returns
 	-------
 	pathFilename : Path
-		Local b-file path. Existing file and metadata values take precedence over supplied cells.
+		Terms b-file path. Known values and existing terms-file values take precedence over supplied cells.
 	"""
 	metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
-	return updateValuesKnown(oeisID, flattenTriangle(triangle, metadata['rowLength'], metadata['rowStart'], metadata['offset']))
+	return updateValuesKnown(oeisID, flattenTriangle(triangle, metadata['rowLength'], metadata['rowStart'], metadata['offset']), pathTerms)
 
 #================== Meat grinders =================================================================
 
-def _getMetadata_bFile(oeisID: OEISid) -> dict[int, int]:
-	"""I use this to load b-file values while constructing the metadata registry.
-
-	(AI generated docstring)
-
-	This function obtains OEIS b-file text through `mapFolding.kitFilesystem.getCacheOrURL`
-	and parses the text with `mapFolding.oeis._beDRY.parse_bFile`.
-
-	Parameters
-	----------
-	oeisID : OEISid
-		Sequence identifier supplied by the metadata construction routine.
-
-	Returns
-	-------
-	valuesKnown : dict[int, int]
-		Parsed sequence values. Empty text produces the parser's sentinel dictionary.
-
-	Warns
-	-----
-	UserWarning
-		If retrieval returns empty text.
-	"""
-	filename: str = oeis_bfile(oeisID)
-	pathFilenameCache: Path = pathCache / filename
-	url: str = oeis_url(oeisID, fmt='bfile')
-
-	oeisData: str = getCacheOrURL(pathFilenameCache, cacheDays, url)
-
-	if not oeisData:
-		message: str = f"Failed to retrieve OEIS sequence information for {oeisID = }."
-		warnings.warn(message, stacklevel=0)
-
-	return parse_bFile(oeisData)
-
-def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
-	"""I use this to load descriptions and starting indices for the metadata registry.
-
-	(AI generated docstring)
-
-	This function normalizes `oeisID` with `mapFolding.oeis._beDRY.formatOEISid` and retrieves
-	the sequence's text record through `mapFolding.kitFilesystem.getCacheOrURL`. The result
-	contains the sequence description and starting index.
-
-	Parameters
-	----------
-	oeisID : OEISid
-		The identifier of the OEIS sequence to retrieve.
-
-	Returns
-	-------
-	description : str
-		Sequence description, or a diagnostic message when no description is found.
-	offset : int
-		Starting sequence index, or `hunterMakesPy.errorL33T` when no offset is found.
-
-	Warns
-	-----
-	UserWarning
-		If retrieval returns empty text, a description is missing, or an offset is missing.
-
-	Text Fields
-	-----------
-	The parser reads `%N` descriptions and the first comma-separated `%O` offset from matching
-	sequence records in the OEIS internal format [1]. Later matching fields replace earlier values.
-	Invalid offset text propagates `ValueError` from integer conversion.
-
-	References
-	----------
-	[1] Internal Format Used in the OEIS.
-		https://oeis.org/eishelp1.html
-	"""
-	oeisID = formatOEISid(oeisID)
-	pathFilenameCache: Path = pathCache / f"{oeisID}.txt"
-	url: str = oeis_url(oeisID, fmt='text')
-
-	oeisData: str = getCacheOrURL(pathFilenameCache, cacheDays, url)
-
-	if not oeisData:
-		message: str = f"Failed to retrieve OEIS sequence information for {oeisID = }."
-		warnings.warn(message, stacklevel=0)
-
-	description: str = ''
-	offset: int | None = None
-	if oeisData:
-		for lineOEIS in oeisData.splitlines():
-			lineOEIS = lineOEIS.strip().split()
-			if 3 <= len(lineOEIS):
-				fieldCode, sequenceID, *fieldData = lineOEIS
-				if sequenceID == oeisID:
-					if fieldCode == '%N':
-						description = ' '.join(fieldData)
-					elif fieldCode == '%O':
-						offset = int(fieldData[0].split(',')[0])
-	if not description:
-		message: str = f"I could not find a description for `{oeisID = }`."
-		warnings.warn(message, stacklevel=2)
-		description = message
-	if offset is None:
-		message: str = f"I could not find an offset for `{oeisID = }`."
-		warnings.warn(message, stacklevel=2)
-		offset = errorL33T
-	return description, offset
-
 def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
-	valuesKnown: dict[int, int] = _getMetadata_bFile(oeisID)
-	description, offset = _getMetadataAFile(oeisID)
-	return MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
+	lookupField: dict[str, list[str]] = parseEntry(readText(makePathFilenameEntry(oeisID, pathSnapshot)))
+	contents: str = readText(makePathFilename_bFile(oeisID, pathSnapshot), default='')
+	if contents:
+		valuesKnown: dict[int, int] = parse_bFile(contents)
+	else:
+		valuesKnown = makeValuesKnown(lookupField)
+	contents = readText(makePathFilename_bFile(oeisID, pathTerms), default='')
+	if contents:
+		valuesKnown.update(dissoc(parse_bFile(contents), *valuesKnown))
+	return MetadataOEISid(description=' '.join(lookupField['%N']), offset=parseOffset(lookupField), valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
+
+boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(oeisIDsImplemented, pathSnapshot)
+"""Implemented OEIS IDs without an entry in `pathSnapshot`."""
+if boxOfOEISidAbsent:
+	from mapFolding.oeis._oeisdataClone import checkoutSnapshot
+	checkoutSnapshot(boxOfOEISidAbsent, path_oeisdata, pathSnapshot)
 
 dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(oeisIDsImplemented, map(_getMetadataOEISid, oeisIDsImplemented), strict=True))
 """Metadata for every implemented OEIS sequence."""

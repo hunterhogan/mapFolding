@@ -13,6 +13,8 @@ from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
 from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
 
+# TODO Do I need or want this? Is this still my best algorithm for this task?
+
 def writeDiagonalCount(n: int, 次diagonal: int) -> None:
 	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
 	writeDiagonal({n: state.totalMeanders},

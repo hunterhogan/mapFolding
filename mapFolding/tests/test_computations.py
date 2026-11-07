@@ -16,6 +16,9 @@ if TYPE_CHECKING:
 	from collections.abc import Callable
 	from mapFolding.theTypes import OEISid
 
+# TODO combine with test_algorithms
+
+# TODO change skip. Can we make it conditional on the presence of ortools?
 markSkipConstraintPropagationPython315 = pytest.mark.skipif(
 	version_info >= (3, 15),
 	reason="constraintPropagation requires ortools, which is not installed on Python 3.15",

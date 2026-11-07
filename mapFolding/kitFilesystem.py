@@ -3,8 +3,7 @@
 
 (AI generated docstring)
 
-You can use this module to persist counts, albums, integer triangles, and diagonals. This module
-also retrieves cached text from URLs.
+You can use this module to persist counts, albums, integer triangles, and diagonals.
 
 Contents
 --------
@@ -40,9 +39,6 @@ Functions
 			Write text and create missing parent directories.
 		writeTriangle
 			Write sorted row numbers followed by row cells.
-	Read and write
-		getCacheOrURL
-			Retrieve cached text or request updated text from a URL.
 	Read
 		getDataFrameFoldings
 			Load bundled folding data for an elimination state.
@@ -66,10 +62,7 @@ Functions
 """
 from __future__ import annotations
 
-from contextlib import suppress
 from csv import reader as csv_reader, writer as csv_writer
-from datetime import datetime, timedelta, UTC
-from email.utils import format_datetime
 from hunterMakesPy import errorL33T, oneIndexed
 from hunterMakesPy.filesystemToolkit import writeStringToHere
 from itertools import repeat, tee
@@ -79,8 +72,6 @@ from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
 from typing import TYPE_CHECKING
-from urllib3 import PoolManager
-from urllib3.exceptions import HTTPError
 import os
 
 if TYPE_CHECKING:
@@ -92,7 +83,6 @@ if TYPE_CHECKING:
 	from os import PathLike
 	from pandas import DataFrame
 	from typing import Any
-	from urllib3.response import BaseHTTPResponse
 
 #======== Paths and filenames ======================================================================
 
@@ -610,78 +600,6 @@ def writeTriangle(triangle: 形Triangle, pathFilename: Path, *, append: bool = F
 		```
 	"""
 	return iterableToCSV(map(lambda n: (n, *triangle[n]), sorted(triangle)), pathFilename, append=append)  # ruff: ignore[unnecessary-map]
-
-#======== Read and save ===========================================================================
-
-def getCacheOrURL(pathFilenameCache: Path, cacheDays: int, url: str) -> str:
-	"""Read cached text or request updated text from `url`.
-
-	(AI generated docstring)
-
-	You can use this function to retrieve UTF-8 text while reusing `pathFilenameCache`. A recent
-	cache returns immediately. A stale or missing cache triggers an HTTP request with urllib3.
-	Suppressed request failures leave the previously read text unchanged.
-
-	Cache Refresh
-	-------------
-	A stale cache adds the HTTP `If-Modified-Since` header [1]. Status 304 updates the cache
-	modification time; status 200 decodes the response and writes the new text using
-	`hunterMakesPy.filesystemToolkit.writeStringToHere`. Other statuses retain the earlier text.
-	The request disables retries. This function suppresses urllib3 `HTTPError` and `AttributeError`,
-	but filesystem and text-decoding errors can propagate.
-
-	Parameters
-	----------
-	pathFilenameCache : Path
-		Local cache file.
-	cacheDays : int
-		Cache lifetime in days, measured from the file modification time.
-	url : str
-		Source URL. The protocol prefix is checked only when a request is needed.
-
-	Returns
-	-------
-	contents : str
-		Cached or retrieved text. A missing cache and an unsuccessful request produce an empty string.
-
-	Raises
-	------
-	ValueError
-		If a request is needed and `url` does not start with `'http:'` or `'https:'`.
-
-	References
-	----------
-	[1] RFC 9110, HTTP If-Modified-Since.
-		https://www.rfc-editor.org/rfc/rfc9110.html#name-if-modified-since
-	"""
-	preferCache: bool = False
-	contents: str = ''
-	cacheDatetime: datetime | None = None
-
-	if pathFilenameCache.exists():
-		cacheDatetime = datetime.fromtimestamp(pathFilenameCache.stat().st_mtime, tz=UTC)
-		preferCache = datetime.now(tz=UTC) - cacheDatetime < timedelta(days=cacheDays)
-		contents = pathFilenameCache.read_text(encoding="utf-8")
-
-	if not preferCache:
-		if not url.startswith(("http:", "https:")):
-			message: str = f"I received {url = }, but it must start with 'http:' or 'https:'"
-			raise ValueError(message)
-
-		headers: dict[str, str] | None = None
-		if cacheDatetime is not None:
-			headers = {"If-Modified-Since": format_datetime(cacheDatetime, usegmt=True)}
-
-		httpPoolManager = PoolManager(retries=False)
-		with suppress(HTTPError, AttributeError):
-			response: BaseHTTPResponse = httpPoolManager.request("GET", url, headers=headers, preload_content=True, decode_content=True)
-			if response.status == 304:  # Not Modified
-				pathFilenameCache.touch()  # Update cache file's modification time to local time.
-			elif response.status == 200:
-				writeStringToHere(contents := response.data.decode("utf-8"), pathFilenameCache)
-		httpPoolManager.clear()
-
-	return contents
 
 #======== Read =====================================================================================
 

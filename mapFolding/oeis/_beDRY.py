@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from functools import partial
-from humpy_cytoolz import compose, take
+from humpy_cytoolz import compose, groupby as toolz_groupby, take, valmap
 from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
-from itertools import filterfalse
-from operator import methodcaller
+from itertools import chain, filterfalse, repeat
+from operator import itemgetter, methodcaller
 from typing import cast as ILiterallyPromiseLiteralLiterallyMeansLiteral, LiteralString, TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Mapping
+	from collections.abc import Mapping, Sequence
 	from mapFolding.theTypes import OEISid
 
 def format_bFile(sequence: Mapping[int, int]) -> str:
@@ -84,6 +84,15 @@ def parse_bFile(oeisData: str) -> dict[int, int]:
 					, map(methodcaller('split'), filterfalse(methodcaller('startswith', '#'), filter(None, map(str.strip, oeisData.splitlines())))
 		)))
 	return n_aOFn
+
+def parseEntry(entry: str) -> dict[str, list[str]]:
+	return valmap(compose(list, partial(map, itemgetter(2))), toolz_groupby(itemgetter(0), map(methodcaller('split', None, 2), entry.splitlines())))
+
+def parseOffset(lookupField: Mapping[str, Sequence[str]]) -> int:
+	return int(lookupField['%O'][0].partition(',')[0])
+
+def makeValuesKnown(lookupField: Mapping[str, Sequence[str]]) -> dict[int, int]:
+	return dict(enumerate(map(int, ''.join(chain.from_iterable(map(lookupField.get, ('%S', '%T', '%U'), repeat(())))).split(',')), parseOffset(lookupField)))
 
 def formatOEISid(oeisID: OEISid) -> OEISid:
 	"""Uppercase an OEIS sequence identifier and strip surrounding whitespace.

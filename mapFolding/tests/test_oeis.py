@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+from mapFolding.kitFilesystem import writeText
 from mapFolding.oeis import (
-	_metadata, getMetadata, getOEISids, getTotalFoldsKnown, getTriangle, getTriangleDiagonal, getValuesKnown, OEIS_for_n, oeisIDfor_n,
+	getMetadata, getOEISids, getTotalFoldsKnown, getTriangle, getTriangleDiagonal, getValuesKnown, OEIS_for_n, oeisIDfor_n,
 	updateTriangle, updateValuesKnown)
 from mapFolding.oeis._beDRY import formatOEISid
+from mapFolding.oeis._oeisdata import makePathFilename_bFile
 from mapFolding.tests import assertEqualTo, messageTestFailure
-from mapFolding.tests.dataSamples.triangleData import contentsBFile, sequenceHalf, triangleHalf
+from mapFolding.tests.dataSamples.triangleData import contents_bFile, sequenceHalf, triangleHalf
 from mapFolding.tests.test_oeis_byFormula import parametrizeOEISfor_n
 from typing import TYPE_CHECKING
 from unittest.mock import patch
@@ -106,34 +108,32 @@ def test_OEIS_for_nError(expected: tuple[int, str, str], argv: tuple[str, ...], 
 @pytest.mark.parametrize('oeisID', ('A400429', ' a400429 '))
 @pytest.mark.parametrize('contents, valuesKnown, sequence, expected', (
 	pytest.param(None, dict[int, int](), {2: 11}, '2 11\n', id='absent'),
-	pytest.param(None, {2: 11}, {2: 37, 3: 13}, '2 11\n3 13\n', id='retain-memory'),
+	pytest.param(None, {2: 11}, {2: 37, 3: 13}, '3 13\n', id='retain-memory'),
 	pytest.param('  # primes\n2 11\n', {2: 11}, {3: 13}, '  # primes\n2 11\n3 13\n', id='indented-comment'),
 	pytest.param('', dict[int, int](), {2: 11}, '2 11\n', id='empty'),
 	pytest.param('# prime observations\n', dict[int, int](), {2: 11}, '# prime observations\n2 11\n', id='comments-only'),
-	pytest.param(contentsBFile, {2: 701, 3: 709}, {2: 719, 4: 727}, '# prime observations\n2 701\n3 709\n4 727\n', id='retain-known'),
-	pytest.param(contentsBFile, {2: 701, 3: 709}, {2: 733}, contentsBFile, id='no-additions'),
+	pytest.param(contents_bFile, {2: 701, 3: 709}, {2: 719, 4: 727}, '# prime observations\n2 701\n3 709\n4 727\n', id='retain-known'),
+	pytest.param(contents_bFile, {2: 701, 3: 709}, {2: 733}, contents_bFile, id='no-additions'),
 ))
 def test_updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], expected: str, contents: str | None, valuesKnown: Mapping[int, int],
-	monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-	monkeypatch.setattr(_metadata, 'pathCache', tmp_path)
+	tmp_path: Path) -> None:
+	pathFilename: Path = makePathFilename_bFile('A400429', tmp_path)
 	if contents is not None:
-		(tmp_path / 'b400429.txt').write_text(contents, encoding='utf-8')
+		writeText(contents, pathFilename)
 	with patch.dict(getMetadata(oeisID)), patch.dict(getValuesKnown(oeisID), valuesKnown, clear=True):
 		known = getValuesKnown(oeisID)
-		assertEqualTo(updateValuesKnown(oeisID, sequence), tmp_path / 'b400429.txt', updateValuesKnown.__name__, oeisID, sequence)
-		assertEqualTo((tmp_path / 'b400429.txt').read_text(encoding='utf-8'), expected, updateValuesKnown.__name__, oeisID, sequence)
+		assertEqualTo(updateValuesKnown(oeisID, sequence, tmp_path), pathFilename, updateValuesKnown.__name__, oeisID, sequence)
+		assertEqualTo(pathFilename.read_text(encoding='utf-8'), expected, updateValuesKnown.__name__, oeisID, sequence)
 		assert known is getMetadata(oeisID)['valuesKnown']
 		assertEqualTo(getMetadata(oeisID)['valueUnknown'], max(known) + 1, updateValuesKnown.__name__, oeisID, sequence)
 
 @pytest.mark.parametrize('oeisID, triangle, expected', (
 	pytest.param('A400429', triangleHalf, {2: 503, 3: 509, 4: 521, 5: 523, 6: 541}, id='half-length-rows'),
 ))
-def test_updateTriangle(oeisID: OEISid, triangle: 形Triangle, expected: dict[int, int], monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-	monkeypatch.setattr(_metadata, 'pathCache', tmp_path)
+def test_updateTriangle(oeisID: OEISid, triangle: 形Triangle, expected: dict[int, int], tmp_path: Path) -> None:
 	with patch.dict(getMetadata(oeisID)), patch.dict(getValuesKnown(oeisID), clear=True):
-		updateTriangle(oeisID, triangle)
+		assertEqualTo(updateTriangle(oeisID, triangle, tmp_path), makePathFilename_bFile('A400429', tmp_path), updateTriangle.__name__, oeisID, triangle)
 		assertEqualTo(getValuesKnown(oeisID), expected, updateTriangle.__name__, oeisID, triangle)
-		assert (tmp_path / 'b400429.txt').is_file()
 
 @pytest.mark.parametrize('valuesKnown, expected', (
 	pytest.param(sequenceHalf, {2: [601], 3: [607], 4: [613, 617], 5: [619]}, id='partial-row'),

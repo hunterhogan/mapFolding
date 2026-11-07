@@ -17,6 +17,7 @@ if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import Folding
 
+# TODO If this isn't an algorithm, figure out which general module it belongs in.
 
 @pytest.mark.parametrize(
 	'mapShape, expected, totalFoldsKnown, filenameKnown',

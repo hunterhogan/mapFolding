@@ -1,9 +1,0 @@
-# A001417 (b-file synthesized from sequence entry)
-0 1
-1 2
-2 8
-3 96
-4 4608
-5 798720
-6 361267200
-7 362794844160
