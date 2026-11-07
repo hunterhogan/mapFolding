@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 	from collections.abc import Mapping
 	from mapFolding.theTypes import OEISid
 
-def formatBFile(sequence: Mapping[int, int]) -> str:
+def format_bFile(sequence: Mapping[int, int]) -> str:
 	"""Format `sequence` as b-file records in ascending index order.
 
 	(AI generated docstring)

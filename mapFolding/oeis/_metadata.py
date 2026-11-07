@@ -6,7 +6,7 @@ from hunterMakesPy import errorL33T
 from itertools import count, takewhile
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
 from mapFolding.kitFilesystem import getCacheOrURL, readText, writeText
-from mapFolding.oeis._beDRY import formatBFile, formatOEISid, parse_bFile
+from mapFolding.oeis._beDRY import format_bFile, formatOEISid, parse_bFile
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
 from mapFolding.oeis._theSSOT import cacheDays, oeisIDsImplemented, pathCache
 from oeis_tools import oeis_bfile, oeis_url
@@ -223,7 +223,7 @@ def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int]) -> Path:
 	if sequence:
 		known.update(sequence)
 		contents = ''.join(map('{}\n'.format, filter(lambda record: record.lstrip().startswith('#'), contents.splitlines())))
-		writeText(contents + formatBFile(known), pathFilename)
+		writeText(contents + format_bFile(known), pathFilename)
 	metadata['valuesKnown'].clear()
 	metadata['valuesKnown'].update(sorted(known.items()))
 	metadata['valueUnknown'] = max(known, default=metadata['offset'] - 1) + 1
@@ -360,64 +360,27 @@ def _getMetadataAFile(oeisID: OEISid) -> tuple[str, int]:
 		offset = errorL33T
 	return description, offset
 
-def _makeDictionaryOEIS() -> dict[str, MetadataOEISid]:
-	"""I use this to assemble the metadata registry during module import.
+def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
+	valuesKnown: dict[int, int] = _getMetadata_bFile(oeisID)
+	description, offset = _getMetadataAFile(oeisID)
+	return MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 
-	(AI generated docstring)
-
-	This function loads descriptions, offsets, and b-file values for each identifier in
-	`mapFolding.oeis._theSSOT.oeisIDsImplemented`.
-
-	Returns
-	-------
-	dictionary : dict[str, MetadataOEISid]
-		New metadata registry. Each `valueUnknown` is one greater than the largest key in
-		`valuesKnown`, without checking for gaps or excluding fallback sentinels.
-
-	Empty Values
-	------------
-	An empty `valuesKnown` dictionary propagates `ValueError` from `max` and prevents completion
-	of the registry.
-	"""
-	dictionary: dict[str, MetadataOEISid] = {}
-	for oeisID in oeisIDsImplemented:
-		valuesKnown: dict[int, int] = _getMetadata_bFile(oeisID)
-		description, offset = _getMetadataAFile(oeisID)
-		dictionary[oeisID] = MetadataOEISid(description=description, offset=offset, valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
-
-	return dictionary
-
-def _makeDictionaryTriangle(dictionaryOEIS: Mapping[str, MetadataOEISid]) -> dict[str, MetadataOEISidTriangle]:
-	"""I use this to add the row layout of each triangle to its metadata during module import.
-
-	(AI generated docstring)
-
-	Each `rowLength` gives the length of a complete row from its row number, and each `rowStart`
-	gives the first row number.
-
-	Parameters
-	----------
-	dictionaryOEIS : Mapping[str, MetadataOEISid]
-		Metadata registry supplying the description, offset, and known values of each triangle.
-
-	Returns
-	-------
-	dictionaryTriangle : dict[str, MetadataOEISidTriangle]
-		New metadata dictionaries for the triangles.
-	"""
-	return {
-		'A259689': MetadataOEISidTriangle(**dictionaryOEIS['A259689'], rowLength=lambda nRow: nRow // 2, rowStart=2),
-		'A259698': MetadataOEISidTriangle(**dictionaryOEIS['A259698'], rowLength=partial(add, -1), rowStart=2),
-		'A259701': MetadataOEISidTriangle(**dictionaryOEIS['A259701'], rowLength=partial(add, -1), rowStart=2),
-		'A259703': MetadataOEISidTriangle(**dictionaryOEIS['A259703'], rowLength=partial(add, -1), rowStart=2),
-		'A287548': MetadataOEISidTriangle(**dictionaryOEIS['A287548'], rowLength=int, rowStart=1),
-		'A331499': MetadataOEISidTriangle(**dictionaryOEIS['A331499'], rowLength=int, rowStart=1),
-		'A339179': MetadataOEISidTriangle(**dictionaryOEIS['A339179'], rowLength=lambda nRow: nRow // 2, rowStart=2),
-		'A400429': MetadataOEISidTriangle(**dictionaryOEIS['A400429'], rowLength=lambda nRow: nRow // 2, rowStart=2),
-	}
-
-dictionaryOEIS: dict[str, MetadataOEISid] = _makeDictionaryOEIS()
+dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(oeisIDsImplemented, map(_getMetadataOEISid, oeisIDsImplemented), strict=True))
 """Metadata for every implemented OEIS sequence."""
-dictionaryTriangle: dict[str, MetadataOEISidTriangle] = _makeDictionaryTriangle(dictionaryOEIS)
+dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
+	'A001263': MetadataOEISidTriangle(**dictionaryOEIS['A001263'], rowLength=int, rowStart=1, columnStart=1),
+	'A008828': MetadataOEISidTriangle(**dictionaryOEIS['A008828'], rowLength=int, rowStart=1, columnStart=1),
+	'A053121': MetadataOEISidTriangle(**dictionaryOEIS['A053121'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
+	'A060972': MetadataOEISidTriangle(**dictionaryOEIS['A060972'], rowLength=int, rowStart=1, columnStart=1),
+	'A259689': MetadataOEISidTriangle(**dictionaryOEIS['A259689'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
+	'A259698': MetadataOEISidTriangle(**dictionaryOEIS['A259698'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A259701': MetadataOEISidTriangle(**dictionaryOEIS['A259701'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A259703': MetadataOEISidTriangle(**dictionaryOEIS['A259703'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A287548': MetadataOEISidTriangle(**dictionaryOEIS['A287548'], rowLength=int, rowStart=1, columnStart=1),
+	'A331499': MetadataOEISidTriangle(**dictionaryOEIS['A331499'], rowLength=int, rowStart=1, columnStart=1),
+	'A339179': MetadataOEISidTriangle(**dictionaryOEIS['A339179'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
+	'A380369': MetadataOEISidTriangle(**dictionaryOEIS['A380369'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
+	'A400429': MetadataOEISidTriangle(**dictionaryOEIS['A400429'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=1),
+}
 """Metadata, including the row layout, for every implemented triangle."""
 dictionaryOEIS.update(dictionaryTriangle)

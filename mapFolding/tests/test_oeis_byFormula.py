@@ -130,11 +130,15 @@ parametrizeOEISfor_n: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n,
 		, (('A005316',), (getMetadata('A005316')['offset'], 3), (None,), ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'))
 		, (('A007822',), (getMetadata('A007822')['offset'], 3), (None,), ('algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'))
 	)))
+	, CartesianProduct(('A000108', 'A001246', 'A002415', 'A006659', 'A007746', 'A014137', 'A014140', 'A401693')
+		, (7,), (None,), (None,))
+	, (('A001263', 7, None, None), ('A008828', 7, None, None), ('A053121', 10, None, None)
+		, ('A060972', 7, None, None), ('A380369', 10, None, None))
 )))
 
 @pytest.mark.parametrize('oeisID, n, f', tuple(chain.from_iterable(map(  # ruff: ignore[unnecessary-map]
-	lambda oeisID: CartesianProduct((oeisID,), (getMetadata(oeisID)['offset'], 3, 4, 7)
-		, get_args(get_args(get_annotations(getattr(byFormula, oeisID), eval_str=True)['f'])[0]))
+	lambda oeisID: CartesianProduct((oeisID,), filter(getMetadata(oeisID)['offset'].__le__, (getMetadata(oeisID)['offset'], 3, 4, 7))
+		, (*get_args(get_args(get_annotations(getattr(byFormula, oeisID), eval_str=True)['f'])[0]), None))
 	, filter(partial(hasattr, byFormula), oeisIDsImplemented)
 ))))
 def test_byFormula(oeisID: OEISid, n: int, f: LiteralString | None, expected: int) -> None:

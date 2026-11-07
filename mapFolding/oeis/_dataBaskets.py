@@ -47,9 +47,13 @@ class MetadataOEISidTriangle(MetadataOEISid):
 		Length of each complete row, from the row number.
 	rowStart : int
 		First row number. The first cell of row `rowStart` has index `offset`.
+	columnStart : int
+		Mathematical column index of the first cell in each row.
 	"""
 
 	rowLength: Callable[[int], int]
 	"""Length of each complete row, from the row number."""
 	rowStart: int
 	"""First row number. The first cell of row `rowStart` has index `offset`."""
+	columnStart: int
+	"""Mathematical column index of the first cell in each row."""

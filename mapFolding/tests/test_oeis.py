@@ -35,7 +35,7 @@ def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None, flow: Lite
 	, pytest.param('A000136', 1.5, None, {}, ValueError, id='non-integer-float')
 	, pytest.param('A001418', 0, None, {}, ArithmeticError, id='below-offset')
 	, pytest.param('A999999', 3, None, {}, KeyError, id='unknown-identifier')
-	, pytest.param('A000108', 3, None, {}, ValueError, id='unimplemented-sequence')
+	, pytest.param('A204352', 3, None, {}, ValueError, id='unimplemented-sequence')
 ))
 def test_oeisIDfor_nError(oeisID: OEISid, n: int, f: LiteralString | None, keywordArgumentsCount: 形KeywordArgumentsCount, expected: type[Exception]) -> None:
 	with pytest.raises(expected):

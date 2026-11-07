@@ -26,15 +26,16 @@ oeisIDsCountingImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImple
 """OEIS IDs of counting algorithms: map folding, meanders, and symmetric folding."""
 
 oeisIDsImplemented: tuple[LiteralString, ...] = (*oeisIDsMapFoldingImplemented
-	, 'A000108', 'A000560', 'A000682', 'A001010', 'A001011'
-	, 'A005315', 'A005316', 'A006661', 'A006662', 'A007822'
-	, 'A045445', 'A060206', 'A076876', 'A077014', 'A077054', 'A077055', 'A077460', 'A078591', 'A078592', 'A085973'
+	, 'A000108', 'A000560', 'A000682', 'A001010', 'A001011', 'A001246', 'A001263', 'A002415'
+	, 'A005315', 'A005316', 'A006657', 'A006658', 'A006659', 'A006660', 'A006661', 'A006662', 'A007746', 'A007822', 'A008828'
+	, 'A014137', 'A014140', 'A045445', 'A053121', 'A060206', 'A060972', 'A076876'
+	, 'A077014', 'A077054', 'A077055', 'A077056', 'A077460', 'A078591', 'A078592', 'A085973'
 	, 'A204352', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095'
-	, 'A227167', 'A259689', 'A259698', 'A259701', 'A259702', 'A259703', 'A259974', 'A287548'
-	, 'A301620', 'A331499', 'A333971', 'A334615', 'A337581', 'A339179', 'A380367'
+	, 'A227167', 'A259689', 'A259698', 'A259700', 'A259701', 'A259702', 'A259703', 'A259974', 'A260785', 'A287548'
+	, 'A301620', 'A322507', 'A331499', 'A333971', 'A334615', 'A337581', 'A339179', 'A380367', 'A380369'
 	, 'A400429', 'A400630', 'A400631', 'A400632', 'A400633', 'A400634', 'A400635', 'A400636', 'A400637'
 	#, 'A400638', 'A400639'
-	#, 'A401693', 'A401694'
+	, 'A401693',  # 'A401694'
 )
 """Every implemented OEIS ID."""
 pathCache: Path = settingsPackage.pathPackage / 'oeis' / '.cache'
@@ -49,4 +50,3 @@ lookupSymbolic: dict[OEISid, type[AppliedUndef]] = dict(zip(oeisIDsImplemented
 )
 
 lookupOEISid: dict[type[AppliedUndef], OEISid] = dict(zip(lookupSymbolic.values(), lookupSymbolic, strict=True))
-lookupColumnStart: dict[OEISid, int] = {'A259689': 2, 'A259698': 1, 'A259701': 1, 'A259703': 1, 'A339179': 2, 'A400429': 1}

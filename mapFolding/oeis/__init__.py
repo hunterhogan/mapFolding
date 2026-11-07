@@ -54,7 +54,7 @@ byFormula
 """
 from __future__ import annotations
 
-from mapFolding.oeis._beDRY import formatBFile as formatBFile
+from mapFolding.oeis._beDRY import format_bFile as format_bFile
 from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, oeisIDsMapFoldingImplemented as oeisIDsMapFoldingImplemented
 
 # isort: split

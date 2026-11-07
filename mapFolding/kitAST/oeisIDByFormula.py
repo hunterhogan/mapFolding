@@ -16,7 +16,7 @@ from sympy import (
 	Symbol, together)
 from sympy.core.function import AppliedUndef
 from sympy.core.relational import Equality
-from sympy.logic.boolalg import true
+from sympy.logic.boolalg import BooleanTrue, true
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,8 +73,10 @@ def make_astIf(ast_stmt: ast.stmt, branch: tuple[Expr, Boolean]) -> ast.If:
 
 def make_ast_exprInteger(expression: Basic) -> ast.expr:
 	match expression:
+		case BooleanTrue():
+			ast_expr: ast.expr = Make.Constant(value=True)
 		case Integer():
-			ast_expr: ast.expr = Make.Constant(int(expression))
+			ast_expr = Make.Constant(int(expression))
 		case Symbol():
 			ast_expr = Make.Name(expression.name)
 		case Add() | Mul() if (quotient := makeFraction(expression))[1] != 1:
@@ -96,9 +98,15 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
 			ast_expr = Make.Call(Make.Name('factorial'), [make_ast_exprInteger(expression.args[0])])
 		case Sum():
 			k, lowerBound, upperBound = expression.limits[0]
+			if isinstance(expression.function, AppliedUndef) and expression.function.args == (k,):
+				ast_exprCallable: ast.expr = Make.Name(expression.function.func.__name__)
+			else:
+				ast_exprCallable = Make.Lambda(Make.arguments(list_arg=[Make.arg(k.name)]), make_ast_exprInteger(expression.function))
+			boxOfBounds: list[ast.expr] = [make_ast_exprInteger(upperBound + 1)]
+			if lowerBound != 0:
+				boxOfBounds.insert(0, make_ast_exprInteger(lowerBound))
 			ast_expr = Make.Call(Make.Name('sum'), [Make.Call(Make.Name('map'), [
-				Make.Lambda(Make.arguments(list_arg=[Make.arg(k.name)]), make_ast_exprInteger(expression.function))
-				, Make.Call(Make.Name('range'), [make_ast_exprInteger(lowerBound), make_ast_exprInteger(upperBound + 1)])])])
+				ast_exprCallable, Make.Call(Make.Name('range'), boxOfBounds)])])
 		case Equality():
 			ast_expr = Make.Compare(make_ast_exprInteger(expression.lhs), [Make.Eq()], [make_ast_exprInteger(expression.rhs)])
 		case GreaterThan():
@@ -143,11 +151,14 @@ def makeMatch_case(f: str, condition: Boolean, expression: Expr, ast_stmt: ast.s
 def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Expr, Boolean]]) -> IngredientsFunction:
 	boxOf_f: tuple[str, ...] = tuple(map(compose(make_f, itemgetter(1)), boxOfSolutions))
 	boxOf_fFormula: tuple[str, ...] = tuple(unique(filter(None, boxOf_f)))
-	if len(boxOf_fFormula) == 1:
-		ast_expr: ast.expr = Make.Constant(boxOf_fFormula[0])
-	else:
-		ast_expr = Make.Tuple(list(map(Make.Constant, boxOf_fFormula)))
-	astSubscript: ast.Subscript = Make.Subscript(Make.Name('Literal'), ast_expr)
+	ast_exprAnnotation: ast.expr = Make.Name('LiteralString')
+	if boxOf_fFormula:
+		if len(boxOf_fFormula) == 1:
+			ast_expr: ast.expr = Make.Constant(boxOf_fFormula[0])
+		else:
+			ast_expr = Make.Tuple(list(map(Make.Constant, boxOf_fFormula)))
+		astSubscript: ast.Subscript = Make.Subscript(Make.Name('Literal'), ast_expr)
+		ast_exprAnnotation = Make.BitOr.join([astSubscript, ast_exprAnnotation])
 	metadata: MetadataOEISid = getMetadata(oeisID)
 	boxOfBranches: tuple[tuple[Expr, Boolean], ...] = tuple(map(itemgetter(1, 2)
 		, filterfalse(compose(make_f, itemgetter(1)), boxOfSolutions)))
@@ -155,35 +166,35 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
 		, Make.Assign([Make.Name('countTotal', Make.Store())], Make.Call(Make.Name('oeisIDfor_n'), [Make.Constant(oeisID), Make.Name('n')])))
 
 	docstring: str = f"""
-    Compute {oeisID}(n) as a function of {' or '.join(boxOf_fFormula)}.
+	Compute {oeisID}(n) as a function of {' or '.join(boxOf_fFormula) or 'n'}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID}
-    is "{metadata['description']}".
+	*The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID}
+	is "{metadata['description']}".
 
-    The domain of {oeisID} starts at {metadata['offset']}, therefore for values of `n` < {metadata['offset']}, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is {metadata['valueUnknown']}.
+	The domain of {oeisID} starts at {metadata['offset']}, therefore for values of `n` < {metadata['offset']}, a(n) is undefined. The smallest value of n for which a(n)
+	has not yet been computed is {metadata['valueUnknown']}.
 
-    Parameters
-    ----------
-    n : int
-        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
-    f : str | None = None
-        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+	Parameters
+	----------
+	n : int
+		Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+	f : str | None = None
+		The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
 
-    Returns
-    -------
-    a(n) : int
-        {metadata['description']}
+	Returns
+	-------
+	a(n) : int
+		{metadata['description']}
 
-    Would You Like to Know More?
-    ----------------------------
-    OEIS : webpage
-        https://oeis.org/{oeisID}
-    """
+	Would You Like to Know More?
+	----------------------------
+	OEIS : webpage
+		https://oeis.org/{oeisID}
+	"""
 
 	ingredientsFunction: IngredientsFunction = IngredientsFunction(Make.FunctionDef(oeisID
 		, Make.arguments(list_arg=[Make.arg('n', Make.Name('int'))
-			, Make.arg('f', Make.BitOr.join([astSubscript, Make.Name('LiteralString'), Make.Constant(None)]))], defaults=[Make.Constant(None)])
+			, Make.arg('f', Make.BitOr.join([ast_exprAnnotation, Make.Constant(None)]))], defaults=[Make.Constant(None)])
 		, body=[Make.Expr(Make.Constant(docstring)), Make.AnnAssign(Make.Name('countTotal', Make.Store()), Make.Name('int'))
 			, Make.Match(Make.Name('f'), [*map(partial(makeMatch_case, ast_stmt=ast_stmt), filter(None, boxOf_f)
 				, compress(map(itemgetter(2), boxOfSolutions), boxOf_f), compress(map(itemgetter(1), boxOfSolutions), boxOf_f), strict=True)
