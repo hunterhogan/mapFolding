@@ -44,7 +44,7 @@ Parse parameters
 """
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from functools import cache, partial
 from humpy_cytoolz import unique
 from hunterMakesPy import decreasing, zeroIndexed
@@ -53,13 +53,55 @@ from itertools import accumulate
 from more_itertools import iter_index
 from numba import get_num_threads, set_num_threads
 from operator import add, mul
-from sympy import catalan as sympy_catalan
+from sympy import binomial as sympy_binomial, catalan as sympy_catalan
 from sys import maxsize as sysMaxsize
-from typing import SupportsIndex, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from collections.abc import Iterator
+	from collections.abc import Iterable, Iterator
 	from hunterMakesPy import ConcurrencyLimit
+	from typing import SupportsIndex
+
+def binomial(top: int, degree: int) -> int:
+	"""Evaluate a generalized binomial coefficient as a Python integer.
+
+	(AI generated docstring)
+
+	You can use an integer `top` of either sign. A negative `degree` gives zero. When `top` is
+	nonnegative, a `degree` greater than `top` also gives zero.
+
+	Mathematics
+	-----------
+	binomial coefficient : equation
+
+	```math
+		Let  t ≜ `top`, d ≜ `degree`, b ≜ `binomial(top, degree)`
+
+		b = 0                           for d < 0
+		b = 1                           for d = 0
+		b = (∏ⱼ₌₀ᵈ⁻¹ (t − j)) / d!     for d > 0
+	```
+
+	Parameters
+	----------
+	top : int
+		Top index of the binomial coefficient.
+	degree : int
+		Lower index of the binomial coefficient.
+
+	Returns
+	-------
+	binomial : int
+		Exact binomial coefficient as a Python integer.
+
+	See Also
+	--------
+	`工boxOfBasisBinomial`
+		Select a sequence of degrees while keeping the top index fixed.
+	`dotProductBinomial`
+		Evaluate a weighted sum of binomial coefficients.
+	"""
+	return int(sympy_binomial(top, degree))
 
 def 工boxOfBasisCatalan(start: SupportsIndex, stop: SupportsIndex | None = None, step: SupportsIndex = 1) -> Iterable[int]:
 	"""Iterate over Catalan numbers at ordinals selected with range bounds.

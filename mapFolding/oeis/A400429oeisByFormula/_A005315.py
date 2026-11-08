@@ -101,7 +101,7 @@ References
 from __future__ import annotations
 
 from itertools import chain, repeat
-from sympy import binomial as sympy_binomial
+from mapFolding.beDRY import binomial
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -167,7 +167,7 @@ def A005315of0(x: int, 次n: int = 0) -> int:
 	`次n` translates the input origin without changing the expression. SymPy's
 	`binomial` also returns 1 for a negative upper argument when the lower argument is 0.
 	"""
-	return int(sympy_binomial(x - 2 * 次n, 0))  # pyright: ignore[reportArgumentType]
+	return int(binomial(x - 2 * 次n, 0))
 
 def A005315of1(x: int, 次n: int = 1) -> int:
 	"""Return A005315(1) = 1 at `x = 2` and A005315(2) = 2 at `x = 3`.
@@ -209,7 +209,7 @@ def A005315of2(x: int, 次n: int = 2) -> int:
 		manuscript dated 1 October 2026; supplied as A400429 diagonal 2 proof.pdf.
 	"""
 	x -= 2 * 次n
-	return 2 * ((int(sympy_binomial((x + 6) // 2, 2)) + int(sympy_binomial((x + 7) // 2, 2))) - 5)  # pyright: ignore[reportArgumentType]
+	return 2 * ((int(binomial((x + 6) // 2, 2)) + int(binomial((x + 7) // 2, 2))) - 5)
 
 def A005315of3(x: int, 次n: int = 3) -> int:
 	"""Return A005315(3) at `x = 6` and A005315(4) at `x = 7`.
