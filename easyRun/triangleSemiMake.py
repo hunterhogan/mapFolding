@@ -2,24 +2,11 @@
 from __future__ import annotations
 
 from hunterMakesPy import oneIndexed
-from itertools import repeat
 from mapFolding.algorithms.matrixMeanders import doTheNeedful
-from mapFolding.algorithms.matrixMeandersShare import makeLookupDiagonal
-from mapFolding.basecamp import countMeanders
 from mapFolding.dataBaskets import StateMeanders
-from mapFolding.kitFilesystem import makePathFilenameCount, writeDiagonal
 from mapFolding.oeis import getValuesKnown, updateValuesKnown
 from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
-from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
-
-# TODO Do I need or want this? Is this still my best algorithm for this task?
-
-def writeDiagonalCount(n: int, 次diagonal: int) -> None:
-	state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
-	writeDiagonal({n: state.totalMeanders},
-		makePathFilenameCount(settingsPackage.pathPackage / 'oeis' / 'A400429', 'diagonal', str(次diagonal), suffix='.csv'),
-		次diagonal, append=True)
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:
 	#=SIN= For loop: the requested row writer preserves ordered output across its selected rows.
@@ -46,18 +33,13 @@ def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None
 
 if __name__ == '__main__':
 	flow = 'rows'
-	flow: str = 'diagonal'
 	if flow == 'rows':
 		nT: int = 491
 		nStart: int = 45
 		nStop: int = 46
 		kStart: int = 6
 		writeTriangleRows(nT, nStart, nStop, kStart)
-	else:
-		次diagonal: int = 12
-		nStart = 47
-		nStop = 500
-		tuple(map(writeDiagonalCount, tqdm(range(nStart, nStop)), repeat(次diagonal)))
+
 """
 source /home/hunte/mapFolding/.venv/bin/activate && cd mapFolding
 sudo nice -n -10 /home/hunte/mapFolding/.venv/bin/python -X faulthandler=0 -X tracemalloc=0 -X frozen_modules=on /home/hunte/mapFolding/easyRun/triangleSemiMake.py
