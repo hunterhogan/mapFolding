@@ -13,7 +13,6 @@ if __name__ == '__main__':
 	keepGoing: bool = True
 	while keepGoing:
 		keepGoing = False
-		#=SIN= For loop: attempt every callable on each pass; ascending `n` lets one pass extend a b-file by several terms.
 		for oeisID, n, expression in sorted(getMissingFormulas(), key=itemgetter(1)):
 			if n != getMetadata(oeisID)['valueUnknown']:
 				continue

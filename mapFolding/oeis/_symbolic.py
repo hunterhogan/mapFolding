@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from functools import cache, partial
 from humpy_cytoolz import compose_left, juxt, unique
-from itertools import chain, compress, filterfalse, product as CartesianProduct, starmap, takewhile
+from itertools import chain, compress, filterfalse, starmap, takewhile
 from mapFolding.dataStructures import locateIndex, locateRow
 from mapFolding.oeis._metadata import dictionaryTriangle, getMetadata, getMetadataTriangle, getValuesKnown
 from mapFolding.oeis._theSSOT import (
@@ -183,7 +183,7 @@ boxOfRelations: tuple[tuple[Equality | BooleanFalse | BooleanTrue, Range], ...] 
 	, (Eq(A337581(n), n - 1), Range(2, 4))
 )
 
-def getSequenceCall(oeisID: OEISid, n: int):
+def getSequenceCall(oeisID: OEISid, n: int) -> AppliedUndef:
 	"""Represent a b-file index as a symbolic sequence value or triangle cell.
 
 	(AI generated docstring)
@@ -194,7 +194,7 @@ def getSequenceCall(oeisID: OEISid, n: int):
 	if oeisID in dictionaryTriangle:
 		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
 		row, 次column = locateIndex(n, metadata['rowLength'], metadata['rowStart'], metadata['offset'])
-		call = sequence(row, 次column + metadata['columnStart'])
+		call: AppliedUndef = sequence(row, 次column + metadata['columnStart'])
 	else:
 		call = sequence(n)
 	return call
@@ -354,22 +354,26 @@ def getMissingFormula(equation: Equality) -> tuple[OEISid, int, Expr] | None:
 			missing = (lookupOEISid[wanted.func], as_int(wanted.args[0]), formula)
 	return missing
 
-def getCallsKnown(sequence: type[AppliedUndef]):
+def bindValueUnknown(sequence: type[AppliedUndef]) -> Iterator[Equality]:
+	"""Instantiate every relation at the first unknown value of a sequence.
+
+	(AI generated docstring)
+	"""
 	oeisID: OEISid = lookupOEISid[sequence]
-	boxOfCalls = map(partial(getSequenceCall, oeisID), getValuesKnown(oeisID))
-	return unique(boxOfCalls, key=compose_left(attrgetter('args'), itemgetter(0)))
+	valueUnknown: int = getMetadata(oeisID)['valueUnknown']
+	return filter(methodcaller('has', sequence(valueUnknown))
+		, chain.from_iterable(map(partial(bindRelation, getSequenceCall(oeisID, valueUnknown)), boxOfRelations)))
 
 def getMissingFormulas() -> tuple[tuple[OEISid, int, Expr], ...]:
-	"""Find missing values implied by relations anchored at known b-file values.
+	"""Find missing values implied by relations anchored at the first unknown value of each sequence.
 
 	(AI generated docstring)
 
-	Results can include gaps and indices beyond the consecutive known prefix. Relations with
-	several unknown values remain undetermined.
+	Relations with several unknown values remain undetermined. Sequences in `makeOEISidCalculable` have no missing values.
 	"""
-	boxOfSequences: Iterator[type[AppliedUndef]] = filter(Tuple(*map(itemgetter(0), boxOfRelations)).has, lookupSymbolic.values())
-	boxOfCallsKnown = chain.from_iterable(map(getCallsKnown, boxOfSequences))
-	boxOfEquations: dict[Equality, None] = dict.fromkeys(chain.from_iterable(starmap(bindRelation, CartesianProduct(boxOfCallsKnown, boxOfRelations))))
+	boxOfSequences: Iterator[type[AppliedUndef]] = filter(Tuple(*map(itemgetter(0), boxOfRelations)).has
+		, filterfalse(compose_left(lookupOEISid.__getitem__, makeOEISidCalculable().__contains__), lookupSymbolic.values()))
+	boxOfEquations: dict[Equality, None] = dict.fromkeys(chain.from_iterable(map(bindValueUnknown, boxOfSequences)))
 	return tuple(unique(filter(None, map(getMissingFormula, boxOfEquations)), key=itemgetter(0, 1)))
 
 def solveDifference(wanted: AppliedUndef, difference: Expr) -> Expr:
@@ -432,3 +436,29 @@ def makeSolutionsSymbolic() -> tuple[tuple[OEISid, Expr, Boolean], ...]:
 		, boxOfRelations
 	)
 	return tuple(chain.from_iterable(map(makeSolutionsRelation, boxOfRelationsUnary)))
+
+def valueInitial吗(solution: tuple[OEISid, Expr, Boolean]) -> bool:
+	_oeisID, formula, condition = solution
+	return not formula.atoms(AppliedUndef) and condition != true
+
+def makeOEISidBasis(oeisID: OEISid, formula: Expr) -> frozenset[OEISid]:
+	return frozenset(map(lookupOEISid.__getitem__, map(attrgetter('func'), formula.atoms(AppliedUndef)))) - {oeisID}  # pyright: ignore[reportReturnType]
+
+@cache
+def makeOEISidCalculable() -> frozenset[OEISid]:
+	"""Find the sequences that a formula computes at every index without a counting algorithm.
+
+	(AI generated docstring)
+
+	A sequence qualifies through a closed form on its whole domain or through a formula whose other sequences qualify. A
+	formula may read earlier values of its own sequence. An initial value does not qualify a sequence.
+	"""
+	boxOfSolutions: tuple[tuple[OEISid, Expr, Boolean], ...] = tuple(filterfalse(valueInitial吗, makeSolutionsSymbolic()))
+	boxOfOEISid: tuple[OEISid, ...] = tuple(map(itemgetter(0), boxOfSolutions))
+	boxOfBasis: tuple[frozenset[OEISid], ...] = tuple(starmap(makeOEISidBasis, map(itemgetter(0, 1), boxOfSolutions)))
+	boxOfOEISidCalculable: frozenset[OEISid] = frozenset()
+	boxOfOEISidPrior: frozenset[OEISid] | None = None
+	while boxOfOEISidCalculable != boxOfOEISidPrior:
+		boxOfOEISidPrior = boxOfOEISidCalculable
+		boxOfOEISidCalculable = frozenset(compress(boxOfOEISid, map(boxOfOEISidPrior.issuperset, boxOfBasis)))  # pyright: ignore[reportAssignmentType]
+	return boxOfOEISidCalculable
