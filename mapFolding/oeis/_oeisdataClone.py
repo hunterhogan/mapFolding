@@ -8,7 +8,8 @@ from functools import partial
 from git import Repo
 from itertools import batched, starmap
 from mapFolding.oeis._oeisdata import copy_oeisdata, makeBoxOfPathFilename
-from mapFolding.oeis._theSSOT import url_oeisdata
+from mapFolding.oeis._theSSOT import (
+	oeisIDsImplemented, path_oeisdata as path_oeisdataDefault, pathSnapshot as pathSnapshotDefault, url_oeisdata)
 from more_itertools import consume
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -18,7 +19,8 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 	from pathlib import Path
 
-def 工repo(path_oeisdata: Path) -> Repo:
+def 工repo(path_oeisdata: Path | None = None) -> Repo:
+	path_oeisdata = path_oeisdata or path_oeisdataDefault
 	if path_oeisdata.exists():
 		repo: Repo = Repo(path_oeisdata)
 	else:
@@ -37,11 +39,18 @@ def update_oeisdata(repo: Repo) -> Repo:
 	repo.head.reset('origin/main', index=True, working_tree=True)
 	return repo
 
-def checkoutSnapshot(boxOfOEISid: Sequence[OEISid], path_oeisdata: Path, pathSnapshot: Path) -> Path:
+def checkoutSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
+	if boxOfOEISid is None:
+		boxOfOEISid = oeisIDsImplemented
+	path_oeisdata = path_oeisdata or path_oeisdataDefault
+	pathSnapshot = pathSnapshot or pathSnapshotDefault
 	checkout_oeisdata(boxOfOEISid, 工repo(path_oeisdata))
 	return copy_oeisdata(makeBoxOfPathFilename(boxOfOEISid, PurePosixPath()), path_oeisdata, pathSnapshot)
 
-def updateSnapshot(boxOfOEISid: Sequence[OEISid], path_oeisdata: Path, pathSnapshot: Path) -> Path:
+# TODO eliminate the time.txt process.
+def updateSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
+	path_oeisdata = path_oeisdata or path_oeisdataDefault
+	pathSnapshot = pathSnapshot or pathSnapshotDefault
 	update_oeisdata(工repo(path_oeisdata))
 	checkoutSnapshot(boxOfOEISid, path_oeisdata, pathSnapshot)
 	return copy_oeisdata((PurePosixPath('time.txt'),), path_oeisdata, pathSnapshot)

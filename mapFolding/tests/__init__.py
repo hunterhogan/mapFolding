@@ -1,39 +1,23 @@
 """Test suite for the mapFolding package.
 
-This test suite provides comprehensive validation of map folding computations,
-file system operations, OEIS integration, task division, and foundational
-utilities. The tests are designed to support multiple audiences and use cases.
-
-Test Module Organization (in mapFolding/tests/):
-- conftest.py: Testing infrastructure and shared fixtures
-- test_algorithms.py: Core mathematical validation and algorithm testing
-- test_computations.py: Elimination flows and counts after pinning
-- test_dataBaskets.py: Computation state and array-shape behavior
-- test_dataDynamic.py: Leaf domains, pile choices, and map-derived lookups
-- test_dataStructures.py: Dense and sparse triangle conversions and selections
-- test_filesystem.py: File operations and path management
-- test_insertion.py: Album insertion and constrained search-space construction
+Test package organization (in mapFolding/tests/):
+- conftest.py: Fixtures: parameter dimensions, derived expected values, filesystem isolation, and environment control
+- conftestAnnex.py: Assertion helpers, re-exported here
+- dataSamples/: Static expected data and pytest-ready parameter rows
+- test_algorithms.py: Counts, enumerations, insertion albums, and synthesized jobs from each algorithm
+- test_dataDynamic.py: Leaf domains, pile choices, and creases of 2^n-dimensional maps
+- test_dataStructures.py: Triangle diagonals and flattening, and array shapes and slicers inside Numba-compiled code
+- test_filesystem.py: Filenames, paths, and reading and writing the package's files
 - test_measurements.py: Positional-numeral measurements of leaf and pile labels
-- test_oeis.py: OEIS sequence access, triangle layouts, and local b-file updates
-- test_oeis_byFormula.py: Formula selection and sequence relationships
-- test_parameterValidation.py: Input and processor-limit validation
-- test_pinning.py: Pinning and leaf-order restrictions
+- test_oeis.py: OEIS sequence access, the command line, triangle layouts, and local b-file updates
+- test_oeis_byFormula.py: Each formula in `mapFolding.oeis.byFormula`
+- test_parameterValidation.py: Map-shape validation, leaf totals, and the `hunterMakesPy` parsers they rely on
+- test_pinning.py: Pinning functions cover every folding exactly once
 - test_semiotics.py: Dimension-position ideographs and head-relative labels
-- test_taskDivisions.py: Task division and work distribution
+- test_taskDivisions.py: Processor limits and task division
 
-For Contributors:
-The test suite follows Domain-Driven Design principles, organizing tests around
-mathematical concepts rather than implementation details. Use the existing
-patterns as templates when adding new functionality.
-
-For Users Adding Custom Modules:
-The test_algorithms.py module provides the most relevant examples for testing
-custom computational approaches. The standardized testing functions in conftest.py
-ensure consistent error reporting across all tests.
-
-For AI Assistants:
-The testing framework emphasizes readable, predictable patterns that maintain
-mathematical correctness while supporting code evolution and optimization.
+Each test module imports its assertion helpers from `mapFolding.tests` and its static data from
+`mapFolding.tests.dataSamples`; pytest supplies the fixtures in `conftest.py` by name.
 """
 from __future__ import annotations
 

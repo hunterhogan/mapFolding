@@ -25,8 +25,6 @@ When adding test data for new `mapShape`, follow these guidelines:
 3. Maintain the same data format as existing entries
 """
 
-from typing import Any
-
 mapShape2上4Dimensional: tuple[int, ...] = (2, 2, 2, 2)
 mapShape2上5Dimensional: tuple[int, ...] = (2, 2, 2, 2, 2)
 mapShape2上6Dimensional: tuple[int, ...] = (2, 2, 2, 2, 2, 2)
@@ -449,7 +447,3 @@ dictionaryCreasesDecreaseKnown: dict[tuple[int, ...], dict[int, list[int]]] = {
 		63: [31, 47, 55, 59, 61],
 	},
 }
-
-def getMapShapesWithData(dataSource: dict[tuple[int, ...], Any]) -> list[tuple[int, ...]]:
-	"""Return list of mapShapes that have test data available in the given dictionary."""
-	return list(dataSource.keys())

@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 url_oeisdata: str = 'https://github.com/oeis/oeisdata.git'
 """Git export of the OEIS: sequence entries in `seq/`, and supporting files, such as b-files, in `files/` through Git LFS."""
+# TODO handle the hardcoding
 path_oeisdata: Path = Path('C:/clones/oeisdata')
 """Local sparse clone of `url_oeisdata`. Nothing commits to this clone."""
 pathSnapshot: Path = settingsPackage.pathPackage / 'oeis' / 'oeisdata'

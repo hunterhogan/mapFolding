@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from functools import partial
+from itertools import starmap
 from mapFolding import (
-	dimensionIndex, leafOrigin, pileOrigin, 一, 七, 三, 九, 二, 五, 八, 六, 四, 零, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三,
-	首零二, 首零二三)
+	dimensionIndex, 一, 七, 三, 九, 二, 五, 八, 六, 四, 零, 首一, 首一三, 首一二, 首一二三, 首三, 首二, 首二三, 首零, 首零一, 首零一三, 首零一二, 首零一二三, 首零三, 首零二, 首零二三)
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.semioticsData import (
 	expectedDimensionIndex, expected一, expected七, expected三, expected九, expected二, expected五, expected八, expected六, expected四, expected零,
@@ -16,34 +17,34 @@ import pytest
 if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
 
-@pytest.mark.parametrize('actualValue, expectedValue, identifierName', [
+@pytest.mark.parametrize('actual, expected, identifier', [
 	(零, expected零, '零'), (一, expected一, '一'), (二, expected二, '二'), (三, expected三, '三')
 	, (四, expected四, '四'), (五, expected五, '五'), (六, expected六, '六'), (七, expected七, '七')
 	, (八, expected八, '八'), (九, expected九, '九')
 ])
-def test_dimensionIndexConstantsMatchExpected(actualValue: int, expectedValue: int, identifierName: str) -> None:
-	assertEqualTo(actualValue, expectedValue, identifierName)
+def test_dimensionIndexConstantsMatchExpected(actual: int, expected: int, identifier: str) -> None:
+	assertEqualTo(actual, expected, identifier)
 
-@pytest.mark.parametrize('dimensionAsNonnegativeInteger, expectedDimensionIndexValue', expectedDimensionIndex)
-def test_dimensionIndexReturnsExpectedIndex(dimensionAsNonnegativeInteger: int, expectedDimensionIndexValue: int) -> None:
-	assertEqualTo(dimensionIndex(dimensionAsNonnegativeInteger), expectedDimensionIndexValue, 'dimensionIndex', dimensionAsNonnegativeInteger)
+@pytest.mark.parametrize('dimensionAsNonnegativeInteger, expected', expectedDimensionIndex)
+def test_dimensionIndex(dimensionAsNonnegativeInteger: int, expected: int) -> None:
+	assertEqualTo(dimensionIndex(dimensionAsNonnegativeInteger), expected, dimensionIndex.__name__, dimensionAsNonnegativeInteger)
 
-@pytest.mark.parametrize('functionTarget, totalDimensions, expectedValue', [
-	*tuple((首零, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零)
-	, *tuple((首零一, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一)
-	, *tuple((首零一二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一二)
-	, *tuple((首零二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零二)
-	, *tuple((首一, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一)
-	, *tuple((首一二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一二)
-	, *tuple((首二, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首二)
-	, *tuple((首三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首三)
-	, *tuple((首零一二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一二三)
-	, *tuple((首零一三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零一三)
-	, *tuple((首零二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零二三)
-	, *tuple((首零三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首零三)
-	, *tuple((首一二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一二三)
-	, *tuple((首一三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首一三)
-	, *tuple((首二三, totalDimensions, expectedValue) for totalDimensions, expectedValue in expected首二三),
-])
-def test_dimensionCoordinateFunctionsReturnExpected(functionTarget: CallableFunction[[int], int], totalDimensions: int, expectedValue: int) -> None:
-	assertEqualTo(functionTarget(totalDimensions), expectedValue, functionTarget.__name__, totalDimensions)
+@pytest.mark.parametrize('function, totalDimensions, expected', (
+	*starmap(partial(pytest.param, 首零), expected首零)
+	, *starmap(partial(pytest.param, 首零一), expected首零一)
+	, *starmap(partial(pytest.param, 首零一二), expected首零一二)
+	, *starmap(partial(pytest.param, 首零二), expected首零二)
+	, *starmap(partial(pytest.param, 首一), expected首一)
+	, *starmap(partial(pytest.param, 首一二), expected首一二)
+	, *starmap(partial(pytest.param, 首二), expected首二)
+	, *starmap(partial(pytest.param, 首三), expected首三)
+	, *starmap(partial(pytest.param, 首零一二三), expected首零一二三)
+	, *starmap(partial(pytest.param, 首零一三), expected首零一三)
+	, *starmap(partial(pytest.param, 首零二三), expected首零二三)
+	, *starmap(partial(pytest.param, 首零三), expected首零三)
+	, *starmap(partial(pytest.param, 首一二三), expected首一二三)
+	, *starmap(partial(pytest.param, 首一三), expected首一三)
+	, *starmap(partial(pytest.param, 首二三), expected首二三)
+))
+def test_dimensionCoordinateFunctionsReturnExpected(function: CallableFunction[[int], int], totalDimensions: int, expected: int) -> None:
+	assertEqualTo(function(totalDimensions), expected, function.__name__, totalDimensions)

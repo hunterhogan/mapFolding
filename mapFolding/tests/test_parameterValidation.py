@@ -1,32 +1,12 @@
-"""Foundational utilities and data validation testing.
+"""Validate map shapes and count their leaves.
 
-This module tests the core utility functions that support the mathematical computations but aren't
-specific to any particular algorithm. These are the building blocks that ensure data integrity and
-proper parameter handling throughout the package.
-
-The tests here validate fundamental operations like dimension validation, processor limit
-configuration, and basic mathematical utilities. These functions form the foundation that other
-modules build upon.
-
-Key Testing Areas:
-	- Input validation and sanitization for map dimensions
-	- Processor limit configuration for parallel computations
-	- Mathematical utility functions from helper modules
-	- Edge case handling for boundary conditions
-	- Type system validation and error propagation
-
-For users extending the package: these tests demonstrate proper input validation patterns and show how
-to handle edge cases gracefully. The parametrized tests provide examples of comprehensive boundary
-testing that you can adapt for your own functions.
-
-The integration with external utility modules (hunterMakesPy) shows how to test dependencies while
-maintaining clear separation of concerns.
+`validateMapShape` and `getTotalLeaves` belong to `mapFolding.beDRY`. The `intInnit` and `oopsieKwargsie`
+tests exercise the `hunterMakesPy` parsers that `validateMapShape` relies on.
 """
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
 from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
-from itertools import permutations
 from mapFolding.beDRY import getTotalLeaves, validateMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
@@ -34,19 +14,17 @@ import pytest
 import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Iterable, Sequence
+	from collections.abc import Callable, Collection, Sequence
 	from typing import Any
 
 # TODO `getTotalLeaves` comprehensive tests.
-def test_getTotalLeaves_edge_cases() -> None:
-	"""Test edge cases for getTotalLeaves."""
-	# Order independence
-	ImaTuple: tuple[int, ...] = (2, 3, 4)
-	baseline: int = getTotalLeaves(ImaTuple)
-
-	for mapShape in permutations(ImaTuple):
-		actual: int = getTotalLeaves(mapShape)
-		assertEqualTo(actual, baseline, getTotalLeaves.__name__, mapShape)
+@pytest.mark.parametrize('mapShape, expected', (
+	pytest.param((2, 3, 5), 30, id='2x3x5'), pytest.param((2, 5, 3), 30, id='2x5x3'), pytest.param((3, 2, 5), 30, id='3x2x5')
+	, pytest.param((3, 5, 2), 30, id='3x5x2'), pytest.param((5, 2, 3), 30, id='5x2x3'), pytest.param((5, 3, 2), 30, id='5x3x2')
+	, pytest.param((2, 2, 2, 2), 16, id='2^4-dimensional'), pytest.param((13,), 13, id='strip-13')
+))
+def test_getTotalLeaves(mapShape: tuple[int, ...], expected: int) -> None:
+	assertEqualTo(getTotalLeaves(mapShape), expected, getTotalLeaves.__name__, mapShape)
 
 @pytest.mark.parametrize(
 	'mapShape,expected'
@@ -67,7 +45,7 @@ def test_getTotalLeaves_edge_cases() -> None:
 		, ((3, 5, 7), [3, 5, 7])
 	]
 )
-def test_intInnit(mapShape: Iterable[Any], expected: list[int]) -> None:
+def test_intInnit(mapShape: Collection[Any], expected: list[int]) -> None:
 	actual: list[int] = intInnit(mapShape)
 	assertEqualTo(actual, expected, intInnit.__name__, mapShape)
 
@@ -90,7 +68,7 @@ def test_IntInnit_humpy(nameOfTest: str, callablePytest: Callable[[], None]) -> 
 		, ([float('nan')], ValueError)
 	]
 )
-def test_intInnitError(mapShape: Iterable[Any], expected: type[Exception]) -> None:
+def test_intInnitError(mapShape: Collection[Any], expected: type[Exception]) -> None:
 	with pytest.raises(expected) as exceptionInfo:
 		intInnit(mapShape)
 	assertEqualTo(type(exceptionInfo.value), expected, intInnit.__name__, mapShape)

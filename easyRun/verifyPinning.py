@@ -4,9 +4,8 @@ from dataclasses import dataclass
 from functools import partial
 from humpy_cytoolz import valfilter as filterLeaf
 from hunterMakesPy import ansiColor, ansiColorReset
-from mapFolding.filters import leaf吗
+from mapFolding.filters import beansWithoutCornbread, leaf吗
 from mapFolding.kitFilesystem import getDataFrameFoldings, writeAlbum
-from mapFolding.tests.test_pinning import beansWithoutCornbread
 from mapFolding.theSSOT import settingsPackage
 from pprint import pformat
 from typing import TYPE_CHECKING
@@ -18,6 +17,8 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from mapFolding.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding.theTypes import Folding, PinnedLeaves
+
+# TODO where does this module belong?
 
 @dataclass
 class PermutationSpaceStatus:

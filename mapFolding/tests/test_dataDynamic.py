@@ -9,8 +9,8 @@ configurations. Currently, data exists for:
 - (2,)*5 → 32 leaves (2^5-dimensional)
 - (2,)*6 → 64 leaves (2^6-dimensional)
 
-When adding new test data for additional `mapShape` values, add the data to `A001417.py`
-and the tests will automatically pick them up via parametrization.
+When adding test data for another `mapShape`, add the data to `A001417.py` and add the `mapShape` to the
+parametrization of each test that uses the data.
 """
 
 from __future__ import annotations
@@ -35,9 +35,8 @@ if TYPE_CHECKING:
 	from collections.abc import Iterable, Sequence
 	from hunterMakesPy import CallableFunction
 	from mapFolding.theTypes import ChoicesLeaf, Pile
-	from types import ModuleType
 
-@pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
+@pytest.mark.parametrize('mapShape', (pytest.param(A001417.mapShape2上4Dimensional, id='2^4-dimensional'), pytest.param(A001417.mapShape2上5Dimensional, id='2^5-dimensional'), pytest.param(A001417.mapShape2上6Dimensional, id='2^6-dimensional')))
 def test_getLookupDomainsLeaves(mapShape: tuple[int, ...]) -> None:
 	"""Verify getLookupDomainsLeaves against authoritative leaf domain data for all leaves."""
 	state: StateElimination = StateElimination(mapShape=mapShape)
@@ -45,7 +44,7 @@ def test_getLookupDomainsLeaves(mapShape: tuple[int, ...]) -> None:
 
 	dictionaryLeafDomainsActual: dict[int, range] = getLookupDomainsLeaves(state)
 
-	assertEqualTo(len(dictionaryLeafDomainsActual), state.totalLeaves, 'getLookupDomainsLeaves', mapShape)
+	assertEqualTo(len(dictionaryLeafDomainsActual), state.totalLeaves, getLookupDomainsLeaves.__name__, mapShape)
 
 	for leaf in range(state.totalLeaves):
 		rangeActual: range = dictionaryLeafDomainsActual[leaf]
@@ -54,22 +53,22 @@ def test_getLookupDomainsLeaves(mapShape: tuple[int, ...]) -> None:
 		assertEqualTo(rangeActual.stop, stopAuthoritativeData, 'getLookupDomainsLeaves.range.stop', leaf, mapShape)
 		assertEqualTo(rangeActual.step, stepAuthoritativeData, 'getLookupDomainsLeaves.range.step', leaf, mapShape)
 
-@pytest.mark.parametrize("mapShape", list(A001417.dictionaryChoicesLeafKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryChoicesLeafKnown])
-def test_getDictionaryChoicesLeaf(mapShape: tuple[int, ...]) -> None:
-	"""Verify getDictionaryChoicesLeaf against authoritative pile range data for all piles."""
+@pytest.mark.parametrize('mapShape', (pytest.param(A001417.mapShape2上4Dimensional, id='2^4-dimensional'), pytest.param(A001417.mapShape2上5Dimensional, id='2^5-dimensional'), pytest.param(A001417.mapShape2上6Dimensional, id='2^6-dimensional')))
+def test_getLookupChoicesLeaf(mapShape: tuple[int, ...]) -> None:
+	"""Verify getLookupChoicesLeaf against authoritative pile range data for all piles."""
 	state: StateElimination = StateElimination(mapShape=mapShape)
 	dictionaryChoicesLeafAuthoritativeData: dict[int, tuple[int, ...]] = A001417.dictionaryChoicesLeafKnown[mapShape]
 
 	dictionaryChoicesLeafActual: dict[Pile, ChoicesLeaf] = getLookupChoicesLeaf(state)
 
-	assertEqualTo(len(dictionaryChoicesLeafActual), state.totalLeaves, 'getDictionaryChoicesLeaf', mapShape)
+	assertEqualTo(len(dictionaryChoicesLeafActual), state.totalLeaves, getLookupChoicesLeaf.__name__, mapShape)
 
 	for pile in range(state.totalLeaves):
 		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(dictionaryChoicesLeafActual[pile]))
 		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryChoicesLeafAuthoritativeData[pile]
-		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getDictionaryChoicesLeaf', pile, mapShape)
+		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, getLookupChoicesLeaf.__name__, pile, mapShape)
 
-@pytest.mark.parametrize("mapShape", list(A001417.dictionaryLeafDomainKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryLeafDomainKnown])
+@pytest.mark.parametrize('mapShape', (pytest.param(A001417.mapShape2上4Dimensional, id='2^4-dimensional'), pytest.param(A001417.mapShape2上5Dimensional, id='2^5-dimensional'), pytest.param(A001417.mapShape2上6Dimensional, id='2^6-dimensional')))
 def test_getDomainLeaf(mapShape: tuple[int, ...]) -> None:
 	"""Verify getDomainLeaf against authoritative leaf domain data for all leaves."""
 	state: StateElimination = StateElimination(mapShape=mapShape)
@@ -85,47 +84,44 @@ def test_getDomainLeaf(mapShape: tuple[int, ...]) -> None:
 xfailDimension4: pytest.MarkDecorator = pytest.mark.xfail(
 	raises=AssertionError, strict=True, reason='Four-dimensional combined domains disagree with observations verified against the folding pickle.')
 
-@pytest.mark.parametrize('totalDimensions, domainFunction, moduleAuthoritativeData, columnPositions', (
-	pytest.param(4, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一, (0, 1, 2, 3), id='dimension-one-4'),
-	pytest.param(5, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一, (0, 1, 2, 3), id='dimension-one-5'),
-	pytest.param(6, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一, (0, 1, 2, 3), id='dimension-one-6'),
-	pytest.param(4, getDomainDimension一, p2上nDimensionalDomain3_首一, (0, 2), id='dimension-one-pairs-4'),
-	pytest.param(5, getDomainDimension一, p2上nDimensionalDomain3_首一, (0, 2), id='dimension-one-pairs-5'),
-	pytest.param(6, getDomainDimension一, p2上nDimensionalDomain3_首一, (0, 2), id='dimension-one-pairs-6'),
-	pytest.param(4, getDomainDimension二, p2上nDimensionalDomain6_7_5_4, (0, 1, 2, 3), marks=xfailDimension4, id='dimension-two-4'),
-	pytest.param(5, getDomainDimension二, p2上nDimensionalDomain6_7_5_4, (0, 1, 2, 3), id='dimension-two-5'),
-	pytest.param(6, getDomainDimension二, p2上nDimensionalDomain6_7_5_4, (0, 1, 2, 3), id='dimension-two-6'),
-	pytest.param(4, getDomainDimension二, p2上nDimensionalDomain6_5, (0, 2), marks=xfailDimension4, id='dimension-two-pairs-4'),
-	pytest.param(5, getDomainDimension二, p2上nDimensionalDomain6_5, (0, 2), id='dimension-two-pairs-5'),
-	pytest.param(6, getDomainDimension二, p2上nDimensionalDomain6_5, (0, 2), id='dimension-two-pairs-6'),
-	pytest.param(4, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二, (0, 1, 2, 3), marks=xfailDimension4, id='head-dimension-two-4'),
-	pytest.param(5, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二, (0, 1, 2, 3), id='head-dimension-two-5'),
-	pytest.param(6, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二, (0, 1, 2, 3), id='head-dimension-two-6'),
-	pytest.param(4, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二, (0, 2), marks=xfailDimension4, id='headDimensionTwoPairs4'),
-	pytest.param(5, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二, (0, 2), id='headDimensionTwoPairs5'),
-	pytest.param(6, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二, (0, 2), id='headDimensionTwoPairs6'),
-	pytest.param(4, getDomain二一零and二一, p2上nDimensionalDomain7_6, (0, 1), marks=xfailDimension4, id='crease-two-one-4'),
-	pytest.param(5, getDomain二一零and二一, p2上nDimensionalDomain7_6, (0, 1), id='crease-two-one-5'),
-	pytest.param(6, getDomain二一零and二一, p2上nDimensionalDomain7_6, (0, 1), id='crease-two-one-6'),
-	pytest.param(4, getDomain二零and二, p2上nDimensionalDomain5_4, (0, 1), marks=xfailDimension4, id='crease-two-4'),
-	pytest.param(5, getDomain二零and二, p2上nDimensionalDomain5_4, (0, 1), id='crease-two-5'),
-	pytest.param(6, getDomain二零and二, p2上nDimensionalDomain5_4, (0, 1), id='crease-two-6'),
-	pytest.param(5, getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二, (0, 1), id='head-crease-two-one-5'),
-	pytest.param(6, getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二, (0, 1), id='head-crease-two-one-6'),
-	pytest.param(5, getDomain首零二and首二, p2上nDimensionalDomain首零二_首二, (0, 1), id='head-crease-two-5'),
-	pytest.param(6, getDomain首零二and首二, p2上nDimensionalDomain首零二_首二, (0, 1), id='head-crease-two-6'),
+@pytest.mark.parametrize('totalDimensions, domainFunction, domainKnown, columnPositions', (
+	pytest.param(4, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一.boxOfDomain2上4Dimensional, (0, 1, 2, 3), id='dimension-one-4'),
+	pytest.param(5, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一.boxOfDomain2上5Dimensional, (0, 1, 2, 3), id='dimension-one-5'),
+	pytest.param(6, getDomainDimension一, p2上nDimensionalDomain3_2_首一_首零一.boxOfDomain2上6Dimensional, (0, 1, 2, 3), id='dimension-one-6'),
+	pytest.param(4, getDomainDimension一, p2上nDimensionalDomain3_首一.boxOfDomain2上4Dimensional, (0, 2), id='dimension-one-pairs-4'),
+	pytest.param(5, getDomainDimension一, p2上nDimensionalDomain3_首一.boxOfDomain2上5Dimensional, (0, 2), id='dimension-one-pairs-5'),
+	pytest.param(6, getDomainDimension一, p2上nDimensionalDomain3_首一.boxOfDomain2上6Dimensional, (0, 2), id='dimension-one-pairs-6'),
+	pytest.param(4, getDomainDimension二, p2上nDimensionalDomain6_7_5_4.boxOfDomain2上4Dimensional, (0, 1, 2, 3), marks=xfailDimension4, id='dimension-two-4'),
+	pytest.param(5, getDomainDimension二, p2上nDimensionalDomain6_7_5_4.boxOfDomain2上5Dimensional, (0, 1, 2, 3), id='dimension-two-5'),
+	pytest.param(6, getDomainDimension二, p2上nDimensionalDomain6_7_5_4.boxOfDomain2上6Dimensional, (0, 1, 2, 3), id='dimension-two-6'),
+	pytest.param(4, getDomainDimension二, p2上nDimensionalDomain6_5.boxOfDomain2上4Dimensional, (0, 2), marks=xfailDimension4, id='dimension-two-pairs-4'),
+	pytest.param(5, getDomainDimension二, p2上nDimensionalDomain6_5.boxOfDomain2上5Dimensional, (0, 2), id='dimension-two-pairs-5'),
+	pytest.param(6, getDomainDimension二, p2上nDimensionalDomain6_5.boxOfDomain2上6Dimensional, (0, 2), id='dimension-two-pairs-6'),
+	pytest.param(4, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二.boxOfDomain2上4Dimensional, (0, 1, 2, 3), marks=xfailDimension4, id='head-dimension-two-4'),
+	pytest.param(5, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二.boxOfDomain2上5Dimensional, (0, 1, 2, 3), id='head-dimension-two-5'),
+	pytest.param(6, getDomainDimension首二, p2上nDimensionalDomain首二_首零二_首零一二_首一二.boxOfDomain2上6Dimensional, (0, 1, 2, 3), id='head-dimension-two-6'),
+	pytest.param(4, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二.boxOfDomain2上4Dimensional, (0, 2), marks=xfailDimension4, id='head-dimension-two-pairs-4'),
+	pytest.param(5, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二.boxOfDomain2上5Dimensional, (0, 2), id='head-dimension-two-pairs-5'),
+	pytest.param(6, getDomainDimension首二, p2上nDimensionalDomain首二_首零一二.boxOfDomain2上6Dimensional, (0, 2), id='head-dimension-two-pairs-6'),
+	pytest.param(4, getDomain二一零and二一, p2上nDimensionalDomain7_6.boxOfDomain2上4Dimensional, (0, 1), marks=xfailDimension4, id='crease-two-one-4'),
+	pytest.param(5, getDomain二一零and二一, p2上nDimensionalDomain7_6.boxOfDomain2上5Dimensional, (0, 1), id='crease-two-one-5'),
+	pytest.param(6, getDomain二一零and二一, p2上nDimensionalDomain7_6.boxOfDomain2上6Dimensional, (0, 1), id='crease-two-one-6'),
+	pytest.param(4, getDomain二零and二, p2上nDimensionalDomain5_4.boxOfDomain2上4Dimensional, (0, 1), marks=xfailDimension4, id='crease-two-4'),
+	pytest.param(5, getDomain二零and二, p2上nDimensionalDomain5_4.boxOfDomain2上5Dimensional, (0, 1), id='crease-two-5'),
+	pytest.param(6, getDomain二零and二, p2上nDimensionalDomain5_4.boxOfDomain2上6Dimensional, (0, 1), id='crease-two-6'),
+	pytest.param(5, getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二.boxOfDomain2上5Dimensional, (0, 1), id='head-crease-two-one-5'),
+	pytest.param(6, getDomain首零一二and首一二, p2上nDimensionalDomain首零一二_首一二.boxOfDomain2上6Dimensional, (0, 1), id='head-crease-two-one-6'),
+	pytest.param(5, getDomain首零二and首二, p2上nDimensionalDomain首零二_首二.boxOfDomain2上5Dimensional, (0, 1), id='head-crease-two-5'),
+	pytest.param(6, getDomain首零二and首二, p2上nDimensionalDomain首零二_首二.boxOfDomain2上6Dimensional, (0, 1), id='head-crease-two-6'),
 ))
 def test_getDomainLeafsCombined(totalDimensions: int, domainFunction: CallableFunction[[StateElimination], Sequence[tuple[int, ...]]],
-	moduleAuthoritativeData: ModuleType, columnPositions: tuple[int, ...]) -> None:
+	domainKnown: Sequence[tuple[int, ...]], columnPositions: tuple[int, ...]) -> None:
 	"""Verify combined domain function against authoritative dataset: completeness, uniqueness, correctness."""
 	mapShape: tuple[int, ...] = (2,) * totalDimensions
 	state: StateElimination = StateElimination(mapShape=mapShape)
 	tuplesDomainActual: tuple[tuple[int, ...], ...] = tuple(domainFunction(state))
-	tuplesDomainAuthoritativeData: tuple[tuple[int, ...], ...] = getattr(
-		moduleAuthoritativeData, f"boxOfDomain2上{totalDimensions}Dimensional"
-	)
 
-	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(tuplesDomainAuthoritativeData,
+	tuplesMissingFromActual, tuplesExtraInActual = unique_to_each(domainKnown,
 		map(cast('CallableFunction[[tuple[int, ...]], tuple[int, ...]]', itemgetter(*columnPositions)), tuplesDomainActual))
 	tuplesMissingFromActual = tuple(tuplesMissingFromActual)
 	tuplesExtraInActual = tuple(tuplesExtraInActual)
@@ -135,7 +131,7 @@ def test_getDomainLeafsCombined(totalDimensions: int, domainFunction: CallableFu
 	assertEqualTo(len(tuplesMissingFromActual), 0, domainFunction.__name__, mapShape, missing=tuplesMissingFromActual)
 	assertEqualTo(len(tuplesExtraInActual), 0, domainFunction.__name__, mapShape, extra=tuplesExtraInActual)
 
-@pytest.mark.parametrize("mapShape", list(A001417.dictionaryChoicesLeafKnown), ids=[f"mapShape={shape}" for shape in A001417.dictionaryChoicesLeafKnown])
+@pytest.mark.parametrize('mapShape', (pytest.param(A001417.mapShape2上4Dimensional, id='2^4-dimensional'), pytest.param(A001417.mapShape2上5Dimensional, id='2^5-dimensional'), pytest.param(A001417.mapShape2上6Dimensional, id='2^6-dimensional')))
 def test_getChoicesLeaf(mapShape: tuple[int, ...]) -> None:
 	"""Verify getChoicesLeaf against authoritative pile range data for all piles."""
 	state: StateElimination = StateElimination(mapShape=mapShape)
@@ -145,11 +141,14 @@ def test_getChoicesLeaf(mapShape: tuple[int, ...]) -> None:
 		boxOfLeavesPileActual: tuple[int, ...] = tuple(getIteratorOfLeaves(getChoicesLeaf(state, pile)))
 		boxOfLeavesPileAuthoritativeData: tuple[int, ...] = dictionaryChoicesLeafAuthoritativeData[pile]
 
-		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, 'getChoicesLeaf', pile, mapShape)
+		assertEqualTo(boxOfLeavesPileActual, boxOfLeavesPileAuthoritativeData, getChoicesLeaf.__name__, pile, mapShape)
 
-@pytest.mark.parametrize("totalDimensions", [5, 6], ids=lambda totalDimensions: f"2^{totalDimensions}-dimensional")
-@pytest.mark.parametrize("creaseKind,creaseFunction,dictionaryExpectedByMapShape", [("increase", getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown), ("decrease", getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown)], ids=["increase", "decrease"])
-def test_getLeavesCrease(creaseKind: str, creaseFunction: CallableFunction[[StateElimination, int], Iterable[int]], dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]], totalDimensions: int) -> None:
+@pytest.mark.parametrize('totalDimensions', (pytest.param(5, id='2^5-dimensional'), pytest.param(6, id='2^6-dimensional')))
+@pytest.mark.parametrize('creaseFunction, dictionaryExpectedByMapShape', (
+	pytest.param(getLeavesCreasePost, A001417.dictionaryCreasesIncreaseKnown, id='increase')
+	, pytest.param(getLeavesCreaseAnte, A001417.dictionaryCreasesDecreaseKnown, id='decrease')
+))
+def test_getLeavesCrease(creaseFunction: CallableFunction[[StateElimination, int], Iterable[int]], dictionaryExpectedByMapShape: dict[tuple[int, ...], dict[int, list[int]]], totalDimensions: int) -> None:
 	mapShape: tuple[int, ...] = (2,) * totalDimensions
 	state: StateElimination = StateElimination(mapShape=mapShape)
 	dictionaryExpectedByLeaf: dict[int, list[int]] = dictionaryExpectedByMapShape[mapShape]

@@ -9,7 +9,7 @@ from mapFolding.kitFilesystem import readText, writeText
 from mapFolding.oeis._beDRY import format_bFile, formatOEISid, makeValuesKnown, parse_bFile, parseEntry, parseOffset
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
 from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
-from mapFolding.oeis._theSSOT import oeisIDsImplemented, path_oeisdata, pathSnapshot, pathTerms
+from mapFolding.oeis._theSSOT import oeisIDsImplemented, pathSnapshot, pathTerms
 from operator import add
 from typing import TYPE_CHECKING
 
@@ -273,7 +273,7 @@ boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(oeisIDsImplemented, pa
 """Implemented OEIS IDs without an entry in `pathSnapshot`."""
 if boxOfOEISidAbsent:
 	from mapFolding.oeis._oeisdataClone import checkoutSnapshot
-	checkoutSnapshot(boxOfOEISidAbsent, path_oeisdata, pathSnapshot)
+	checkoutSnapshot(boxOfOEISidAbsent)
 
 dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(oeisIDsImplemented, map(_getMetadataOEISid, oeisIDsImplemented), strict=True))
 """Metadata for every implemented OEIS sequence."""

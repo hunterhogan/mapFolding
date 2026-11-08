@@ -241,6 +241,7 @@ Koehler
 Kplus
 kwarguments
 kwatatype
+kwdefaults
 kwonlyargs
 kwour
 Laguë

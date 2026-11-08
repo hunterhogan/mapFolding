@@ -8,6 +8,8 @@ distinguish a pinned leaf index from a `ChoicesLeaf` without validating index bo
 Contents
 --------
 Boolean antecedents
+	beansWithoutCornbread
+		Test whether a permutation space pins one leaf of a beans-and-cornbread pair without the other.
 	choicesLeaf吗
 		Identify a `ChoicesLeaf` and narrow the value's type.
 	leafInChoicesLeaf吗
@@ -31,13 +33,14 @@ Filtering functions
 from __future__ import annotations
 
 from gmpy2 import bit_test as isBit1吗
-from mapFolding import 零
+from mapFolding import 一, 零, 首一, 首零一
 from mapFolding.theTypes import ChoicesLeaf, DimensionIndex, Leaf, LeafSpace
 from operator import attrgetter
 from typing import TYPE_CHECKING, TypeIs
+from Z0Z_tools import DOTvalues
 
 if TYPE_CHECKING:
-	from mapFolding.dataBaskets import PermutationSpace
+	from mapFolding.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding.theTypes import Pile, PinnedLeaves
 
 #======== Boolean antecedents ================================================
@@ -188,6 +191,29 @@ def pileChoicesLeaf吗(pileLeafSpace: tuple[Pile, LeafSpace]) -> TypeIs[tuple[Pi
 
 	"""
 	return isinstance(pileLeafSpace[0], int) and choicesLeaf吗(pileLeafSpace[1])
+
+def beansWithoutCornbread(state: StateElimination, permutationSpace: PermutationSpace) -> bool:
+	"""Test whether `permutationSpace` pins one leaf of a beans-and-cornbread pair without the other.
+
+	(AI generated docstring)
+
+	The pairs are leaves `一 + 零` and `一`, and leaves `首一(state.totalDimensions)` and
+	`首零一(state.totalDimensions)`. A pinned leaf is a value of `permutationSpace`.
+
+	Parameters
+	----------
+	state : StateElimination
+		Elimination state supplying `totalDimensions` for the head-relative pair.
+	permutationSpace : PermutationSpace
+		Permutation space whose values are tested.
+
+	Returns
+	-------
+	beansWithoutCornbread : bool
+		`True` when, for at least one pair, exactly one leaf is a value of `permutationSpace`.
+	"""
+	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace))
+		for beans, cornbread in ((一 + 零, 一), (首一(state.totalDimensions), 首零一(state.totalDimensions))))
 
 #======== Filtering functions ================================================
 

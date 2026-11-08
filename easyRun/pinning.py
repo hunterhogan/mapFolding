@@ -1,15 +1,15 @@
 from __future__ import annotations
 
+from easyRun.verifyPinning import verifyPinning2Dn
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_cytoolz.curried import map as toolz_map
 from mapFolding import pinIt, 首一
-from mapFolding.choicesLeaf import getChoicesLeaf, getIteratorOfLeaves, getLookupChoicesLeaf, lengthChoicesLeaf
+from mapFolding.choicesLeaf import getLookupChoicesLeaf, lengthChoicesLeaf
 from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
-from mapFolding.oeis import printEasyRunBenchmark
 from math import prod
 from operator import methodcaller
 from pprint import pprint
@@ -32,11 +32,10 @@ def printStatisticsPermutations(state: StateElimination) -> None:
 
 if __name__ == '__main__':
 	state: StateElimination = StateElimination((2,) * 5)
-	# TODO find the verification function for pinnings.
-	#  FOUND IT! easyRun\verifyPinning.py
 	if True:
 		timeStart: float = time.perf_counter()
 		state = pinIt.pinLeavesDimensions0零一(state)
+		verifyPinning2Dn(state)
 
 		printStatisticsPermutations(state)
 	else:

@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal
+from hunterMakesPy import oneIndexed
+from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, ShapeArray, ShapeSlicer
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.triangleData import triangleBeyondInt64, triangleDense, triangleInt64Edges
+from numba import jit
 from typing import TYPE_CHECKING
+import numpy
 import pytest
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from mapFolding.theTypes import 形Triangle
+	from mapFolding.theTypes import 形Array2Dint64, 形Triangle
 
 @pytest.mark.parametrize('triangle, 次diagonal, rowLength, expected', (
 	pytest.param(triangleDense, 1, int, {2: 13, 3: 23}, id='last-cells-partial'),
@@ -33,3 +36,41 @@ def test_makeLookupDiagonal(triangle: 形Triangle, 次diagonal: int, rowLength: 
 ))
 def test_flattenTriangle(triangle: 形Triangle, rowLength: Callable[[int], int], rowStart: int, offset: int, expected: dict[int, int]) -> None:
 	assertEqualTo(flattenTriangle(triangle, rowLength, rowStart, offset), expected, flattenTriangle.__name__, triangle, rowStart, offset)
+
+次Values: int = 2
+次Subset: int = 3
+slicerValues: ShapeSlicer = ShapeSlicer(at=次Values, length=...)
+
+@jit(cache=False, error_model='numpy', fastmath=True, forceinline=True, locals={})
+def exerciseShapeObjectsNumba(length: int, indexes: int, values: tuple[int, ...]) -> 形Array2Dint64:
+	arrayTarget: 形Array2Dint64 = numpy.zeros(ShapeArray(indexes=indexes, length=length), dtype=numpy.int64)
+	arrayTarget[slicerValues] = values
+	arrayTarget[ShapeSlicer(at=次Subset, length=slice(oneIndexed, length))] = values[oneIndexed:]
+	arrayTarget[slicerValues] >>= oneIndexed
+	return arrayTarget
+
+@pytest.mark.parametrize(
+	'length, indexes, values, expected',
+	[
+		pytest.param(
+			3,
+			5,
+			(2, 3, 5),
+			(
+				(0, 0, 1, 0, 0),
+				(0, 0, 1, 3, 0),
+				(0, 0, 2, 5, 0),
+			),
+			id='keywordConstructedNamedTuples',
+		),
+	],
+)
+def test_exerciseShapeObjectsNumba(
+	length: int,
+	indexes: int,
+	values: tuple[int, ...],
+	expected: tuple[tuple[int, ...], ...],
+) -> None:
+	actual: 形Array2Dint64 = exerciseShapeObjectsNumba(length, indexes, values)
+
+	assertEqualTo(tuple(map(tuple, actual.tolist())), expected, exerciseShapeObjectsNumba.__name__, length, indexes, values)  # ty: ignore[unresolved-attribute]

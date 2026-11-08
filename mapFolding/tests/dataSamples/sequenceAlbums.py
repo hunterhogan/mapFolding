@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import TYPE_CHECKING
 import pytest
 
@@ -29,6 +28,7 @@ albumStamps4: list[Folding] = [
 albumStampsBlank4: list[Folding] = [(1, 4, 3, 2), (1, 2, 3, 4), (2, 1, 4, 3), (1, 3, 4, 2), (1, 2, 4, 3)]
 
 albumSemi4: list[Folding] = [(1, 4, 3, 2), (1, 3, 4, 2), (1, 2, 4, 3), (1, 2, 3, 4)]
+contentsAlbumSemi4: str = '1,4,3,2\n1,3,4,2\n1,2,4,3\n1,2,3,4\n'
 
 albumSemi6: list[Folding] = [
 	(1, 6, 5, 4, 3, 2),
@@ -285,12 +285,12 @@ parametersEnumeration: tuple[ParameterSet, ...] = (
 	, pytest.param(2, 'semi-meanders symmetric', 'bilateralConcurrent', 2, 'A000560', id='concurrent-two-symmetric-offset')
 )
 
-parametersErrors: tuple[ParameterSet, ...] = (
+parametersEnumerationErrors: tuple[ParameterSet, ...] = (
 	pytest.param(6, 'unknown', 'permutations', None, None, KeyError, id='unknown-kind')
 	, pytest.param(4, '', 'permutations', None, None, KeyError, id='empty-kind')
-	, pytest.param(4, 'semi', 'permutations', Path('existing.album'), None, FileExistsError, id='existing-album')
-	, pytest.param(4, 'semi', 'bilateral', Path('existing.album'), None, FileExistsError, id='existing-album-bilateral')
-	, pytest.param(4, 'semi', 'bilateralConcurrent', Path('existing.album'), 2, FileExistsError, id='existing-album-concurrent')
+	, pytest.param(4, 'semi', 'permutations', contentsAlbumSemi4, None, FileExistsError, id='existing-album')
+	, pytest.param(4, 'semi', 'bilateral', contentsAlbumSemi4, None, FileExistsError, id='existing-album-bilateral')
+	, pytest.param(4, 'semi', 'bilateralConcurrent', contentsAlbumSemi4, 2, FileExistsError, id='existing-album-concurrent')
 	, pytest.param(4, 'stamps', 'bilateral', None, None, KeyError, id='bilateral-stamps-unimplemented')
 	, pytest.param(4, 'stamps blank', 'bilateral', None, None, KeyError, id='bilateral-blank-unimplemented')
 	, pytest.param(4, 'meanders', 'bilateral', None, None, KeyError, id='bilateral-meanders-unimplemented')
