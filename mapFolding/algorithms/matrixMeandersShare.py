@@ -1,10 +1,7 @@
 from __future__ import annotations
 
-from functools import cache
-from mapFolding.beDRY import catalan, dotProduct, 工boxOfBasisCatalan
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
-from math import comb as nCr
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -102,103 +99,6 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
 		raise ValueError(message)
 
 	return lookupMeanders
-
-#================== Buckets =======================================================================
-
-totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254
-	, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
-
-# TODO fix this crap that has destroyed matrixMeanders.
-# I hate my life.
-
-coefficientsGrowthSemi: tuple[tuple[tuple[int, int, int], tuple[int, int, int]], ...] = (
-	((3, -2, 2), (1, 0, 0))
-	, ((11, -15, 4), (3, -2, 2))
-	, ((25, -62, 17), (7, -11, 3))
-	, ((57, -189, 26), (16, -43, 11))
-	, ((140, -612, 84), (39, -139, 16))
-	, ((313, -1665, 149), (88, -414, 56))
-	, ((736, -4670, 419), (206, -1155, 89))
-	, ((1678, -12261, 808), (471, -3160, 283))
-	, ((3829, -31894, 2124), (1075, -8205, 483))
-	, ((8769, -81418, 4246), (2461, -21402, 1425))
-	, ((19791, -203954, 10802), (5563, -53588, 2560))
-	, ((45077, -507404, 21917), (12660, -135124, 7153))
-)
-
-@cache
-def countDyckCuts(distance: int) -> int:
-	total: int = 0
-	k: int = 0
-	while 2 * k <= distance:
-		total += (distance - 2 * k + 1) * nCr(2 * distance - 2 * k + 2, k) // (distance - k + 1)
-		k += 1
-	return total
-
-@cache
-def getTotalsMaximum(boundary: int) -> tuple[int, int]:
-	totalBucketsMaximum: int = catalan(boundary + 1) + dotProduct(
-		(min(3 * k - 1 + boundary % 2, 3 * (boundary + 1 - k), 3 * boundary // 2) for k in range(boundary + 1))
-		, 工boxOfBasisCatalan(boundary + 1), strict=True)
-	totalStatesMaximum: int = dotProduct(
-		(1 + min(k - (boundary + 1) % 2, boundary + 1 - k) for k in range(1, boundary + 2))
-		, 工boxOfBasisCatalan(1, boundary + 2), strict=True)
-	return totalBucketsMaximum, totalStatesMaximum
-
-@cache
-def getTotalsMeanders(n: int, boundary: int) -> tuple[int, int]:
-	totalBuckets: int = 0
-	nLess_boundary: int = n - boundary
-	distance: int = nLess_boundary - 1 + n % 2
-	totalArcCodes: int = -(distance % 2 == 0)
-	while 0 <= distance:
-		totalCuts: int = countDyckCuts(distance)
-		totalPeaks: int = countDyckCuts(distance - 1) if distance else 0
-		totalBuckets += 4 * totalCuts - totalPeaks
-		if distance % 2 == 0:
-			totalBuckets -= 4 * catalan(distance // 2)
-		totalArcCodes += totalCuts
-		distance -= 2
-	if n % 2 == 0:
-		totalCuts = countDyckCuts(nLess_boundary - 1)
-		totalPeaks = countDyckCuts(nLess_boundary - 2) if 2 <= nLess_boundary else 0
-		totalBuckets += 4 * totalCuts - totalPeaks
-		if nLess_boundary % 2:
-			totalBuckets -= 2 * catalan(nLess_boundary // 2)
-		totalArcCodes += totalCuts
-	return totalBuckets, totalArcCodes
-
-def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
-	totalBuckets: int = (355 * totalArcCodes + 99) // 100
-	nLess_boundary: int = state.n - state.boundary
-
-	if 3 * state.boundary + 1 + state.boundary % 2 <= state.n or (state.kind == 'meanders' and state.boundary == 1 and state.n == 4):
-		totalBucketsKnown, totalStatesKnown = getTotalsMaximum(state.boundary)
-	elif state.kind == 'semi' and 3 * state.boundary <= state.n <= 3 * state.boundary + state.boundary % 2:
-		totalBucketsKnown, totalStatesKnown = getTotalsMaximum(state.boundary)
-		if state.n == 3 * state.boundary + 1:
-			totalStatesMissing: int = 1
-		elif state.boundary % 2:
-			totalStatesMissing = 1 << (state.boundary - 1)
-		else:
-			totalStatesMissing = 3 << (state.boundary - 2)
-		totalBucketsKnown -= totalStatesMissing
-		totalStatesKnown -= totalStatesMissing
-		if state.boundary % 2 == 0:
-			totalBucketsKnown += 1
-	elif state.kind == 'meanders' and nLess_boundary < state.boundary:
-		totalBucketsKnown, totalStatesKnown = getTotalsMeanders(state.n, state.boundary)
-	elif (state.kind == 'semi' and nLess_boundary <= len(coefficientsGrowthSemi)
-			and (nLess_boundary == 1 or 3 * nLess_boundary <= state.n)):
-		coefficientsBuckets, coefficientsArcCodes = coefficientsGrowthSemi[nLess_boundary - 1]
-		totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2), strict=True)
-		totalStatesKnown = dotProduct(coefficientsArcCodes, (state.n // 2, 1, state.n % 2), strict=True)
-	else:
-		return totalBuckets if totalArcCodes else getTotalsMaximum(state.boundary)[0]
-
-	if not totalArcCodes or totalArcCodes == totalStatesKnown:
-		return totalBucketsKnown
-	return min(totalBuckets, totalBucketsKnown)
 
 # SEMIOTICS
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
@@ -298,3 +198,51 @@ def prune(state: StateMeanders) -> StateMeanders:
 	if not state.lookupMeanders:
 		state.boundary = 0
 	return state
+
+#================== Buckets =======================================================================
+
+totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254
+	, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
+
+# TODO remake `getTotalBuckets` from scratch.
+
+# Factors:
+# 	[ ] Intentionally incomplete arcCode to total meanders dictionaries sometimes require more
+# 		buckets. Crazy, but true. Can `research/matrixMeanders/fixed_deficit_semimeanders.py` help
+# 		me find a formula for this?
+# 	- The starting quantity of `arcCode`.
+# 	- The value(s) of the starting `arcCode`.
+# 	- n
+# 	- parity of n
+# 	- boundary
+# 	- parity of boundary
+# 	- Whether this totalBuckets is increasing, as compared to all of the prior totalBuckets.
+# 	- If increasing, is it exponential or logarithmic?
+# 	- The maximum value.
+# 	- If decreasing, I don't really know the factors.
+# 	- If I know the actual value or if I must estimate it.
+
+# Figure out an intelligent flow for so many factors.
+def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
+	"""Estimate the output allocation length for one transfer-matrix step.
+
+	(AI generated docstring)
+
+	You can use this function to choose an initial output-buffer length from the number of input
+	records and the transfer boundary. The estimate can be smaller than the required allocation;
+	callers that write additional records must allow the buffer to grow.
+
+	Parameters
+	----------
+	state : StateMeanders
+		The current transfer-matrix state.
+	totalArcCodes : int = 0
+		Number of unique input `arcCode` at the current boundary.
+
+	Returns
+	-------
+	totalBuckets : int
+		The exact or estimated number of non-unique `arcCode` rows to allocate.
+	"""
+	totalBuckets: int = (355 * totalArcCodes + 99) // 100
+	return max(totalBuckets, totalBucketsMaximumBy_boundary.get(state.boundary, totalBuckets))

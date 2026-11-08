@@ -26,7 +26,7 @@ def 工repo(path_oeisdata: Path | None = None) -> Repo:
 	else:
 		repo = Repo.clone_from(url_oeisdata, path_oeisdata, multi_options=['--filter=blob:none', '--depth=1', '--sparse', '--no-checkout'])
 		repo.git.config('lfs.fetchexclude', '')
-		repo.git.sparse_checkout('set', '--no-cone', '/time.txt')
+		repo.git.sparse_checkout('set', '--no-cone', '!/*')
 		repo.git.checkout('main')
 	return repo
 
@@ -47,10 +47,6 @@ def checkoutSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata:
 	checkout_oeisdata(boxOfOEISid, 工repo(path_oeisdata))
 	return copy_oeisdata(makeBoxOfPathFilename(boxOfOEISid, PurePosixPath()), path_oeisdata, pathSnapshot)
 
-# TODO eliminate the time.txt process.
 def updateSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
-	path_oeisdata = path_oeisdata or path_oeisdataDefault
-	pathSnapshot = pathSnapshot or pathSnapshotDefault
 	update_oeisdata(工repo(path_oeisdata))
-	checkoutSnapshot(boxOfOEISid, path_oeisdata, pathSnapshot)
-	return copy_oeisdata((PurePosixPath('time.txt'),), path_oeisdata, pathSnapshot)
+	return checkoutSnapshot(boxOfOEISid, path_oeisdata, pathSnapshot)

@@ -13,8 +13,6 @@ if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit
 	from pathlib import Path
 
-# TODO Make low-number albums for sequences for which it works. Put guards on non-working cases.
-
 if __name__ == '__main__':
 	mapShape: tuple[int, ...] = (2, 2)
 	CPUlimit: ConcurrencyLimit = -2

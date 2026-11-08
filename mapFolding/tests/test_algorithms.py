@@ -161,11 +161,15 @@ def test_enumerateSequencesError(
 	, pytest.param((5,), 'p5.album', 5, (1, 5), id='single-dimension')
 	, pytest.param((2, 2), 'p2x2.album', 1, (2, 2), id='A001417-2')
 	, pytest.param((2, 2, 2), 'p2x2x2.album', 6, (2, 2, 2), id='A001417-3')
-	, pytest.param((2, 3), 'p2x3.album', 5, None, id='A001415')
-	, pytest.param((3, 2), 'p3x2.album', 5, None, id='A001416')
+	, pytest.param((2, 3), 'p2x3.album', 5, (2, 3), id='A001415-3')
+	, pytest.param((2, 4), 'p2x4.album', 20, (2, 4), id='A001415-4')
+	, pytest.param((2, 5), 'p2x5.album', 99, (2, 5), id='A001415-5')
+	, pytest.param((2, 6), 'p2x6.album', 438, (2, 6), id='A001415-6')
+	, pytest.param((3, 2), 'p3x2.album', 5, None, id='A001416-2')
+	, pytest.param((3, 4), 'p3x4.album', 648, (3, 4), id='A001416-4')
 	, pytest.param((2, 3, 2), 'p2x3x2.album', 102, None, id='mixed-three-dimensions')
 	, pytest.param((2, 2, 2, 2), 'p2x2x2x2.album', 144, (2, 2, 2, 2), id='A001417-4')
-	, pytest.param((3, 3), 'p3x3.album', 76, None, id='A001418')
+	, pytest.param((3, 3), 'p3x3.album', 76, (3, 3), id='A001418-3')
 ), indirect=['albumKnown'])
 def test_insertion(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit, expected: str, totalRepresentatives: int, albumKnown: tuple[Folding, ...]
 	, pathAlbum: Path) -> None:
