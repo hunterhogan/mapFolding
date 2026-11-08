@@ -183,7 +183,7 @@ boxOfRelations: tuple[tuple[Equality | BooleanFalse | BooleanTrue, Range], ...] 
 	, (Eq(A337581(n), n - 1), Range(2, 4))
 )
 
-def getSequenceCall(oeisID: OEISid, n: int) -> AppliedUndef:
+def getSequenceCall(oeisID: OEISid, n: int):
 	"""Represent a b-file index as a symbolic sequence value or triangle cell.
 
 	(AI generated docstring)
@@ -194,7 +194,7 @@ def getSequenceCall(oeisID: OEISid, n: int) -> AppliedUndef:
 	if oeisID in dictionaryTriangle:
 		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
 		row, 次column = locateIndex(n, metadata['rowLength'], metadata['rowStart'], metadata['offset'])
-		call: AppliedUndef = sequence(row, 次column + metadata['columnStart'])
+		call = sequence(row, 次column + metadata['columnStart'])
 	else:
 		call = sequence(n)
 	return call
@@ -260,7 +260,7 @@ def solveRelation(wanted: AppliedUndef, equation: Equality) -> Expr | None:
 	"""
 	boxOfCalls: set[AppliedUndef] = equation.atoms(AppliedUndef) - {wanted}
 	lookupKnown: dict[AppliedUndef, Expr] = dict(zip(boxOfCalls, map(getKnownValue, boxOfCalls), strict=True))
-	equationKnown: Equality | BooleanFalse | BooleanTrue = equation.xreplace(lookupKnown)
+	equationKnown: Boolean = equation.xreplace(lookupKnown)
 	formula: Expr | None = None
 	if equationKnown.atoms(AppliedUndef) == {wanted}:
 		boxOfValues: Set = solveset(equationKnown, wanted, domain=domainSymbolic)
@@ -304,7 +304,7 @@ def solveRelationValue(wanted: AppliedUndef, boxOfOEISidBasis: frozenset[OEISid]
 	boxOfValues: tuple[int | None, ...] = tuple(takewhile(partial(is_not, None), map(evaluateCallDeriving, boxOfCalls)))
 	value: int | None = None
 	if len(boxOfValues) == len(boxOfCalls):
-		equationKnown: Equality | BooleanFalse | BooleanTrue = equation.xreplace(dict(zip(boxOfCalls, map(Integer, boxOfValues), strict=True)))
+		equationKnown: Boolean = equation.xreplace(dict(zip(boxOfCalls, map(Integer, boxOfValues), strict=True)))
 		boxOfSolutions: Set = solveset(equationKnown, wanted, domain=domainSymbolic)
 		if isinstance(boxOfSolutions, FiniteSet) and len(boxOfSolutions) == 1:
 			(solution,) = boxOfSolutions
@@ -319,7 +319,7 @@ def deriveValue(boxOfOEISidBasis: frozenset[OEISid], boxOfOEISidDeriving: frozen
 
 	Relations with fewer values to derive are attempted first.
 	"""
-	call: AppliedUndef = getSequenceCall(lookupOEISid[wanted.func], as_int(wanted.args[0]))
+	call = getSequenceCall(lookupOEISid[wanted.func], as_int(wanted.args[0]))
 	boxOfEquations: Iterator[Equality] = filter(methodcaller('has', wanted), chain.from_iterable(map(partial(bindRelation, call), boxOfRelations)))
 	boxOfValues: Iterator[int | None] = map(partial(solveRelationValue, wanted, boxOfOEISidBasis, boxOfOEISidDeriving, oeisIDfor_n)
 		, sorted(boxOfEquations, key=partial(countCallsOutside, boxOfOEISidBasis, wanted)))
@@ -354,9 +354,9 @@ def getMissingFormula(equation: Equality) -> tuple[OEISid, int, Expr] | None:
 			missing = (lookupOEISid[wanted.func], as_int(wanted.args[0]), formula)
 	return missing
 
-def getCallsKnown(sequence: type[AppliedUndef]) -> Iterator[AppliedUndef]:
+def getCallsKnown(sequence: type[AppliedUndef]):
 	oeisID: OEISid = lookupOEISid[sequence]
-	boxOfCalls: Iterator[AppliedUndef] = map(partial(getSequenceCall, oeisID), getValuesKnown(oeisID))
+	boxOfCalls = map(partial(getSequenceCall, oeisID), getValuesKnown(oeisID))
 	return unique(boxOfCalls, key=compose_left(attrgetter('args'), itemgetter(0)))
 
 def getMissingFormulas() -> tuple[tuple[OEISid, int, Expr], ...]:
@@ -368,26 +368,23 @@ def getMissingFormulas() -> tuple[tuple[OEISid, int, Expr], ...]:
 	several unknown values remain undetermined.
 	"""
 	boxOfSequences: Iterator[type[AppliedUndef]] = filter(Tuple(*map(itemgetter(0), boxOfRelations)).has, lookupSymbolic.values())
-	boxOfCallsKnown: Iterator[AppliedUndef] = chain.from_iterable(map(getCallsKnown, boxOfSequences))
+	boxOfCallsKnown = chain.from_iterable(map(getCallsKnown, boxOfSequences))
 	boxOfEquations: dict[Equality, None] = dict.fromkeys(chain.from_iterable(starmap(bindRelation, CartesianProduct(boxOfCallsKnown, boxOfRelations))))
 	return tuple(unique(filter(None, map(getMissingFormula, boxOfEquations)), key=itemgetter(0, 1)))
 
-def solveDifference(wanted: AppliedUndef, difference: Expr) -> Expr | None:
+def solveDifference(wanted: AppliedUndef, difference: Expr) -> Expr:
 	"""Solve `difference = 0` for one nonnegative expression of the requested value.
 
 	(AI generated docstring)
 	"""
 	coefficient: Expr = difference.diff(wanted).doit()
 	if coefficient != 0 and not coefficient.has(wanted):
-		solution: Expr | None = -difference.xreplace({wanted: 0}) / coefficient
+		solution: Expr = -difference.xreplace({wanted: S.Zero}) / coefficient
 	else:
-		boxOfSolutions: tuple[Expr, ...] = tuple(filter(attrgetter('is_nonnegative'), solve(difference, wanted)))
-		solution = None
-		if len(boxOfSolutions) == 1:
-			solution = boxOfSolutions[0]
+		(solution,) = filter(attrgetter('is_nonnegative'), solve(difference, wanted))
 	return solution
 
-def solveRelationSymbolic(relation: tuple[Equality, Range], sequence: type[AppliedUndef]) -> tuple[OEISid, Expr, Boolean] | None:
+def solveRelationSymbolic(relation: tuple[Equality, Range], sequence: type[AppliedUndef]) -> tuple[OEISid, Expr, Boolean]:
 	"""Solve a relation for a sequence at the general index `n` and state the admissible indices.
 
 	(AI generated docstring)
@@ -399,28 +396,24 @@ def solveRelationSymbolic(relation: tuple[Equality, Range], sequence: type[Appli
 	boxOfIndices: Iterator[Expr] = map(compose_left(attrgetter('args'), itemgetter(0)), filterfalse(methodcaller('has', k), equation.atoms(sequence)))
 	index: Expr = max(boxOfIndices, key=juxt(methodcaller('coeff', n), methodcaller('subs', n, 0)))
 	nSequence: Dummy = Dummy('n', integer=True, nonnegative=True)
-	nRelation: Expr = solve(Eq(index, nSequence), n)[0]
+	nRelation: Expr = (nSequence - index.subs(n, 0)) / index.coeff(n)
 	difference: Expr = piecewise_fold((equation.lhs - equation.rhs).subs(n, nRelation))
 	if isinstance(difference, Piecewise):
 		boxOfBranches: tuple[ExprCondPair, ...] | tuple[tuple[Expr, Boolean], ...] = difference.args
 	else:
 		boxOfBranches = ((difference, true),)
 	boxOfDifferences, boxOfConditions = zip(*boxOfBranches, strict=True)
-	boxOfSolutions: tuple[Expr | None, ...] = tuple(map(partial(solveDifference, sequence(nSequence)), boxOfDifferences))
-	solution: tuple[OEISid, Expr, Boolean] | None = None
-	if None not in boxOfSolutions:
-		numerator, denominator = fraction(together(nRelation))
-		lowerBound: Expr = ceiling(index.subs(n, domain.inf))
-		condition: Boolean = Eq(Mod(numerator - domain.inf * denominator, domain.step * denominator), 0)
-		if getMetadata(oeisID)['offset'] < lowerBound:
-			condition = And(Ge(nSequence, lowerBound), condition)
-		if domain.sup.is_finite:
-			condition = And(condition, Le(nSequence, floor(index.subs(n, domain.sup))))
-		formula: Expr = Piecewise(*zip(boxOfSolutions, boxOfConditions, strict=True))
-		solution = (oeisID, formula.xreplace({nSequence: n}), condition.xreplace({nSequence: n}))
-	return solution
+	formula: Expr = Piecewise(*zip(map(partial(solveDifference, sequence(nSequence)), boxOfDifferences), boxOfConditions, strict=True))
+	numerator, denominator = fraction(together(nRelation))
+	lowerBound: Expr = ceiling(index.subs(n, domain.start))
+	condition: Boolean = Eq(Mod(numerator - domain.start * denominator, domain.step * denominator), 0)
+	if getMetadata(oeisID)['offset'] < lowerBound:
+		condition = And(Ge(nSequence, lowerBound), condition)
+	if domain.stop.is_finite:
+		condition = And(condition, Le(nSequence, floor(index.subs(n, domain.stop - domain.step))))
+	return (oeisID, formula.xreplace({nSequence: n}), condition.xreplace({nSequence: n}))
 
-def makeSolutionsRelation(relation: tuple[Equality | BooleanFalse | BooleanTrue, Range]) -> Iterator[tuple[OEISid, Expr, Boolean] | None]:
+def makeSolutionsRelation(relation: tuple[Equality | BooleanFalse | BooleanTrue, Range]) -> Iterator[tuple[OEISid, Expr, Boolean]]:
 	equation, domain = relation
 	if isinstance(equation, Equality):
 		boxOfSequences: set[type[AppliedUndef]] = set(map(attrgetter('func'), filterfalse(methodcaller('has', k), equation.atoms(AppliedUndef))))
@@ -438,4 +431,4 @@ def makeSolutionsSymbolic() -> tuple[tuple[OEISid, Expr, Boolean], ...]:
 		compose_left(itemgetter(0), methodcaller('has', *boxOfSequencesTriangle))
 		, boxOfRelations
 	)
-	return tuple(filter(None, chain.from_iterable(map(makeSolutionsRelation, boxOfRelationsUnary))))
+	return tuple(chain.from_iterable(map(makeSolutionsRelation, boxOfRelationsUnary)))
