@@ -27,7 +27,7 @@ from astToolkit.changeDef import extractClassDef
 from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.ohWow import unparseFindReplace
 from hunterMakesPy import raiseIfNone
-from hunterMakesPy.filesystemToolkit import importLogicalPath2Identifier
+from hunterMakesPy.kitFilesystem import importLogicalPath2Identifier
 from inspect import get_annotations
 from mapFolding.kitAST import IfThis, IngredientsFunction, LedgerOfImports
 from typing import cast, TYPE_CHECKING

@@ -1,6 +1,6 @@
 [project]
 name = "mapFolding"
-version = "0.38.0"
+version = "0.39.0"
 description = "Map folding, meanders, stamp folding, semi-meanders. Experiment with algorithm transformations, and analyze computational states."
 readme = "README.md"
 requires-python = ">=3.14"
@@ -44,7 +44,7 @@ dependencies = [
   "anyascii",
   "astToolkit>=0.13.0",
   "gmpy2",
-  "hunterMakesPy>=0.9.0",
+  "hunterMakesPy>=0.10.0",
   "more_itertools",
   "numba",
   "numba_progress",
@@ -70,6 +70,7 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
 ], oeisdata = ["dulwich>=1.2.21"], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
   "ortools; python_version < '3.15'",
   "pandas",
+  "dulwich",
   "polars>=1.44.2",
   "pyarrow",
   "pytest-env",

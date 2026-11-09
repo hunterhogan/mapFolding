@@ -28,7 +28,7 @@ from pathlib import PurePath
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.theTypes import Default
 	from os import PathLike
 	import ast

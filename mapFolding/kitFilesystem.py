@@ -64,7 +64,7 @@ from __future__ import annotations
 
 from csv import reader as csv_reader, writer as csv_writer
 from hunterMakesPy import errorL33T, oneIndexed
-from hunterMakesPy.filesystemToolkit import writeStringToHere
+from hunterMakesPy.kitFilesystem import writeStringToHere
 from itertools import repeat, tee
 from mapFolding.theSSOT import settingsPackage
 from operator import itemgetter
@@ -317,7 +317,7 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 
 	Test File Lifetime
 	------------------
-	This function writes through `hunterMakesPy.filesystemToolkit.writeStringToHere`.
+	This function writes through `hunterMakesPy.kitFilesystem.writeStringToHere`.
 	A later call to `saveTotal` normally replaces the test integer with the computed count.
 	This function does not reserve the path against concurrent writers or remove the test file
 	when subsequent computation fails.
@@ -403,7 +403,7 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	(AI generated docstring)
 
 	You can use this function to persist a completed integer count. This function first writes to
-	`pathFilename` using `hunterMakesPy.filesystemToolkit.writeStringToHere`. If that attempt
+	`pathFilename` using `hunterMakesPy.kitFilesystem.writeStringToHere`. If that attempt
 	fails, this function prints the count and attempts a file in the working directory.
 
 	Fallback Output
@@ -535,7 +535,7 @@ def writeText(contents: str, pathFilename: Path) -> Path:
 	(AI generated docstring)
 
 	This function creates the parent directory tree and delegates writing to
-	`hunterMakesPy.filesystemToolkit.writeStringToHere`. Existing contents are replaced.
+	`hunterMakesPy.kitFilesystem.writeStringToHere`. Existing contents are replaced.
 
 	Parameters
 	----------

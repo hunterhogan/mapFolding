@@ -47,8 +47,8 @@ import ast
 import dataclasses
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
 	from collections.abc import Callable
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.dataBaskets import StateMapFoldingSymmetric
 	from mapFolding.kitAST import IngredientsFunction, IngredientsModule
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass

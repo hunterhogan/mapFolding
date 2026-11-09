@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
-from hunterMakesPy.filesystemToolkit import writePython
+from hunterMakesPy.kitFilesystem import writePython
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import getDataFrameFoldings
 from mapFolding.theSSOT import settingsPackage

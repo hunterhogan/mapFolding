@@ -24,7 +24,7 @@ from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.theTypes import Default
 	from os import PathLike
 	from pathlib import PurePath

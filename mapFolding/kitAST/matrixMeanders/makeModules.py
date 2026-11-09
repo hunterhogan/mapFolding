@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.kitAST.numba.kitNumba import ParametersNumba
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath

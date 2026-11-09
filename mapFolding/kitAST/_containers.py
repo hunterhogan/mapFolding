@@ -44,7 +44,7 @@ from collections.abc import Iterable
 from humpy_cytoolz.functoolz import compose, curry
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
-from hunterMakesPy.filesystemToolkit import settings_autoflakeDEFAULT, settings_isortDEFAULT
+from hunterMakesPy.kitFilesystem import settings_autoflakeDEFAULT, settings_isortDEFAULT
 from itertools import chain, filterfalse, starmap
 from more_itertools import consume
 from operator import attrgetter, itemgetter, ne, not_

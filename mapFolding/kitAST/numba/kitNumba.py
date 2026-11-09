@@ -31,7 +31,7 @@ from __future__ import annotations
 
 from astToolkit import Be, Grab, IfThis, Make, NodeChanger, Then
 from collections.abc import Mapping
-from itertools import filterfalse, starmap, takewhile
+from itertools import filterfalse, takewhile
 from mapFolding.kitAST import IngredientsModule
 from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.kitAST.theSSOT import default
@@ -40,8 +40,8 @@ from typing_extensions import TypedDict
 import ast
 
 if TYPE_CHECKING:
-	from astToolkit import identifierDotAttribute
 	from collections.abc import Sequence
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.kitAST import IngredientsFunction
 	from mapFolding.theTypes import Default
 	from os import PathLike
