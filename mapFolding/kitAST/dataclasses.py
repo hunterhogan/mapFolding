@@ -22,7 +22,7 @@ Functions
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractClassDef
 from astToolkit.filesystem import parseLogicalPath2astModule
 from astToolkit.ohWow import unparseFindReplace
@@ -37,6 +37,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from _typeshed import AnnotationForm
 	from collections.abc import Callable, Iterable
+	from hunterMakesPy import identifierDotAttribute
 	from typing import Any, Literal
 
 # DEVELOPMENT Try to apply more of these concepts https://github.com/python/typing/discussions/2092.

@@ -13,7 +13,7 @@ Functions
 """
 from __future__ import annotations
 
-from astToolkit import Grab, identifierDotAttribute, NodeChanger, Then
+from astToolkit import Grab, NodeChanger, Then
 from astToolkit.changeDef import inlineFunctionDef
 from mapFolding.kitAST import IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, toDisk
 from mapFolding.kitAST.theSSOT import default
@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 	from typing import Any

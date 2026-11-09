@@ -22,7 +22,7 @@ Functions
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, Grab, hasDOTbody, identifierDotAttribute, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, Grab, hasDOTbody, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, toDisk
@@ -36,6 +36,7 @@ import operator
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
+	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 	from typing import Any

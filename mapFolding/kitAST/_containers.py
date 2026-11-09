@@ -36,7 +36,7 @@ Classes
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, identifierDotAttribute, IfThis, Make, NodeChanger, NodeTourist
+from astToolkit import Be, DOT, IfThis, Make, NodeChanger, NodeTourist
 from astToolkit.changeDef import extractFunctionDef, removeUnusedParameters
 from astToolkit.filesystem import write_astModule
 from collections import defaultdict
@@ -54,6 +54,7 @@ import dataclasses
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
+	from hunterMakesPy import identifierDotAttribute
 	from os import PathLike
 	from pathlib import Path, PurePath
 	from typing import Any
