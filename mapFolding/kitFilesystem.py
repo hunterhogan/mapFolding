@@ -514,9 +514,11 @@ def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diag
 	`mapFolding.dataBaskets.StateMeanders.totalMeanders` to a diagonal file.
 
 		```python
+		from mapFolding.oeis import settingsOEIS
+
 		writeDiagonal(
 			{n: state.totalMeanders},
-			makePathFilenameCount(settingsPackage.pathPackage / 'oeis' / 'A400429', 'diagonal', str(次diagonal), suffix='.csv'),
+			makePathFilenameCount(settingsOEIS.pathPackage / 'A400429', 'diagonal', str(次diagonal), suffix='.csv'),
 			次diagonal, append=True
 		)
 		```

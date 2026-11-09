@@ -42,10 +42,8 @@ Functions
 		Add missing terms to a local b-file and refresh shared known values.
 
 Variables
-	oeisIDsImplemented
-		List the sequence identifiers registered for metadata loading and sequence selection.
-	oeisIDsMapFoldingImplemented
-		List the sequence identifiers dispatched to map-folding algorithms.
+	settingsOEIS
+		Access OEIS package settings, paths, sequence identifiers, and symbolic configuration.
 
 Modules
 -------
@@ -55,7 +53,7 @@ byFormula
 from __future__ import annotations
 
 from mapFolding.oeis._beDRY import format_bFile as format_bFile
-from mapFolding.oeis._theSSOT import oeisIDsImplemented as oeisIDsImplemented, oeisIDsMapFoldingImplemented as oeisIDsMapFoldingImplemented
+from mapFolding.oeis._theSSOT import settingsOEIS as settingsOEIS
 
 # isort: split
 from mapFolding.oeis._metadata import (

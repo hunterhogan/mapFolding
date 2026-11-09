@@ -35,7 +35,7 @@ from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
 from itertools import chain, repeat
 from mapFolding.oeis._beDRY import formatBenchmarkRatio
 from mapFolding.oeis._metadata import dictionaryOEIS, getTriangle, getValuesKnown
-from mapFolding.oeis._theSSOT import oeisIDsMapFoldingImplemented
+from mapFolding.oeis._theSSOT import settingsOEIS
 from more_itertools import loops
 from operator import eq
 from typing import TYPE_CHECKING
@@ -93,7 +93,7 @@ def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 	(AI generated docstring)
 
 	You can use this function to inspect known folding totals for every map shape represented by
-	`mapFolding.oeis._theSSOT.oeisIDsMapFoldingImplemented`. This function retrieves known
+	`mapFolding.oeis.settingsOEIS.boxOfIDsMapFolding`. This function retrieves known
 	values with `mapFolding.oeis.getValuesKnown` and converts sequence indices to dimensions
 	with `makeMapShape`.
 
@@ -108,7 +108,7 @@ def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
 	Only registered map-folding sequences contribute values. `A007822`, which counts symmetric
 	foldings, is excluded. This function does not filter retrieval sentinels before shape conversion.
 	"""
-	return merge(*[keymap(partial(makeMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in oeisIDsMapFoldingImplemented])
+	return merge(*[keymap(partial(makeMapShape, oeisID), getValuesKnown(oeisID)) for oeisID in settingsOEIS.boxOfIDsMapFolding])
 
 def makeMapShape(oeisID: LiteralString | Literal['A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418', 'A007822'], n: int) -> tuple[int, ...]:
 	"""Convert a supported OEIS sequence identifier and index to map dimensions.

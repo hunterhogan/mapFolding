@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
-from mapFolding.oeis import getMetadata, makeMapShape, oeisIDsMapFoldingImplemented
+from mapFolding.oeis import getMetadata, makeMapShape, settingsOEIS
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.oeis._symbolic import getValueSymbolic
-from mapFolding.oeis._theSSOT import oeisIDsCountingImplemented
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -82,12 +81,12 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 		message: str = f"I received `{n = }`, but OEIS sequence `{oeisID = }` is not defined for values below `offset = {metadata['offset']}`."
 		raise ArithmeticError(message)
 
-	if ((f or oeisID not in oeisIDsCountingImplemented)
+	if ((f or oeisID not in settingsOEIS.boxOfIDsCounting)
 		and (valueSymbolic := getValueSymbolic(oeisID, n, f, oeisIDfor_n)) is not None):
 		totalFolds: int = valueSymbolic
 	elif n == metadata['offset']:
 		totalFolds = metadata['valuesKnown'][n]
-	elif not f and oeisID in oeisIDsMapFoldingImplemented:
+	elif not f and oeisID in settingsOEIS.boxOfIDsMapFolding:
 		totalFolds = countFolds(mapShape=makeMapShape(oeisID, n), **keywordArguments)
 	else:
 		match oeisID:

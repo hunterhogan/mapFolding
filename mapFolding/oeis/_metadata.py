@@ -9,7 +9,7 @@ from mapFolding.kitFilesystem import readText, writeText
 from mapFolding.oeis._beDRY import format_bFile, formatOEISid, makeValuesKnown, parse_bFile, parseEntry, parseOffset
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
 from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
-from mapFolding.oeis._theSSOT import oeisIDsImplemented, pathSnapshot, pathTerms
+from mapFolding.oeis._theSSOT import settingsOEIS
 from operator import add
 from typing import TYPE_CHECKING
 
@@ -168,7 +168,7 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int) -> dict[int, int]:
 	"""
 	return makeLookupDiagonal(getTriangle(oeisID), 次diagonal, getMetadataTriangle(oeisID)['rowLength'])
 
-def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Path = pathTerms) -> Path:
+def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Path = settingsOEIS.pathTerms) -> Path:
 	"""Add terms absent from the known values of `oeisID` to the terms b-file and update shared known values.
 
 	(AI generated docstring)
@@ -184,7 +184,7 @@ def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Pa
 	sequence : Mapping[int, int]
 		Computed values keyed by flat sequence index. Known values and existing terms-file values take
 		precedence over supplied values.
-	pathTerms : Path = `mapFolding.oeis._theSSOT.pathTerms`
+	pathTerms : Path = `mapFolding.oeis.settingsOEIS.pathTerms`
 		Directory in the oeisdata directory layout. Supply a directory outside the package for terms
 		that must remain private.
 
@@ -228,7 +228,7 @@ def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Pa
 	metadata['valueUnknown'] = max(metadata['valuesKnown'], default=metadata['offset'] - 1) + 1
 	return pathFilename
 
-def updateTriangle(oeisID: OEISid, triangle: 形Triangle, pathTerms: Path = pathTerms) -> Path:
+def updateTriangle(oeisID: OEISid, triangle: 形Triangle, pathTerms: Path = settingsOEIS.pathTerms) -> Path:
 	"""Add the cells of `triangle` to the local b-file for the triangle `oeisID`.
 
 	(AI generated docstring)
@@ -244,7 +244,7 @@ def updateTriangle(oeisID: OEISid, triangle: 形Triangle, pathTerms: Path = path
 	triangle : 形Triangle
 		Row numbers mapped to the cells of each row, starting with the first cell. A row can be a
 		prefix of the complete row.
-	pathTerms : Path = `mapFolding.oeis._theSSOT.pathTerms`
+	pathTerms : Path = `mapFolding.oeis.settingsOEIS.pathTerms`
 		Directory in the oeisdata directory layout, passed to `updateValuesKnown`.
 
 	Returns
@@ -258,24 +258,24 @@ def updateTriangle(oeisID: OEISid, triangle: 形Triangle, pathTerms: Path = path
 #================== Meat grinders =================================================================
 
 def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
-	lookupField: dict[str, list[str]] = parseEntry(readText(makePathFilenameEntry(oeisID, pathSnapshot)))
-	contents: str = readText(makePathFilename_bFile(oeisID, pathSnapshot), default='')
+	lookupField: dict[str, list[str]] = parseEntry(readText(makePathFilenameEntry(oeisID, settingsOEIS.pathSnapshot)))
+	contents: str = readText(makePathFilename_bFile(oeisID, settingsOEIS.pathSnapshot), default='')
 	if contents:
 		valuesKnown: dict[int, int] = parse_bFile(contents)
 	else:
 		valuesKnown = makeValuesKnown(lookupField)
-	contents = readText(makePathFilename_bFile(oeisID, pathTerms), default='')
+	contents = readText(makePathFilename_bFile(oeisID, settingsOEIS.pathTerms), default='')
 	if contents:
 		valuesKnown.update(dissoc(parse_bFile(contents), *valuesKnown))
 	return MetadataOEISid(description=' '.join(lookupField['%N']), offset=parseOffset(lookupField), valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 
-boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(oeisIDsImplemented, pathSnapshot)
-"""Implemented OEIS IDs without an entry in `pathSnapshot`."""
+boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(settingsOEIS.boxOfIDs, settingsOEIS.pathSnapshot)
+"""Implemented OEIS IDs without an entry in `settingsOEIS.pathSnapshot`."""
 if boxOfOEISidAbsent:
 	from mapFolding.oeis._oeisdataClone import checkoutSnapshot
 	checkoutSnapshot(boxOfOEISidAbsent)
 
-dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(oeisIDsImplemented, map(_getMetadataOEISid, oeisIDsImplemented), strict=True))
+dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(settingsOEIS.boxOfIDs, map(_getMetadataOEISid, settingsOEIS.boxOfIDs), strict=True))
 """Metadata for every implemented OEIS sequence."""
 dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 	'A001263': MetadataOEISidTriangle(**dictionaryOEIS['A001263'], rowLength=int, rowStart=1, columnStart=1),

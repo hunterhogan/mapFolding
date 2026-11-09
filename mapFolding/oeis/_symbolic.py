@@ -6,8 +6,7 @@ from humpy_cytoolz import compose_left, juxt, unique
 from itertools import chain, compress, filterfalse, starmap, takewhile
 from mapFolding.dataStructures import locateIndex, locateRow
 from mapFolding.oeis._metadata import dictionaryTriangle, getMetadata, getMetadataTriangle, getValuesKnown
-from mapFolding.oeis._theSSOT import (
-	domainSymbolic, kSymbolic as k, lookupOEISid, lookupSymbolic, nSymbolic as n, oeisIDsCountingImplemented)
+from mapFolding.oeis._theSSOT import settingsOEIS
 from operator import attrgetter, is_not, itemgetter, methodcaller
 from sympy import (
 	And, ceiling, Dummy, Eq, factorial, floor, fraction, Ge, Integer, Le, Mod, oo, Piecewise, piecewise_fold, Range, S, solve, solveset, Sum,
@@ -23,26 +22,29 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator
 	from mapFolding.oeis._dataBaskets import MetadataOEISidTriangle
 	from mapFolding.theTypes import OEISid
-	from sympy import Expr
+	from sympy import Expr, Symbol
 	from sympy.functions.elementary.piecewise import ExprCondPair
 	from sympy.logic.boolalg import Boolean, BooleanFalse, BooleanTrue
 	from sympy.sets.sets import Set
 	from typing import LiteralString
 
+n: Symbol = settingsOEIS.n
+k: Symbol = settingsOEIS.k
+
 (A000136, A000560, A000682, A001010, A001011, A005315, A005316, A007822, A060206, A077014,
 	A077054, A077460, A078591, A078592, A085973, A208357, A217310, A217318, A223093, A223094,
 	A223095, A227167, A259689, A259702, A301620, A333971, A334615, A337581
-	) = map(lookupSymbolic.__getitem__, (
+	) = map(settingsOEIS.lookupSymbolic.__getitem__, (
 	'A000136', 'A000560', 'A000682', 'A001010', 'A001011', 'A005315', 'A005316', 'A007822', 'A060206', 'A077014',
 	'A077054', 'A077460', 'A078591', 'A078592', 'A085973', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094',
 	'A223095', 'A227167', 'A259689', 'A259702', 'A301620', 'A333971', 'A334615', 'A337581'))
 (A006661, A076876, A259698, A259701, A259703, A339179, A400429, A400632, A400633
-	) = map(lookupSymbolic.__getitem__,
+	) = map(settingsOEIS.lookupSymbolic.__getitem__,
 	('A006661', 'A076876', 'A259698', 'A259701', 'A259703', 'A339179', 'A400429', 'A400632', 'A400633'))
 (A000108, A001246, A001263, A002415, A006657, A006658, A006659, A006660, A007746, A008828,
 	A014137, A014140, A045445, A053121, A060972, A077056, A259700, A260785,
 	A287548, A322507, A331499, A380369, A400630, A400631, A400634, A400635, A400636, A400637, A401693
-	) = map(lookupSymbolic.__getitem__, (
+	) = map(settingsOEIS.lookupSymbolic.__getitem__, (
 	'A000108', 'A001246', 'A001263', 'A002415', 'A006657', 'A006658', 'A006659', 'A006660', 'A007746', 'A008828',
 	'A014137', 'A014140', 'A045445', 'A053121', 'A060972', 'A077056', 'A259700', 'A260785',
 	'A287548', 'A322507', 'A331499', 'A380369', 'A400630', 'A400631', 'A400634', 'A400635', 'A400636', 'A400637', 'A401693'))
@@ -190,7 +192,7 @@ def getSequenceCall(oeisID: OEISid, n: int) -> AppliedUndef:
 
 	Triangle coordinates use the registered row lengths and mathematical column origin.
 	"""
-	sequence: type[AppliedUndef] = lookupSymbolic[oeisID]
+	sequence: type[AppliedUndef] = settingsOEIS.lookupSymbolic[oeisID]
 	if oeisID in dictionaryTriangle:
 		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
 		row, 次column = locateIndex(n, metadata['rowLength'], metadata['rowStart'], metadata['offset'])
@@ -205,7 +207,7 @@ def getFlatCall(expression: AppliedUndef) -> AppliedUndef:
 	(AI generated docstring)
 	"""
 	if len(expression.args) == 2:
-		oeisID: OEISid = lookupOEISid[expression.func]
+		oeisID: OEISid = settingsOEIS.lookupID[expression.func]
 		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
 		row, column = expression.args
 		expression = expression.func(locateRow(as_int(row), metadata['rowLength'], metadata['rowStart'], metadata['offset'])[
@@ -217,7 +219,7 @@ def getKnownValue(expression: AppliedUndef) -> Expr:
 
 	(AI generated docstring)
 	"""
-	return sympify(getValuesKnown(lookupOEISid[expression.func]).get(as_int(expression.args[0]), expression))
+	return sympify(getValuesKnown(settingsOEIS.lookupID[expression.func]).get(as_int(expression.args[0]), expression))
 
 def makeTermLast(summand: Expr, *limits: Tuple) -> Expr:
 	return summand.subs(dict(map(itemgetter(0, 2), limits)))
@@ -247,7 +249,7 @@ def bindRelation(wanted: AppliedUndef, relation: tuple[Equality, Range]) -> tupl
 
 def countCallsOutside(boxOfOEISid: frozenset[OEISid], wanted: AppliedUndef, equation: Equality) -> int:
 	boxOfCalls: set[AppliedUndef] = equation.atoms(AppliedUndef) - {wanted}
-	boxOfOEISidCalls: Iterator[OEISid] = map(lookupOEISid.__getitem__, map(attrgetter('func'), boxOfCalls))
+	boxOfOEISidCalls: Iterator[OEISid] = map(settingsOEIS.lookupID.__getitem__, map(attrgetter('func'), boxOfCalls))
 	return len(tuple(filterfalse(boxOfOEISid.__contains__, boxOfOEISidCalls)))
 
 def solveRelation(wanted: AppliedUndef, equation: Equality) -> Expr | None:
@@ -263,7 +265,7 @@ def solveRelation(wanted: AppliedUndef, equation: Equality) -> Expr | None:
 	equationKnown: Boolean = equation.xreplace(lookupKnown)
 	formula: Expr | None = None
 	if equationKnown.atoms(AppliedUndef) == {wanted}:
-		boxOfValues: Set = solveset(equationKnown, wanted, domain=domainSymbolic)
+		boxOfValues: Set = solveset(equationKnown, wanted, domain=settingsOEIS.domain)
 		if isinstance(boxOfValues, FiniteSet) and len(boxOfValues) == 1:
 			boxOfFormulas: list[Expr] = solve(equation, wanted)
 			boxOfFormulasKnown: Iterator[Expr] = map(methodcaller('xreplace', lookupKnown), boxOfFormulas)
@@ -279,7 +281,7 @@ def evaluateCall(boxOfOEISidBasis: frozenset[OEISid], boxOfOEISidDeriving: froze
 	A value of a basis sequence or of a sequence being derived comes from the known values or, when
 	unknown, from `oeisIDfor_n`.
 	"""
-	oeisID: OEISid = lookupOEISid[expression.func]
+	oeisID: OEISid = settingsOEIS.lookupID[expression.func]
 	index: int = as_int(expression.args[0])
 	lookupValuesKnown: dict[int, int] = getValuesKnown(oeisID)
 	if oeisID not in boxOfOEISidBasis and oeisID not in boxOfOEISidDeriving:
@@ -300,12 +302,12 @@ def solveRelationValue(wanted: AppliedUndef, boxOfOEISidBasis: frozenset[OEISid]
 	"""
 	boxOfCalls: tuple[AppliedUndef, ...] = tuple(equation.atoms(AppliedUndef) - {wanted})
 	evaluateCallDeriving: Callable[[AppliedUndef], int | None] = partial(evaluateCall, boxOfOEISidBasis
-		, boxOfOEISidDeriving.union((lookupOEISid[wanted.func],)), oeisIDfor_n)
+		, boxOfOEISidDeriving.union((settingsOEIS.lookupID[wanted.func],)), oeisIDfor_n)
 	boxOfValues: tuple[int | None, ...] = tuple(takewhile(partial(is_not, None), map(evaluateCallDeriving, boxOfCalls)))
 	value: int | None = None
 	if len(boxOfValues) == len(boxOfCalls):
 		equationKnown: Boolean = equation.xreplace(dict(zip(boxOfCalls, map(Integer, boxOfValues), strict=True)))
-		boxOfSolutions: Set = solveset(equationKnown, wanted, domain=domainSymbolic)
+		boxOfSolutions: Set = solveset(equationKnown, wanted, domain=settingsOEIS.domain)
 		if isinstance(boxOfSolutions, FiniteSet) and len(boxOfSolutions) == 1:
 			(solution,) = boxOfSolutions
 			value = as_int(solution)
@@ -319,7 +321,7 @@ def deriveValue(boxOfOEISidBasis: frozenset[OEISid], boxOfOEISidDeriving: frozen
 
 	Relations with fewer values to derive are attempted first.
 	"""
-	call = getSequenceCall(lookupOEISid[wanted.func], as_int(wanted.args[0]))
+	call = getSequenceCall(settingsOEIS.lookupID[wanted.func], as_int(wanted.args[0]))
 	boxOfEquations: Iterator[Equality] = filter(methodcaller('has', wanted), chain.from_iterable(map(partial(bindRelation, call), boxOfRelations)))
 	boxOfValues: Iterator[int | None] = map(partial(solveRelationValue, wanted, boxOfOEISidBasis, boxOfOEISidDeriving, oeisIDfor_n)
 		, sorted(boxOfEquations, key=partial(countCallsOutside, boxOfOEISidBasis, wanted)))
@@ -336,8 +338,8 @@ def getValueSymbolic(oeisID: OEISid, n: int, f: LiteralString | None, oeisIDfor_
 	if f:
 		boxOfOEISidBasis: frozenset[OEISid] = frozenset(regex.findall(r'A\d{6}', f))
 	else:
-		boxOfOEISidBasis = frozenset(oeisIDsCountingImplemented)
-	return deriveValue(boxOfOEISidBasis, frozenset(), oeisIDfor_n, lookupSymbolic[oeisID](n))
+		boxOfOEISidBasis = frozenset(settingsOEIS.boxOfIDsCounting)
+	return deriveValue(boxOfOEISidBasis, frozenset(), oeisIDfor_n, settingsOEIS.lookupSymbolic[oeisID](n))
 
 def getMissingFormula(equation: Equality) -> tuple[OEISid, int, Expr] | None:
 	"""Derive the one missing sequence value in an instantiated equation.
@@ -351,7 +353,7 @@ def getMissingFormula(equation: Equality) -> tuple[OEISid, int, Expr] | None:
 		(wanted,) = boxOfUnknown
 		formula: Expr | None = solveRelation(wanted, equation)
 		if formula is not None:
-			missing = (lookupOEISid[wanted.func], as_int(wanted.args[0]), formula)
+			missing = (settingsOEIS.lookupID[wanted.func], as_int(wanted.args[0]), formula)
 	return missing
 
 def bindValueUnknown(sequence: type[AppliedUndef]) -> Iterator[Equality]:
@@ -359,7 +361,7 @@ def bindValueUnknown(sequence: type[AppliedUndef]) -> Iterator[Equality]:
 
 	(AI generated docstring)
 	"""
-	oeisID: OEISid = lookupOEISid[sequence]
+	oeisID: OEISid = settingsOEIS.lookupID[sequence]
 	valueUnknown: int = getMetadata(oeisID)['valueUnknown']
 	return filter(methodcaller('has', sequence(valueUnknown))
 		, chain.from_iterable(map(partial(bindRelation, getSequenceCall(oeisID, valueUnknown)), boxOfRelations)))
@@ -372,7 +374,7 @@ def getMissingFormulas() -> tuple[tuple[OEISid, int, Expr], ...]:
 	Relations with several unknown values remain undetermined. Sequences in `makeOEISidCalculable` have no missing values.
 	"""
 	boxOfSequences: Iterator[type[AppliedUndef]] = filter(Tuple(*map(itemgetter(0), boxOfRelations)).has
-		, filterfalse(compose_left(lookupOEISid.__getitem__, makeOEISidCalculable().__contains__), lookupSymbolic.values()))
+		, filterfalse(compose_left(settingsOEIS.lookupID.__getitem__, makeOEISidCalculable().__contains__), settingsOEIS.lookupSymbolic.values()))
 	boxOfEquations: dict[Equality, None] = dict.fromkeys(chain.from_iterable(map(bindValueUnknown, boxOfSequences)))
 	return tuple(unique(filter(None, map(getMissingFormula, boxOfEquations)), key=itemgetter(0, 1)))
 
@@ -396,7 +398,7 @@ def solveRelationSymbolic(relation: tuple[Equality, Range], sequence: type[Appli
 	The sequence value with the greatest index in the relation is the solved value.
 	"""
 	equation, domain = relation
-	oeisID: OEISid = lookupOEISid[sequence]
+	oeisID: OEISid = settingsOEIS.lookupID[sequence]
 	boxOfIndices: Iterator[Expr] = map(compose_left(attrgetter('args'), itemgetter(0)), filterfalse(methodcaller('has', k), equation.atoms(sequence)))
 	index: Expr = max(boxOfIndices, key=juxt(methodcaller('coeff', n), methodcaller('subs', n, 0)))
 	nSequence: Dummy = Dummy('n', integer=True, nonnegative=True)
@@ -430,7 +432,7 @@ def makeSolutionsSymbolic() -> tuple[tuple[OEISid, Expr, Boolean], ...]:
 
 	Sequence values inside a sum are not solved.
 	"""
-	boxOfSequencesTriangle: tuple[type[AppliedUndef], ...] = tuple(map(lookupSymbolic.__getitem__, dictionaryTriangle))
+	boxOfSequencesTriangle: tuple[type[AppliedUndef], ...] = tuple(map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle))
 	boxOfRelationsUnary: Iterator[tuple[Equality | BooleanFalse | BooleanTrue, Range]] = filterfalse(
 		compose_left(itemgetter(0), methodcaller('has', *boxOfSequencesTriangle))
 		, boxOfRelations
@@ -442,7 +444,7 @@ def valueInitial吗(solution: tuple[OEISid, Expr, Boolean]) -> bool:
 	return not formula.atoms(AppliedUndef) and condition != true
 
 def makeOEISidBasis(oeisID: OEISid, formula: Expr) -> frozenset[OEISid]:
-	return frozenset(map(lookupOEISid.__getitem__, map(attrgetter('func'), formula.atoms(AppliedUndef)))) - {oeisID}  # pyright: ignore[reportReturnType]
+	return frozenset(map(settingsOEIS.lookupID.__getitem__, map(attrgetter('func'), formula.atoms(AppliedUndef)))) - {oeisID}  # pyright: ignore[reportReturnType]
 
 @cache
 def makeOEISidCalculable() -> frozenset[OEISid]:

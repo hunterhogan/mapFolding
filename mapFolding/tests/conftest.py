@@ -6,7 +6,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.parseParameters import defineConcurrencyLimit
 from mapFolding import kitFilesystem
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, makePathFilenameFolds, readAlbum, readDataFrame, writeAlbum, writeText
-from mapFolding.oeis import getValuesKnown, oeisIDsImplemented
+from mapFolding.oeis import getValuesKnown, settingsOEIS
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.oeis._oeisdata import makePathFilename_bFile
 from mapFolding.theSSOT import settingsPackage
@@ -50,7 +50,7 @@ def rtol() -> float:
 def CPUlimit(request: pytest.FixtureRequest) -> ConcurrencyLimit:
 	return request.param
 
-@pytest.fixture(params=oeisIDsImplemented)
+@pytest.fixture(params=settingsOEIS.boxOfIDs)
 def oeisID(request: pytest.FixtureRequest) -> OEISid:
 	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
 

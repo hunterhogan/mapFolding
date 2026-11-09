@@ -6,9 +6,8 @@ from functools import partial, reduce
 from humpy_cytoolz import compose, groupby as toolz_groupby, unique
 from itertools import compress, filterfalse, starmap
 from mapFolding.kitAST import IngredientsFunction, IngredientsModule
-from mapFolding.oeis import getMetadata
+from mapFolding.oeis import getMetadata, settingsOEIS
 from mapFolding.oeis._symbolic import makeSolutionsSymbolic
-from mapFolding.oeis._theSSOT import lookupOEISid
 from mapFolding.theSSOT import settingsPackage
 from operator import attrgetter, itemgetter, methodcaller
 from sympy import (
@@ -125,7 +124,7 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
     return ast_expr
 
 def make_f(expression: Expr) -> str:
-    boxOfOEISid: list[str] = sorted(set(map(lookupOEISid.__getitem__, map(attrgetter('func'), expression.atoms(AppliedUndef)))))
+    boxOfOEISid: list[str] = sorted(set(map(settingsOEIS.lookupID.__getitem__, map(attrgetter('func'), expression.atoms(AppliedUndef)))))
     match boxOfOEISid:
         case []:
             f: str = ''
@@ -209,7 +208,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'LiteralString')
     return ingredientsFunction
 
-def makeOEISidByFormula(pathFilename: Path = settingsPackage.pathPackage / 'oeis' / 'byFormula.py') -> Path:
+def makeOEISidByFormula(pathFilename: Path = settingsOEIS.pathPackage / 'byFormula.py') -> Path:
     lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
     ingredientsModule = IngredientsModule(list(starmap(makeIngredientsOEISid, sorted(lookupSolutions.items()))))
     docstringModule: str = ('Compute a(n) for an OEIS ID by computing other OEIS IDs.\n\nThis is a generated file; edit'
