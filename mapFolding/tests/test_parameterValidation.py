@@ -1,12 +1,11 @@
 """Validate map shapes and count their leaves.
 
-`validateMapShape` and `getTotalLeaves` belong to `mapFolding.beDRY`. The `intInnit` and `oopsieKwargsie`
-tests exercise the `hunterMakesPy` parsers that `validateMapShape` relies on.
+`validateMapShape` and `getTotalLeaves` belong to `mapFolding.beDRY`. The `intInnit` tests exercise the
+`hunterMakesPy` parser that `validateMapShape` relies on.
 """
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
-from hunterMakesPy.tests.test_parseParameters import PytestFor_intInnit, PytestFor_oopsieKwargsie
 from mapFolding.beDRY import getTotalLeaves, validateMapShape
 from mapFolding.tests import assertEqualTo
 from typing import TYPE_CHECKING
@@ -14,7 +13,7 @@ import pytest
 import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Callable, Collection, Sequence
+	from collections.abc import Collection, Sequence
 	from typing import Any
 
 # TODO `getTotalLeaves` comprehensive tests.
@@ -49,10 +48,6 @@ def test_intInnit(mapShape: Collection[Any], expected: list[int]) -> None:
 	actual: list[int] = intInnit(mapShape)
 	assertEqualTo(actual, expected, intInnit.__name__, mapShape)
 
-@pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_intInnit())
-def test_IntInnit_humpy(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
-	callablePytest()
-
 @pytest.mark.parametrize(
 	'mapShape,expected'
 	, [
@@ -72,10 +67,6 @@ def test_intInnitError(mapShape: Collection[Any], expected: type[Exception]) -> 
 	with pytest.raises(expected) as exceptionInfo:
 		intInnit(mapShape)
 	assertEqualTo(type(exceptionInfo.value), expected, intInnit.__name__, mapShape)
-
-@pytest.mark.parametrize('nameOfTest,callablePytest', PytestFor_oopsieKwargsie())
-def test_OopsieKwargsie(nameOfTest: str, callablePytest: Callable[[], None]) -> None:
-	callablePytest()
 
 @pytest.mark.parametrize(
 	'mapShape,expected'

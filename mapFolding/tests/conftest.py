@@ -4,14 +4,16 @@ from __future__ import annotations
 
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.parseParameters import defineConcurrencyLimit
+from itertools import repeat
 from mapFolding import kitFilesystem
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, makePathFilenameFolds, readAlbum, readDataFrame, writeAlbum, writeText
-from mapFolding.oeis import getValuesKnown
+from mapFolding.oeis import getTriangle, getValuesKnown
 from mapFolding.oeis._beDRY import formatOEISid
 from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.oeis._oeisdata import makePathFilename_bFile
 from mapFolding.theSSOT import settingsPackage
 from numba import get_num_threads, set_num_threads
+from operator import add
 from typing import TYPE_CHECKING
 import numpy
 import pytest
@@ -19,7 +21,7 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Iterator
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import Folding, OEISid
+	from mapFolding.theTypes import Folding, OEISid, 形Triangle
 	from numpy.typing import NDArray
 	from pathlib import Path
 
@@ -94,6 +96,16 @@ def pathTerms(request: pytest.FixtureRequest, oeisID: OEISid, tmp_path: Path) ->
 @pytest.fixture
 def expected(oeisID: OEISid, n: int) -> int:
 	return getValuesKnown(oeisID)[n]
+
+@pytest.fixture(scope='session')
+def triangle() -> 形Triangle:
+	"""The A400429 triangle, each row followed by one zero cell.
+
+	Row n has floor(n/2) cells because no semi-meander with n crossings has a winding number above n - 2. The zero cell supplies
+	T(2,2) = 0, which the A077460 identity reads at n = 2. Row 46 is partial, so its zero cell is not a count.
+	"""
+	triangleRows: dict[int, list[int]] = getTriangle('A400429')
+	return dict(zip(triangleRows, map(add, triangleRows.values(), repeat([0])), strict=True))
 
 @pytest.fixture
 def arrayFoldings(totalDimensions: int) -> NDArray[numpy.uint8]:

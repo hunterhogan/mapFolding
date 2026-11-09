@@ -10,7 +10,8 @@ Test package organization (in mapFolding/tests/):
 - test_filesystem.py: Filenames, paths, and reading and writing the package's files
 - test_measurements.py: Positional-numeral measurements of leaf and pile labels
 - test_oeis.py: OEIS sequence access, the command line, triangle layouts, and local b-file updates
-- test_oeis_byFormula.py: Each formula in `mapFolding.oeis.byFormula`
+- test_oeis_byFormula.py: Each formula in `mapFolding.oeis.byFormula`, and the A400429 triangle identities and diagonal formulas in
+	`mapFolding.oeis.A400429oeisByFormula`
 - test_parameterValidation.py: Map-shape validation, leaf totals, and the `hunterMakesPy` parsers they rely on
 - test_pinning.py: Pinning functions cover every folding exactly once
 - test_semiotics.py: Dimension-position ideographs and head-relative labels

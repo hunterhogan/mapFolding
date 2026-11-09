@@ -36,7 +36,7 @@ Classes
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, identifierDotAttribute, IfThis, Make, NodeChanger
+from astToolkit import Be, DOT, identifierDotAttribute, IfThis, Make, NodeChanger, NodeTourist
 from astToolkit.changeDef import extractFunctionDef, removeUnusedParameters
 from astToolkit.filesystem import write_astModule
 from collections import defaultdict
@@ -45,8 +45,9 @@ from humpy_cytoolz.functoolz import compose, curry
 from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
 from hunterMakesPy.filesystemToolkit import settings_autoflakeDEFAULT, settings_isortDEFAULT
-from itertools import starmap
-from operator import attrgetter, itemgetter, ne
+from itertools import chain, filterfalse, starmap
+from more_itertools import consume
+from operator import attrgetter, itemgetter, ne, not_
 from typing import NamedTuple, overload, TYPE_CHECKING
 import ast
 import dataclasses
@@ -84,7 +85,6 @@ class Settings形(NamedTuple):
 	typeIdentifier: str
 	type_asname: str | None = None
 
-# TODO Problem: `LedgerOfImports` does not handle TYPE_CHECKING blocks very well.
 # TODO Python 3.15 `is_lazy`. fml.
 
 class LedgerOfImports:
@@ -132,9 +132,28 @@ class LedgerOfImports:
 		"""
 		self._dictionaryImportFrom: dict[identifierDotAttribute, list[tuple[str, str | None]]] = defaultdict(list)
 		self._listImport: list[tuple[identifierDotAttribute, str | None]] = []
+		self._typeChecking: LedgerOfImports | None = None
 		self.type_ignores: list[ast.TypeIgnore] = [] if type_ignores is None else list(type_ignores)
 		if startWith:
 			self.walkThis(startWith)
+
+	@property
+	def typeChecking(self) -> LedgerOfImports:
+		if self._typeChecking is None:
+			self._typeChecking = LedgerOfImports()
+		return self._typeChecking
+
+	def _subtractImportFrom(self, dotModule: identifierDotAttribute, list_nameTuples: list[tuple[str, str | None]]) -> None:
+		if dotModule in self._dictionaryImportFrom:
+			self._dictionaryImportFrom[dotModule] = list(filterfalse(set(list_nameTuples).__contains__, self._dictionaryImportFrom[dotModule]))
+			if not self._dictionaryImportFrom[dotModule]:
+				self._dictionaryImportFrom.pop(dotModule)
+
+	def subtractRuntime(self, fromLedger: LedgerOfImports) -> None:
+		self._listImport = list(filterfalse(set(fromLedger._listImport).__contains__, self._listImport))
+		consume(starmap(self._subtractImportFrom, fromLedger._dictionaryImportFrom.items()))
+		if self._typeChecking is not None:
+			self._typeChecking.subtractRuntime(fromLedger)
 
 	def addAst(self, astImport____: ast.Import | ast.ImportFrom, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		"""
@@ -220,9 +239,11 @@ class LedgerOfImports:
 		"""
 		listModuleIdentifiers: list[identifierDotAttribute] = list(self._dictionaryImportFrom.keys())
 		listModuleIdentifiers.extend(map(itemgetter(0), self._listImport))
+		if self._typeChecking is not None:
+			listModuleIdentifiers.extend(self._typeChecking.exportListModuleIdentifiers())
 		return sorted(set(listModuleIdentifiers))
 
-	def makeList_ast(self) -> list[ast.ImportFrom | ast.Import]:
+	def makeList_ast(self) -> list[ast.ImportFrom | ast.Import | ast.If]:
 		"""
 		Generate the actual import statement nodes for the final Python module.
 
@@ -233,21 +254,30 @@ class LedgerOfImports:
 
 		Returns
 		-------
-		listImportFrom : list[ast.ImportFrom | ast.Import]
+		listImportFrom : list[ast.ImportFrom | ast.Import | ast.If]
 			List of AST nodes representing import statements, ready to be placed in a Python module.
 			These nodes can be converted to Python source code like "import ast" and "from collections
 			import defaultdict".
 		"""
+		boxOfIf: list[ast.If] = []
+		if self._typeChecking is not None:
+			self._typeChecking.subtractRuntime(self)
+			if self._typeChecking.exportListModuleIdentifiers() and ('TYPE_CHECKING', None) not in self._dictionaryImportFrom.get('typing', []):
+				self.addImportFrom_asStr('typing', 'TYPE_CHECKING')
+				self._typeChecking.subtractRuntime(self)
+			list_body: list[ast.ImportFrom | ast.Import | ast.If] = self._typeChecking.makeList_ast()
+			if list_body:
+				boxOfIf.append(Make.If(Make.Name('TYPE_CHECKING'), list_body))
 		listImportFrom: list[ast.ImportFrom] = []
 		for dotModule, list_nameTuples in sorted(self._dictionaryImportFrom.items()):
-			list_nameTuples: list[tuple[str, str | None]] = sorted(set(list_nameTuples))
+			list_nameTuples: list[tuple[str, str | None]] = sorted(set(list_nameTuples), key=repr)
 			list_alias: list[ast.alias] = []
 			for name, asName in list_nameTuples:
 				list_alias.append(Make.alias(name, asName))
 			if list_alias:
 				listImportFrom.append(Make.ImportFrom(dotModule, list_alias))
-		list_astImport: list[ast.Import] = list(starmap(Make.Import, self._listImport))
-		return listImportFrom + list_astImport
+		list_astImport: list[ast.Import] = list(starmap(Make.Import, dict.fromkeys(self._listImport)))
+		return listImportFrom + list_astImport + boxOfIf
 
 	def removeImportFromModule(self, dotModule: identifierDotAttribute) -> None:
 		"""
@@ -264,6 +294,8 @@ class LedgerOfImports:
 		"""
 		self._dictionaryImportFrom.pop(dotModule, None)
 		self._listImport = list(filter(compose(dotModule.__ne__, itemgetter(0)), self._listImport))
+		if self._typeChecking is not None:
+			self._typeChecking.removeImportFromModule(dotModule)
 
 	def removeImportFrom(self, dotModule: identifierDotAttribute | None, name: str | None, asName: str | None = None) -> None:
 		"""
@@ -303,6 +335,8 @@ class LedgerOfImports:
 		elif dotModule is None:
 			for module in list(self._dictionaryImportFrom):
 				self.removeImportFrom(module, name, asName)
+		if self._typeChecking is not None:
+			self._typeChecking.removeImportFrom(dotModule, name, asName)
 
 	def update(self, *fromLedger: LedgerOfImports) -> None:
 		"""
@@ -318,10 +352,12 @@ class LedgerOfImports:
 			One or more other LedgerOfImports instances to merge dependencies from.
 		"""
 		self._dictionaryImportFrom = defaultdict(list, updateExtendPolishDictionaryLists(self._dictionaryImportFrom, *map(attrgetter('_dictionaryImportFrom'), fromLedger)
-					, destroyDuplicates=True, reorderLists=True))
+					, destroyDuplicates=True))
 		for ledger in fromLedger:
 			self._listImport.extend(ledger._listImport)  # ruff:ignore[private-member-access]
 			self.type_ignores.extend(ledger.type_ignores)
+			if ledger._typeChecking is not None:  # ruff: ignore[private-member-access]
+				self.typeChecking.update(ledger._typeChecking)  # ruff: ignore[private-member-access]
 
 	def walkThis(self, walkThis: ast.AST, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		"""
@@ -338,9 +374,17 @@ class LedgerOfImports:
 		type_ignores : list[ast.TypeIgnore] | None
 			Additional type ignore directives to include.
 		"""
-		for nodeBuffalo in ast.walk(walkThis):
-			if isinstance(nodeBuffalo, (ast.Import, ast.ImportFrom)):
-				self.addAst(nodeBuffalo)
+		boxOfIf: list[ast.If] = []
+		NodeTourist(Be.If.testIs(IfThis.isAnyOf(
+			IfThis.isNameIdentifier('TYPE_CHECKING'), IfThis.isAttributeNamespaceIdentifier('typing', 'TYPE_CHECKING'))), boxOfIf.append).visit(walkThis)
+		boxOfTyping: set[ast.AST] = set()
+		if boxOfIf:
+			NodeTourist(Be.AST, boxOfTyping.add).visit(Make.Module(list(chain.from_iterable(map(DOT.body, boxOfIf)))))
+			astModuleTyping: ast.Module = Make.Module(list(chain.from_iterable(map(DOT.body, filterfalse(boxOfTyping.__contains__, boxOfIf)))))
+			NodeTourist(Be.Import, self.typeChecking.addAst).visit(astModuleTyping)
+			NodeTourist(Be.ImportFrom, self.typeChecking.addAst).visit(astModuleTyping)
+		NodeTourist(IfThis.isAllOf(Be.Import, compose(not_, boxOfTyping.__contains__)), self.addAst).visit(walkThis)
+		NodeTourist(IfThis.isAllOf(Be.ImportFrom, compose(not_, boxOfTyping.__contains__)), self.addAst).visit(walkThis)
 		if type_ignores:
 			self.type_ignores.extend(type_ignores)
 
@@ -644,7 +688,7 @@ class IngredientsModule:
 		return sherpaLedger
 
 	@property
-	def _list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom]:
+	def _list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom | ast.If]:
 		return self._consolidatedLedger().makeList_ast()
 
 	@property
