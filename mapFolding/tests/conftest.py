@@ -6,8 +6,9 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.parseParameters import defineConcurrencyLimit
 from mapFolding import kitFilesystem
 from mapFolding.kitFilesystem import makePathFilenameArrayFoldings, makePathFilenameFolds, readAlbum, readDataFrame, writeAlbum, writeText
-from mapFolding.oeis import getValuesKnown, settingsOEIS
+from mapFolding.oeis import getValuesKnown
 from mapFolding.oeis._beDRY import formatOEISid
+from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.oeis._oeisdata import makePathFilename_bFile
 from mapFolding.theSSOT import settingsPackage
 from numba import get_num_threads, set_num_threads
@@ -50,9 +51,9 @@ def rtol() -> float:
 def CPUlimit(request: pytest.FixtureRequest) -> ConcurrencyLimit:
 	return request.param
 
-@pytest.fixture(params=settingsOEIS.boxOfIDs)
+@pytest.fixture(params=dictionaryOEIS)
 def oeisID(request: pytest.FixtureRequest) -> OEISid:
-	"""Parametrized fixture providing all implemented OEIS sequence identifiers.
+	"""Parametrized fixture providing OEIS sequence identifiers with loaded metadata.
 
 	Parameters
 	----------
@@ -62,7 +63,7 @@ def oeisID(request: pytest.FixtureRequest) -> OEISid:
 	Returns
 	-------
 	sequenceIdentifier : OEISid
-		OEIS sequence identifier for testing across all implemented sequences.
+		OEIS sequence identifier for testing across available sequences.
 	"""
 	return request.param
 

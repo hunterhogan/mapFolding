@@ -120,6 +120,7 @@ DOTHARDCODED
 downgress
 Doye
 dtypes
+dulwich
 dumbass
 Dunder
 dups

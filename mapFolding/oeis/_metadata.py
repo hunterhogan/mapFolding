@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cache, partial
 from humpy_cytoolz import dissoc, get_in
 from hunterMakesPy import errorL33T
-from itertools import count, takewhile
+from itertools import count, filterfalse, takewhile
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
 from mapFolding.kitFilesystem import readText, writeText
 from mapFolding.oeis._beDRY import format_bFile, formatOEISid, makeValuesKnown, parse_bFile, parseEntry, parseOffset
@@ -12,6 +12,7 @@ from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile,
 from mapFolding.oeis._theSSOT import settingsOEIS
 from operator import add
 from typing import TYPE_CHECKING
+import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Mapping
@@ -209,7 +210,7 @@ def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Pa
 	The cell writer in `easyRun/triangleSemiMake.py` saves each computed triangle term.
 
 		```python
-		updateValuesKnown('A400429', {nT: aOFn下k})
+			updateValuesKnown('A400429', {nT: aOFn下k})
 		```
 	"""
 	oeisID = formatOEISid(oeisID)
@@ -274,9 +275,15 @@ boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(settingsOEIS.boxOfIDs,
 if boxOfOEISidAbsent:
 	from mapFolding.oeis._oeisdataClone import checkoutSnapshot
 	checkoutSnapshot(boxOfOEISidAbsent)
+	boxOfOEISidAbsent = filterEntryAbsent(settingsOEIS.boxOfIDs, settingsOEIS.pathSnapshot)
+	if boxOfOEISidAbsent:
+		message: str = (f"I could not find OEIS snapshot entries for `{boxOfOEISidAbsent = }`. "
+			"I will continue with the available metadata.\n")
+		sys.stdout.write(message)
 
-dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(settingsOEIS.boxOfIDs, map(_getMetadataOEISid, settingsOEIS.boxOfIDs), strict=True))
-"""Metadata for every implemented OEIS sequence."""
+boxOfOEISid: tuple[OEISid, ...] = (*filterfalse(boxOfOEISidAbsent.__contains__, settingsOEIS.boxOfIDs),)
+dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(boxOfOEISid, map(_getMetadataOEISid, boxOfOEISid), strict=True))
+"""Metadata loaded for implemented OEIS sequences with snapshot entries."""
 dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 	'A001263': MetadataOEISidTriangle(**dictionaryOEIS['A001263'], rowLength=int, rowStart=1, columnStart=1),
 	'A008828': MetadataOEISidTriangle(**dictionaryOEIS['A008828'], rowLength=int, rowStart=1, columnStart=1),

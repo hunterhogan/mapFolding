@@ -67,7 +67,7 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
   "pyarrow-stubs",
   "pytest-cov",
   "setuptools",
-], oeisdata = ["GitPython"], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
+], oeisdata = ["dulwich>=1.2.21"], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
   "ortools; python_version < '3.15'",
   "pandas",
   "polars>=1.44.2",
