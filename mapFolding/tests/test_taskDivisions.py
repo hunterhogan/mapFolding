@@ -6,8 +6,10 @@ processor total so the expected worker counts do not depend on the machine.
 """
 from __future__ import annotations
 
+from hunterMakesPy.parseParameters import defineConcurrencyLimit
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions
 from mapFolding.tests import assertEqualTo
+from numba import get_num_threads
 from typing import TYPE_CHECKING
 import pytest
 
@@ -16,8 +18,9 @@ if TYPE_CHECKING:
 
 @pytest.mark.usefixtures('cpuTotal')
 @pytest.mark.parametrize('concurrencyPackage', (None, 'multiprocessing', 'numba', 'unknown-package'))
-@pytest.mark.parametrize('CPUlimit, expected', [(None, 8), (False, 8), (True, 1), (4, 4), (0.5, 4), (-0.5, 4), (-2, 6), (0, 8), (1, 1)])
-def test_defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | None, expected: int) -> None:
+@pytest.mark.parametrize('CPUlimit', [None, False, True, 4, 0.5, -0.5, -2, 0, 1])
+def test_defineProcessorLimit(CPUlimit: ConcurrencyLimit, concurrencyPackage: str | None) -> None:
+	expected: int = defineConcurrencyLimit(CPUlimit, cpuTotal=get_num_threads()) if concurrencyPackage == 'numba' else defineConcurrencyLimit(CPUlimit)
 	assertEqualTo(defineProcessorLimit(CPUlimit, concurrencyPackage), expected, defineProcessorLimit.__name__, CPUlimit, concurrencyPackage)
 
 @pytest.mark.usefixtures('cpuTotal')

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from easyRun.verifyPinning import verifyPinning2Dn
+from mapFolding.tests.verifyPinning import verifyPinning2Dn
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_cytoolz.curried import map as toolz_map

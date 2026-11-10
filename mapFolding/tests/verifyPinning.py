@@ -18,8 +18,6 @@ if TYPE_CHECKING:
 	from mapFolding.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding.theTypes import Folding, PinnedLeaves
 
-# TODO where does this module belong?
-
 @dataclass
 class PermutationSpaceStatus:
 	boxOfSurplusDictionaries: list[PermutationSpace]

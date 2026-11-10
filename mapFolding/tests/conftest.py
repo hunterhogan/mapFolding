@@ -13,6 +13,7 @@ from mapFolding.oeis._metadata import dictionaryOEIS
 from mapFolding.oeis._oeisdata import makePathFilename_bFile
 from mapFolding.theSSOT import settingsPackage
 from numba import get_num_threads, set_num_threads
+from numba.core.config import NUMBA_NUM_THREADS
 from operator import add
 from typing import TYPE_CHECKING
 import numpy
@@ -147,6 +148,6 @@ def cpuTotal(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) ->
 	"""Fix the processor total for `defineConcurrencyLimit` and the Numba thread count, then restore the Numba thread count."""
 	threadsNumba: int = get_num_threads()
 	monkeypatch.setitem(raiseIfNone(defineConcurrencyLimit.__kwdefaults__), 'cpuTotal', request.param)
-	set_num_threads(request.param)
+	set_num_threads(min(request.param, NUMBA_NUM_THREADS))
 	yield request.param
 	set_num_threads(threadsNumba)
