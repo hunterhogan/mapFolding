@@ -153,8 +153,6 @@ def crunchCoefficients(次coefficient: int, numerator: tuple[int, ...], denomina
 
 #================== A005315 formulas and diagonal extensions =========================================================
 
-# TODO integrate
-
 def A005315of0(x: int, 次n: int = 0) -> int:
 	"""Return the special base value 1 when `x >= 2*次n`.
 
@@ -790,4 +788,318 @@ For j = 1, ..., 11, use `boxOfA005315of[j](2*j)` for A005315(j), or
 `boxOfA005315of[j](2*j + 1)` for A005315(j + 1). Position zero is the separate
 base-case expression. Selection preserves each function's default `次n`.
 The diagonal proof status is documented above and in each selected function.
+"""
+
+def diagonal1(n: int) -> int:
+	"""Return the first A400429 diagonal count for `n` crossings.
+
+	(AI generated docstring)
+
+	The semi-meanders have winding number `n - 2`. The count is `1` at `n = 2`
+	and `2` for every `n > 2`.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `2`. Smaller inputs cause `ZeroDivisionError`.
+
+	Returns
+	-------
+	countTotal : int
+		Number of semi-meanders with `n` crossings and winding number `n - 2`.
+
+	See Also
+	--------
+	`A005315of1`
+		Evaluate the same formula with an optional input-origin offset.
+	"""
+	return A005315of1(n)
+
+def diagonal2(n: int) -> int:
+	"""Return the second A400429 diagonal count for `n` crossings.
+
+	(AI generated docstring)
+
+	The semi-meanders have winding number `n - 4`. The counting identity is proved
+	for every `n >= 4`.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `4`. Smaller inputs evaluate the expression
+		outside its counting domain; the domain is not checked.
+
+	Returns
+	-------
+	countTotal : int
+		Number of semi-meanders with `n` crossings and winding number `n - 4`.
+
+	See Also
+	--------
+	`A005315of2`
+		Evaluate the same formula with an optional input-origin offset.
+	"""
+	return A005315of2(n)
+
+def diagonal3(n: int) -> int:
+	"""Return the third A400429 diagonal count for `n` crossings.
+
+	(AI generated docstring)
+
+	The semi-meanders have winding number `n - 6`. The counting identity is proved
+	for every `n >= 6`.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `6`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Number of semi-meanders with `n` crossings and winding number `n - 6`.
+
+	See Also
+	--------
+	`A005315of3`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of3(n)
+
+def diagonal4(n: int) -> int:
+	"""Return the fourth A400429 diagonal count for `n` crossings.
+
+	(AI generated docstring)
+
+	The semi-meanders have winding number `n - 8`. The counting identity is proved
+	for every `n >= 8`.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `8`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Number of semi-meanders with `n` crossings and winding number `n - 8`.
+
+	See Also
+	--------
+	`A005315of4`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of4(n)
+
+def diagonal5(n: int) -> int:
+	"""Evaluate the conjectured fifth A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 10`
+	for every `n >= 10`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `10`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 10`.
+
+	See Also
+	--------
+	`A005315of5`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of5(n)
+
+def diagonal6(n: int) -> int:
+	"""Evaluate the conjectured sixth A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 12`
+	for every `n >= 12`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `12`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 12`.
+
+	See Also
+	--------
+	`A005315of6`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of6(n)
+
+def diagonal7(n: int) -> int:
+	"""Evaluate the conjectured seventh A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 14`
+	for every `n >= 14`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `14`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 14`.
+
+	See Also
+	--------
+	`A005315of7`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of7(n)
+
+def diagonal8(n: int) -> int:
+	"""Evaluate the conjectured eighth A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 16`
+	for every `n >= 16`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `16`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 16`.
+
+	See Also
+	--------
+	`A005315of8`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of8(n)
+
+def diagonal9(n: int) -> int:
+	"""Evaluate the conjectured ninth A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 18`
+	for every `n >= 18`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `18`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 18`.
+
+	See Also
+	--------
+	`A005315of9`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of9(n)
+
+def diagonal10(n: int) -> int:
+	"""Evaluate the conjectured tenth A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 20`
+	for every `n >= 20`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `20`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 20`.
+
+	See Also
+	--------
+	`A005315of10`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of10(n)
+
+def diagonal11(n: int) -> int:
+	"""Evaluate the conjectured eleventh A400429 diagonal for `n` crossings.
+
+	(AI generated docstring)
+
+	The result is conjectured to count semi-meanders with winding number `n - 22`
+	for every `n >= 22`. Exact formula evaluation does not establish that identity.
+
+	Parameters
+	----------
+	n : int
+		Number of crossings, at least `22`. Smaller inputs cause `IndexError`
+		in the coefficient evaluation.
+
+	Returns
+	-------
+	countTotal : int
+		Exact formula value, conjectured to count semi-meanders with `n` crossings
+		and winding number `n - 22`.
+
+	See Also
+	--------
+	`A005315of11`
+		Evaluate the rational-series formula with an optional input-origin offset.
+	"""
+	return A005315of11(n)
+
+boxOfDiagonals: list[CallableFunction[[int], int]] = [
+	diagonal1, diagonal2, diagonal3, diagonal4, diagonal5
+	, diagonal6, diagonal7, diagonal8, diagonal9, diagonal10, diagonal11
+]
+"""Select an A400429 diagonal formula by its zero-based list position.
+
+(AI generated docstring)
+
+For a diagonal number `j` from `1` through `11`, use `boxOfDiagonals[j - 1](n)`
+with `n >= 2*j`. The input `n` is the number of crossings, and the winding number
+is `n - 2*j`. Position `0` contains `diagonal1`; position `10` contains `diagonal11`.
+The separate base-case formula `A005315of0` is not included.
+
+The counting identities for diagonals `1` through `4` are proved throughout their
+domains. The counting identities for diagonals `5` through `11` remain conjectural.
+
+See Also
+--------
+`boxOfA005315of`
+	Select the corresponding A005315 formula by suffix, including suffix zero.
 """

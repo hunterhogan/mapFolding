@@ -58,6 +58,7 @@ bsolute
 CAPSLOCK
 carmichaels
 Cassio
+catafusenes
 cclass
 Celler
 cffconvert

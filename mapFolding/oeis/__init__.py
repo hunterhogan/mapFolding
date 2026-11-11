@@ -67,6 +67,13 @@ from mapFolding.oeis.__main__ import (
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n
+from mapFolding.oeis.A400429 import (
+	A005315of0 as A005315of0, A005315of1 as A005315of1, A005315of2 as A005315of2, A005315of3 as A005315of3, A005315of4 as A005315of4,
+	A005315of5 as A005315of5, A005315of6 as A005315of6, A005315of7 as A005315of7, A005315of8 as A005315of8, A005315of9 as A005315of9,
+	A005315of10 as A005315of10, A005315of11 as A005315of11, boxOfA005315of as boxOfA005315of, boxOfDiagonals as boxOfDiagonals,
+	diagonal1 as diagonal1, diagonal2 as diagonal2, diagonal3 as diagonal3, diagonal4 as diagonal4, diagonal5 as diagonal5,
+	diagonal6 as diagonal6, diagonal7 as diagonal7, diagonal8 as diagonal8, diagonal9 as diagonal9, diagonal10 as diagonal10,
+	diagonal11 as diagonal11)
 
 # isort: split
 from mapFolding.oeis._commandLine import getOEISids as getOEISids, OEIS_for_n as OEIS_for_n

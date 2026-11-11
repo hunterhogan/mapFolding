@@ -3,9 +3,8 @@ from __future__ import annotations
 from functools import partial
 from inspect import get_annotations
 from itertools import chain, product as CartesianProduct
-from mapFolding.oeis import A400429oeisByFormula, byFormula, getMetadata, getTriangleDiagonal, settingsOEIS
-from mapFolding.oeis.A400429oeisByFormula import boxOfA005315of
-from mapFolding.oeis.A400429oeisByFormula._A005315 import crunchCoefficients
+from mapFolding.oeis import A400429oeisByFormula, boxOfA005315of, byFormula, getMetadata, getTriangleDiagonal, settingsOEIS
+from mapFolding.oeis.A400429 import crunchCoefficients
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.A400429oeisByFormula import (
 	parametersA005315of, parametersCalculateDiagonal, parametersCrunchCoefficients, parametersCrunchCoefficientsError,

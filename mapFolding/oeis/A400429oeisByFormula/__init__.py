@@ -11,7 +11,7 @@ Diagonal Formula Status
 -----------------------
 The first four fixed-diagonal formulas are proved on their stated domains. The formulas for
 diagonals five through eleven agree with known counts but remain conjectural as complete
-diagonal formulas. `mapFolding.oeis.A400429oeisByFormula._A005315` records domains,
+diagonal formulas. `mapFolding.oeis.A400429` records domains,
 initial exceptions, coefficient representations, and proof references. Agreement printed by
 `checkFormulas` is a comparison with available data, not an additional proof.
 
@@ -60,27 +60,27 @@ A005315 formula family
 	A005315of9
 		Evaluate the ninth fixed-diagonal expression with a selectable input offset.
 Fixed-diagonal functions
-	工diagonal1
+	diagonal1
 		Evaluate the first diagonal at its default offset.
-	工diagonal10
+	diagonal10
 		Evaluate the conjectured tenth diagonal at its default offset.
-	工diagonal11
+	diagonal11
 		Evaluate the conjectured eleventh diagonal at its default offset.
-	工diagonal2
+	diagonal2
 		Evaluate the second diagonal at its default offset.
-	工diagonal3
+	diagonal3
 		Evaluate the third diagonal at its default offset.
-	工diagonal4
+	diagonal4
 		Evaluate the fourth diagonal at its default offset.
-	工diagonal5
+	diagonal5
 		Evaluate the conjectured fifth diagonal at its default offset.
-	工diagonal6
+	diagonal6
 		Evaluate the conjectured sixth diagonal at its default offset.
-	工diagonal7
+	diagonal7
 		Evaluate the conjectured seventh diagonal at its default offset.
-	工diagonal8
+	diagonal8
 		Evaluate the conjectured eighth diagonal at its default offset.
-	工diagonal9
+	diagonal9
 		Evaluate the conjectured ninth diagonal at its default offset.
 Verification
 	checkFormulas
@@ -93,7 +93,7 @@ Variables
 
 See Also
 --------
-`mapFolding.oeis.A400429oeisByFormula._A005315`
+`mapFolding.oeis.A400429`
 	Inspect the formula domains, initial exceptions, coefficient representations, and proof sources.
 
 References
@@ -103,15 +103,7 @@ References
 """
 from __future__ import annotations
 
-from mapFolding.oeis.A400429oeisByFormula._A005315 import (
-	A005315of0 as A005315of0, A005315of1 as A005315of1, A005315of2 as A005315of2, A005315of3 as A005315of3, A005315of4 as A005315of4,
-	A005315of5 as A005315of5, A005315of6 as A005315of6, A005315of7 as A005315of7, A005315of8 as A005315of8, A005315of9 as A005315of9,
-	A005315of10 as A005315of10, A005315of11 as A005315of11, boxOfA005315of as boxOfA005315of)
 from mapFolding.oeis.A400429oeisByFormula._integrate_fromTriangleCells import (
 	A000136 as A000136, A000682 as A000682, A005315 as A005315, A005316 as A005316, A006661 as A006661, A076876 as A076876, A077054 as A077054,
 	A077460 as A077460)
 from mapFolding.oeis.A400429oeisByFormula._integrate_verify import checkFormulas as checkFormulas
-from mapFolding.oeis.A400429oeisByFormula._semi import (
-	boxOfDiagonals as boxOfDiagonals, 工diagonal1 as 工diagonal1, 工diagonal2 as 工diagonal2, 工diagonal3 as 工diagonal3, 工diagonal4 as 工diagonal4,
-	工diagonal5 as 工diagonal5, 工diagonal6 as 工diagonal6, 工diagonal7 as 工diagonal7, 工diagonal8 as 工diagonal8, 工diagonal9 as 工diagonal9,
-	工diagonal10 as 工diagonal10, 工diagonal11 as 工diagonal11)

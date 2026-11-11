@@ -5,8 +5,8 @@ The stored A400429 rows 2 through 45 are complete; row 46 is partial. Every doma
 from __future__ import annotations
 
 from itertools import chain, product as CartesianProduct
-from mapFolding.oeis.A400429oeisByFormula import (
-	工diagonal1, 工diagonal2, 工diagonal3, 工diagonal4, 工diagonal5, 工diagonal6, 工diagonal7, 工diagonal8, 工diagonal9, 工diagonal10, 工diagonal11)
+from mapFolding.oeis import (
+	diagonal1, diagonal2, diagonal3, diagonal4, diagonal5, diagonal6, diagonal7, diagonal8, diagonal9, diagonal10, diagonal11)
 from mapFolding.oeis.A400429oeisByFormula._integrate_fromTriangleCells import calculateDiagonal2, calculateDiagonal3
 from typing import TYPE_CHECKING
 import pytest
@@ -51,14 +51,14 @@ parametersA005315of: tuple[tuple[int, int, int], ...] = tuple(chain(
 # Reference: OEIS A400630 through A400637, the diagonals D_2 through D_9 of A400429, a(n) = T(n, floor(n/2) - j + 1), n >= 2*j.
 # The b-files of A400632 and A400633 end at n = 300, so every diagonal stops there.
 parametersDiagonalSequence: tuple[tuple[CallableFunction[[int], int], str, int], ...] = tuple(chain(
-	CartesianProduct((工diagonal2,), ('A400630',), range(4, 301))
-	, CartesianProduct((工diagonal3,), ('A400631',), range(6, 301))
-	, CartesianProduct((工diagonal4,), ('A400632',), range(8, 301))
-	, CartesianProduct((工diagonal5,), ('A400633',), range(10, 301))
-	, CartesianProduct((工diagonal6,), ('A400634',), range(12, 301))
-	, CartesianProduct((工diagonal7,), ('A400635',), range(14, 301))
-	, CartesianProduct((工diagonal8,), ('A400636',), range(16, 301))
-	, CartesianProduct((工diagonal9,), ('A400637',), range(18, 301))
+	CartesianProduct((diagonal2,), ('A400630',), range(4, 301))
+	, CartesianProduct((diagonal3,), ('A400631',), range(6, 301))
+	, CartesianProduct((diagonal4,), ('A400632',), range(8, 301))
+	, CartesianProduct((diagonal5,), ('A400633',), range(10, 301))
+	, CartesianProduct((diagonal6,), ('A400634',), range(12, 301))
+	, CartesianProduct((diagonal7,), ('A400635',), range(14, 301))
+	, CartesianProduct((diagonal8,), ('A400636',), range(16, 301))
+	, CartesianProduct((diagonal9,), ('A400637',), range(18, 301))
 ))
 
 # Reference: OEIS A400630 and A400631, the diagonals D_2 and D_3 of A400429, through n = 300.
@@ -70,17 +70,17 @@ parametersCalculateDiagonal: tuple[tuple[CallableFunction[[int], Fraction], str,
 # Reference: the diagonal D_j(n) = T(n, floor(n/2) - j + 1) of the A400429 triangle, for 2*j <= n <= 45.
 # This is the only reference for every n of D_1, D_10, and D_11 beyond the A005315 anchors.
 parametersDiagonalTriangle: tuple[tuple[CallableFunction[[int], int], int, int], ...] = tuple(chain(
-	CartesianProduct((工diagonal1,), (1,), range(2, 46))
-	, CartesianProduct((工diagonal2,), (2,), range(4, 46))
-	, CartesianProduct((工diagonal3,), (3,), range(6, 46))
-	, CartesianProduct((工diagonal4,), (4,), range(8, 46))
-	, CartesianProduct((工diagonal5,), (5,), range(10, 46))
-	, CartesianProduct((工diagonal6,), (6,), range(12, 46))
-	, CartesianProduct((工diagonal7,), (7,), range(14, 46))
-	, CartesianProduct((工diagonal8,), (8,), range(16, 46))
-	, CartesianProduct((工diagonal9,), (9,), range(18, 46))
-	, CartesianProduct((工diagonal10,), (10,), range(20, 46))
-	, CartesianProduct((工diagonal11,), (11,), range(22, 46))
+	CartesianProduct((diagonal1,), (1,), range(2, 46))
+	, CartesianProduct((diagonal2,), (2,), range(4, 46))
+	, CartesianProduct((diagonal3,), (3,), range(6, 46))
+	, CartesianProduct((diagonal4,), (4,), range(8, 46))
+	, CartesianProduct((diagonal5,), (5,), range(10, 46))
+	, CartesianProduct((diagonal6,), (6,), range(12, 46))
+	, CartesianProduct((diagonal7,), (7,), range(14, 46))
+	, CartesianProduct((diagonal8,), (8,), range(16, 46))
+	, CartesianProduct((diagonal9,), (9,), range(18, 46))
+	, CartesianProduct((diagonal10,), (10,), range(20, 46))
+	, CartesianProduct((diagonal11,), (11,), range(22, 46))
 ))
 
 #======== Rational-series coefficients =====================================

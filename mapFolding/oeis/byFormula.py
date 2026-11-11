@@ -4,8 +4,10 @@ This is a generated file; edit `mapFolding.oeis._symbolic.boxOfRelations` and ru
 """
 from __future__ import annotations
 
+from itertools import repeat
 from mapFolding.oeis import oeisIDfor_n
 from math import factorial, isqrt
+from operator import floordiv, mul
 from typing import Literal, LiteralString
 
 def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693'] | LiteralString | None = None) -> int:
@@ -256,14 +258,14 @@ def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A00
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A223094':
             if 4 <= n:
-                countTotal = factorial(n - 1) - sum(map(lambda k: A223094(k) * factorial(n - 1) // factorial(k), range(3, n)))
+                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), map(factorial, repeat(n - 1, len(range(3, n))))), map(factorial, range(3, n))))  # ruff: ignore[map-without-explicit-strict]
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A301620':
             if 3 <= n:
-                countTotal = 2 ** (n - 2) + sum(map(lambda k: 2 ** (n - k - 2) * A301620(k), range(3, n - 1)))
+                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1))))  # ruff: ignore[map-without-explicit-strict]
             elif n <= 2:
                 countTotal = 1
             else:
@@ -799,7 +801,7 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     countTotal: int
     match f:
         case 'A000108':
-            countTotal = sum(map(lambda k: (n + 1 - k) * A000108(k), range(n + 1)))
+            countTotal = sum(map(mul, map((n + 1).__sub__, range(n + 1)), map(A000108, range(n + 1))))  # ruff: ignore[map-without-explicit-strict]
         case 'A014137 and A014140':
             if 1 <= n:
                 countTotal = A014137(n) + A014140(n - 1)
