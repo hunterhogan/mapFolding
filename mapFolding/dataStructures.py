@@ -13,7 +13,7 @@ Array storage
 	makeDataContainer
 		Allocate storage through a replaceable allocation interface.
 	make_memmap
-		Open file-backed integer storage using a filename stem.
+		Allocate file-backed integer storage that the operating system deletes after release.
 	make_zeros
 		Allocate a zero-filled array with the common container signature.
 Connection graphs
@@ -51,8 +51,9 @@ locate a diagonal, so diagonal 1 selects the last cell only when that cell is av
 from __future__ import annotations
 
 from functools import partial
-from hunterMakesPy import inclusive, raiseIfNone
+from hunterMakesPy import inclusive
 from itertools import accumulate, chain, count, takewhile, tee
+from mapFolding.kitFilesystem import openFileTemporary
 from mapFolding.theTypes import 形NumPyTotalLeaves
 from more_itertools import split_into
 from numba import jit
@@ -69,15 +70,16 @@ if TYPE_CHECKING:
 
 #======== Array storage ============================================================================
 
-# TODO The make_memmap API must be in data structures, but it has filesystem components. Resolve the tension.
-def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
-	"""Open file-backed array storage named from `name`.
+def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger]) -> memmap[tuple[Any, ...], dtype[形NumPyInteger]]:
+	"""Allocate zero-filled, file-backed array storage that needs no cleanup.
 
 	(AI generated docstring)
 
 	You can use this function to request a NumPy memory-mapped array with `shape` and `datatype`.
-	This function forwards the filename `f'{name}.mM'` and the mode `'w+'` [1] to the
-	NumPy constructor.
+	The file comes from `mapFolding.kitFilesystem.openFileTemporary` and is mapped with the mode
+	`'w+'` [1]. The memory map holds its own operating-system handle, so this function closes the
+	file object immediately, and the operating system deletes the file after the memory map and
+	every view of it are released. Concurrent callers never share storage.
 
 	Parameters
 	----------
@@ -85,8 +87,6 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 		Requested axis lengths.
 	datatype : type[形NumPyInteger]
 		Integer element datatype.
-	name : str
-		Filename stem, relative to the working directory unless `name` includes a path.
 
 	Returns
 	-------
@@ -98,7 +98,7 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 	`mapFolding.algorithms.matrixMeandersNumPy.makeDataContainer` forwards allocation requests.
 
 		```python
-		return make_memmap(shape, datatype, raiseIfNone(name))
+		return make_memmap(shape, datatype)
 		```
 
 	References
@@ -107,7 +107,8 @@ def make_memmap(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: s
 		https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
 
 	"""
-	return numpy.memmap(f'{name}.mM', datatype, mode='w+', shape=shape)
+	with openFileTemporary() as fileTemporary:
+		return numpy.memmap(fileTemporary, datatype, mode='w+', shape=shape)
 
 # TODO This is not tenable. What is the shape?
 def extendArray(array: 形ArrayArcCode, length: int) -> 形ArrayArcCode:
@@ -134,21 +135,14 @@ def extendArray(array: 形ArrayArcCode, length: int) -> 形ArrayArcCode:
 
 	Storage Behavior
 	----------------
-	Memory-mapped input is flushed and reopened over the same file with mode `'r+'` [1], preserving
-	the datatype and byte offset. Ordinary arrays are copied using `numpy.pad`. The alias
-	does not enforce the two-axis shape at runtime.
-
-	References
-	----------
-	[1] NumPy `numpy.memmap`.
-		https://numpy.org/doc/stable/reference/generated/numpy.memmap.html
+	Memory-mapped input is copied into new storage from `make_memmap`, preserving the datatype.
+	Ordinary arrays are copied using `numpy.pad`. The alias does not enforce the two-axis shape at
+	runtime.
 	"""
 	if isinstance(array, numpy.memmap):
-		lengthStored: int = len(array)
-		array.flush()
-		array = numpy.memmap(raiseIfNone(array.filename), dtype=array.dtype, mode='r+', offset=array.offset,
-			shape=ShapeArray(length=length, indexes=array.shape[1]))
-		array[lengthStored:length] = 0
+		arrayExtended: 形ArrayArcCode = make_memmap(ShapeArray(length=length, indexes=array.shape[1]), array.dtype.type)
+		arrayExtended[0:len(array)] = array
+		array = arrayExtended
 	else:
 		array = numpy.pad(array, ((0, length - len(array)), (0, 0)))
 	return array
@@ -156,7 +150,7 @@ def extendArray(array: 形ArrayArcCode, length: int) -> 形ArrayArcCode:
 # TODO Figure out `shape`. Factors include: `_ShapeLike`, `ShapeArray`, TypeVar for the shape?
 
 def makeDataContainer(
-	shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger], name: str | None = None
+	shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]
 ) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:
 	"""Allocate a zero-filled integer array through a replaceable container interface.
 
@@ -172,9 +166,6 @@ def makeDataContainer(
 		The array shape, either as a single axis length or a tuple of axes lengths.
 	datatype : 形NumPyInteger | numpy_dtype[形NumPyInteger]
 		The integer datatype for the array elements.
-	name : str | None = None
-		An optional storage name. The default allocator ignores `name`; an alternative allocator
-		can use `name` to identify storage.
 
 	Returns
 	-------
@@ -184,7 +175,7 @@ def makeDataContainer(
 	See Also
 	--------
 	`make_memmap`
-		Allocate file-backed storage through the same shape, datatype, and name interface.
+		Allocate file-backed storage through the same shape and datatype interface.
 
 	Replacing the Allocator
 	----------------------
@@ -194,32 +185,29 @@ def makeDataContainer(
 	replace the same binding.
 
 	The local allocator in `mapFolding.algorithms.matrixMeandersNumPy` delegates to
-	`make_memmap`, which uses `name` as a filename stem. Supply a meaningful `name` at
-	allocation sites that may later use file-backed storage, even when the current allocator
-	ignores `name`.
+	`make_memmap`. Allocation sites need no storage knowledge: the operating system deletes
+	file-backed storage after its release.
 
 	Examples
 	--------
-	The matrix-meander algorithm supplies a storage name when allocating its working array.
+	The matrix-meander algorithm allocates its working array.
 
 		```python
-		arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+		arrayMeanders = makeDataContainer(shape, 形ArcCode)
 		```
 
 	"""
-	return make_zeros(shape, datatype, name)
+	return make_zeros(shape, datatype)
 
 @jit(nopython=True, error_model='numpy', fastmath=True)
 def make_zeros(
 	shape: int | tuple[Any, ...], datatype: 形NumPyInteger | numpy_dtype[形NumPyInteger]
-	, name: str | None = None  # ruff: ignore[unused-function-argument]
 ) -> ndarray[tuple[Any, ...], numpy_dtype[形NumPyInteger]]:
 	"""Allocate a zero-filled integer array with the common storage interface.
 
 	(AI generated docstring)
 
-	This function returns storage allocated by `numpy.zeros`. The unused `name` argument
-	keeps the call interface compatible with `makeDataContainer`.
+	This function returns storage allocated by `numpy.zeros`.
 
 	Parameters
 	----------
@@ -227,8 +215,6 @@ def make_zeros(
 		Requested array dimensions.
 	datatype : 形NumPyInteger | numpy_dtype[形NumPyInteger]
 		Integer element datatype.
-	name : str | None = None
-		Storage name accepted for interface compatibility and ignored by this allocator.
 
 	Returns
 	-------

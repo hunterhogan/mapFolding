@@ -10,7 +10,6 @@ authors = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 maintainers = [{ name = "Hunter Hogan", email = "HunterHogan@pm.me" }]
 keywords = [
   "A001415",
-  "A001417",
   "A400429",
   "OEIS",
   "combinatorial geometry",
@@ -71,11 +70,12 @@ optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", 
   "ortools; python_version < '3.15'",
   "pandas",
   "dulwich",
+  "hypothesis",
   "polars>=1.44.2",
   "pyarrow",
   "pytest-env",
   "pytest-xdist",
-  "pytest",
+  "pytest>=9.0",
 ] }
 
 [project.urls]
@@ -92,7 +92,13 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.coverage]
-report = { exclude_lines = ["if TYPE_CHECKING:", "if __name__ == \"__main__\":", "numba.jit_module"], ignore_errors = false }
+report = { exclude_also = [
+  "@overload",
+  "^\\s*\\.\\.\\.$",
+  "if TYPE_CHECKING:",
+  "if __name__ == \"__main__\":",
+  "numba.jit_module",
+], ignore_errors = false }
 run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFolding/tests/coverage/.coverage", omit = [
   "**/archive/**",
   "**/development/**",
@@ -106,9 +112,13 @@ run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFoldin
 ], parallel = true, source = ["."] }
 
 [tool.pytest]
-addopts = ["--color=yes", "-n", "4"]
+addopts = ["--color=yes", "-n", "3"]
+empty_parameter_set_mark = "fail_at_collect"
+filterwarnings = ["error"]
 log_auto_indent = "On"
-testpaths = ["**/tests"]
+minversion = "9.0"
+strict = true
+testpaths = ["mapFolding/tests"]
 
 [tool.pytest_env]
 # Re-confirmed: numba Version: 0.63.1 2025 December 30

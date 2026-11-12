@@ -1,12 +1,10 @@
 from __future__ import annotations
 
-from contextlib import suppress
 from gc import collect as goByeBye
-from hunterMakesPy import raiseIfNone
 from mapFolding.algorithms.matrixMeandersShare import getTotalBuckets, integersWide吗
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
-from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
+from mapFolding.oeis import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import countBigInt, flipDyckEndpoint, integersWideNumPy吗
 from mapFolding.theTypes import 形ArcCode
 from numpy import (
@@ -15,7 +13,6 @@ from numpy import (
 from tqdm.auto import tqdm
 from typing import cast, TYPE_CHECKING
 import numpy
-import pathlib
 
 if TYPE_CHECKING:
     from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
@@ -74,7 +71,7 @@ def count(state: StateMeanders) -> StateMeanders:
     NumPy implementations I tried.
     """
     shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
-    arrayMeanders: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+    arrayMeanders: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode)
     del shape
 
     arrayMeanders[slicerArcCode] = array(list(state.lookupMeanders.keys()), dtype=形ArcCode)
@@ -87,11 +84,11 @@ def count(state: StateMeanders) -> StateMeanders:
         state.bitWidthArcCode = int(arrayMeanders[slicerArcCode].max(initial=0)).bit_length()
         state.setBitsLocator()
         shape = ShapeArray(length=getTotalBuckets(state, len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)
-        arrayAnalyzed: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
+        arrayAnalyzed: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode)
         del shape
 
         shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indexes=indexesWorkbench)
-        arrayWorkbench: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayPrepArea')
+        arrayWorkbench: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode)
         del shape
 
         #=EndNotes##arrayWorkbench=
@@ -240,7 +237,7 @@ def count(state: StateMeanders) -> StateMeanders:
         unique: UniqueInverseResult[形ArcCode] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
 
         shape = ShapeArray(length=len(unique.values), indexes=indexesAnalyzed)
-        arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+        arrayMeanders = makeDataContainer(shape, 形ArcCode)
         del shape
 
         arrayMeanders[slicerArcCode] = unique.values
@@ -256,19 +253,9 @@ def count(state: StateMeanders) -> StateMeanders:
 
     state.lookupMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerMeanders]), strict=True))
 
-    if isinstance(arrayMeanders, memmap):
-        del arrayMeanders
-
-        with suppress(Exception):
-            pathlib.Path('arrayMeanders.mM').unlink()
-        with suppress(Exception):
-            pathlib.Path('arrayAnalyzed.mM').unlink()
-        with suppress(Exception):
-            pathlib.Path('arrayPrepArea.mM').unlink()
-
     return state
 
-def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None = None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
+def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger]) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
     """Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
 
     Parameters
@@ -277,18 +264,15 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
         Shape of the `ndarray`.
     datatype : type[形NumPyInteger]
         Integer `dtype` used for each array element.
-    name : str | None = None
-        Required filename stem for the current memory-mapped allocator. The default `None`
-        does not supply a usable storage name.
 
     Returns
     -------
     container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-        File-backed array created by `mapFolding.dataStructures.make_memmap`. Existing
-        storage with the same filename is replaced.
+        File-backed array created by `mapFolding.dataStructures.make_memmap`. The operating
+        system deletes the storage after the array and every view of it are released.
 
     """
-    return make_memmap(shape, datatype, raiseIfNone(name))
+    return make_memmap(shape, datatype)
 
 def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCodeAnalysis: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMaximum: int) -> tuple[形ArrayArcCode, int]:
     """Record retained `arcCodeAnalysis` values and their counts in a possibly extended `arrayAnalyzed`.

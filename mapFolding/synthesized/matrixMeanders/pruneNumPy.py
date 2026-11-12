@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-from contextlib import suppress
 from functools import cache
 from gc import collect as goByeBye
-from hunterMakesPy import raiseIfNone
-from mapFolding.beDRY import catalan, dotProduct, 工boxOfBasisCatalan
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
-from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
+from mapFolding.oeis import boxOfDiagonals
 from mapFolding.theTypes import 形ArcCode, 形ArrayArcCode
-from math import comb as nCr
 from numpy import (
 	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
 	bool as numpy_bool, greater as moreThan, less_equal as lessThanEqual, memmap, multiply, subtract)
@@ -17,7 +13,6 @@ from operator import neg
 from tqdm.auto import tqdm
 from typing import cast, TYPE_CHECKING
 import numpy
-import pathlib
 
 if TYPE_CHECKING:
     from typing import Literal, LiteralString
@@ -97,75 +92,6 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
         message: str = f"I received `kind = {kind!r}` for meander computation, but I don't know that kind."
         raise ValueError(message)
     return lookupMeanders
-totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
-coefficientsGrowthSemi: tuple[tuple[tuple[int, int, int], tuple[int, int, int]], ...] = (((3, -2, 2), (1, 0, 0)), ((11, -15, 4), (3, -2, 2)), ((25, -62, 17), (7, -11, 3)), ((57, -189, 26), (16, -43, 11)), ((140, -612, 84), (39, -139, 16)), ((313, -1665, 149), (88, -414, 56)), ((736, -4670, 419), (206, -1155, 89)), ((1678, -12261, 808), (471, -3160, 283)), ((3829, -31894, 2124), (1075, -8205, 483)), ((8769, -81418, 4246), (2461, -21402, 1425)), ((19791, -203954, 10802), (5563, -53588, 2560)), ((45077, -507404, 21917), (12660, -135124, 7153)))
-
-@cache
-def countDyckCuts(distance: int) -> int:
-    total: int = 0
-    k: int = 0
-    while 2 * k <= distance:
-        total += (distance - 2 * k + 1) * nCr(2 * distance - 2 * k + 2, k) // (distance - k + 1)
-        k += 1
-    return total
-
-@cache
-def getTotalsMaximum(boundary: int) -> tuple[int, int]:
-    totalBucketsMaximum: int = catalan(boundary + 1) + dotProduct((min(3 * k - 1 + boundary % 2, 3 * (boundary + 1 - k), 3 * boundary // 2) for k in range(boundary + 1)), 工boxOfBasisCatalan(boundary + 1), strict=True)
-    totalStatesMaximum: int = dotProduct((1 + min(k - (boundary + 1) % 2, boundary + 1 - k) for k in range(1, boundary + 2)), 工boxOfBasisCatalan(1, boundary + 2), strict=True)
-    return (totalBucketsMaximum, totalStatesMaximum)
-
-@cache
-def getTotalsMeanders(n: int, boundary: int) -> tuple[int, int]:
-    totalBuckets: int = 0
-    nLess_boundary: int = n - boundary
-    distance: int = nLess_boundary - 1 + n % 2
-    totalArcCodes: int = -(distance % 2 == 0)
-    while 0 <= distance:
-        totalCuts: int = countDyckCuts(distance)
-        totalPeaks: int = countDyckCuts(distance - 1) if distance else 0
-        totalBuckets += 4 * totalCuts - totalPeaks
-        if distance % 2 == 0:
-            totalBuckets -= 4 * catalan(distance // 2)
-        totalArcCodes += totalCuts
-        distance -= 2
-    if n % 2 == 0:
-        totalCuts = countDyckCuts(nLess_boundary - 1)
-        totalPeaks = countDyckCuts(nLess_boundary - 2) if 2 <= nLess_boundary else 0
-        totalBuckets += 4 * totalCuts - totalPeaks
-        if nLess_boundary % 2:
-            totalBuckets -= 2 * catalan(nLess_boundary // 2)
-        totalArcCodes += totalCuts
-    return (totalBuckets, totalArcCodes)
-
-def getTotalBuckets(state: StateMeanders, totalArcCodes: int=0) -> int:
-    totalBuckets: int = (355 * totalArcCodes + 99) // 100
-    nLess_boundary: int = state.n - state.boundary
-    if 3 * state.boundary + 1 + state.boundary % 2 <= state.n or (state.kind == 'meanders' and state.boundary == 1 and (state.n == 4)):
-        totalBucketsKnown, totalStatesKnown = getTotalsMaximum(state.boundary)
-    elif state.kind == 'semi' and 3 * state.boundary <= state.n <= 3 * state.boundary + state.boundary % 2:
-        totalBucketsKnown, totalStatesKnown = getTotalsMaximum(state.boundary)
-        if state.n == 3 * state.boundary + 1:
-            totalStatesMissing: int = 1
-        elif state.boundary % 2:
-            totalStatesMissing = 1 << state.boundary - 1
-        else:
-            totalStatesMissing = 3 << state.boundary - 2
-        totalBucketsKnown -= totalStatesMissing
-        totalStatesKnown -= totalStatesMissing
-        if state.boundary % 2 == 0:
-            totalBucketsKnown += 1
-    elif state.kind == 'meanders' and nLess_boundary < state.boundary:
-        totalBucketsKnown, totalStatesKnown = getTotalsMeanders(state.n, state.boundary)
-    elif state.kind == 'semi' and nLess_boundary <= len(coefficientsGrowthSemi) and (nLess_boundary == 1 or 3 * nLess_boundary <= state.n):
-        coefficientsBuckets, coefficientsArcCodes = coefficientsGrowthSemi[nLess_boundary - 1]
-        totalBucketsKnown = dotProduct(coefficientsBuckets, (state.n // 2, 1, state.n % 2), strict=True)
-        totalStatesKnown = dotProduct(coefficientsArcCodes, (state.n // 2, 1, state.n % 2), strict=True)
-    else:
-        return totalBuckets if totalArcCodes else getTotalsMaximum(state.boundary)[0]
-    if not totalArcCodes or totalArcCodes == totalStatesKnown:
-        return totalBucketsKnown
-    return min(totalBuckets, totalBucketsKnown)
 
 def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
     """Prepare a semi-meander state for counting diagonal `次diagonal` at row `n`.
@@ -263,6 +189,31 @@ def prune(state: StateMeanders) -> StateMeanders:
     if not state.lookupMeanders:
         state.boundary = 0
     return state
+totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
+
+def getTotalBuckets(state: StateMeanders, totalArcCodes: int=0) -> int:
+    """Estimate the output allocation length for one transfer-matrix step.
+
+    (AI generated docstring)
+
+    You can use this function to choose an initial output-buffer length from the number of input
+    records and the transfer boundary. The estimate can be smaller than the required allocation;
+    callers that write additional records must allow the buffer to grow.
+
+    Parameters
+    ----------
+    state : StateMeanders
+        The current transfer-matrix state.
+    totalArcCodes : int = 0
+        Number of unique input `arcCode` at the current boundary.
+
+    Returns
+    -------
+    totalBuckets : int
+        The exact or estimated number of non-unique `arcCode` rows to allocate.
+    """
+    totalBuckets: int = (355 * totalArcCodes + 99) // 100
+    return max(totalBuckets, totalBucketsMaximumBy_boundary.get(state.boundary, totalBuckets))
 
 def integersWideNumPy吗(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> bool:
     """Determine whether the next transfer step exceeds the fixed-width integer capacity.
@@ -516,7 +467,7 @@ def count(state: StateMeanders) -> StateMeanders:
     NumPy implementations I tried.
     """
     shape = ShapeArray(length=len(state.lookupMeanders), indexes=indexesAnalyzed)
-    arrayMeanders: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+    arrayMeanders: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode)
     del shape
     arrayMeanders[slicerArcCode] = array(list(state.lookupMeanders.keys()), dtype=形ArcCode)
     arrayMeanders[slicerMeanders] = array(list(state.lookupMeanders.values()), dtype=形ArcCode)
@@ -526,10 +477,10 @@ def count(state: StateMeanders) -> StateMeanders:
         state.bitWidthArcCode = int(arrayMeanders[slicerArcCode].max(initial=0)).bit_length()
         state.setBitsLocator()
         shape = ShapeArray(length=getTotalBuckets(state, len(arrayMeanders[slicerArcCode])), indexes=indexesAnalyzed)
-        arrayAnalyzed: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayAnalyzed')
+        arrayAnalyzed: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode)
         del shape
         shape = ShapeArray(length=len(arrayMeanders[slicerArcCode]), indexes=indexesWorkbench)
-        arrayWorkbench: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode, 'arrayPrepArea')
+        arrayWorkbench: 形ArrayArcCode = makeDataContainer(shape, 形ArcCode)
         del shape
         toPrepArea: 形ArrayArcCode1D = arrayWorkbench[slicerPrepArea].view()
         bitsAlfa: 形ArrayArcCode1D = arrayWorkbench[slicerAlfa].view()
@@ -625,7 +576,7 @@ def count(state: StateMeanders) -> StateMeanders:
             goByeBye()
         unique: UniqueInverseResult[形ArcCode] = numpy.unique_inverse(arrayAnalyzed[slicerArcCode])
         shape = ShapeArray(length=len(unique.values), indexes=indexesAnalyzed)
-        arrayMeanders = makeDataContainer(shape, 形ArcCode, 'arrayMeanders')
+        arrayMeanders = makeDataContainer(shape, 形ArcCode)
         del shape
         arrayMeanders[slicerArcCode] = unique.values
         arrayMeanders[slicerMeanders] = 0
@@ -636,17 +587,9 @@ def count(state: StateMeanders) -> StateMeanders:
         tqdmBoundary.update()
     tqdmBoundary.close()
     state.lookupMeanders = dict(zip(map(int, arrayMeanders[slicerArcCode]), map(int, arrayMeanders[slicerMeanders]), strict=True))
-    if isinstance(arrayMeanders, memmap):
-        del arrayMeanders
-        with suppress(Exception):
-            pathlib.Path('arrayMeanders.mM').unlink()
-        with suppress(Exception):
-            pathlib.Path('arrayAnalyzed.mM').unlink()
-        with suppress(Exception):
-            pathlib.Path('arrayPrepArea.mM').unlink()
     return state
 
-def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], name: str | None=None) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
+def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger]) -> ndarray[tuple[Any, ...], dtype[形NumPyInteger]]:
     """Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
 
     Parameters
@@ -655,18 +598,15 @@ def makeDataContainer(shape: tuple[Any, ...], datatype: type[形NumPyInteger], n
         Shape of the `ndarray`.
     datatype : type[形NumPyInteger]
         Integer `dtype` used for each array element.
-    name : str | None = None
-        Required filename stem for the current memory-mapped allocator. The default `None`
-        does not supply a usable storage name.
 
     Returns
     -------
     container : ndarray[tuple[Any, ...], dtype[形NumPyInteger]]
-        File-backed array created by `mapFolding.dataStructures.make_memmap`. Existing
-        storage with the same filename is replaced.
+        File-backed array created by `mapFolding.dataStructures.make_memmap`. The operating
+        system deletes the storage after the array and every view of it are released.
 
     """
-    return make_memmap(shape, datatype, raiseIfNone(name))
+    return make_memmap(shape, datatype)
 
 def recordAnalysis(arrayAnalyzed: 形ArrayArcCode, 次start: int, arcCodeAnalysis: 形ArrayArcCode1D, arrayMeanders: 形ArrayArcCode, arcCodeMaximum: int) -> tuple[形ArrayArcCode, int]:
     """Record retained `arcCodeAnalysis` values and their counts in a possibly extended `arrayAnalyzed`.

@@ -1,10 +1,11 @@
-"""Verification data for _measure.py functions.
+"""The values of each function in `mapFolding.measure`, keyed by input, from the lowest valid input through 256 unless sparse.
 
-Generated using the actual functions from _measure.py.
-Each function tested from lowest valid value up to 256 inclusive.
+Reference: the rule in each function's docstring. The tables were generated with the functions; an independent pure-Python
+evaluation of each docstring rule, with `int.bit_length` and `bin`, reproduced every entry on 2026-11-11.
 """
+from __future__ import annotations
 
-dataDimensionNearest: dict[int, int] = {
+expected工dimension首零: dict[int, int] = {
     0: 0,
     1: 0,
     2: 1,
@@ -264,7 +265,7 @@ dataDimensionNearest: dict[int, int] = {
     256: 8,
 }
 
-dataDimensionSecondNearest: dict[int, int | None] = {
+expected工dimension首一: dict[int, int | None] = {
     0: 0,
     1: None,
     2: None,
@@ -524,7 +525,7 @@ dataDimensionSecondNearest: dict[int, int | None] = {
     256: None,
 }
 
-dataDimensionThirdNearest: dict[int, int | None] = {
+expected工dimension首二: dict[int, int | None] = {
     0: None,
     1: None,
     2: None,
@@ -784,7 +785,7 @@ dataDimensionThirdNearest: dict[int, int | None] = {
     256: None,
 }
 
-dataDimensionFourthNearest: dict[int, int | None] = {
+expected工dimension首三: dict[int, int | None] = {
     7: None,
     9: None,
     22: None,
@@ -792,26 +793,7 @@ dataDimensionFourthNearest: dict[int, int | None] = {
     86: 1,
 }
 
-dataTotalDimensionsTail: tuple[tuple[tuple[int, ...], int, int], ...] = (
-    ((2, 2, 2), 0, 0),
-    ((2, 2, 2), 1, 1),
-    ((2, 2, 2), 3, 2),
-    ((2, 2, 2, 2), 9, 1),
-    ((2, 2, 2, 2), 15, 0),
-    ((2, 2, 2, 2, 2), 15, 4),
-    ((2, 2, 2, 2, 2), 27, 2),
-)
-
-dataInvertLeafIn2上nDimensions: tuple[tuple[int, int, int], ...] = (
-    (0, 0, 0),
-    (1, 0, 1),
-    (1, 1, 0),
-    (3, 5, 2),
-    (4, 9, 6),
-    (6, 42, 21),
-)
-
-dataLeafInSubHyperplane: dict[int, int] = {
+expectedLeafInSubHyperplane: dict[int, int] = {
     2: 0,
     3: 1,
     4: 0,
@@ -1069,7 +1051,7 @@ dataLeafInSubHyperplane: dict[int, int] = {
     256: 0,
 }
 
-dataHowMany0coordinatesAtTail: dict[int, int] = {
+expected工dimensionTail: dict[int, int] = {
     0: 0,
     1: 0,
     2: 1,
@@ -1329,7 +1311,7 @@ dataHowMany0coordinatesAtTail: dict[int, int] = {
     256: 8,
 }
 
-data工totalDimensionsOdd: dict[int, int] = {
+expected工totalDimensionsOdd: dict[int, int] = {
     0: 0,
     1: 0,
     2: 0,
@@ -1589,7 +1571,7 @@ data工totalDimensionsOdd: dict[int, int] = {
     256: 0,
 }
 
-dataPtount: dict[int, int] = {
+expectedPtount: dict[int, int] = {
     5: 0,
     6: 1,
     7: 0,

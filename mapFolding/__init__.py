@@ -38,7 +38,7 @@ dataStructures
 filters
 	Test leaf assignments and filter elimination search spaces.
 kitFilesystem
-	Name, save, cache, and load computation data.
+	Name, save, cache, and load computation data; open temporary binary files.
 leafDomains
 	Compute possible pile ranges and joint pile assignments for leaves.
 measure

@@ -1,9 +1,10 @@
 #ruff: file-ignore[suspicious-pickle-usage] #=Sin= Centralize all pickle usage here.
-"""Name, save, cache, and load folding computation data.
+"""Manage folding computation data and temporary binary files.
 
 (AI generated docstring)
 
-You can use this module to persist counts, albums, integer triangles, and diagonals.
+You can use this module to persist counts, albums, integer triangles, and diagonals, and to open
+temporary binary files.
 
 Contents
 --------
@@ -26,6 +27,9 @@ Functions
 	Confirm write capability
 		saveTotalFAILearly
 			Leave a test value at a new output path before counting.
+	Temporary files
+		openFileTemporary
+			Open a binary file with automatic cleanup.
 	Write
 		iterableToCSV
 			Write groups to CSV with optional appending.
@@ -71,6 +75,7 @@ from operator import itemgetter
 from pathlib import Path, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
+from tempfile import TemporaryFile
 from typing import TYPE_CHECKING
 import os
 
@@ -82,7 +87,7 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Folding, 形Triangle
 	from os import PathLike
 	from pandas import DataFrame
-	from typing import Any
+	from typing import Any, IO
 
 #======== Paths and filenames ======================================================================
 
@@ -357,6 +362,36 @@ def saveTotalFAILearly[形PathLike: PathLike[str]](pathFilename: 形PathLike) ->
 		raise FileNotFoundError(message)
 
 	return pathFilename
+
+#======== Temporary files ==========================================================================
+
+def openFileTemporary() -> IO[bytes]:
+	"""Open a binary temporary file with automatic cleanup.
+
+	(AI generated docstring)
+
+	You can use the file for temporary binary storage, including a NumPy memory map. The file
+	starts empty, supports reading and writing in mode `'w+b'`, and uses the temporary directory
+	selected by Python's `tempfile` module.
+
+	File Lifetime
+	-------------
+	Use the returned file as a context manager or close the file explicitly. Closing the file
+	releases its handle and initiates automatic cleanup. A memory map can retain access to the
+	storage until the memory map and its views are released. A visible filename depends on the
+	platform; pass the file object to consumers rather than reopening its name.
+
+	Returns
+	-------
+	fileTemporary : IO[bytes]
+		Open binary file with read, write, seek, and file-descriptor access.
+
+	See Also
+	--------
+	`mapFolding.dataStructures.make_memmap`
+		Allocate zero-filled array storage backed by a temporary file.
+	"""
+	return TemporaryFile()
 
 #======== Save =====================================================================================
 

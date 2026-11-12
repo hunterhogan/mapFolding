@@ -21,14 +21,13 @@ contact:
 - given-names: Hunter
   family-names: Hogan
   email: HunterHogan@pm.me
-date-released: '2026-11-10'
+date-released: '2026-11-12'
 identifiers:
 - type: url
   value: https://github.com/hunterhogan/mapFolding/releases/tag/0.39.0
   description: The URL for mapFolding 0.39.0.
 keywords:
 - A001415
-- A001417
 - A400429
 - OEIS
 - combinatorial geometry

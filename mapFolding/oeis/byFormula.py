@@ -258,14 +258,14 @@ def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A00
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A223094':
             if 4 <= n:
-                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), map(factorial, repeat(n - 1, len(range(3, n))))), map(factorial, range(3, n))))  # ruff: ignore[map-without-explicit-strict]
+                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), map(factorial, repeat(n - 1, len(range(3, n))))), map(factorial, range(3, n))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A301620':
             if 3 <= n:
-                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1))))  # ruff: ignore[map-without-explicit-strict]
+                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1))))
             elif n <= 2:
                 countTotal = 1
             else:
@@ -452,7 +452,7 @@ def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A0602
     is "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times.".
 
     The domain of A005315 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 35.
+    has not yet been computed is 39.
 
     Parameters
     ----------
@@ -526,7 +526,7 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
     is "Meandric numbers: number of ways a river can cross a road n times.".
 
     The domain of A005316 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 59.
+    has not yet been computed is 60.
 
     Parameters
     ----------
@@ -801,7 +801,7 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     countTotal: int
     match f:
         case 'A000108':
-            countTotal = sum(map(mul, map((n + 1).__sub__, range(n + 1)), map(A000108, range(n + 1))))  # ruff: ignore[map-without-explicit-strict]
+            countTotal = sum(map(mul, map((n + 1).__sub__, range(n + 1)), map(A000108, range(n + 1))))
         case 'A014137 and A014140':
             if 1 <= n:
                 countTotal = A014137(n) + A014140(n - 1)
@@ -907,7 +907,7 @@ def A077014(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
     is "Number of ways that a directed line (or river) that starts in the south can cross an east-west road n times.".
 
     The domain of A077014 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 59.
+    has not yet been computed is 60.
 
     Parameters
     ----------
@@ -1018,7 +1018,7 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206'] | LiteralString 
     is "Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.".
 
     The domain of A077460 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 30.
+    has not yet been computed is 35.
 
     Parameters
     ----------
@@ -1064,7 +1064,7 @@ def A078591(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
     is "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.".
 
     The domain of A078591 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 30.
+    has not yet been computed is 35.
 
     Parameters
     ----------
@@ -1185,7 +1185,7 @@ def A208357(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
     is "Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut.".
 
     The domain of A208357 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 29.
+    has not yet been computed is 34.
 
     Parameters
     ----------
@@ -1536,7 +1536,7 @@ def A322507(n: int, f: LiteralString | None = None) -> int:
     is "a(n) is the number of arches for semi-meanders with n top arches that have exactly two covering arches.".
 
     The domain of A322507 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 25.
+    has not yet been computed is 27.
 
     Parameters
     ----------
@@ -1774,7 +1774,7 @@ def A400631(n: int, f: LiteralString | None = None) -> int:
     match f:
         case _:
             if True:
-                countTotal = (13 * n ** 4 + 24 * n ** 3 + 9 * (2 * n ** 2 + 21 - 8 * n) * (n % 2) + 17920 - 64 * 0 ** (n % 3) - 284 * n ** 2 - 4560 * n) // 288
+                countTotal = (13 * n ** 4 + 24 * n ** 3 + 9 * (2 * n ** 2 + 21 - 8 * n) * (n % 2) + 17920 - 284 * n ** 2 - 4560 * n - 64 * 0 ** (n % 3)) // 288
             else:
                 countTotal = oeisIDfor_n('A400631', n)
     return countTotal

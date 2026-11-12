@@ -208,13 +208,14 @@ def getFlatCall(qq: AppliedUndef) -> Expr:
 
 	(AI generated docstring)
 	"""
-	ww: AppliedUndef | Expr = qq
-	if len(qq.args) == 2:
-		oeisID: OEISid = settingsOEIS.lookupID[qq.func]
-		metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
-		row, column = qq.args
-		ww = qq.func(locateRow(as_int(row), metadata['rowLength'], metadata['rowStart'], metadata['offset'])[
-			as_int(column) - metadata['columnStart']])
+	match qq.args:
+		case (Integer() as row, Integer() as column):
+			oeisID: OEISid = settingsOEIS.lookupID[qq.func]
+			metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+			ww: AppliedUndef | Expr = qq.func(locateRow(as_int(row), metadata['rowLength'], metadata['rowStart'], metadata['offset'])[
+				as_int(column) - metadata['columnStart']])
+		case _:
+			ww = qq
 	return ww
 
 def getKnownValue(expression: AppliedUndef) -> Expr:
@@ -313,9 +314,11 @@ def solveRelationValue(wanted: AppliedUndef, boxOfOEISidBasis: frozenset[OEISid]
 	if len(boxOfValues) == len(boxOfCalls):
 		equationKnown: Boolean = equation.xreplace(dict(zip(boxOfCalls, map(Integer, boxOfValues), strict=True)))
 		boxOfSolutions: Set = solveset(equationKnown, wanted, domain=settingsOEIS.domain)
-		if isinstance(boxOfSolutions, FiniteSet) and len(boxOfSolutions) == 1:
-			(solution,) = boxOfSolutions
-			value = as_int(solution)
+		match boxOfSolutions:
+			case FiniteSet(args=(Integer() as solution,)):
+				value = as_int(solution)
+			case _:
+				pass
 	return value
 
 def deriveValue(boxOfOEISidBasis: frozenset[OEISid], boxOfOEISidDeriving: frozenset[OEISid], oeisIDfor_n: Callable[[OEISid, int], int]

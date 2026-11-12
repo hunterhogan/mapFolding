@@ -1,38 +1,39 @@
+"""Assert contracts about mapFolding's own domain objects, which `hunterMakesPy.tests` cannot depend on.
+
+The shared assertion helpers come from `hunterMakesPy.tests` through `mapFolding.tests`.
+"""
 from __future__ import annotations
 
-from itertools import starmap
+from hunterMakesPy.tests import messageTestFailure
+from operator import methodcaller
 from typing import TYPE_CHECKING
 import numpy
-import pytest
+import numpy.testing
+import pandas
 
 if TYPE_CHECKING:
-	from numpy import dtype, ndarray, number
+	from collections.abc import Sequence
+	from mapFolding.dataBaskets import PermutationSpace
+	from numpy.typing import NDArray
 	from typing import Any
 
-#================== Assert scalar and built-in containers ========================================================================
+def assertPermutationSpacesPartitionFoldings(boxOfPermutationSpace: Sequence[PermutationSpace], arrayFoldings: NDArray[numpy.uint8]
+	, function: str, *arguments: Any, **keywordArguments: Any) -> None:
+	"""Assert that every folding agrees with the pinned leaves of exactly one permutation space.
 
-def assertEqualTo[个](actual: 个, expected: 个, function: str, *arguments: Any, **keywordArguments: Any) -> None:
-	"""Assert that two objects are equal, and if not, raise an AssertionError with a detailed message."""
-	assert actual == expected, messageTestFailure(actual, expected, function, *arguments, **keywordArguments)
-
-def assert_approx[个](actual: 个, expected: 个, pytest_rel: float, pytest_abs: float, function: str, *arguments: Any, **keywordArguments: Any) -> None:
-	assert actual == pytest.approx(expected, pytest_rel, pytest_abs, nan_ok=True), messageTestFailure(actual, expected, function, *arguments, **keywordArguments)
-
-def messageTestFailure(actual: Any, expected: Any, function: str, *arguments: Any, **keywordArguments: Any) -> str:
-	"""Format assertion message for any test comparison."""
-	parameters: list[str] = [*map(repr, arguments), *starmap('{}={!r}'.format, keywordArguments.items())]
-	return f'{function}({", ".join(parameters)}) = {actual!r}, but {expected = }.'
-
-#================== Assert NumPy arrays ========================================================================
-
-def assert_array_equal[形ndarray: ndarray[tuple[Any, ...], dtype[number]]](actual: 形ndarray, expected: 形ndarray, function: str, *arguments: Any, **keywordArguments: Any) -> None:
-	"""Assert that two arrays are equal, and if not, raise an AssertionError with a detailed message."""
-	assert numpy.array_equal(actual, expected), messageTestFailure_ndarray(actual, expected, function, *arguments, **keywordArguments)
-
-def assert_allclose[形ndarray: ndarray[tuple[Any, ...], dtype[number]]](actual: 形ndarray, expected: 形ndarray, rtol: float, atol: float, function: str, *arguments: Any, **keywordArguments: Any) -> None:
-	assert numpy.allclose(actual, expected, rtol, atol), messageTestFailure_ndarray(actual, expected, function, *arguments, **keywordArguments)
-
-def messageTestFailure_ndarray[形ndarray: ndarray[tuple[Any, ...], dtype[number]]](actual: 形ndarray, expected: 形ndarray, function: str, *arguments: Any, **keywordArguments: Any) -> str:
-	"""Printing arrays is absurd."""
-	parameters: list[str] = [*map(repr, arguments), *starmap('{}={!r}'.format, keywordArguments.items())]
-	return f'{function}({", ".join(parameters)}) = {actual.shape=},\t{actual.dtype=}, but {expected.shape=}, {expected.dtype=}.'
+	Each row of `arrayFoldings` is one folding, and column `pile` holds the leaf at `pile`. A folding agrees with a permutation
+	space when the folding has every leaf that the permutation space pins, at the pile where the permutation space pins it. A
+	permutation space that pins no leaf agrees with every folding.
+	"""
+	leavesPinned: pandas.DataFrame = (pandas.DataFrame(map(methodcaller('pinnedLeaves'), boxOfPermutationSpace))
+		.melt(ignore_index=False, var_name='pile', value_name='leaf').dropna().astype({'leaf': int}).reset_index(names='permutationSpace'))
+	foldings: pandas.DataFrame = (pandas.DataFrame(arrayFoldings)
+		.melt(ignore_index=False, var_name='pile', value_name='leaf').astype({'leaf': int}).reset_index(names='folding'))
+	agreements: pandas.Series = leavesPinned.merge(foldings, on=['pile', 'leaf']).value_counts(['permutationSpace', 'folding'])
+	agreementsRequired: pandas.Series = leavesPinned.value_counts('permutationSpace')
+	agreementsComplete: pandas.Series = agreements[agreements.to_numpy() == agreementsRequired.reindex(agreements.index.get_level_values('permutationSpace')).to_numpy()]
+	permutationSpacesPinningNothing: int = len(boxOfPermutationSpace) - len(agreementsRequired)
+	permutationSpacesPerFolding: NDArray[numpy.integer] = (agreementsComplete.index.get_level_values('folding').value_counts()
+		.reindex(range(len(arrayFoldings)), fill_value=0).add(permutationSpacesPinningNothing).to_numpy(dtype=numpy.int64))
+	numpy.testing.assert_array_equal(permutationSpacesPerFolding, numpy.ones(len(arrayFoldings), dtype=numpy.int64)
+		, err_msg=messageTestFailure(permutationSpacesPerFolding, 'one permutation space per folding', function, *arguments, **keywordArguments), strict=True)

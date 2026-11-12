@@ -1,36 +1,20 @@
-"""Test data for elimination algorithm functions, indexed by n-cube dimension (2^n totalLeaves).
+"""Facts about every folding of the 2^n-dimensional maps, whose `mapShape` is `(2,) * n` and which have 2^n leaves.
 
-The OEIS sequence A001417 counts the number of ways to fold a 2^n map (n-dimensional hypercube with
-side length 2 in each dimension). This module provides known test data for functions that compute
-properties of such foldings, organized by `mapShape`.
+- `dictionaryLeafDomainKnown`: for each leaf, `(start, stop, step)` of the range of piles at which the leaf appears.
+	Reference: the piles of each leaf in the enumerated foldings in `arrayFoldings2上{n}Dimensional.pkl`, which
+	`mapFolding.kitFilesystem.getDataFrameFoldings` reads. Each range holds exactly the observed piles (verified 2026-11-11).
+- `dictionaryChoicesLeafKnown`: for each pile, the leaves that appear at the pile. Reference: the same enumerated foldings;
+	each tuple holds exactly the observed leaves (verified 2026-11-11).
+- `dictionaryCreasesIncreaseKnown` and `dictionaryCreasesDecreaseKnown`: for each leaf, the crease-connected leaves that can
+	follow or precede it, in increasing order of leaf. Accepted recording, stored before the 2026-11 reorganization.
 
-Data Structure
---------------
-Each dictionary is keyed by `mapShape` (a tuple defining the n-dimensional hypercube). The naming
-convention `2^n-dimensional` refers to a shape of `(2,) * n`, which yields `2^n` leaves. For example:
-- `2^4-dimensional` means `(2, 2, 2, 2)` → 16 totalLeaves
-- `2^5-dimensional` means `(2, 2, 2, 2, 2)` → 32 totalLeaves
-- `2^6-dimensional` means `(2, 2, 2, 2, 2, 2)` → 64 totalLeaves
-
-Synonyms:
-- n=4: (2,)*4, 2^4-dimensional, 16 totalLeaves, A001417(4)
-- n=5: (2,)*5, 2^5-dimensional, 32 totalLeaves, A001417(5)
-- n=6: (2,)*6, 2^6-dimensional, 64 totalLeaves, A001417(6)
-
-Future Extensions
------------------
-When adding test data for new `mapShape`, follow these guidelines:
-1. Add the new `mapShape` as a key in the appropriate dictionary
-2. Use prime or Fibonacci indices for spot-checking when full data is unavailable
-3. Maintain the same data format as existing entries
+Consumers do not mutate these objects.
 """
 
 mapShape2上4Dimensional: tuple[int, ...] = (2, 2, 2, 2)
 mapShape2上5Dimensional: tuple[int, ...] = (2, 2, 2, 2, 2)
 mapShape2上6Dimensional: tuple[int, ...] = (2, 2, 2, 2, 2, 2)
 
-# Leaf domain data: for each leaf, the (start, stop, step) defining its domain range
-# Extracted empirically from pickled foldings data via getDataFrameFoldings
 dictionaryLeafDomainKnown: dict[tuple[int, ...], dict[int, tuple[int, int, int]]] = {
 	mapShape2上4Dimensional: {
 		0: (0, 1, 2),

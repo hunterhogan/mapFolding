@@ -1,13 +1,15 @@
 """Verification data for combined leaf domains.
 
 This module contains empirically extracted combined domain data for leaves
-['首零一二', '首一二'] across multiple mapShape configurations.
+['首零一二', '首一二'] across multiple map-shape configurations.
 
 Each list is named `boxOfDomain2上{totalDimensions}Dimensional` where `totalDimensions`
 is the exponent in the 2^n-dimensional mapShape, and it contains tuples representing
 valid pile indices for the specified leaves. The tuple element sequence follows the original
 leaf argument order.
 """
+
+boxOfDomain2上4Dimensional: list[tuple[int, ...]] = [(5, 6), (7, 8), (9, 6), (9, 10), (11, 4), (11, 12), (13, 6), (13, 10)]
 
 boxOfDomain2上5Dimensional: list[tuple[int, ...]] = [(9, 10), (11, 12), (13, 14), (15, 16), (17, 14), (17, 18), (19, 12), (19, 20), (21, 10), (21, 18), (21, 22), (23, 8), (23, 24), (25, 10), (25, 14), (25, 18), (25, 22), (25, 26), (27, 12), (27, 20), (27, 28), (29, 14), (29, 18), (29, 22), (29, 26)]
 

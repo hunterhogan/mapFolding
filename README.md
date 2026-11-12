@@ -157,6 +157,11 @@ Exact enumeration becomes expensive quickly. Running time, memory use, and the a
 
 Pass `pathLikeWrite` to a counting function to save the total. An existing directory receives a generated filename; an explicit filename is also supported. The destination is write-tested before counting, leaving a test value until the result replaces it. An existing target file is rejected. These output files save totals; they do not checkpoint a running search.
 
+For temporary working storage, `mapFolding.kitFilesystem.openFileTemporary` opens a binary file in
+the default temporary directory. Use the file as a context manager to initiate automatic cleanup
+when the context ends. `dataStructures.make_memmap` uses this file for NumPy array storage, which
+remains available while the memory map or its views retain it.
+
 `countFolds` can divide work using an integer, `computationDivisions='cpu'`, or `computationDivisions='maximum'`. Tasks repeat substantial preparatory work, so division can increase elapsed time. Leave `computationDivisions=None` unless task division is part of your experiment; see the function's docstring for the tradeoffs.
 
 ## Repository guide
