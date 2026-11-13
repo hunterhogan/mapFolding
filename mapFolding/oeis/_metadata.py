@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from functools import cache, partial
-from humpy_cytoolz import dissoc, get_in
+from humpy_cytoolz import compose_left, dissoc, get_in
 from hunterMakesPy import errorL33T
 from itertools import count, filterfalse, takewhile
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
@@ -10,7 +10,7 @@ from mapFolding.oeis._beDRY import format_bFile, formatOEISid, makeValuesKnown, 
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
 from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
 from mapFolding.oeis._theSSOT import settingsOEIS
-from operator import add
+from operator import add, methodcaller
 from typing import TYPE_CHECKING
 import sys
 
@@ -293,6 +293,8 @@ dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 	'A259698': MetadataOEISidTriangle(**dictionaryOEIS['A259698'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
 	'A259701': MetadataOEISidTriangle(**dictionaryOEIS['A259701'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
 	'A259703': MetadataOEISidTriangle(**dictionaryOEIS['A259703'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A259974': MetadataOEISidTriangle(**dictionaryOEIS['A259974']
+		, rowLength=compose_left(partial(add, 1), methodcaller('__floordiv__', 2)), rowStart=1, columnStart=1),
 	'A287548': MetadataOEISidTriangle(**dictionaryOEIS['A287548'], rowLength=int, rowStart=1, columnStart=1),
 	'A331499': MetadataOEISidTriangle(**dictionaryOEIS['A331499'], rowLength=int, rowStart=1, columnStart=1),
 	'A339179': MetadataOEISidTriangle(**dictionaryOEIS['A339179'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),

@@ -10,9 +10,9 @@ from math import factorial, isqrt
 from operator import floordiv, mul
 from typing import Literal, LiteralString
 
-def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693'] | LiteralString | None = None) -> int:
+def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693', 'A001405', 'A000108 and A002057'] | LiteralString | None = None) -> int:
     """
-    Compute A000108(n) as a function of A000108 or A001246 or A014137 or A014137 and A401693.
+    Compute A000108(n) as a function of A000108 or A001246 or A014137 or A014137 and A401693 or A001405 or A000108 and A002057.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000108
     is "Catalan numbers: C(n) = binomial(2n,n)/(n+1) = (2n)!/(n!(n+1)!).".
@@ -65,6 +65,15 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A40
         case 'A014137 and A401693':
             if 3 <= n and (n + 1) % 2 == 0:
                 countTotal = 2 * A014137(n) + A401693(n - 2) - 2 * A014137((n - 1) // 2) - A401693(n)
+            elif True:
+                countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
+            else:
+                countTotal = oeisIDfor_n('A000108', n)
+        case 'A001405':
+            countTotal = A001405(2 * n) // (n + 1)
+        case 'A000108 and A002057':
+            if 3 <= n:
+                countTotal = 2 * A000108(n - 1) + A002057(n - 3)
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
@@ -408,6 +417,96 @@ def A001246(n: int, f: Literal['A000108'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A001246', n)
     return countTotal
 
+def A001405(n: int, f: Literal['A000108', 'A001405'] | LiteralString | None = None) -> int:
+    """
+    Compute A001405(n) as a function of A000108 or A001405.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001405
+    is "a(n) = binomial(n, floor(n/2)).".
+
+    The domain of A001405 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 1001.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        a(n) = binomial(n, floor(n/2)).
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A001405
+    """
+    countTotal: int
+    match f:
+        case 'A000108':
+            if n % 2 == 0:
+                countTotal = (n + 2) * A000108(n // 2) // 2
+            elif True:
+                countTotal = factorial(n) // (factorial(-(-n // 2)) * factorial(n // 2))
+            else:
+                countTotal = oeisIDfor_n('A001405', n)
+        case 'A001405':
+            if 2 <= n and n % 2 == 0:
+                countTotal = 2 * A001405(n - 1)
+            elif True:
+                countTotal = factorial(n) // (factorial(-(-n // 2)) * factorial(n // 2))
+            else:
+                countTotal = oeisIDfor_n('A001405', n)
+        case _:
+            if True:
+                countTotal = factorial(n) // (factorial(-(-n // 2)) * factorial(n // 2))
+            else:
+                countTotal = oeisIDfor_n('A001405', n)
+    return countTotal
+
+def A002057(n: int, f: Literal['A000108', 'A006659'] | LiteralString | None = None) -> int:
+    """
+    Compute A002057(n) as a function of A000108 or A006659.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002057
+    is "Fourth convolution of Catalan numbers: a(n) = 4*binomial(2*n+3,n)/(n+4).".
+
+    The domain of A002057 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 1001.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Fourth convolution of Catalan numbers: a(n) = 4*binomial(2*n+3,n)/(n+4).
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A002057
+    """
+    countTotal: int
+    match f:
+        case 'A000108':
+            countTotal = A000108(n + 3) - 2 * A000108(n + 2)
+        case 'A006659':
+            countTotal = A006659(n + 1) // (n + 2)
+        case _:
+            if True:
+                countTotal = 4 * factorial(2 * n + 3) // (factorial(n) * factorial(n + 4))
+            else:
+                countTotal = oeisIDfor_n('A002057', n)
+    return countTotal
+
 def A002415(n: int, f: LiteralString | None = None) -> int:
     """
     Compute A002415(n) as a function of n.
@@ -442,6 +541,44 @@ def A002415(n: int, f: LiteralString | None = None) -> int:
                 countTotal = n ** 2 * (n ** 2 - 1) // 12
             else:
                 countTotal = oeisIDfor_n('A002415', n)
+    return countTotal
+
+def A002694(n: int, f: Literal['A006659'] | LiteralString | None = None) -> int:
+    """
+    Compute A002694(n) as a function of A006659.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002694
+    is "Binomial coefficients C(2n, n-2).".
+
+    The domain of A002694 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 201.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Binomial coefficients C(2n, n-2).
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A002694
+    """
+    countTotal: int
+    match f:
+        case 'A006659':
+            countTotal = A006659(n - 1) // 2
+        case _:
+            if True:
+                countTotal = factorial(2 * n) // (factorial(n - 2) * factorial(n + 2))
+            else:
+                countTotal = oeisIDfor_n('A002694', n)
     return countTotal
 
 def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A060206, and A077460', 'A078591', 'A208357'] | LiteralString | None = None) -> int:
@@ -518,9 +655,9 @@ def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A0602
                 countTotal = oeisIDfor_n('A005315', n)
     return countTotal
 
-def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A060206, and A077460', 'A005316 and A078592', 'A000682 and A223093', 'A217310, A217318, and A227167'] | LiteralString | None = None) -> int:
+def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A060206, and A077460', 'A005316 and A078592', 'A000682 and A223093', 'A217310, A217318, and A227167', 'A006661 and A076876'] | LiteralString | None = None) -> int:
     """
-    Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A000682 and A223093 or A217310, A217318, and A227167.
+    Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A000682 and A223093 or A217310, A217318, and A227167 or A006661 and A076876.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316
     is "Meandric numbers: number of ways a river can cross a road n times.".
@@ -594,6 +731,13 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005316', n)
+        case 'A006661 and A076876':
+            if 2 <= n and n % 2 == 0:
+                countTotal = A006661(n + 4) - A076876(n)
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A005316', n)
         case _:
             if n <= 1:
                 countTotal = 1
@@ -601,9 +745,9 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
                 countTotal = oeisIDfor_n('A005316', n)
     return countTotal
 
-def A006659(n: int, f: LiteralString | None = None) -> int:
+def A006659(n: int, f: Literal['A002057', 'A002694'] | LiteralString | None = None) -> int:
     """
-    Compute A006659(n) as a function of n.
+    Compute A006659(n) as a function of A002057 or A002694.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006659
     is "Number of closed meander systems of order n+1 with n components.".
@@ -630,11 +774,53 @@ def A006659(n: int, f: LiteralString | None = None) -> int:
     """
     countTotal: int
     match f:
+        case 'A002057':
+            countTotal = (n + 1) * A002057(n - 1)
+        case 'A002694':
+            countTotal = 2 * A002694(n + 1)
         case _:
             if True:
                 countTotal = 2 * factorial(2 * n + 2) // (factorial(n - 1) * factorial(n + 3))
             else:
                 countTotal = oeisIDfor_n('A006659', n)
+    return countTotal
+
+def A006661(n: int, f: Literal['A005316 and A076876'] | LiteralString | None = None) -> int:
+    """
+    Compute A006661(n) as a function of A005316 and A076876.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006661
+    is "Number of meanders in which first bridge is 5.".
+
+    The domain of A006661 starts at 5, therefore for values of `n` < 5, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 41.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Number of meanders in which first bridge is 5.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A006661
+    """
+    countTotal: int
+    match f:
+        case 'A005316 and A076876':
+            if 6 <= n and n % 2 == 0:
+                countTotal = A005316(n - 4) + A076876(n - 4)
+            else:
+                countTotal = oeisIDfor_n('A006661', n)
+        case _:
+            countTotal = oeisIDfor_n('A006661', n)
     return countTotal
 
 def A007746(n: int, f: LiteralString | None = None) -> int:
@@ -897,6 +1083,44 @@ def A060206(n: int, f: Literal['A000682', 'A005315, A005316, and A077460'] | Lit
                 countTotal = oeisIDfor_n('A060206', n)
         case _:
             countTotal = oeisIDfor_n('A060206', n)
+    return countTotal
+
+def A076876(n: int, f: Literal['A005316 and A006661'] | LiteralString | None = None) -> int:
+    """
+    Compute A076876(n) as a function of A005316 and A006661.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A076876
+    is "Meandric numbers for a river crossing two parallel roads at n points.".
+
+    The domain of A076876 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 41.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Meandric numbers for a river crossing two parallel roads at n points.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A076876
+    """
+    countTotal: int
+    match f:
+        case 'A005316 and A006661':
+            if 2 <= n and n % 2 == 0:
+                countTotal = A006661(n + 4) - A005316(n)
+            else:
+                countTotal = oeisIDfor_n('A076876', n)
+        case _:
+            countTotal = oeisIDfor_n('A076876', n)
     return countTotal
 
 def A077014(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:

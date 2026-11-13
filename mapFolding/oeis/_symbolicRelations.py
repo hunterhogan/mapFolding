@@ -16,6 +16,7 @@ k: Symbol = settingsOEIS.k
 A000108 = settingsOEIS.lookupSymbolic['A000108']
 A001246 = settingsOEIS.lookupSymbolic['A001246']
 A001263 = settingsOEIS.lookupSymbolic['A001263']
+A001405 = settingsOEIS.lookupSymbolic['A001405']
 A002415 = settingsOEIS.lookupSymbolic['A002415']
 A014137 = settingsOEIS.lookupSymbolic['A014137']
 A014140 = settingsOEIS.lookupSymbolic['A014140']
@@ -45,6 +46,13 @@ boxOfRelationsCatalan: tuple[形Relation, ...] = (
 	, (Eq(A401693(2 * n + 1), A014140(2 * n + 1) - 2 * A014140(n)), Range(0, oo))
 	, (Eq(A401693(2 * n), A401693(2 * n - 2) + 2 * A014137(2 * n) - 2 * A014137(n - 1) - A000108(2 * n)), Range(2, oo))
 	, (Eq(A401693(2 * n + 1), A401693(2 * n - 1) + 2 * A014137(2 * n + 1) - 2 * A014137(n) - A000108(2 * n + 1)), Range(1, oo))
+)
+
+boxOfRelationsBallot: tuple[形Relation, ...] = (
+	(Eq(A001405(n), factorial(n) / (factorial(floor(n / 2)) * factorial(ceiling(n / 2)))), Range(0, oo))
+	, (Eq(A001405(n), Sum(A053121(n, k), (k, 0, n))), Range(0, oo))
+	, (Eq(A001405(2 * n), (n + 1) * A000108(n)), Range(0, oo))
+	, (Eq(A001405(2 * n), 2 * A001405(2 * n - 1)), Range(1, oo))
 )
 
 A045445 = settingsOEIS.lookupSymbolic['A045445']
@@ -210,6 +218,8 @@ boxOfRelationsWinding: tuple[形Relation, ...] = (
 	, (Eq(A400429(n, floor(n / 2) - 8), A400637(n)), Range(18, oo))
 )
 
+A002057 = settingsOEIS.lookupSymbolic['A002057']
+A002694 = settingsOEIS.lookupSymbolic['A002694']
 A006657 = settingsOEIS.lookupSymbolic['A006657']
 A006658 = settingsOEIS.lookupSymbolic['A006658']
 A006659 = settingsOEIS.lookupSymbolic['A006659']
@@ -228,6 +238,11 @@ boxOfRelationsSystems: tuple[形Relation, ...] = (
 	, (Eq(A006659(n), 2 * factorial(2 * n + 2) / (factorial(n - 1) * factorial(n + 3))), Range(1, oo))
 	, (Eq(A007746(n), 4 * factorial(2 * n) * (n ** 4 + 20 * n ** 3 + 107 * n ** 2 - 107 * n + 15)
 		/ (3 * factorial(n - 4) * factorial(n + 6))), Range(4, oo))
+	, (Eq(A002057(n), 4 * factorial(2 * n + 3) / (factorial(n) * factorial(n + 4))), Range(0, oo))
+	, (Eq(A002057(n), A000108(n + 3) - 2 * A000108(n + 2)), Range(0, oo))
+	, (Eq(A006659(n), (n + 1) * A002057(n - 1)), Range(1, oo))
+	, (Eq(A002694(n), factorial(2 * n) / (factorial(n - 2) * factorial(n + 2))), Range(2, oo))
+	, (Eq(A006659(n), 2 * A002694(n + 1)), Range(1, oo))
 	, (Eq(A060972(n, 1), 1), Range(1, oo))
 	, (Eq(A060972(n, n), 1), Range(1, oo))
 	, (Eq(A060972(n, 2), A002415(n)), Range(2, oo))
@@ -236,6 +251,18 @@ boxOfRelationsSystems: tuple[形Relation, ...] = (
 )
 
 A006660 = settingsOEIS.lookupSymbolic['A006660']
+A006662 = settingsOEIS.lookupSymbolic['A006662']
+A259974 = settingsOEIS.lookupSymbolic['A259974']
+
+boxOfRelationsBridges: tuple[形Relation, ...] = (
+	(Eq(A259974(n, 1), A005316(n - 1)), Range(1, oo))
+	, (Eq(A259974(n, 2), A006660(n)), Range(3, oo))
+	, (Eq(A259974(n, 3), A006661(n)), Range(5, oo))
+	, (Eq(A259974(n, 4), A006662(n)), Range(7, oo))
+	, (Eq(A005316(n), Sum(A259974(n, k), (k, 1, ceiling(n / 2)))), Range(1, oo))
+	, (Eq(A006661(n), A076876(n - 4) + A005316(n - 4)), Range(6, oo, 2))
+)
+
 A077056 = settingsOEIS.lookupSymbolic['A077056']
 A380369 = settingsOEIS.lookupSymbolic['A380369']
 
@@ -249,5 +276,5 @@ boxOfRelationsHumps: tuple[形Relation, ...] = (
 	, (Eq(A077056(n), 0), Range(0, 1))
 )
 
-boxOfRelations: tuple[形Relation, ...] = (*boxOfRelationsCatalan, *boxOfRelationsCatafusenes, *boxOfRelationsMeanders, *boxOfRelationsStamps
-	, *boxOfRelationsArches, *boxOfRelationsOverlaps, *boxOfRelationsWinding, *boxOfRelationsSystems, *boxOfRelationsHumps)
+boxOfRelations: tuple[形Relation, ...] = (*boxOfRelationsCatalan, *boxOfRelationsBallot, *boxOfRelationsCatafusenes, *boxOfRelationsMeanders, *boxOfRelationsStamps
+	, *boxOfRelationsArches, *boxOfRelationsOverlaps, *boxOfRelationsWinding, *boxOfRelationsSystems, *boxOfRelationsBridges, *boxOfRelationsHumps)

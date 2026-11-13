@@ -44,7 +44,7 @@ from mapFolding.oeis._symbolic import makeSolutionsSymbolic
 from mapFolding.theSSOT import settingsPackage
 from operator import attrgetter, itemgetter, methodcaller
 from sympy import (
-	Add, And, factorial, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational, StrictGreaterThan, StrictLessThan, Sum,
+	Add, And, ceiling, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational, StrictGreaterThan, StrictLessThan, Sum,
 	Symbol, together)
 from sympy.core.function import AppliedUndef
 from sympy.core.relational import Equality
@@ -96,7 +96,7 @@ def make_ast_exprSymbolic(expression: Expr) -> ast.expr:
             ast_expr = Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args)))
         case _:
             ast_expr = Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(expression.func.__name__)]),
-                slice=Make.Constant(int(Integer(expression.args[0]))))
+                slice=make_ast_exprInteger(expression.args[0]))
     return ast_expr
 
 def makeSymbolicFormula(oeisID: OEISid, expression: Expr) -> IngredientsFunction:
@@ -253,6 +253,12 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
             ast_expr = Make.Mod.join(list(map(make_ast_exprInteger, expression.args)))
         case factorial():
             ast_expr = Make.Call(Make.Name('factorial'), [make_ast_exprInteger(expression.args[0])])
+        case floor():
+            ast_expr = Make.FloorDiv.join(list(map(make_ast_exprInteger, makeFraction(expression.args[0]))))
+        case ceiling():
+            numerator, denominator = makeFraction(expression.args[0])
+            ast_expr = Make.UnaryOp(Make.USub(), Make.FloorDiv.join([
+                make_ast_exprInteger(-numerator), make_ast_exprInteger(denominator)]))
         case Sum():
             k, lowerBound, upperBound = expression.limits[0]
             boxOfBounds: list[ast.expr] = [make_ast_exprInteger(upperBound + 1)]

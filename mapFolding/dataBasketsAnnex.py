@@ -50,7 +50,7 @@ References
 """
 def _numbaTypeRepresentsPythonType(numbaType: numba_types.BaseNamedTuple, pythonType: type[tuple[Any, ...]]) -> bool:
 	#=SIN= Pyright suppression: Numba's `BaseNamedTuple` stub omits its runtime `instance_class` attribute.
-	return numbaType.instance_class is pythonType  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[unresolved-attribute]
+	return numbaType.instance_class is pythonType  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[missing-attribute]
 
 @overload(getitem, jit_options={'forceinline': True})
 def _overloadGetitemShapeSlicer(arrayTarget: Any, slicer: Any) -> Callable[..., Any] | None:
@@ -184,7 +184,7 @@ def _unbox(numbaType: 形DataclassNumba, value: Any, context: _UnboxContext) -> 
 					fieldObject = context.pyapi.object_getattr_string(value, fieldName)
 					with cgutils.early_exit_if_null(context.builder, stack, fieldObject):
 						context.builder.store(cgutils.true_bit, isErrorSlot)
-					fieldNative = context.unbox(fieldType, fieldObject)  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[unresolved-attribute]
+					fieldNative = context.unbox(fieldType, fieldObject)  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[missing-attribute]
 					context.pyapi.decref(fieldObject)
 					with cgutils.early_exit_if(context.builder, stack, fieldNative.is_error):
 						context.builder.store(cgutils.true_bit, isErrorSlot)
@@ -213,7 +213,7 @@ def _reflect(numbaType: 形DataclassNumba, value: Any, context: _ReflectContext)
 		fieldType: numba_types.Type = numbaType.field_dict[fieldName]
 		fieldValue = getattr(payload, fieldName)
 		context.context.nrt.incref(context.builder, fieldType, fieldValue)
-		fieldObject = context.box(fieldType, fieldValue)  # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[unresolved-attribute]
+		fieldObject = context.box(fieldType, fieldValue)  # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[missing-attribute]
 		context.pyapi.object_setattr_string(parent, fieldName, fieldObject)
 		context.pyapi.decref(fieldObject)
 
