@@ -497,6 +497,6 @@ def makeOEISidByFormula(pathFilename: Path = settingsOEIS.pathPackage / 'byFormu
     lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
     ingredientsModule = IngredientsModule(list(starmap(makeIngredientsOEISid, sorted(lookupSolutions.items()))))
     docstringModule: str = ('Compute a(n) for an OEIS ID by computing other OEIS IDs.\n\nThis is a generated file; edit'
-        ' `mapFolding.oeis._symbolic.boxOfRelations` and run `easyRun/synthesizeModules.py`.\n')
+        ' `mapFolding.oeis._symbolicRelations.boxOfRelations` and run `easyRun/synthesizeModules.py`.\n')
     return write_astModule(Make.Module([Make.Expr(Make.Constant(docstringModule)), *ingredientsModule.body]), pathFilename
         , identifierPackage=settingsPackage.identifierPackage)

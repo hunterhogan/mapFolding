@@ -89,7 +89,7 @@ def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralStri
         raise ValueError(message)
     return lookupMeanders
 
-def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
+def makeLookupMeandersDiagonal(n: int, 次diagonal: int) -> StateMeanders:
     """Prepare a semi-meander state for counting diagonal `次diagonal` at row `n`.
 
     (AI generated docstring)
@@ -121,7 +121,7 @@ def makeLookupDiagonal(n: int, 次diagonal: int) -> StateMeanders:
     `easyRun/triangleSemiMake.py` counts a diagonal term before saving the total.
 
         ```python
-        state = countMeanders(state=makeLookupDiagonal(n, 次diagonal))
+        state = countMeanders(state=makeLookupMeandersDiagonal(n, 次diagonal))
         ```
 
     """

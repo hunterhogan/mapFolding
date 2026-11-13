@@ -1,7 +1,7 @@
 """Each formula in `mapFolding.oeis.byFormula`, named by its OEIS sequence, against the OEIS b-file.
 
 Each formula function receives every value of `f` that its annotation declares, and `None`, at its offset and at n = 3, 4, and 7
-at or above the offset. `byFormula` is generated from `mapFolding.oeis._symbolic.boxOfRelations`; when a relation changes, change
+at or above the offset. `byFormula` is generated from `mapFolding.oeis._symbolicRelations.boxOfRelations`; when a relation changes, change
 the parametrization with it.
 """
 from __future__ import annotations

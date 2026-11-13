@@ -1,6 +1,6 @@
 """Compute a(n) for an OEIS ID by computing other OEIS IDs.
 
-This is a generated file; edit `mapFolding.oeis._symbolic.boxOfRelations` and run `easyRun/synthesizeModules.py`.
+This is a generated file; edit `mapFolding.oeis._symbolicRelations.boxOfRelations` and run `easyRun/synthesizeModules.py`.
 """
 from __future__ import annotations
 
@@ -146,9 +146,9 @@ def A000560(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A000560', n)
     return countTotal
 
-def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A001011', 'A060206', 'A005316 and A223093', 'A000682 and A223094', 'A227167', 'A000682 and A259702', 'A000682 and A301620', 'A000682 and A333971', 'A000682 and A334615', 'A337581', 'A223094', 'A301620'] | LiteralString | None = None) -> int:
+def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001010 and A001011', 'A005316 and A223093', 'A000682 and A223094', 'A227167', 'A223094', 'A000682 and A301620', 'A000682 and A333971', 'A000682 and A334615', 'A337581', 'A301620', 'A000682 and A259702'] | LiteralString | None = None) -> int:
     """
-    Compute A000682(n) as a function of A000136 or A000560 or A001010 or A001010 and A001011 or A060206 or A005316 and A223093 or A000682 and A223094 or A227167 or A000682 and A259702 or A000682 and A301620 or A000682 and A333971 or A000682 and A334615 or A337581 or A223094 or A301620.
+    Compute A000682(n) as a function of A060206 or A000136 or A000560 or A001010 or A001010 and A001011 or A005316 and A223093 or A000682 and A223094 or A227167 or A223094 or A000682 and A301620 or A000682 and A333971 or A000682 and A334615 or A337581 or A301620 or A000682 and A259702.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682
     is "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times.".
@@ -175,6 +175,13 @@ def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A00
     """
     countTotal: int
     match f:
+        case 'A060206':
+            if (n + 1) % 2 == 0:
+                countTotal = A060206((n - 1) // 2)
+            elif n <= 2:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A000682', n)
         case 'A000136':
             countTotal = A000136(n) // n
         case 'A000560':
@@ -198,13 +205,6 @@ def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A00
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
-        case 'A060206':
-            if (n + 1) % 2 == 0:
-                countTotal = A060206((n - 1) // 2)
-            elif n <= 2:
-                countTotal = 1
-            else:
-                countTotal = oeisIDfor_n('A000682', n)
         case 'A005316 and A223093':
             if 2 <= n:
                 countTotal = (2 - (n + 1) % 2) * A005316(n - 1) + A223093(n - 1)
@@ -221,9 +221,9 @@ def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A00
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A227167':
             countTotal = (2 - n % 2) * A227167(n) // n
-        case 'A000682 and A259702':
-            if 3 <= n:
-                countTotal = 2 * A000682(n - 1) + 2 * A259702(n)
+        case 'A223094':
+            if 4 <= n:
+                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), map(factorial, repeat(n - 1, len(range(3, n))))), map(factorial, range(3, n))))
             elif n <= 2:
                 countTotal = 1
             else:
@@ -256,16 +256,16 @@ def A000682(n: int, f: Literal['A000136', 'A000560', 'A001010', 'A001010 and A00
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
-        case 'A223094':
-            if 4 <= n:
-                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), map(factorial, repeat(n - 1, len(range(3, n))))), map(factorial, range(3, n))))
+        case 'A301620':
+            if 3 <= n:
+                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
-        case 'A301620':
+        case 'A000682 and A259702':
             if 3 <= n:
-                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1))))
+                countTotal = 2 * A000682(n - 1) + 2 * A259702(n)
             elif n <= 2:
                 countTotal = 1
             else:
@@ -1018,7 +1018,7 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206'] | LiteralString 
     is "Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.".
 
     The domain of A077460 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 35.
+    has not yet been computed is 39.
 
     Parameters
     ----------
@@ -1064,7 +1064,7 @@ def A078591(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
     is "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.".
 
     The domain of A078591 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 35.
+    has not yet been computed is 39.
 
     Parameters
     ----------
@@ -1185,7 +1185,7 @@ def A208357(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
     is "Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut.".
 
     The domain of A208357 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 34.
+    has not yet been computed is 38.
 
     Parameters
     ----------
@@ -1486,9 +1486,9 @@ def A259702(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None = No
                 countTotal = oeisIDfor_n('A259702', n)
     return countTotal
 
-def A301620(n: int, f: Literal['A000682', 'A259702', 'A301620 and A334615'] | LiteralString | None = None) -> int:
+def A301620(n: int, f: Literal['A000682', 'A301620 and A334615', 'A259702'] | LiteralString | None = None) -> int:
     """
-    Compute A301620(n) as a function of A000682 or A259702 or A301620 and A334615.
+    Compute A301620(n) as a function of A000682 or A301620 and A334615 or A259702.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620
     is "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches.".
@@ -1517,13 +1517,13 @@ def A301620(n: int, f: Literal['A000682', 'A259702', 'A301620 and A334615'] | Li
     match f:
         case 'A000682':
             countTotal = A000682(n + 2) - 2 * A000682(n + 1)
-        case 'A259702':
-            countTotal = 2 * A259702(n + 2)
         case 'A301620 and A334615':
             if 2 <= n:
                 countTotal = 2 * A301620(n - 1) + A334615(n + 2)
             else:
                 countTotal = oeisIDfor_n('A301620', n)
+        case 'A259702':
+            countTotal = 2 * A259702(n + 2)
         case _:
             countTotal = oeisIDfor_n('A301620', n)
     return countTotal

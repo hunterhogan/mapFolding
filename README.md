@@ -81,7 +81,7 @@ You can also supply an existing `StateMeanders` through the `state` argument to 
 
 ### Sequence formulas and reference data
 
-`oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or derives the value by chaining the exact relations in [`oeis/_symbolic.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/_symbolic.py). Its `f` argument names the sequences from which to compute the value, such as `'A000682 and A005316'`. [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py), generated from the same relations, has one documented function for each sequence.
+`oeisIDfor_n` dispatches to a folding, symmetric-folding, or meander algorithm, or derives the value by chaining the exact relations in [`oeis/_symbolicRelations.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/_symbolicRelations.py). Its `f` argument names the sequences from which to compute the value, such as `'A000682 and A005316'`. [`oeis/byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py), generated from the same relations, has one documented function for each sequence.
 
 Shared arithmetic in [`beDRY.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/beDRY.py)
 provides Python-integer Catalan numbers through `catalan(n)` and a lazy Catalan basis through

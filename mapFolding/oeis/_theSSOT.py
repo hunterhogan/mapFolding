@@ -62,7 +62,7 @@ class PackageSettingsOEIS(PackageSettings):
 			, 'A227167', 'A259689', 'A259698', 'A259700', 'A259701', 'A259702', 'A259703', 'A259974', 'A260785', 'A287548'
 			, 'A301620', 'A322507', 'A331499', 'A333971', 'A334615', 'A337581', 'A339179', 'A380367', 'A380369'
 			, 'A400429', 'A400630', 'A400631', 'A400632', 'A400633', 'A400634', 'A400635', 'A400636', 'A400637', 'A400638'
-			, 'A401693',  # 'A401694'
+			, 'A401693', 'A401694'
 		)
 		self.lookupSymbolic = dict(zip(self.boxOfIDs
 			, map(partial(UndefinedFunction, integer=True, nonnegative=True), self.boxOfIDs), strict=True)
