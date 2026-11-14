@@ -409,7 +409,7 @@ def getTotalLeaves(mapShape: tuple[int, ...]) -> int:
 	productDimensions = 1
 	for dimension in mapShape:
 		#=EndNotes##absurd=
-		if dimension > sysMaxsize // productDimensions:
+		if sysMaxsize < productDimensions * dimension:
 			message: str = f"I received `{dimension = }` in `{mapShape = }`, but the product of the dimensions exceeds the maximum size of an integer on this system."
 			raise OverflowError(message)
 		productDimensions *= dimension

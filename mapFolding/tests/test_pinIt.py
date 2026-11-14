@@ -17,55 +17,30 @@ if TYPE_CHECKING:
 	from numpy import uint8
 	from numpy.typing import NDArray
 
-markDefectDimension4: pytest.MarkDecorator = pytest.mark.xfail(raises=AssertionError, strict=True
-	, reason='The function pins from a four-dimensional combined domain that is a known defect in `mapFolding.leafDomains`.')
-
-@pytest.mark.parametrize('pin, mapShape', (
-	pytest.param(pinPilesAtEnds, mapShape2上4Dimensional, id='pinPilesAtEnds-mapShape2上4Dimensional')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), mapShape2上4Dimensional, id='pinPilesAtEnds-pileDepth2-mapShape2上4Dimensional')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), mapShape2上4Dimensional, id='pinPilesAtEnds-pileDepth3-mapShape2上4Dimensional')
-	, pytest.param(pinPile零Ante首零, mapShape2上4Dimensional, id='pinPile零Ante首零-mapShape2上4Dimensional')
-	, pytest.param(pinLeavesDimension0, mapShape2上4Dimensional, id='pinLeavesDimension0-mapShape2上4Dimensional')
-	, pytest.param(pinLeaf首零Plus零, mapShape2上4Dimensional, id='pinLeaf首零Plus零-mapShape2上4Dimensional')
-	, pytest.param(pinLeavesDimension零, mapShape2上4Dimensional, id='pinLeavesDimension零-mapShape2上4Dimensional')
-	, pytest.param(pinLeavesDimension一, mapShape2上4Dimensional, id='pinLeavesDimension一-mapShape2上4Dimensional')
-	, pytest.param(pinLeavesDimensions0零一, mapShape2上4Dimensional, id='pinLeavesDimensions0零一-mapShape2上4Dimensional')
-	, pytest.param(pinLeavesDimension二, mapShape2上4Dimensional, marks=markDefectDimension4, id='pinLeavesDimension二-mapShape2上4Dimensional')
-	, pytest.param(pinLeavesDimension首二, mapShape2上4Dimensional, marks=markDefectDimension4, id='pinLeavesDimension首二-mapShape2上4Dimensional')
-	, pytest.param(pin3beans2, mapShape2上4Dimensional, id='pin3beans2-mapShape2上4Dimensional')
-	, pytest.param(pin首beans, mapShape2上4Dimensional, id='pin首beans-mapShape2上4Dimensional')
-	, pytest.param(pinPilesAtEnds, mapShape2上5Dimensional, id='pinPilesAtEnds-mapShape2上5Dimensional')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), mapShape2上5Dimensional, id='pinPilesAtEnds-pileDepth2-mapShape2上5Dimensional')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), mapShape2上5Dimensional, id='pinPilesAtEnds-pileDepth3-mapShape2上5Dimensional')
-	, pytest.param(pinPile零Ante首零, mapShape2上5Dimensional, id='pinPile零Ante首零-mapShape2上5Dimensional')
-	, pytest.param(pinLeavesDimension0, mapShape2上5Dimensional, id='pinLeavesDimension0-mapShape2上5Dimensional')
-	, pytest.param(pinLeaf首零Plus零, mapShape2上5Dimensional, id='pinLeaf首零Plus零-mapShape2上5Dimensional')
-	, pytest.param(pinLeavesDimension零, mapShape2上5Dimensional, id='pinLeavesDimension零-mapShape2上5Dimensional')
-	, pytest.param(pinLeavesDimension一, mapShape2上5Dimensional, id='pinLeavesDimension一-mapShape2上5Dimensional')
-	, pytest.param(pinLeavesDimensions0零一, mapShape2上5Dimensional, id='pinLeavesDimensions0零一-mapShape2上5Dimensional')
-	, pytest.param(pinLeavesDimension二, mapShape2上5Dimensional, id='pinLeavesDimension二-mapShape2上5Dimensional')
-	, pytest.param(pinLeavesDimension首二, mapShape2上5Dimensional, id='pinLeavesDimension首二-mapShape2上5Dimensional')
-	, pytest.param(pin3beans2, mapShape2上5Dimensional, id='pin3beans2-mapShape2上5Dimensional')
-	, pytest.param(pin首beans, mapShape2上5Dimensional, id='pin首beans-mapShape2上5Dimensional')
-	, pytest.param(pinPilesAtEnds, mapShape2上6Dimensional, id='pinPilesAtEnds-mapShape2上6Dimensional')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), mapShape2上6Dimensional, id='pinPilesAtEnds-pileDepth2-mapShape2上6Dimensional')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), mapShape2上6Dimensional, id='pinPilesAtEnds-pileDepth3-mapShape2上6Dimensional')
-	, pytest.param(pinPile零Ante首零, mapShape2上6Dimensional, id='pinPile零Ante首零-mapShape2上6Dimensional')
-	, pytest.param(pinLeavesDimension0, mapShape2上6Dimensional, id='pinLeavesDimension0-mapShape2上6Dimensional')
-	, pytest.param(pinLeaf首零Plus零, mapShape2上6Dimensional, id='pinLeaf首零Plus零-mapShape2上6Dimensional')
-	, pytest.param(pinLeavesDimension零, mapShape2上6Dimensional, id='pinLeavesDimension零-mapShape2上6Dimensional')
-	, pytest.param(pinLeavesDimension一, mapShape2上6Dimensional, id='pinLeavesDimension一-mapShape2上6Dimensional')
-	, pytest.param(pinLeavesDimensions0零一, mapShape2上6Dimensional, id='pinLeavesDimensions0零一-mapShape2上6Dimensional')
-	, pytest.param(pinLeavesDimension二, mapShape2上6Dimensional, id='pinLeavesDimension二-mapShape2上6Dimensional')
-	, pytest.param(pinLeavesDimension首二, mapShape2上6Dimensional, id='pinLeavesDimension首二-mapShape2上6Dimensional')
-	, pytest.param(pin3beans2, mapShape2上6Dimensional, id='pin3beans2-mapShape2上6Dimensional')
-	, pytest.param(pin首beans, mapShape2上6Dimensional, id='pin首beans-mapShape2上6Dimensional')
+@pytest.mark.parametrize('mapShape', (
+	pytest.param(mapShape2上4Dimensional, id='mapShape2上4Dimensional')
+	, pytest.param(mapShape2上5Dimensional, id='mapShape2上5Dimensional')
+	, pytest.param(mapShape2上6Dimensional, id='mapShape2上6Dimensional')
+))
+@pytest.mark.parametrize('pin', (
+	pytest.param(pinPilesAtEnds, id='pinPilesAtEnds')
+	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), id='pinPilesAtEnds-pileDepth2')
+	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), id='pinPilesAtEnds-pileDepth3')
+	, pytest.param(pinPile零Ante首零, id='pinPile零Ante首零')
+	, pytest.param(pinLeavesDimension0, id='pinLeavesDimension0')
+	, pytest.param(pinLeaf首零Plus零, id='pinLeaf首零Plus零')
+	, pytest.param(pinLeavesDimension零, id='pinLeavesDimension零')
+	, pytest.param(pinLeavesDimension一, id='pinLeavesDimension一')
+	, pytest.param(pinLeavesDimensions0零一, id='pinLeavesDimensions0零一')
+	, pytest.param(pinLeavesDimension二, id='pinLeavesDimension二')
+	, pytest.param(pinLeavesDimension首二, id='pinLeavesDimension首二')
+	, pytest.param(pin3beans2, id='pin3beans2')
+	, pytest.param(pin首beans, id='pin首beans')
 ))
 def test_pinPartitionsFoldings(arrayFoldings: NDArray[uint8], pin: Callable[..., StateElimination], mapShape: tuple[int, ...]) -> None:
 	"""Relation: every enumerated folding agrees with exactly one permutation space, and no permutation space has beans without cornbread.
 
-	The worker count, `CPUlimit`, does not affect the permutation spaces. The complete product of functions and maps is enumerated
-	because the known defect marks only some combinations.
+	The worker count, `CPUlimit`, does not affect the permutation spaces.
 	"""
 	state: StateElimination = pin(StateElimination(mapShape), CPUlimit=0.75)
 	assertPermutationSpacesPartitionFoldings(state.boxOfPermutationSpace, arrayFoldings, 'pin', mapShape)

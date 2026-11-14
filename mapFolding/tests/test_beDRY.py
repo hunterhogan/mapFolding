@@ -27,15 +27,13 @@ if TYPE_CHECKING:
 	, pytest.param((1,) * 1000, 1, id='ones1000')
 	, pytest.param((sys.maxsize,), sys.maxsize, id='maxsize')
 	, pytest.param((2, 0), 0, id='p2x0')
-	, pytest.param((0, 2), 0, id='p0x2'
-		, marks=pytest.mark.xfail(raises=ZeroDivisionError, strict=True
-			, reason='`getTotalLeaves` divides `sys.maxsize` by the running product, which is zero after a zero dimension.'))
+	, pytest.param((0, 2), 0, id='p0x2')
 ))
 def test_getTotalLeaves(mapShape: tuple[int, ...], expected: int) -> None:
 	assertEqualTo(getTotalLeaves(mapShape), expected, getTotalLeaves.__name__, mapShape)
 
-# Lengths start at 1 until the defect at `p0x2` is fixed. The product of at most 8 lengths below 2**7 stays below `sys.maxsize`.
-@given(mapShape=strategies.lists(strategies.integers(1, 127), min_size=1, max_size=8), dimension=strategies.integers(1, 127))
+# The product of at most 9 lengths below 2**7 stays below `sys.maxsize`.
+@given(mapShape=strategies.lists(strategies.integers(0, 127), min_size=1, max_size=8), dimension=strategies.integers(0, 127))
 def test_getTotalLeavesGenerated(mapShape: list[int], dimension: int) -> None:
 	"""Relation: appending a dimension multiplies the total, and reversing the dimensions preserves it."""
 	assertEqualTo(getTotalLeaves((*mapShape, dimension)), getTotalLeaves(tuple(mapShape)) * dimension, getTotalLeaves.__name__, (*mapShape, dimension))

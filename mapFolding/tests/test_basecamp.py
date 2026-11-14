@@ -92,16 +92,10 @@ def test_countFoldsSymmetric(oeisID: OEISid, n: int, flow: LiteralString, expect
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 	assertEqualTo(countFoldsSymmetric(mapShape, flow), expected, countFoldsSymmetric.__name__, mapShape, flow)
 
-markDefectLengthened: pytest.MarkDecorator = pytest.mark.xfail(raises=UserWarning, strict=True
-	, reason='`getTotalBuckets` allocates 32 rows of `dataframeAnalyzed` at boundary 27, `recordArcCodes` needs 33, and it warns when it lengthens the allocation.')
-
-# The known defect marks one combination of `flow`, `n`, and `kind`, so the combinations are enumerated rather than stacked.
 @pytest.mark.parametrize('flow, n, kind, oeisID', tuple(chain(
 	CartesianProduct(('matrixMeanders', 'matrixPandas', 'matrixNumPy'), (1, 2, 3, 11, 20, 30), ('semi',), ('A000682',))
 	, CartesianProduct(('matrixMeanders', 'matrixPandas', 'matrixNumPy'), (1, 2, 3, 11, 20, 30), ('meanders',), ('A005316',))
-	, CartesianProduct(('prune', 'pruneNumPy'), (1, 2, 3, 22, 23, 30), ('semi',), ('A000682',))
-	, CartesianProduct(('prunePandas',), (1, 2, 3, 22, 23), ('semi',), ('A000682',))
-	, (pytest.param('prunePandas', 30, 'semi', 'A000682', marks=markDefectLengthened),)
+	, CartesianProduct(('prune', 'pruneNumPy', 'prunePandas'), (1, 2, 3, 22, 23, 30), ('semi',), ('A000682',))
 	, CartesianProduct(('prune', 'pruneNumPy', 'prunePandas'), (1, 2, 3, 22, 23, 30), ('meanders',), ('A005316',))
 )))
 def test_countMeanders(kind: LiteralString, n: int, flow: LiteralString, oeisID: OEISid, expected: int) -> None:

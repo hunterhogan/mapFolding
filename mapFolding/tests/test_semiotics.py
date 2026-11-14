@@ -22,9 +22,6 @@ if TYPE_CHECKING:
 def test_dimensionIndexConstants(constant: int, expected: int) -> None:
 	assertEqualTo(constant, expected, 'dimension index constant')
 
-markDefectFloatLogarithm: pytest.MarkDecorator = pytest.mark.xfail(strict=True
-	, reason='`dimensionIndex` truncates `math.log(dimensionAsNonnegativeInteger, dimensionLength)`, a float that can fall below the integer.')
-
 # Reference: the docstring: the base-`dimensionLength` logarithm of a single-dimension coordinate.
 @pytest.mark.parametrize('dimensionAsNonnegativeInteger, dimensionLength, expected', (
 	pytest.param(1, 2, 0, id='coordinate2上0'), pytest.param(2, 2, 1, id='coordinate2上1'), pytest.param(4, 2, 2, id='coordinate2上2')
@@ -32,16 +29,16 @@ markDefectFloatLogarithm: pytest.MarkDecorator = pytest.mark.xfail(strict=True
 	, pytest.param(64, 2, 6, id='coordinate2上6'), pytest.param(128, 2, 7, id='coordinate2上7'), pytest.param(256, 2, 8, id='coordinate2上8')
 	, pytest.param(512, 2, 9, id='coordinate2上9')
 	, pytest.param(2 ** 1478, 2, 1478, id='coordinate2上1478')
-	, pytest.param(2 ** 1479, 2, 1479, marks=markDefectFloatLogarithm, id='coordinate2上1479')
+	, pytest.param(2 ** 1479, 2, 1479, id='coordinate2上1479')
 	, pytest.param(1, 3, 0, id='coordinate3上0'), pytest.param(3, 3, 1, id='coordinate3上1'), pytest.param(81, 3, 4, id='coordinate3上4')
-	, pytest.param(243, 3, 5, marks=markDefectFloatLogarithm, id='coordinate3上5')
+	, pytest.param(243, 3, 5, id='coordinate3上5')
 ))
 def test_dimensionIndex(dimensionAsNonnegativeInteger: int, dimensionLength: int, expected: int) -> None:
 	assertEqualTo(dimensionIndex(dimensionAsNonnegativeInteger, dimensionLength=dimensionLength), expected, dimensionIndex.__name__
 		, dimensionAsNonnegativeInteger, dimensionLength=dimensionLength)
 
-# Indices stop at 1478 until the defect at `coordinate2上1479` is fixed; they reach far beyond a float's 53-bit mantissa.
-@given(strategies.integers(0, 1478))
+# Indices reach 4096, far past 1024, where the coordinate 2**index exceeds a float's range.
+@given(strategies.integers(0, 4096))
 def test_dimensionIndexGenerated(index: int) -> None:
 	"""Relation: `dimensionIndex` inverts the coordinate 2**index."""
 	assertEqualTo(dimensionIndex(2 ** index), index, dimensionIndex.__name__, 2 ** index)

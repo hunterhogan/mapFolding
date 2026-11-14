@@ -748,7 +748,7 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 		(二 + 一, 二 + 一 + 零, 二 + 零, 二)
 		```
 
-	The map-shape predicate requires at least 5 axes, all of length `2`. If the
+	The map-shape predicate requires at least 4 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
 	The domain function supplies the possible pile assignments.
@@ -762,7 +762,7 @@ def pinLeavesDimension二(state: StateElimination, *, CPUlimit: ConcurrencyLimit
 		```
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (二 + 一, 二 + 一 + 零, 二 + 零, 二)
-	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, leaves, getDomainDimension二(state), youMustBeDimensionsTallToRideThis=4, CPUlimit=CPUlimit)
 
 def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin the four head-relative dimension-two leaves using combined pile domains.
@@ -799,7 +799,7 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 		(首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
 		```
 
-	The map-shape predicate requires at least 5 axes, all of length `2`. If the
+	The map-shape predicate requires at least 4 axes, all of length `2`. If the
 	predicate fails, the pinning step returns `state` without refining the permutation spaces.
 
 	The domain function supplies the possible pile assignments.
@@ -813,7 +813,7 @@ def pinLeavesDimension首二(state: StateElimination, *, CPUlimit: ConcurrencyLi
 		```
 	"""
 	leaves: tuple[Leaf, Leaf, Leaf, Leaf] = (首二(state.totalDimensions), 首零二(state.totalDimensions), 首零一二(state.totalDimensions), 首一二(state.totalDimensions))
-	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToRideThis=5, CPUlimit=CPUlimit)
+	return _pinLeavesByDomain(state, leaves, getDomainDimension首二(state), youMustBeDimensionsTallToRideThis=4, CPUlimit=CPUlimit)
 
 def pin3beans2(state: StateElimination, *, CPUlimit: ConcurrencyLimit = None) -> StateElimination:
 	"""Pin leaves three and two to consecutive piles.

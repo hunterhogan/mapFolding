@@ -76,7 +76,7 @@ Variables
 from __future__ import annotations
 
 from functools import cache
-from math import log
+from gmpy2 import remove
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -178,9 +178,10 @@ def dimensionIndex(dimensionAsNonnegativeInteger: int, /, *, dimensionLength: in
 	Returns
 	-------
 	index : DimensionIndex
-		Tail-relative index computed from the base-`dimensionLength` logarithm.
+		Tail-relative index: the multiplicity of the factor `dimensionLength` in `dimensionAsNonnegativeInteger`, which is its
+		exact base-`dimensionLength` logarithm.
 	"""
-	return int(log(dimensionAsNonnegativeInteger, dimensionLength))
+	return remove(dimensionAsNonnegativeInteger, dimensionLength)[1]
 
 #======== Head-relative constructors select coordinates within totalDimensions ========
 
