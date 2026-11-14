@@ -12,7 +12,7 @@ from mapFolding.theTypes import OEISid
 from operator import attrgetter, is_not, itemgetter, methodcaller
 from sympy import (
 	And, Basic, ceiling, Dummy, Eq, Equality, Expr, FiniteSet, floor, fraction, Ge, Integer, Le, Mod, Piecewise, piecewise_fold, S, solve,
-	solveset, Sum, sympify, together, true, Tuple, Union)
+	solveset, Sum, sympify, together, true, Tuple)
 from sympy.core.function import AppliedUndef
 from sympy.utilities.misc import as_int
 from typing import TYPE_CHECKING
@@ -83,8 +83,8 @@ def makeEquationFlat(equation: Boolean) -> Boolean:
 	boxOfCalls: set[AppliedUndef] = equation.atoms(AppliedUndef)
 	return equation.xreplace(dict(zip(boxOfCalls, map(getFlatCall, boxOfCalls), strict=True)))
 
-def solve_n(wanted: AppliedUndef, domain: Range, expression: AppliedUndef) -> Set:
-	return solveset(Eq(expression.args[0], wanted.args[0]), n, S.Integers).intersect(domain)
+def solve_n(wanted: AppliedUndef, domain: Range, expression: AppliedUndef) -> list[Expr]:
+	return list(filter(domain.__contains__, solve(Eq(expression.args[0], wanted.args[0]), n)))
 
 @cache
 def bindRelation(wanted: AppliedUndef, relation: 形Relation) -> tuple[Boolean, ...]:
@@ -98,7 +98,7 @@ def bindRelation(wanted: AppliedUndef, relation: 形Relation) -> tuple[Boolean, 
 	"""
 	equation, domain = relation
 	boxOfCalls: set[AppliedUndef] = equation.replace(Sum, makeTermLast).atoms(wanted.func)
-	boxOfIndices: Set = Union(*map(partial(solve_n, wanted, domain), boxOfCalls))
+	boxOfIndices: list[Expr] = sorted(set(chain.from_iterable(map(partial(solve_n, wanted, domain), boxOfCalls))), key=int)
 	boxOfEquations: Iterator[Boolean] = map(methodcaller('doit'), map(partial(equation.subs, n), boxOfIndices))
 	return tuple(map(makeEquationFlat, boxOfEquations))
 

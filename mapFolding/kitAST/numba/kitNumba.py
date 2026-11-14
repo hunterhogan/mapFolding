@@ -40,7 +40,7 @@ from typing_extensions import TypedDict
 import ast
 
 if TYPE_CHECKING:
-	from collections.abc import Sequence
+	from collections.abc import Container, Sequence
 	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.kitAST import IngredientsFunction
 	from mapFolding.theTypes import Default
@@ -155,6 +155,32 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifi
 	ingredientsFunction.imports.addImportFrom_asStr(logicalPathNumba, 名CallableDecorator)
 
 	return ingredientsFunction
+
+def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identifiers: Default | None = None, **override: Any) -> PurePath:
+	identifiers = identifiers or default
+	parametersNumba: ParametersNumba = override.get('parametersNumba', parametersNumbaDefault)
+	logicalPathNumba: identifierDotAttribute = override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
+	名CallableDecorator: str = override.get('名CallableDecorator', identifiers['function']['numbaDecorator'])
+
+	boxOfDecorator: list[ast.expr] = [_numbaCall(名CallableDecorator, parametersNumba)]
+	NodeChanger(Be.FunctionDef.nameIs(boxOfCallable.__contains__)
+		, Grab.decorator_listAttribute(boxOfDecorator.__add__)).visit(astModule)
+
+	findThis = IfThis.isAnyOf(
+		Be.Expr.valueIs(Be.Constant.valueIs(str.__instancecheck__))
+		, Be.ImportFrom.moduleIs('__future__'.__eq__))
+	次Import: int = len(tuple(takewhile(findThis, astModule.body)))
+	astImport: ast.ImportFrom = Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)])
+	ingredientsModule = IngredientsModule(epilogue=Make.Module([
+		*astModule.body[:次Import], astImport, *astModule.body[次Import:]
+	], astModule.type_ignores))
+
+	pathRoot: PathLike[str] = override.get('pathRoot', identifiers['filesystem']['pathRoot'])
+	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix', identifiers['logicalPath']['synthetic'])
+	identifierModule: str = override.get('identifierModule', identifiers['module']['algorithmNumba'])
+	pathFilename: PurePath = override.get('pathFilename') or getPathFilename(pathRoot, logicalPathInfix, identifierModule)
+	identifierPackage: str = override.get('package', identifiers['module']['package'])
+	return ingredientsModule.write_astModule(pathFilename, identifierPackage)
 
 def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Write a complete source module with module compilation.

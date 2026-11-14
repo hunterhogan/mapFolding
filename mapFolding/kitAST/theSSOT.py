@@ -97,6 +97,19 @@ defaultMapFolding['variable'].update({
 defaultMapFolding['logicalPath']['default'] = defaultMapFolding['logicalPath']['algorithm']
 defaultMapFolding['module']['default'] = defaultMapFolding['module']['algorithm']
 
+defaultMapFoldingNxN: Default = deepcopy(default)
+defaultMapFoldingNxN['function'].update({
+	'countBits': 'countBits'
+	, 'getGaps': 'getGaps'
+	, 'generateFolds': 'generateFolds'
+})
+defaultMapFoldingNxN['module'].update({
+	'algorithm': 'pNxN'
+	, 'algorithmNumba': 'pNxNNumba'
+})
+defaultMapFoldingNxN['logicalPath']['default'] = defaultMapFoldingNxN['logicalPath']['algorithm']
+defaultMapFoldingNxN['module']['default'] = defaultMapFoldingNxN['module']['algorithm']
+
 defaultMapFoldingSymmetric: Default = deepcopy(defaultMapFolding)
 """Access identifier and output defaults for symmetric folding modules.
 

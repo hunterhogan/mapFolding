@@ -16,9 +16,10 @@ from __future__ import annotations
 from astToolkit.filesystem import parsePathFilename2astModule
 from mapFolding.kitAST.mapFolding._count import makeInlineNumba, makeInlineParallelNumba, makeTheorem2, makeTheorem2Numba, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
-from mapFolding.kitAST.numba.kitNumba import make_jit_module
+from mapFolding.kitAST.numba.kitNumba import make_jit_module, makeNumbaModule
 from mapFolding.kitAST.paths import getModule
-from mapFolding.kitAST.theSSOT import defaultMapFolding
+from mapFolding.kitAST.theSSOT import defaultMapFolding, defaultMapFoldingNxN
+from operator import itemgetter
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -50,6 +51,8 @@ def makeModulesMapFolding() -> None:
 	pathFilename: PurePath = makeTheorem2(getModule(identifiers=defaultMapFolding), defaultMapFolding)
 	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFolding)
 	makeTheorem2Numba(parsePathFilename2astModule(pathFilename), defaultMapFolding)
+	makeNumbaModule(getModule(identifiers=defaultMapFoldingNxN)
+		, itemgetter('countBits', 'getGaps', 'counting', 'generateFolds')(defaultMapFoldingNxN['function']), defaultMapFoldingNxN)
 
 if __name__ == '__main__':
 	makeModulesMapFolding()

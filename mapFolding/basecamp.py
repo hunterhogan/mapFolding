@@ -41,7 +41,7 @@ if TYPE_CHECKING:
 	from typing import Literal, LiteralString
 
 def countFolds(mapShape: Sequence[int]
-				, flow: Literal['daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
+				, flow: Literal['pNxN', 'daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 				, pathLikeWrite: PathLike[str] | None = None
 				, *
 				, CPUlimit: ConcurrencyLimit = None
@@ -158,6 +158,11 @@ def countFolds(mapShape: Sequence[int]
 
 		# IMPROVEMENT Figure out a better place to document this. `boxOfStatesParallel` exists so you can research the parallel computation.
 		totalFolds, _boxOfStatesParallel = doTheNeedful(mapFoldingParallelState, concurrencyLimit)
+
+	elif flow == 'pNxN' and len(mapShape) == 2 and mapShape[0] == mapShape[1]:
+		from mapFolding.synthesized.pNxNNumba import doTheNeedful
+
+		totalFolds = doTheNeedful(mapShape[0], workersMaximum=defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage))
 
 	else:
 		if flow == 'daoOfMapFolding':
