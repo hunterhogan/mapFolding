@@ -50,6 +50,7 @@ bitcast
 bitwidths
 bivariate
 Bletionary
+Bobier
 boolalg
 boolop
 boundscheck
@@ -424,6 +425,7 @@ PYTHONIOENCODING
 qlaefgrw
 quasipolynomiality
 Quizas
+quotienting
 randint
 rechunk
 RECIPEPREFIX

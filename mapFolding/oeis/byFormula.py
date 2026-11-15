@@ -1327,7 +1327,7 @@ def A077055(n: int, f: Literal['A078592', 'A005316 and A223096'] | LiteralString
     is "Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.".
 
     The domain of A077055 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 44.
+    has not yet been computed is 47.
 
     Parameters
     ----------
