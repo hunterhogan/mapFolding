@@ -15,5 +15,6 @@ makeModulesFoldsSymmetric()
 makeModulesFoldsSymmetricAsynchronous()
 makeModulesMeanders()
 
+# TODO These must not be separate processes.
 makeOEISidByFormula()
 makeTestsByFormula()

@@ -83,6 +83,7 @@ def checkoutSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata:
 		checkout_oeisdata(boxOfOEISid, repo)
 	return copy_oeisdata(makeBoxOfPathFilename(boxOfOEISid, PurePosixPath()), path_oeisdata, pathSnapshot)
 
+# SEMIOTICS
 def updateSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
 	with 工repo(path_oeisdata) as repo:
 		update_oeisdata(repo)

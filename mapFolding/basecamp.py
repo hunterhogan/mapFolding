@@ -281,8 +281,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 
 	return totalFolds
 
-#=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
-#ruff: ignore[unused-function-argument]
+#ruff: ignore[unused-function-argument] #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 def countMeanders(
 	kind: Literal['closed', 'meanders', 'semi'] | LiteralString | None = None
 	, n: int | None = None
