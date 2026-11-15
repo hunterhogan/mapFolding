@@ -7,7 +7,6 @@ from mapFolding.oeis import boxOfDiagonals
 from mapFolding.theTypes import 形ArcCode, 形ArrayArcCode, 形Meanders
 from operator import neg
 from typing import TYPE_CHECKING
-from warnings import warn
 import pandas
 
 if TYPE_CHECKING:
@@ -579,7 +578,6 @@ def count(state: StateMeanders) -> StateMeanders:
             次StopAnalyzed: int = state.次Target + int((0 < dataframeMeanders['arcCodeAnalysis']).sum())
             if state.次Target < 次StopAnalyzed:
                 if len(dataframeAnalyzed.index) < 次StopAnalyzed:
-                    warn(f'Lengthened `dataframeAnalyzed` from {len(dataframeAnalyzed.index)} to 次StopAnalyzed={次StopAnalyzed!r}; n={state.n}, state.boundary={state.boundary!r}.', stacklevel=2)
                     dataframeAnalyzed = dataframeAnalyzed.reindex(index=pandas.RangeIndex(次StopAnalyzed), fill_value=0)
                 dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['arcCodeAnalysis']] = dataframeMeanders.loc[0 < dataframeMeanders['arcCodeAnalysis'], ['arcCodeAnalysis']].to_numpy(dtype=形ArcCode, copy=False)
                 dataframeAnalyzed.loc[state.次Target:次StopAnalyzed - 1, ['meanders']] = dataframeMeanders.loc[0 < dataframeMeanders['arcCodeAnalysis'], ['meanders']].to_numpy(dtype=形Meanders, copy=False)
