@@ -7,12 +7,12 @@ from __future__ import annotations
 from itertools import repeat
 from mapFolding.oeis import oeisIDfor_n
 from math import factorial, isqrt
-from operator import floordiv, mul
+from operator import mul
 from typing import Literal, LiteralString
 
-def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693', 'A001405', 'A000108 and A002057'] | LiteralString | None = None) -> int:
+def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693', 'A000108 and A401693', 'A001405', 'A000108 and A002057'] | LiteralString | None = None) -> int:
     """
-    Compute A000108(n) as a function of A000108 or A001246 or A014137 or A014137 and A401693 or A001405 or A000108 and A002057.
+    Compute A000108(n) as a function of A000108 or A001246 or A014137 or A014137 and A401693 or A000108 and A401693 or A001405 or A000108 and A002057.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000108
     is "Catalan numbers: C(n) = binomial(2n,n)/(n+1) = (2n)!/(n!(n+1)!).".
@@ -65,6 +65,27 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A40
         case 'A014137 and A401693':
             if 3 <= n and (n + 1) % 2 == 0:
                 countTotal = 2 * A014137(n) + A401693(n - 2) - 2 * A014137((n - 1) // 2) - A401693(n)
+            elif True:
+                countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
+            else:
+                countTotal = oeisIDfor_n('A000108', n)
+        case 'A000108 and A401693':
+            if 4 <= n and n % 2 == 0:
+                countTotal = -((n + 3) * (2 * A401693(n) - 2 * A000108(n // 2) - A401693(n - 2) - A401693(n + 2))) // (25 * n + 15)
+            elif True:
+                countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
+            else:
+                countTotal = oeisIDfor_n('A000108', n)
+        case 'A000108 and A401693':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = -((n + 3) * (2 * A401693(n) - 2 * A000108((n + 1) // 2) - A401693(n - 2) - A401693(n + 2))) // (25 * n + 15)
+            elif True:
+                countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
+            else:
+                countTotal = oeisIDfor_n('A000108', n)
+        case 'A000108':
+            if 1 <= n:
+                countTotal = sum(map(mul, map(A000108, range(n), strict=True), map(A000108, map(1 .__rsub__, map(n.__sub__, range(n))), strict=True), strict=True))
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
@@ -232,7 +253,7 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
             countTotal = (2 - n % 2) * A227167(n) // n
         case 'A223094':
             if 4 <= n:
-                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), map(factorial, repeat(n - 1, len(range(3, n))))), map(factorial, range(3, n))))
+                countTotal = factorial(n - 1) - sum(map(int.__floordiv__, map(mul, map(A223094, range(3, n), strict=True), map(factorial, repeat(n - 1, len(range(3, n))), strict=True), strict=True), map(factorial, range(3, n), strict=True), strict=True))
             elif n <= 2:
                 countTotal = 1
             else:
@@ -267,7 +288,7 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A301620':
             if 3 <= n:
-                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1))))
+                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1), strict=True), strict=True))
             elif n <= 2:
                 countTotal = 1
             else:
@@ -382,9 +403,9 @@ def A001011(n: int, f: Literal['A000682 and A001010'] | LiteralString | None = N
                 countTotal = oeisIDfor_n('A001011', n)
     return countTotal
 
-def A001246(n: int, f: Literal['A000108'] | LiteralString | None = None) -> int:
+def A001246(n: int, f: Literal['A000108', 'A001246'] | LiteralString | None = None) -> int:
     """
-    Compute A001246(n) as a function of A000108.
+    Compute A001246(n) as a function of A000108 or A001246.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001246
     is "Squares of Catalan numbers.".
@@ -413,6 +434,11 @@ def A001246(n: int, f: Literal['A000108'] | LiteralString | None = None) -> int:
     match f:
         case 'A000108':
             countTotal = A000108(n) ** 2
+        case 'A001246':
+            if 1 <= n:
+                countTotal = 4 * (2 * n - 1) ** 2 * A001246(n - 1) // (n + 1) ** 2
+            else:
+                countTotal = oeisIDfor_n('A001246', n)
         case _:
             countTotal = oeisIDfor_n('A001246', n)
     return countTotal
@@ -456,6 +482,13 @@ def A001405(n: int, f: Literal['A000108', 'A001405'] | LiteralString | None = No
         case 'A001405':
             if 2 <= n and n % 2 == 0:
                 countTotal = 2 * A001405(n - 1)
+            elif True:
+                countTotal = factorial(n) // (factorial(-(-n // 2)) * factorial(n // 2))
+            else:
+                countTotal = oeisIDfor_n('A001405', n)
+        case 'A001405':
+            if 2 <= n:
+                countTotal = (4 * (n - 1) * A001405(n - 2) + 2 * A001405(n - 1)) // (n + 1)
             elif True:
                 countTotal = factorial(n) // (factorial(-(-n // 2)) * factorial(n // 2))
             else:
@@ -581,6 +614,62 @@ def A002694(n: int, f: Literal['A006659'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A002694', n)
     return countTotal
 
+def A004148(n: int, f: Literal['A004148'] | LiteralString | None = None) -> int:
+    """
+    Compute A004148(n) as a function of A004148.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A004148
+    is "Generalized Catalan numbers: a(n+1) = a(n) + Sum_{k=1..n-1} a(k)*a(n-1-k).".
+
+    The domain of A004148 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 2405.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Generalized Catalan numbers: a(n+1) = a(n) + Sum_{k=1..n-1} a(k)*a(n-1-k).
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A004148
+    """
+    countTotal: int
+    match f:
+        case 'A004148':
+            if 2 <= n:
+                countTotal = A004148(n - 1) + sum(map(mul, map(A004148, range(1, n - 1), strict=True), map(A004148, map(2 .__rsub__, map(n.__sub__, range(1, n - 1))), strict=True), strict=True))
+            elif 1 <= n:
+                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A004148', n)
+        case 'A004148':
+            if 4 <= n:
+                countTotal = ((n - 1) * A004148(n - 2) + (2 * n - 5) * A004148(n - 3) + (2 * n + 1) * A004148(n - 1) - (n - 4) * A004148(n - 4)) // (n + 2)
+            elif 1 <= n:
+                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A004148', n)
+        case _:
+            if 1 <= n:
+                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A004148', n)
+    return countTotal
+
 def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A060206, and A077460', 'A078591', 'A208357'] | LiteralString | None = None) -> int:
     """
     Compute A005315(n) as a function of A005316 or A077054 and A085973 or A005316, A060206, and A077460 or A078591 or A208357.
@@ -655,9 +744,9 @@ def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A0602
                 countTotal = oeisIDfor_n('A005315', n)
     return countTotal
 
-def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A060206, and A077460', 'A005316 and A078592', 'A000682 and A223093', 'A217310, A217318, and A227167', 'A006661 and A076876'] | LiteralString | None = None) -> int:
+def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A060206, and A077460', 'A005316 and A078592', 'A077055 and A223096', 'A000682 and A223093', 'A217310, A217318, and A227167', 'A006661 and A076876'] | LiteralString | None = None) -> int:
     """
-    Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A000682 and A223093 or A217310, A217318, and A227167 or A006661 and A076876.
+    Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A077055 and A223096 or A000682 and A223093 or A217310, A217318, and A227167 or A006661 and A076876.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316
     is "Meandric numbers: number of ways a river can cross a road n times.".
@@ -713,6 +802,13 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
         case 'A005316 and A078592':
             if n % 2 == 0:
                 countTotal = 2 * A078592(n // 2) - A005316(n // 2)
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A005316', n)
+        case 'A077055 and A223096':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = 4 * A077055(n) - 2 * A223096((n - 1) // 2)
             elif n <= 1:
                 countTotal = 1
             else:
@@ -902,9 +998,9 @@ def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A007822', n)
     return countTotal
 
-def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A000108, A014137, and A401693'] | LiteralString | None = None) -> int:
+def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A000108, A014137, and A401693', 'A401693 and A401694', 'A014137'] | LiteralString | None = None) -> int:
     """
-    Compute A014137(n) as a function of A000108 or A000108 and A014137 or A014140 or A000108, A014137, and A401693.
+    Compute A014137(n) as a function of A000108 or A000108 and A014137 or A014140 or A000108, A014137, and A401693 or A401693 and A401694 or A014137.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A014137
     is "Partial sums of Catalan numbers (A000108).".
@@ -932,7 +1028,7 @@ def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A00
     countTotal: int
     match f:
         case 'A000108':
-            countTotal = sum(map(A000108, range(n + 1)))
+            countTotal = sum(map(A000108, range(n + 1), strict=True))
         case 'A000108 and A014137':
             if 1 <= n:
                 countTotal = A000108(n) + A014137(n - 1)
@@ -953,13 +1049,28 @@ def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A00
                 countTotal = (A000108(n) + 2 * A014137((n - 1) // 2) + A401693(n) - A401693(n - 2)) // 2
             else:
                 countTotal = oeisIDfor_n('A014137', n)
+        case 'A401693 and A401694':
+            if 1 <= n:
+                countTotal = (A401693(2 * n) + A401693(2 * n - 1) + A401693(2 * n + 1) + 1 - A401694(2 * n)) // 2
+            else:
+                countTotal = oeisIDfor_n('A014137', n)
+        case 'A401693 and A401694':
+            if 2 <= n:
+                countTotal = (A401693(2 * n) + A401693(2 * n - 2) + A401693(2 * n - 1) + 2 - A401694(2 * n - 1)) // 2
+            else:
+                countTotal = oeisIDfor_n('A014137', n)
+        case 'A014137':
+            if 2 <= n:
+                countTotal = ((5 * n - 1) * A014137(n - 1) - 2 * (2 * n - 1) * A014137(n - 2)) // (n + 1)
+            else:
+                countTotal = oeisIDfor_n('A014137', n)
         case _:
             countTotal = oeisIDfor_n('A014137', n)
     return countTotal
 
-def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A401693'] | LiteralString | None = None) -> int:
+def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A401693', 'A014140 and A401694'] | LiteralString | None = None) -> int:
     """
-    Compute A014140(n) as a function of A000108 or A014137 and A014140 or A014140 and A401693.
+    Compute A014140(n) as a function of A000108 or A014137 and A014140 or A014140 and A401693 or A014140 and A401694.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A014140
     is "Apply partial sum operator twice to Catalan numbers.".
@@ -987,7 +1098,7 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     countTotal: int
     match f:
         case 'A000108':
-            countTotal = sum(map(mul, map((n + 1).__sub__, range(n + 1)), map(A000108, range(n + 1))))
+            countTotal = sum(map(mul, map((n + 1).__sub__, range(n + 1)), map(A000108, range(n + 1), strict=True), strict=True))
         case 'A014137 and A014140':
             if 1 <= n:
                 countTotal = A014137(n) + A014140(n - 1)
@@ -1001,6 +1112,16 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
         case 'A014140 and A401693':
             if 1 <= n and (n + 1) % 2 == 0:
                 countTotal = 2 * A014140((n - 1) // 2) + A401693(n)
+            else:
+                countTotal = oeisIDfor_n('A014140', n)
+        case 'A014140 and A401694':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = 2 * A014140((n - 3) // 2) + 4 * A014140((n - 1) // 2) + A401694(n - 1) - A014140(n - 2) - A014140(n - 1)
+            else:
+                countTotal = oeisIDfor_n('A014140', n)
+        case 'A014140 and A401694':
+            if 4 <= n and n % 2 == 0:
+                countTotal = 2 * A014140(n // 2) + 2 * A014140((n - 4) // 2) + 2 * A014140((n - 2) // 2) + A401694(n - 1) - A014140(n - 2) - A014140(n - 1)
             else:
                 countTotal = oeisIDfor_n('A014140', n)
         case _:
@@ -1093,7 +1214,7 @@ def A076876(n: int, f: Literal['A005316 and A006661'] | LiteralString | None = N
     is "Meandric numbers for a river crossing two parallel roads at n points.".
 
     The domain of A076876 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 41.
+    has not yet been computed is 43.
 
     Parameters
     ----------
@@ -1196,6 +1317,56 @@ def A077054(n: int, f: Literal['A005316', 'A005315 and A085973'] | LiteralString
                 countTotal = oeisIDfor_n('A077054', n)
         case _:
             countTotal = oeisIDfor_n('A077054', n)
+    return countTotal
+
+def A077055(n: int, f: Literal['A078592', 'A005316 and A223096'] | LiteralString | None = None) -> int:
+    """
+    Compute A077055(n) as a function of A078592 or A005316 and A223096.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077055
+    is "Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.".
+
+    The domain of A077055 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 44.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A077055
+    """
+    countTotal: int
+    match f:
+        case 'A078592':
+            if 2 <= n and n % 2 == 0:
+                countTotal = A078592(n // 2)
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A077055', n)
+        case 'A005316 and A223096':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = (A005316(n) + 2 * A223096((n - 1) // 2)) // 4
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A077055', n)
+        case _:
+            if n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A077055', n)
     return countTotal
 
 def A077056(n: int, f: LiteralString | None = None) -> int:
@@ -1323,9 +1494,9 @@ def A078591(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A078591', n)
     return countTotal
 
-def A078592(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
+def A078592(n: int, f: Literal['A005316', 'A077055'] | LiteralString | None = None) -> int:
     """
-    Compute A078592(n) as a function of A005316.
+    Compute A078592(n) as a function of A005316 or A077055.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078592
     is "Call two meanders from A005316 with 2n crossings equivalent if they differ by reflections in the X or Y axes. Sequence gives number of inequivalent meanders.".
@@ -1354,6 +1525,11 @@ def A078592(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
     match f:
         case 'A005316':
             countTotal = (A005316(n) + A005316(2 * n)) // 2
+        case 'A077055':
+            if 1 <= n:
+                countTotal = A077055(2 * n)
+            else:
+                countTotal = oeisIDfor_n('A078592', n)
         case _:
             countTotal = oeisIDfor_n('A078592', n)
     return countTotal
@@ -1621,6 +1797,44 @@ def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString
             countTotal = A223094(n) - A223093(n)
         case _:
             countTotal = oeisIDfor_n('A223095', n)
+    return countTotal
+
+def A223096(n: int, f: Literal['A005316 and A077055'] | LiteralString | None = None) -> int:
+    """
+    Compute A223096(n) as a function of A005316 and A077055.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223096
+    is "Number of symmetric meander shapes with 2n+1 crossings.".
+
+    The domain of A223096 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 23.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Number of symmetric meander shapes with 2n+1 crossings.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A223096
+    """
+    countTotal: int
+    match f:
+        case 'A005316 and A077055':
+            if 1 <= n:
+                countTotal = (4 * A077055(2 * n + 1) - A005316(2 * n + 1)) // 2
+            else:
+                countTotal = oeisIDfor_n('A223096', n)
+        case _:
+            countTotal = oeisIDfor_n('A223096', n)
     return countTotal
 
 def A227167(n: int, f: Literal['A000682', 'A005316, A217310, and A217318'] | LiteralString | None = None) -> int:
@@ -2003,9 +2217,81 @@ def A400631(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A400631', n)
     return countTotal
 
-def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693'] | LiteralString | None = None) -> int:
+def A400632(n: int, f: LiteralString | None = None) -> int:
     """
-    Compute A401693(n) as a function of A014140 or A000108, A014137, and A401693.
+    Compute A400632(n) as a function of n.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400632
+    is "Number of semi-meanders with n crossings and winding number n-8, for n >= 8.".
+
+    The domain of A400632 starts at 8, therefore for values of `n` < 8, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 301.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Number of semi-meanders with n crossings and winding number n-8, for n >= 8.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A400632
+    """
+    countTotal: int
+    match f:
+        case _:
+            if True:
+                countTotal = (294 * n ** 6 + 16955410 * n + 20480 * 0 ** (n % 3) * (n - 2) + 25920 * 0 ** (n % 8) + 61440 * 0 ** ((n + 2) % 3) + 43200 * 0 ** ((n + 3) % 8) + 43200 * 0 ** ((n + 6) % 8) + 45 * (1 - 2 * (n % 2)) * (44 * n ** 3 + 358 * n + 4473 - 5 * n ** 4 - 289 * n ** 2) - 60 * n ** 5 - 3895 * n ** 4 - 232300 * n ** 3 - 326739 * n ** 2 - 20480 * 0 ** ((n + 1) % 3) * (n + 1) - 8640 * 0 ** ((n + 1) % 8) - 25920 * 0 ** ((n + 2) % 8) - 43200 * 0 ** ((n + 4) % 8) - 8640 * 0 ** ((n + 5) % 8) - 25920 * 0 ** ((n + 7) % 8) - 48570245) // 138240
+            else:
+                countTotal = oeisIDfor_n('A400632', n)
+    return countTotal
+
+def A400633(n: int, f: LiteralString | None = None) -> int:
+    """
+    Compute A400633(n) as a function of n.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400633
+    is "Number of semi-meanders with n crossings and winding number n-10, for n >= 10.".
+
+    The domain of A400633 starts at 10, therefore for values of `n` < 10, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 301.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Number of semi-meanders with n crossings and winding number n-10, for n >= 10.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A400633
+    """
+    countTotal: int
+    match f:
+        case _:
+            if True:
+                countTotal = (5163390 * n ** 8 + 56558460 * n ** 6 + 600812982000 * n ** 3 + 5767984511820 * n ** 2 + 163296000 * n * (40 * 0 ** (n % 4) + 33 * 0 ** ((n + 1) % 4) - 40 * 0 ** ((n + 2) % 4) - 33 * 0 ** ((n + 3) % 4)) + 458752000 * 0 ** (n % 3) * (108 * n + 50 - 9 * n ** 2) + 18856191452 * 0 ** (n % 5) + 2612736000 * 0 ** (n % 8) * (-(17 * n) - 14) + 458752000 * 0 ** ((n + 1) % 3) * (18 * n ** 2 - 15 * n - 61) + 18856191452 * 0 ** ((n + 1) % 5) + 2612736000 * 0 ** ((n + 1) % 8) * (9 * n + 37) + 458752000 * 0 ** ((n + 2) % 3) * (11 - 9 * n ** 2 - 93 * n) + 117006080547 * 0 ** ((n + 2) % 5) + 7838208000 * 0 ** ((n + 3) % 8) * (11 - 3 * n) + 117006080547 * 0 ** ((n + 4) % 5) + 2612736000 * 0 ** ((n + 4) % 8) * (17 * n + 14) + 2612736000 * 0 ** ((n + 5) % 8) * (-(9 * n) - 37) + 156764160000 * 0 ** ((n + 6) % 8) + 7838208000 * 0 ** ((n + 7) % 8) * (3 * n - 11) + 8505 * (1 - 2 * (n % 2)) * (6992 * n ** 5 + 346000 * n ** 3 + 519600 * n + 17692977 - 476 * n ** 6 - 73490 * n ** 4 - 68012 * n ** 2) + 166068141699607 - 20844000 * n ** 7 - 6784359120 * n ** 5 - 31881482430 * n ** 4 - 68694275761200 * n - 156764160000 * 0 ** ((n + 2) % 8) - 41803776000 * 0 ** ((n + 3) % 5)) // 83607552000
+            else:
+                countTotal = oeisIDfor_n('A400633', n)
+    return countTotal
+
+def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693', 'A000108 and A401693', 'A014137, A401693, and A401694'] | LiteralString | None = None) -> int:
+    """
+    Compute A401693(n) as a function of A014140 or A000108, A014137, and A401693 or A000108 and A401693 or A014137, A401693, and A401694.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A401693
     is "Number of ways to cut a nonempty Dyck word into a prefix and a suffix with both lengths at most n and of the same parity as n.".
@@ -2052,6 +2338,90 @@ def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693'] | Lit
                 countTotal = 2 * A014137(n) + A401693(n - 2) - A000108(n) - 2 * A014137((n - 1) // 2)
             else:
                 countTotal = oeisIDfor_n('A401693', n)
+        case 'A000108 and A401693':
+            if 6 <= n and n % 2 == 0:
+                countTotal = (2 * (n + 1) * A401693(n - 2) + 5 * (5 * n - 7) * A000108(n - 2) - 2 * (n + 1) * A000108((n - 2) // 2) - (n + 1) * A401693(n - 4)) // (n + 1)
+            else:
+                countTotal = oeisIDfor_n('A401693', n)
+        case 'A000108 and A401693':
+            if 5 <= n and (n + 1) % 2 == 0:
+                countTotal = (2 * (n + 1) * A401693(n - 2) + 5 * (5 * n - 7) * A000108(n - 2) - 2 * (n + 1) * A000108((n - 1) // 2) - (n + 1) * A401693(n - 4)) // (n + 1)
+            else:
+                countTotal = oeisIDfor_n('A401693', n)
+        case 'A014137, A401693, and A401694':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = 2 * A014137((n - 1) // 2) + A401694(n - 1) - A401693(n - 2) - A401693(n - 1) - 1
+            else:
+                countTotal = oeisIDfor_n('A401693', n)
+        case 'A014137, A401693, and A401694':
+            if 4 <= n and n % 2 == 0:
+                countTotal = 2 * A014137(n // 2) + A401694(n - 1) - A401693(n - 2) - A401693(n - 1) - 2
+            else:
+                countTotal = oeisIDfor_n('A401693', n)
         case _:
             countTotal = oeisIDfor_n('A401693', n)
+    return countTotal
+
+def A401694(n: int, f: Literal['A014140', 'A014137 and A401693'] | LiteralString | None = None) -> int:
+    """
+    Compute A401694(n) as a function of A014140 or A014137 and A401693.
+
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A401694
+    is "Number of ways to apply one of four moves (see Comments) to a nonempty Dyck word with a cut, where both sides of the cut have lengths at most n+1 and of the same parity as n+1 before the move and at most n after the move.".
+
+    The domain of A401694 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
+    has not yet been computed is 1001.
+
+    Parameters
+    ----------
+    n : int
+        Index (n-dex) for a(n) in the sequence of values. "n" (lower case) and "a(n)" are conventions in mathematics.
+    f : str | None = None
+        The sequences from which to compute a(n). Any other value computes a(n) with `oeisIDfor_n`.
+
+    Returns
+    -------
+    a(n) : int
+        Number of ways to apply one of four moves (see Comments) to a nonempty Dyck word with a cut, where both sides of the cut have lengths at most n+1 and of the same parity as n+1 before the move and at most n after the move.
+
+    Would You Like to Know More?
+    ----------------------------
+    OEIS : webpage
+        https://oeis.org/A401694
+    """
+    countTotal: int
+    match f:
+        case 'A014140':
+            if 2 <= n and n % 2 == 0:
+                countTotal = A014140(n) + A014140(n - 1) + A014140(n + 1) - 4 * A014140(n // 2) - 2 * A014140((n - 2) // 2)
+            elif n <= 1:
+                countTotal = 3
+            else:
+                countTotal = oeisIDfor_n('A401694', n)
+        case 'A014140':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = A014140(n) + A014140(n - 1) + A014140(n + 1) - 2 * A014140((n - 3) // 2) - 2 * A014140((n - 1) // 2) - 2 * A014140((n + 1) // 2)
+            elif n <= 1:
+                countTotal = 3
+            else:
+                countTotal = oeisIDfor_n('A401694', n)
+        case 'A014137 and A401693':
+            if 2 <= n and n % 2 == 0:
+                countTotal = A401693(n) + A401693(n - 1) + A401693(n + 1) + 1 - 2 * A014137(n // 2)
+            elif n <= 1:
+                countTotal = 3
+            else:
+                countTotal = oeisIDfor_n('A401694', n)
+        case 'A014137 and A401693':
+            if 3 <= n and (n + 1) % 2 == 0:
+                countTotal = A401693(n) + A401693(n - 1) + A401693(n + 1) + 2 - 2 * A014137((n + 1) // 2)
+            elif n <= 1:
+                countTotal = 3
+            else:
+                countTotal = oeisIDfor_n('A401694', n)
+        case _:
+            if n <= 1:
+                countTotal = 3
+            else:
+                countTotal = oeisIDfor_n('A401694', n)
     return countTotal

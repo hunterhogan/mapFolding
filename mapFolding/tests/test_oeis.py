@@ -39,6 +39,8 @@ if TYPE_CHECKING:
 	, CartesianProduct(('A060206',), (0, 3), ('A077460, A005315, and A005316', 'A000682'))
 	, CartesianProduct(('A077014',), (0, 3), ('A000682 and A223093', 'A223095 and A000682', 'A005316'))
 	, CartesianProduct(('A077054',), (0, 3), ('A085973 and A005315', 'A005316'))
+	, CartesianProduct(('A077055',), (1, 2, 3, 4, 7, 42, 43), ('A078592', 'A005316 and A223096', None))
+	, CartesianProduct(('A223096',), (0, 1, 3, 7, 21), ('A005316 and A077055', None))
 	, CartesianProduct(('A077460',), (0, 3), ('A005315, A005316, and A060206', 'A000682 and A005316'))
 	, CartesianProduct(('A078591',), (0, 3), ('A005316', 'A005315'))
 	, CartesianProduct(('A078592',), (0, 3), ('A005316',))
@@ -60,6 +62,15 @@ if TYPE_CHECKING:
 	, CartesianProduct(('A000108', 'A001246', 'A001263', 'A001405', 'A002057', 'A002415', 'A002694', 'A006659', 'A007746', 'A008828', 'A014137', 'A014140', 'A060972', 'A401693')
 		, (7,), (None,))
 	, CartesianProduct(('A053121', 'A259974', 'A380369'), (10,), (None,))
+	, CartesianProduct(('A004148',), (0, 1, 3, 7), (None,))
+	, CartesianProduct(('A068253',), (1, 3, 7), ('A078099',))
+	, CartesianProduct(('A204352',), (0, 3, 7), ('A380367',))
+	, CartesianProduct(('A078099',), (1, 4, 6, 7), (None,))
+	, CartesianProduct(('A380367',), (0, 1, 4, 7, 8, 9), ('A005316 and A076876 and A204352',))
+	, CartesianProduct(('A400632',), (8, 9, 31), (None,))
+	, CartesianProduct(('A400633',), (10, 13, 14, 129), (None,))
+	, CartesianProduct(('A400638',), (20, 21, 24), ('A400429',))
+	, CartesianProduct(('A401694',), (1, 2, 3, 7), ('A014140', 'A014137 and A401693', None))
 )))
 def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None, expected: int) -> None:
 	assertEqualTo(oeisIDfor_n(oeisID, n, f), expected, oeisIDfor_n.__name__, oeisID, n, f)
@@ -85,8 +96,9 @@ def test_oeisIDfor_nFlow(oeisID: OEISid, n: int, flow: LiteralString, expected: 
 	, pytest.param('A000136', 'NE', ValueError, id='stringNE')
 	, pytest.param('A000136', 1.5, ValueError, id='fraction')
 	, pytest.param('A001418', 0, ArithmeticError, id='belowOffset')
+	, pytest.param('A077055', 0, ArithmeticError, id='A077055BelowOffset')
 	, pytest.param('A999999', 3, KeyError, id='unregistered')
-	, pytest.param('A204352', 3, ValueError, id='noFormula')
+	, pytest.param('A343358', 4, ValueError, id='noFormula')
 ))
 def test_oeisIDfor_nError(oeisID: OEISid, n: int, expected: type[Exception]) -> None:
 	with pytest.raises(expected):
@@ -115,7 +127,7 @@ def test_getTotalFoldsKnown(mapShape: tuple[int, ...], expected: int | None) -> 
 	'A000108', 'A000136', 'A000560', 'A000682', 'A001010', 'A001011', 'A001246', 'A001263', 'A001405', 'A001415', 'A001416', 'A001417', 'A001418'
 	, 'A002057', 'A002415', 'A002694', 'A005315', 'A005316', 'A006657', 'A006658', 'A006659', 'A006660', 'A006661', 'A006662', 'A007746', 'A007822', 'A008828'
 	, 'A014137', 'A014140', 'A045445', 'A053121', 'A060206', 'A060972', 'A076876', 'A077014', 'A077054', 'A077055', 'A077056', 'A077460'
-	, 'A078591', 'A078592', 'A085973', 'A195646', 'A204352', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095', 'A227167'
+	, 'A078591', 'A078592', 'A085973', 'A195646', 'A204352', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095', 'A223096', 'A227167'
 	, 'A259689', 'A259698', 'A259700', 'A259701', 'A259702', 'A259703', 'A259974', 'A260785', 'A287548', 'A301620', 'A322507', 'A331499'
 	, 'A333971', 'A334615', 'A337581', 'A339179', 'A380367', 'A380369', 'A400429', 'A400630', 'A400631', 'A400632', 'A400633', 'A400634'
 	, 'A400635', 'A400636', 'A400637', 'A401693'

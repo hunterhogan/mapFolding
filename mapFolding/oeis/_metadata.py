@@ -289,6 +289,8 @@ dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 	'A008828': MetadataOEISidTriangle(**dictionaryOEIS['A008828'], rowLength=int, rowStart=1, columnStart=1),
 	'A053121': MetadataOEISidTriangle(**dictionaryOEIS['A053121'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
 	'A060972': MetadataOEISidTriangle(**dictionaryOEIS['A060972'], rowLength=int, rowStart=1, columnStart=1),
+	# Antidiagonal cell (n, k) represents the source array entry T(n - k + 1, k).
+	'A078099': MetadataOEISidTriangle(**dictionaryOEIS['A078099'], rowLength=int, rowStart=1, columnStart=1),
 	'A259689': MetadataOEISidTriangle(**dictionaryOEIS['A259689'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
 	'A259698': MetadataOEISidTriangle(**dictionaryOEIS['A259698'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
 	'A259701': MetadataOEISidTriangle(**dictionaryOEIS['A259701'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
@@ -298,6 +300,8 @@ dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 	'A287548': MetadataOEISidTriangle(**dictionaryOEIS['A287548'], rowLength=int, rowStart=1, columnStart=1),
 	'A331499': MetadataOEISidTriangle(**dictionaryOEIS['A331499'], rowLength=int, rowStart=1, columnStart=1),
 	'A339179': MetadataOEISidTriangle(**dictionaryOEIS['A339179'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
+	# Antidiagonal cell (n, k) represents the source array entry T(k, n - k + 1).
+	'A380367': MetadataOEISidTriangle(**dictionaryOEIS['A380367'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
 	'A380369': MetadataOEISidTriangle(**dictionaryOEIS['A380369'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
 	'A400429': MetadataOEISidTriangle(**dictionaryOEIS['A400429'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=1),
 }

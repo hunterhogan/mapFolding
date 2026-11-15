@@ -15,6 +15,7 @@ from sympy import (
 	solveset, Sum, sympify, together, true, Tuple)
 from sympy.core.function import AppliedUndef
 from sympy.utilities.misc import as_int
+from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 import re as regex
 
@@ -246,10 +247,10 @@ def getMissingFormulas() -> tuple[tuple[OEISid, int, Expr], ...]:
 
 	Relations with several unknown values remain undetermined. Sequences in `makeOEISidCalculable` have no missing values.
 	"""
-	boxOfSequences: Iterator[type[AppliedUndef]] = filter(Tuple(*pluck(0, boxOfRelations)).has
-		, filterfalse(compose_left(settingsOEIS.lookupID.__getitem__, makeOEISidCalculable().__contains__), settingsOEIS.lookupSymbolic.values()))
-	boxOfEquations: dict[Boolean, None] = dict.fromkeys(chain.from_iterable(map(bindValueUnknown, boxOfSequences)))
-	return tuple(unique(filter(None, map(getMissingFormula, boxOfEquations)), key=itemgetter(0, 1)))
+	boxOfSequences: tuple[type[AppliedUndef], ...] = tuple(filter(Tuple(*pluck(0, boxOfRelations)).has
+		, filterfalse(compose_left(settingsOEIS.lookupID.__getitem__, makeOEISidCalculable().__contains__), settingsOEIS.lookupSymbolic.values())))
+	boxOfEquations: dict[Boolean, None] = dict.fromkeys(chain.from_iterable(map(bindValueUnknown, tqdm(boxOfSequences, leave=False, unit='sequence'))))
+	return tuple(unique(filter(None, map(getMissingFormula, tqdm(boxOfEquations, leave=False, unit='equation'))), key=itemgetter(0, 1)))
 
 def solveDifference(wanted: Expr, difference: Expr) -> Expr:
 	"""Solve `difference = 0` for one nonnegative expression of the requested value.

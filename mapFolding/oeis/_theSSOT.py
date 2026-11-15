@@ -19,6 +19,8 @@ if TYPE_CHECKING:
 # TODO Dynamic, but authoritative, discovery of OEIS IDs implemented in mapFolding.
 # TODO Dynamic, but authoritative, discovery of valid parameter values for `f` and `flow`: primarily for testing.
 
+# TODO This is a good first draft, but it needs refining.
+
 @dataclasses.dataclass
 class PackageSettingsOEIS(PackageSettings):
 	urlRepository: str = 'https://github.com/oeis/oeisdata.git'
@@ -58,11 +60,12 @@ class PackageSettingsOEIS(PackageSettings):
 			, 'A005315', 'A005316', 'A006657', 'A006658', 'A006659', 'A006660', 'A006661', 'A006662', 'A007746', 'A007822', 'A008828'
 			, 'A014137', 'A014140', 'A045445', 'A053121', 'A060206', 'A060972', 'A076876'
 			, 'A077014', 'A077054', 'A077055', 'A077056', 'A077460', 'A078591', 'A078592', 'A085973'
-			, 'A204352', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095'
+			, 'A204352', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095', 'A223096'
 			, 'A227167', 'A259689', 'A259698', 'A259700', 'A259701', 'A259702', 'A259703', 'A259974', 'A260785', 'A287548'
 			, 'A301620', 'A322507', 'A331499', 'A333971', 'A334615', 'A337581', 'A339179', 'A380367', 'A380369'
 			, 'A400429', 'A400630', 'A400631', 'A400632', 'A400633', 'A400634', 'A400635', 'A400636', 'A400637', 'A400638'
 			, 'A401693', 'A401694'
+			, 'A000105', 'A001168', 'A001411', 'A002931', 'A003763', 'A004148', 'A006663', 'A008980', 'A008989', 'A068253', 'A077451', 'A078099', 'A096969', 'A118273', 'A121789', 'A216040', 'A224273', 'A245772', 'A300901', 'A301940', 'A304932', 'A343358',
 		)
 		self.lookupSymbolic = dict(zip(self.boxOfIDs
 			, map(partial(UndefinedFunction, integer=True, nonnegative=True), self.boxOfIDs), strict=True)

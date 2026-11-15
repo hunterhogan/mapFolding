@@ -5,15 +5,18 @@
 %N A077055 Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.
 %C A077055 Meander shapes. [_Stéphane Legendre_, Apr 09 2013]
 %H A077055 N. J. A. Sloane, <a href="/A077055/b077055.txt">Table of n, a(n) for n = 0..42</a> [from Legendre, 2013]
-%H A077055 CombOS - Combinatorial Object Server, <a href="http://combos.org/meander">Generate meanders and stamp foldings</a>
-%H A077055 Stéphane Legendre, <a href="/A077055/a077055.pdf">Illustration of initial terms</a>
-%H A077055 Stéphane Legendre, <a href="https://arxiv.org/abs/1302.2025">Foldings and Meanders</a>, arXiv preprint arXiv:1302.2025 [math.CO], 2013.
-%H A077055 J. Sawada and R. Li, <a href="https://doi.org/10.37236/2404">Stamp foldings, semi-meanders, and open meanders: fast generation algorithms</a>, Electronic Journal of Combinatorics, Volume 19 No. 2 (2012), P#43 (16 pages).
+%H A077055 CombOS - Combinatorial Object Server, <a href="https://combos.org/meander">Generate meanders and stamp foldings</a>.
+%H A077055 Stéphane Legendre, <a href="/A077055/a077055.pdf">Illustration of initial terms</a>.
+%H A077055 Stéphane Legendre, <a href="https://ajc.maths.uq.edu.au/pdf/58/ajc_v58_p275.pdf">Foldings and meanders</a>, Australasian Journal of Combinatorics 58(2) (2014), 275-291.
+%H A077055 Stéphane Legendre, <a href="https://arxiv.org/abs/1302.2025">Foldings and meanders</a>, arXiv:1302.2025 [math.CO], 2013.
+%H A077055 Joe Sawada and Roy Li, <a href="https://doi.org/10.37236/2404">Stamp Foldings, Semi-Meanders, and Open Meanders: Fast Generation Algorithms</a>, The Electronic Journal of Combinatorics 19(2) (2012), #P43.
+%H A077055 Joe Sawada and Roy Li, <a href="https://www.cis.uoguelph.ca/~sawada/papers/stamp2.pdf">Stamp Foldings, Semi-meanders, and Open Meanders: Fast Generation Algorithms</a>, preprint (author's copy).
+%H A077055 Joe Sawada, <a href="https://www.socs.uoguelph.ca/~sawada/prog/stamp_meander.c">Stamp foldings, semi-meanders, and open meanders</a>, C program, 2008 (includes symmetric meanders).
 %F A077055 For n even a(n) = (A005316(n)+A005316(n/2))/2 (this is A078592).
 %F A077055 For n odd a(n) = (A005316(n)+2*A223096(floor(n/2)))/4. [_Stéphane Legendre_, Apr 09 2013]
 %e A077055 For n=7 the A005316(7) = 42 meanders with 7 crossings fall into 5 equivalence classes of size 2 and 8 of size 4, so a(7) = 5+8 = 13.
 %Y A077055 Cf. A005316, A077460, A078592, A223096.
 %K A077055 nonn,nice
-%O A077055 0,4
+%O A077055 1,4
 %A A077055 _N. J. A. Sloane_ and _Jon Wild_, Nov 29 2002
 %E A077055 More terms from the Sawada-Li paper from _Daniel Recoskie_, Jul 11 2012

@@ -22,4 +22,3 @@ if __name__ == '__main__':
 			countTotal: int = getattr(module, oeisID)()
 			updateValuesKnown(oeisID, {n: countTotal})
 			keepGoing = True
-			print(oeisID, n, expression, countTotal)

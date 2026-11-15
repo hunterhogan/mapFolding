@@ -44,8 +44,8 @@ from mapFolding.oeis._symbolic import makeSolutionsSymbolic
 from mapFolding.theSSOT import settingsPackage
 from operator import attrgetter, itemgetter, methodcaller
 from sympy import (
-	Add, And, ceiling, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational, StrictGreaterThan, StrictLessThan, Sum,
-	Symbol, together)
+	Add, And, ceiling, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational, StrictGreaterThan,
+	StrictLessThan, Sum, Symbol, together)
 from sympy.core.function import AppliedUndef
 from sympy.core.relational import Equality
 from sympy.logic.boolalg import BooleanTrue, true
@@ -299,13 +299,18 @@ def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> as
                 astCall = Make.Call(Make.Name('map'), [Make.Attribute(astCallLeft.args[0], f'__{identifier}__'), astCallRight])
         elif Be.Name(astCallRight.func) and astCallRight.func.id == 'repeat':
             astCall = Make.Call(Make.Name('map'), [Make.Attribute(astCallRight.args[0], f'__r{identifier}__'), astCallLeft])
+        elif Be.FloorDiv(ast_expr.op):
+            astCall = Make.Call(Make.Name('map'), [Make.Attribute(Make.Name('int'), '__floordiv__'), astCallLeft, astCallRight]
+                , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
         else:
-            astCall = Make.Call(Make.Name('map'), [Make.Name(identifier), astCallLeft, astCallRight])
+            astCall = Make.Call(Make.Name('map'), [Make.Name(identifier), astCallLeft, astCallRight]
+                , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
     elif Be.UnaryOp(ast_expr):
         astCall = Make.Call(Make.Name('map'), [Make.Name('neg'), _makeMapInteger(ast_expr.operand, k, astCallRange)])
     elif Be.Call(ast_expr):
         astCall = Make.Call(Make.Name('map'), [ast_expr.func
-            , *map(partial(_makeMapInteger, k=k, astCallRange=astCallRange), ast_expr.args)])
+            , *map(partial(_makeMapInteger, k=k, astCallRange=astCallRange), ast_expr.args)]
+            , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
     else:
         astCall = Make.Call(Make.Name('repeat'), [ast_expr, Make.Call(Make.Name('len'), [astCallRange])])
     return astCall
