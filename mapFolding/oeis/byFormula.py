@@ -10,7 +10,7 @@ from math import factorial, isqrt
 from operator import mul
 from typing import Literal, LiteralString
 
-def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693', 'A000108 and A401693', 'A001405', 'A000108 and A002057'] | LiteralString | None = None) -> int:
+def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A401693', 'A000108 and A401693', 'A001405', 'A000108 and A002057'] | LiteralString | None=None) -> int:
     """
     Compute A000108(n) as a function of A000108 or A001246 or A014137 or A014137 and A401693 or A000108 and A401693 or A001405 or A000108 and A002057.
 
@@ -106,7 +106,7 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A014137', 'A014137 and A40
                 countTotal = oeisIDfor_n('A000108', n)
     return countTotal
 
-def A000136(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
+def A000136(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A000136(n) as a function of A000682.
 
@@ -141,7 +141,7 @@ def A000136(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A000136', n)
     return countTotal
 
-def A000560(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
+def A000560(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A000560(n) as a function of A000682.
 
@@ -176,7 +176,7 @@ def A000560(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A000560', n)
     return countTotal
 
-def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001010 and A001011', 'A005316 and A223093', 'A000682 and A223094', 'A227167', 'A223094', 'A000682 and A301620', 'A000682 and A333971', 'A000682 and A334615', 'A337581', 'A301620', 'A000682 and A259702'] | LiteralString | None = None) -> int:
+def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001010 and A001011', 'A005316 and A223093', 'A000682 and A223094', 'A227167', 'A223094', 'A000682 and A301620', 'A000682 and A333971', 'A000682 and A334615', 'A337581', 'A301620', 'A000682 and A259702'] | LiteralString | None=None) -> int:
     """
     Compute A000682(n) as a function of A060206 or A000136 or A000560 or A001010 or A001010 and A001011 or A005316 and A223093 or A000682 and A223094 or A227167 or A223094 or A000682 and A301620 or A000682 and A333971 or A000682 and A334615 or A337581 or A301620 or A000682 and A259702.
 
@@ -307,7 +307,7 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
                 countTotal = oeisIDfor_n('A000682', n)
     return countTotal
 
-def A001010(n: int, f: Literal['A000682 and A007822', 'A000682 and A001011'] | LiteralString | None = None) -> int:
+def A001010(n: int, f: Literal['A000682 and A007822', 'A000682 and A001011'] | LiteralString | None=None) -> int:
     """
     Compute A001010(n) as a function of A000682 and A007822 or A000682 and A001011.
 
@@ -360,7 +360,7 @@ def A001010(n: int, f: Literal['A000682 and A007822', 'A000682 and A001011'] | L
                 countTotal = oeisIDfor_n('A001010', n)
     return countTotal
 
-def A001011(n: int, f: Literal['A000682 and A001010'] | LiteralString | None = None) -> int:
+def A001011(n: int, f: Literal['A000682 and A001010'] | LiteralString | None=None) -> int:
     """
     Compute A001011(n) as a function of A000682 and A001010.
 
@@ -403,7 +403,7 @@ def A001011(n: int, f: Literal['A000682 and A001010'] | LiteralString | None = N
                 countTotal = oeisIDfor_n('A001011', n)
     return countTotal
 
-def A001246(n: int, f: Literal['A000108', 'A001246'] | LiteralString | None = None) -> int:
+def A001246(n: int, f: Literal['A000108', 'A001246'] | LiteralString | None=None) -> int:
     """
     Compute A001246(n) as a function of A000108 or A001246.
 
@@ -443,7 +443,7 @@ def A001246(n: int, f: Literal['A000108', 'A001246'] | LiteralString | None = No
             countTotal = oeisIDfor_n('A001246', n)
     return countTotal
 
-def A001405(n: int, f: Literal['A000108', 'A001405'] | LiteralString | None = None) -> int:
+def A001405(n: int, f: Literal['A000108', 'A001405'] | LiteralString | None=None) -> int:
     """
     Compute A001405(n) as a function of A000108 or A001405.
 
@@ -500,7 +500,7 @@ def A001405(n: int, f: Literal['A000108', 'A001405'] | LiteralString | None = No
                 countTotal = oeisIDfor_n('A001405', n)
     return countTotal
 
-def A002057(n: int, f: Literal['A000108', 'A006659'] | LiteralString | None = None) -> int:
+def A002057(n: int, f: Literal['A000108', 'A006659'] | LiteralString | None=None) -> int:
     """
     Compute A002057(n) as a function of A000108 or A006659.
 
@@ -540,7 +540,7 @@ def A002057(n: int, f: Literal['A000108', 'A006659'] | LiteralString | None = No
                 countTotal = oeisIDfor_n('A002057', n)
     return countTotal
 
-def A002415(n: int, f: LiteralString | None = None) -> int:
+def A002415(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A002415(n) as a function of n.
 
@@ -576,7 +576,7 @@ def A002415(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A002415', n)
     return countTotal
 
-def A002694(n: int, f: Literal['A006659'] | LiteralString | None = None) -> int:
+def A002694(n: int, f: Literal['A006659'] | LiteralString | None=None) -> int:
     """
     Compute A002694(n) as a function of A006659.
 
@@ -614,7 +614,7 @@ def A002694(n: int, f: Literal['A006659'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A002694', n)
     return countTotal
 
-def A004148(n: int, f: Literal['A004148'] | LiteralString | None = None) -> int:
+def A004148(n: int, f: Literal['A004148'] | LiteralString | None=None) -> int:
     """
     Compute A004148(n) as a function of A004148.
 
@@ -670,7 +670,7 @@ def A004148(n: int, f: Literal['A004148'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A004148', n)
     return countTotal
 
-def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A060206, and A077460', 'A078591', 'A208357'] | LiteralString | None = None) -> int:
+def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A060206, and A077460', 'A078591', 'A208357'] | LiteralString | None=None) -> int:
     """
     Compute A005315(n) as a function of A005316 or A077054 and A085973 or A005316, A060206, and A077460 or A078591 or A208357.
 
@@ -744,9 +744,9 @@ def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A0602
                 countTotal = oeisIDfor_n('A005315', n)
     return countTotal
 
-def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A060206, and A077460', 'A005316 and A078592', 'A077055 and A223096', 'A000682 and A223093', 'A217310, A217318, and A227167', 'A006661 and A076876'] | LiteralString | None = None) -> int:
+def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A060206, and A077460', 'A005316 and A078592', 'A005316 and A077055', 'A077055 and A223096', 'A000682 and A223093', 'A217310, A217318, and A227167', 'A006661 and A076876'] | LiteralString | None=None) -> int:
     """
-    Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A077055 and A223096 or A000682 and A223093 or A217310, A217318, and A227167 or A006661 and A076876.
+    Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A005316 and A077055 or A077055 and A223096 or A000682 and A223093 or A217310, A217318, and A227167 or A006661 and A076876.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316
     is "Meandric numbers: number of ways a river can cross a road n times.".
@@ -806,6 +806,13 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005316', n)
+        case 'A005316 and A077055':
+            if 2 <= n and n % 2 == 0:
+                countTotal = 2 * A077055(n) - A005316(n // 2)
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A005316', n)
         case 'A077055 and A223096':
             if 3 <= n and (n + 1) % 2 == 0:
                 countTotal = 4 * A077055(n) - 2 * A223096((n - 1) // 2)
@@ -841,7 +848,7 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
                 countTotal = oeisIDfor_n('A005316', n)
     return countTotal
 
-def A006659(n: int, f: Literal['A002057', 'A002694'] | LiteralString | None = None) -> int:
+def A006659(n: int, f: Literal['A002057', 'A002694'] | LiteralString | None=None) -> int:
     """
     Compute A006659(n) as a function of A002057 or A002694.
 
@@ -881,7 +888,7 @@ def A006659(n: int, f: Literal['A002057', 'A002694'] | LiteralString | None = No
                 countTotal = oeisIDfor_n('A006659', n)
     return countTotal
 
-def A006661(n: int, f: Literal['A005316 and A076876'] | LiteralString | None = None) -> int:
+def A006661(n: int, f: Literal['A005316 and A076876'] | LiteralString | None=None) -> int:
     """
     Compute A006661(n) as a function of A005316 and A076876.
 
@@ -919,7 +926,7 @@ def A006661(n: int, f: Literal['A005316 and A076876'] | LiteralString | None = N
             countTotal = oeisIDfor_n('A006661', n)
     return countTotal
 
-def A007746(n: int, f: LiteralString | None = None) -> int:
+def A007746(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A007746(n) as a function of n.
 
@@ -955,7 +962,7 @@ def A007746(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A007746', n)
     return countTotal
 
-def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
+def A007822(n: int, f: Literal['A001010'] | LiteralString | None=None) -> int:
     """
     Compute A007822(n) as a function of A001010.
 
@@ -998,7 +1005,7 @@ def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A007822', n)
     return countTotal
 
-def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A000108, A014137, and A401693', 'A401693 and A401694', 'A014137'] | LiteralString | None = None) -> int:
+def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A000108, A014137, and A401693', 'A401693 and A401694', 'A014137'] | LiteralString | None=None) -> int:
     """
     Compute A014137(n) as a function of A000108 or A000108 and A014137 or A014140 or A000108, A014137, and A401693 or A401693 and A401694 or A014137.
 
@@ -1068,7 +1075,7 @@ def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A00
             countTotal = oeisIDfor_n('A014137', n)
     return countTotal
 
-def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A401693', 'A014140 and A401694'] | LiteralString | None = None) -> int:
+def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A401693', 'A014140 and A401694'] | LiteralString | None=None) -> int:
     """
     Compute A014140(n) as a function of A000108 or A014137 and A014140 or A014140 and A401693 or A014140 and A401694.
 
@@ -1128,7 +1135,7 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
             countTotal = oeisIDfor_n('A014140', n)
     return countTotal
 
-def A045445(n: int, f: Literal['A045445'] | LiteralString | None = None) -> int:
+def A045445(n: int, f: Literal['A045445'] | LiteralString | None=None) -> int:
     """
     Compute A045445(n) as a function of A045445.
 
@@ -1166,7 +1173,7 @@ def A045445(n: int, f: Literal['A045445'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A045445', n)
     return countTotal
 
-def A060206(n: int, f: Literal['A000682', 'A005315, A005316, and A077460'] | LiteralString | None = None) -> int:
+def A060206(n: int, f: Literal['A000682', 'A005315, A005316, and A077460'] | LiteralString | None=None) -> int:
     """
     Compute A060206(n) as a function of A000682 or A005315, A005316, and A077460.
 
@@ -1206,7 +1213,7 @@ def A060206(n: int, f: Literal['A000682', 'A005315, A005316, and A077460'] | Lit
             countTotal = oeisIDfor_n('A060206', n)
     return countTotal
 
-def A076876(n: int, f: Literal['A005316 and A006661'] | LiteralString | None = None) -> int:
+def A076876(n: int, f: Literal['A005316 and A006661'] | LiteralString | None=None) -> int:
     """
     Compute A076876(n) as a function of A005316 and A006661.
 
@@ -1244,7 +1251,7 @@ def A076876(n: int, f: Literal['A005316 and A006661'] | LiteralString | None = N
             countTotal = oeisIDfor_n('A076876', n)
     return countTotal
 
-def A077014(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
+def A077014(n: int, f: Literal['A005316'] | LiteralString | None=None) -> int:
     """
     Compute A077014(n) as a function of A005316.
 
@@ -1279,7 +1286,7 @@ def A077014(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A077014', n)
     return countTotal
 
-def A077054(n: int, f: Literal['A005316', 'A005315 and A085973'] | LiteralString | None = None) -> int:
+def A077054(n: int, f: Literal['A005316', 'A005315 and A085973'] | LiteralString | None=None) -> int:
     """
     Compute A077054(n) as a function of A005316 or A005315 and A085973.
 
@@ -1319,9 +1326,9 @@ def A077054(n: int, f: Literal['A005316', 'A005315 and A085973'] | LiteralString
             countTotal = oeisIDfor_n('A077054', n)
     return countTotal
 
-def A077055(n: int, f: Literal['A078592', 'A005316 and A223096'] | LiteralString | None = None) -> int:
+def A077055(n: int, f: Literal['A078592', 'A005316', 'A005316 and A223096'] | LiteralString | None=None) -> int:
     """
-    Compute A077055(n) as a function of A078592 or A005316 and A223096.
+    Compute A077055(n) as a function of A078592 or A005316 or A005316 and A223096.
 
     *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077055
     is "Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.".
@@ -1355,6 +1362,13 @@ def A077055(n: int, f: Literal['A078592', 'A005316 and A223096'] | LiteralString
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A077055', n)
+        case 'A005316':
+            if 2 <= n and n % 2 == 0:
+                countTotal = (A005316(n // 2) + A005316(n)) // 2
+            elif n <= 1:
+                countTotal = 1
+            else:
+                countTotal = oeisIDfor_n('A077055', n)
         case 'A005316 and A223096':
             if 3 <= n and (n + 1) % 2 == 0:
                 countTotal = (A005316(n) + 2 * A223096((n - 1) // 2)) // 4
@@ -1369,7 +1383,7 @@ def A077055(n: int, f: Literal['A078592', 'A005316 and A223096'] | LiteralString
                 countTotal = oeisIDfor_n('A077055', n)
     return countTotal
 
-def A077056(n: int, f: LiteralString | None = None) -> int:
+def A077056(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A077056(n) as a function of n.
 
@@ -1405,7 +1419,7 @@ def A077056(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A077056', n)
     return countTotal
 
-def A077460(n: int, f: Literal['A005315, A005316, and A060206'] | LiteralString | None = None) -> int:
+def A077460(n: int, f: Literal['A005315, A005316, and A060206'] | LiteralString | None=None) -> int:
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206.
 
@@ -1451,7 +1465,7 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206'] | LiteralString 
                 countTotal = oeisIDfor_n('A077460', n)
     return countTotal
 
-def A078591(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
+def A078591(n: int, f: Literal['A005315'] | LiteralString | None=None) -> int:
     """
     Compute A078591(n) as a function of A005315.
 
@@ -1494,7 +1508,7 @@ def A078591(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A078591', n)
     return countTotal
 
-def A078592(n: int, f: Literal['A005316', 'A077055'] | LiteralString | None = None) -> int:
+def A078592(n: int, f: Literal['A005316', 'A077055'] | LiteralString | None=None) -> int:
     """
     Compute A078592(n) as a function of A005316 or A077055.
 
@@ -1534,7 +1548,7 @@ def A078592(n: int, f: Literal['A005316', 'A077055'] | LiteralString | None = No
             countTotal = oeisIDfor_n('A078592', n)
     return countTotal
 
-def A085973(n: int, f: Literal['A005315 and A077054'] | LiteralString | None = None) -> int:
+def A085973(n: int, f: Literal['A005315 and A077054'] | LiteralString | None=None) -> int:
     """
     Compute A085973(n) as a function of A005315 and A077054.
 
@@ -1577,7 +1591,7 @@ def A085973(n: int, f: Literal['A005315 and A077054'] | LiteralString | None = N
                 countTotal = oeisIDfor_n('A085973', n)
     return countTotal
 
-def A208357(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
+def A208357(n: int, f: Literal['A005315'] | LiteralString | None=None) -> int:
     """
     Compute A208357(n) as a function of A005315.
 
@@ -1612,7 +1626,7 @@ def A208357(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
             countTotal = oeisIDfor_n('A208357', n)
     return countTotal
 
-def A217310(n: int, f: Literal['A223093', 'A005316, A217318, and A227167'] | LiteralString | None = None) -> int:
+def A217310(n: int, f: Literal['A223093', 'A005316, A217318, and A227167'] | LiteralString | None=None) -> int:
     """
     Compute A217310(n) as a function of A223093 or A005316, A217318, and A227167.
 
@@ -1649,7 +1663,7 @@ def A217310(n: int, f: Literal['A223093', 'A005316, A217318, and A227167'] | Lit
             countTotal = oeisIDfor_n('A217310', n)
     return countTotal
 
-def A217318(n: int, f: Literal['A223095', 'A005316, A217310, and A227167'] | LiteralString | None = None) -> int:
+def A217318(n: int, f: Literal['A223095', 'A005316, A217310, and A227167'] | LiteralString | None=None) -> int:
     """
     Compute A217318(n) as a function of A223095 or A005316, A217310, and A227167.
 
@@ -1686,7 +1700,7 @@ def A217318(n: int, f: Literal['A223095', 'A005316, A217310, and A227167'] | Lit
             countTotal = oeisIDfor_n('A217318', n)
     return countTotal
 
-def A223093(n: int, f: Literal['A217310', 'A000682 and A005316', 'A223094 and A223095'] | LiteralString | None = None) -> int:
+def A223093(n: int, f: Literal['A217310', 'A000682 and A005316', 'A223094 and A223095'] | LiteralString | None=None) -> int:
     """
     Compute A223093(n) as a function of A217310 or A000682 and A005316 or A223094 and A223095.
 
@@ -1725,7 +1739,7 @@ def A223093(n: int, f: Literal['A217310', 'A000682 and A005316', 'A223094 and A2
             countTotal = oeisIDfor_n('A223093', n)
     return countTotal
 
-def A223094(n: int, f: Literal['A000682', 'A223093 and A223095'] | LiteralString | None = None) -> int:
+def A223094(n: int, f: Literal['A000682', 'A223093 and A223095'] | LiteralString | None=None) -> int:
     """
     Compute A223094(n) as a function of A000682 or A223093 and A223095.
 
@@ -1762,7 +1776,7 @@ def A223094(n: int, f: Literal['A000682', 'A223093 and A223095'] | LiteralString
             countTotal = oeisIDfor_n('A223094', n)
     return countTotal
 
-def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString | None = None) -> int:
+def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString | None=None) -> int:
     """
     Compute A223095(n) as a function of A217318 or A223093 and A223094.
 
@@ -1799,7 +1813,7 @@ def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString
             countTotal = oeisIDfor_n('A223095', n)
     return countTotal
 
-def A223096(n: int, f: Literal['A005316 and A077055'] | LiteralString | None = None) -> int:
+def A223096(n: int, f: Literal['A005316 and A077055'] | LiteralString | None=None) -> int:
     """
     Compute A223096(n) as a function of A005316 and A077055.
 
@@ -1837,7 +1851,7 @@ def A223096(n: int, f: Literal['A005316 and A077055'] | LiteralString | None = N
             countTotal = oeisIDfor_n('A223096', n)
     return countTotal
 
-def A227167(n: int, f: Literal['A000682', 'A005316, A217310, and A217318'] | LiteralString | None = None) -> int:
+def A227167(n: int, f: Literal['A000682', 'A005316, A217310, and A217318'] | LiteralString | None=None) -> int:
     """
     Compute A227167(n) as a function of A000682 or A005316, A217310, and A217318.
 
@@ -1874,7 +1888,7 @@ def A227167(n: int, f: Literal['A000682', 'A005316, A217310, and A217318'] | Lit
             countTotal = oeisIDfor_n('A227167', n)
     return countTotal
 
-def A259702(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None = None) -> int:
+def A259702(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None=None) -> int:
     """
     Compute A259702(n) as a function of A000682 or A301620.
 
@@ -1924,7 +1938,7 @@ def A259702(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None = No
                 countTotal = oeisIDfor_n('A259702', n)
     return countTotal
 
-def A301620(n: int, f: Literal['A000682', 'A301620 and A334615', 'A259702'] | LiteralString | None = None) -> int:
+def A301620(n: int, f: Literal['A000682', 'A301620 and A334615', 'A259702'] | LiteralString | None=None) -> int:
     """
     Compute A301620(n) as a function of A000682 or A301620 and A334615 or A259702.
 
@@ -1966,7 +1980,7 @@ def A301620(n: int, f: Literal['A000682', 'A301620 and A334615', 'A259702'] | Li
             countTotal = oeisIDfor_n('A301620', n)
     return countTotal
 
-def A322507(n: int, f: LiteralString | None = None) -> int:
+def A322507(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A322507(n) as a function of n.
 
@@ -2002,7 +2016,7 @@ def A322507(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A322507', n)
     return countTotal
 
-def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
+def A333971(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A333971(n) as a function of A000682.
 
@@ -2045,7 +2059,7 @@ def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A333971', n)
     return countTotal
 
-def A334615(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None = None) -> int:
+def A334615(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None=None) -> int:
     """
     Compute A334615(n) as a function of A000682 or A301620.
 
@@ -2095,7 +2109,7 @@ def A334615(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None = No
                 countTotal = oeisIDfor_n('A334615', n)
     return countTotal
 
-def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
+def A337581(n: int, f: Literal['A000682'] | LiteralString | None=None) -> int:
     """
     Compute A337581(n) as a function of A000682.
 
@@ -2138,7 +2152,7 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A337581', n)
     return countTotal
 
-def A400630(n: int, f: Literal['A400630'] | LiteralString | None = None) -> int:
+def A400630(n: int, f: Literal['A400630'] | LiteralString | None=None) -> int:
     """
     Compute A400630(n) as a function of A400630.
 
@@ -2181,7 +2195,7 @@ def A400630(n: int, f: Literal['A400630'] | LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A400630', n)
     return countTotal
 
-def A400631(n: int, f: LiteralString | None = None) -> int:
+def A400631(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A400631(n) as a function of n.
 
@@ -2217,7 +2231,7 @@ def A400631(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A400631', n)
     return countTotal
 
-def A400632(n: int, f: LiteralString | None = None) -> int:
+def A400632(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A400632(n) as a function of n.
 
@@ -2253,7 +2267,7 @@ def A400632(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A400632', n)
     return countTotal
 
-def A400633(n: int, f: LiteralString | None = None) -> int:
+def A400633(n: int, f: LiteralString | None=None) -> int:
     """
     Compute A400633(n) as a function of n.
 
@@ -2289,7 +2303,7 @@ def A400633(n: int, f: LiteralString | None = None) -> int:
                 countTotal = oeisIDfor_n('A400633', n)
     return countTotal
 
-def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693', 'A000108 and A401693', 'A014137, A401693, and A401694'] | LiteralString | None = None) -> int:
+def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693', 'A000108 and A401693', 'A014137, A401693, and A401694'] | LiteralString | None=None) -> int:
     """
     Compute A401693(n) as a function of A014140 or A000108, A014137, and A401693 or A000108 and A401693 or A014137, A401693, and A401694.
 
@@ -2362,7 +2376,7 @@ def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693', 'A000
             countTotal = oeisIDfor_n('A401693', n)
     return countTotal
 
-def A401694(n: int, f: Literal['A014140', 'A014137 and A401693'] | LiteralString | None = None) -> int:
+def A401694(n: int, f: Literal['A014140', 'A014137 and A401693'] | LiteralString | None=None) -> int:
     """
     Compute A401694(n) as a function of A014140 or A014137 and A401693.
 

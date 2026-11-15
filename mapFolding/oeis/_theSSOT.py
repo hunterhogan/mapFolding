@@ -45,6 +45,16 @@ class PackageSettingsOEIS(PackageSettings):
 	lookupSymbolic: dict[OEISid, type[AppliedUndef]] = dataclasses.field(init=False)
 	lookupID: dict[type[AppliedUndef], OEISid] = dataclasses.field(init=False)
 
+	# Counting indices stay small even when a relation multiplies the test index.
+	testCountLimit: int = 7
+	# Symbolic fallbacks can chain through counting sequences; sample their first few terms.
+	testDeriveLimit: int = 4
+	# Include adjacent indices for parity, initial values, and applicability boundaries.
+	testIndexSpan: int = 8
+	# Bound repeated generated calls and finite sums before evaluating their dependencies.
+	testCallLimit: int = 256
+	testSumLimit: int = 32
+
 	def __post_init__(self, identifierPackageFALLBACK: str) -> None:
 		super().__post_init__(identifierPackageFALLBACK)
 		if self.pathClone == Path():

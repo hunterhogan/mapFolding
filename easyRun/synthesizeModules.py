@@ -6,6 +6,7 @@ from mapFolding.kitAST.mapFoldingSymmetric.makeModules import makeModulesFoldsSy
 from mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous import makeModulesFoldsSymmetricAsynchronous
 from mapFolding.kitAST.matrixMeanders.makeModules import makeModulesMeanders
 from mapFolding.kitAST.oeisIDByFormula import makeOEISidByFormula
+from mapFolding.kitAST.oeisTests import makeTestsByFormula
 from mapFolding.oeis._oeisdataClone import updateSnapshot
 
 updateSnapshot()
@@ -15,3 +16,4 @@ makeModulesFoldsSymmetricAsynchronous()
 makeModulesMeanders()
 
 makeOEISidByFormula()
+makeTestsByFormula()

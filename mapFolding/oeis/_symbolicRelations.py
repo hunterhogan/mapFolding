@@ -111,6 +111,7 @@ boxOfRelationsMeanders: tuple[形Relation, ...] = (
 	, (Eq(2 * A078591(n), A005315(n)), Range(2, oo))
 	, (Eq(2 * A078592(n), A005316(2 * n) + A005316(n)), Range(0, oo))
 	, (Eq(A077055(2 * n), A078592(n)), Range(1, oo))
+	, (Eq(2 * A077055(2 * n), A005316(2 * n) + A005316(n)), Range(1, oo))
 	, (Eq(4 * A077055(2 * n + 1), A005316(2 * n + 1) + 2 * A223096(n)), Range(1, oo))
 	, (Eq(A077055(n), 1), Range(1, 2))
 	, (Eq(A208357(n), A005315(n + 1) ** 2), Range(1, oo))

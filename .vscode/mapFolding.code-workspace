@@ -5,9 +5,6 @@
 		}
 	],
 	"settings": {
-		"workbench.editorAssociations": {
-			"*.copilotmd": "vscode.markdown.preview.editor",
-		},
 		"python.testing.pytestArgs": [
 			"mapFolding"
 		],
