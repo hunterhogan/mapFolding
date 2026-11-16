@@ -11,8 +11,8 @@ from mapFolding.oeis._theSSOT import settingsOEIS
 from mapFolding.theTypes import OEISid
 from operator import attrgetter, is_not, itemgetter, methodcaller
 from sympy import (
-	And, Basic, ceiling, Dummy, Eq, Equality, Expr, FiniteSet, floor, fraction, Ge, Integer, Le, Mod, Piecewise, piecewise_fold, S, solve,
-	solveset, Sum, sympify, together, true, Tuple)
+	And, Basic, ceiling, Dummy, Eq, Equality, Expr, FiniteSet, floor, fraction, Ge, Integer, Le, Mod, Piecewise, piecewise_fold, Poly, roots,
+	S, solveset, Sum, sympify, together, true, Tuple)
 from sympy.core.function import AppliedUndef
 from sympy.utilities.misc import as_int
 from tqdm.auto import tqdm
@@ -85,7 +85,13 @@ def makeEquationFlat(equation: Boolean) -> Boolean:
 	return equation.xreplace(dict(zip(boxOfCalls, map(getFlatCall, boxOfCalls), strict=True)))
 
 def solve_n(wanted: AppliedUndef, domain: Range, expression: AppliedUndef) -> list[Expr]:
-	return list(filter(domain.__contains__, solve(Eq(expression.args[0], wanted.args[0]), n)))
+	boxOf_n: list[Expr] = []
+	match expression.args[0], wanted.args[0]:
+		case (Expr() as index, Expr() as indexWanted):
+			boxOf_n = list(filter(domain.__contains__, roots(Poly(index - indexWanted, n))))
+		case _:
+			pass
+	return boxOf_n
 
 @cache
 def bindRelation(wanted: AppliedUndef, relation: 形Relation) -> tuple[Boolean, ...]:
@@ -123,7 +129,7 @@ def solveRelation(wanted: AppliedUndef, DeadOrAlive: Boolean) -> Expr | None:
 	if equationKnown.atoms(AppliedUndef) == {wanted}:
 		boxOfValues: Set = solveset(equationKnown, wanted, domain=settingsOEIS.domain)
 		if isinstance(boxOfValues, FiniteSet) and len(boxOfValues) == 1:
-			boxOfFormulas: list[Expr] = solve(DeadOrAlive, wanted)
+			boxOfFormulas: list[Expr] = list(roots(Poly(DeadOrAlive, wanted)))
 			boxOfFormulasKnown: Iterator[Basic] = map(flip(Basic.xreplace, lookupKnown), boxOfFormulas)
 			formula = next(compress(boxOfFormulas, map(boxOfValues.__contains__, boxOfFormulasKnown)), None)
 	return formula
@@ -261,7 +267,7 @@ def solveDifference(wanted: Expr, difference: Expr) -> Expr:
 	if coefficient != 0 and not coefficient.has(wanted):
 		solution: Expr = -difference.xreplace({wanted: S.Zero}) / coefficient
 	else:
-		(solution,) = filter(attrgetter('is_nonnegative'), solve(difference, wanted))
+		(solution,) = filter(attrgetter('is_nonnegative'), roots(Poly(difference, wanted)))
 	return solution
 
 def solveRelationSymbolic(relation: tuple[Expr, Range], oeisID: OEISid) -> tuple[OEISid, Expr, Boolean]:

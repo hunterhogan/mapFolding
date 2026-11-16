@@ -8,17 +8,20 @@ from mapFolding.oeis import getMetadata, updateValuesKnown
 from mapFolding.oeis._symbolic import getMissingFormulas
 from operator import itemgetter
 from types import ModuleType
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+	from mapFolding.kitAST import IngredientsFunction
 
 if __name__ == '__main__':
 	keepGoing: bool = True
 	while keepGoing:
 		keepGoing = False
 		for oeisID, n, expression in sorted(getMissingFormulas(), key=itemgetter(1)):
-			if n != getMetadata(oeisID)['valueUnknown']:
-				continue
-			ingredientsFunction = makeSymbolicFormula(oeisID, expression)
-			module = ModuleType(oeisID)
-			exec(compile(fix_missing_locations(Make.Module(IngredientsModule(ingredientsFunction).body)), __file__, 'exec'), module.__dict__)  # ruff: ignore[exec-builtin]
-			countTotal: int = getattr(module, oeisID)()
-			updateValuesKnown(oeisID, {n: countTotal})
-			keepGoing = True
+			if n == getMetadata(oeisID)['valueUnknown']:
+				ingredientsFunction: IngredientsFunction = makeSymbolicFormula(oeisID, expression)
+				module = ModuleType(oeisID)
+				exec(compile(fix_missing_locations(Make.Module(IngredientsModule(ingredientsFunction).body)), __file__, 'exec'), module.__dict__)  # ruff: ignore[exec-builtin]
+				countTotal: int = getattr(module, oeisID)()
+				updateValuesKnown(oeisID, {n: countTotal})
+				keepGoing = True

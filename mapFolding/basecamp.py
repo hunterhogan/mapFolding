@@ -545,8 +545,7 @@ def enumerateSequences(
 	-------
 	album : list[Folding] | int
 		List of leaf-label tuples in generation order for the permutation algorithm, or an integer
-		count for either bilateral algorithm. Each tuple lists leaf labels by pile position. For
-		`'meanders symmetric'`, each tuple has one more leaf than `n`.
+		count for either bilateral algorithm. Each tuple lists leaf labels by pile position.
 
 	Output Files
 	------------

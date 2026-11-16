@@ -5,8 +5,7 @@ come from the targets' docstrings unless a comment names another basis.
 """
 from __future__ import annotations
 
-from functools import partial
-from itertools import chain, product as CartesianProduct, starmap
+from itertools import chain, product as CartesianProduct
 from mapFolding.kitFilesystem import readText
 from mapFolding.oeis import (
 	getMetadata, getOEISids, getTotalFoldsKnown, getTriangle, getTriangleDiagonal, OEIS_for_n, oeisIDfor_n, updateTriangle, updateValuesKnown)
@@ -24,8 +23,6 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid, 形Triangle
 	from typing import LiteralString
 
-markMeandersSymmetric: pytest.MarkDecorator = pytest.mark.skip(reason='A077055 offset repair is pending.')
-
 # Each sequence meets its offset and n = 3.
 @pytest.mark.parametrize('oeisID, n, f', tuple(chain(
 	CartesianProduct(('A000136',), (1, 3), ('A000560', 'A001011 and A001010', 'A223094 and A000682', 'A223095, A077014, and A000682', 'A227167', 'A000682'))
@@ -38,16 +35,13 @@ markMeandersSymmetric: pytest.MarkDecorator = pytest.mark.skip(reason='A077055 o
 	, CartesianProduct(('A005315',), (0, 3), ('A077460, A005316, and A060206', 'A078591', 'A085973 and A077054', 'A208357', 'A005316'))
 	, CartesianProduct(('A005316',), (0, 3), ('A077014', 'A077054 and A005315', 'A077460, A005315, and A060206', 'A078592 and A005315'
 		, 'A227167, A217310, and A217318', 'A000682 and A223093'))
-	, starmap(partial(pytest.param, marks=markMeandersSymmetric)
-		, CartesianProduct(('A005316',), range(2, 47, 2), ('A005316 and A077055',)))
+	, CartesianProduct(('A005316',), range(2, 47, 2), ('A005316 and A077055',))
 	, CartesianProduct(('A007822',), (1, 3), ('A001010',))
 	, CartesianProduct(('A060206',), (0, 3), ('A077460, A005315, and A005316', 'A000682'))
 	, CartesianProduct(('A077014',), (0, 3), ('A000682 and A223093', 'A223095 and A000682', 'A005316'))
 	, CartesianProduct(('A077054',), (0, 3), ('A085973 and A005315', 'A005316'))
-	, starmap(partial(pytest.param, marks=markMeandersSymmetric)
-		, CartesianProduct(('A077055',), (1, 2, 3, 4, 7, 42, 43, 44, 45, 46), ('A078592', 'A005316', 'A005316 and A223096', None)))
-	, starmap(partial(pytest.param, marks=markMeandersSymmetric)
-		, CartesianProduct(('A223096',), (0, 1, 3, 7), ('A005316 and A077055',)))
+	, CartesianProduct(('A077055',), (1, 2, 3, 4, 7, 42, 43, 44, 45, 46), ('A078592', 'A005316', 'A005316 and A223096', None))
+	, CartesianProduct(('A223096',), (0, 1, 3, 7), ('A005316 and A077055',))
 	, CartesianProduct(('A223096',), (0, 1, 3, 7), (None,))
 	, CartesianProduct(('A077460',), (0, 3), ('A005315, A005316, and A060206', 'A000682 and A005316'))
 	, CartesianProduct(('A078591',), (0, 3), ('A005316', 'A005315'))
@@ -104,7 +98,7 @@ def test_oeisIDfor_nFlow(oeisID: OEISid, n: int, flow: LiteralString, expected: 
 	, pytest.param('A000136', 'NE', ValueError, id='stringNE')
 	, pytest.param('A000136', 1.5, ValueError, id='fraction')
 	, pytest.param('A001418', 0, ArithmeticError, id='belowOffset')
-	, pytest.param('A077055', 0, ArithmeticError, marks=markMeandersSymmetric, id='A077055BelowOffset')
+	, pytest.param('A077055', 0, ArithmeticError, id='A077055BelowOffset')
 	, pytest.param('A999999', 3, KeyError, id='unregistered')
 	, pytest.param('A343358', 4, ValueError, id='noFormula')
 ))
@@ -135,7 +129,7 @@ def test_getTotalFoldsKnown(mapShape: tuple[int, ...], expected: int | None) -> 
 	'A000108', 'A000136', 'A000560', 'A000682', 'A001010', 'A001011', 'A001246', 'A001263', 'A001405', 'A001415', 'A001416', 'A001417', 'A001418'
 	, 'A002057', 'A002415', 'A002694', 'A005315', 'A005316', 'A006657', 'A006658', 'A006659', 'A006660', 'A006661', 'A006662', 'A007746', 'A007822', 'A008828'
 	, 'A014137', 'A014140', 'A045445', 'A053121', 'A060206', 'A060972', 'A076876', 'A077014', 'A077054'
-	, pytest.param('A077055', marks=markMeandersSymmetric), 'A077056', 'A077460'
+	, 'A077055', 'A077056', 'A077460'
 	, 'A078591', 'A078592', 'A085973', 'A195646', 'A204352', 'A208357', 'A217310', 'A217318', 'A223093', 'A223094', 'A223095', 'A223096', 'A227167'
 	, 'A259689', 'A259698', 'A259700', 'A259701', 'A259702', 'A259703', 'A259974', 'A260785', 'A287548', 'A301620', 'A322507', 'A331499'
 	, 'A333971', 'A334615', 'A337581', 'A339179', 'A380367', 'A380369', 'A400429', 'A400630', 'A400631', 'A400632', 'A400633', 'A400634'

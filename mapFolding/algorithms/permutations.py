@@ -531,8 +531,8 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 	Sequence Indexing
 	-----------------
 	The enumeration core follows the permutation construction of Sawada and Li [1]. For `'semi'`,
-	the core uses one fewer leaf than `n`; saving adds the fixed first leaf. For
-	`'meanders symmetric'`, the core uses one more leaf than `n`. Other families use `n` directly.
+	the core uses one fewer leaf than `n`; saving adds the fixed first leaf. All other families
+	use `n` directly.
 	The blank stamp-folding and symmetric open-meander choices retain equivalence-class
 	representatives [1].
 
@@ -549,8 +549,7 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 	-------
 	album : list[Folding]
 		Generated permutations in enumeration order. Each tuple lists leaf labels by pile position.
-		Each tuple contains `n` leaves, except `'meanders symmetric'`, which contains one additional
-		leaf. The list retains every generated representative in memory.
+		Each tuple contains `n` leaves. The list retains every generated representative in memory.
 
 	See Also
 	--------
@@ -578,7 +577,7 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 		semiMeanders=kind == 'semi',
 		symmetricSemiMeanders=kind == 'semi-meanders symmetric',
 	)
-	nNormalized: int = n - mode.semiMeanders + (kind == 'meanders symmetric')
+	nNormalized: int = n - mode.semiMeanders
 	state: StateStampMeander = StateStampMeander(nNormalized)
 	if nNormalized == 0:
 		savePermutation(state, mode)
