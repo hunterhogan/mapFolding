@@ -273,6 +273,8 @@ def test_enumerateSequencesWriteCount(pathRootJobDEFAULT: Path, n: int, kind: Li
 @pytest.mark.parametrize('n, kind, flow, pathFilename, CPUlimit, expected', (
 	pytest.param(6, 'unknown', 'permutations', None, None, KeyError, id='kindUnknown-permutations')
 	, pytest.param(4, '', 'permutations', None, None, KeyError, id='kindEmpty-permutations')
+	, pytest.param(0, 'meanders symmetric', 'permutations', None, None, ArithmeticError, id='0-meandersSymmetric')
+	, pytest.param(1, 'semi-meanders symmetric', 'permutations', None, None, ArithmeticError, id='1-semiMeandersSymmetric')
 	, pytest.param(4, 'semi', 'permutations', contentsAlbumSemi4, None, FileExistsError, id='albumExists-permutations')
 	, pytest.param(4, 'semi', 'bilateral', contentsAlbumSemi4, None, FileExistsError, id='albumExists-bilateral')
 	, pytest.param(4, 'semi', 'bilateralConcurrent', contentsAlbumSemi4, 2, FileExistsError, id='albumExists-bilateralConcurrent')

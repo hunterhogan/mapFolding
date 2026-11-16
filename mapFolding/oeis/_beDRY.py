@@ -94,7 +94,7 @@ def parseOffset(lookupField: Mapping[str, Sequence[str]]) -> int:
 def makeValuesKnown(lookupField: Mapping[str, Sequence[str]]) -> dict[int, int]:
 	return dict(enumerate(map(int, ''.join(chain.from_iterable(map(lookupField.get, ('%S', '%T', '%U'), repeat(())))).split(',')), parseOffset(lookupField)))
 
-def formatOEISid(oeisID: OEISid) -> OEISid:
+def formatOEISid(oeisID: str) -> OEISid:
 	"""Uppercase an OEIS sequence identifier and strip surrounding whitespace.
 
 	(AI generated docstring)
@@ -105,7 +105,7 @@ def formatOEISid(oeisID: OEISid) -> OEISid:
 
 	Parameters
 	----------
-	oeisID : OEISid
+	oeisID : str
 		The OEIS sequence identifier to standardize.
 
 	Returns
@@ -115,3 +115,6 @@ def formatOEISid(oeisID: OEISid) -> OEISid:
 
 	"""
 	return ILiterallyPromiseLiteralLiterallyMeansLiteral("LiteralString", str(oeisID).upper().strip())
+
+def formatOEISname(name: str) -> str:
+	return ''.join(filter(str.isalnum, formatOEISid(name)))

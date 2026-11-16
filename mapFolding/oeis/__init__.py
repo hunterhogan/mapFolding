@@ -40,6 +40,8 @@ Functions
 		Add triangle rows to a local b-file.
 	updateValuesKnown
 		Add missing terms to a local b-file and refresh shared known values.
+	Z0Z_oeisName
+		Look up the OEIS ID of an OEIS ID or common name, ignoring case, whitespace, and punctuation.
 
 Variables
 	settingsOEIS
@@ -58,7 +60,7 @@ from mapFolding.oeis._theSSOT import settingsOEIS as settingsOEIS
 # isort: split
 from mapFolding.oeis._metadata import (
 	getMetadata as getMetadata, getTriangle as getTriangle, getTriangleDiagonal as getTriangleDiagonal, getValuesKnown as getValuesKnown,
-	updateTriangle as updateTriangle, updateValuesKnown as updateValuesKnown)
+	updateTriangle as updateTriangle, updateValuesKnown as updateValuesKnown, Z0Z_oeisName as Z0Z_oeisName)
 
 # isort: split
 from mapFolding.oeis.__main__ import (

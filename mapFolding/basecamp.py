@@ -1,5 +1,4 @@
-#=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
-#ruff: file-ignore[import-outside-top-level]
+#ruff: file-ignore[import-outside-top-level] #=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
 """Select and run map-folding, stamp-folding, and meander algorithms.
 
 (AI generated docstring)
@@ -35,19 +34,19 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import Folding
+	from mapFolding.theTypes import Folding, OEISid
 	from os import PathLike
 	from pathlib import Path
 	from typing import Literal, LiteralString
 
 def countFolds(mapShape: Sequence[int]
-				, flow: Literal['pNxN', 'daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
-				, pathLikeWrite: PathLike[str] | None = None
-				, *
-				, CPUlimit: ConcurrencyLimit = None
-				, computationDivisions: int | str | None = None
-				, suffix: str = ".totalFolds"
-				) -> int:
+	, flow: Literal['pNxN', 'daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
+	, pathLikeWrite: PathLike[str] | None = None
+	, *
+	, CPUlimit: ConcurrencyLimit = None
+	, computationDivisions: int | str | None = None
+	, suffix: str = ".totalFolds"
+) -> int:
 	"""Count distinct foldings of the map described by `mapShape`.
 
 	You can use this function to count ways of folding a map or stamp strip. This function normalizes
@@ -121,7 +120,7 @@ def countFolds(mapShape: Sequence[int]
 	"""
 	mapShape = validateMapShape(mapShape)
 
-#-------- task division instructions -----------------------------------------------------
+	#================== task division instructions ================================================
 
 	if computationDivisions:
 		concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
@@ -130,14 +129,14 @@ def countFolds(mapShape: Sequence[int]
 		concurrencyLimit = 1
 		taskDivisions = 0
 
-#-------- memorialization instructions ---------------------------------------------
+	#================== memorialization instructions ==============================================
 
 	if pathLikeWrite is None:
 		pathFilenameTotalFolds: Path | None = None
 	else:
 		pathFilenameTotalFolds = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
 
-#-------- Algorithm version -----------------------------------------------------
+	#================== Algorithm version =========================================================
 
 	if 0 in mapShape:
 		""" I don't think 0 is a valid number of panels in a dimension. I think some offset values on OEIS are wrong.
@@ -186,7 +185,7 @@ def countFolds(mapShape: Sequence[int]
 		mapFoldingState = doTheNeedful(mapFoldingState)
 		totalFolds = mapFoldingState.totalFolds
 
-#-------- Follow memorialization instructions ---------------------------------------------
+	#================== Follow memorialization instructions =======================================
 
 	if pathFilenameTotalFolds is not None:
 		saveTotal(pathFilenameTotalFolds, totalFolds)
@@ -244,14 +243,14 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	"""
 	mapShape = validateMapShape(mapShape)
 
-#-------- memorialization instructions ---------------------------------------------
+	#================== memorialization instructions ==============================================
 
 	if pathLikeWrite is None:
 		pathFilenameTotalFolds: Path | None = None
 	else:
 		pathFilenameTotalFolds = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
 
-#-------- Algorithm version -----------------------------------------------------
+	#================== Algorithm version -------------------------------------------------
 
 	if flow == 'asynchronous':
 		from mapFolding.synthesized.mapFoldingSymmetric.asynchronous import doTheNeedful
@@ -274,7 +273,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 		symmetricState = doTheNeedful(symmetricState)
 		totalFolds = symmetricState.symmetricFolds
 
-#-------- Follow memorialization instructions ---------------------------------------------
+	#================== Follow memorialization instructions =======================================
 
 	if pathFilenameTotalFolds is not None:
 		saveTotal(pathFilenameTotalFolds, totalFolds)
@@ -347,7 +346,7 @@ def countMeanders(
 		```
 
 	"""
-#-------- memorialization instructions ---------------------------------------------
+	#================== memorialization instructions ==============================================
 
 	if state is not None:
 		kind = state.kind
@@ -366,7 +365,7 @@ def countMeanders(
 	else:
 		pathFilenameCountTotal = saveTotalFAILearly(makePathFilenameCount(pathLikeWrite, kind, str(n), suffix=suffix))
 
-#-------- Algorithm selection and execution ---------------------------------------------
+	#================== Algorithm selection and execution =========================================
 
 	if kind != 'semi' or n != 1:
 		match flow:
@@ -386,7 +385,7 @@ def countMeanders(
 		state = doTheNeedful(state)
 	countTotal: int = state.totalMeanders
 
-#-------- Follow memorialization instructions ---------------------------------------------
+	#================== Follow memorialization instructions =======================================
 
 	if pathFilenameCountTotal is not None:
 		saveTotal(pathFilenameCountTotal, countTotal)
@@ -466,7 +465,7 @@ def eliminateFolds(
 
 	concurrencyLimit: int = defineProcessorLimit(CPUlimit, settingsPackage.concurrencyPackage)
 
-	#-------- Memorialization instructions ---------------------------------------------
+	#================== memorialization instructions ==============================================
 
 	if pathLikeWrite is None:
 		pathFilenameTotalFolds: Path | None = None
@@ -474,7 +473,7 @@ def eliminateFolds(
 		pathFilenameTotalFolds = makePathFilenameFolds(state.mapShape, pathLikeWrite, suffix=suffix)
 		saveTotalFAILearly(pathFilenameTotalFolds)
 
-	#-------- Algorithm version -----------------------------------------------------
+	#================== Algorithm version =========================================================
 
 	if 0 in state.mapShape:
 		totalFolds: int = 1
@@ -493,7 +492,7 @@ def eliminateFolds(
 
 		totalFolds = doTheNeedful(state, concurrencyLimit).totalFolds
 
-	#-------- Follow memorialization instructions ---------------------------------------------
+	#================== Follow memorialization instructions =======================================
 
 	if pathFilenameTotalFolds is not None:
 		saveTotal(pathFilenameTotalFolds, totalFolds)
@@ -517,6 +516,16 @@ def enumerateSequences(
 	semi-meanders without retaining the permutations. The permutation algorithm returns a list.
 	Either bilateral algorithm returns an integer count. Providing `pathLikeWrite` also saves
 	the list or count to a new file.
+
+	Output Files
+	------------
+	Path resolution creates missing parent directories. Before computation,
+	`mapFolding.kitFilesystem.saveTotalFAILearly` rejects an existing output file with
+	`FileExistsError`, then writes and reads a test integer for a new file. The test integer
+	remains in the output file if subsequent computation fails. Successful permutation
+	enumeration replaces the test integer with one comma-separated record per folding through
+	`mapFolding.kitFilesystem.writeAlbum`. Bilateral counting writes the integer count through
+	`mapFolding.kitFilesystem.saveTotal`, even when the filename ends in `'.album'`.
 
 	Parameters
 	----------
@@ -547,15 +556,10 @@ def enumerateSequences(
 		List of leaf-label tuples in generation order for the permutation algorithm, or an integer
 		count for either bilateral algorithm. Each tuple lists leaf labels by pile position.
 
-	Output Files
-	------------
-	Path resolution creates missing parent directories. Before computation,
-	`mapFolding.kitFilesystem.saveTotalFAILearly` rejects an existing output file with
-	`FileExistsError`, then writes and reads a test integer for a new file. The test integer
-	remains in the output file if subsequent computation fails. Successful permutation
-	enumeration replaces the test integer with one comma-separated record per folding through
-	`mapFolding.kitFilesystem.writeAlbum`. Bilateral counting writes the integer count through
-	`mapFolding.kitFilesystem.saveTotal`, even when the filename ends in `'.album'`.
+	Raises
+	------
+	ArithmeticError
+		If `n` is below the sequence family's OEIS offset.
 
 	Examples
 	--------
@@ -568,24 +572,25 @@ def enumerateSequences(
 		```
 
 	"""
-	lookupParameterKind: dict[LiteralString | str | None, LiteralString | None] = {'a000136': 'stamps', 'A000136': 'stamps'
-		, 'a000560': 'semi-meanders symmetric', 'A000560': 'semi-meanders symmetric', 'a000682': 'semi', 'A000682': 'semi'
-		, 'a001011': 'stamps blank', 'A001011': 'stamps blank', 'a005316': 'meanders', 'A005316': 'meanders'
-		, 'a077055': 'meanders symmetric', 'A077055': 'meanders symmetric', 'meanders symmetric': 'meanders symmetric'
-		, 'meanders': 'meanders', 'semi-meanders symmetric': 'semi-meanders symmetric', 'semi-meanders': 'semi', 'semi': 'semi'
-		, 'semimeanders symmetric': 'semi-meanders symmetric', 'semimeanders': 'semi', 'stamps blank': 'stamps blank', 'stamps': 'stamps'
-		, None: None}
-	kind = lookupParameterKind[kind]
-	kind = kind or 'semi'
+	from mapFolding.oeis import getMetadata, Z0Z_oeisName
 
-#-------- memorialization instructions ---------------------------------------------
+	if kind is None:
+		kind = 'semi'
+	oeisID: OEISid = Z0Z_oeisName(kind)
+	(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric', 'stamps', 'stamps blank'})
+	offset: int = getMetadata(oeisID)['offset']
+	if n < offset:
+		message: str = f"I received `{n = }`, but `{kind = }` is not defined for values below `{offset = }`."
+		raise ArithmeticError(message)
+
+	#================== memorialization instructions ==============================================
 
 	if pathLikeWrite is None:
 		pathFilenameAlbum: Path | None = None
 	else:
 		pathFilenameAlbum = saveTotalFAILearly(makePathFilenameCount(pathLikeWrite, kind, str(n), suffix=suffix))
 
-#-------- Algorithm selection and execution ---------------------------------------------
+	#================== Algorithm selection and execution =========================================
 
 	if flow in {'bilateral', 'bilateralConcurrent'}:
 		n = {'semi': n - 1, 'semi-meanders symmetric': n}[kind]
@@ -607,7 +612,7 @@ def enumerateSequences(
 
 	album: list[Folding] = doTheNeedful(n, kind)
 
-#-------- Follow memorialization instructions ---------------------------------------------
+	#================== Follow memorialization instructions =======================================
 
 	if pathFilenameAlbum is not None:
 		writeAlbum(album, pathFilenameAlbum)

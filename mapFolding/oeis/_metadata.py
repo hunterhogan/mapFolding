@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 from functools import cache, partial
-from humpy_cytoolz import compose_left, dissoc, get_in
+from humpy_cytoolz import compose_left, cons, dissoc, get_in, merge
 from hunterMakesPy import errorL33T
 from itertools import count, filterfalse, takewhile
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
 from mapFolding.kitFilesystem import readText, writeText
-from mapFolding.oeis._beDRY import format_bFile, formatOEISid, makeValuesKnown, parse_bFile, parseEntry, parseOffset
+from mapFolding.oeis._beDRY import format_bFile, formatOEISid, formatOEISname, makeValuesKnown, parse_bFile, parseEntry, parseOffset
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
 from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
 from mapFolding.oeis._theSSOT import settingsOEIS
@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 	from collections.abc import Mapping
 	from mapFolding.theTypes import OEISid, 形Triangle
 	from pathlib import Path
+	from typing import LiteralString
 
 #================== Sausage =======================================================================
 
@@ -256,7 +257,30 @@ def updateTriangle(oeisID: OEISid, triangle: 形Triangle, pathTerms: Path = sett
 	metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
 	return updateValuesKnown(oeisID, flattenTriangle(triangle, metadata['rowLength'], metadata['rowStart'], metadata['offset']), pathTerms)
 
+def Z0Z_oeisName(name: str) -> OEISid:
+	return lookupOEISid[formatOEISname(name)]
+
 #================== Meat grinders =================================================================
+
+lookupCommonNames: dict[OEISid, tuple[LiteralString, ...]] = {
+	'A000105': ('free polyominoes',),
+	'A000108': ('Catalan numbers', 'Catalan'),
+	'A000136': ('stamps',),
+	'A000560': ('semi-meanders symmetric', 'symmetric semi-meanders'),
+	'A000682': ('semi', 'semi-meanders'),
+	'A001011': ('stamps blank', 'blank stamps'),
+	'A001168': ('fixed polyominoes',),
+	'A001263': ('Narayana numbers', 'Narayana triangle'),
+	'A001411': ('self-avoiding walks',),
+	'A002415': ('4-dimensional pyramidal numbers',),
+	'A002931': ('self-avoiding polygons',),
+	'A004148': ('generalized Catalan numbers',),
+	'A005315': ('closed meanders', 'closed meandric numbers'),
+	'A005316': ('meanders', 'meandric numbers', 'open meanders'),
+	'A006663': ('projective meanders',),
+	'A077055': ('meanders symmetric', 'symmetric meanders'),
+	'A227167': ('meandering curves',),
+}
 
 def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
 	lookupField: dict[str, list[str]] = parseEntry(readText(makePathFilenameEntry(oeisID, settingsOEIS.pathSnapshot)))
@@ -268,7 +292,7 @@ def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
 	contents = readText(makePathFilename_bFile(oeisID, settingsOEIS.pathTerms), default='')
 	if contents:
 		valuesKnown.update(dissoc(parse_bFile(contents), *valuesKnown))
-	return MetadataOEISid(description=' '.join(lookupField['%N']), offset=parseOffset(lookupField), valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
+	return MetadataOEISid(boxOfCommonNames=lookupCommonNames.get(oeisID, ()), description=' '.join(lookupField['%N']), offset=parseOffset(lookupField), valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 
 boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(settingsOEIS.boxOfIDs, settingsOEIS.pathSnapshot)
 """Implemented OEIS IDs without an entry in `settingsOEIS.pathSnapshot`."""
@@ -307,3 +331,9 @@ dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 }
 """Metadata, including the row layout, for every implemented triangle."""
 dictionaryOEIS.update(dictionaryTriangle)
+
+def _makeLookupOEISid(oeisID: OEISid) -> dict[str, OEISid]:
+	return dict.fromkeys(map(formatOEISname, cons(oeisID, dictionaryOEIS[oeisID]['boxOfCommonNames'])), oeisID)
+
+lookupOEISid: dict[str, OEISid] = merge(map(_makeLookupOEISid, dictionaryOEIS))
+"""Every OEIS ID and common name, formatted by `formatOEISname`, mapped to its OEIS ID."""

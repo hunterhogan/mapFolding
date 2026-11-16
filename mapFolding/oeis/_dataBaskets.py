@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
+	from typing import LiteralString
 
 class MetadataOEISid(TypedDict):
 	"""Describe known sequence values.
@@ -25,8 +26,12 @@ class MetadataOEISid(TypedDict):
 	valueUnknown : int
 		One greater than the largest key in `valuesKnown`, refreshed during metadata loading
 		and local b-file updates. This value does not locate gaps below the largest stored index.
+	boxOfCommonNames : tuple[LiteralString, ...]
+		Common names of the sequence, such as `'Catalan numbers'`; empty when the sequence has none.
 	"""
 
+	boxOfCommonNames: tuple[LiteralString, ...]
+	"""Common names of the sequence, such as 'Catalan numbers'; empty when the sequence has none."""
 	description: str
 	"""The OEIS.org description of the integer sequence."""
 	offset: int
