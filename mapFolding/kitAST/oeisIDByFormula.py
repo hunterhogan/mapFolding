@@ -33,13 +33,14 @@ Functions
 
 from __future__ import annotations
 
-from astToolkit import Be, Make
+from astToolkit import Be, IfThis, Make, NodeTourist, Then
 from astToolkit.filesystem import write_astModule
 from functools import partial, reduce
 from humpy_cytoolz import compose, groupby as toolz_groupby, unique
 from itertools import compress, filterfalse, starmap
 from mapFolding.kitAST import IngredientsFunction, IngredientsModule
 from mapFolding.oeis import getMetadata, settingsOEIS
+from mapFolding.oeis._metadata import dictionaryTriangle, getMetadataTriangle
 from mapFolding.oeis._symbolic import makeSolutionsSymbolic
 from mapFolding.theSSOT import settingsPackage
 from operator import attrgetter, itemgetter, methodcaller
@@ -243,6 +244,11 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
             ast_expr = reduce(addTerm, boxOfTerms, make_ast_exprInteger(termFirst))
         case Mul() if expression.could_extract_minus_sign():
             ast_expr = Make.UnaryOp(Make.USub(), make_ast_exprInteger(-expression))
+        case Mul() if expression.has(Mod) and expression.has(*map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
+            coefficient: Expr = Mul(*filterfalse(methodcaller('has', *map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle))
+                , expression.args))
+            ast_expr = Make.And.join([make_ast_exprInteger(coefficient)
+                , Make.Mult.join(list(map(make_ast_exprInteger, expression.as_ordered_factors())))])
         case Mul():
             ast_expr = Make.Mult.join(list(map(make_ast_exprInteger, expression.as_ordered_factors())))
         case Pow() if expression.exp == Rational(1, 2):
@@ -278,14 +284,21 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
             ast_expr = Make.Compare(make_ast_exprInteger(expression.lhs), [Make.Lt()], [make_ast_exprInteger(expression.rhs)])
         case And():
             ast_expr = Make.And.join(list(map(make_ast_exprInteger, expression.args)))
+        case AppliedUndef() if len(expression.args) == 2 and expression.func in tuple(map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
+            oeisID: OEISid = settingsOEIS.lookupID[expression.func]
+            ast_expr = Make.Subscript(Make.Subscript(Make.Call(Make.Name('getTriangle'), [Make.Constant(oeisID)])
+                , make_ast_exprInteger(expression.args[0]))
+                , Make.Sub.join([make_ast_exprInteger(expression.args[1]), Make.Constant(getMetadataTriangle(oeisID)['columnStart'])]))
         case _:
             ast_expr = Make.Call(Make.Name(expression.func.__name__), list(map(make_ast_exprInteger, expression.args)))
 
     return ast_expr
 
 def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> ast.Call:
-    if Be.Name(ast_expr) and ast_expr.id == k.name:
-        astCall: ast.Call = astCallRange
+    if NodeTourist(IfThis.isNameIdentifier(k.name), Then.extractIt).captureLastMatch(ast_expr) is None:
+        astCall: ast.Call = Make.Call(Make.Name('repeat'), [ast_expr, Make.Call(Make.Name('len'), [astCallRange])])
+    elif Be.Name(ast_expr) and ast_expr.id == k.name:
+        astCall = astCallRange
     elif Be.BinOp(ast_expr):
         identifier: str = type(ast_expr.op).__name__.lower()
         if Be.Mult(ast_expr.op):
@@ -307,6 +320,10 @@ def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> as
                 , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
     elif Be.UnaryOp(ast_expr):
         astCall = Make.Call(Make.Name('map'), [Make.Name('neg'), _makeMapInteger(ast_expr.operand, k, astCallRange)])
+    elif Be.Subscript(ast_expr):
+        astCall = Make.Call(Make.Name('map'), [Make.Name('getitem')
+            , _makeMapInteger(ast_expr.value, k, astCallRange), _makeMapInteger(ast_expr.slice, k, astCallRange)]
+            , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
     elif Be.Call(ast_expr):
         astCall = Make.Call(Make.Name('map'), [ast_expr.func
             , *map(partial(_makeMapInteger, k=k, astCallRange=astCallRange), ast_expr.args)]
@@ -463,11 +480,13 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
         , returns=Make.Name('int')))
     ingredientsFunction.imports.addImportFrom_asStr('__future__', 'annotations')
     ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'oeisIDfor_n')
+    ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'getTriangle')
     ingredientsFunction.imports.addImportFrom_asStr('itertools', 'repeat')
     ingredientsFunction.imports.addImportFrom_asStr('math', 'factorial')
     ingredientsFunction.imports.addImportFrom_asStr('math', 'isqrt')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'add')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'floordiv')
+    ingredientsFunction.imports.addImportFrom_asStr('operator', 'getitem')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'mod')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'mul')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'neg')

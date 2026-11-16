@@ -5,7 +5,7 @@ from functools import cache, partial
 from humpy_cytoolz import compose_left, flip, juxt, pluck, unique
 from itertools import chain, compress, filterfalse
 from mapFolding.dataStructures import locateIndex, locateRow
-from mapFolding.oeis._metadata import dictionaryTriangle, getMetadata, getMetadataTriangle, getValuesKnown
+from mapFolding.oeis._metadata import dictionaryTriangle, getMetadata, getMetadataTriangle, getTriangle, getValuesKnown
 from mapFolding.oeis._symbolicRelations import boxOfRelations
 from mapFolding.oeis._theSSOT import settingsOEIS
 from mapFolding.theTypes import OEISid
@@ -303,21 +303,76 @@ def makeSolutionsRelation(boxOfSequencesTriangle: tuple[type[AppliedUndef], ...]
 	equation, domain = relation
 	match equation:
 		case Equality(lhs=Expr() as lhs, rhs=Expr() as rhs):
-			if not equation.has(*boxOfSequencesTriangle):
-				boxOfOEISid: set[OEISid] = set[OEISid](map(getOEISid, filterfalse(flip(Basic.has, k), equation.atoms(AppliedUndef))))
-				yield from map(partial(solveRelationSymbolic, (lhs - rhs, domain)), boxOfOEISid)
+			boxOfCalls: Iterator[AppliedUndef] = filterfalse(
+				compose_left(attrgetter('func'), boxOfSequencesTriangle.__contains__)
+				, filterfalse(flip(Basic.has, k), equation.atoms(AppliedUndef)))
+			boxOfOEISid: set[OEISid] = set[OEISid](map(getOEISid, boxOfCalls))
+			yield from map(partial(solveRelationSymbolic, (lhs - rhs, domain)), boxOfOEISid)
 		case _:
 			pass
 
 def makeSolutionsSymbolic() -> tuple[tuple[OEISid, Expr, Boolean], ...]:
-	"""Solve every relation of one-index sequences for each of its sequences at the general index `n`.
+	"""Solve every relation for each one-index sequence at the general index `n`.
 
 	(AI generated docstring)
 
-	Sequence values inside a sum are not solved.
+	Triangle cells remain prerequisites. Sequence values inside a sum are not solved.
 	"""
 	boxOfSequencesTriangle: tuple[type[AppliedUndef], ...] = tuple(map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle))
 	return tuple(chain.from_iterable(map(partial(makeSolutionsRelation, boxOfSequencesTriangle), boxOfRelations)))
+
+def callStored吗(call: AppliedUndef) -> bool:
+	oeisID: OEISid = getOEISid(call)
+	stored: bool = False
+	match call.args:
+		case (Integer(p=index),):
+			stored = getMetadata(oeisID)['offset'] <= index and index in getValuesKnown(oeisID)
+		case (Integer(p=row), Integer(p=column)):
+			metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+			stored = (metadata['rowStart'] <= row
+				and metadata['columnStart'] <= column < metadata['columnStart'] + metadata['rowLength'](row)
+				and locateRow(row, metadata['rowLength'], metadata['rowStart'], metadata['offset'])[
+					column - metadata['columnStart']] in getValuesKnown(oeisID))
+		case _:
+			pass
+	return stored
+
+def expressionStored吗(expression: Basic) -> bool:
+	return all(map(callStored吗, expression.doit().atoms(AppliedUndef)))
+
+def makeIndicesCall(domain: Range, call: AppliedUndef) -> frozenset[int]:
+	oeisID: OEISid = getOEISid(call)
+	boxOfIndices: dict[int, int] | dict[int, list[int]] = getValuesKnown(oeisID)
+	if oeisID in dictionaryTriangle:
+		boxOfIndices = getTriangle(oeisID)
+	boxOf_n: set[int] = set()
+	match call.args[0]:
+		case Expr() as index:
+			nRelation: Expr = (n - index.subs(n, 0)) / index.coeff(n)
+			boxOfValues: Iterator[Basic] = map(partial(nRelation.subs, n), boxOfIndices)
+			while (value := next(boxOfValues, None)) is not None:
+				match value:
+					case Integer(p=nKnown) if nKnown in domain:
+						boxOf_n.add(nKnown)
+					case _:
+						pass
+		case _:
+			pass
+	return frozenset(boxOf_n)
+
+def makeIndicesRelation(relation: 形Relation) -> tuple[int, ...]:
+	equation, domain = relation
+	boxOf_n: tuple[int, ...] = ()
+	match equation:
+		case Equality():
+			boxOfCalls: tuple[AppliedUndef, ...] = tuple(filter(
+				compose_left(getOEISid, dictionaryTriangle.__contains__)
+				, equation.replace(Sum, makeTermLast).atoms(AppliedUndef)))
+			boxOfIndices: set[int] = set[int]().union(*map(partial(makeIndicesCall, domain), boxOfCalls))
+			boxOf_n = tuple(filter(compose_left(partial(equation.subs, n), expressionStored吗), sorted(boxOfIndices)))
+		case _:
+			pass
+	return boxOf_n
 
 def valueInitial吗(solution: tuple[OEISid, Expr, Boolean]) -> bool:
 	_oeisID, formula, condition = solution

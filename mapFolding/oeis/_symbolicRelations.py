@@ -113,7 +113,7 @@ boxOfRelationsMeanders: tuple[形Relation, ...] = (
 	, (Eq(A077055(2 * n), A078592(n)), Range(1, oo))
 	, (Eq(2 * A077055(2 * n), A005316(2 * n) + A005316(n)), Range(1, oo))
 	, (Eq(4 * A077055(2 * n + 1), A005316(2 * n + 1) + 2 * A223096(n)), Range(1, oo))
-	, (Eq(A077055(n), 1), Range(1, 2))
+	, (Eq(A077055(n), 1), Range(1, 4))
 	, (Eq(A208357(n), A005315(n + 1) ** 2), Range(1, oo))
 	, (Eq(A000682(n), 1), Range(1, 3))
 	, (Eq(A005315(n), 1), Range(0, 2))
@@ -150,7 +150,7 @@ boxOfRelationsStamps: tuple[形Relation, ...] = (
 	, (Eq(A000682(n + 1), factorial(n) - Sum(A223094(k) * factorial(n) / factorial(k), (k, 3, n))), Range(3, oo))
 	, (Eq(A001010(n), 1), Range(1, 2))
 	, (Eq(A001011(n), 1), Range(1, 2))
-	, (Eq(A007822(n), 1), Range(1, 2))
+	, (Eq(A007822(n), 1), Range(1, 3))
 )
 
 A287548 = settingsOEIS.lookupSymbolic['A287548']

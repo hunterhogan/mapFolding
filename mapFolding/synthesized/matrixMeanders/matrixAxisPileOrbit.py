@@ -123,7 +123,6 @@ def count(state: StateMeanders) -> StateMeanders:
     return state
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from mapFolding.dataBaskets import StateMeanders
 
 def getBitsLocator(arcCode: int) -> int:
     return (1 << (arcCode.bit_length() | 1) + 1) // 3

@@ -1,10 +1,10 @@
-"""Store folding and meander computation state and named array layouts.
+"""Store folding and meander computation state.
 
 (AI generated docstring)
 
 You can use this module to construct mutable state for map-folding and meander algorithms.
 State initialization derives map sizes, connection lookups, or arch-code limits from the supplied
-problem. Named array layouts keep shape construction and indexing consistent.
+problem. `StateMeandersAxis` selects the initial arch code and fixed threshold for axis-meanders.
 `PermutationSpace` stores pinned leaves and possible leaf choices at each pile. `StateElimination`
 groups these search branches with map-derived values, reduction preferences, and folding counts.
 
@@ -25,11 +25,8 @@ Elimination state
 Meander state
 	StateMeanders
 		Store transfer counts, boundary position, and integer-width limits.
-Matrix-meander array layouts
-	ShapeArray
-		Name the record-count and field-count axes of an array.
-	ShapeSlicer
-		Name the record selection and field selection of an array index.
+	StateMeandersAxis
+		Store pile-axis or strip-axis transfer counts with a fixed arch-code threshold.
 Numba types
 	形DataclassNumba
 		Re-export the compiled-state adapter from `mapFolding.dataBasketsAnnex`.
@@ -276,18 +273,106 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		deconstructedPermutationSpace: list[PermutationSpace] = []
 
 		def pileOpenByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
+			"""Make a predicate for an undetermined pile at a domain position.
+
+			(AI generated docstring)
+
+			Parameters
+			----------
+			次 : int
+				Position of a leaf's pile in each domain sequence.
+
+			Returns
+			-------
+			workhorse : CallableFunction[[Sequence[Pile]], bool]
+				Predicate that normalizes the selected pile and tests whether leaf choices remain.
+			"""
 			def workhorse(domain: Sequence[Pile]) -> bool:
+				"""Test whether the selected domain position names an undetermined pile.
+
+				(AI generated docstring)
+
+				Parameters
+				----------
+				domain : Sequence[Pile]
+					Pile positions corresponding to the enclosing method's `leaves`.
+
+				Returns
+				-------
+				pileIsUndetermined : bool
+					`True` when the selected pile retains leaf choices after normalization.
+				"""
 				return self.pileUndetermined吗(domain[次])
 			return workhorse
 
 		def leafInPileRangeByIndex(次: int) -> CallableFunction[[Sequence[Pile]], bool]:
+			"""Make a predicate for a leaf's membership in its proposed pile's choices.
+
+			(AI generated docstring)
+
+			Parameters
+			----------
+			次 : int
+				Shared position of the leaf in `leaves` and its pile in each domain sequence.
+
+			Returns
+			-------
+			workhorse : CallableFunction[[Sequence[Pile]], bool]
+				Predicate that normalizes the proposed pile and tests membership in its leaf choices.
+			"""
 			def workhorse(domain: Sequence[Pile]) -> bool:
+				"""Test whether the selected leaf belongs to its proposed pile's choices.
+
+				(AI generated docstring)
+
+				Parameters
+				----------
+				domain : Sequence[Pile]
+					Pile positions corresponding to `leaves`, with the selected pile undetermined.
+
+				Returns
+				-------
+				leafInPileRange : bool
+					`True` when the selected leaf belongs to the normalized choices. If normalization
+					pins the pile, membership uses a fallback mask covering indices below
+					`len(self)`.
+				"""
 				choicesLeaf: ChoicesLeaf = raiseIfNone(self.getChoicesLeaf(domain[次], default=bit_mask(len(self))))
 				return leafInChoicesLeaf吗(leaves[次], choicesLeaf)
 			return workhorse
 
 		def isPinnedAtPileByIndex(leaf: Leaf, 次: int) -> CallableFunction[[Sequence[Pile]], bool]:
+			"""Make a predicate for an existing leaf assignment at a domain position.
+
+			(AI generated docstring)
+
+			Parameters
+			----------
+			leaf : Leaf
+				Pinned leaf whose pile must match the proposed domain.
+			次 : int
+				Position of the leaf's proposed pile in each domain sequence.
+
+			Returns
+			-------
+			workhorse : CallableFunction[[Sequence[Pile]], bool]
+				Predicate that normalizes the selected pile and compares its assignment with `leaf`.
+			"""
 			def workhorse(domain: Sequence[Pile]) -> bool:
+				"""Test whether the selected domain position agrees with the pinned leaf.
+
+				(AI generated docstring)
+
+				Parameters
+				----------
+				domain : Sequence[Pile]
+					Pile positions corresponding to the enclosing method's `leaves`.
+
+				Returns
+				-------
+				leafIsPinnedAtPile : bool
+					`True` when the selected pile holds `leaf` after normalization.
+				"""
 				return self.leafPinnedAtPile吗(leaf, domain[次])
 			return workhorse
 
@@ -593,6 +678,14 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 		return choicesLeaf吗(self[pile])
 
 	def _solidifyLeafSpace(self) -> None:
+		"""I use this to normalize leaf choices and exclude leaves pinned elsewhere.
+
+		(AI generated docstring)
+
+		Singleton choices become pinned leaves unless the leaf is already pinned. Empty choices and
+		duplicate singleton assignments set `self.valid` to `False`. Pinned leaves are excluded from
+		the remaining choices. Another pass occurs when the pinned-entry count increases.
+		"""
 		count: int = self.leafCount
 		if count < len(self):
 			tuple(map(self._solidifyLeafSpaceAtPile, self))
@@ -605,6 +698,19 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 				self._solidifyLeafSpace()
 
 	def _solidifyLeafSpaceAtPile(self, pile: Pile) -> None:
+		"""I use this to normalize one pile's leaf choices and detect impossible assignments.
+
+		(AI generated docstring)
+
+		An empty choice set or a singleton whose leaf is already pinned sets `self.valid` to `False`
+		and leaves the assignment unchanged. An available singleton becomes a pinned integer leaf.
+		An integer assignment remains unchanged.
+
+		Parameters
+		----------
+		pile : Pile
+			Existing pile whose assignment will be normalized.
+		"""
 		rangeOfPile: LeafSpace | None = self[pile]
 		if choicesLeaf吗(rangeOfPile):
 			rangeOfPile = mapFolding.choicesLeaf.distinguishChoicesLeaf(rangeOfPile)
@@ -1037,7 +1143,7 @@ class StateMapFolding:
 	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
 		Track the leaf label selected for a connection.
 	dimensionsUnconstrained : 形TotalLeaves
-		Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count.
+		Track the number of unconstrained dimensions. The initial value is zero.
 	countDimensionsGapped : 形ArrayTotalLeaves1D
 		Track the number of dimensions admitting each candidate gap.
 	gapRangeStart : 形ArrayElephino1D
@@ -1119,11 +1225,13 @@ class StateMapFolding:
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value.
 
-		Notes
-		-----
-		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
-		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
+		(AI generated docstring)
 
+		Zero-dimensional array placeholders are replaced with storage sized for the map.
+		`gapsWhere` receives `totalLeaves ** 2 + 1` entries; the other search arrays receive
+		`totalLeaves + 1` entries. Supplied arrays with one or more dimensions are retained,
+		including empty arrays. `totalDimensions`, `totalLeaves`, and `connectionGraph` are derived
+		from `mapShape`.
 		"""
 		self.totalDimensions = 形TotalLeaves(len(self.mapShape))
 		self.totalLeaves = 形TotalLeaves(getTotalLeaves(self.mapShape))
@@ -1190,11 +1298,8 @@ class StateMapFoldingParallel(StateMapFolding):
 
 		(AI generated docstring)
 
-		This method calls the parent initialization to set up all base
-		computational arrays, then configures the task division
-		parameters. If `taskDivisions` is 0, it automatically sets the
-		value to `totalLeaves` for optimal parallelization.
-
+		The inherited arrays and map-derived values are initialized. A zero `taskDivisions` selects
+		one task per leaf; a nonzero `taskDivisions` is retained. Task bounds are not validated.
 		"""
 		super().__post_init__()
 		if self.taskDivisions == 0:
@@ -1249,7 +1354,7 @@ class StateMapFoldingSymmetric(StateMapFolding):
 	leafConnectee : 形TotalLeaves = 形TotalLeaves(0)
 		Track the leaf label selected for a connection.
 	dimensionsUnconstrained : 形TotalLeaves
-		Track the number of unconstrained dimensions; initialization replaces `None` with the dimension count.
+		Track the number of unconstrained dimensions. The initial value is zero.
 	countDimensionsGapped : 形ArrayTotalLeaves1D
 		Track the number of dimensions admitting each candidate gap.
 	gapRangeStart : 形ArrayElephino1D
@@ -1285,11 +1390,12 @@ class StateMapFoldingSymmetric(StateMapFolding):
 	def __post_init__(self) -> None:
 		"""Ensure all fields have a value.
 
-		Notes
-		-----
-		Arrays that are not explicitly provided (None) are automatically allocated with appropriate sizes based on the map
-		dimensions. `totalDimensions`, `totalLeaves`, and `connectionGraph` cannot be set: they are calculated.
+		(AI generated docstring)
 
+		The inherited search arrays and map-derived values are initialized. `indices` receives
+		cyclic comparison pairs with shape `(totalLeaves + 1, totalLeaves // 2, 2)`.
+		A zero-dimensional `leafComparison` is replaced with `totalLeaves + 1` entries.
+		Supplied arrays with one or more dimensions are retained, including empty arrays.
 		"""
 		super(StateMapFoldingSymmetric, self).__post_init__()
 		totalLeavesAsInt = int(self.totalLeaves)
@@ -1476,7 +1582,15 @@ class StateMeanders:
 		return sum(self.lookupMeanders.values()) + self.countAddend
 
 	def __post_init__(self) -> None:
-		"""Post init."""
+		"""Initialize the transfer boundary, active counts, and arch-code limits.
+
+		(AI generated docstring)
+
+		A zero `boundary` selects `n - 1`. An empty `lookupMeanders` selects the initial counts for
+		`kind`, `n`, and the selected boundary. A supplied nonempty lookup is retained. The resulting
+		lookup must be nonempty so its largest arch code can determine `bitWidthArcCode`.
+		`bitsLocator` and `arcCodeMaximum` are refreshed from the initialized state.
+		"""
 		if not self.boundary:
 			self.boundary = self.n - 1
 
@@ -1492,12 +1606,51 @@ class StateMeanders:
 
 @dataclasses.dataclass(slots=True)
 class StateMeandersAxis(StateMeanders):
+	"""Store transfer counts for pile-axis or strip-axis meanders.
+
+	(AI generated docstring)
+
+	You can initialize an axis-meander transfer problem or continue from supplied counts. The
+	boundary, bit-width tracking, and total-count property are inherited from `StateMeanders`.
+	The arch-code threshold depends on `n` and remains unchanged when the boundary decreases.
+
+	Attributes
+	----------
+	kind : Literal['pile', 'strip'] | LiteralString
+		Axis-meander family. An empty initial lookup selects arch code `0b1111` for `'pile'` or
+		`0b110` for `'strip'`, each with count one. Other labels require a nonempty supplied lookup.
+	lookupMeanders : dict[int, int]
+		Active arch-code counts. A nonempty supplied dictionary is retained.
+	arcCodeMaximum : int
+		Fixed threshold `1 << (2 * n + 4)`, recomputed during initialization and boundary reduction.
+
+	See Also
+	--------
+	`StateMeanders`
+		Inspect the inherited transfer boundary, count accumulation, and integer-width settings.
+	"""
 	kind: Literal['pile', 'strip'] | LiteralString
 
 	def set_arcCodeMaximum(self) -> None:
+		"""Set the fixed arch-code threshold for the axis-meander problem.
+
+		(AI generated docstring)
+
+		`self.arcCodeMaximum` receives `1 << (2 * self.n + 4)`, independent of `self.boundary`.
+		The inherited boundary reduction therefore retains the same threshold while `self.n`
+		remains unchanged.
+		"""
 		self.arcCodeMaximum = 1 << (2 * self.n + 4)
 
 	def __post_init__(self) -> None:
+		"""Initialize axis-meander counts and inherited transfer limits.
+
+		(AI generated docstring)
+
+		An empty `lookupMeanders` selects `{0b1111: 1}` for `'pile'` or `{0b110: 1}` for `'strip'`.
+		A nonempty supplied lookup is retained without consulting `kind`. A zero boundary selects
+		`n - 1`, and the arch-code width, locator mask, and fixed axis threshold are refreshed.
+		"""
 		self.lookupMeanders = self.lookupMeanders or {{'pile': 0b1111, 'strip': 0b110}[self.kind]: 1}
 		super().__post_init__()
 

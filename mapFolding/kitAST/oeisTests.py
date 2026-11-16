@@ -7,25 +7,27 @@ from astToolkit import Be, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
 from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
 from collections import deque
 from functools import partial
-from humpy_cytoolz import compose, groupby as toolz_groupby, unique
+from humpy_cytoolz import compose, compose_left, groupby as toolz_groupby, unique
 from hunterMakesPy import raiseIfNone
-from itertools import compress, filterfalse, product as CartesianProduct
+from hunterMakesPy.kitFilesystem import settings_autoflakeDEFAULT
+from itertools import chain, compress, filterfalse, product as CartesianProduct
 from mapFolding.kitAST import IngredientsFunction, IngredientsModule
-from mapFolding.kitAST.oeisIDByFormula import make_f
+from mapFolding.kitAST.oeisIDByFormula import make_ast_exprSymbolic, make_f
 from mapFolding.kitAST.paths import getPathFilename
 from mapFolding.oeis import getMetadata, getValuesKnown, settingsOEIS
-from mapFolding.oeis._symbolic import makeSolutionsSymbolic
-from mapFolding.theSSOT import settingsPackage
+from mapFolding.oeis._metadata import dictionaryTriangle
+from mapFolding.oeis._symbolic import (
+	callStored吗, expressionStored吗, getFlatCall, getOEISid, makeIndicesCall, makeIndicesRelation, makeSolutionsSymbolic, makeTermLast)
+from mapFolding.oeis._symbolicRelations import boxOfRelations
 from operator import itemgetter, methodcaller
 from pathlib import Path
-from sympy import Integer, Sum, true
+from sympy import Equality, Expr, Integer, oo, Range, Sum, true
 from sympy.core.function import AppliedUndef
 from typing import TYPE_CHECKING
 import re as regex
 
 if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
-	from sympy import Expr
 	from sympy.logic.boolalg import Boolean
 	import ast
 
@@ -62,10 +64,14 @@ def formulaBounded吗(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boo
 					_k, lower, upper = summation.limits[0]
 					length = upper - lower + 1
 					bounded = length.is_Integer is True and bool(length <= settingsOEIS.testSumLimit)
+				if bounded and expression.has(*map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
+					bounded = expressionStored吗(expression)
 				if bounded:
 					boxOfCalls = iter(expression.doit().atoms(AppliedUndef))
 					while bounded and (call := next(boxOfCalls, None)) is not None:
-						if isinstance(index := call.args[0], Integer):
+						if getOEISid(call) in dictionaryTriangle:
+							bounded = callStored吗(call)
+						elif isinstance(index := call.args[0], Integer):
 							boxOfPending.append((settingsOEIS.lookupID[call.func], int(index), None))
 						else:
 							bounded = False
@@ -82,7 +88,18 @@ def makeFormulaParameters(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr,
 			, unique((*range(offset, offset + settingsOEIS.testIndexSpan), 31, 129, 300))))
 		boxOfSelectors: tuple[str | None, ...] = (*unique(filter(None, map(compose(make_f, itemgetter(1)), boxOfSolutionsSequence))), None)
 		boxOfParameters.extend(filter(partial(formulaBounded吗, lookupSolutions), CartesianProduct((oeisID,), boxOfIndices, boxOfSelectors)))
-	return tuple(boxOfParameters)
+		boxOfFormulas = iter(boxOfSolutionsSequence)
+		while (solution := next(boxOfFormulas, None)) is not None:
+			_oeisID, formula, condition = solution
+			if formula.has(*map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
+				boxOfCalls: tuple[AppliedUndef, ...] = tuple(filter(compose_left(getOEISid, dictionaryTriangle.__contains__)
+					, formula.replace(Sum, makeTermLast).atoms(AppliedUndef)))
+				boxOfIndices = tuple(sorted(set[int]().union(*map(partial(makeIndicesCall, Range(offset, oo)), boxOfCalls))))
+				boxOfStored: tuple[int, ...] = tuple(filter(compose_left(partial(condition.subs, settingsOEIS.n), bool)
+					, filter(getValuesKnown(oeisID).__contains__, boxOfIndices)))
+				boxOfParameters.extend(filter(partial(formulaBounded吗, lookupSolutions)
+					, CartesianProduct((oeisID,), boxOfStored, (make_f(formula),))))
+	return tuple(unique(boxOfParameters))
 
 def make_astParameter(parameter: tuple[OEISid, int, str | None]) -> ast.Call:
 	oeisID, n, f = parameter
@@ -91,13 +108,79 @@ def make_astParameter(parameter: tuple[OEISid, int, str | None]) -> ast.Call:
 		, list_keyword=[Make.keyword('id', Make.Constant(f'{oeisID}-{n}-{regex.sub(r"\W+", "_", f or "default")}'))])
 	return astCall
 
-def makeTestsByFormula(pathFilename: Path | None = None, pathSamples: Path | None = None) -> tuple[Path, Path]:
+def makeRelationParameters() -> tuple[tuple[int, int, Expr, Expr], ...]:
+	boxOfParameters: list[tuple[int, int, Expr, Expr]] = []
+	boxOfEnumerated = iter(enumerate(boxOfRelations, start=1))
+	while (enumerated := next(boxOfEnumerated, None)) is not None:
+		次relation, relation = enumerated
+		equation, _domain = relation
+		match equation:
+			case Equality(lhs=Expr() as lhs, rhs=Expr() as rhs) if equation.has(*map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
+				boxOfIndices = iter(makeIndicesRelation(relation))
+				while (n := next(boxOfIndices, None)) is not None:
+					boxOfParameters.append((次relation, n, rhs.subs(settingsOEIS.n, n).doit(), lhs.subs(settingsOEIS.n, n).doit()))
+			case _:
+				pass
+	return tuple(boxOfParameters)
+
+def make_astLookup(astSubscript: ast.Subscript) -> ast.expr:
+	ast_expr: ast.expr = astSubscript
+	if Be.Call(astSubscript.value):
+		ast_expr = Make.Subscript(Make.Name('lookupValues'), Make.Tuple([astSubscript.value.args[0], astSubscript.slice]))
+	return ast_expr
+
+def make_astReference(expression: Expr) -> ast.expr:
+	boxOfCalls: set[AppliedUndef] = expression.atoms(AppliedUndef)
+	expression = expression.xreplace(dict(zip(boxOfCalls, map(getFlatCall, boxOfCalls), strict=True)))
+	astExpr: ast.Expr = Make.Expr(make_ast_exprSymbolic(expression))
+	NodeChanger(Be.Subscript, make_astLookup).visit(astExpr)
+	return astExpr.value
+
+def make_astIdentity(parameter: tuple[int, int, Expr, Expr]) -> ast.Call:
+	次relation, n, actual, expected = parameter
+	return Make.Call(Make.Attribute(Make.Name('pytest'), 'param')
+		, [Make.Constant(次relation), Make.Constant(n), make_astReference(actual), make_astReference(expected)]
+		, list_keyword=[Make.keyword('id', Make.Constant(f'relation{次relation}-{n}'))])
+
+def makeTestsTriangle(pathFilename: Path, boxOfParameters: tuple[tuple[int, int, Expr, Expr], ...]) -> Path:
+	ingredientsFunction = IngredientsFunction(Make.FunctionDef('test_relationsTriangle'
+		, Make.arguments(list_arg=[Make.arg('relation', Make.Name('int')), Make.arg('n', Make.Name('int'))
+			, Make.arg('actual', Make.BitOr.join([Make.Name('Expr'), Make.Name('int')]))
+			, Make.arg('expected', Make.BitOr.join([Make.Name('Expr'), Make.Name('int')]))])
+		, [Make.Expr(Make.Call(Make.Name('assertEqualTo')
+			, [Make.Name('actual'), Make.Name('expected'), Make.Constant('relation'), Make.Name('relation'), Make.Name('n')]))]
+		, decorator_list=[Make.Call(Make.Attribute(Make.Attribute(Make.Name('pytest'), 'mark'), 'parametrize')
+			, [Make.Constant('relation, n, actual, expected'), Make.Tuple(list(map(make_astIdentity, boxOfParameters)))])]
+		, returns=Make.Constant(None)))
+	ingredientsFunction.imports.addImportFrom_asStr('__future__', 'annotations')
+	ingredientsFunction.imports.addImportFrom_asStr('mapFolding.tests', 'assertEqualTo')
+	ingredientsFunction.imports.addImportFrom_asStr('mapFolding.tests.dataSamples.oeis', 'lookupValues')
+	ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Rational')
+	ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Pow')
+	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('sympy', 'Expr')
+	ingredientsFunction.imports.addImport_asStr('pytest')
+	ingredientsModule = IngredientsModule(ingredientsFunction)
+	with pathFilename.open('w', encoding='utf-8', newline='\n') as stream:
+		write_astModule(Make.Module([Make.Expr(Make.Constant(
+			'Generated by mapFolding.kitAST.oeisTests.makeTestsByFormula.\n\n'
+			'(AI generated docstring)\n\n'
+			'Relation: each triangle identity at every index whose prerequisites are stored.\n'
+			'Reference: static OEIS b-file values in dataSamples.oeis.'))
+			, *ingredientsModule.body]), stream
+			, settings={'autoflake': {**settings_autoflakeDEFAULT, 'ignore_pass_statements': True}})
+	return pathFilename
+
+def makeTestsByFormula(pathFilename: Path | None = None, pathSamples: Path | None = None
+	, pathTriangle: Path | None = None) -> tuple[Path, Path]:
 	if pathFilename is None:
 		pathFilename = Path(getPathFilename(logicalPathInfix='tests', identifierModule='test_byFormula'))
 	if pathSamples is None:
 		pathSamples = Path(getPathFilename(logicalPathInfix='tests.dataSamples', identifierModule='oeis'))
+	if pathTriangle is None:
+		pathTriangle = Path(getPathFilename(logicalPathInfix='tests', identifierModule='test_relationsTriangle'))
 	lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
 	boxOfParameters: tuple[tuple[OEISid, int, str | None], ...] = makeFormulaParameters(lookupSolutions)
+	boxOfIdentities: tuple[tuple[int, int, Expr, Expr], ...] = makeRelationParameters()
 	astDict: ast.Dict = Make.Dict()
 	astModule: ast.Module = Make.Module([Make.Expr(Make.Constant(
 		'Reference: values copied from the stored OEIS b-files by makeTestsByFormula.\n'
@@ -111,7 +194,17 @@ def makeTestsByFormula(pathFilename: Path | None = None, pathSamples: Path | Non
 		astDict = raiseIfNone(NodeTourist(Be.Dict, Then.extractIt).captureLastMatch(astModule))
 	lookupValues: dict[tuple[OEISid, int], int] = literal_eval(astDict)
 	changed: bool = False
-	boxOfMissing = iter(boxOfParameters)
+	boxOfAtoms: set[AppliedUndef] = set[AppliedUndef]().union(*map(methodcaller('atoms', AppliedUndef)
+		, chain.from_iterable(map(itemgetter(2, 3), boxOfIdentities))))
+	boxOfReferences: list[tuple[OEISid, int, str | None]] = list(boxOfParameters)
+	boxOfCalls = iter(boxOfAtoms)
+	while (call := next(boxOfCalls, None)) is not None:
+		match getFlatCall(call).args:
+			case (Integer(p=index),):
+				boxOfReferences.append((getOEISid(call), index, None))
+			case _:
+				pass
+	boxOfMissing = iter(boxOfReferences)
 	while (parameter := next(boxOfMissing, None)) is not None:
 		oeisID, n, _f = parameter
 		if (oeisID, n) not in lookupValues:
@@ -123,8 +216,10 @@ def makeTestsByFormula(pathFilename: Path | None = None, pathSamples: Path | Non
 	if changed:
 		NodeChanger(Be.AnnAssign.targetIs(IfThis.isNameIdentifier('lookupValues'))
 			, Grab.valueAttribute(Then.replaceWith(astDict))).visit(astModule)
-		with pathSamples.open('w', encoding='utf-8', newline='\n') as stream:
-			write_astModule(astModule, stream, identifierPackage=settingsPackage.identifierPackage)
+	with pathSamples.open('w', encoding='utf-8', newline='\n') as stream:
+		write_astModule(astModule, stream
+			, settings={'autoflake': {**settings_autoflakeDEFAULT, 'ignore_pass_statements': True}})
+		stream.truncate(stream.tell() - 1)
 	ingredientsFunction = IngredientsFunction(Make.FunctionDef('test_byFormula'
 		, Make.arguments(list_arg=[Make.arg('oeisID', Make.Name('OEISid')), Make.arg('n', Make.Name('int'))
 			, Make.arg('f', Make.BitOr.join([Make.Name('LiteralString'), Make.Constant(None)])), Make.arg('expected', Make.Name('int'))])
@@ -147,5 +242,7 @@ def makeTestsByFormula(pathFilename: Path | None = None, pathSamples: Path | Non
 			'Generated by mapFolding.kitAST.oeisTests.makeTestsByFormula from the symbolic relations.\n'
 			'Reference: static OEIS b-file values in dataSamples.oeis.\n'
 			'Counting indices, symbolic fallbacks, expanded calls, and finite sums are bounded by settingsOEIS.'))
-			, *ingredientsModule.body]), stream, identifierPackage=settingsPackage.identifierPackage)
+			, *ingredientsModule.body]), stream
+			, settings={'autoflake': {**settings_autoflakeDEFAULT, 'ignore_pass_statements': True}})
+	makeTestsTriangle(pathTriangle, boxOfIdentities)
 	return pathFilename, pathSamples
