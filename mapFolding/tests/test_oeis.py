@@ -79,7 +79,8 @@ def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None, expected: 
 
 boxOfFlowsMapFolding: tuple[str, ...] = ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
 boxOfFlowsMeanders: tuple[str, ...] = ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas')
-boxOfFlowsSymmetric: tuple[str, ...] = ('algorithm', 'algorithmNumba', 'asynchronous', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
+boxOfFlowsSymmetric: tuple[str, ...] = (
+	'algorithm', 'algorithmNumba', 'asynchronous', 'matrixAxisStrip', 'matrixAxisStripOrbit', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
 
 @pytest.mark.parametrize('oeisID, n, flow', tuple(chain(
 	CartesianProduct(('A000136',), (1, 3), boxOfFlowsMapFolding)
@@ -89,6 +90,7 @@ boxOfFlowsSymmetric: tuple[str, ...] = ('algorithm', 'algorithmNumba', 'asynchro
 	, CartesianProduct(('A000682',), (1, 3), boxOfFlowsMeanders)
 	, CartesianProduct(('A005316',), (0, 3), boxOfFlowsMeanders)
 	, CartesianProduct(('A007822',), (1, 3), boxOfFlowsSymmetric)
+	, CartesianProduct(('A223096',), (0, 3), ('matrixAxisPile', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'))
 )))
 def test_oeisIDfor_nFlow(oeisID: OEISid, n: int, flow: LiteralString, expected: int) -> None:
 	assertEqualTo(oeisIDfor_n(oeisID, n, flow=flow), expected, oeisIDfor_n.__name__, oeisID, n, flow=flow)

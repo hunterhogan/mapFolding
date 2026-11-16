@@ -1490,6 +1490,17 @@ class StateMeanders:
 		self.setBitsLocator()
 		self.set_arcCodeMaximum()
 
+@dataclasses.dataclass(slots=True)
+class StateMeandersAxis(StateMeanders):
+	kind: Literal['pile', 'strip'] | LiteralString
+
+	def set_arcCodeMaximum(self) -> None:
+		self.arcCodeMaximum = 1 << (2 * self.n + 4)
+
+	def __post_init__(self) -> None:
+		self.lookupMeanders = self.lookupMeanders or {{'pile': 0b1111, 'strip': 0b110}[self.kind]: 1}
+		super().__post_init__()
+
 #================== `numba` types =================================================================
 
 # DEVELOPMENT

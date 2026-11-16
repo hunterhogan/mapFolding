@@ -96,6 +96,9 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 			case 'A005316' if not f:
 				state = countMeanders('meanders', n, **keywordArguments)
 				totalFolds = state.totalMeanders
+			case 'A223096' if not f:
+				state = countMeanders('symmetric', n, **keywordArguments)
+				totalFolds = state.totalMeanders
 			case 'A007822' if not f:
 				totalFolds = countFoldsSymmetric(makeMapShape(oeisID, n), **keywordArguments)
 			case _:

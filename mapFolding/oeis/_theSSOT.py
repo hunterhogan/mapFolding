@@ -64,7 +64,7 @@ class PackageSettingsOEIS(PackageSettings):
 				self.pathClone = self.pathPackage.parents[2] / 'oeisdata'
 		self.pathSnapshot = self.pathPackage / 'oeisdata'
 		self.pathTerms = self.pathPackage / 'terms'
-		self.boxOfIDsCounting = (*self.boxOfIDsMapFolding, 'A000682', 'A005316', 'A007822')
+		self.boxOfIDsCounting = (*self.boxOfIDsMapFolding, 'A000682', 'A005316', 'A007822', 'A223096')
 		self.boxOfIDs = (*self.boxOfIDsMapFolding
 			, 'A000108', 'A000560', 'A000682', 'A001010', 'A001011', 'A001246', 'A001263', 'A001405', 'A002057', 'A002415', 'A002694'
 			, 'A005315', 'A005316', 'A006657', 'A006658', 'A006659', 'A006660', 'A006661', 'A006662', 'A007746', 'A007822', 'A008828'

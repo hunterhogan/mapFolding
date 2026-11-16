@@ -87,6 +87,7 @@ def test_countFoldsError(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit, 
 @pytest.mark.parametrize('oeisID, n, flow', tuple(chain(
 	CartesianProduct(('A007822',), (2, 7), ('numba', 'theorem2Numba', 'algorithmNumba'))
 	, CartesianProduct(('A007822',), (2, 5), ('algorithm', 'theorem2', 'theorem2Trimmed'))
+	, CartesianProduct(('A007822',), (1, 2, 5, 17), ('matrixAxisStrip', 'matrixAxisStripOrbit'))
 )))
 def test_countFoldsSymmetric(oeisID: OEISid, n: int, flow: LiteralString, expected: int) -> None:
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
@@ -100,6 +101,7 @@ def test_countFoldsSymmetric(oeisID: OEISid, n: int, flow: LiteralString, expect
 	, (pytest.param('prunePandas', 30, 'semi', 'A000682', marks=pytest.mark.xfail(strict=True, raises=UserWarning
 		, reason='getTotalBuckets underestimates the dataframeAnalyzed allocation; repair pending.')),)
 	, CartesianProduct(('prune', 'pruneNumPy', 'prunePandas'), (1, 2, 3, 22, 23, 30), ('meanders',), ('A005316',))
+	, CartesianProduct(('matrixAxisPile', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'), (0, 1, 2, 3, 11, 16), ('symmetric',), ('A223096',))
 )))
 def test_countMeanders(kind: LiteralString, n: int, flow: LiteralString, oeisID: OEISid, expected: int) -> None:
 	assertEqualTo(countMeanders(kind, n, flow).totalMeanders, expected, countMeanders.__name__, kind, n, flow)
