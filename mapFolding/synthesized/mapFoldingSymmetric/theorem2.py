@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.dataBaskets import StateMapFoldingSymmetric
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.synthesized.mapFoldingSymmetric.initializeState import transitionOnGroupsOfFolds
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
@@ -21,6 +24,7 @@ def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
                         if state.leafComparison[次Left] != state.leafComparison[次Right]:
                             state.leafConnectee = 0
                             break
+                    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
                     state.symmetricFolds += state.leafConnectee
             else:
                 state.dimensionsUnconstrained = state.totalDimensions
@@ -63,10 +67,13 @@ def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
         state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
         state.leaf1ndex += 1
     else:
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state.symmetricFolds *= 2
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def doTheNeedful(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state = transitionOnGroupsOfFolds(state)
     state = count(state)

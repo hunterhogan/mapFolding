@@ -442,6 +442,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     ast_stmt: ast.stmt = reduce(make_astIf, reversed(boxOfBranches)
         , Make.Assign([Make.Name('countTotal', Make.Store())], Make.Call(Make.Name('oeisIDfor_n'), [Make.Constant(oeisID), Make.Name('n')])))
 
+    # TODO Disambiguate 'symmetric' in OEIS descriptions before regenerating these docstrings.
     docstring: str = f"""
     Compute {oeisID}(n) as a function of {' or '.join(boxOf_fFormula) or 'n'}.
 

@@ -1,4 +1,5 @@
 #ruff: file-ignore[import-outside-top-level] #=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Select and run map-folding, stamp-folding, and meander algorithms.
 
 (AI generated docstring)
@@ -27,6 +28,7 @@ from __future__ import annotations
 
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import (
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	StateElimination, StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders, StateMeandersAxis)
 from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly, writeAlbum
 from mapFolding.theSSOT import settingsPackage
@@ -193,7 +195,9 @@ def countFolds(mapShape: Sequence[int]
 
 	return totalFolds
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit', 'matrixAxisStrip', 'matrixAxisStripOrbit', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: ConcurrencyLimit = None, suffix: str = ".totalFolds") -> int:
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -254,7 +258,9 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	#================== Algorithm version -------------------------------------------------
 
 	if flow == 'asynchronous':
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		from mapFolding.synthesized.mapFoldingSymmetric.asynchronous import doTheNeedful
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		totalFolds = doTheNeedful(StateMapFoldingSymmetric(mapShape), defineProcessorLimit(CPUlimit)).symmetricFolds
 	elif flow == 'matrixAxisStrip':
 		from mapFolding.algorithms.matrixAxisStrip import doTheNeedful
@@ -271,19 +277,27 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	else:
 		match flow:
 			case 'algorithmNumba':
+				# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 				from mapFolding.synthesized.mapFoldingSymmetric.algorithmNumba import doTheNeedful
 			case 'theorem2':
+				# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 				from mapFolding.synthesized.mapFoldingSymmetric.theorem2 import doTheNeedful
 			case 'theorem2Numba':
+				# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 				from mapFolding.synthesized.mapFoldingSymmetric.theorem2Numba import doTheNeedful
 			case 'theorem2Trimmed':
+				# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 				from mapFolding.synthesized.mapFoldingSymmetric.theorem2Trimmed import doTheNeedful
 			case 'algorithm' | _:
+				# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 				from mapFolding.synthesized.mapFoldingSymmetric.algorithm import doTheNeedful
 
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		symmetricState: StateMapFoldingSymmetric = StateMapFoldingSymmetric(mapShape)
 
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		symmetricState = doTheNeedful(symmetricState)
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		totalFolds = symmetricState.symmetricFolds
 
 	#================== Follow memorialization instructions =======================================
@@ -295,6 +309,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 
 #ruff: ignore[unused-function-argument] #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 def countMeanders(
+	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 	kind: Literal['closed', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
 	, n: int | None = None
 	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'
@@ -306,6 +321,7 @@ def countMeanders(
 	, CPUlimit: ConcurrencyLimit = None
 	, suffix: str = ".countTotal"
 ) -> StateMeanders:
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	"""Compute a meander sequence term for `kind` and `n`, or continue `state`.
 
 	(AI generated docstring)
@@ -324,9 +340,11 @@ def countMeanders(
 
 	Parameters
 	----------
-	kind : Literal['closed', 'meanders', 'semi'] | LiteralString | None = None
-		Meander family when `state` is absent. `'closed'` constructs a meander state at the
-		transformed index `2 * n - 1`; other values are forwarded as the state family.
+	kind : Literal['closed', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
+		Meander family, OEIS identifier, or common name when `state` is absent. `'closed'`
+		constructs a meander state at the transformed index `2 * n - 1`. `'symmetric'` counts
+		symmetric meander shapes (A223096). `'meanders symmetric'` identifies A077055 and is
+		available through `enumerateSequences`.
 	n : int | None = None
 		Sequence index when `state` is absent. This function does not validate the index range.
 	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'] | LiteralString | None = None
@@ -370,8 +388,15 @@ def countMeanders(
 		if kind is None or n is None:
 			message: str = 'kind and n are required when state is None.'
 			raise TypeError(message)
+		from mapFolding.oeis import getMetadata, Z0Z_oeisName
+
+		oeisID: OEISid = Z0Z_oeisName(kind)
+		# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
+		(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'closed', 'meanders', 'semi', 'symmetric'})
+
 		if kind == 'closed':
 			state = StateMeanders(2 * n - 1, 'meanders')
+		# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 		elif kind == 'symmetric':
 			match flow:
 				case 'matrixAxisPileDeadEnd' | 'matrixAxisPileDeadEndOrbit':
@@ -542,6 +567,7 @@ def eliminateFolds(
 
 def enumerateSequences(
 	n: int
+	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
 	, kind: LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None = None
 	, flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None = None
 	, pathLikeWrite: PathLike[str] | None = None
@@ -549,6 +575,7 @@ def enumerateSequences(
 	, CPUlimit: ConcurrencyLimit = None
 	, suffix: str = '.album'
 ) -> list[Folding] | int:
+	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
 	"""Generate stamp-folding or meander permutations at sequence index `n`.
 
 	(AI generated docstring)
@@ -618,6 +645,7 @@ def enumerateSequences(
 	if kind is None:
 		kind = 'semi'
 	oeisID: OEISid = Z0Z_oeisName(kind)
+	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
 	(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric', 'stamps', 'stamps blank'})
 	offset: int = getMetadata(oeisID)['offset']
 	if n < offset:
@@ -634,15 +662,19 @@ def enumerateSequences(
 	#================== Algorithm selection and execution =========================================
 
 	if flow in {'bilateral', 'bilateralConcurrent'}:
+		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		n = {'semi': n - 1, 'semi-meanders symmetric': n}[kind]
+		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		symmetric: bool = kind == 'semi-meanders symmetric'
 		if flow == 'bilateralConcurrent':
 			from mapFolding.algorithms.permutationsBilateralConcurrent import doTheNeedful
 
+			# TODO Disambiguate 'symmetric' here by naming the exact relation or equivalence being counted.
 			countTotal: int = doTheNeedful(n, symmetric=symmetric, concurrencyLimit=defineProcessorLimit(CPUlimit))
 		else:
 			from mapFolding.algorithms.permutationsBilateral import doTheNeedful
 
+			# TODO Disambiguate 'symmetric' here by naming the exact relation or equivalence being counted.
 			countTotal = doTheNeedful(n, symmetric=symmetric)
 
 		if pathFilenameAlbum is not None:

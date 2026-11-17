@@ -4,20 +4,26 @@
 from __future__ import annotations
 
 from copy import deepcopy
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.dataBaskets import StateMapFoldingSymmetric
 from mapFolding.theTypes import 形TotalFolds
 from queue import Queue
 from threading import Lock, Thread
 
 boxOfThreads: list[Thread] = []
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 queueFutures: Queue[StateMapFoldingSymmetric] = Queue()
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 symmetricTotalFolds: int = 0
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 LOCKsymmetricTotalFolds = Lock()
 # TODO There isn't a better way to do this?
 STOPsignal = object()
 # pyright: reportArgumentType=false
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> None:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """Initialize the shared queue, accumulated count, and background workers.
 
     (AI generated docstring)
@@ -41,9 +47,11 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> No
         initializeConcurrencyManager(maxWorkers)
         ```
     """
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     global boxOfThreads, symmetricTotalFolds, queueFutures
     boxOfThreads = []
     queueFutures = Queue()
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     symmetricTotalFolds = symmetricFolds
 
     indexThread = 0
@@ -54,6 +62,7 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> No
         indexThread += 1
 
 def _threadDoesSomething() -> None:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """I use this worker target to consume queued states and accumulate filtered counts.
 
     (AI generated docstring)
@@ -62,16 +71,23 @@ def _threadDoesSomething() -> None:
     symmetric count while holding the shared lock. The function exits after receiving the shared
     stop object.
     """
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     global symmetricTotalFolds
     while True:
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state: StateMapFoldingSymmetric = queueFutures.get()
         if state is STOPsignal:
             break
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state = _filterAsymmetricFolds(state)
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         with LOCKsymmetricTotalFolds:
+            # TODO Make the A007822 folding relation explicit in this symmetry terminology.
             symmetricTotalFolds += state.symmetricFolds
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def _filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """I use this placeholder to define the filtering contract in the worker template.
 
     (AI generated docstring)
@@ -91,7 +107,9 @@ def _filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSy
     """
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """Queue a copied state for background symmetry filtering.
 
     (AI generated docstring)
@@ -114,7 +132,9 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
     """
     queueFutures.put_nowait(deepcopy(state))
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def getSymmetricTotalFolds() -> 形TotalFolds:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """Stop initialized workers after queued work and return the accumulated symmetric count.
 
     (AI generated docstring)
@@ -139,4 +159,5 @@ def getSymmetricTotalFolds() -> 形TotalFolds:
         queueFutures.put(STOPsignal)
     for thread in boxOfThreads:
         thread.join()
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     return symmetricTotalFolds

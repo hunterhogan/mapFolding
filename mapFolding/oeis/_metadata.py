@@ -266,6 +266,7 @@ lookupCommonNames: dict[OEISid, tuple[LiteralString, ...]] = {
 	'A000105': ('free polyominoes',),
 	'A000108': ('Catalan numbers', 'Catalan'),
 	'A000136': ('stamps',),
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	'A000560': ('semi-meanders symmetric', 'symmetric semi-meanders'),
 	'A000682': ('semi', 'semi-meanders'),
 	'A001011': ('stamps blank', 'blank stamps'),
@@ -275,10 +276,13 @@ lookupCommonNames: dict[OEISid, tuple[LiteralString, ...]] = {
 	'A002415': ('4-dimensional pyramidal numbers',),
 	'A002931': ('self-avoiding polygons',),
 	'A004148': ('generalized Catalan numbers',),
-	'A005315': ('closed meanders', 'closed meandric numbers'),
+	'A005315': ('closed meanders', 'closed meandric numbers', 'closed'),
 	'A005316': ('meanders', 'meandric numbers', 'open meanders'),
 	'A006663': ('projective meanders',),
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	'A077055': ('meanders symmetric', 'symmetric meanders'),
+	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
+	'A223096': ('symmetric', 'symmetric meander shapes'),
 	'A227167': ('meandering curves',),
 }
 

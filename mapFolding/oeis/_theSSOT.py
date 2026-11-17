@@ -35,6 +35,7 @@ class PackageSettingsOEIS(PackageSettings):
 	boxOfIDsMapFolding: tuple[LiteralString, ...] = ('A000136', 'A001415', 'A001416', 'A001417', 'A195646', 'A001418')
 	"""OEIS IDs of multidimensional map-folding algorithms."""
 	boxOfIDsCounting: tuple[LiteralString, ...] = dataclasses.field(init=False)
+	# TODO Disambiguate 'symmetric' here by naming the exact relation or equivalence being counted.
 	"""OEIS IDs of counting algorithms: map folding, meanders, and symmetric folding."""
 	boxOfIDs: tuple[LiteralString, ...] = dataclasses.field(init=False)
 	"""Every implemented OEIS ID."""

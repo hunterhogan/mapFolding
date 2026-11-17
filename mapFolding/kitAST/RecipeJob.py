@@ -49,6 +49,7 @@ import dataclasses
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import identifierDotAttribute
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	from mapFolding.dataBaskets import StateMapFoldingSymmetric
 	from mapFolding.kitAST import IngredientsFunction, IngredientsModule
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass
@@ -57,6 +58,7 @@ if TYPE_CHECKING:
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Configure a computation job for one initialized map shape.
 
 	(AI generated docstring)
@@ -122,6 +124,7 @@ class RecipeJobTheorem2:
 		Create a recipe from map dimensions with initialized computation state.
 	"""
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	state: StateMapFolding | StateMapFoldingSymmetric
 	"""The map folding computation state containing dimensions and initial values."""
 	totalFoldsEstimated: int = 0

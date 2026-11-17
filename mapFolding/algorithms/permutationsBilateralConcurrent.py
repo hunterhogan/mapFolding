@@ -92,6 +92,7 @@ def _gatherFrontier(n下i: int, milepost: Milepost, n: int, splitDepth: int, *, 
 
 	return listQQ, totalFU
 
+# TODO Replace this A000560 symmetry name with its precise counting convention.
 def doTheNeedful(n: int, *, symmetric: bool, concurrencyLimit: int | None = None) -> int:
 	totalPermutations: int = 1
 	milepost: Milepost = makeMilepost()
@@ -138,4 +139,5 @@ def doTheNeedful(n: int, *, symmetric: bool, concurrencyLimit: int | None = None
 	queueIn.close()
 	queueOut.close()
 
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	return totalPermutations * (2 - symmetric)

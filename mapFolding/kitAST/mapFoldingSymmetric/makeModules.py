@@ -1,3 +1,4 @@
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Generate synchronous symmetric counting and Theorem 2 variants.
 
 (AI generated docstring)
@@ -24,6 +25,7 @@ from mapFolding.kitAST.mapFolding._count import makeTheorem2, makeTheorem2Numba,
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
 from mapFolding.kitAST.paths import getModule, getPathFilename
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.kitAST.theSSOT import defaultMapFolding, defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
@@ -36,6 +38,7 @@ if TYPE_CHECKING:
 	import ast
 
 def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Write a counting module that filters discovered fold groups for symmetry.
 
 	(AI generated docstring)
@@ -69,6 +72,7 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 		addSymmetryCheck(astModule, defaultMapFoldingSymmetric)
 		```
 	"""
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	identifiers = identifiers or defaultMapFoldingSymmetric
 	名DataclassSource: str = keywordArguments.get('名DataclassSource') or identifiers['variable'].get('stateDataclassSource') or defaultMapFolding['variable']['stateDataclass']
 	名Dataclass: str = keywordArguments.get('名Dataclass') or identifiers['variable']['stateDataclass']
@@ -81,12 +85,19 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 	名CountingSource: str = keywordArguments.get('名CountingSource') or identifiers['variable'].get('countingSource') or defaultMapFolding['variable']['counting']
 	名Counting: str = keywordArguments.get('名Counting') or identifiers['variable']['counting']
 	名Indices: str = keywordArguments.get('名Indices') or identifiers['variable']['indices']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFoldsSource: str = keywordArguments.get('名FilterAsymmetricFoldsSource') or identifiers['function'].get('filterAsymmetricFoldsSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFolds: str = keywordArguments.get('名FilterAsymmetricFolds') or identifiers['function']['filterAsymmetricFolds']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名DataclassFilterSource: str = keywordArguments.get('名DataclassFilterSource') or identifiers['variable'].get('stateDataclassFilterSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名DataclassInstanceFilterSource: str = keywordArguments.get('名DataclassInstanceFilterSource') or identifiers['variable'].get('stateInstanceFilterSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名CountingFilterSource: str = keywordArguments.get('名CountingFilterSource') or identifiers['variable'].get('countingFilterSource') or defaultMapFoldingSymmetric['variable']['counting']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名IndicesFilterSource: str = keywordArguments.get('名IndicesFilterSource') or identifiers['variable'].get('indicesFilterSource') or defaultMapFoldingSymmetric['variable']['indices']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
 	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
 	logicalPathSource: identifierDotAttribute = keywordArguments.get('logicalPathSource') or identifiers['logicalPath']['algorithm']
@@ -136,11 +147,14 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 
 	NodeChanger(Be.Return, Then.insertThisAbove([adjustTotalFolds])).visit(FunctionDef_count)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	foldsSymmetricIncrementCount: ast.Assign = Make.Assign(
 		[Make.Name(名DataclassInstance, Make.Store())]
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		, value=Make.Call(Make.Name(名FilterAsymmetricFolds), [Make.Name(名DataclassInstance)]))
 	NodeChanger(
 		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(名DataclassInstance, 名CountingSource))
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		, doThat=Then.replaceWith(foldsSymmetricIncrementCount)
 		).visit(FunctionDef_count)
 
@@ -156,22 +170,32 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 			, Grab.nameAttribute(Then.replaceWith(名Dataclass))
 		).visit(astModuleFilterSource)
 	imports.walkThis(astModuleFilterSource)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(
 		astModuleFilterSource
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		, 名FilterAsymmetricFoldsSource))
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	FunctionDef_filterAsymmetricFolds.name = 名FilterAsymmetricFolds
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	FunctionDef_filterAsymmetricFolds.args.args[0].arg = 名DataclassInstance
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	FunctionDef_filterAsymmetricFolds.args.args[0].annotation = Make.Name(名Dataclass)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	FunctionDef_filterAsymmetricFolds.returns = Make.Name(名Dataclass)
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名DataclassInstanceFilterSource))
 			, Grab.idAttribute(Then.replaceWith(名DataclassInstance))
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		).visit(FunctionDef_filterAsymmetricFolds)
 	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier(名CountingFilterSource))
 			, Grab.attrAttribute(Then.replaceWith(名Counting))
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		).visit(FunctionDef_filterAsymmetricFolds)
 	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier(名IndicesFilterSource))
 			, Grab.attrAttribute(Then.replaceWith(名Indices))
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		).visit(FunctionDef_filterAsymmetricFolds)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	astModule.body = [*imports.makeList_ast(), FunctionDef_filterAsymmetricFolds, *astModule.body]
 
 	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
@@ -180,7 +204,9 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 
 	return pathFilename
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def makeModulesFoldsSymmetric() -> None:
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Regenerate synchronous symmetric counting and Theorem 2 modules.
 
 	(AI generated docstring)
@@ -199,18 +225,25 @@ def makeModulesFoldsSymmetric() -> None:
 		```
 	"""
 	astModule: ast.Module = getModule(logicalPathInfix=defaultMapFolding['logicalPath']['algorithm'], identifierModule=defaultMapFolding['module']['algorithm'])
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	pathFilename: PurePath = addSymmetryCheck(astModule, defaultMapFoldingSymmetric)
 
 	astModule = parsePathFilename2astModule(pathFilename)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	make_jit_module(astModule, defaultMapFoldingSymmetric)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	makeInitializeState(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	pathFilename = makeTheorem2(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	pathFilename = trimTheorem2(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	makeTheorem2Numba(parsePathFilename2astModule(pathFilename), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	makeModulesFoldsSymmetric()

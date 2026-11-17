@@ -107,6 +107,7 @@ def uncrossRoadLaterally(是: Undo) -> tuple[int, Interval, Milepost]:
 	是.milepost.intervalComplement = 是.intervalComplement
 	return 是.n下i, interval, 是.milepost
 
+# TODO Replace this A000560 symmetry name with its precise counting convention.
 def doTheNeedful(n: int, *, symmetric: bool) -> int:
 	totalPermutations: int = 1
 	milepost: Milepost = makeMilepost()
@@ -122,5 +123,6 @@ def doTheNeedful(n: int, *, symmetric: bool) -> int:
 		totalPermutations = count(是.n下i, milepost, n)
 		if 是.countComplement:
 			totalPermutations += count(是.n下i, milepost.complement, n)
+		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		totalPermutations *= (2 - symmetric)
 	return totalPermutations

@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def transitionOnGroupsOfFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     while state.symmetricFolds == 0:
         if state.leaf1ndex <= 1 or state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:
@@ -20,6 +23,7 @@ def transitionOnGroupsOfFolds(state: StateMapFoldingSymmetric) -> StateMapFoldin
                         if state.leafComparison[次Left] != state.leafComparison[次Right]:
                             state.leafConnectee = 0
                             break
+                    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
                     state.symmetricFolds += state.leafConnectee
             else:
                 state.dimensionsUnconstrained = state.totalDimensions
@@ -62,5 +66,6 @@ def transitionOnGroupsOfFolds(state: StateMapFoldingSymmetric) -> StateMapFoldin
             state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leaf1ndex
             state.gapRangeStart[state.leaf1ndex] = state.gap1ndex
             state.leaf1ndex += 1
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state

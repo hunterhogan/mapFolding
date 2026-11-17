@@ -1,6 +1,7 @@
 """You can use this script to benchmark map-folding algorithms against known OEIS values."""
 from __future__ import annotations
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.basecamp import countFoldsSymmetric
 from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
 from typing import TYPE_CHECKING
@@ -30,6 +31,7 @@ if __name__ == '__main__':
 		mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 
 		timeStart: float = time.perf_counter()
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		totalFolds: int = countFoldsSymmetric(mapShape, flow, pathLikeWrite, CPUlimit=CPUlimit)
 
 		printEasyRunBenchmark(oeisID, n, totalFolds, timeStart, ratio=ratio)

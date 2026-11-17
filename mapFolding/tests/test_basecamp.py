@@ -10,6 +10,7 @@ from collections import Counter
 from functools import partial
 from importlib.util import find_spec
 from itertools import chain, product as CartesianProduct
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders, eliminateFolds, enumerateSequences
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import readAlbum, readText
@@ -19,6 +20,7 @@ from mapFolding.pinIt import (
 	pinLeavesDimension首二, pinPilesAtEnds, pinPile零Ante首零, pin首beans)
 from mapFolding.tests import assertEqualTo, messageTestFailure
 from mapFolding.tests.dataSamples.albums import (
+	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
 	albumMeanders3, albumMeanders4, albumMeandersSymmetric4, albumSemi4, albumSemi6, albumSemi7, albumSemiSymmetric4, albumSemiSymmetric7,
 	albumStamps4, albumStampsBlank4, contentsAlbumSemi4)
 from pathlib import Path
@@ -90,8 +92,10 @@ def test_countFoldsError(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit, 
 	, CartesianProduct(('A007822',), (1, 2, 5, 17), ('matrixAxisStrip', 'matrixAxisStripOrbit'))
 	, CartesianProduct(('A007822',), (1, 2, 5, 17), ('matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit'))
 )))
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def test_countFoldsSymmetric(oeisID: OEISid, n: int, flow: LiteralString, expected: int) -> None:
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	assertEqualTo(countFoldsSymmetric(mapShape, flow), expected, countFoldsSymmetric.__name__, mapShape, flow)
 
 @pytest.mark.parametrize('flow, n, kind, oeisID', tuple(chain(
@@ -102,8 +106,11 @@ def test_countFoldsSymmetric(oeisID: OEISid, n: int, flow: LiteralString, expect
 	, (pytest.param('prunePandas', 30, 'semi', 'A000682', marks=pytest.mark.xfail(strict=True, raises=UserWarning
 		, reason='getTotalBuckets underestimates the dataframeAnalyzed allocation; repair pending.')),)
 	, CartesianProduct(('prune', 'pruneNumPy', 'prunePandas'), (1, 2, 3, 22, 23, 30), ('meanders',), ('A005316',))
+	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 	, CartesianProduct(('matrixAxisPile', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'), (0, 1, 2, 3, 11, 16), ('symmetric',), ('A223096',))
+	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 	, CartesianProduct(('matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit'), (0, 1, 2, 3, 11, 16), ('symmetric',), ('A223096',))
+	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 	, CartesianProduct(('matrixAxisStripGap', 'matrixAxisStripGapOrbit'), (0, 1, 2, 3, 11, 16), ('symmetric',), ('A223096',))
 )))
 def test_countMeanders(kind: LiteralString, n: int, flow: LiteralString, oeisID: OEISid, expected: int) -> None:
@@ -184,7 +191,9 @@ parametersEnumerateSequencesWritten: tuple[ParameterSet, ...] = (
 	pytest.param(1, 'meanders', 'A005316', id='1-meanders')
 	, pytest.param(3, 'meanders', 'A005316', id='3-meanders')
 	, pytest.param(4, 'meanders', 'A005316', id='4-meanders')
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	, pytest.param(1, 'meanders symmetric', 'A077055', id='1-meandersSymmetric')
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	, pytest.param(4, 'meanders symmetric', 'A077055', id='4-meandersSymmetric')
 	, pytest.param(1, None, 'A000682', id='1-None')
 	, pytest.param(4, None, 'A000682', id='4-None')
@@ -192,8 +201,11 @@ parametersEnumerateSequencesWritten: tuple[ParameterSet, ...] = (
 	, pytest.param(4, 'semi', 'A000682', id='4-semi')
 	, pytest.param(6, 'semi', 'A000682', id='6-semi')
 	, pytest.param(7, 'semi', 'A000682', id='7-semi')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(2, 'semi-meanders symmetric', 'A000560', id='2-semiMeandersSymmetric')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(4, 'semi-meanders symmetric', 'A000560', id='4-semiMeandersSymmetric')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(7, 'semi-meanders symmetric', 'A000560', id='7-semiMeandersSymmetric')
 	, pytest.param(1, 'stamps', 'A000136', id='1-stamps')
 	, pytest.param(4, 'stamps', 'A000136', id='4-stamps')
@@ -216,11 +228,14 @@ def test_enumerateSequences(pathRootJobDEFAULT: Path, n: int, kind: LiteralStrin
 @pytest.mark.parametrize('n, kind, expected', (
 	pytest.param(3, 'meanders', albumMeanders3, id='3-meanders')
 	, pytest.param(4, 'meanders', albumMeanders4, id='4-meanders')
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	, pytest.param(4, 'meanders symmetric', albumMeandersSymmetric4, id='4-meandersSymmetric')
 	, pytest.param(4, 'semi', albumSemi4, id='4-semi')
 	, pytest.param(6, 'semi', albumSemi6, id='6-semi')
 	, pytest.param(7, 'semi', albumSemi7, id='7-semi')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(4, 'semi-meanders symmetric', albumSemiSymmetric4, id='4-semiMeandersSymmetric')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(7, 'semi-meanders symmetric', albumSemiSymmetric7, id='7-semiMeandersSymmetric')
 	, pytest.param(4, 'stamps', albumStamps4, id='4-stamps')
 	, pytest.param(4, 'stamps blank', albumStampsBlank4, id='4-stampsBlank')
@@ -231,14 +246,18 @@ def test_enumerateSequencesAlbum(n: int, kind: LiteralString, flow: Literal['per
 	assert isinstance(album, list), messageTestFailure(type(album), list, enumerateSequences.__name__, n, kind, flow)
 	assertEqualTo(Counter(album), Counter(expected), enumerateSequences.__name__, n, kind, flow)
 
+# TODO Replace this A000560 symmetry name with its precise counting convention.
 # The bilateral flows count only semi-meanders and symmetric semi-meanders.
 parametersEnumerateSequencesBilateral: tuple[ParameterSet, ...] = (
 	pytest.param(1, 'semi', 'A000682', id='1-semi')
 	, pytest.param(2, 'semi', 'A000682', id='2-semi')
 	, pytest.param(4, 'semi', 'A000682', id='4-semi')
 	, pytest.param(7, 'semi', 'A000682', id='7-semi')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(2, 'semi-meanders symmetric', 'A000560', id='2-semiMeandersSymmetric')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(4, 'semi-meanders symmetric', 'A000560', id='4-semiMeandersSymmetric')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(7, 'semi-meanders symmetric', 'A000560', id='7-semiMeandersSymmetric')
 )
 
@@ -278,7 +297,9 @@ def test_enumerateSequencesWriteCount(pathRootJobDEFAULT: Path, n: int, kind: Li
 @pytest.mark.parametrize('n, kind, flow, pathFilename, CPUlimit, expected', (
 	pytest.param(6, 'unknown', 'permutations', None, None, KeyError, id='kindUnknown-permutations')
 	, pytest.param(4, '', 'permutations', None, None, KeyError, id='kindEmpty-permutations')
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	, pytest.param(0, 'meanders symmetric', 'permutations', None, None, ArithmeticError, id='0-meandersSymmetric')
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	, pytest.param(1, 'semi-meanders symmetric', 'permutations', None, None, ArithmeticError, id='1-semiMeandersSymmetric')
 	, pytest.param(4, 'semi', 'permutations', contentsAlbumSemi4, None, FileExistsError, id='albumExists-permutations')
 	, pytest.param(4, 'semi', 'bilateral', contentsAlbumSemi4, None, FileExistsError, id='albumExists-bilateral')
@@ -286,10 +307,12 @@ def test_enumerateSequencesWriteCount(pathRootJobDEFAULT: Path, n: int, kind: Li
 	, pytest.param(4, 'stamps', 'bilateral', None, None, KeyError, id='stamps-bilateral')
 	, pytest.param(4, 'stamps blank', 'bilateral', None, None, KeyError, id='stampsBlank-bilateral')
 	, pytest.param(4, 'meanders', 'bilateral', None, None, KeyError, id='meanders-bilateral')
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	, pytest.param(4, 'meanders symmetric', 'bilateral', None, None, KeyError, id='meandersSymmetric-bilateral')
 	, pytest.param(4, 'stamps', 'bilateralConcurrent', None, 2, KeyError, id='stamps-bilateralConcurrent')
 	, pytest.param(4, 'stamps blank', 'bilateralConcurrent', None, 2, KeyError, id='stampsBlank-bilateralConcurrent')
 	, pytest.param(4, 'meanders', 'bilateralConcurrent', None, 2, KeyError, id='meanders-bilateralConcurrent')
+	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	, pytest.param(4, 'meanders symmetric', 'bilateralConcurrent', None, 2, KeyError, id='meandersSymmetric-bilateralConcurrent')
 ), indirect=['pathFilename'])
 def test_enumerateSequencesError(n: int, kind: LiteralString, flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'], pathFilename: Path, CPUlimit: ConcurrencyLimit, expected: type[Exception]) -> None:

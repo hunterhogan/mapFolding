@@ -1,18 +1,24 @@
 from __future__ import annotations
 
 from copy import deepcopy
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.dataBaskets import StateMapFoldingSymmetric
 from mapFolding.theTypes import 形TotalFolds
 from queue import Queue
 from threading import Lock, Thread
 
 boxOfThreads: list[Thread] = []
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 queueFutures: Queue[StateMapFoldingSymmetric] = Queue()
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 symmetricTotalFolds: int = 0
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 LOCKsymmetricTotalFolds = Lock()
 STOPsignal = object()
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """Initialize the shared queue, accumulated count, and background workers.
 
     (AI generated docstring)
@@ -36,9 +42,11 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
         initializeConcurrencyManager(maxWorkers)
         ```
     """
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     global boxOfThreads, symmetricTotalFolds, queueFutures
     boxOfThreads = []
     queueFutures = Queue()
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     symmetricTotalFolds = symmetricFolds
     indexThread = 0
     while indexThread < maxWorkers:
@@ -48,6 +56,7 @@ def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int=0) -> None
         indexThread += 1
 
 def _threadDoesSomething() -> None:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """I use this worker target to consume queued states and accumulate filtered counts.
 
     (AI generated docstring)
@@ -56,16 +65,23 @@ def _threadDoesSomething() -> None:
     symmetric count while holding the shared lock. The function exits after receiving the shared
     stop object.
     """
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     global symmetricTotalFolds
     while True:
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state: StateMapFoldingSymmetric = queueFutures.get()
         if state is STOPsignal:
             break
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state = _filterAsymmetricFolds(state)
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         with LOCKsymmetricTotalFolds:
+            # TODO Make the A007822 folding relation explicit in this symmetry terminology.
             symmetricTotalFolds += state.symmetricFolds
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """Queue a copied state for background symmetry filtering.
 
     (AI generated docstring)
@@ -88,7 +104,9 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> None:
     """
     queueFutures.put_nowait(deepcopy(state))
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def getSymmetricTotalFolds() -> 形TotalFolds:
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     """Stop initialized workers after queued work and return the accumulated symmetric count.
 
     (AI generated docstring)
@@ -113,8 +131,10 @@ def getSymmetricTotalFolds() -> 形TotalFolds:
         queueFutures.put(STOPsignal)
     for thread in boxOfThreads:
         thread.join()
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     return symmetricTotalFolds
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def _filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Leaf = 1
     state.leafComparison[0] = 1
@@ -130,25 +150,32 @@ def _filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSy
             if state.leafComparison[次Left] != state.leafComparison[次Right]:
                 state.leafConnectee = 0
                 break
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state.symmetricFolds += state.leafConnectee
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def activeLeafGreaterThan0(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > 0
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def activeLeafGreaterThanTotalLeaves(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > state.totalLeaves
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def activeLeafIsTheFirstLeaf(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex <= 1
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def activeLeafIsUnconstrainedInAllDimensions(state: StateMapFoldingSymmetric) -> bool:
     return not state.dimensionsUnconstrained
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def activeLeafUnconstrainedInThisDimension(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.dimensionsUnconstrained -= 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def filterCommonGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gapsWhere[state.gap1ndex] = state.gapsWhere[state.次MiniGap]
     if state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] == state.dimensionsUnconstrained:
@@ -156,31 +183,38 @@ def filterCommonGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetri
     state.countDimensionsGapped[state.gapsWhere[state.次MiniGap]] = 0
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def gapAvailable(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > 0
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def incrementActiveGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gap1ndex += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def incrementGap1ndexCeiling(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gap1ndexCeiling += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def incrementIndexMiniGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次MiniGap += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def initializeIndexMiniGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次MiniGap = state.gap1ndex
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def initializeVariablesToFindGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.dimensionsUnconstrained = state.totalDimensions
     state.gap1ndexCeiling = state.gapRangeStart[state.leaf1ndex - 1]
     state.次Dimension = 0
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def insertActiveLeaf(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Leaf = 0
     while state.次Leaf < state.leaf1ndex:
@@ -189,6 +223,7 @@ def insertActiveLeaf(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetri
         state.次Leaf += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def insertActiveLeafAtGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gap1ndex -= 1
     state.leafAbove[state.leaf1ndex] = state.gapsWhere[state.gap1ndex]
@@ -199,12 +234,15 @@ def insertActiveLeafAtGap(state: StateMapFoldingSymmetric) -> StateMapFoldingSym
     state.leaf1ndex += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def leafBelowSentinelIs1(state: StateMapFoldingSymmetric) -> bool:
     return state.leafBelow[0] == 1
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def leafConnecteeIsActiveLeaf(state: StateMapFoldingSymmetric) -> bool:
     return state.leafConnectee == state.leaf1ndex
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def lookForGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.gapsWhere[state.gap1ndexCeiling] = state.leafConnectee
     if state.countDimensionsGapped[state.leafConnectee] == 0:
@@ -212,40 +250,50 @@ def lookForGaps(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.countDimensionsGapped[state.leafConnectee] += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def lookupLeafConnecteeInConnectionGraph(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leaf1ndex]
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def loopingLeavesConnectedToActiveLeaf(state: StateMapFoldingSymmetric) -> bool:
     return state.leafConnectee != state.leaf1ndex
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def loopingThroughTheDimensions(state: StateMapFoldingSymmetric) -> bool:
     return state.次Dimension < state.totalDimensions
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def loopingToActiveGapCeiling(state: StateMapFoldingSymmetric) -> bool:
     return state.次MiniGap < state.gap1ndexCeiling
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def noGapsHere(state: StateMapFoldingSymmetric) -> bool:
     return state.leaf1ndex > 0 and state.gap1ndex == state.gapRangeStart[state.leaf1ndex - 1]
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def tryAnotherLeafConnectee(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.leafConnectee = state.connectionGraph[state.次Dimension, state.leaf1ndex, state.leafBelow[state.leafConnectee]]
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def tryNextDimension(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Dimension += 1
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def undoLastLeafPlacement(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.leaf1ndex -= 1
     state.leafBelow[state.leafAbove[state.leaf1ndex]] = state.leafBelow[state.leaf1ndex]
     state.leafAbove[state.leafBelow[state.leaf1ndex]] = state.leafAbove[state.leaf1ndex]
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     while activeLeafGreaterThan0(state):
         if activeLeafIsTheFirstLeaf(state) or leafBelowSentinelIs1(state):
             if activeLeafGreaterThanTotalLeaves(state):
+                # TODO Make the A007822 folding relation explicit in this symmetry terminology.
                 filterAsymmetricFolds(state)
             else:
                 state = initializeVariablesToFindGaps(state)
@@ -269,10 +317,13 @@ def count(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
         if gapAvailable(state):
             state = insertActiveLeafAtGap(state)
     else:
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state.symmetricFolds = getSymmetricTotalFolds()
+    # TODO Make the A007822 folding relation explicit in this symmetry terminology.
     state.symmetricFolds = (state.symmetricFolds + 1) // 2
     return state
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def doTheNeedful(state: StateMapFoldingSymmetric, maxWorkers: int) -> StateMapFoldingSymmetric:
     initializeConcurrencyManager(maxWorkers)
     state = count(state)

@@ -178,6 +178,7 @@ def A000136(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     return countTotal
 
 def A000560(n: int, f: Literal['A000682', 'A259701', 'A259703'] | LiteralString | None = None) -> int:
+    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A000560(n) as a function of A000682 or A259701 or A259703.
 
@@ -403,6 +404,7 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
     return countTotal
 
 def A001010(n: int, f: Literal['A000682 and A007822', 'A000682 and A001011'] | LiteralString | None = None) -> int:
+    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A001010(n) as a function of A000682 and A007822 or A000682 and A001011.
 
@@ -1304,6 +1306,7 @@ def A007746(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     return countTotal
 
 def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
+    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A007822(n) as a function of A001010.
 
@@ -1477,6 +1480,7 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     return countTotal
 
 def A045445(n: int, f: Literal['A045445'] | LiteralString | None = None) -> int:
+    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A045445(n) as a function of A045445.
 
@@ -1515,6 +1519,7 @@ def A045445(n: int, f: Literal['A045445'] | LiteralString | None = None) -> int:
     return countTotal
 
 def A060206(n: int, f: Literal['A000682', 'A005315, A005316, and A077460'] | LiteralString | None = None) -> int:
+    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A060206(n) as a function of A000682 or A005315, A005316, and A077460.
 
@@ -2260,6 +2265,7 @@ def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString
     return countTotal
 
 def A223096(n: int, f: Literal['A005316 and A077055', 'A077055 and A400429'] | LiteralString | None = None) -> int:
+    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A223096(n) as a function of A005316 and A077055 or A077055 and A400429.
 

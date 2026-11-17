@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from mapFolding.basecamp import countMeanders
-from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader, Z0Z_oeisName
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -13,12 +13,15 @@ import warnings
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
+	from mapFolding.theTypes import OEISid
 	from os import PathLike
 	from typing import LiteralString
 
 if __name__ == '__main__':
 	if (3, 14) <= sys.version_info:
 		warnings.filterwarnings("ignore", category=FutureWarning)
+
+	ratio: int = 0
 
 	state: StateMeanders | None = None
 	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/mapFolding/jobs')
@@ -32,22 +35,16 @@ if __name__ == '__main__':
 	flow = 'matrixNumPy'
 	flow = 'matrixAxisPileNumPy'
 
-	literallyAnnoyingListOfLiteralStrings: list[tuple[LiteralString, LiteralString]] = [
-			# ('A005315', 'closed'),
-			# ('A005316', 'meanders'),
-			# ('A000682', 'semi'),
-			('A223096', 'symmetric'),
-		]
-
-	ratio: int = 0
-
-	for oeisID, kind in literallyAnnoyingListOfLiteralStrings:
+	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
+	boxOfKind: list[LiteralString] = ['symmetric']
+	for kind in boxOfKind:
+		oeisID: OEISid = Z0Z_oeisName(kind)
 		printEasyRunHeader(oeisID, flow)
 
 		boxOf_n: list[int] = []
-		# boxOf_n.extend(range(2, 10))
-		boxOf_n.extend(range(27, 28))
-		boxOf_n.extend(range(28, 33))
+		boxOf_n.extend(range(2, 10))
+		# boxOf_n.extend(range(10, 28))
+		# boxOf_n.extend(range(28, 33))
 		# boxOf_n.extend(range(33, 38))
 		# boxOf_n.extend(range(38, 43))
 		# boxOf_n.extend(range(43, 46))

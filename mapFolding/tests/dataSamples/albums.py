@@ -130,6 +130,7 @@ albumSemi7: list[Folding] = [
 	(1, 2, 3, 4, 5, 6, 7),
 ]
 
+# TODO Replace this A000560 symmetry name with its precise counting convention.
 albumSemiSymmetric7: list[Folding] = [
 	(7, 6, 5, 4, 3, 2, 1),
 	(6, 5, 4, 3, 2, 7, 1),
@@ -220,7 +221,9 @@ albumSemiSymmetric7: list[Folding] = [
 	(2, 3, 4, 5, 6, 7, 1),
 ]
 
+# TODO Replace this A000560 symmetry name with its precise counting convention.
 albumSemiSymmetric4: list[Folding] = [(4, 3, 2, 1), (3, 2, 1, 4), (3, 4, 2, 1), (2, 4, 3, 1), (2, 3, 4, 1)]
 albumMeanders3: list[Folding] = [(1, 2, 3), (3, 2, 1)]
 albumMeanders4: list[Folding] = [(1, 2, 3, 4), (1, 4, 3, 2), (3, 2, 1, 4)]
+# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 albumMeandersSymmetric4: list[Folding] = [(1, 4, 3, 2), (1, 2, 3, 4)]

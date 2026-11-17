@@ -1,3 +1,4 @@
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Access shared identifier mappings and estimated counts for source generation.
 
 (AI generated docstring)
@@ -110,7 +111,9 @@ defaultMapFoldingNxN['module'].update({
 defaultMapFoldingNxN['logicalPath']['default'] = defaultMapFoldingNxN['logicalPath']['algorithm']
 defaultMapFoldingNxN['module']['default'] = defaultMapFoldingNxN['module']['algorithm']
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric: Default = deepcopy(defaultMapFolding)
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Access identifier and output defaults for symmetric folding modules.
 
 (AI generated docstring)
@@ -118,30 +121,42 @@ defaultMapFoldingSymmetric: Default = deepcopy(defaultMapFolding)
 This mapping extends the map-folding defaults with symmetric state, filtering, worker
 management, and synchronous and asynchronous generation identifiers.
 """
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['function'].update({
 	'_processCompletedFutures': '_processCompletedFutures'
 	, 'activeLeafGreaterThan0': 'activeLeafGreaterThan0'
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	, 'filterAsymmetricFolds': 'filterAsymmetricFolds'
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	, 'getSymmetricTotalFolds': 'getSymmetricTotalFolds'
 	, 'initializeConcurrencyManager': 'initializeConcurrencyManager'
 	, 'initializeState': defaultMapFolding['function']['initializeState']
 })
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['logicalPath']['synthetic'] += '.mapFoldingSymmetric'
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['logicalPath'].update({'assembly': 'kitAST.mapFoldingSymmetric'})
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['module'].update({
 	'algorithm': 'algorithm'
 	, 'algorithmNumba': 'algorithmNumba'
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	, 'algorithmSource': 'foldsSymmetric'
 	, 'asynchronous': 'asynchronous'
 	, 'asynchronousAnnex': '_asynchronousAnnex'
 })
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['variable'].update({
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	'counting': 'symmetricFolds'
 	, 'indices': 'indices'
 	, 'maxWorkers': 'maxWorkers'
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	, 'stateDataclass': 'StateMapFoldingSymmetric'
 })
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['logicalPath']['default'] = defaultMapFoldingSymmetric['logicalPath']['synthetic']
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 defaultMapFoldingSymmetric['module']['default'] = defaultMapFoldingSymmetric['module']['algorithm']
 
 defaultMatrixMeanders: Default = deepcopy(default)

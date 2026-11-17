@@ -151,6 +151,7 @@ def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
 		wind: int = state.wind
 		visitIntervals(state, mode)
 
+		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		if (not (mode.symmetricSemiMeanders and crossingAfter == 2)
 			and not (mode.semiMeanders and crossingAfter == 2)
 			and not (mode.folds and crossingAfter == 2 and not mode.equivalenceClasses)
@@ -516,9 +517,11 @@ class SettingsMode:
 	folds: bool = False
 	meanders: bool = False
 	semiMeanders: bool = False
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	symmetricSemiMeanders: bool = False
 
 def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
+	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
 	"""Generate stamp-folding or meander permutations at sequence index `n`.
 
 	(AI generated docstring)
@@ -571,10 +574,13 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 		https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43
 	"""
 	mode: SettingsMode = SettingsMode(
+		# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 		equivalenceClasses=kind in {'stamps blank', 'meanders symmetric'},
 		folds=kind in {'stamps', 'stamps blank'},
+		# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 		meanders=kind in {'meanders', 'meanders symmetric'},
 		semiMeanders=kind == 'semi',
+		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		symmetricSemiMeanders=kind == 'semi-meanders symmetric',
 	)
 	nNormalized: int = n - mode.semiMeanders

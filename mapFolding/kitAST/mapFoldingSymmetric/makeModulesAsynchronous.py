@@ -1,3 +1,4 @@
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Generate symmetric counting with queued background filtering.
 
 (AI generated docstring)
@@ -20,6 +21,7 @@ from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis, LedgerOfImports
 from mapFolding.kitAST.paths import getModule, getPathFilename
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
@@ -34,6 +36,7 @@ if TYPE_CHECKING:
 # TODO figure out asynchronous + numba.
 
 def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Make the check for symmetry in each folding pattern in a group of folds asynchronous to the rest of the symmetric map folding algorithm.
 
 	To do asynchronous filtering, a few things must happen.
@@ -48,15 +51,20 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	3. To discover the foldsSymmetric count for n=27, which is currently unknown, I estimate there will be 369192702554 calls to filterAsymmetricFolds.
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
 	"""
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	identifiers = identifiers or defaultMapFoldingSymmetric
 	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
 	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('asynchronous') or 名CallableSource
 	名CallableDispatcherSource: str = keywordArguments.get('名CallableDispatcherSource') or identifiers['function']['dispatcher']
 	名CallableDispatcher: str = keywordArguments.get('名CallableDispatcher') or identifiers['function'].get('asynchronousDispatcher') or 名CallableDispatcherSource
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFoldsSource: str = keywordArguments.get('名FilterAsymmetricFoldsSource') or identifiers['function']['filterAsymmetricFolds']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFolds: str = keywordArguments.get('名FilterAsymmetricFolds') or identifiers['function'].get('filterAsymmetricFoldsAsynchronous') or 名FilterAsymmetricFoldsSource
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFoldsPrivate: str = keywordArguments.get('名FilterAsymmetricFoldsPrivate') or f'_{名FilterAsymmetricFolds}'
 	名InitializeConcurrencyManager: str = keywordArguments.get('名InitializeConcurrencyManager') or identifiers['function']['initializeConcurrencyManager']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名GetSymmetricTotalFolds: str = keywordArguments.get('名GetSymmetricTotalFolds') or identifiers['function']['getSymmetricTotalFolds']
 	名ActiveLeafGreaterThan0Source: str = keywordArguments.get('名ActiveLeafGreaterThan0Source') or identifiers['function']['activeLeafGreaterThan0']
 	名ActiveLeafGreaterThan0: str = keywordArguments.get('名ActiveLeafGreaterThan0') or identifiers['function'].get('activeLeafGreaterThan0Asynchronous') or 名ActiveLeafGreaterThan0Source
@@ -69,14 +77,23 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	名MaximumWorkers: str = keywordArguments.get('名MaximumWorkers') or identifiers['variable']['maxWorkers']
 	logicalPathAssembly: identifierDotAttribute = keywordArguments.get('logicalPathAssembly') or identifiers['logicalPath']['assembly']
 	名ModuleAsynchronousAnnex: str = keywordArguments.get('名ModuleAsynchronousAnnex') or identifiers['module']['asynchronousAnnex']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名DataclassAnnexSource: str = keywordArguments.get('名DataclassAnnexSource') or identifiers['variable'].get('stateDataclassAnnexSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名DataclassInstanceAnnexSource: str = keywordArguments.get('名DataclassInstanceAnnexSource') or identifiers['variable'].get('stateInstanceAnnexSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名CountingAnnexSource: str = keywordArguments.get('名CountingAnnexSource') or identifiers['variable'].get('countingAnnexSource') or defaultMapFoldingSymmetric['variable']['counting']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名MaximumWorkersAnnexSource: str = keywordArguments.get('名MaximumWorkersAnnexSource') or identifiers['variable'].get('maxWorkersAnnexSource') or defaultMapFoldingSymmetric['variable']['maxWorkers']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名InitializeConcurrencyManagerAnnexSource: str = keywordArguments.get('名InitializeConcurrencyManagerAnnexSource') or identifiers['function'].get('initializeConcurrencyManagerAnnexSource') or defaultMapFoldingSymmetric['function']['initializeConcurrencyManager']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名GetSymmetricTotalFoldsAnnexSource: str = keywordArguments.get('名GetSymmetricTotalFoldsAnnexSource') or identifiers['function'].get('getSymmetricTotalFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['getSymmetricTotalFolds']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFoldsAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	名FilterAsymmetricFoldsPrivateAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsPrivateAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsPrivateAnnexSource') or f'_{名FilterAsymmetricFoldsAnnexSource}'
 	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
 	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
@@ -98,10 +115,14 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier(名CountingSource))
 			, Grab.attrAttribute(Then.replaceWith(名Counting))
 		).visit(astModule)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFolds))
 		).visit(astModule)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名FilterAsymmetricFoldsSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFolds))
 		).visit(astModule)
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名ActiveLeafGreaterThan0Source))
@@ -117,16 +138,21 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 		).captureLastMatch(astModule))
 	astFunctionDef_count.name = 名Callable
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	exprCallFilterAsymmetricFoldsState: ast.Expr = Make.Expr(Make.Call(
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		Make.Name(名FilterAsymmetricFolds)
 		, listParameters=[Make.Name(名DataclassInstance)]))
 
 	NodeChanger(
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		Be.Assign.valueIs(IfThis.isCallIdentifier(名FilterAsymmetricFolds))
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		, Then.replaceWith(exprCallFilterAsymmetricFoldsState)).visit(astFunctionDef_count)
 
 	assignTotalToCountingIdentifier: ast.Assign = Make.Assign(
 		[Make.Attribute(Make.Name(名DataclassInstance), 名Counting, context=Make.Store())]
+		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		, value=Make.Call(Make.Name(名GetSymmetricTotalFolds)))
 	NodeChanger(
 		findThis=Be.While.testIs(IfThis.isCallIdentifier(名ActiveLeafGreaterThan0))
@@ -193,31 +219,46 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名InitializeConcurrencyManagerAnnexSource))
 			, Grab.idAttribute(Then.replaceWith(名InitializeConcurrencyManager))
 		).visit(astModuleAsynchronousAnnex)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名GetSymmetricTotalFoldsAnnexSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.nameAttribute(Then.replaceWith(名GetSymmetricTotalFolds))
 		).visit(astModuleAsynchronousAnnex)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名GetSymmetricTotalFoldsAnnexSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.idAttribute(Then.replaceWith(名GetSymmetricTotalFolds))
 		).visit(astModuleAsynchronousAnnex)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsAnnexSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFolds))
 		).visit(astModuleAsynchronousAnnex)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名FilterAsymmetricFoldsAnnexSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFolds))
 		).visit(astModuleAsynchronousAnnex)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsPrivateAnnexSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
 		).visit(astModuleAsynchronousAnnex)
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名FilterAsymmetricFoldsPrivateAnnexSource))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
 		).visit(astModuleAsynchronousAnnex)
 	imports.walkThis(astModuleAsynchronousAnnex)
 	removeImports.visit(astModuleAsynchronousAnnex)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFolds))
+			# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
 		).visit(astModule)
 
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsPrivate))
 			, Then.removeIt
 		).visit(astModuleAsynchronousAnnex)
@@ -230,7 +271,9 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 
 	return pathFilename
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Regenerate the configured asynchronous symmetric counting module.
 
 	(AI generated docstring)
@@ -252,7 +295,9 @@ def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
 		makeModulesFoldsSymmetricAsynchronous()
 		```
 	"""
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	return addSymmetryCheckAsynchronous(getModule(identifiers=defaultMapFoldingSymmetric), defaultMapFoldingSymmetric)
 
 if __name__ == '__main__':
+	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	makeModulesFoldsSymmetricAsynchronous()

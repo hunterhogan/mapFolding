@@ -88,6 +88,7 @@ def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:
 	return lookupTotalFolds.get(tuple(mapShape))
 
 def makeLookupTotalFoldsKnown() -> dict[tuple[int, ...], int]:
+	# TODO Disambiguate 'symmetric' here by naming the exact relation or equivalence being counted.
 	"""Build a map-shape lookup from known map-folding sequence values.
 
 	(AI generated docstring)

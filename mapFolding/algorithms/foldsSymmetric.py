@@ -1,3 +1,4 @@
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Count the number of symmetric folds in the group of folds defined by `leafBelow`.
 
 Notes
@@ -11,9 +12,11 @@ Notes
 """
 from __future__ import annotations
 
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
 # IMPROVEMENT this algorithm is slow.
+# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Leaf = 1
     state.leafComparison[0] = 1
@@ -36,6 +39,7 @@ def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSym
             if state.leafComparison[次Left] != state.leafComparison[次Right]:
                 state.leafConnectee = 0
                 break
+        # TODO Make the A007822 folding relation explicit in this symmetry terminology.
         state.symmetricFolds += state.leafConnectee
 
     return state
