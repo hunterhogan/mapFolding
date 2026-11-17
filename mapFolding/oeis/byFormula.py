@@ -1724,7 +1724,7 @@ def A077055(n: int, f: Literal['A078592', 'A005316', 'A005316 and A223096', 'A22
     is "Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.".
 
     The domain of A077055 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 51.
+    has not yet been computed is 60.
 
     Parameters
     ----------
@@ -2267,7 +2267,7 @@ def A223096(n: int, f: Literal['A005316 and A077055', 'A077055 and A400429'] | L
     is "Number of symmetric meander shapes with 2n+1 crossings.".
 
     The domain of A223096 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 25.
+    has not yet been computed is 32.
 
     Parameters
     ----------
