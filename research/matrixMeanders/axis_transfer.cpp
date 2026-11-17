@@ -418,8 +418,13 @@ int main(int argc, char **argv) {
         if (n < 0 || n > 32) throw std::runtime_error("supported indices: 0..32");
         if ((flow == "pile" || flow == "pile-plain") && n > 31)
             throw std::runtime_error("use pile-wide above n=31");
-        if (flow != "pile" && flow != "pile-plain" && flow != "pile-wide" && n > 30)
-            throw std::runtime_error("gap and strip keys support n<=30");
+        // Strip starts with 3 bits and gains at most 2 per step: at n=31,
+        // terminal keys have at most 63 bits, and transition inputs at most 61.
+        if ((flow == "strip" || flow == "strip-plain") && n > 31)
+            throw std::runtime_error("strip keys support n<=31");
+        if (flow != "pile" && flow != "pile-plain" && flow != "pile-wide"
+            && flow != "strip" && flow != "strip-plain" && n > 30)
+            throw std::runtime_error("gap keys support n<=30");
         rlimit memory{U64(28) << 30, U64(28) << 30};
         if (setrlimit(RLIMIT_AS, &memory)) throw std::runtime_error("cannot set memory limit");
         auto start = std::chrono::steady_clock::now();

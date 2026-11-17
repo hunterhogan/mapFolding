@@ -5,10 +5,14 @@ Run from the activated repository environment after building permutationStatisti
 
 The upper bound is inclusive. Existing reference cells, semi-meander totals, and
 restricted row sums must all agree before any terms from a row are saved.
+Use --partitions 64 --workers 8 --checkpoint-dir PATH to distribute disjoint
+prefix subtrees and retain each completed partition for later resumption.
 """
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -24,13 +28,48 @@ def main() -> None:
     parser.add_argument('start', type=int)
     parser.add_argument('stop', type=int)
     parser.add_argument('--executable', type=Path, required=True)
+    parser.add_argument('--partitions', type=int, default=1)
+    parser.add_argument('--workers', type=int, default=1)
+    parser.add_argument('--checkpoint-dir', type=Path)
     args = parser.parse_args()
+    if args.partitions < 1 or args.partitions > 1024 or args.workers < 1:
+        parser.error('Use 1..1024 partitions and a positive worker count.')
+    if args.checkpoint_dir:
+        args.checkpoint_dir /= hashlib.sha256(args.executable.read_bytes()).hexdigest()
+        args.checkpoint_dir.mkdir(parents=True, exist_ok=True)
     families = {'A259698': 'runs', 'A259703': 'first', 'A259701': 'restricted'}
     for n in range(args.start, args.stop + 1):
         print(f'Enumerating n={n}', flush=True)
         start = perf_counter()
-        result = subprocess.run([str(args.executable), str(n)], check=True, capture_output=True, text=True)
-        record = json.loads(result.stdout)
+        def run_partition(partition: int) -> dict:
+            cache = args.checkpoint_dir / f'n{n}_part{partition}_of{args.partitions}.json' if args.checkpoint_dir else None
+            if cache and cache.exists():
+                partial = json.loads(cache.read_text())
+            else:
+                command = [str(args.executable), str(n)]
+                if args.partitions > 1:
+                    command.extend([str(partition), str(args.partitions)])
+                result = subprocess.run(command, check=True, capture_output=True, text=True)
+                partial = json.loads(result.stdout)
+                if cache:
+                    temporary = cache.with_suffix('.tmp')
+                    temporary.write_text(json.dumps(partial) + '\n')
+                    temporary.replace(cache)
+            assert partial['n'] == n
+            assert partial.get('partition', 0) == partition and partial.get('partitions', 1) == args.partitions
+            return partial
+
+        pool = ThreadPoolExecutor(max_workers=min(args.workers, args.partitions))
+        try:
+            partials = list(pool.map(run_partition, range(args.partitions)))
+        finally:
+            pool.shutdown(wait=True, cancel_futures=True)
+        record = {'n': n, 'total': sum(partial['total'] for partial in partials)}
+        for key in ('runs', 'first', 'restricted'):
+            record[key] = [sum(values) for values in zip(*(partial[key] for partial in partials), strict=True)]
+        if args.partitions > 1:
+            record['partitions'] = args.partitions
+            record['workers'] = args.workers
         assert record['n'] == n
         assert record['total'] == getValuesKnown('A000682')[n]
         assert sum(record['runs']) == sum(record['first']) == record['total']

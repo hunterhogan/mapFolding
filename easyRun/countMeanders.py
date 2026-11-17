@@ -31,9 +31,9 @@ if __name__ == '__main__':
 	flow = 'matrixMeanders'
 	flow = 'prune'
 	flow = 'prunePandas'
-	flow = 'pruneNumPy'
 	flow = 'matrixNumPy'
 	flow = 'matrixAxisPileNumPy'
+	flow = 'pruneNumPy'
 
 	boxOfKind: list[LiteralString] = ['meander shapes']
 	for kind in boxOfKind:

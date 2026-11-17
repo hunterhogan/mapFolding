@@ -89,3 +89,4 @@
 {"flow": "cpp-pile", "n": 29, "value": 44051514192054, "tail_layers": 3, "seconds": 82.7169, "max_rss_kib": 6295508, "expected": null, "shape_n": 59, "shape_numerator_remainder": 0, "shape_value": 319960722152016248206479788, "shape_expected": null}
 {"flow": "cpp-pile", "n": 30, "value": 147170887842404, "tail_layers": 4, "seconds": 204.975, "max_rss_kib": 6295380, "expected": null}
 {"flow": "cpp-pile", "n": 31, "value": 492550457391043, "tail_layers": 5, "seconds": 771.42, "max_rss_kib": 6295260, "expected": null}
+{"flow": "cpp-pile-wide", "n": 32, "value": 1650268613634453, "tail_layers": 5, "seconds": 2241.27, "max_rss_kib": 12586968, "expected": null, "checkpoint_chunks_verified": 8192, "checkpoint_doubled_sum": 3300537227268906}

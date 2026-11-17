@@ -1,6 +1,8 @@
 // Statistics collector adapted from the attributed Sawada-Li generator below.
 // Build: gcc -O3 -march=native -std=c11 research/permutationStatistics.c -o /tmp/permutationStatistics
 // Run: /tmp/permutationStatistics 15
+// Optional: n partition partitions selects one residue class of depth-10 prefixes.
+// Summing every partition recovers the serial search exactly.
 // Enumerates the A000682(n) permutations starting with 1.
 // Run statistics use inverse-permutation direction changes and Sade first-run lengths,
 // as defined by the PARI programs in the bundled A259698/A259701/A259703 entries.
@@ -42,6 +44,8 @@ List perm;
 Node node[MAX_VAL];
 int N, MEANDER=0, SEMI=1, STAMP=0, UNLABELED=0, SYM_SEMI=0;
 uint64_t total=0, runs_hist[MAX_VAL]={0}, first_hist[MAX_VAL]={0}, restricted_hist[MAX_VAL]={0};
+int partition_id=0, partition_count=1, partition_depth=10;
+uint64_t partition_ordinal=0;
 
 //--------------------------------------------------------------------------------
 //--------------------------------------------------------------------------------
@@ -145,6 +149,9 @@ void RestorePerm(int t, int i) {
 void Gen(int t, Node* X, int depth) {
     Node *Y;
     int i, up, j, n, p, old_up_side, old_up_interval, side;
+
+    // Every prefix at this depth roots one disjoint subtree of the serial search.
+    if (partition_count>1 && t==partition_depth && partition_ordinal++%partition_count!=(uint64_t)partition_id) return;
 
     if (t > N) Print();
     else {
@@ -261,8 +268,8 @@ void Gen(int t, Node* X, int depth) {
 int main(int argc, char **argv) {
     int i;
 
-    if (argc!=2) {
-        fprintf(stderr, "usage: permutationStatistics n (3<=n<=32)\n");
+    if (argc!=2 && argc!=4) {
+        fprintf(stderr, "usage: permutationStatistics n [partition partitions] (3<=n<=32)\n");
         return 2;
     }
     N=atoi(argv[1])-1;
@@ -270,6 +277,11 @@ int main(int argc, char **argv) {
         fprintf(stderr, "supported indices: 3..32\n");
         return 2;
     }
+    if (argc==4) {
+        partition_id=atoi(argv[2]); partition_count=atoi(argv[3]);
+        if (partition_count<1 || partition_count>1024 || partition_id<0 || partition_id>=partition_count) return 2;
+    }
+    if (partition_depth>N+1) partition_depth=N+1;
 
     // INITIALIZE NODES
     for (i=0; i<=2*N; i++) {
@@ -290,7 +302,8 @@ int main(int argc, char **argv) {
     interval[2].next_perm = NULL;
 
     Gen(2, &node[0], 0);
-    printf("{\"n\":%d,\"total\":%" PRIu64, N+1, total);
+    printf("{\"n\":%d,\"partition\":%d,\"partitions\":%d,\"total\":%" PRIu64,
+           N+1, partition_id, partition_count, total);
     uint64_t *histograms[3]={runs_hist,first_hist,restricted_hist};
     const char *names[3]={"runs","first","restricted"};
     for (int h=0; h<3; ++h) {
