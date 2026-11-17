@@ -132,7 +132,7 @@ def makeLookupMeandersDiagonal(n: int, 次diagonal: int) -> StateMeanders:
     arcCode: int = (1 << 2 * (n - 2 * 次diagonal) + 2) - 1
     return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
 
-def prune(state: StateMeanders) -> StateMeanders:
+def prune[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateMeanders:
     """Accumulate final contributions for dictionary states with known completion counts.
 
     (AI generated docstring)
@@ -258,7 +258,7 @@ else:
         return intWithExtra_0b1 ^ flipExtra_0b1_Here
     flipDyckEndpoint = flipDyckEndpoint.ufunc
 
-def countBigInt(state: StateMeanders) -> StateMeanders:
+def countBigInt[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     (AI generated docstring)
@@ -340,7 +340,7 @@ def integersWidePandas吗(state: StateMeanders, dataframeAnalyzed: pandas.DataFr
     bitWidthMeanders: int = (4 * int(dataframeAnalyzed['meanders'].to_numpy().sum(dtype=object))).bit_length()
     return state.bitWidthLimit < max(bitWidthArcCode, bitWidthMeanders)
 
-def pruneDataFrame(state: StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> tuple[StateMeanders, pandas.DataFrame]:
+def pruneDataFrame[形StateMeanders: StateMeanders](state: 形StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> tuple[形StateMeanders, pandas.DataFrame]:
     """Accumulate known diagonal contributions and retain the remaining dataframe rows.
 
     (AI generated docstring)

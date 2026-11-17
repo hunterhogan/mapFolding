@@ -56,7 +56,7 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
             findTheExtra_0b1 += neg(1)
     return flipExtra_0b1_Here
 
-def count(state: StateMeanders) -> StateMeanders:
+def count[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
 
     (AI generated docstring)

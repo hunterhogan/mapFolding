@@ -1616,42 +1616,53 @@ class StateMeandersAxis(StateMeanders):
 
 	Attributes
 	----------
-	kind : Literal['pile', 'strip'] | LiteralString
-		Axis-meander family. An empty initial lookup selects arch code `0b1111` for `'pile'` or
-		`0b110` for `'strip'`, each with count one. Other labels require a nonempty supplied lookup.
+	kind : Literal['pile', 'pileDeadEnd', 'pileDeadEndOutward', 'strip', 'stripGap'] | LiteralString
+		Axis-meander family. An empty initial lookup selects the arch codes of the first transfer step
+		of the family's counting module, each with count one. `'pileDeadEnd'` and
+		`'pileDeadEndOutward'` share their arch codes; `'pileDeadEndOutward'` places leaf 1's dead end
+		only where it is not enclosed. Other labels require a nonempty supplied lookup.
 	lookupMeanders : dict[int, int]
 		Active arch-code counts. A nonempty supplied dictionary is retained.
 	arcCodeMaximum : int
-		Fixed threshold `1 << (2 * n + 4)`, recomputed during initialization and boundary reduction.
+		Fixed threshold `1 << (4 * n + 4)` for `'stripGap'` and `1 << (2 * n + 4)` for other labels,
+		recomputed during initialization and boundary reduction.
 
 	See Also
 	--------
 	`StateMeanders`
 		Inspect the inherited transfer boundary, count accumulation, and integer-width settings.
 	"""
-	kind: Literal['pile', 'strip'] | LiteralString
+	kind: Literal['pile', 'pileDeadEnd', 'pileDeadEndOutward', 'strip', 'stripGap'] | LiteralString
 
 	def set_arcCodeMaximum(self) -> None:
 		"""Set the fixed arch-code threshold for the axis-meander problem.
 
 		(AI generated docstring)
 
-		`self.arcCodeMaximum` receives `1 << (2 * self.n + 4)`, independent of `self.boundary`.
-		The inherited boundary reduction therefore retains the same threshold while `self.n`
-		remains unchanged.
+		`self.arcCodeMaximum` receives `1 << (4 * self.n + 4)` for `'stripGap'` and
+		`1 << (2 * self.n + 4)` for other labels, independent of `self.boundary`. The inherited
+		boundary reduction therefore retains the same threshold while `self.n` remains unchanged.
 		"""
-		self.arcCodeMaximum = 1 << (2 * self.n + 4)
+		self.arcCodeMaximum = 1 << {'stripGap': 4 * self.n + 4}.get(self.kind, 2 * self.n + 4)
 
 	def __post_init__(self) -> None:
 		"""Initialize axis-meander counts and inherited transfer limits.
 
 		(AI generated docstring)
 
-		An empty `lookupMeanders` selects `{0b1111: 1}` for `'pile'` or `{0b110: 1}` for `'strip'`.
-		A nonempty supplied lookup is retained without consulting `kind`. A zero boundary selects
-		`n - 1`, and the arch-code width, locator mask, and fixed axis threshold are refreshed.
+		An empty `lookupMeanders` selects `{0b1111: 1}` for `'pile'`, `{0b110: 1}` for `'strip'`,
+		`{0b110010: 1}` for `'stripGap'`, and `{0b1111: 1, ~0b1101: 1, ~0b1110: 1}` for `'pileDeadEnd'`
+		and `'pileDeadEndOutward'`. A nonempty supplied lookup is retained without consulting `kind`.
+		A zero boundary selects `n - 1`, and the arch-code width, locator mask, and fixed axis
+		threshold are refreshed.
 		"""
-		self.lookupMeanders = self.lookupMeanders or {{'pile': 0b1111, 'strip': 0b110}[self.kind]: 1}
+		self.lookupMeanders = self.lookupMeanders or {
+			'pile': {0b1111: 1}
+			, 'pileDeadEnd': {0b1111: 1, ~0b1101: 1, ~0b1110: 1}
+			, 'pileDeadEndOutward': {0b1111: 1, ~0b1101: 1, ~0b1110: 1}
+			, 'strip': {0b110: 1}
+			, 'stripGap': {0b110010: 1}
+		}[self.kind]
 		super().__post_init__()
 
 #================== `numba` types =================================================================

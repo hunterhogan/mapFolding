@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
-	from mapFolding.dataBaskets import StateMeanders
+	from mapFolding.dataBaskets import StateMeandersAxis
 
 def getBitsLocator(arcCode: int) -> int:
 	return (1 << (arcCode.bit_length() | 1) + 1) // 3
@@ -49,7 +49,7 @@ def isAxisMirrored吗(arcCode: int) -> bool:
 def isHalfJoined吗(arcCode: int) -> bool:
 	return isAxisMirrored吗(arcCode) and isJoined吗(makeLookupPartner(arcCode))
 
-def doTheNeedful(state: StateMeanders) -> StateMeanders:
+def doTheNeedful(state: StateMeandersAxis) -> StateMeandersAxis:
 	state = count(state)
 	state.countAddend += sum(map(mul, state.lookupMeanders.values(), map(add
 		, map(isHalfJoined吗, state.lookupMeanders.keys()), map(isHalfJoined吗, map(reflectArcCode, state.lookupMeanders.keys())), strict=True), strict=True)) // 2

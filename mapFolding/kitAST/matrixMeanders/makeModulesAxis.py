@@ -14,7 +14,7 @@ Functions
 	makeAxisPileOrbit
 		Combine reflection-orbit counting with pile-axis completion.
 	makeModulesAxis
-		Write the strip-axis orbit, pile-axis orbit, and pile-axis NumPy modules.
+		Write the axis-meander orbit modules and the pile-axis NumPy module.
 	makeOrbit
 		Represent each generated arch code by the smaller code in its reflection orbit.
 Variables
@@ -53,8 +53,12 @@ defaultMatrixAxis['module'].update({
 	'axisPile': 'matrixAxisPile'
 	, 'axisPileNumPy': 'matrixAxisPileNumPy'
 	, 'axisPileOrbit': 'matrixAxisPileOrbit'
+	, 'axisPileDeadEnd': 'matrixAxisPileDeadEnd'
+	, 'axisPileDeadEndOrbit': 'matrixAxisPileDeadEndOrbit'
 	, 'axisStrip': 'matrixAxisStrip'
 	, 'axisStripOrbit': 'matrixAxisStripOrbit'
+	, 'axisStripGap': 'matrixAxisStripGap'
+	, 'axisStripGapOrbit': 'matrixAxisStripGapOrbit'
 })
 defaultMatrixAxis['variable'].update({'arcCodeAnalysis': 'arcCodeAnalysis'})
 
@@ -214,18 +218,18 @@ def makeAxisPileNumPy(astModuleAxisPile: ast.Module, astModuleNumPy: ast.Module,
 	return Make.Module([Make.ImportFrom('operator', [Make.alias('itemgetter')]), *astModuleNumPy.body, *astModuleAxisPile.body])
 
 def makeModulesAxis() -> None:
-	"""Write the strip-axis orbit, pile-axis orbit, and pile-axis NumPy modules.
+	"""Write the axis-meander orbit modules and the pile-axis NumPy module.
 
 	(AI generated docstring)
 
-	You can generate all three variants using the current `defaultMatrixAxis` settings. Source
+	You can generate all five variants using the current `defaultMatrixAxis` settings. Source
 	algorithms are read from the configured source package and algorithm path. Imports are
 	consolidated before each generated module is written.
 
 	See Also
 	--------
 	`makeOrbit`
-		Transform strip-axis counting to use reflection representatives.
+		Transform strip-axis, strip-gap, and dead-end pile counting to use reflection representatives.
 	`makeAxisPileOrbit`
 		Assemble pile-axis reflection-orbit counting.
 	`makeAxisPileNumPy`
@@ -233,8 +237,9 @@ def makeModulesAxis() -> None:
 
 	File Replacement
 	----------------
-	The configured `axisStripOrbit`, `axisPileOrbit`, and `axisPileNumPy` output modules are
-	written to the configured generated-module directory, replacing existing files.
+	The configured `axisStripOrbit`, `axisStripGapOrbit`, `axisPileDeadEndOrbit`, `axisPileOrbit`, and
+	`axisPileNumPy` output modules are written to the configured generated-module directory, replacing
+	existing files.
 	"""
 	identifiers: Default = defaultMatrixAxis
 	pathRoot: PurePath = identifiers['filesystem']['sourcePackage']
@@ -245,6 +250,14 @@ def makeModulesAxis() -> None:
 
 	toDisk(combineModules(makeOrbit(parsePathFilename2astModule(pathFilenameAxisStrip), identifiers), Make.Module([]))
 		, identifiers, {}, identifiers['module']['axisStripOrbit'])
+
+	toDisk(combineModules(makeOrbit(parsePathFilename2astModule(getPathFilename(
+		pathRoot, logicalPathAlgorithm, identifiers['module']['axisStripGap'])), identifiers), Make.Module([]))
+		, identifiers, {}, identifiers['module']['axisStripGapOrbit'])
+
+	toDisk(combineModules(makeOrbit(parsePathFilename2astModule(getPathFilename(
+		pathRoot, logicalPathAlgorithm, identifiers['module']['axisPileDeadEnd'])), identifiers), Make.Module([]))
+		, identifiers, {}, identifiers['module']['axisPileDeadEndOrbit'])
 
 	toDisk(combineModules(makeAxisPileOrbit(parsePathFilename2astModule(pathFilenameAxisPile), parsePathFilename2astModule(
 		getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])), identifiers), Make.Module([]))

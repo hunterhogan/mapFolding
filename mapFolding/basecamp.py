@@ -193,7 +193,7 @@ def countFolds(mapShape: Sequence[int]
 
 	return totalFolds
 
-def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'matrixAxisStrip', 'matrixAxisStripOrbit', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: ConcurrencyLimit = None, suffix: str = ".totalFolds") -> int:
+def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal['algorithm', 'algorithmNumba', 'asynchronous', 'matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit', 'matrixAxisStrip', 'matrixAxisStripOrbit', 'theorem2', 'theorem2Numba', 'theorem2Trimmed', ''] = '', pathLikeWrite: PathLike[str] | None = None, *, CPUlimit: ConcurrencyLimit = None, suffix: str = ".totalFolds") -> int:
 	"""Count foldings constrained by rotational symmetry.
 
 	(AI generated docstring)
@@ -262,6 +262,12 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	elif flow == 'matrixAxisStripOrbit':
 		from mapFolding.synthesized.matrixMeanders.matrixAxisStripOrbit import doTheNeedful
 		totalFolds = doTheNeedful(StateMeandersAxis(mapShape[-1] // 2 - 1, 'strip')).totalMeanders
+	elif flow == 'matrixAxisPileDeadEnd':
+		from mapFolding.algorithms.matrixAxisPileDeadEnd import doTheNeedful
+		totalFolds = doTheNeedful(StateMeandersAxis(mapShape[-1] // 2 - 1, 'pileDeadEnd')).totalMeanders
+	elif flow == 'matrixAxisPileDeadEndOrbit':
+		from mapFolding.synthesized.matrixMeanders.matrixAxisPileDeadEndOrbit import doTheNeedful
+		totalFolds = doTheNeedful(StateMeandersAxis(mapShape[-1] // 2 - 1, 'pileDeadEnd')).totalMeanders
 	else:
 		match flow:
 			case 'algorithmNumba':
@@ -292,7 +298,8 @@ def countMeanders(
 	kind: Literal['closed', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
 	, n: int | None = None
 	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'
-		, 'matrixAxisPile', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'] | LiteralString | None = None
+		, 'matrixAxisPile', 'matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'
+		, 'matrixAxisStripGap', 'matrixAxisStripGapOrbit'] | LiteralString | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, state: StateMeanders | None = None
@@ -366,7 +373,13 @@ def countMeanders(
 		if kind == 'closed':
 			state = StateMeanders(2 * n - 1, 'meanders')
 		elif kind == 'symmetric':
-			state = StateMeandersAxis(n, 'pile')
+			match flow:
+				case 'matrixAxisPileDeadEnd' | 'matrixAxisPileDeadEndOrbit':
+					state = StateMeandersAxis(n, 'pileDeadEndOutward')
+				case 'matrixAxisStripGap' | 'matrixAxisStripGapOrbit':
+					state = StateMeandersAxis(n, 'stripGap')
+				case _:
+					state = StateMeandersAxis(n, 'pile')
 		else:
 			state = StateMeanders(n, kind)
 
@@ -379,10 +392,18 @@ def countMeanders(
 
 	if isinstance(state, StateMeandersAxis):
 		match flow:
+			case 'matrixAxisPileDeadEnd':
+				from mapFolding.algorithms.matrixAxisPileDeadEnd import doTheNeedful
+			case 'matrixAxisPileDeadEndOrbit':
+				from mapFolding.synthesized.matrixMeanders.matrixAxisPileDeadEndOrbit import doTheNeedful
 			case 'matrixAxisPileNumPy':
 				from mapFolding.synthesized.matrixMeanders.matrixAxisPileNumPy import doTheNeedful
 			case 'matrixAxisPileOrbit':
 				from mapFolding.synthesized.matrixMeanders.matrixAxisPileOrbit import doTheNeedful
+			case 'matrixAxisStripGap':
+				from mapFolding.algorithms.matrixAxisStripGap import doTheNeedful
+			case 'matrixAxisStripGapOrbit':
+				from mapFolding.synthesized.matrixMeanders.matrixAxisStripGapOrbit import doTheNeedful
 			case 'matrixAxisPile' | _:
 				from mapFolding.algorithms.matrixAxisPile import doTheNeedful
 

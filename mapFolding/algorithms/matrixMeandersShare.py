@@ -139,7 +139,7 @@ def makeLookupMeandersDiagonal(n: int, 次diagonal: int) -> StateMeanders:
 	arcCode: int = (1 << (2 * (n - 2 * 次diagonal) + 2)) - 1
 	return StateMeanders(n, 'semi', lookupMeanders={arcCode: 1})
 
-def prune(state: StateMeanders) -> StateMeanders:
+def prune[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateMeanders:
 	"""Accumulate final contributions for dictionary states with known completion counts.
 
 	(AI generated docstring)
