@@ -279,8 +279,7 @@ lookupCommonNames: dict[OEISid, tuple[LiteralString, ...]] = {
 	'A005315': ('closed meanders', 'closed meandric numbers', 'closed'),
 	'A005316': ('meanders', 'meandric numbers', 'open meanders'),
 	'A006663': ('projective meanders',),
-	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
-	'A077055': ('meanders symmetric', 'symmetric meanders'),
+	'A077055': ('meander shapes', 'meander shape', 'open meander shapes', 'open meander shape'),
 	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 	'A223096': ('symmetric', 'symmetric meander shapes'),
 	'A227167': ('meandering curves',),

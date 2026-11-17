@@ -26,8 +26,7 @@ if __name__ == '__main__':
 		n: int = 2
 		boxOfKind.append('stamps blank')
 		boxOfKind.append('stamps')
-		# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
-		boxOfKind.append('meanders symmetric')
+		boxOfKind.append('meander shapes')
 		boxOfKind.append('meanders')
 		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		boxOfKind.append('semi-meanders symmetric')

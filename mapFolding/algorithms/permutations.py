@@ -521,7 +521,7 @@ class SettingsMode:
 	symmetricSemiMeanders: bool = False
 
 def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
-	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	"""Generate stamp-folding or meander permutations at sequence index `n`.
 
 	(AI generated docstring)
@@ -536,7 +536,7 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 	The enumeration core follows the permutation construction of Sawada and Li [1]. For `'semi'`,
 	the core uses one fewer leaf than `n`; saving adds the fixed first leaf. All other families
 	use `n` directly.
-	The blank stamp-folding and symmetric open-meander choices retain equivalence-class
+	The blank stamp-folding and meander-shape choices retain equivalence-class
 	representatives [1].
 
 	Parameters
@@ -545,7 +545,7 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 		Sequence index in the domain documented by the public entry point.
 	kind : LiteralString
 		Canonical family name. Supported values are `'stamps'`, `'stamps blank'`, `'meanders'`,
-		`'meanders symmetric'`, `'semi'`, and `'semi-meanders symmetric'`. OEIS identifiers and
+		`'meander shapes'`, `'semi'`, and `'semi-meanders symmetric'`. OEIS identifiers and
 		alternative family spellings must be resolved before this call.
 
 	Returns
@@ -574,11 +574,9 @@ def doTheNeedful(n: int, kind: LiteralString) -> list[Folding]:
 		https://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p43
 	"""
 	mode: SettingsMode = SettingsMode(
-		# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
-		equivalenceClasses=kind in {'stamps blank', 'meanders symmetric'},
+		equivalenceClasses=kind in {'stamps blank', 'meander shapes'},
 		folds=kind in {'stamps', 'stamps blank'},
-		# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
-		meanders=kind in {'meanders', 'meanders symmetric'},
+		meanders=kind in {'meanders', 'meander shapes'},
 		semiMeanders=kind == 'semi',
 		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		symmetricSemiMeanders=kind == 'semi-meanders symmetric',

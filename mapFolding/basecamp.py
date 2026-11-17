@@ -310,7 +310,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 #ruff: ignore[unused-function-argument] #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 def countMeanders(
 	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
-	kind: Literal['closed', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
+	kind: Literal['closed', 'meander shapes', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
 	, n: int | None = None
 	, flow: Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'
 		, 'matrixAxisPile', 'matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'
@@ -321,7 +321,6 @@ def countMeanders(
 	, CPUlimit: ConcurrencyLimit = None
 	, suffix: str = ".countTotal"
 ) -> StateMeanders:
-	# TODO A077055 is a "Meander shape"; replace the misleading 'symmetric' name.
 	"""Compute a meander sequence term for `kind` and `n`, or continue `state`.
 
 	(AI generated docstring)
@@ -340,11 +339,14 @@ def countMeanders(
 
 	Parameters
 	----------
-	kind : Literal['closed', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
+	kind : Literal['closed', 'meander shapes', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
 		Meander family, OEIS identifier, or common name when `state` is absent. `'closed'`
 		constructs a meander state at the transformed index `2 * n - 1`. `'symmetric'` counts
-		symmetric meander shapes (A223096). `'meanders symmetric'` identifies A077055 and is
-		available through `enumerateSequences`.
+		symmetric meander shapes (A223096). `'meander shapes'` counts meander shapes (A077055)
+		from the open meanders at `n` with 2 * A077055(n) = A005316(n) + A005316(n / 2) for even `n`
+		and 4 * A077055(n) = A005316(n) + 2 * A223096((n - 1) / 2) for odd `n` above one; `flow`
+		selects the implementation for each part, and other parts use their default
+		implementation. The completed state holds the A077055 term in `countAddend`.
 	n : int | None = None
 		Sequence index when `state` is absent. This function does not validate the index range.
 	flow : Literal['matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas'] | LiteralString | None = None
@@ -392,10 +394,12 @@ def countMeanders(
 
 		oeisID: OEISid = Z0Z_oeisName(kind)
 		# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
-		(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'closed', 'meanders', 'semi', 'symmetric'})
+		(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'closed', 'meander shapes', 'meanders', 'semi', 'symmetric'})
 
 		if kind == 'closed':
 			state = StateMeanders(2 * n - 1, 'meanders')
+		elif kind == 'meander shapes':
+			state = StateMeanders(n, 'meanders')
 		# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 		elif kind == 'symmetric':
 			match flow:
@@ -433,6 +437,18 @@ def countMeanders(
 				from mapFolding.algorithms.matrixAxisPile import doTheNeedful
 
 		state = doTheNeedful(state)
+	elif kind == 'meander shapes':
+		if state.kind != kind:
+			countMeandersOpen: int = countMeanders(flow=flow, state=state).totalMeanders
+			if n % 2 == 0:
+				countMeanderShapes: int = (countMeandersOpen + countMeanders('meanders', n // 2, flow).totalMeanders) // 2
+			elif n == 1:
+				countMeanderShapes = countMeandersOpen
+			else:
+				countMeanderShapes = (countMeandersOpen + 2 * countMeanders('symmetric', n // 2, flow).totalMeanders) // 4
+			state.kind = kind
+			state.lookupMeanders = {}
+			state.countAddend = countMeanderShapes
 	elif kind != 'semi' or n != 1:
 		match flow:
 			case 'prune':
@@ -567,15 +583,15 @@ def eliminateFolds(
 
 def enumerateSequences(
 	n: int
-	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
-	, kind: LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None = None
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
+	, kind: LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meander shapes', 'semi', 'semi-meanders symmetric'] | None = None
 	, flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None = None
 	, pathLikeWrite: PathLike[str] | None = None
 	, *
 	, CPUlimit: ConcurrencyLimit = None
 	, suffix: str = '.album'
 ) -> list[Folding] | int:
-	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
 	"""Generate stamp-folding or meander permutations at sequence index `n`.
 
 	(AI generated docstring)
@@ -599,7 +615,7 @@ def enumerateSequences(
 	----------
 	n : int
 		Sequence index.
-	kind : LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric'] | None = 'semi'
+	kind : LiteralString | Literal['stamps', 'stamps blank', 'meanders', 'meander shapes', 'semi', 'semi-meanders symmetric'] | None = 'semi'
 		Sequence family.
 	flow : Literal['permutations', 'bilateral', 'bilateralConcurrent'] | None = 'permutations'
 		`'permutations'` generates a list for any supported family. `'bilateral'` and
@@ -645,8 +661,8 @@ def enumerateSequences(
 	if kind is None:
 		kind = 'semi'
 	oeisID: OEISid = Z0Z_oeisName(kind)
-	# TODO A077055 is a "Meander shape"; distinguish it from A000560's counting convention when replacing 'symmetric'.
-	(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'meanders', 'meanders symmetric', 'semi', 'semi-meanders symmetric', 'stamps', 'stamps blank'})
+	# TODO Replace this A000560 symmetry name with its precise counting convention.
+	(kind,) = set(getMetadata(oeisID)['boxOfCommonNames']).intersection({'meanders', 'meander shapes', 'semi', 'semi-meanders symmetric', 'stamps', 'stamps blank'})
 	offset: int = getMetadata(oeisID)['offset']
 	if n < offset:
 		message: str = f"I received `{n = }`, but `{kind = }` is not defined for values below `{offset = }`."

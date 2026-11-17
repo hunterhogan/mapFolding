@@ -35,8 +35,7 @@ if __name__ == '__main__':
 	flow = 'matrixNumPy'
 	flow = 'matrixAxisPileNumPy'
 
-	# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
-	boxOfKind: list[LiteralString] = ['symmetric']
+	boxOfKind: list[LiteralString] = ['meander shapes']
 	for kind in boxOfKind:
 		oeisID: OEISid = Z0Z_oeisName(kind)
 		printEasyRunHeader(oeisID, flow)
