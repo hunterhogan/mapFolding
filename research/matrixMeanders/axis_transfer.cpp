@@ -1,8 +1,8 @@
-// Research accelerator for the existing pile-orbit and strip-gap-orbit transfers.
-// Sources: synthesized/matrixMeanders/matrixAxis{Pile,StripGap}Orbit.py.
+// Research accelerator for the existing pile, strip, and strip-gap orbit transfers.
+// Sources: synthesized/matrixMeanders/matrixAxis{Pile,Strip,StripGap}Orbit.py.
 // Build: g++ -O3 -march=native -std=c++20 -fopenmp research/matrixMeanders/axis_transfer.cpp -o /tmp/axis_transfer
 // Run: OMP_NUM_THREADS=8 /tmp/axis_transfer pile-wide 32 4
-// Counts use checked uint64_t arithmetic. Keys use 64 bits (pile) or 128 (gap).
+// Counts use checked uint64_t arithmetic. Keys use 64 bits (pile/strip) or 128 (gap).
 // Final layers are streamed in parallel instead of storing their enormous maps.
 // The full doubled sum is bounded by 2*4^31 for supported indices, including
 // all intermediate products and parallel partial sums; these fit uint64_t.
@@ -237,6 +237,44 @@ U128 unpack_gap(U64 key) {
     return (word << width(word)) | (U128(1) << (key & 63));
 }
 
+// Strip-axis transfer: matrixAxisStrip.py, for A007822(n+1).
+// The leading 1 is a sentinel; the lower bits encode one Dyck matching.
+U64 reflect_strip(U64 c) {
+    int w = width(c);
+    U64 x = c & ~(U64(1) << (w - 1));
+    x = ((x >> 1) & 0x5555555555555555ULL) | ((x & 0x5555555555555555ULL) << 1);
+    x = ((x >> 2) & 0x3333333333333333ULL) | ((x & 0x3333333333333333ULL) << 2);
+    x = ((x >> 4) & 0x0f0f0f0f0f0f0f0fULL) | ((x & 0x0f0f0f0f0f0f0f0fULL) << 4);
+    x = __builtin_bswap64(x);
+    return (x >> (65 - w)) ^ ((U64(1) << w) - 1);
+}
+bool half_strip(U64 c) {
+    int size = width(c) - 1, partner[64], open[64], opened = 0;
+    for (int i = 0; i < size; ++i) {
+        if ((c >> i) & 1) {
+            if (!opened) throw std::runtime_error("invalid strip Dyck path");
+            int other = open[--opened];
+            partner[i] = other; partner[other] = i;
+        } else open[opened++] = i;
+    }
+    if (opened || !size) throw std::runtime_error("unclosed strip Dyck path");
+    int terminal = partner[0], strands = 1;
+    while (terminal != size / 2) {
+        if (terminal <= 0 || terminal >= size || strands > size)
+            throw std::runtime_error("invalid strip partner cycle");
+        terminal = partner[size - terminal]; ++strands;
+    }
+    return 2 * strands == size;
+}
+template<class Emit> void strip_transitions(U64 c, Emit emit) {
+    int t = width(c) - 1;
+    emit((c << 1) | (U64(1) << (t + 2)));
+    U64 a = U64(walk_alfa(c)), z = U64(walk_zulu(c));
+    emit(((c ^ a) | (U64(1) << (t + 1))) >> 1);
+    emit((c ^ z ^ (U64(1) << t)) << 1);
+    if (z > 1) emit(((c ^ a ^ z) >> 1) ^ (U64(1) << (t - 1)));
+}
+
 int tail_layers = 1;
 template<class K, class TailK = K, class Reflect, class Half, class Transitions>
 U64 count(int n, bool orbit, K initial, U128 maximum, Reflect reflect, Half half, Transitions transitions) {
@@ -381,13 +419,16 @@ int main(int argc, char **argv) {
         if ((flow == "pile" || flow == "pile-plain") && n > 31)
             throw std::runtime_error("use pile-wide above n=31");
         if (flow != "pile" && flow != "pile-plain" && flow != "pile-wide" && n > 30)
-            throw std::runtime_error("gap keys support n<=30");
+            throw std::runtime_error("gap and strip keys support n<=30");
         rlimit memory{U64(28) << 30, U64(28) << 30};
         if (setrlimit(RLIMIT_AS, &memory)) throw std::runtime_error("cannot set memory limit");
         auto start = std::chrono::steady_clock::now();
         bool orbit = flow.find("plain") == std::string::npos;
         U64 result;
-        if (flow == "pile-wide") {
+        if (flow == "strip" || flow == "strip-plain") {
+            result = count<U64>(n, orbit, 6, U128(1) << (2 * n + 4), reflect_strip, half_strip,
+                [](U64 c, auto emit) { strip_transitions(c, emit); });
+        } else if (flow == "pile-wide") {
             result = count<U64, U128>(n, true, 15, U128(1) << (2 * n + 4),
                 reflect_pile_wide, half_pile_wide,
                 [](U128 c, auto emit) { pile_transitions_wide(c, emit); });
