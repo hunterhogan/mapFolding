@@ -234,7 +234,7 @@ if TYPE_CHECKING:
 else:
     from numba import vectorize
 
-    @vectorize(['int64(int64)', 'uint64(uint64)'], cache=True, nopython=True)
+    @vectorize(['int64(int64)', 'uint64(uint64)'], cache=True, nopython=True, target='parallel')
     def flipDyckEndpoint(intWithExtra_0b1: int) -> int:
         """Flip the matched endpoint in each unbalanced Dyck path.
 
@@ -252,7 +252,6 @@ else:
             else:
                 findTheExtra_0b1 += neg(1)
         return intWithExtra_0b1 ^ flipExtra_0b1_Here
-    flipDyckEndpoint = flipDyckEndpoint.ufunc
 
 def countBigInt[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.

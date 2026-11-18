@@ -81,6 +81,7 @@ class ParametersNumba(TypedDict, total=False, closed=True):
 	parallel: bool | ast.expr
 	pipeline_class: ast.expr
 	signature_or_function: str | Sequence[str] | ast.expr
+	target: str
 
 parametersNumbaDefault: Final[ParametersNumba] = {'boundscheck': False, 'cache': True, 'error_model': 'numpy', 'forceinline': True, 'inline': 'always', 'nopython': True, 'parallel': False}
 """Access the shared default compilation option mapping.

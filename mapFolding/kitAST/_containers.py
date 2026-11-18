@@ -86,7 +86,7 @@ class Settings形(NamedTuple):
 	typeIdentifier: str
 	type_asname: str | None = None
 
-# TODO Python 3.15 `is_lazy`. fml.
+# TODO Add Python 3.15 `is_lazy` parameter to LedgerOfImports.
 
 class LedgerOfImports:
 	"""

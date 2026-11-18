@@ -17,8 +17,6 @@ Functions
 		Build a sequence function with formula selectors and its import dependencies.
 	makeMatch_case
 		Build one formula selector case with conditional assignments.
-	makeOEISidByFormula
-		Write the generated module of sequence functions from symbolic relations.
 	makeSymbolicFormula
 		Build a function that evaluates a formula from stored sequence values.
 	make_astIf
@@ -34,15 +32,12 @@ Functions
 from __future__ import annotations
 
 from astToolkit import Be, IfThis, Make, NodeTourist, Then
-from astToolkit.filesystem import write_astModule
 from functools import partial, reduce
-from humpy_cytoolz import compose, groupby as toolz_groupby, unique
-from itertools import compress, filterfalse, starmap
-from mapFolding.kitAST import IngredientsFunction, IngredientsModule
+from humpy_cytoolz import compose, unique
+from itertools import compress, filterfalse
+from mapFolding.kitAST import IngredientsFunction
 from mapFolding.oeis import getMetadata, settingsOEIS
 from mapFolding.oeis._metadata import dictionaryTriangle, getMetadataTriangle
-from mapFolding.oeis._symbolic import makeSolutionsSymbolic
-from mapFolding.theSSOT import settingsPackage
 from operator import attrgetter, itemgetter, methodcaller
 from sympy import (
 	Add, And, ceiling, Equality, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational,
@@ -54,7 +49,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from mapFolding.oeis._dataBaskets import MetadataOEISid
     from mapFolding.theTypes import OEISid
-    from pathlib import Path
     from sympy import Basic, Expr
     from sympy.logic.boolalg import Boolean
     import ast
@@ -420,8 +414,8 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
 
     See Also
     --------
-    `makeOEISidByFormula`
-        Write the module assembled from the symbolic solutions for all sequences.
+    `mapFolding.kitAST.oeisModules.makeModulesOEIS`
+        Write sequence functions, their tests, and reference samples.
     `makeSymbolicFormula`
         Build a function for a formula with sequence indices already resolved.
     """
@@ -497,38 +491,3 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'Literal')
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'LiteralString')
     return ingredientsFunction
-
-def makeOEISidByFormula(pathFilename: Path = settingsOEIS.pathPackage / 'byFormula.py') -> Path:
-    """Write a Python module of sequence functions derived from symbolic relations.
-
-    (AI generated docstring)
-
-    You can regenerate the sequence functions after changing the symbolic relations.
-    Each generated function offers the formula selectors supplied by its solutions and
-    falls back to `oeisIDfor_n` when no applicable formula is selected.
-
-    Parameters
-    ----------
-    pathFilename : Path = settingsOEIS.pathPackage / 'byFormula.py'
-        The destination Python file. The default is `byFormula.py` in the OEIS package.
-
-    Returns
-    -------
-    pathFilename : Path
-        The path of the written module, with functions ordered by OEIS ID.
-
-    See Also
-    --------
-    `mapFolding.oeis._symbolic.makeSolutionsSymbolic`
-        Obtain the sequence formulas and their applicability conditions.
-
-    File Replacement
-    ----------------
-    An existing destination file is overwritten with formatted generated source.
-    """
-    lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
-    ingredientsModule = IngredientsModule(list(starmap(makeIngredientsOEISid, sorted(lookupSolutions.items()))))
-    docstringModule: str = ('Compute a(n) for an OEIS ID by computing other OEIS IDs.\n\nThis is a generated file; edit'
-        ' `mapFolding.oeis._symbolicRelations.boxOfRelations` and run `easyRun/synthesizeModules.py`.\n')
-    return write_astModule(Make.Module([Make.Expr(Make.Constant(docstringModule)), *ingredientsModule.body]), pathFilename
-        , identifierPackage=settingsPackage.identifierPackage)

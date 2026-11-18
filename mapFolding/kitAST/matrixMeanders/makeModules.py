@@ -51,7 +51,6 @@ def combineModules(astModule: ast.Module, astModuleAdditions: ast.Module) -> Ing
 	ingredientsModule.appendEpilogue(statement=list(filterfalse(findImport, astModule.body)))
 	return ingredientsModule
 
-# TODO Will parallel increase the speed of the vectorize?
 # TODO I strongly dislike placing a FunctionDef in `if TYPE_CHECKING:/else:`
 """
 if TYPE_CHECKING:
@@ -103,7 +102,7 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 	logicalPathNumba: identifierDotAttribute = override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
 	名CallableDecorator: str = override.get('名CallableDecorator', identifiers['function']['numbaVectorize'])
 	parametersNumba: ParametersNumba = override.get('parametersNumba', {
-		'cache': True, 'nopython': True
+		'cache': True, 'nopython': True, 'target': 'parallel'
 		, 'signature_or_function': ('int64(int64)', f'{形ArcCode.__name__}({形ArcCode.__name__})')
 	})
 	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableFlip))).visit(ingredients.astFunctionDef)
@@ -119,12 +118,14 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 		'        (AI generated docstring)\n\n'
 		'        Every input must contain a matching endpoint. The generated NumPy ufunc accepts\n'
 		'        signed and unsigned 64-bit scalars and arrays, including pandas columns.\n        ')))).visit(ingredients.astFunctionDef)
+	boxOfStatements: list[ast.stmt] = [Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)]), ingredients.astFunctionDef]
+	if parametersNumba.get('target', 'cpu') == 'cpu':
+		boxOfStatements.append(Make.Assign([Make.Name(名CallableFlip, Make.Store())], Make.Attribute(Make.Name(名CallableFlip), 'ufunc')))
 	ingredientsModule.imports.addImportFrom_asStr('typing', 'TYPE_CHECKING')
 	ingredientsModule.appendEpilogue(statement=Make.If(Make.Name('TYPE_CHECKING'), [
 		Make.ImportFrom('numpy', [Make.alias('ufunc')])
 		, Make.AnnAssign(Make.Name(名CallableFlip, Make.Store()), Make.Name('ufunc'))
-	], [Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)]), ingredients.astFunctionDef
-		, Make.Assign([Make.Name(名CallableFlip, Make.Store())], Make.Attribute(Make.Name(名CallableFlip), 'ufunc'))]))
+	], boxOfStatements))
 	return ingredientsModule
 
 def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
