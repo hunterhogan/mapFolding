@@ -12,8 +12,8 @@ import socket
 
 if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
+	from sympy import Set
 	from sympy.core.function import AppliedUndef
-	from sympy.sets.sets import Set
 	from typing import LiteralString
 
 # TODO Dynamic, but authoritative, discovery of OEIS IDs implemented in mapFolding.

@@ -45,11 +45,10 @@ from mapFolding.oeis._symbolic import makeSolutionsSymbolic
 from mapFolding.theSSOT import settingsPackage
 from operator import attrgetter, itemgetter, methodcaller
 from sympy import (
-	Add, And, ceiling, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational, StrictGreaterThan,
-	StrictLessThan, Sum, Symbol, together)
+	Add, And, ceiling, Equality, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational,
+	StrictGreaterThan, StrictLessThan, Sum, Symbol, together, true)
 from sympy.core.function import AppliedUndef
-from sympy.core.relational import Equality
-from sympy.logic.boolalg import BooleanTrue, true
+from sympy.logic.boolalg import BooleanTrue
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
