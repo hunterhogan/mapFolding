@@ -148,7 +148,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 			, IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
 							, Be.Assign.valueIs(Be.Constant))
 			)
-			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # pyright: ignore[reportArgumentType, reportUnknownArgumentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty: ignore[unresolved-attribute]
+			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # pyright: ignore[reportArgumentType, reportUnknownArgumentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty: ignore[missing-attribute]
 		).visit(ingredientsFunction.astFunctionDef)
 
 	#-------- `identifier` - 1. ----------------------------------------------

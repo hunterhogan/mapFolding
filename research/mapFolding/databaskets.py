@@ -2,7 +2,7 @@
 # Effectively abandoned module.
 # TODO https://github.com/python/typing/discussions/2092
 # pyright: reportAttributeAccessIssue=false, reportUnknownMemberType=false
-# ty: ignore[unresolved-attribute,redundant-condition]
+# ty: ignore[missing-attribute,redundant-condition]
 from __future__ import annotations
 
 from mapFolding import leafOrigin
