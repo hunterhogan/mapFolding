@@ -441,15 +441,17 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     ast_stmt: ast.stmt = reduce(make_astIf, reversed(boxOfBranches)
         , Make.Assign([Make.Name('countTotal', Make.Store())], Make.Call(Make.Name('oeisIDfor_n'), [Make.Constant(oeisID), Make.Name('n')])))
 
-    # TODO Disambiguate 'symmetric' in OEIS descriptions before regenerating these docstrings.
     docstring: str = f"""
     Compute {oeisID}(n) as a function of {' or '.join(boxOf_fFormula) or 'n'}.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID}
-    is "{metadata['description']}".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of {oeisID} is
+    "{metadata['description']}".
 
-    The domain of {oeisID} starts at {metadata['offset']}, therefore for values of `n` < {metadata['offset']}, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is {metadata['valueUnknown']}.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of {oeisID} starts at {metadata['offset']}, therefore for values of `n` < {metadata['offset']},
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is {metadata['valueUnknown']}.
 
     Parameters
     ----------

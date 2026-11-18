@@ -14,11 +14,14 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A001263', 'A053121', 'A014
     """
     Compute A000108(n) as a function of A000108 or A001246 or A001263 or A053121 or A014137 or A014137 and A401693 or A000108 and A401693 or A001405 or A287548 or A331499 or A008828 or A000108 and A002057.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000108
-    is "Catalan numbers: C(n) = binomial(2n,n)/(n+1) = (2n)!/(n!(n+1)!).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000108 is
+    "Catalan numbers: C(n) = binomial(2n,n)/(n+1) = (2n)!/(n!(n+1)!).".
 
-    The domain of A000108 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A000108 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -146,11 +149,14 @@ def A000136(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A000136(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136
-    is "Number of ways of folding a strip of n labeled stamps.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000136 is
+    "Number of ways of folding a strip of n labeled stamps.".
 
-    The domain of A000136 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 50.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A000136 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 50.
 
     Parameters
     ----------
@@ -178,15 +184,17 @@ def A000136(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     return countTotal
 
 def A000560(n: int, f: Literal['A000682', 'A259701', 'A259703'] | LiteralString | None = None) -> int:
-    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A000560(n) as a function of A000682 or A259701 or A259703.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560
-    is "Number of symmetric ways of folding a strip of n labeled stamps.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000560 is
+    "Number of symmetric ways of folding a strip of n labeled stamps.".
 
-    The domain of A000560 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A000560 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 49.
 
     Parameters
     ----------
@@ -221,11 +229,14 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
     """
     Compute A000682(n) as a function of A060206 or A000136 or A000560 or A001010 or A001010 and A001011 or A005316 and A223093 or A000682 and A223094 or A227167 or A223094 or A000682 and A301620 or A000682 and A333971 or A000682 and A334615 or A337581 or A301620 or A339179 or A287548 or A331499 or A000682 and A259702 or A259689 or A259698 or A259703 or A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682
-    is "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A000682 is
+    "Semi-meanders: number of ways a semi-infinite directed curve can cross a straight line n times.".
 
-    The domain of A000682 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 50.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A000682 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 50.
 
     Parameters
     ----------
@@ -404,15 +415,17 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
     return countTotal
 
 def A001010(n: int, f: Literal['A000682 and A007822', 'A000682 and A001011'] | LiteralString | None = None) -> int:
-    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A001010(n) as a function of A000682 and A007822 or A000682 and A001011.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010
-    is "Number of symmetric foldings of a strip of n labeled stamps.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001010 is
+    "Number of symmetric foldings of a strip of n labeled stamps.".
 
-    The domain of A001010 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 53.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A001010 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 65.
 
     Parameters
     ----------
@@ -461,11 +474,14 @@ def A001011(n: int, f: Literal['A000682 and A001010'] | LiteralString | None = N
     """
     Compute A001011(n) as a function of A000682 and A001010.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001011
-    is "Number of ways to fold a strip of n blank stamps.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001011 is
+    "Number of ways to fold a strip of n blank stamps.".
 
-    The domain of A001011 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 50.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A001011 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 50.
 
     Parameters
     ----------
@@ -504,11 +520,14 @@ def A001246(n: int, f: Literal['A000108', 'A001246', 'A008828'] | LiteralString 
     """
     Compute A001246(n) as a function of A000108 or A001246 or A008828.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001246
-    is "Squares of Catalan numbers.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001246 is
+    "Squares of Catalan numbers.".
 
-    The domain of A001246 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 101.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A001246 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 101.
 
     Parameters
     ----------
@@ -549,11 +568,14 @@ def A001405(n: int, f: Literal['A053121', 'A000108', 'A001405'] | LiteralString 
     """
     Compute A001405(n) as a function of A053121 or A000108 or A001405.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001405
-    is "a(n) = binomial(n, floor(n/2)).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A001405 is
+    "a(n) = binomial(n, floor(n/2)).".
 
-    The domain of A001405 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A001405 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -608,11 +630,14 @@ def A002057(n: int, f: Literal['A000108', 'A006659'] | LiteralString | None = No
     """
     Compute A002057(n) as a function of A000108 or A006659.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002057
-    is "Fourth convolution of Catalan numbers: a(n) = 4*binomial(2*n+3,n)/(n+4).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002057 is
+    "Fourth convolution of Catalan numbers: a(n) = 4*binomial(2*n+3,n)/(n+4).".
 
-    The domain of A002057 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A002057 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -648,11 +673,14 @@ def A002415(n: int, f: Literal['A001263', 'A060972'] | LiteralString | None = No
     """
     Compute A002415(n) as a function of A001263 or A060972.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002415
-    is "4-dimensional pyramidal numbers: a(n) = n^2*(n^2-1)/12.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002415 is
+    "4-dimensional pyramidal numbers: a(n) = n^2*(n^2-1)/12.".
 
-    The domain of A002415 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A002415 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -705,11 +733,14 @@ def A002694(n: int, f: Literal['A006659'] | LiteralString | None = None) -> int:
     """
     Compute A002694(n) as a function of A006659.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002694
-    is "Binomial coefficients C(2n, n-2).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A002694 is
+    "Binomial coefficients C(2n, n-2).".
 
-    The domain of A002694 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 201.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A002694 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 201.
 
     Parameters
     ----------
@@ -743,11 +774,14 @@ def A004148(n: int, f: Literal['A004148', 'A001263'] | LiteralString | None = No
     """
     Compute A004148(n) as a function of A004148 or A001263.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A004148
-    is "Generalized Catalan numbers: a(n+1) = a(n) + Sum_{k=1..n-1} a(k)*a(n-1-k).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A004148 is
+    "Generalized Catalan numbers: a(n+1) = a(n) + Sum_{k=1..n-1} a(k)*a(n-1-k).".
 
-    The domain of A004148 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 2405.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A004148 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 2405.
 
     Parameters
     ----------
@@ -808,11 +842,14 @@ def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A0602
     """
     Compute A005315(n) as a function of A005316 or A077054 and A085973 or A005316, A060206, and A077460 or A078591 or A208357 or A400429 or A005316 and A400429 or A008828 or A060972.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005315
-    is "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005315 is
+    "Closed meandric numbers (or meanders): number of ways a loop can cross a road 2n times.".
 
-    The domain of A005315 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 39.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A005315 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 39.
 
     Parameters
     ----------
@@ -917,11 +954,14 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
     """
     Compute A005316(n) as a function of A005315 or A077054 or A077014 or A005315, A060206, and A077460 or A005316 and A078592 or A005316 and A077055 or A077055 and A223096 or A000682 and A223093 or A217310, A217318, and A227167 or A005315 and A400429 or A259974 or A006661 and A076876 or A380367.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316
-    is "Meandric numbers: number of ways a river can cross a road n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A005316 is
+    "Meandric numbers: number of ways a river can cross a road n times.".
 
-    The domain of A005316 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 60.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A005316 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 60.
 
     Parameters
     ----------
@@ -1039,11 +1079,14 @@ def A006657(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     """
     Compute A006657(n) as a function of A008828.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006657
-    is "Number of closed meanders with 2 components and 2n bridges.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006657 is
+    "Number of closed meanders with 2 components and 2n bridges.".
 
-    The domain of A006657 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 21.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A006657 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 21.
 
     Parameters
     ----------
@@ -1074,11 +1117,14 @@ def A006658(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     """
     Compute A006658(n) as a function of A008828.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006658
-    is "Closed meanders with 3 components and 2n bridges.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006658 is
+    "Closed meanders with 3 components and 2n bridges.".
 
-    The domain of A006658 starts at 3, therefore for values of `n` < 3, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 21.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A006658 starts at 3, therefore for values of `n` < 3,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 21.
 
     Parameters
     ----------
@@ -1109,11 +1155,14 @@ def A006659(n: int, f: Literal['A008828', 'A002057', 'A002694'] | LiteralString 
     """
     Compute A006659(n) as a function of A008828 or A002057 or A002694.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006659
-    is "Number of closed meander systems of order n+1 with n components.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006659 is
+    "Number of closed meander systems of order n+1 with n components.".
 
-    The domain of A006659 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A006659 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -1151,11 +1200,14 @@ def A006660(n: int, f: Literal['A259974', 'A380369'] | LiteralString | None = No
     """
     Compute A006660(n) as a function of A259974 or A380369.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006660
-    is "Number of meanders in which first bridge is 3.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006660 is
+    "Number of meanders in which first bridge is 3.".
 
-    The domain of A006660 starts at 3, therefore for values of `n` < 3, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 42.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A006660 starts at 3, therefore for values of `n` < 3,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 42.
 
     Parameters
     ----------
@@ -1191,11 +1243,14 @@ def A006661(n: int, f: Literal['A400429', 'A259974', 'A005316 and A076876'] | Li
     """
     Compute A006661(n) as a function of A400429 or A259974 or A005316 and A076876.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006661
-    is "Number of meanders in which first bridge is 5.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006661 is
+    "Number of meanders in which first bridge is 5.".
 
-    The domain of A006661 starts at 5, therefore for values of `n` < 5, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 41.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A006661 starts at 5, therefore for values of `n` < 5,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 41.
 
     Parameters
     ----------
@@ -1236,11 +1291,14 @@ def A006662(n: int, f: Literal['A259974'] | LiteralString | None = None) -> int:
     """
     Compute A006662(n) as a function of A259974.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006662
-    is "Number of meanders in which first bridge is 7.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A006662 is
+    "Number of meanders in which first bridge is 7.".
 
-    The domain of A006662 starts at 7, therefore for values of `n` < 7, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 41.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A006662 starts at 7, therefore for values of `n` < 7,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 41.
 
     Parameters
     ----------
@@ -1271,11 +1329,14 @@ def A007746(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     """
     Compute A007746(n) as a function of A008828.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007746
-    is "Number of ways for n-3 nonintersecting loops to cross a line 2n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007746 is
+    "Number of ways for n-3 nonintersecting loops to cross a line 2n times.".
 
-    The domain of A007746 starts at 4, therefore for values of `n` < 4, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 51.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A007746 starts at 4, therefore for values of `n` < 4,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 51.
 
     Parameters
     ----------
@@ -1306,15 +1367,17 @@ def A007746(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     return countTotal
 
 def A007822(n: int, f: Literal['A001010'] | LiteralString | None = None) -> int:
-    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A007822(n) as a function of A001010.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007822
-    is "Number of symmetric foldings of 2n+1 stamps.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A007822 is
+    "Number of symmetric foldings of 2n+1 stamps.".
 
-    The domain of A007822 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 27.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A007822 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 33.
 
     Parameters
     ----------
@@ -1353,11 +1416,14 @@ def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A00
     """
     Compute A014137(n) as a function of A000108 or A000108 and A014137 or A014140 or A000108, A014137, and A401693 or A401693 and A401694 or A014137.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A014137
-    is "Partial sums of Catalan numbers (A000108).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A014137 is
+    "Partial sums of Catalan numbers (A000108).".
 
-    The domain of A014137 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A014137 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -1423,11 +1489,14 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     """
     Compute A014140(n) as a function of A000108 or A014137 and A014140 or A014140 and A401693 or A014140 and A401694.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A014140
-    is "Apply partial sum operator twice to Catalan numbers.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A014140 is
+    "Apply partial sum operator twice to Catalan numbers.".
 
-    The domain of A014140 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 201.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A014140 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 201.
 
     Parameters
     ----------
@@ -1480,15 +1549,17 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     return countTotal
 
 def A045445(n: int, f: Literal['A045445'] | LiteralString | None = None) -> int:
-    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A045445(n) as a function of A045445.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A045445
-    is "Number of nonisomorphic systems of catafusenes for the unsymmetrical schemes (group C_s) with two appendages (see references for precise definition).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A045445 is
+    "Number of nonisomorphic systems of catafusenes for the unsymmetrical schemes (group C_s) with two appendages (see references for precise definition).".
 
-    The domain of A045445 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A045445 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -1519,15 +1590,17 @@ def A045445(n: int, f: Literal['A045445'] | LiteralString | None = None) -> int:
     return countTotal
 
 def A060206(n: int, f: Literal['A000682', 'A005315, A005316, and A077460'] | LiteralString | None = None) -> int:
-    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A060206(n) as a function of A000682 or A005315, A005316, and A077460.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206
-    is "Number of rotationally symmetric closed meanders of length 4n+2.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A060206 is
+    "Number of rotationally symmetric closed meanders of length 4n+2.".
 
-    The domain of A060206 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 25.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A060206 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 25.
 
     Parameters
     ----------
@@ -1563,11 +1636,14 @@ def A068253(n: int, f: Literal['A078099'] | LiteralString | None = None) -> int:
     """
     Compute A068253(n) as a function of A078099.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A068253
-    is "1/3 of the number of colorings of an n X n square array with 3 colors.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A068253 is
+    "1/3 of the number of colorings of an n X n square array with 3 colors.".
 
-    The domain of A068253 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 25.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A068253 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 25.
 
     Parameters
     ----------
@@ -1598,11 +1674,14 @@ def A076876(n: int, f: Literal['A400429', 'A005316 and A006661', 'A380367'] | Li
     """
     Compute A076876(n) as a function of A400429 or A005316 and A006661 or A380367.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A076876
-    is "Meandric numbers for a river crossing two parallel roads at n points.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A076876 is
+    "Meandric numbers for a river crossing two parallel roads at n points.".
 
-    The domain of A076876 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 43.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A076876 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 43.
 
     Parameters
     ----------
@@ -1643,11 +1722,14 @@ def A077014(n: int, f: Literal['A005316'] | LiteralString | None = None) -> int:
     """
     Compute A077014(n) as a function of A005316.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077014
-    is "Number of ways that a directed line (or river) that starts in the south can cross an east-west road n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077014 is
+    "Number of ways that a directed line (or river) that starts in the south can cross an east-west road n times.".
 
-    The domain of A077014 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 60.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A077014 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 60.
 
     Parameters
     ----------
@@ -1678,11 +1760,14 @@ def A077054(n: int, f: Literal['A005316', 'A005315 and A085973', 'A400429', 'A38
     """
     Compute A077054(n) as a function of A005316 or A005315 and A085973 or A400429 or A380369.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077054
-    is "Number of ways a river can cross a road 2n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077054 is
+    "Number of ways a river can cross a road 2n times.".
 
-    The domain of A077054 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 30.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A077054 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 30.
 
     Parameters
     ----------
@@ -1725,11 +1810,14 @@ def A077055(n: int, f: Literal['A078592', 'A005316', 'A005316 and A223096', 'A22
     """
     Compute A077055(n) as a function of A078592 or A005316 or A005316 and A223096 or A223096 and A400429 or A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077055
-    is "Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077055 is
+    "Call two meanders from A005316 equivalent if they differ by a reflection in the Y axis (if n even) or by reflections in the X or Y axes (if n odd). Sequence gives number of inequivalent meanders with n crossings.".
 
-    The domain of A077055 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 60.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A077055 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 60.
 
     Parameters
     ----------
@@ -1796,11 +1884,14 @@ def A077056(n: int, f: Literal['A380369'] | LiteralString | None = None) -> int:
     """
     Compute A077056(n) as a function of A380369.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077056
-    is "Total number of "humps" in all A005316(2n) open meanders with 2n crossings.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077056 is
+    "Total number of "humps" in all A005316(2n) open meanders with 2n crossings.".
 
-    The domain of A077056 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 23.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A077056 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 23.
 
     Parameters
     ----------
@@ -1839,11 +1930,14 @@ def A077460(n: int, f: Literal['A005315, A005316, and A060206'] | LiteralString 
     """
     Compute A077460(n) as a function of A005315, A005316, and A060206.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460
-    is "Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A077460 is
+    "Number of closed meanders (loops crossing a road 2n times) that are nonisomorphic under reflection and rotation.".
 
-    The domain of A077460 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 39.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A077460 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 39.
 
     Parameters
     ----------
@@ -1885,11 +1979,14 @@ def A078591(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
     """
     Compute A078591(n) as a function of A005315.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078591
-    is "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078591 is
+    "Number of nonisomorphic ways a loop can cross a road (running East-West) 2n times.".
 
-    The domain of A078591 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 39.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A078591 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 39.
 
     Parameters
     ----------
@@ -1928,11 +2025,14 @@ def A078592(n: int, f: Literal['A005316', 'A077055'] | LiteralString | None = No
     """
     Compute A078592(n) as a function of A005316 or A077055.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078592
-    is "Call two meanders from A005316 with 2n crossings equivalent if they differ by reflections in the X or Y axes. Sequence gives number of inequivalent meanders.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A078592 is
+    "Call two meanders from A005316 with 2n crossings equivalent if they differ by reflections in the X or Y axes. Sequence gives number of inequivalent meanders.".
 
-    The domain of A078592 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 30.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A078592 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 30.
 
     Parameters
     ----------
@@ -1968,11 +2068,14 @@ def A085973(n: int, f: Literal['A005315 and A077054'] | LiteralString | None = N
     """
     Compute A085973(n) as a function of A005315 and A077054.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A085973
-    is "Number of ways a loop can cross two parallel roads 2n times.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A085973 is
+    "Number of ways a loop can cross two parallel roads 2n times.".
 
-    The domain of A085973 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 30.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A085973 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 30.
 
     Parameters
     ----------
@@ -2011,11 +2114,14 @@ def A204352(n: int, f: Literal['A380367'] | LiteralString | None = None) -> int:
     """
     Compute A204352(n) as a function of A380367.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A204352
-    is "Meandric numbers for a river crossing up to 3 parallel roads at n points.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A204352 is
+    "Meandric numbers for a river crossing up to 3 parallel roads at n points.".
 
-    The domain of A204352 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 41.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A204352 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 41.
 
     Parameters
     ----------
@@ -2046,11 +2152,14 @@ def A208357(n: int, f: Literal['A005315'] | LiteralString | None = None) -> int:
     """
     Compute A208357(n) as a function of A005315.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A208357
-    is "Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A208357 is
+    "Number of meanders of order 2n+1 (4*n+2 crossings of the infinite line) with central 1-1 cut.".
 
-    The domain of A208357 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 38.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A208357 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 38.
 
     Parameters
     ----------
@@ -2081,11 +2190,14 @@ def A217310(n: int, f: Literal['A223093', 'A005316, A217318, and A227167'] | Lit
     """
     Compute A217310(n) as a function of A223093 or A005316, A217318, and A227167.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310
-    is "The number of meandering curves of order n with only one extremity covered by their arcs.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217310 is
+    "The number of meandering curves of order n with only one extremity covered by their arcs.".
 
-    The domain of A217310 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A217310 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 49.
 
     Parameters
     ----------
@@ -2118,11 +2230,14 @@ def A217318(n: int, f: Literal['A223095', 'A005316, A217310, and A227167'] | Lit
     """
     Compute A217318(n) as a function of A223095 or A005316, A217310, and A227167.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318
-    is "The number of meandering curves of order n with both extremities covered by their arcs.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A217318 is
+    "The number of meandering curves of order n with both extremities covered by their arcs.".
 
-    The domain of A217318 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A217318 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 49.
 
     Parameters
     ----------
@@ -2155,11 +2270,14 @@ def A223093(n: int, f: Literal['A217310', 'A000682 and A005316', 'A223094 and A2
     """
     Compute A223093(n) as a function of A217310 or A000682 and A005316 or A223094 and A223095.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093
-    is "Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223093 is
+    "Number of foldings of n labeled stamps in which leaf 1 is inwards and leaf n outwards (or leaf 1 outwards and leaf n inwards).".
 
-    The domain of A223093 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A223093 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 49.
 
     Parameters
     ----------
@@ -2194,11 +2312,14 @@ def A223094(n: int, f: Literal['A000682', 'A223093 and A223095'] | LiteralString
     """
     Compute A223094(n) as a function of A000682 or A223093 and A223095.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094
-    is "Number of foldings of n labeled stamps in which leaf n is inwards.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223094 is
+    "Number of foldings of n labeled stamps in which leaf n is inwards.".
 
-    The domain of A223094 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A223094 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 49.
 
     Parameters
     ----------
@@ -2231,11 +2352,14 @@ def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString
     """
     Compute A223095(n) as a function of A217318 or A223093 and A223094.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095
-    is "Number of foldings of n labeled stamps in which both end leaves are inwards.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223095 is
+    "Number of foldings of n labeled stamps in which both end leaves are inwards.".
 
-    The domain of A223095 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 49.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A223095 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 49.
 
     Parameters
     ----------
@@ -2265,15 +2389,17 @@ def A223095(n: int, f: Literal['A217318', 'A223093 and A223094'] | LiteralString
     return countTotal
 
 def A223096(n: int, f: Literal['A005316 and A077055', 'A077055 and A400429'] | LiteralString | None = None) -> int:
-    # TODO Disambiguate the symmetry terminology in this generated OEIS description at its source.
     """
     Compute A223096(n) as a function of A005316 and A077055 or A077055 and A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223096
-    is "Number of symmetric meander shapes with 2n+1 crossings.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A223096 is
+    "Number of symmetric meander shapes with 2n+1 crossings.".
 
-    The domain of A223096 starts at 0, therefore for values of `n` < 0, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 32.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A223096 starts at 0, therefore for values of `n` < 0,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 33.
 
     Parameters
     ----------
@@ -2312,11 +2438,14 @@ def A227167(n: int, f: Literal['A000682', 'A005316, A217310, and A217318'] | Lit
     """
     Compute A227167(n) as a function of A000682 or A005316, A217310, and A217318.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A227167
-    is "The number of meandering curves of order n.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A227167 is
+    "The number of meandering curves of order n.".
 
-    The domain of A227167 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 50.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A227167 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 50.
 
     Parameters
     ----------
@@ -2349,11 +2478,14 @@ def A259700(n: int, f: Literal['A259698'] | LiteralString | None = None) -> int:
     """
     Compute A259700(n) as a function of A259698.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259700
-    is "a(n) = Sum_{k=2..n-1} k*A259698(n,k).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259700 is
+    "a(n) = Sum_{k=2..n-1} k*A259698(n,k).".
 
-    The domain of A259700 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 15.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A259700 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 26.
 
     Parameters
     ----------
@@ -2384,11 +2516,14 @@ def A259702(n: int, f: Literal['A000682', 'A301620', 'A259701'] | LiteralString 
     """
     Compute A259702(n) as a function of A000682 or A301620 or A259701.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702
-    is "Row sums of A259701 except first column.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A259702 is
+    "Row sums of A259701 except first column.".
 
-    The domain of A259702 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 50.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A259702 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 50.
 
     Parameters
     ----------
@@ -2436,11 +2571,14 @@ def A260785(n: int, f: Literal['A259689'] | LiteralString | None = None) -> int:
     """
     Compute A260785(n) as a function of A259689.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A260785
-    is "Leading diagonal of triangle in A259689: a(n)= number of permutations without overlaps that generate exactly 2 permutations without overlaps in a(n+1).".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A260785 is
+    "Leading diagonal of triangle in A259689: a(n)= number of permutations without overlaps that generate exactly 2 permutations without overlaps in a(n+1).".
 
-    The domain of A260785 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 27.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A260785 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 27.
 
     Parameters
     ----------
@@ -2471,11 +2609,14 @@ def A301620(n: int, f: Literal['A000682', 'A301620 and A334615', 'A339179', 'A25
     """
     Compute A301620(n) as a function of A000682 or A301620 and A334615 or A339179 or A259702 or A259689 or A259689 and A322507.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620
-    is "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A301620 is
+    "a(n) is the total number of top arches with exactly one covering arch for semi-meanders with n top arches.".
 
-    The domain of A301620 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 48.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A301620 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 48.
 
     Parameters
     ----------
@@ -2522,11 +2663,14 @@ def A322507(n: int, f: Literal['A259689 and A301620'] | LiteralString | None = N
     """
     Compute A322507(n) as a function of A259689 and A301620.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A322507
-    is "a(n) is the number of arches for semi-meanders with n top arches that have exactly two covering arches.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A322507 is
+    "a(n) is the number of arches for semi-meanders with n top arches that have exactly two covering arches.".
 
-    The domain of A322507 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 27.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A322507 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 27.
 
     Parameters
     ----------
@@ -2565,11 +2709,14 @@ def A333971(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A333971(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A333971
-    is "a(n) is the number of semi-meanders with n top arches that have at least one arch with length 1 adjacent to the center of the top arch configuration or at either end of the arch configuration.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A333971 is
+    "a(n) is the number of semi-meanders with n top arches that have at least one arch with length 1 adjacent to the center of the top arch configuration or at either end of the arch configuration.".
 
-    The domain of A333971 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 51.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A333971 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 51.
 
     Parameters
     ----------
@@ -2608,11 +2755,14 @@ def A334615(n: int, f: Literal['A000682', 'A301620'] | LiteralString | None = No
     """
     Compute A334615(n) as a function of A000682 or A301620.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A334615
-    is "a(n) is the number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch configuration and no arch of length 1 adjacent to the center of the top arch configuration.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A334615 is
+    "a(n) is the number of semi-meanders with n top arches that has no arch of length 1 at the ends of the top arch configuration and no arch of length 1 adjacent to the center of the top arch configuration.".
 
-    The domain of A334615 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 50.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A334615 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 50.
 
     Parameters
     ----------
@@ -2658,11 +2808,14 @@ def A337581(n: int, f: Literal['A000682'] | LiteralString | None = None) -> int:
     """
     Compute A337581(n) as a function of A000682.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A337581
-    is "a(n) is the number of semi-meanders with n top arches that have both an arch of length 1 adjacent to the center of the top arch configuration and an arch of length 1 starting or ending the top arch configuration.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A337581 is
+    "a(n) is the number of semi-meanders with n top arches that have both an arch of length 1 adjacent to the center of the top arch configuration and an arch of length 1 starting or ending the top arch configuration.".
 
-    The domain of A337581 starts at 2, therefore for values of `n` < 2, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 52.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A337581 starts at 2, therefore for values of `n` < 2,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 52.
 
     Parameters
     ----------
@@ -2701,11 +2854,14 @@ def A400630(n: int, f: Literal['A400429', 'A400630'] | LiteralString | None = No
     """
     Compute A400630(n) as a function of A400429 or A400630.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400630
-    is "Number of semi-meanders with n crossings and winding number n-4, for n >= 4.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400630 is
+    "Number of semi-meanders with n crossings and winding number n-4, for n >= 4.".
 
-    The domain of A400630 starts at 4, therefore for values of `n` < 4, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400630 starts at 4, therefore for values of `n` < 4,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10001.
 
     Parameters
     ----------
@@ -2746,11 +2902,14 @@ def A400631(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400631(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400631
-    is "Number of semi-meanders with n crossings and winding number n-6, for n >= 6.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400631 is
+    "Number of semi-meanders with n crossings and winding number n-6, for n >= 6.".
 
-    The domain of A400631 starts at 6, therefore for values of `n` < 6, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10006.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400631 starts at 6, therefore for values of `n` < 6,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10006.
 
     Parameters
     ----------
@@ -2784,11 +2943,14 @@ def A400632(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400632(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400632
-    is "Number of semi-meanders with n crossings and winding number n-8, for n >= 8.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400632 is
+    "Number of semi-meanders with n crossings and winding number n-8, for n >= 8.".
 
-    The domain of A400632 starts at 8, therefore for values of `n` < 8, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 301.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400632 starts at 8, therefore for values of `n` < 8,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 401.
 
     Parameters
     ----------
@@ -2822,11 +2984,14 @@ def A400633(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400633(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400633
-    is "Number of semi-meanders with n crossings and winding number n-10, for n >= 10.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400633 is
+    "Number of semi-meanders with n crossings and winding number n-10, for n >= 10.".
 
-    The domain of A400633 starts at 10, therefore for values of `n` < 10, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 301.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400633 starts at 10, therefore for values of `n` < 10,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 401.
 
     Parameters
     ----------
@@ -2860,11 +3025,14 @@ def A400634(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400634(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400634
-    is "Number of semi-meanders with n crossings and winding number n-12, for n >= 12.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400634 is
+    "Number of semi-meanders with n crossings and winding number n-12, for n >= 12.".
 
-    The domain of A400634 starts at 12, therefore for values of `n` < 12, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10012.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400634 starts at 12, therefore for values of `n` < 12,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10012.
 
     Parameters
     ----------
@@ -2895,11 +3063,14 @@ def A400635(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400635(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400635
-    is "Number of semi-meanders with n crossings and winding number n-14, for n >= 14.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400635 is
+    "Number of semi-meanders with n crossings and winding number n-14, for n >= 14.".
 
-    The domain of A400635 starts at 14, therefore for values of `n` < 14, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10014.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400635 starts at 14, therefore for values of `n` < 14,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10014.
 
     Parameters
     ----------
@@ -2930,11 +3101,14 @@ def A400636(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400636(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400636
-    is "Number of semi-meanders with n crossings and winding number n-16, for n >= 16.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400636 is
+    "Number of semi-meanders with n crossings and winding number n-16, for n >= 16.".
 
-    The domain of A400636 starts at 16, therefore for values of `n` < 16, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10016.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400636 starts at 16, therefore for values of `n` < 16,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10016.
 
     Parameters
     ----------
@@ -2965,11 +3139,14 @@ def A400637(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400637(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400637
-    is "Number of semi-meanders with n crossings and winding number n-18, for n >= 18.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400637 is
+    "Number of semi-meanders with n crossings and winding number n-18, for n >= 18.".
 
-    The domain of A400637 starts at 18, therefore for values of `n` < 18, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10018.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400637 starts at 18, therefore for values of `n` < 18,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10018.
 
     Parameters
     ----------
@@ -3000,11 +3177,14 @@ def A400638(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     """
     Compute A400638(n) as a function of A400429.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400638
-    is "Number of semi-meanders with n crossings and winding number n-20, for n >= 20.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A400638 is
+    "Number of semi-meanders with n crossings and winding number n-20, for n >= 20.".
 
-    The domain of A400638 starts at 20, therefore for values of `n` < 20, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 10020.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A400638 starts at 20, therefore for values of `n` < 20,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 10020.
 
     Parameters
     ----------
@@ -3035,11 +3215,14 @@ def A401693(n: int, f: Literal['A014140', 'A000108, A014137, and A401693', 'A000
     """
     Compute A401693(n) as a function of A014140 or A000108, A014137, and A401693 or A000108 and A401693 or A014137, A401693, and A401694.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A401693
-    is "Number of ways to cut a nonempty Dyck word into a prefix and a suffix with both lengths at most n and of the same parity as n.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A401693 is
+    "Number of ways to cut a nonempty Dyck word into a prefix and a suffix with both lengths at most n and of the same parity as n.".
 
-    The domain of A401693 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A401693 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
@@ -3108,11 +3291,14 @@ def A401694(n: int, f: Literal['A014140', 'A014137 and A401693'] | LiteralString
     """
     Compute A401694(n) as a function of A014140 or A014137 and A401693.
 
-    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A401694
-    is "Number of ways to apply one of four moves (see Comments) to a nonempty Dyck word with a cut, where both sides of the cut have lengths at most n+1 and of the same parity as n+1 before the move and at most n after the move.".
+    *The On-Line Encyclopedia of Integer Sequences* (OEIS) description of A401694 is
+    "Number of ways to apply one of four moves (see Comments) to a nonempty Dyck word with a cut, where both sides of the cut have lengths at most n+1 and of the same parity as n+1 before the move and at most n after the move.".
 
-    The domain of A401694 starts at 1, therefore for values of `n` < 1, a(n) is undefined. The smallest value of n for which a(n)
-    has not yet been computed is 1001.
+    I wish my template for these docstrings were better. Will you help me improve the template or
+    template system?
+
+    The domain of A401694 starts at 1, therefore for values of `n` < 1,
+    a(n) is undefined. The smallest value of n for which a(n) has not yet been computed is 1001.
 
     Parameters
     ----------
