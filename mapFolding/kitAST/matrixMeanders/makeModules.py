@@ -51,7 +51,7 @@ def combineModules(astModule: ast.Module, astModuleAdditions: ast.Module) -> Ing
 	ingredientsModule.appendEpilogue(statement=list(filterfalse(findImport, astModule.body)))
 	return ingredientsModule
 
-# TODO Will parallel increase vectorize?
+# TODO Will parallel increase the speed of the vectorize?
 # TODO I strongly dislike placing a FunctionDef in `if TYPE_CHECKING:/else:`
 """
 if TYPE_CHECKING:

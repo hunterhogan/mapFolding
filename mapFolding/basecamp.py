@@ -664,12 +664,10 @@ def enumerateSequences(
 		if flow == 'bilateralConcurrent':
 			from mapFolding.algorithms.permutationsBilateralConcurrent import doTheNeedful
 
-			# TODO Disambiguate 'symmetric' here by naming the exact relation or equivalence being counted.
 			countTotal: int = doTheNeedful(n, symmetric=symmetric, concurrencyLimit=defineProcessorLimit(CPUlimit))
 		else:
 			from mapFolding.algorithms.permutationsBilateral import doTheNeedful
 
-			# TODO Disambiguate 'symmetric' here by naming the exact relation or equivalence being counted.
 			countTotal = doTheNeedful(n, symmetric=symmetric)
 
 		if pathFilenameAlbum is not None:
