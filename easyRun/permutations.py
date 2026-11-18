@@ -28,7 +28,6 @@ if __name__ == '__main__':
 		boxOfKind.append('stamps')
 		boxOfKind.append('meander shapes')
 		boxOfKind.append('meanders')
-		# TODO Replace this A000560 symmetry name with its precise counting convention.
 		boxOfKind.append('semi-meanders symmetric')
 	if True:
 		boxOfKind.append('semi')

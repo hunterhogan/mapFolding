@@ -1,4 +1,3 @@
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Store folding and meander computation state.
 
 (AI generated docstring)
@@ -1307,9 +1306,7 @@ class StateMapFoldingParallel(StateMapFolding):
 			self.taskDivisions = 形TotalLeaves(int(self.totalLeaves))
 
 @dataclasses.dataclass(slots=True)
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 class StateMapFoldingSymmetric(StateMapFolding):
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Store mutable insertion-search state for symmetric map foldings.
 
 	(AI generated docstring)
@@ -1381,17 +1378,13 @@ class StateMapFoldingSymmetric(StateMapFolding):
 
 	"""
 
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	symmetricFolds: 形TotalFolds = dataclasses.field(default=形TotalFolds(0), metadata={'theCountingIdentifier': True})
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Current count of symmetric folds."""
 
 	leafComparison: 形ArrayTotalLeaves1D = dataclasses.field(default_factory=lambda: 形ArrayTotalLeaves1D([]), init=True, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves1D)[1])[0]})
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Array for finding symmetric folds."""
 
 	indices: 形ArrayTotalLeaves3D = dataclasses.field(init=False, metadata={'dtype': get_args(get_args(形ArrayTotalLeaves3D)[1])[0]})
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Precomputed index pairs for symmetric fold checking."""
 
 	def __post_init__(self) -> None:
@@ -1404,7 +1397,6 @@ class StateMapFoldingSymmetric(StateMapFolding):
 		A zero-dimensional `leafComparison` is replaced with `totalLeaves + 1` entries.
 		Supplied arrays with one or more dimensions are retained, including empty arrays.
 		"""
-		# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 		super(StateMapFoldingSymmetric, self).__post_init__()
 		totalLeavesAsInt = int(self.totalLeaves)
 

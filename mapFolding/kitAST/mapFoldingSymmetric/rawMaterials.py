@@ -1,4 +1,3 @@
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Access reusable filter-call and count-adjustment syntax.
 
 (AI generated docstring)
@@ -29,34 +28,25 @@ from astToolkit import Make
 from astToolkit.changeDef import extractFunctionDef
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST.paths import getModule
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 import ast
 
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(getModule(defaultMapFoldingSymmetric['module']['algorithmSource'], defaultMapFoldingSymmetric['logicalPath']['algorithm']), defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']))
 """Insert the extracted symmetry-filter function into generated modules."""
 
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 ImaString: str = f"{defaultMapFoldingSymmetric['variable']['stateInstance']} = {defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']}({defaultMapFoldingSymmetric['variable']['stateInstance']})"
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 foldsSymmetricIncrementCount: ast.stmt = ast.parse(ImaString).body[0]
 """Replace a generated count increment with a symmetry-filter assignment."""
 del ImaString
 
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 ImaString = f'{defaultMapFoldingSymmetric['variable']['stateInstance']}.{defaultMapFoldingSymmetric['variable']['counting']} = ({defaultMapFoldingSymmetric['variable']['stateInstance']}.{defaultMapFoldingSymmetric['variable']['counting']} + 1) // 2'
 adjustTotalFolds: ast.stmt = ast.parse(ImaString).body[0]
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Halve the generated symmetric-fold total with upward rounding."""
 del ImaString
 
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 ExprCallFilterAsymmetricFolds_leafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Name('leafBelow')]))
 """Call the symmetry filter with the generated `leafBelow` name."""
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 ExprCallFilterAsymmetricFoldsState: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Name(defaultMapFoldingSymmetric['variable']['stateInstance'])]))
 """Call the symmetry filter with the generated state name."""
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 ExprCallFilterAsymmetricFoldsStateDot_leafBelow: ast.Expr = Make.Expr(Make.Call(Make.Name(defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']), listParameters=[Make.Attribute(Make.Name(defaultMapFoldingSymmetric['variable']['stateInstance']), 'leafBelow')]))
 """Call the symmetry filter with `leafBelow` from the generated state name."""

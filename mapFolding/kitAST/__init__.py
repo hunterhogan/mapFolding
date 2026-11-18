@@ -1,4 +1,3 @@
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Generate specialized computation modules from source syntax.
 
 (AI generated docstring, and it's old)

@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
 from mapFolding.dataStructures import ShapeArray, ShapeSlicer
 from numba import typeof, types as numba_types  # pyright: ignore[reportUnknownVariableType]
@@ -108,7 +107,6 @@ class _UnboxContext(NamedTuple):
 
 @structref.register  # pyright: ignore[reportUnknownMemberType]
 class 形DataclassNumba(numba_types.StructRef):
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Represent Python dataclass structures in Numba-compiled code.
 
 	(AI generated docstring)
@@ -138,10 +136,8 @@ class 形DataclassNumba(numba_types.StructRef):
 
 形StateMapFoldingNumba = 形DataclassNumba
 
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 @typeof_impl.register(StateMapFoldingSymmetric)  # pyright: ignore[reportFunctionMemberAccess]
 @typeof_impl.register(StateMapFolding)  # pyright: ignore[reportFunctionMemberAccess]
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 def _typeofDataclass(value: StateMapFolding | StateMapFoldingSymmetric, _context: Any) -> 形DataclassNumba:
 	def typeofField(field: dataclasses.Field[Any]) -> tuple[str, numba_types.Type]:
 		return field.name, typeof(getattr(value, field.name))

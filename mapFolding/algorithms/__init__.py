@@ -1,4 +1,3 @@
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 """Hand-made algorithms and formulas.
 
 Modules

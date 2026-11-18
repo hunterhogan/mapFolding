@@ -79,7 +79,6 @@ def test_oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None, expected: 
 
 boxOfFlowsMapFolding: tuple[str, ...] = ('daoOfMapFolding', 'daoOfMapFoldingNumba', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
 boxOfFlowsMeanders: tuple[str, ...] = ('matrixMeanders', 'matrixNumPy', 'matrixPandas', 'prune', 'pruneNumPy', 'prunePandas')
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 boxOfFlowsSymmetric: tuple[str, ...] = (
 	'algorithm', 'algorithmNumba', 'asynchronous', 'matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit', 'matrixAxisStrip'
 	, 'matrixAxisStripOrbit', 'theorem2', 'theorem2Numba', 'theorem2Trimmed')
@@ -91,7 +90,6 @@ boxOfFlowsSymmetric: tuple[str, ...] = (
 	, CartesianProduct(('A001418',), (1,), boxOfFlowsMapFolding)
 	, CartesianProduct(('A000682',), (1, 3), boxOfFlowsMeanders)
 	, CartesianProduct(('A005316',), (0, 3), boxOfFlowsMeanders)
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	, CartesianProduct(('A007822',), (1, 3), boxOfFlowsSymmetric)
 	, CartesianProduct(('A223096',), (0, 3), ('matrixAxisPile', 'matrixAxisPileNumPy', 'matrixAxisPileOrbit'))
 	, CartesianProduct(('A223096',), (0, 3), ('matrixAxisPileDeadEnd', 'matrixAxisPileDeadEndOrbit'))

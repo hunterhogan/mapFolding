@@ -125,7 +125,6 @@ def renameName(identifier: str, identifierNew: str, node: ast.AST) -> None:
 
 # TODO Use this concept in general modules, not just custom jobs.
 def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsModule: IngredientsModule, boxOfSettings形: list[Settings形]) -> tuple[IngredientsFunction, IngredientsModule]:
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""Customize data types in the given ingredients by adjusting imports.
 
 	In the ecosystem of "Ingredients", "Recipes", "DataBaskets," and "shattered dataclasses," a ton of code is dedicated to

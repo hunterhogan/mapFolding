@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from hunterMakesPy.parseParameters import intInnit
-# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 from mapFolding.basecamp import countFolds, countFoldsSymmetric, countMeanders
 from mapFolding.oeis import getMetadata, makeMapShape, settingsOEIS
 from mapFolding.oeis._beDRY import formatOEISid
@@ -14,7 +13,6 @@ if TYPE_CHECKING:
 	from typing import LiteralString, Unpack
 
 def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywordArguments: Unpack[形KeywordArgumentsCount]) -> int:
-	# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 	"""You can calculate the value a(n) for a specified OEIS ID and index.
 
 	(AI generated docstring)
@@ -99,11 +97,9 @@ def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywor
 				state = countMeanders('meanders', n, **keywordArguments)
 				totalFolds = state.totalMeanders
 			case 'A223096' if not f:
-				# TODO Name the precise A223096 meander-shape constraint instead of the ambiguous symmetry label.
 				state = countMeanders('symmetric', n, **keywordArguments)
 				totalFolds = state.totalMeanders
 			case 'A007822' if not f:
-				# TODO Make the A007822 folding relation explicit in this symmetry terminology.
 				totalFolds = countFoldsSymmetric(makeMapShape(oeisID, n), **keywordArguments)
 			case _:
 				message = f"I received `{oeisID = }`, but I couldn't find a formula for it."
