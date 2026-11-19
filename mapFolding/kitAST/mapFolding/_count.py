@@ -25,7 +25,8 @@ from __future__ import annotations
 from astToolkit import Be, DOT, Grab, hasDOTbody, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import inlineFunctionDef
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, toDisk
+from mapFolding.kitAST import (
+	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, renameName, toDisk)
 from mapFolding.kitAST.dataclasses import removeDataclass, shatterDataclass, ShatteredDataclass, toFieldsToCallToDataclass
 from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba, ParametersNumba, parametersNumbaDefault
 from mapFolding.kitAST.paths import getLogicalPath
@@ -460,16 +461,20 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	名Counting: str = override.get('名Counting') or identifiers['variable']['counting']
 	parametersNumba: ParametersNumba = override.get('parametersNumba', parametersNumbaDefault)
 
-	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = 名Callable
-
 	logicalPathDataclass: identifierDotAttribute = (
 		override.get('logicalPathDataclass')
 		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
 	)
+	identifierDataclass: str = override.get('identifierDataclass') or identifiers['variable']['stateDataclass']
 	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
-
 	名dataclassParallel: identifierDotAttribute = override.get('名dataclassParallel') or identifiers['variable']['stateDataclassParallel']
+
+	renameName(identifierDataclass, 名dataclassParallel, astModule)
+	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclass))
+		, Grab.nameAttribute(Then.replaceWith(名dataclassParallel))).visit(astModule)
+
+	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
+	ingredientsFunction.astFunctionDef.name = 名Callable
 	shatteredDataclassParallel: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名dataclassParallel, identifierDataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
@@ -500,11 +505,6 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
 	unRepackDataclass.astFunctionDef.name = 'unRepack' + 名dataclassParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
-	NodeChanger(
-			findThis=IfThis.is_argIdentifier(identifierDataclassInstance)
-			, doThat=Grab.annotationAttribute(Grab.idAttribute(Then.replaceWith(名dataclassParallel)))
-		).visit(unRepackDataclass.astFunctionDef)
-	unRepackDataclass.astFunctionDef.returns = Make.Name(名dataclassParallel)
 	名CallableTarget: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	NodeChanger(
 		findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))

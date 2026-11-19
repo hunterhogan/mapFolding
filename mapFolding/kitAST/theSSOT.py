@@ -180,6 +180,7 @@ defaultMatrixMeanders['module'].update({
 defaultMatrixMeanders['variable'].update({
 	'arrayMeanders': 'arrayMeanders'
 	, 'dataframeAnalyzed': 'dataframeAnalyzed'
+	, 'intWithExtra_0b1': 'intWithExtra_0b1'
 	, 'tqdmBoundary': 'tqdmBoundary'
 })
 defaultMatrixMeanders['logicalPath']['default'] = defaultMatrixMeanders['logicalPath']['algorithm']

@@ -11,7 +11,10 @@ Notes
 """
 from __future__ import annotations
 
-from mapFolding.dataBaskets import StateMapFoldingSymmetric
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
 # IMPROVEMENT this algorithm is slow.
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:

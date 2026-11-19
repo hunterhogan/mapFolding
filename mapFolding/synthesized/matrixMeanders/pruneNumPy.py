@@ -5,7 +5,7 @@ from gc import collect as goByeBye
 from mapFolding.dataBaskets import StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
 from mapFolding.oeis import boxOfDiagonals
-from mapFolding.theTypes import 形ArcCode, 形ArrayArcCode
+from mapFolding.theTypes import 形ArcCode
 from numpy import (
 	array, bitwise_and as Xand, bitwise_left_shift as XshiftLeft, bitwise_or as X_or, bitwise_right_shift as XshiftRight, bitwise_xor as Xxor,
 	bool as numpy_bool, greater as moreThan, less_equal as lessThanEqual, memmap, multiply, subtract)
@@ -15,7 +15,11 @@ from typing import cast, TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
-    from typing import Literal, LiteralString
+    from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
+    from numpy import dtype, ndarray, ufunc
+    from numpy.lib._arraysetops_impl import UniqueInverseResult
+    from typing import Any, Literal, LiteralString
+    import pandas
 'Matrix Meanders Goals:\n- Extreme abstraction.\n- Find operations with latent intermediate arrays and make the intermediate array explicit.\n- Reduce or eliminate intermediate arrays and selector arrays.\n- Write formulas in prefix notation.\n- For each formula, find an equivalent prefix notation formula that never uses the same variable as input more than once: that\n\twould allow the evaluation of the expression with only a single stack, which saves memory.\n- Standardize code as much as possible to create duplicate code.\n- Convert duplicate code to procedures.\n'
 
 def integersWide吗(state: StateMeanders) -> bool:
@@ -232,30 +236,29 @@ def integersWideNumPy吗(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -
     bitWidthArcCode: int = int(arrayMeanders[..., 0].max(initial=0)).bit_length() + 4
     bitWidthMeanders: int = (4 * int(arrayMeanders[..., 1].sum(dtype=object))).bit_length()
     return state.bitWidthLimit < max(bitWidthArcCode, bitWidthMeanders)
+
+def _flipDyckEndpoint(intWithExtra_0b1: int) -> int:
+    """Flip the matched endpoint in each unbalanced Dyck path.
+
+    (AI generated docstring)
+
+    Every input must contain a matching endpoint. The NumPy ufunc accepts signed and unsigned
+    64-bit scalars and arrays, including pandas columns.
+    """
+    findTheExtra_0b1: int = 0
+    flipExtra_0b1_Here: int = 1
+    while 0 <= findTheExtra_0b1:
+        flipExtra_0b1_Here <<= 2
+        if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
+            findTheExtra_0b1 += 1
+        else:
+            findTheExtra_0b1 += neg(1)
+    return intWithExtra_0b1 ^ flipExtra_0b1_Here
 if TYPE_CHECKING:
-    from numpy import ufunc
     flipDyckEndpoint: ufunc
 else:
     from numba import vectorize
-
-    @vectorize(['int64(int64)', 'uint64(uint64)'], cache=True, nopython=True, target='parallel')
-    def flipDyckEndpoint(intWithExtra_0b1: int) -> int:
-        """Flip the matched endpoint in each unbalanced Dyck path.
-
-        (AI generated docstring)
-
-        Every input must contain a matching endpoint. The generated NumPy ufunc accepts
-        signed and unsigned 64-bit scalars and arrays, including pandas columns.
-        """
-        findTheExtra_0b1: int = 0
-        flipExtra_0b1_Here: int = 1
-        while 0 <= findTheExtra_0b1:
-            flipExtra_0b1_Here <<= 2
-            if intWithExtra_0b1 & flipExtra_0b1_Here == 0:
-                findTheExtra_0b1 += 1
-            else:
-                findTheExtra_0b1 += neg(1)
-        return intWithExtra_0b1 ^ flipExtra_0b1_Here
+    flipDyckEndpoint = vectorize(['int64(int64)', 'uint64(uint64)'], cache=True, nopython=True, target='parallel')(_flipDyckEndpoint)
 
 def countBigInt[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateMeanders:
     """Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
@@ -318,8 +321,6 @@ def countBigInt[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形
         tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values(), strict=True))
         state = prune(state)
     return state
-if TYPE_CHECKING:
-    import pandas
 
 def integersWidePandas吗(state: StateMeanders, dataframeAnalyzed: pandas.DataFrame) -> bool:
     """Determine whether the next transfer step exceeds the fixed-width integer capacity.
@@ -412,11 +413,6 @@ def walkDyckPath(intWithExtra_0b1: int) -> int:
         else:
             findTheExtra_0b1 += neg(1)
     return flipExtra_0b1_Here
-if TYPE_CHECKING:
-    from mapFolding.theTypes import 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
-    from numpy import dtype, ndarray
-    from numpy.lib._arraysetops_impl import UniqueInverseResult
-    from typing import Any
 indexesAnalyzed: int = 2
 次ArcCode, 次Meanders = range(indexesAnalyzed)
 slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., at=次ArcCode)

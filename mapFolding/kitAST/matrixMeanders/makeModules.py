@@ -5,21 +5,19 @@
 from __future__ import annotations
 
 from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
+from astToolkit.changeDef import extractFunctionDef
 from astToolkit.filesystem import parsePathFilename2astModule
 from hunterMakesPy import raiseIfNone
-from inspect import cleandoc
 from itertools import filterfalse
 from mapFolding.kitAST import (
-	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, removeFunctionDef, renameFunctionDef,
+	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, removeFunctionDef, renameFunctionDef,
 	toDisk)
-from mapFolding.kitAST.numba.kitNumba import decorateCallableWithNumba
+from mapFolding.kitAST.numba.kitNumba import makeNumbaCall
 from mapFolding.kitAST.paths import getLogicalPath, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
-from mapFolding.theTypes import 形ArcCode
-from operator import getitem, not_
-from textwrap import indent
+from mapFolding.theTypes import 形ArcCode, 形ArrayArcCode
+from operator import methodcaller
 from typing import TYPE_CHECKING
-import ast
 
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
@@ -27,42 +25,8 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Default
 	from pathlib import PurePath
 	from typing import Any
+	import ast
 
-def expandDocstring(astConstant: ast.Constant) -> ast.Constant:
-	"""Expand docstring indentation to match the AST writer's four-space blocks.
-
-	(AI generated docstring)
-	"""
-	return Make.Constant(str(astConstant.value).expandtabs(4))
-
-def combineModules(astModule: ast.Module, astModuleAdditions: ast.Module) -> IngredientsModule:
-	"""Combine module definitions and consolidate their top-level imports.
-
-	(AI generated docstring)
-
-	Nested imports retain their scope. The supplied modules must have distinct definitions
-	for their non-import bindings.
-	"""
-	astModule = Make.Module([*astModule.body, *astModuleAdditions.body], [*astModule.type_ignores, *astModuleAdditions.type_ignores])
-	NodeChanger(Be.FunctionDef, Grab.bodyAttribute(Grab.index(0,
-		NodeChanger(Be.Expr.valueIs(Be.Constant), NodeChanger(Be.Constant, expandDocstring).visit).visit))).visit(astModule)
-	findImport = IfThis.isAnyOf(Be.Import, Be.ImportFrom)
-	ingredientsModule = IngredientsModule(imports=LedgerOfImports(Make.Module(list(filter(findImport, astModule.body)))))
-	ingredientsModule.appendEpilogue(statement=list(filterfalse(findImport, astModule.body)))
-	return ingredientsModule
-
-# TODO I strongly dislike placing a FunctionDef in `if TYPE_CHECKING:/else:`
-"""
-if TYPE_CHECKING:
-    from numpy import ufunc
-    flipDyckEndpoint: ufunc
-else:
-    from numba import vectorize
-
-    @vectorize(['int64(int64)', 'uint64(uint64)'], cache=True, nopython=True)
-    def flipDyckEndpoint(intWithExtra_0b1: int) -> int:
-
-"""
 def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
 	"""Generate array width checks and the vectorized Dyck-endpoint operation.
 
@@ -71,14 +35,13 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 	identifiers = identifiers or defaultMatrixMeanders
 	名Callable: str = override.get('名Callable') or identifiers['function']['bigIntTest']
 	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名Callable)
-	ingredients.imports = LedgerOfImports(Make.Module(list(filter(IfThis.isAnyOf(Be.Import, Be.ImportFrom), astModule.body))))
 	名CallableWide: str = override.get('名CallableWide') or identifiers['function']['bigIntTestNumPy']
-	名DataclassInstance: str = ingredients.astFunctionDef.args.args[0].arg
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
 	名ArrayMeanders: str = override.get('名ArrayMeanders') or identifiers['variable']['arrayMeanders']
 	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableWide))).visit(ingredients.astFunctionDef)
-	ast_arguments: ast.arguments = Make.arguments(list_arg=[
-		ingredients.astFunctionDef.args.args[0], Make.arg(名ArrayMeanders, Make.Name('形ArrayArcCode'))])
-	NodeChanger(Be.FunctionDef, Grab.argsAttribute(Then.replaceWith(ast_arguments))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.arg.argIs(IfThis.isIdentifier(名DataclassInstance))
+		, Then.insertThisBelow([Make.arg(名ArrayMeanders, Make.Name(形ArrayArcCode.__name__))])
+	).visit(ingredients.astFunctionDef.args)
 	astCall: ast.Call = Make.Call(Make.Name('max'), [Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders')]
 		, list_keyword=[Make.keyword('default', Make.Constant(0))])
 	astSubscript: ast.Subscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(0)]))
@@ -90,42 +53,42 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 	astCallTotal: ast.Call = Make.Call(Make.Name('int'), [Make.Call(Make.Attribute(astSubscript, 'sum')
 		, list_keyword=[Make.keyword('dtype', Make.Name('object'))])])
 	NodeChanger(IfThis.astIs(astCall), Then.replaceWith(astCallTotal)).visit(ingredients.astFunctionDef)
-	astConstant: ast.Constant = raiseIfNone(NodeTourist(Be.Constant, Then.extractIt).captureLastMatch(ingredients.astFunctionDef.body[0]))
-	NodeChanger(IfThis.astIs(astConstant), Then.replaceWith(Make.Constant(
-		indent(cleandoc(str(astConstant.value)), '    ').lstrip() + '\n    '))).visit(ingredients.astFunctionDef)
-	ingredients.imports.addImportFrom_asStr('mapFolding.theTypes', '形ArrayArcCode')
+	ingredients.imports.typeChecking.addImportFrom_asStr('mapFolding.theTypes', 形ArrayArcCode.__name__)
 	ingredientsModule = IngredientsModule(ingredients)
 
 	ingredients = astModuleToIngredientsFunction(astModuleDyck, override.get('名CallableDyck') or identifiers['function']['Dyck'])
-	ingredientsModule.imports.update(ingredients.imports)
 	名CallableFlip: str = override.get('名CallableFlip') or identifiers['function']['flipDyckEndpoint']
+	名CallableScalar: str = f'_{名CallableFlip}'
+	名IntWithExtra_0b1: str = override.get('名IntWithExtra_0b1') or identifiers['variable']['intWithExtra_0b1']
 	logicalPathNumba: identifierDotAttribute = override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
 	名CallableDecorator: str = override.get('名CallableDecorator', identifiers['function']['numbaVectorize'])
 	parametersNumba: ParametersNumba = override.get('parametersNumba', {
 		'cache': True, 'nopython': True, 'target': 'parallel'
 		, 'signature_or_function': ('int64(int64)', f'{形ArcCode.__name__}({形ArcCode.__name__})')
 	})
-	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableFlip))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableScalar))).visit(ingredients.astFunctionDef)
 	NodeChanger(Be.FunctionDef, Grab.decorator_listAttribute(Then.replaceWith(list(filterfalse(
 		IfThis.isNameIdentifier('cache'), ingredients.astFunctionDef.decorator_list))))).visit(ingredients.astFunctionDef)
-	ingredients = decorateCallableWithNumba(ingredients, identifiers, parametersNumba=parametersNumba
-		, logicalPathNumba=logicalPathNumba, 名CallableDecorator=名CallableDecorator)
-	ast_exprReturn: ast.expr = raiseIfNone(NodeTourist(Be.Return, DOT.value).captureLastMatch(ingredients.astFunctionDef))
 	NodeChanger(Be.Return, Grab.valueAttribute(Then.replaceWith(Make.BitXor.join([
-		Make.Name(ingredients.astFunctionDef.args.args[0].arg), ast_exprReturn])))).visit(ingredients.astFunctionDef)
-	NodeChanger(IfThis.astIs(ingredients.astFunctionDef.body[0]), Then.replaceWith(Make.Expr(Make.Constant(
+		Make.Name(名IntWithExtra_0b1)
+		, raiseIfNone(NodeTourist(Be.Return, DOT.value).captureLastMatch(ingredients.astFunctionDef))
+	])))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.FunctionDef, Grab.bodyAttribute(Grab.index(0, Then.replaceWith(Make.Expr(Make.Constant(
 		'Flip the matched endpoint in each unbalanced Dyck path.\n\n'
-		'        (AI generated docstring)\n\n'
-		'        Every input must contain a matching endpoint. The generated NumPy ufunc accepts\n'
-		'        signed and unsigned 64-bit scalars and arrays, including pandas columns.\n        ')))).visit(ingredients.astFunctionDef)
-	boxOfStatements: list[ast.stmt] = [Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)]), ingredients.astFunctionDef]
+		'    (AI generated docstring)\n\n'
+		'    Every input must contain a matching endpoint. The NumPy ufunc accepts signed and unsigned\n'
+		'    64-bit scalars and arrays, including pandas columns.\n    ')))))).visit(ingredients.astFunctionDef)
+	ingredientsModule.appendIngredientsFunction(ingredients)
+	ast_exprUfunc: ast.expr = Make.Call(makeNumbaCall(名CallableDecorator, parametersNumba), [Make.Name(名CallableScalar)])
 	if parametersNumba.get('target', 'cpu') == 'cpu':
-		boxOfStatements.append(Make.Assign([Make.Name(名CallableFlip, Make.Store())], Make.Attribute(Make.Name(名CallableFlip), 'ufunc')))
-	ingredientsModule.imports.addImportFrom_asStr('typing', 'TYPE_CHECKING')
+		ast_exprUfunc = Make.Attribute(ast_exprUfunc, 'ufunc')
+	ingredientsModule.imports.typeChecking.addImportFrom_asStr('numpy', 'ufunc')
 	ingredientsModule.appendEpilogue(statement=Make.If(Make.Name('TYPE_CHECKING'), [
-		Make.ImportFrom('numpy', [Make.alias('ufunc')])
-		, Make.AnnAssign(Make.Name(名CallableFlip, Make.Store()), Make.Name('ufunc'))
-	], boxOfStatements))
+		Make.AnnAssign(Make.Name(名CallableFlip, Make.Store()), Make.Name('ufunc'))
+	], [
+		Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)])
+		, Make.Assign([Make.Name(名CallableFlip, Make.Store())], ast_exprUfunc)
+	]))
 	return ingredientsModule
 
 def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
@@ -135,40 +98,43 @@ def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifi
 	"""
 	identifiers = identifiers or defaultMatrixMeanders
 	名Callable: str = override.get('名Callable') or identifiers['function']['bigIntTestNumPy']
-	ingredients: IngredientsFunction = astModuleToIngredientsFunction(astModuleNumPy, 名Callable)
-	ingredients.imports = LedgerOfImports(Make.Module(list(filter(IfThis.isAnyOf(Be.Import, Be.ImportFrom), astModuleNumPy.body))))
+	ingredients = IngredientsFunction(raiseIfNone(extractFunctionDef(astModuleNumPy, 名Callable)))
+	ingredients.imports.extractImports(Make.Module(astModuleNumPy.body))
 	名CallableWide: str = override.get('名CallableWide') or identifiers['function']['bigIntTestPandas']
-	名DataclassInstance: str = ingredients.astFunctionDef.args.args[0].arg
-	名ArrayMeanders: str = ingredients.astFunctionDef.args.args[1].arg
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
+	名ArrayMeanders: str = override.get('名ArrayMeanders') or identifiers['variable']['arrayMeanders']
 	名DataframeAnalyzed: str = override.get('名DataframeAnalyzed') or identifiers['variable']['dataframeAnalyzed']
 	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallableWide))).visit(ingredients.astFunctionDef)
-	NodeChanger(Be.FunctionDef, Grab.argsAttribute(Then.replaceWith(Make.arguments(list_arg=[
-		ingredients.astFunctionDef.args.args[0], Make.arg(名DataframeAnalyzed, Make.Attribute(Make.Name('pandas'), 'DataFrame'))
-	])))).visit(ingredients.astFunctionDef)
-	astSubscript: ast.Subscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(0)]))
-	astCall: ast.Call = Make.Call(Make.Attribute(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('arcCodeAnalysis')), 'to_numpy'))
-	NodeChanger(IfThis.astIs(astSubscript), Then.replaceWith(astCall)).visit(ingredients.astFunctionDef)
-	astSubscript = Make.Subscript(Make.Name(名ArrayMeanders), Make.Tuple([Make.Constant(Ellipsis), Make.Constant(1)]))
-	astCall = Make.Call(Make.Attribute(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('meanders')), 'to_numpy'))
-	NodeChanger(IfThis.astIs(astSubscript), Then.replaceWith(astCall)).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.arg.argIs(IfThis.isIdentifier(名ArrayMeanders))
+		, Then.replaceWith(Make.arg(名DataframeAnalyzed, Make.Attribute(Make.Name('pandas'), 'DataFrame')))
+	).visit(ingredients.astFunctionDef.args)
+	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier('max'))
+		, NodeChanger(Be.Subscript.valueIs(IfThis.isNameIdentifier(名ArrayMeanders)), Then.replaceWith(
+			Make.Call(Make.Attribute(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('arcCodeAnalysis')), 'to_numpy'))
+		)).visit
+	).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier('sum'))
+		, NodeChanger(Be.Subscript.valueIs(IfThis.isNameIdentifier(名ArrayMeanders)), Then.replaceWith(
+			Make.Call(Make.Attribute(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('meanders')), 'to_numpy'))
+		)).visit
+	).visit(ingredients.astFunctionDef)
 	ingredientsModule = IngredientsModule(ingredients)
-	ingredientsModule.imports.addImportFrom_asStr('typing', 'TYPE_CHECKING')
-	ingredientsModule.appendPrologue(statement=Make.If(Make.Name('TYPE_CHECKING'), [Make.Import('pandas')]))
+	ingredientsModule.imports.typeChecking.addImport_asStr('pandas')
 
 	ingredients = astModuleToIngredientsFunction(astModule, override.get('名CallablePruneSource') or identifiers['function']['prune'])
-	ingredients.imports = LedgerOfImports(Make.Module(list(filter(IfThis.isAnyOf(Be.Import, Be.ImportFrom), astModule.body))))
-	名DataclassInstance = ingredients.astFunctionDef.args.args[0].arg
 	名CallablePrune: str = override.get('名CallablePrune') or identifiers['function']['pruneDataFrame']
 	NodeChanger(Be.FunctionDef, Grab.nameAttribute(Then.replaceWith(名CallablePrune))).visit(ingredients.astFunctionDef)
-	NodeChanger(Be.FunctionDef, Grab.argsAttribute(Then.replaceWith(Make.arguments(list_arg=[
-		ingredients.astFunctionDef.args.args[0], Make.arg(名DataframeAnalyzed, Make.Attribute(Make.Name('pandas'), 'DataFrame'))
-	])))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.arg.argIs(IfThis.isIdentifier(名DataclassInstance))
+		, Then.insertThisBelow([Make.arg(名DataframeAnalyzed, Make.Attribute(Make.Name('pandas'), 'DataFrame'))])
+	).visit(ingredients.astFunctionDef.args)
 	NodeChanger(Be.FunctionDef, Grab.returnsAttribute(Then.replaceWith(Make.Subscript(Make.Name('tuple'), Make.Tuple([
-		raiseIfNone(ingredients.astFunctionDef.args.args[0].annotation), Make.Attribute(Make.Name('pandas'), 'DataFrame')
+		raiseIfNone(ingredients.astFunctionDef.returns), Make.Attribute(Make.Name('pandas'), 'DataFrame')
 	]))))).visit(ingredients.astFunctionDef)
-	astCall = Make.Call(Make.Attribute(Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders'), 'pop'), [Make.Name('arcCode'), Make.Constant(0)])
+	astCall: ast.Call = Make.Call(Make.Attribute(Make.Attribute(Make.Name(名DataclassInstance), 'lookupMeanders'), 'pop')
+		, [Make.Name('arcCode'), Make.Constant(0)])
 	astCompare: ast.Compare = Make.Compare(Make.Subscript(Make.Name(名DataframeAnalyzed), Make.Constant('arcCodeAnalysis')), [Make.Eq()], [Make.Name('arcCode')])
-	astSubscript = Make.Subscript(Make.Attribute(Make.Name(名DataframeAnalyzed), 'loc'), Make.Tuple([astCompare, Make.Constant('meanders')]))
+	astSubscript: ast.Subscript = Make.Subscript(Make.Attribute(Make.Name(名DataframeAnalyzed), 'loc')
+		, Make.Tuple([astCompare, Make.Constant('meanders')]))
 	astCallTotal: ast.Call = Make.Call(Make.Name('int'), [Make.Call(Make.Attribute(Make.Call(Make.Attribute(astSubscript, 'to_numpy')), 'sum')
 		, list_keyword=[Make.keyword('dtype', Make.Name('object'))])])
 	NodeChanger(IfThis.astIs(astCall), Then.replaceWith(astCallTotal)).visit(ingredients.astFunctionDef)
@@ -180,13 +146,13 @@ def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifi
 		Make.Call(Make.Name('len'), [Make.Attribute(Make.Name(名DataframeAnalyzed), 'index')]))).visit(ingredients.astFunctionDef)
 	NodeChanger(Be.Return, Then.replaceWith(Make.Return(Make.Tuple([Make.Name(名DataclassInstance), Make.Call(
 		Make.Attribute(Make.Name(名DataframeAnalyzed), 'reset_index'), list_keyword=[Make.keyword('drop', Make.Constant(value=True))])])))).visit(ingredients.astFunctionDef)
-	NodeChanger(IfThis.astIs(ingredients.astFunctionDef.body[0]), Then.replaceWith(Make.Expr(Make.Constant(
+	NodeChanger(Be.FunctionDef, Grab.bodyAttribute(Grab.index(0, Then.replaceWith(Make.Expr(Make.Constant(
 		'Accumulate known diagonal contributions and retain the remaining dataframe rows.\n\n'
 		'    (AI generated docstring)\n\n'
 		'    Repeated arc codes contribute all their counts, summed as Python integers.\n'
 		'    The returned dataframe preserves row order and has a fresh consecutive index.\n'
 		'    The state retains completed contributions in `countAddend`; an empty dataframe\n'
-		'    sets `boundary` to zero. Retain both returned objects.\n    ')))).visit(ingredients.astFunctionDef)
+		'    sets `boundary` to zero. Retain both returned objects.\n    ')))))).visit(ingredients.astFunctionDef)
 	ingredientsModule.appendIngredientsFunction(ingredients)
 	return ingredientsModule
 
@@ -259,7 +225,9 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	astModuleShare: ast.Module = parsePathFilename2astModule(getPathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
 	removeFunctionDef(名Callable, astModuleShare)
-	ingredientsModule = combineModules(astModuleShare, astModule)
+	ingredientsModule = IngredientsModule(epilogue=astModuleShare)
+	ingredientsModule.appendEpilogue(astModule)
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 	return toDisk(ingredientsModule, identifiers, override, 名Module, logicalPathInfix=logicalPathInfix)
 
 def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
@@ -308,22 +276,24 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
 	astModuleShare: ast.Module = parsePathFilename2astModule(getPathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
-	removeFunctionDef(identifiers['function']['Dyck'], astModuleShare)
-	astModule = Make.Module(combineModules(astModuleShare, astModule).body)
+	removeFunctionDef(override.get('名CallableDyck') or identifiers['function']['Dyck'], astModuleShare)
+	ingredientsModule = IngredientsModule(epilogue=astModuleShare)
+	ingredientsModule.appendEpilogue(astModule)
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 
 	astAssign_shortcut: ast.Assign = Make.Assign([Make.Name(名DataclassInstance, Make.Store())]
 		, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))
 
 	NodeChanger(IfThis.isWhile0LessThanAttributeNamespaceIdentifier(名DataclassInstance, 'boundary')
-		, Then.insertThisAbove([astAssign_shortcut])).visit(astModule)
+		, Then.insertThisAbove([astAssign_shortcut])).visit(ingredientsModule.epilogue)
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableCounting))
-		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(astModule)
+		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(ingredientsModule.epilogue)
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableBigInt))
-		, NodeChanger(Be.While, Then.insertThisAbove([astAssign_shortcut])).visit).visit(astModule)
+		, NodeChanger(Be.While, Then.insertThisAbove([astAssign_shortcut])).visit).visit(ingredientsModule.epilogue)
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableBigInt))
-		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(astModule)
+		, NodeChanger(Be.Expr.valueIs(IfThis.isCallIdentifier('tuple')), Then.insertThisBelow([astAssign_shortcut])).visit).visit(ingredientsModule.epilogue)
 
-	return toDisk(IngredientsModule(epilogue=astModule), identifiers, override, 名Module)
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
 	"""Generate an array meander module with formula pruning.
@@ -414,14 +384,13 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleCommon))), Then.removeIt).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleShare))), Then.removeIt).visit(astModule)
-	NodeChanger(Be.If.testIs(IfThis.isNameIdentifier('TYPE_CHECKING')),
-		NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('mapFolding.theTypes')),
-			NodeChanger(Be.alias.nameIs(IfThis.isIdentifier('形ArrayArcCode')), Then.removeIt).visit).visit).visit(astModule)
 	astModulePrune: ast.Module = parsePathFilename2astModule(getPathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
 	removeFunctionDef(名CallableCounting, astModulePrune)
 	removeFunctionDef(名CallableDispatcher, astModulePrune)
-	ingredientsModule = combineModules(astModulePrune, astModule)
+	ingredientsModule = IngredientsModule(epilogue=astModulePrune)
+	ingredientsModule.appendEpilogue(astModule)
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
@@ -514,20 +483,13 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleCommon))), Then.removeIt).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleShare))), Then.removeIt).visit(astModule)
-	NodeChanger(Be.If.testIs(IfThis.isNameIdentifier('TYPE_CHECKING')),
-		NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier('mapFolding.dataBaskets')),
-			NodeChanger(Be.alias.nameIs(IfThis.isIdentifier('StateMeanders')), Then.removeIt).visit).visit).visit(astModule)
-	NodeChanger(Be.ImportFrom.namesIs(not_), Then.removeIt).visit(astModule)
-	NodeChanger(IfThis.astIs(Make.If(Make.Name('TYPE_CHECKING'), [])), Then.removeIt).visit(astModule)
 	astModulePrune: ast.Module = parsePathFilename2astModule(getPathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
-	NodeChanger(Be.If.testIs(IfThis.isNameIdentifier('TYPE_CHECKING')),
-		NodeChanger(Be.Import, NodeChanger(Be.alias.nameIs(IfThis.isIdentifier('pandas')), Then.removeIt).visit).visit).visit(astModulePrune)
-	NodeChanger(Be.Import.namesIs(not_), Then.removeIt).visit(astModulePrune)
-	NodeChanger(IfThis.astIs(Make.If(Make.Name('TYPE_CHECKING'), [])), Then.removeIt).visit(astModulePrune)
 	removeFunctionDef(名CallableCounting, astModulePrune)
 	removeFunctionDef(名CallableDispatcher, astModulePrune)
-	ingredientsModule = combineModules(astModulePrune, astModule)
+	ingredientsModule = IngredientsModule(epilogue=astModulePrune)
+	ingredientsModule.appendEpilogue(astModule)
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
@@ -566,7 +528,7 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 	ingredients = astModuleToIngredientsFunction(astModule, 名Callable)
 
 	NodeChanger(Be.While
-			, Then.insertThisAbove(raiseIfNone(NodeTourist[ast.While, list[ast.stmt]](Be.While, Then.extractIt(DOT.body)
+			, Then.insertThisAbove(raiseIfNone(NodeTourist(Be.While, DOT.body
 		).captureLastMatch(ingredients.astFunctionDef)))).visit(ingredients.astFunctionDef)
 	NodeChanger(Be.While, Then.removeIt).visit(ingredients.astFunctionDef)
 	NodeChanger(Be.Delete, Then.removeIt).visit(ingredients.astFunctionDef)
@@ -575,8 +537,8 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 	NodeChanger(Be.Expr.valueIs(Be.Call.funcIs(Be.Attribute.valueIs(IfThis.isNameIdentifier('tqdmBoundary'))))
 			, Then.removeIt).visit(ingredients.astFunctionDef)
 	NodeChanger(Be.AnnAssign.targetIs(IfThis.isNameIdentifier('tqdmBoundary')), Then.removeIt).visit(ingredients.astFunctionDef)
-	totalArcCodes: ast.expr = getitem(raiseIfNone(NodeTourist[ast.Call, list[ast.expr]](IfThis.isCallIdentifier('getTotalBuckets')
-			, Then.extractIt(DOT.args)).captureLastMatch(ingredients.astFunctionDef)), 1)
+	totalArcCodes: ast.expr = raiseIfNone(NodeTourist(IfThis.isCallIdentifier('getTotalBuckets'),
+		NodeTourist(IfThis.isCallIdentifier('len'), Then.extractIt).captureLastMatch).captureLastMatch(ingredients.astFunctionDef))
 	totalArcCodes = Make.Call(Make.Name('max'), [Make.Constant(65536), Make.Mult.join([Make.Constant(4), totalArcCodes])])
 	NodeChanger(Be.Call.funcIs(IfThis.isNameIdentifier('getTotalBuckets')), Then.replaceWith(totalArcCodes)).visit(ingredients.astFunctionDef)
 
@@ -590,8 +552,9 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
 	ingredients = astModuleToIngredientsFunction(astModule, 名CallableDispatcher)
 
-	reduceBoundary = Make.Expr(Make.Call(Make.Attribute(Make.Name(名DataclassInstance), 'reduceBoundary')))
-	NodeChanger(Be.If, Grab.orelseAttribute(Grab.index(0, Then.insertThisAbove([reduceBoundary])))).visit(ingredients.astFunctionDef)
+	NodeChanger(Be.If, Grab.orelseAttribute([
+		Make.Expr(Make.Call(Make.Attribute(Make.Name(名DataclassInstance), 'reduceBoundary')))
+	].__add__)).visit(ingredients.astFunctionDef)
 
 	ingredientsModule.appendIngredientsFunction(ingredients)
 
@@ -611,14 +574,24 @@ def makeModulesMeanders() -> None:
 	pathFilenameDyck: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])
 	pathFilenameNumPy: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])
 	pathFilenamePandas: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['pandas'])
+	astModule: ast.Module = parsePathFilename2astModule(pathFilenameCommon)
+	astModuleCommon: ast.Module = parsePathFilename2astModule(pathFilenameCommon)
+	expandDocstringTabs = NodeChanger(Be.FunctionDef, Grab.bodyAttribute(Grab.index(0,
+		NodeChanger(Be.Expr.valueIs(Be.Constant.valueIs(str.__instancecheck__))
+			, NodeChanger(Be.Constant, Grab.valueAttribute(methodcaller('expandtabs', 4))).visit
+	).visit))).visit
+	expandDocstringTabs(astModule)
+	expandDocstringTabs(astModuleCommon)
 	ingredientsModule: IngredientsModule = makeCommonNumPy(
-		parsePathFilename2astModule(pathFilenameCommon), parsePathFilename2astModule(pathFilenameDyck), identifiers)
-	ingredientsModule = combineModules(parsePathFilename2astModule(pathFilenameCommon), Make.Module(ingredientsModule.body))
+		astModule, parsePathFilename2astModule(pathFilenameDyck), identifiers)
+	ingredientsModule.appendPrologue(astModuleCommon)
+	ingredientsModule.imports.extractImports(ingredientsModule.prologue)
 	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
 	pathFilenameShare: PurePath = makeCountBigInt(parsePathFilename2astModule(pathFilenameDyck), identifiers)
 	ingredientsModule = makeCommonPandas(parsePathFilename2astModule(pathFilenameCommon)
 		, parsePathFilename2astModule(pathFilenameShare), identifiers)
-	ingredientsModule = combineModules(parsePathFilename2astModule(pathFilenameShare), Make.Module(ingredientsModule.body))
+	ingredientsModule.appendPrologue(parsePathFilename2astModule(pathFilenameShare))
+	ingredientsModule.imports.extractImports(ingredientsModule.prologue)
 	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
 	makePrune(parsePathFilename2astModule(pathFilenameDyck), identifiers)
 	makePruneNumPy(parsePathFilename2astModule(pathFilenameNumPy), identifiers)

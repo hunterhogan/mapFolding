@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import StateMapFoldingSymmetric
 from numba import jit_module
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mapFolding.dataBaskets import StateMapFoldingSymmetric
 
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
     state.次Leaf = 1

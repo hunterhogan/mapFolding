@@ -1,21 +1,23 @@
 # The real module is generated from this incomplete module. Comments are not preserved. Docstrings corrupt the file.
-# ruff: file-ignore[global-statement, typing-only-first-party-import]
-# ty: ignore[invalid-argument-type]
+# ruff: file-ignore[global-statement]
 from __future__ import annotations
 
 from copy import deepcopy
-from mapFolding.dataBaskets import StateMapFoldingSymmetric
-from mapFolding.theTypes import 形TotalFolds
 from queue import Queue
 from threading import Lock, Thread
+from typing import TYPE_CHECKING
+from typing_extensions import sentinel
+
+if TYPE_CHECKING:
+    from _thread import lock
+    from mapFolding.dataBaskets import StateMapFoldingSymmetric
+    from mapFolding.theTypes import 形TotalFolds
 
 boxOfThreads: list[Thread] = []
-queueFutures: Queue[StateMapFoldingSymmetric] = Queue()
+signalStop = sentinel('signalStop')
+queueFutures: Queue[StateMapFoldingSymmetric | signalStop] = Queue()
 symmetricTotalFolds: int = 0
-LOCKsymmetricTotalFolds = Lock()
-# TODO There isn't a better way to do this?
-STOPsignal = object()
-# pyright: reportArgumentType=false
+LOCKsymmetricTotalFolds: lock = Lock()
 
 def initializeConcurrencyManager(maxWorkers: int, symmetricFolds: int = 0) -> None:
     """Initialize the shared queue, accumulated count, and background workers.
@@ -64,8 +66,8 @@ def _threadDoesSomething() -> None:
     """
     global symmetricTotalFolds
     while True:
-        state: StateMapFoldingSymmetric = queueFutures.get()
-        if state is STOPsignal:
+        state: StateMapFoldingSymmetric | signalStop = queueFutures.get()
+        if state is signalStop:
             break
         state = _filterAsymmetricFolds(state)
         with LOCKsymmetricTotalFolds:
@@ -136,7 +138,7 @@ def getSymmetricTotalFolds() -> 形TotalFolds:
         ```
     """
     for _thread in boxOfThreads:
-        queueFutures.put(STOPsignal)
+        queueFutures.put(signalStop)
     for thread in boxOfThreads:
         thread.join()
     return symmetricTotalFolds

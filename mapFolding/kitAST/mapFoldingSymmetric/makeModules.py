@@ -145,7 +145,8 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 		).visit(FunctionDef_count)
 
 	imports = LedgerOfImports(astModule)
-	NodeChanger(IfThis.isAnyOf(Be.ImportFrom, Be.Import), Then.removeIt).visit(astModule)
+	imports.removeTYPE_CHECKING(astModule)
+	NodeChanger(IfThis.isAllOf(IfThis.isAnyOf(Be.ImportFrom, Be.Import), astModule.body.__contains__), Then.removeIt).visit(astModule)
 	imports.addImport_asStr('numpy')
 
 	astModuleFilterSource: ast.Module = getModule(名ModuleSource, logicalPathSource, 名PackageSource)

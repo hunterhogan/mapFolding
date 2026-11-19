@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixMeandersShare import getTotalBuckets, integersWide吗
-from mapFolding.dataBaskets import StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
 from mapFolding.oeis import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import countBigInt, flipDyckEndpoint, integersWideNumPy吗
@@ -15,6 +14,7 @@ from typing import cast, TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
+    from mapFolding.dataBaskets import StateMeanders
     from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
     from numpy import dtype, ndarray
     from numpy.lib._arraysetops_impl import UniqueInverseResult

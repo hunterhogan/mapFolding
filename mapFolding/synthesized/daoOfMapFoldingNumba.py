@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import StateMapFolding
 from numba import jit_module
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mapFolding.dataBaskets import StateMapFolding
 
 def activeLeafGreaterThan0(state: StateMapFolding) -> bool:
     return state.leaf1ndex > 0

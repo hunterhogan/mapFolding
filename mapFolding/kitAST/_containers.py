@@ -36,7 +36,7 @@ Classes
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, IfThis, Make, NodeChanger, NodeTourist
+from astToolkit import Be, DOT, IfThis, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractFunctionDef, removeUnusedParameters
 from astToolkit.filesystem import write_astModule
 from collections import defaultdict
@@ -46,7 +46,7 @@ from hunterMakesPy import raiseIfNone
 from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
 from hunterMakesPy.kitFilesystem import settings_autoflakeDEFAULT, settings_isortDEFAULT
 from itertools import chain, filterfalse, starmap
-from more_itertools import consume
+from more_itertools import consume, partition
 from operator import attrgetter, itemgetter, ne, not_
 from typing import NamedTuple, overload, TYPE_CHECKING
 import ast
@@ -134,6 +134,8 @@ class LedgerOfImports:
 		self._dictionaryImportFrom: dict[identifierDotAttribute, list[tuple[str, str | None]]] = defaultdict(list)
 		self._listImport: list[tuple[identifierDotAttribute, str | None]] = []
 		self._typeChecking: LedgerOfImports | None = None
+		self._isIfTYPE_CHECKING吗 = Be.If.testIs(IfThis.isAnyOf(
+			IfThis.isNameIdentifier('TYPE_CHECKING'), IfThis.isAttributeNamespaceIdentifier('typing', 'TYPE_CHECKING')))
 		self.type_ignores: list[ast.TypeIgnore] = [] if type_ignores is None else list(type_ignores)
 		if startWith:
 			self.walkThis(startWith)
@@ -339,6 +341,9 @@ class LedgerOfImports:
 		if self._typeChecking is not None:
 			self._typeChecking.removeImportFrom(dotModule, name, asName)
 
+	def removeTYPE_CHECKING(self, astAST: ast.AST) -> ast.AST | None:
+		return NodeChanger(self._isIfTYPE_CHECKING吗, Then.removeIt).visit(astAST)
+
 	def update(self, *fromLedger: LedgerOfImports) -> None:
 		"""
 		Merge import dependencies from other Ledgers into this one.
@@ -376,8 +381,7 @@ class LedgerOfImports:
 			Additional type ignore directives to include.
 		"""
 		boxOfIf: list[ast.If] = []
-		NodeTourist(Be.If.testIs(IfThis.isAnyOf(
-			IfThis.isNameIdentifier('TYPE_CHECKING'), IfThis.isAttributeNamespaceIdentifier('typing', 'TYPE_CHECKING'))), boxOfIf.append).visit(walkThis)
+		NodeTourist(self._isIfTYPE_CHECKING吗, boxOfIf.append).visit(walkThis)
 		boxOfTyping: set[ast.AST] = set()
 		if boxOfIf:
 			NodeTourist(Be.AST, boxOfTyping.add).visit(Make.Module(list(chain.from_iterable(map(DOT.body, boxOfIf)))))
@@ -388,6 +392,27 @@ class LedgerOfImports:
 		NodeTourist(IfThis.isAllOf(Be.ImportFrom, compose(not_, boxOfTyping.__contains__)), self.addAst).visit(walkThis)
 		if type_ignores:
 			self.type_ignores.extend(type_ignores)
+
+	def _declaresImportsOnly吗(self, ast_stmt: ast.stmt) -> bool:
+		match ast_stmt:
+			case ast.Import() | ast.ImportFrom():
+				return True
+			case ast.If(body=boxOfStatements, orelse=[]) if self._isIfTYPE_CHECKING吗(ast_stmt):
+				return all(map(IfThis.isAnyOf(Be.Import, Be.ImportFrom), boxOfStatements))
+			case _:
+				return False
+
+	def extractImports(self, astModule: ast.Module) -> None:
+		"""Record top-level imports and remove their declarations from `astModule`.
+
+		(AI generated docstring)
+
+		Imports in top-level, import-only `TYPE_CHECKING` blocks enter `typeChecking`.
+		Other conditional blocks and imports inside definitions keep their scope.
+		"""
+		boxOfStatements, boxOfImports = partition(self._declaresImportsOnly吗, astModule.body)
+		self.walkThis(Make.Module(list(boxOfImports)))
+		astModule.body = list(boxOfStatements)
 
 @dataclasses.dataclass(slots=True)
 class IngredientsFunction:

@@ -6,6 +6,10 @@ from mapFolding.dataBaskets import StateMeanders
 from operator import add, mul, neg
 from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from mapFolding.dataBaskets import StateMeandersAxis
+
 @cache
 def walkDyckPath(intWithExtra_0b1: int) -> int:
     """Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
@@ -121,9 +125,6 @@ def count[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateM
         state.lookupMeanders = {}
         tuple(map(analyzeArcCode, lookupArcCodeMeanders.keys(), lookupArcCodeMeanders.values(), strict=True))
     return state
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-    from mapFolding.dataBaskets import StateMeandersAxis
 
 def getBitsLocator(arcCode: int) -> int:
     return (1 << (arcCode.bit_length() | 1) + 1) // 3

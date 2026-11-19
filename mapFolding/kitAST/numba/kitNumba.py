@@ -122,8 +122,8 @@ def _numbaExpression(parameterValue: NumbaOption) -> ast.expr:
 		ast_expr = Make.List(tuple(map(Make.Constant, parameterValue)))
 	return ast_expr
 
-def _numbaCall(名Callable: str, parametersNumba: ParametersNumba) -> ast.Call:
-	"""I use this function to construct a compiler call from its option mapping.
+def makeNumbaCall(名Callable: str, parametersNumba: ParametersNumba) -> ast.Call:
+	"""Construct a Numba compiler call from its option mapping.
 
 	(AI generated docstring)
 
@@ -194,7 +194,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifi
 	logicalPathNumba: identifierDotAttribute = override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
 	名CallableDecorator: str = override.get('名CallableDecorator', identifiers['function']['numbaDecorator'])
 
-	astDecorator: ast.Call = _numbaCall(名CallableDecorator, parametersNumba)
+	astDecorator: ast.Call = makeNumbaCall(名CallableDecorator, parametersNumba)
 	findThis = IfThis.isAnyOf(IfThis.isNameIdentifier(名CallableDecorator), IfThis.isCallIdentifier(名CallableDecorator))
 	NodeChanger(Be.FunctionDef, Grab.decorator_listAttribute(Then.replaceWith([
 		astDecorator, *filterfalse(findThis, ingredientsFunction.astFunctionDef.decorator_list)
@@ -269,7 +269,7 @@ def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identi
 	logicalPathNumba: identifierDotAttribute = override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
 	名CallableDecorator: str = override.get('名CallableDecorator', identifiers['function']['numbaDecorator'])
 
-	boxOfDecorator: list[ast.expr] = [_numbaCall(名CallableDecorator, parametersNumba)]
+	boxOfDecorator: list[ast.expr] = [makeNumbaCall(名CallableDecorator, parametersNumba)]
 	NodeChanger(Be.FunctionDef.nameIs(boxOfCallable.__contains__)
 		, Grab.decorator_listAttribute(boxOfDecorator.__add__)).visit(astModule)
 
@@ -358,7 +358,7 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 	astImport: ast.ImportFrom = Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableModule)])
 	ingredientsModule = IngredientsModule(epilogue=Make.Module([
 		*astModule.body[:次Import], astImport, *astModule.body[次Import:]
-		, Make.Expr(_numbaCall(名CallableModule, parametersNumba))
+		, Make.Expr(makeNumbaCall(名CallableModule, parametersNumba))
 	], astModule.type_ignores))
 
 	pathRoot: PathLike[str] = override.get('pathRoot', identifiers['filesystem']['pathRoot'])

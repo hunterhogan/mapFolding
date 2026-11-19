@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mapFolding.dataBaskets import StateMapFolding
 
 def count(state: StateMapFolding) -> StateMapFolding:
     while state.leaf1ndex > 4:

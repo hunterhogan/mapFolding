@@ -28,8 +28,7 @@ from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.filesystem import parsePathFilename2astModule
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, removeFunctionDef, toDisk
-from mapFolding.kitAST.matrixMeanders.makeModules import combineModules
+from mapFolding.kitAST import IfThis, IngredientsModule, removeFunctionDef, toDisk
 from mapFolding.kitAST.paths import getLogicalPath, getPathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from typing import TYPE_CHECKING
@@ -248,24 +247,29 @@ def makeModulesAxis() -> None:
 	pathFilenameAxisPile: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['axisPile'])
 	pathFilenameAxisStrip: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['axisStrip'])
 
-	toDisk(combineModules(makeOrbit(parsePathFilename2astModule(pathFilenameAxisStrip), identifiers), Make.Module([]))
-		, identifiers, {}, identifiers['module']['axisStripOrbit'])
+	ingredientsModule = IngredientsModule(epilogue=makeOrbit(parsePathFilename2astModule(pathFilenameAxisStrip), identifiers))
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisStripOrbit'])
 
-	toDisk(combineModules(makeOrbit(parsePathFilename2astModule(getPathFilename(
-		pathRoot, logicalPathAlgorithm, identifiers['module']['axisStripGap'])), identifiers), Make.Module([]))
-		, identifiers, {}, identifiers['module']['axisStripGapOrbit'])
+	ingredientsModule = IngredientsModule(epilogue=makeOrbit(parsePathFilename2astModule(getPathFilename(
+		pathRoot, logicalPathAlgorithm, identifiers['module']['axisStripGap'])), identifiers))
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisStripGapOrbit'])
 
-	toDisk(combineModules(makeOrbit(parsePathFilename2astModule(getPathFilename(
-		pathRoot, logicalPathAlgorithm, identifiers['module']['axisPileDeadEnd'])), identifiers), Make.Module([]))
-		, identifiers, {}, identifiers['module']['axisPileDeadEndOrbit'])
+	ingredientsModule = IngredientsModule(epilogue=makeOrbit(parsePathFilename2astModule(getPathFilename(
+		pathRoot, logicalPathAlgorithm, identifiers['module']['axisPileDeadEnd'])), identifiers))
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisPileDeadEndOrbit'])
 
-	toDisk(combineModules(makeAxisPileOrbit(parsePathFilename2astModule(pathFilenameAxisPile), parsePathFilename2astModule(
-		getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])), identifiers), Make.Module([]))
-		, identifiers, {}, identifiers['module']['axisPileOrbit'])
+	ingredientsModule = IngredientsModule(epilogue=makeAxisPileOrbit(parsePathFilename2astModule(pathFilenameAxisPile)
+		, parsePathFilename2astModule(getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])), identifiers))
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisPileOrbit'])
 
-	toDisk(combineModules(makeAxisPileNumPy(parsePathFilename2astModule(pathFilenameAxisPile), parsePathFilename2astModule(
-		getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])), identifiers), Make.Module([]))
-		, identifiers, {}, identifiers['module']['axisPileNumPy'])
+	ingredientsModule = IngredientsModule(epilogue=makeAxisPileNumPy(parsePathFilename2astModule(pathFilenameAxisPile)
+		, parsePathFilename2astModule(getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])), identifiers))
+	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisPileNumPy'])
 
 if __name__ == '__main__':
 	makeModulesAxis()

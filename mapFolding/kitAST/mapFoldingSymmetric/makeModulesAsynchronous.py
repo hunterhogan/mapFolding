@@ -162,8 +162,8 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	del astFunctionDefDispatcher
 
 	imports = LedgerOfImports(astModule)
-	removeImports: NodeChanger[ast.AST, None] = NodeChanger(IfThis.isAnyOf(Be.ImportFrom, Be.Import), Then.removeIt)
-	removeImports.visit(astModule)
+	imports.removeTYPE_CHECKING(astModule)
+	NodeChanger(IfThis.isAllOf(IfThis.isAnyOf(Be.ImportFrom, Be.Import), astModule.body.__contains__), Then.removeIt).visit(astModule)
 
 	astModuleAsynchronousAnnex: ast.Module = getModule(名ModuleAsynchronousAnnex, logicalPathAssembly, 名PackageSource)
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名DataclassAnnexSource))
@@ -212,7 +212,8 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
 		).visit(astModuleAsynchronousAnnex)
 	imports.walkThis(astModuleAsynchronousAnnex)
-	removeImports.visit(astModuleAsynchronousAnnex)
+	imports.removeTYPE_CHECKING(astModuleAsynchronousAnnex)
+	NodeChanger(IfThis.isAllOf(IfThis.isAnyOf(Be.ImportFrom, Be.Import), astModuleAsynchronousAnnex.body.__contains__), Then.removeIt).visit(astModuleAsynchronousAnnex)
 
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFolds))
 			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))

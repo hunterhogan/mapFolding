@@ -3,7 +3,6 @@ from __future__ import annotations
 from gc import collect as goByeBye
 from mapFolding.algorithms.matrixAxisStrip import isJoined吗
 from mapFolding.algorithms.matrixMeandersShare import getTotalBuckets, integersWide吗
-from mapFolding.dataBaskets import StateMeanders
 from mapFolding.dataStructures import extendArray, make_memmap, ShapeArray, ShapeSlicer
 from mapFolding.oeis import boxOfDiagonals
 from mapFolding.synthesized.matrixMeanders.matrixMeandersShare import countBigInt, flipDyckEndpoint, integersWideNumPy吗
@@ -17,6 +16,8 @@ from typing import cast, TYPE_CHECKING
 import numpy
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+    from mapFolding.dataBaskets import StateMeanders
     from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
     from numpy import dtype, ndarray
     from numpy.lib._arraysetops_impl import UniqueInverseResult
@@ -283,8 +284,6 @@ def doTheNeedful(state: StateMeanders) -> StateMeanders:
     state.countAddend += sum(map(mul, state.lookupMeanders.values(), map(add, map(isHalfJoined吗, state.lookupMeanders.keys()), map(isHalfJoined吗, map(reflectArcCode, state.lookupMeanders.keys())), strict=True), strict=True)) // 2
     state.lookupMeanders = {}
     return state
-if TYPE_CHECKING:
-    from collections.abc import Iterator
 
 def getBitsLocator(arcCode: int) -> int:
     return (1 << (arcCode.bit_length() | 1) + 1) // 3

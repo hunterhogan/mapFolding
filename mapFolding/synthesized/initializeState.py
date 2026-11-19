@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import StateMapFolding
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mapFolding.dataBaskets import StateMapFolding
 
 def transitionOnGroupsOfFolds(state: StateMapFolding) -> StateMapFolding:
     while state.groupsOfFolds == 0:

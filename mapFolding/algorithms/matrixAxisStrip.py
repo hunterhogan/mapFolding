@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from mapFolding.dataBaskets import StateMeandersAxis
 from operator import add, mul, neg
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
+	from mapFolding.dataBaskets import StateMeandersAxis
 
 def walkDyckPathAlfa(arcCode: int) -> int:
 	findTheExtra_0b1: int = 0
