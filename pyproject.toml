@@ -41,7 +41,7 @@ scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.
 dependencies = [
   "Z0Z_tools>=4.0.0",
   "anyascii",
-  "astToolkit>=0.13.0",
+  "astToolkit>=0.14.1",
   "gmpy2",
   "hunterMakesPy>=0.10.0",
   "more_itertools",

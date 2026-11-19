@@ -294,6 +294,8 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 
 	return totalFolds
 
+# TODO some algorithms have some concurrency in numba. And, I think some use stdlib. Some might use
+# both! At the very least, I have plans for viable implementations that use both.
 #ruff: ignore[unused-function-argument] #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
 def countMeanders(
 	kind: Literal['closed', 'meander shapes', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None

@@ -102,8 +102,7 @@ if TYPE_CHECKING:
 	from typing import Any, LiteralString, TypeAlias
 
 type Folding = tuple[Leaf, ...]
-"""`leaf` indexed to `pile`; length must be `totalLeaves`.
-"""
+"""`leaf` indexed to `pile`; length must be `totalLeaves`."""
 
 #=EndNotes##TypeAlias=
 Leaf: TypeAlias = int
