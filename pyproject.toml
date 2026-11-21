@@ -122,11 +122,9 @@ strict = true
 testpaths = ["mapFolding/tests"]
 
 [tool.pytest_env]
-# Measured 2026-11-21 with numba 0.68.1 and coverage 7.17.4: NUMBA_JIT_COVERAGE = "1" marks every line that Numba lowers while
-# compiling, whether or not the line executes, and marks nothing when a function loads from Numba's on-disk cache (`cache=True`),
-# so it reported either every compiled line or none. NUMBA_DISABLE_JIT = "1" measures the executed lines and branches of the
-# compiled functions, at the cost of interpreting them.
-# NUMBA_DISABLE_JIT = "1"
+# Re-confirmed: numba Version: 0.63.1 2025 December 30
+NUMBA_JIT_COVERAGE = "1"  # This does not work, whether it is 0 or 1.
+# NUMBA_DISABLE_JIT = "1" # This is the only way to get coverage data
 
 [tool.setuptools]
 package-data = { "*" = ["py.typed"], mapFolding = ["_semiotics.md", "_symbols.md", "oeis/oeisdata/**/*", "oeis/terms/**/*"] }

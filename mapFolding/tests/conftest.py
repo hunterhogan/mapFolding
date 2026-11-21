@@ -57,14 +57,6 @@ def arrayFoldings(mapShape: tuple[int, ...]) -> NDArray[numpy.uint8]:
 	return getDataFrameFoldings(StateElimination(mapShape)).to_numpy(dtype=numpy.uint8)
 
 @pytest.fixture
-def domainLeavesEnumerated(arrayFoldings: NDArray[numpy.uint8], leaves: tuple[int, ...]) -> set[tuple[int, ...]]:
-	"""The piles of `leaves`, in the order of `leaves`, in each enumerated folding of the 2^n-dimensional `mapShape`.
-
-	Each row of `arrayFoldings` is a permutation of the leaves, so the order that sorts a row is the pile of each leaf.
-	"""
-	return set(map(tuple, numpy.argsort(arrayFoldings, axis=1)[:, leaves].tolist()))
-
-@pytest.fixture
 def pathRootJobDEFAULT(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
 	"""Default job directory, owned by one test, in place of the user's data directory."""
 	pathRootJobDEFAULT: Path = tmp_path / 'jobs'
