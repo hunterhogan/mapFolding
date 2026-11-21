@@ -36,12 +36,12 @@ if TYPE_CHECKING:
 # didn't know how to calculate what 'elephino' needs. I now have a safe upper bound for that in a
 # notebook somewhere.
 boxOfSettings形: list[Settings形] = [
-	Settings形(datatypeIdentifier='形TotalLeaves', typeModule='numba', typeIdentifier='uint8', type_asname='形TotalLeaves'),
-	Settings形(datatypeIdentifier='形Elephino', typeModule='numba', typeIdentifier='uint16', type_asname='形Elephino'),
-	Settings形(datatypeIdentifier='形TotalFolds', typeModule='numba', typeIdentifier='int64', type_asname='形TotalFolds'),
-	Settings形(datatypeIdentifier='形ArrayTotalLeaves1D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayTotalLeaves1D'),
-	Settings形(datatypeIdentifier='形ArrayElephino1D', typeModule='numpy', typeIdentifier='uint16', type_asname='形ArrayElephino1D'),
-	Settings形(datatypeIdentifier='形ArrayTotalLeaves3D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayTotalLeaves3D'),
+	Settings形(名TypeOriginal='形TotalLeaves', dotModule='numba', 名Type='uint8', 名TypeAlias='形TotalLeaves'),
+	Settings形(名TypeOriginal='形Elephino', dotModule='numba', 名Type='uint16', 名TypeAlias='形Elephino'),
+	Settings形(名TypeOriginal='形TotalFolds', dotModule='numba', 名Type='int64', 名TypeAlias='形TotalFolds'),
+	Settings形(名TypeOriginal='形ArrayTotalLeaves1D', dotModule='numpy', 名Type='uint8', 名TypeAlias='形ArrayTotalLeaves1D'),
+	Settings形(名TypeOriginal='形ArrayElephino1D', dotModule='numpy', 名Type='uint16', 名TypeAlias='形ArrayElephino1D'),
+	Settings形(名TypeOriginal='形ArrayTotalLeaves3D', dotModule='numpy', 名Type='uint8', 名TypeAlias='形ArrayTotalLeaves3D'),
 ]
 """Access the fixed datatype substitutions used during job compilation.
 

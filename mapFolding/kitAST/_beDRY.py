@@ -143,9 +143,9 @@ def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsMo
 		A tuple containing the modified `IngredientsFunction` and `IngredientsModule` with updated imports for the specified datatypes.
 	"""
 	for datatypeConfig in boxOfSettings形:
-		ingredientsFunction.imports.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
-		ingredientsModule.removeImportFrom(None, None, datatypeConfig.datatypeIdentifier)
-		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.typeModule, datatypeConfig.typeIdentifier, datatypeConfig.type_asname)
+		ingredientsFunction.imports.removeImportFrom(None, None, datatypeConfig.名TypeOriginal)
+		ingredientsModule.removeImportFrom(None, None, datatypeConfig.名TypeOriginal)
+		ingredientsFunction.imports.addImportFrom_asStr(datatypeConfig.dotModule, datatypeConfig.名Type, datatypeConfig.名TypeAlias)
 
 	return ingredientsFunction, ingredientsModule
 

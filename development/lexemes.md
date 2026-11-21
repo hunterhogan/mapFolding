@@ -1,0 +1,62 @@
+# Map folding lexemes
+
+- Coordinates, positions, and order
+  - leaf: a panel of the unfolded map.
+  - pile: a position in the stack.
+  - dimension: an axis of the unfolded map.
+  - coordinate: position along a dimension.
+  - crease: a shared boundary along which adjacent leaves fold.
+  - gap: an insertion slot between leaves or at a stack end.
+  - origin: the zero position.
+  - 次: an index value.
+  - 首: the most significant end of the full positional sequence.
+  - tail: the least significant end of the full positional sequence.
+  - Ante: preceding.
+  - Post: following.
+  - at: location.
+  - of: possession or association.
+- Possibilities and assignments
+  - domain: the allowed values of a variable.
+  - choices: the remaining alternatives.
+  - anti: set complement.
+  - pin: fix a leaf at a pile.
+  - pair: two associated objects.
+  - intersect: retain the common members of sets.
+  - iterate: visit members one at a time.
+- Collections and quantities
+  - boxOf: a collection.
+  - lookup: a mapping from keys to values.
+  - count: determine how many, or the resulting number.
+  - total: the sum over a whole group.
+  - minimum: the least admissible value.
+  - half: one of two equal parts.
+  - prior: before the current step.
+- Operations and notation
+  - get: return an existing value unchanged.
+  - make: construct a value from existing values.
+  - 工: an expression.
+  - 吗: a question.
+  - 形: a type or form.
+  - 名: a textual name.
+  - record: store a fact or result.
+  - complete: having reached the end condition.
+  - may: permitted by the current checks.
+- Folding and concurrent work
+  - fold: a complete stack order of leaves.
+  - symmetric: unchanged by the specified transformation.
+  - state: values carried between steps.
+  - step: one advance in a computation.
+  - task: a unit of work.
+  - queue: a first-in, first-out collection.
+  - lock: a control for exclusive access to a shared resource.
+- Types, sequences, and files
+  - type: a kind of value.
+  - import: bind a module or a name from it.
+  - replacement: a substitute value or binding.
+  - call: a function application.
+  - sequence: values ordered by index.
+  - term: a sequence value at one index.
+  - flatten: reduce to one level or dimension while preserving order.
+  - probe: check by a small trial.
+  - output: data produced by a computation.
+  - file: a byte stream stored on a filesystem.

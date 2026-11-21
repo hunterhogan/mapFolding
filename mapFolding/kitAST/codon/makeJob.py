@@ -33,12 +33,12 @@ if TYPE_CHECKING:
 	import ast
 
 boxOfSettings形: list[Settings形] = [
-	Settings形(datatypeIdentifier='形TotalLeaves', typeModule='numpy', typeIdentifier='uint8', type_asname='形TotalLeaves'),
-	Settings形(datatypeIdentifier='形Elephino', typeModule='numpy', typeIdentifier='uint8', type_asname='形Elephino'),
-	Settings形(datatypeIdentifier='形TotalFolds', typeModule='numpy', typeIdentifier='uint64', type_asname='形TotalFolds'),
-	Settings形(datatypeIdentifier='形ArrayTotalLeaves1D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayTotalLeaves1D'),
-	Settings形(datatypeIdentifier='形ArrayElephino1D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayElephino1D'),
-	Settings形(datatypeIdentifier='形ArrayTotalLeaves3D', typeModule='numpy', typeIdentifier='uint8', type_asname='形ArrayTotalLeaves3D'),
+	Settings形(名TypeOriginal='形TotalLeaves', dotModule='numpy', 名Type='uint8', 名TypeAlias='形TotalLeaves'),
+	Settings形(名TypeOriginal='形Elephino', dotModule='numpy', 名Type='uint8', 名TypeAlias='形Elephino'),
+	Settings形(名TypeOriginal='形TotalFolds', dotModule='numpy', 名Type='uint64', 名TypeAlias='形TotalFolds'),
+	Settings形(名TypeOriginal='形ArrayTotalLeaves1D', dotModule='numpy', 名Type='uint8', 名TypeAlias='形ArrayTotalLeaves1D'),
+	Settings形(名TypeOriginal='形ArrayElephino1D', dotModule='numpy', 名Type='uint8', 名TypeAlias='形ArrayElephino1D'),
+	Settings形(名TypeOriginal='形ArrayTotalLeaves3D', dotModule='numpy', 名Type='uint8', 名TypeAlias='形ArrayTotalLeaves3D'),
 ]
 """Access the fixed datatype substitutions used during source preparation.
 

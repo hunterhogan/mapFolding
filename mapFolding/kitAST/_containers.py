@@ -31,12 +31,12 @@ systematically assembled into final output. This approach is particularly useful
 The containers handle the mechanical details of import management, code organization, and formatting,
 allowing transformation logic to focus on semantic changes rather than syntactic concerns.
 Classes
-	Settings形
+	TypeImportReplacement
 		Specify a replacement import for an abstract datatype.
 """
 from __future__ import annotations
 
-from astToolkit import Be, DOT, IfThis, Make, NodeChanger, NodeTourist, Then
+from astToolkit import Be, DOT, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractFunctionDef, removeUnusedParameters
 from astToolkit.filesystem import write_astModule
 from collections import defaultdict
@@ -51,6 +51,7 @@ from operator import attrgetter, itemgetter, ne, not_
 from typing import NamedTuple, overload, TYPE_CHECKING
 import ast
 import dataclasses
+import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
@@ -71,22 +72,20 @@ class Settings形(NamedTuple):
 
 	Attributes
 	----------
-	datatypeIdentifier : str
+	名TypeOriginal : str
 		Original abstract datatype identifier whose import alias will be replaced.
-	typeModule : identifierDotAttribute
+	dotModule : identifierDotAttribute
 		Dotted module path supplying the replacement datatype.
-	typeIdentifier : str
+	名Type : str
 		Datatype identifier imported from the replacement module.
-	type_asname : str | None = None
+	名TypeAlias : str | None = None
 		Optional alias written on the replacement import.
 	"""
 
-	datatypeIdentifier: str
-	typeModule: identifierDotAttribute
-	typeIdentifier: str
-	type_asname: str | None = None
-
-# TODO Add Python 3.15 `is_lazy` parameter to LedgerOfImports.
+	名TypeOriginal: str
+	dotModule: identifierDotAttribute
+	名Type: str
+	名TypeAlias: str | None = None
 
 class LedgerOfImports:
 	"""
@@ -134,6 +133,8 @@ class LedgerOfImports:
 		self._dictionaryImportFrom: dict[identifierDotAttribute, list[tuple[str, str | None]]] = defaultdict(list)
 		self._listImport: list[tuple[identifierDotAttribute, str | None]] = []
 		self._typeChecking: LedgerOfImports | None = None
+		self._lazy: LedgerOfImports | None = None
+		self._isLazy吗: bool = False
 		self._isIfTYPE_CHECKING吗 = Be.If.testIs(IfThis.isAnyOf(
 			IfThis.isNameIdentifier('TYPE_CHECKING'), IfThis.isAttributeNamespaceIdentifier('typing', 'TYPE_CHECKING')))
 		self.type_ignores: list[ast.TypeIgnore] = [] if type_ignores is None else list(type_ignores)
@@ -146,6 +147,14 @@ class LedgerOfImports:
 			self._typeChecking = LedgerOfImports()
 		return self._typeChecking
 
+	if sys.version_info >= (3, 15):
+		@property
+		def lazy(self) -> LedgerOfImports:
+			if self._lazy is None:
+				self._lazy = LedgerOfImports()
+				self._lazy._isLazy吗 = True  # ruff: ignore[private-member-access]
+			return self._lazy
+
 	def _subtractImportFrom(self, dotModule: identifierDotAttribute, list_nameTuples: list[tuple[str, str | None]]) -> None:
 		if dotModule in self._dictionaryImportFrom:
 			self._dictionaryImportFrom[dotModule] = list(filterfalse(set(list_nameTuples).__contains__, self._dictionaryImportFrom[dotModule]))
@@ -157,6 +166,8 @@ class LedgerOfImports:
 		consume(starmap(self._subtractImportFrom, fromLedger._dictionaryImportFrom.items()))
 		if self._typeChecking is not None:
 			self._typeChecking.subtractRuntime(fromLedger)
+		if self._lazy is not None:
+			self._lazy.subtractRuntime(fromLedger)
 
 	def addAst(self, astImport____: ast.Import | ast.ImportFrom, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		"""
@@ -174,17 +185,20 @@ class LedgerOfImports:
 		type_ignores : list[ast.TypeIgnore] | None
 			Additional type ignore directives associated with this import.
 		"""
+		ledger: LedgerOfImports = self
+		if sys.version_info >= (3, 15) and astImport____.is_lazy:
+			ledger = self.lazy
 		match astImport____:
 			case ast.Import():
 				for alias in astImport____.names:
-					self._listImport.append((alias.name, alias.asname))
+					ledger._listImport.append((alias.name, alias.asname))  # ruff: ignore[private-member-access]
 			case ast.ImportFrom():
 				if astImport____.module is None:
 					astImport____.module = '.'
 				elif 0 < astImport____.level:
 					astImport____.module = f"{'.' * astImport____.level}{astImport____.module}"
 				for alias in astImport____.names:
-					self._dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
+					ledger._dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))  # ruff: ignore[private-member-access]
 			case _:
 				pass
 		if type_ignores:
@@ -244,6 +258,8 @@ class LedgerOfImports:
 		listModuleIdentifiers.extend(map(itemgetter(0), self._listImport))
 		if self._typeChecking is not None:
 			listModuleIdentifiers.extend(self._typeChecking.exportListModuleIdentifiers())
+		if self._lazy is not None:
+			listModuleIdentifiers.extend(self._lazy.exportListModuleIdentifiers())
 		return sorted(set(listModuleIdentifiers))
 
 	def makeList_ast(self) -> list[ast.ImportFrom | ast.Import | ast.If]:
@@ -265,12 +281,18 @@ class LedgerOfImports:
 		boxOfIf: list[ast.If] = []
 		if self._typeChecking is not None:
 			self._typeChecking.subtractRuntime(self)
+			if self._lazy is not None:
+				self._typeChecking.subtractRuntime(self._lazy)
 			if self._typeChecking.exportListModuleIdentifiers() and ('TYPE_CHECKING', None) not in self._dictionaryImportFrom.get('typing', []):
 				self.addImportFrom_asStr('typing', 'TYPE_CHECKING')
 				self._typeChecking.subtractRuntime(self)
 			list_body: list[ast.ImportFrom | ast.Import | ast.If] = self._typeChecking.makeList_ast()
 			if list_body:
 				boxOfIf.append(Make.If(Make.Name('TYPE_CHECKING'), list_body))
+		boxOfImportsLazy: list[ast.ImportFrom | ast.Import | ast.If] = []
+		if self._lazy is not None:
+			self._lazy.subtractRuntime(self)
+			boxOfImportsLazy = self._lazy.makeList_ast()
 		listImportFrom: list[ast.ImportFrom] = []
 		for dotModule, list_nameTuples in sorted(self._dictionaryImportFrom.items()):
 			list_nameTuples: list[tuple[str, str | None]] = sorted(set(list_nameTuples), key=repr)
@@ -280,7 +302,9 @@ class LedgerOfImports:
 			if list_alias:
 				listImportFrom.append(Make.ImportFrom(dotModule, list_alias))
 		list_astImport: list[ast.Import] = list(starmap(Make.Import, dict.fromkeys(self._listImport)))
-		return listImportFrom + list_astImport + boxOfIf
+		if sys.version_info >= (3, 15) and self._isLazy吗:
+			consume(map(Grab.is_lazyAttribute(Then.replaceWith(this=True)), chain(listImportFrom, list_astImport)))
+		return listImportFrom + list_astImport + boxOfImportsLazy + boxOfIf
 
 	def removeImportFromModule(self, dotModule: identifierDotAttribute) -> None:
 		"""
@@ -299,6 +323,8 @@ class LedgerOfImports:
 		self._listImport = list(filter(compose(dotModule.__ne__, itemgetter(0)), self._listImport))
 		if self._typeChecking is not None:
 			self._typeChecking.removeImportFromModule(dotModule)
+		if self._lazy is not None:
+			self._lazy.removeImportFromModule(dotModule)
 
 	def removeImportFrom(self, dotModule: identifierDotAttribute | None, name: str | None, asName: str | None = None) -> None:
 		"""
@@ -340,6 +366,8 @@ class LedgerOfImports:
 				self.removeImportFrom(module, name, asName)
 		if self._typeChecking is not None:
 			self._typeChecking.removeImportFrom(dotModule, name, asName)
+		if self._lazy is not None:
+			self._lazy.removeImportFrom(dotModule, name, asName)
 
 	def removeTYPE_CHECKING(self, astAST: ast.AST) -> ast.AST | None:
 		return NodeChanger(self._isIfTYPE_CHECKING吗, Then.removeIt).visit(astAST)
@@ -364,6 +392,8 @@ class LedgerOfImports:
 			self.type_ignores.extend(ledger.type_ignores)
 			if ledger._typeChecking is not None:  # ruff: ignore[private-member-access]
 				self.typeChecking.update(ledger._typeChecking)  # ruff: ignore[private-member-access]
+			if sys.version_info >= (3, 15) and ledger._lazy is not None:  # ruff: ignore[private-member-access]
+				self.lazy.update(ledger._lazy)  # ruff: ignore[private-member-access]
 
 	def walkThis(self, walkThis: ast.AST, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		"""
@@ -707,11 +737,11 @@ class IngredientsModule:
 			ingredientsFunction.imports.removeImportFrom(dotModule, name, asName)
 
 	def _consolidatedLedger(self) -> LedgerOfImports:
-		sherpaLedger = LedgerOfImports()
-		listLedgers: list[LedgerOfImports] = [self.imports]
-		listLedgers.extend(ingredientsFunction.imports for ingredientsFunction in self.listIngredientsFunctions)
-		sherpaLedger.update(*listLedgers)
-		return sherpaLedger
+		ledger = LedgerOfImports()
+		boxOfLedger: list[LedgerOfImports] = [self.imports]
+		boxOfLedger.extend(ingredientsFunction.imports for ingredientsFunction in self.listIngredientsFunctions)
+		ledger.update(*boxOfLedger)
+		return ledger
 
 	@property
 	def _list_astImportImportFrom(self) -> list[ast.Import | ast.ImportFrom | ast.If]:

@@ -39,11 +39,11 @@ classifiers = [
 ]
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "Z0Z_tools>=4.0.0",
+  "Z0Z_tools>=4.1.1",
   "anyascii",
   "astToolkit>=0.14.1",
   "gmpy2",
-  "hunterMakesPy>=0.10.0",
+  "hunterMakesPy>=0.10.1",
   "more_itertools",
   "numba",
   "numba_progress",
