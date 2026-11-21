@@ -1,6 +1,6 @@
 """Albums of representative foldings from the insertion algorithm, `mapFolding.algorithms.insertion.doTheNeedful`.
 
-Expected values and exceptions come from the targets' docstrings unless a comment names another basis.
+Expected values and exceptions come from the targets' docstrings unless a test's docstring names another basis.
 """
 from __future__ import annotations
 
@@ -21,8 +21,6 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import Folding
 	from pathlib import Path
 
-# Reference for `expected`: the docstring of `mapFolding.kitFilesystem.makeFilenameFolds`, with the suffix `.album`.
-# Accepted recording for `totalRepresentatives`, stored before the 2026-11 reorganization.
 @pytest.mark.parametrize('CPUlimit', (1, 2))
 @pytest.mark.parametrize('pathAlbum', (None,), indirect=True, ids=['albumAbsent'])
 @pytest.mark.parametrize('mapShape, expected, totalRepresentatives, albumKnown', (
@@ -50,6 +48,9 @@ def test_insertion(pathAlbum: Path, albumKnown: tuple[Folding, ...], mapShape: t
 	By the docstring, each representative has the origin leaf at the origin pile, and leaf one precedes leaf two in it. A map of
 	fewer than three leaves has the leaves of `(1, 2)` that exist. The new album contains every folding of the stored album of
 	`mapShape` named by `albumKnown`.
+
+	Reference for `expected`: the docstring of `mapFolding.kitFilesystem.makeFilenameFolds`, with the suffix `.album`. Accepted
+	recording for `totalRepresentatives`, stored before the 2026-11 reorganization.
 	"""
 	pathFilenameAlbum: Path = insertion.doTheNeedful(mapShape, CPUlimit)
 	album: tuple[Folding, ...] = readAlbum(pathFilenameAlbum)
@@ -67,16 +68,16 @@ def test_insertion(pathAlbum: Path, albumKnown: tuple[Folding, ...], mapShape: t
 	assertEqualTo(set(albumKnown).difference(album), set(), insertion.doTheNeedful.__name__, mapShape, CPUlimit)
 
 @pytest.mark.parametrize('CPUlimit', (1, 2))
-@pytest.mark.parametrize('mapShape, pathAlbum, albumKnown, expected', (
-	pytest.param((), None, None, ValueError, id='noDimensions')
-	, pytest.param((-2, 3), None, None, ValueError, id='negativeDimension')
-	, pytest.param((0,), None, None, ValueError, id='zeroLeaves')
-	, pytest.param((2, 0), None, None, ValueError, id='p2x0')
-	, pytest.param((2, 2, 2), (2, 2, 2), (2, 2, 2), FileExistsError, id='albumExists')
+@pytest.mark.parametrize('mapShape, pathAlbum, albumKnown, expected, match', (
+	pytest.param((), None, None, ValueError, 'did not receive a value for `mapShape`', id='noDimensions')
+	, pytest.param((-2, 3), None, None, ValueError, 'at least one positive integer dimension', id='negativeDimension')
+	, pytest.param((0,), None, None, ValueError, 'at least one leaf', id='zeroLeaves')
+	, pytest.param((2, 0), None, None, ValueError, 'at least one leaf', id='p2x0')
+	, pytest.param((2, 2, 2), (2, 2, 2), (2, 2, 2), FileExistsError, 'already exists', id='albumExists')
 ), indirect=['pathAlbum', 'albumKnown'])
 def test_insertionError(pathAlbum: Path, albumKnown: tuple[Folding, ...], mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit
-	, expected: type[Exception]) -> None:
+	, expected: type[Exception], match: str) -> None:
 	"""The call raises, and the album directory still holds exactly the stored album that `pathAlbum` copied into it."""
-	with pytest.raises(expected):
+	with pytest.raises(expected, match=match):
 		insertion.doTheNeedful(mapShape, CPUlimit)
 	assertEqualTo(tuple(chain.from_iterable(map(readAlbum, pathAlbum.iterdir()))), albumKnown, insertion.doTheNeedful.__name__, mapShape, CPUlimit)

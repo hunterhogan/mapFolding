@@ -136,7 +136,7 @@ def prune[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateM
     (AI generated docstring)
 
     You can use this function between counting iterations to remove entries whose remaining work
-    can be evaluated by `mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`. The function preserves
+    can be evaluated by `mapFolding.oeis.A400429.boxOfDiagonals`. The function preserves
     each removed entry's final contribution in `state.countAddend` and returns the updated state.
 
     Parameters
@@ -151,7 +151,7 @@ def prune[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateM
 
     See Also
     --------
-    `mapFolding.oeis.A400429oeisByFormula.boxOfDiagonals`
+    `mapFolding.oeis.A400429.boxOfDiagonals`
         Inspect the known diagonal formulas used to complete selected dictionary entries.
     `mapFolding.synthesized.matrixMeanders.matrixMeandersShare.pruneDataFrame`
         Prune an active table stored as a dataframe instead of a dictionary.

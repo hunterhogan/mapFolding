@@ -17,22 +17,20 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator
 	from hunterMakesPy import CallableFunction
 
-parametersGetLeavesCrease: dict[str, tuple[Callable[[StateElimination, int], Iterator[int]], tuple[int, ...], int, list[int]]] = dict(chain(
-	zip(map('getLeavesCreasePost-mapShape2上5Dimensional-leaf{}'.format, dictionaryCreasesIncreaseKnown[mapShape2上5Dimensional])
-		, zip(repeat(getLeavesCreasePost), repeat(mapShape2上5Dimensional), dictionaryCreasesIncreaseKnown[mapShape2上5Dimensional].keys()
-			, dictionaryCreasesIncreaseKnown[mapShape2上5Dimensional].values()), strict=True)
-	, zip(map('getLeavesCreasePost-mapShape2上6Dimensional-leaf{}'.format, dictionaryCreasesIncreaseKnown[mapShape2上6Dimensional])
-		, zip(repeat(getLeavesCreasePost), repeat(mapShape2上6Dimensional), dictionaryCreasesIncreaseKnown[mapShape2上6Dimensional].keys()
-			, dictionaryCreasesIncreaseKnown[mapShape2上6Dimensional].values()), strict=True)
-	, zip(map('getLeavesCreaseAnte-mapShape2上5Dimensional-leaf{}'.format, dictionaryCreasesDecreaseKnown[mapShape2上5Dimensional])
-		, zip(repeat(getLeavesCreaseAnte), repeat(mapShape2上5Dimensional), dictionaryCreasesDecreaseKnown[mapShape2上5Dimensional].keys()
-			, dictionaryCreasesDecreaseKnown[mapShape2上5Dimensional].values()), strict=True)
-	, zip(map('getLeavesCreaseAnte-mapShape2上6Dimensional-leaf{}'.format, dictionaryCreasesDecreaseKnown[mapShape2上6Dimensional])
-		, zip(repeat(getLeavesCreaseAnte), repeat(mapShape2上6Dimensional), dictionaryCreasesDecreaseKnown[mapShape2上6Dimensional].keys()
-			, dictionaryCreasesDecreaseKnown[mapShape2上6Dimensional].values()), strict=True)
-))
-
-@pytest.mark.parametrize('getLeavesCrease, mapShape, leaf, expected', parametersGetLeavesCrease.values(), ids=parametersGetLeavesCrease.keys())
+@pytest.mark.parametrize('getLeavesCrease, mapShape, leaf, expected', (parametersGetLeavesCrease := dict(chain(
+		zip(map('getLeavesCreasePost-mapShape2上5Dimensional-leaf{}'.format, dictionaryCreasesIncreaseKnown[mapShape2上5Dimensional])
+			, zip(repeat(getLeavesCreasePost), repeat(mapShape2上5Dimensional), dictionaryCreasesIncreaseKnown[mapShape2上5Dimensional].keys()
+				, dictionaryCreasesIncreaseKnown[mapShape2上5Dimensional].values()), strict=True)
+		, zip(map('getLeavesCreasePost-mapShape2上6Dimensional-leaf{}'.format, dictionaryCreasesIncreaseKnown[mapShape2上6Dimensional])
+			, zip(repeat(getLeavesCreasePost), repeat(mapShape2上6Dimensional), dictionaryCreasesIncreaseKnown[mapShape2上6Dimensional].keys()
+				, dictionaryCreasesIncreaseKnown[mapShape2上6Dimensional].values()), strict=True)
+		, zip(map('getLeavesCreaseAnte-mapShape2上5Dimensional-leaf{}'.format, dictionaryCreasesDecreaseKnown[mapShape2上5Dimensional])
+			, zip(repeat(getLeavesCreaseAnte), repeat(mapShape2上5Dimensional), dictionaryCreasesDecreaseKnown[mapShape2上5Dimensional].keys()
+				, dictionaryCreasesDecreaseKnown[mapShape2上5Dimensional].values()), strict=True)
+		, zip(map('getLeavesCreaseAnte-mapShape2上6Dimensional-leaf{}'.format, dictionaryCreasesDecreaseKnown[mapShape2上6Dimensional])
+			, zip(repeat(getLeavesCreaseAnte), repeat(mapShape2上6Dimensional), dictionaryCreasesDecreaseKnown[mapShape2上6Dimensional].keys()
+				, dictionaryCreasesDecreaseKnown[mapShape2上6Dimensional].values()), strict=True)
+	))).values(), ids=parametersGetLeavesCrease.keys())
 def test_getLeavesCrease(getLeavesCrease: CallableFunction[[StateElimination, int], Iterator[int]], mapShape: tuple[int, ...], leaf: int
 	, expected: list[int]) -> None:
 	"""The leaves are the recorded leaves, in increasing order of the flipped dimension index, which is the order of `leaf ^ leafCrease`."""

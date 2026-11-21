@@ -35,6 +35,11 @@ def expected(oeisID: OEISid, n: int) -> int:
 	"""Reference: a(n) of `oeisID` in the OEIS b-file that `mapFolding.oeis` stores."""
 	return getValuesKnown(oeisID)[n]
 
+@pytest.fixture
+def cellsKnown(oeisID: OEISid, n: int) -> list[int]:
+	"""Reference: the cells T(n, k), for every k, of the triangle `oeisID` in the OEIS b-file that `mapFolding.oeis` stores."""
+	return getTriangle(oeisID)[n]
+
 @pytest.fixture(scope='session')
 def triangle() -> 形Triangle:
 	"""The A400429 triangle, each row followed by one zero cell.
@@ -50,6 +55,14 @@ def triangle() -> 形Triangle:
 def arrayFoldings(mapShape: tuple[int, ...]) -> NDArray[numpy.uint8]:
 	"""The enumerated foldings of the 2^n-dimensional `mapShape`: one row per folding, and the leaf at each pile in its column."""
 	return getDataFrameFoldings(StateElimination(mapShape)).to_numpy(dtype=numpy.uint8)
+
+@pytest.fixture
+def domainLeavesEnumerated(arrayFoldings: NDArray[numpy.uint8], leaves: tuple[int, ...]) -> set[tuple[int, ...]]:
+	"""The piles of `leaves`, in the order of `leaves`, in each enumerated folding of the 2^n-dimensional `mapShape`.
+
+	Each row of `arrayFoldings` is a permutation of the leaves, so the order that sorts a row is the pile of each leaf.
+	"""
+	return set(map(tuple, numpy.argsort(arrayFoldings, axis=1)[:, leaves].tolist()))
 
 @pytest.fixture
 def pathRootJobDEFAULT(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:

@@ -13,16 +13,15 @@ import pytest
 if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
 
-# Reference: the module defines the dimension constant of index k as 2**k.
 @pytest.mark.parametrize('constant, expected', (
 	pytest.param(零, 1, id='零'), pytest.param(一, 2, id='一'), pytest.param(二, 4, id='二'), pytest.param(三, 8, id='三')
 	, pytest.param(四, 16, id='四'), pytest.param(五, 32, id='五'), pytest.param(六, 64, id='六'), pytest.param(七, 128, id='七')
 	, pytest.param(八, 256, id='八'), pytest.param(九, 512, id='九')
 ))
 def test_dimensionIndexConstants(constant: int, expected: int) -> None:
+	"""Reference: the module defines the dimension constant of index k as 2**k."""
 	assertEqualTo(constant, expected, 'dimension index constant')
 
-# Reference: the docstring: the base-`dimensionLength` logarithm of a single-dimension coordinate.
 @pytest.mark.parametrize('dimensionAsNonnegativeInteger, dimensionLength, expected', (
 	pytest.param(1, 2, 0, id='coordinate2上0'), pytest.param(2, 2, 1, id='coordinate2上1'), pytest.param(4, 2, 2, id='coordinate2上2')
 	, pytest.param(8, 2, 3, id='coordinate2上3'), pytest.param(16, 2, 4, id='coordinate2上4'), pytest.param(32, 2, 5, id='coordinate2上5')
@@ -34,16 +33,18 @@ def test_dimensionIndexConstants(constant: int, expected: int) -> None:
 	, pytest.param(243, 3, 5, id='coordinate3上5')
 ))
 def test_dimensionIndex(dimensionAsNonnegativeInteger: int, dimensionLength: int, expected: int) -> None:
+	"""Reference: the docstring: the base-`dimensionLength` logarithm of a single-dimension coordinate."""
 	assertEqualTo(dimensionIndex(dimensionAsNonnegativeInteger, dimensionLength=dimensionLength), expected, dimensionIndex.__name__
 		, dimensionAsNonnegativeInteger, dimensionLength=dimensionLength)
 
-# Indices reach 4096, far past 1024, where the coordinate 2**index exceeds a float's range.
 @given(strategies.integers(0, 4096))
 def test_dimensionIndexGenerated(index: int) -> None:
-	"""Relation: `dimensionIndex` inverts the coordinate 2**index."""
+	"""Relation: `dimensionIndex` inverts the coordinate 2**index.
+
+	Indices reach 4096, far past 1024, where the coordinate 2**index exceeds a float's range.
+	"""
 	assertEqualTo(dimensionIndex(2 ** index), index, dimensionIndex.__name__, 2 ** index)
 
-# Reference: the docstrings: each named head position k, counted from the head, sets bit `totalDimensions - 1 - k`.
 @pytest.mark.parametrize('headPositions, totalDimensions, expected', (
 	*starmap(partial(pytest.param, 首零), ((5, 16), (6, 32), (7, 64), (8, 128)))
 	, *starmap(partial(pytest.param, 首零一), ((5, 24), (6, 48), (7, 96), (8, 192)))
@@ -62,4 +63,5 @@ def test_dimensionIndexGenerated(index: int) -> None:
 	, *starmap(partial(pytest.param, 首二三), ((5, 6), (6, 12), (7, 24), (8, 48)))
 ))
 def test_headPositions(headPositions: CallableFunction[[int], int], totalDimensions: int, expected: int) -> None:
+	"""Reference: the docstrings: each named head position k, counted from the head, sets bit `totalDimensions - 1 - k`."""
 	assertEqualTo(headPositions(totalDimensions), expected, headPositions.__name__, totalDimensions)

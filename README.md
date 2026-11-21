@@ -106,7 +106,7 @@ settings. `makeTriangle` groups consecutive values into rows and keeps a final n
 of a complete row. `makeLookupDiagonal` selects only known cells, locating the diagonal from each
 complete row's expected length.
 
-For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429oeisByFormula/`](https://github.com/hunterhogan/mapFolding/tree/main/mapFolding/oeis/A400429oeisByFormula/) exposes triangle-cell identities and fixed-diagonal formulas. Its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven.
+For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429.py`](mapFolding/oeis/A400429.py) exposes the fixed-diagonal formulas, and its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven. The triangle-cell identities that relate A400429 to other sequences are in [`oeis/_symbolicRelations.py`](mapFolding/oeis/_symbolicRelations.py), from which `byFormula` is generated.
 
 | Task                        | Interface                                 | Result                                                                   |
 | --------------------------- | ----------------------------------------- | ------------------------------------------------------------------------ |

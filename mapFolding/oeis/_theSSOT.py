@@ -51,6 +51,8 @@ class PackageSettingsOEIS(PackageSettings):
 	testDeriveLimit: int = 4
 	# Include adjacent indices for parity, initial values, and applicability boundaries.
 	testIndexSpan: int = 8
+	# Large indices retain inexpensive polynomial checks; dependency bounds still apply.
+	testIndicesLarge: tuple[int, ...] = (31, 129, 300)
 	# Bound repeated generated calls and finite sums before evaluating their dependencies.
 	testCallLimit: int = 256
 	testSumLimit: int = 32

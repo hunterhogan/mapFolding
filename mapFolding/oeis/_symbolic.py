@@ -80,7 +80,7 @@ def getKnownValue(expression: AppliedUndef) -> Expr:
 def makeTermLast(summand: Expr, *limits: Tuple) -> Expr:
 	return summand.subs(dict(map(itemgetter(0, 2), limits)))
 
-def makeEquationFlat(equation: Boolean) -> Boolean:
+def makeEquationFlat[形Basic: Basic](equation: 形Basic) -> 形Basic:
 	boxOfCalls: set[AppliedUndef] = equation.atoms(AppliedUndef)
 	return equation.xreplace(dict(zip(boxOfCalls, map(getFlatCall, boxOfCalls), strict=True)))
 
