@@ -134,7 +134,7 @@ def getTriangle(oeisID: OEISid) -> dict[int, list[int]]:
 
 	Examples
 	--------
-	`mapFolding.oeis.A400429oeisByFormula.checkFormulas` obtains the stored semi-meander rows.
+	Obtain the stored semi-meander rows.
 
 		```python
 		from mapFolding.oeis import getTriangle

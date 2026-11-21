@@ -4,8 +4,7 @@ from __future__ import annotations
 from hunterMakesPy import oneIndexed
 from mapFolding.algorithms.matrixMeanders import doTheNeedful
 from mapFolding.dataBaskets import StateMeanders
-from mapFolding.oeis import getValuesKnown, updateValuesKnown
-from mapFolding.oeis.A400429oeisByFormula import boxOfDiagonals
+from mapFolding.oeis import boxOfDiagonals, getValuesKnown, updateValuesKnown
 from tqdm.auto import tqdm
 
 def writeTriangleRows(nT: int, nStart: int, nStop: int, kStart: int = 0) -> None:

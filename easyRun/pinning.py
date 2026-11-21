@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from mapFolding.tests.verifyPinning import verifyPinning2Dn
 from gmpy2 import fac
 from humpy_cytoolz import compose
 from humpy_cytoolz.curried import map as toolz_map
@@ -10,6 +9,7 @@ from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
+from mapFolding.tests import verifyPinning2Dn
 from math import prod
 from operator import methodcaller
 from pprint import pprint

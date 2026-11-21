@@ -230,6 +230,7 @@ boxOfRelationsWinding: tuple[形Relation, ...] = (
 	, (Eq(A400429(2 * n, 1), A005315(n)), Range(1, oo))
 	, (Eq(A400429(2 * n - 1, 1), A005315(n)), Range(2, oo))
 	, (Eq(A400429(2 * n, 2), A005315(n + 1) - 2 * A005316(2 * n)), Range(2, oo))
+	, (Eq(2 * A005316(n), 2 * A400429(n, 1) + A400429(n, 2) - A400429(n - 1, 2)), Range(6, oo, 2))
 	, (Eq(A400429(n, floor(n / 2)), 2), Range(3, oo))
 	, (Eq(A400429(n, floor(n / 2) - 1), (n ** 2 + 2 * n + Mod(n, 2) - 20) / 2), Range(4, oo))
 	, (Eq(A400429(n, floor(n / 2) - 3), A400632(n)), Range(8, oo))

@@ -16,16 +16,14 @@ import pytest
 if TYPE_CHECKING:
 	from mapFolding.theTypes import UndeterminedPiles
 
-parametersGetChoicesLeaf: dict[str, tuple[tuple[int, ...], int, tuple[int, ...]]] = dict(chain(
-	zip(map('mapShape2上4Dimensional-pile{}'.format, dictionaryChoicesLeafKnown[mapShape2上4Dimensional])
-		, zip(repeat(mapShape2上4Dimensional), dictionaryChoicesLeafKnown[mapShape2上4Dimensional].keys(), dictionaryChoicesLeafKnown[mapShape2上4Dimensional].values()), strict=True)
-	, zip(map('mapShape2上5Dimensional-pile{}'.format, dictionaryChoicesLeafKnown[mapShape2上5Dimensional])
-		, zip(repeat(mapShape2上5Dimensional), dictionaryChoicesLeafKnown[mapShape2上5Dimensional].keys(), dictionaryChoicesLeafKnown[mapShape2上5Dimensional].values()), strict=True)
-	, zip(map('mapShape2上6Dimensional-pile{}'.format, dictionaryChoicesLeafKnown[mapShape2上6Dimensional])
-		, zip(repeat(mapShape2上6Dimensional), dictionaryChoicesLeafKnown[mapShape2上6Dimensional].keys(), dictionaryChoicesLeafKnown[mapShape2上6Dimensional].values()), strict=True)
-))
-
-@pytest.mark.parametrize('mapShape, pile, expected', parametersGetChoicesLeaf.values(), ids=parametersGetChoicesLeaf.keys())
+@pytest.mark.parametrize('mapShape, pile, expected', (parametersGetChoicesLeaf := dict(chain(
+		zip(map('mapShape2上4Dimensional-pile{}'.format, dictionaryChoicesLeafKnown[mapShape2上4Dimensional])
+			, zip(repeat(mapShape2上4Dimensional), dictionaryChoicesLeafKnown[mapShape2上4Dimensional].keys(), dictionaryChoicesLeafKnown[mapShape2上4Dimensional].values()), strict=True)
+		, zip(map('mapShape2上5Dimensional-pile{}'.format, dictionaryChoicesLeafKnown[mapShape2上5Dimensional])
+			, zip(repeat(mapShape2上5Dimensional), dictionaryChoicesLeafKnown[mapShape2上5Dimensional].keys(), dictionaryChoicesLeafKnown[mapShape2上5Dimensional].values()), strict=True)
+		, zip(map('mapShape2上6Dimensional-pile{}'.format, dictionaryChoicesLeafKnown[mapShape2上6Dimensional])
+			, zip(repeat(mapShape2上6Dimensional), dictionaryChoicesLeafKnown[mapShape2上6Dimensional].keys(), dictionaryChoicesLeafKnown[mapShape2上6Dimensional].values()), strict=True)
+	))).values(), ids=parametersGetChoicesLeaf.keys())
 def test_getChoicesLeaf(mapShape: tuple[int, ...], pile: int, expected: tuple[int, ...]) -> None:
 	assertEqualTo(tuple(getIteratorOfLeaves(getChoicesLeaf(StateElimination(mapShape), pile))), expected, getChoicesLeaf.__name__, mapShape, pile)
 

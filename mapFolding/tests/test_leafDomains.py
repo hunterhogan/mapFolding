@@ -22,19 +22,17 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Sequence
 	from hunterMakesPy import CallableFunction
 
-parametersGetDomainLeaf: dict[str, tuple[tuple[int, ...], int, range]] = dict(chain(
-	zip(map('mapShape2上4Dimensional-leaf{}'.format, dictionaryLeafDomainKnown[mapShape2上4Dimensional])
-		, zip(repeat(mapShape2上4Dimensional), dictionaryLeafDomainKnown[mapShape2上4Dimensional]
-			, starmap(range, dictionaryLeafDomainKnown[mapShape2上4Dimensional].values())), strict=True)
-	, zip(map('mapShape2上5Dimensional-leaf{}'.format, dictionaryLeafDomainKnown[mapShape2上5Dimensional])
-		, zip(repeat(mapShape2上5Dimensional), dictionaryLeafDomainKnown[mapShape2上5Dimensional]
-			, starmap(range, dictionaryLeafDomainKnown[mapShape2上5Dimensional].values())), strict=True)
-	, zip(map('mapShape2上6Dimensional-leaf{}'.format, dictionaryLeafDomainKnown[mapShape2上6Dimensional])
-		, zip(repeat(mapShape2上6Dimensional), dictionaryLeafDomainKnown[mapShape2上6Dimensional]
-			, starmap(range, dictionaryLeafDomainKnown[mapShape2上6Dimensional].values())), strict=True)
-))
-
-@pytest.mark.parametrize('mapShape, leaf, expected', parametersGetDomainLeaf.values(), ids=parametersGetDomainLeaf.keys())
+@pytest.mark.parametrize('mapShape, leaf, expected', (parametersGetDomainLeaf := dict(chain(
+		zip(map('mapShape2上4Dimensional-leaf{}'.format, dictionaryLeafDomainKnown[mapShape2上4Dimensional])
+			, zip(repeat(mapShape2上4Dimensional), dictionaryLeafDomainKnown[mapShape2上4Dimensional]
+				, starmap(range, dictionaryLeafDomainKnown[mapShape2上4Dimensional].values())), strict=True)
+		, zip(map('mapShape2上5Dimensional-leaf{}'.format, dictionaryLeafDomainKnown[mapShape2上5Dimensional])
+			, zip(repeat(mapShape2上5Dimensional), dictionaryLeafDomainKnown[mapShape2上5Dimensional]
+				, starmap(range, dictionaryLeafDomainKnown[mapShape2上5Dimensional].values())), strict=True)
+		, zip(map('mapShape2上6Dimensional-leaf{}'.format, dictionaryLeafDomainKnown[mapShape2上6Dimensional])
+			, zip(repeat(mapShape2上6Dimensional), dictionaryLeafDomainKnown[mapShape2上6Dimensional]
+				, starmap(range, dictionaryLeafDomainKnown[mapShape2上6Dimensional].values())), strict=True)
+	))).values(), ids=parametersGetDomainLeaf.keys())
 def test_getDomainLeaf(mapShape: tuple[int, ...], leaf: int, expected: range) -> None:
 	assertEqualTo(getDomainLeaf(StateElimination(mapShape), leaf), expected, getDomainLeaf.__name__, mapShape, leaf)
 
@@ -52,7 +50,6 @@ def test_getDomainLeaf(mapShape: tuple[int, ...], leaf: int, expected: range) ->
 def test_getLookupDomainsLeaves(mapShape: tuple[int, ...], expected: dict[int, range]) -> None:
 	assertEqualTo(getLookupDomainsLeaves(StateElimination(mapShape)), expected, getLookupDomainsLeaves.__name__, mapShape)
 
-# Reference: the piles of the leaves in each enumerated folding, extracted by `createDataSamples.makeVerificationDataLeavesDomain`.
 @pytest.mark.parametrize('getDomain, mapShape, projectLeavesRecorded, expected', (
 	pytest.param(getDomainDimension一, mapShape2上4Dimensional, itemgetter(0, 1, 2, 3), p2上nDimensionalDomain3_2_首一_首零一.boxOfDomain2上4Dimensional, id='getDomainDimension一-mapShape2上4Dimensional-leavesAll')
 	, pytest.param(getDomainDimension一, mapShape2上5Dimensional, itemgetter(0, 1, 2, 3), p2上nDimensionalDomain3_2_首一_首零一.boxOfDomain2上5Dimensional, id='getDomainDimension一-mapShape2上5Dimensional-leavesAll')
@@ -87,7 +84,10 @@ def test_getLookupDomainsLeaves(mapShape: tuple[int, ...], expected: dict[int, r
 ))
 def test_getDomainCombined(getDomain: CallableFunction[[StateElimination], Sequence[tuple[int, ...]]], mapShape: tuple[int, ...]
 	, projectLeavesRecorded: Callable[[tuple[int, ...]], tuple[int, ...]], expected: list[tuple[int, ...]]) -> None:
-	"""Each assignment is unique, and the assignments of the recorded leaves are exactly the recorded assignments."""
+	"""Each assignment is unique, and the assignments of the recorded leaves are exactly the recorded assignments.
+
+	Reference: the piles of the leaves in each enumerated folding, extracted by `createDataSamples.makeVerificationDataLeavesDomain`.
+	"""
 	domainCombined: Sequence[tuple[int, ...]] = getDomain(StateElimination(mapShape))
 	assert allUnique吗(domainCombined), messageTestFailure(domainCombined, 'unique assignments', getDomain.__name__, mapShape)
 	assertEqualTo(set(map(projectLeavesRecorded, domainCombined)), set(expected), getDomain.__name__, mapShape)

@@ -1,6 +1,6 @@
 """Validate map shapes, count their leaves, and resolve processor limits and task divisions.
 
-Expected values and exceptions come from the targets' docstrings unless a comment names another basis.
+Expected values and exceptions come from the targets' docstrings unless a test's docstring names another basis.
 """
 from __future__ import annotations
 
@@ -15,7 +15,6 @@ import pytest
 import sys
 
 if TYPE_CHECKING:
-	from _pytest.mark.structures import ParameterSet
 	from collections.abc import Sequence
 	from hunterMakesPy import ConcurrencyLimit
 
@@ -32,19 +31,21 @@ if TYPE_CHECKING:
 def test_getTotalLeaves(mapShape: tuple[int, ...], expected: int) -> None:
 	assertEqualTo(getTotalLeaves(mapShape), expected, getTotalLeaves.__name__, mapShape)
 
-# The product of at most 9 lengths below 2**7 stays below `sys.maxsize`.
 @given(mapShape=strategies.lists(strategies.integers(0, 127), min_size=1, max_size=8), dimension=strategies.integers(0, 127))
 def test_getTotalLeavesGenerated(mapShape: list[int], dimension: int) -> None:
-	"""Relation: appending a dimension multiplies the total, and reversing the dimensions preserves it."""
+	"""Relation: appending a dimension multiplies the total, and reversing the dimensions preserves it.
+
+	The product of at most 9 lengths below 2**7 stays below `sys.maxsize`.
+	"""
 	assertEqualTo(getTotalLeaves((*mapShape, dimension)), getTotalLeaves(tuple(mapShape)) * dimension, getTotalLeaves.__name__, (*mapShape, dimension))
 	assertEqualTo(getTotalLeaves(tuple(reversed(mapShape))), getTotalLeaves(tuple(mapShape)), getTotalLeaves.__name__, tuple(reversed(mapShape)))
 
-@pytest.mark.parametrize('mapShape, expected', (
-	pytest.param((sys.maxsize, 2), OverflowError, id='maxsizeX2')
-	, pytest.param((2 ** 32, 2 ** 32), OverflowError, id='p2上32x2上32')
+@pytest.mark.parametrize('mapShape, expected, match', (
+	pytest.param((sys.maxsize, 2), OverflowError, 'exceeds the maximum size of an integer', id='maxsizeX2')
+	, pytest.param((2 ** 32, 2 ** 32), OverflowError, 'exceeds the maximum size of an integer', id='p2上32x2上32')
 ))
-def test_getTotalLeavesError(mapShape: tuple[int, ...], expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_getTotalLeavesError(mapShape: tuple[int, ...], expected: type[Exception], match: str) -> None:
+	with pytest.raises(expected, match=match):
 		getTotalLeaves(mapShape)
 
 @pytest.mark.parametrize('mapShape, expected', (
@@ -61,38 +62,35 @@ def test_getTotalLeavesError(mapShape: tuple[int, ...], expected: type[Exception
 def test_validateMapShape(mapShape: Sequence[Any], expected: tuple[int, ...]) -> None:
 	assertEqualTo(validateMapShape(mapShape), expected, validateMapShape.__name__, mapShape)
 
-# `intInnit` raises `TypeError` for boolean, nested, and `None` elements.
-@pytest.mark.parametrize('mapShape, expected', (
-	pytest.param([], ValueError, id='empty')
-	, pytest.param([-4, 2], ValueError, id='negative')
-	, pytest.param(['NE'], ValueError, id='stringNE')
-	, pytest.param([7.5], ValueError, id='fraction')
-	, pytest.param([float('inf')], ValueError, id='infinity')
-	, pytest.param([float('nan')], ValueError, id='NaN')
-	, pytest.param([complex(1, 1)], ValueError, id='complex')
-	, pytest.param(None, ValueError, id='None')
-	, pytest.param([None], TypeError, id='elementNone')
-	, pytest.param([True], TypeError, id='elementTrue')
-	, pytest.param([[17, 39]], TypeError, id='elementList')
+@pytest.mark.parametrize('mapShape, expected, match', (
+	pytest.param([], ValueError, 'did not receive a value for `mapShape`', id='empty')
+	, pytest.param([-4, 2], ValueError, 'at least one positive integer dimension', id='negative')
+	, pytest.param(['NE'], ValueError, "allegedInt = 'NE'", id='stringNE')
+	, pytest.param([7.5], ValueError, 'allegedInt = 7\\.5', id='fraction')
+	, pytest.param([float('inf')], ValueError, 'allegedInt = inf', id='infinity')
+	, pytest.param([float('nan')], ValueError, 'allegedInt = nan', id='NaN')
+	, pytest.param([complex(1, 1)], ValueError, 'allegedInt = \\(1\\+1j\\)', id='complex')
+	, pytest.param(None, ValueError, 'did not receive a value for `mapShape`', id='None')
+	, pytest.param([None], TypeError, 'allegedInt = None', id='elementNone')
+	, pytest.param([True], TypeError, 'allegedInt = True', id='elementTrue')
+	, pytest.param([[17, 39]], TypeError, 'allegedInt = \\[17, 39\\]', id='elementList')
 ))
-def test_validateMapShapeError(mapShape: Sequence[Any], expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_validateMapShapeError(mapShape: Sequence[Any], expected: type[Exception], match: str) -> None:
+	"""`intInnit` raises `TypeError` for boolean, nested, and `None` elements."""
+	with pytest.raises(expected, match=match):
 		validateMapShape(mapShape)
 
 #=SIN= Type-checker suppression: `numba.core.config` creates `NUMBA_NUM_THREADS` at runtime through `globals()`, so its type is unknown.
 markNumbaThreadsFewerThan4: pytest.MarkDecorator = pytest.mark.skipif(NUMBA_NUM_THREADS < 4, reason='Numba has fewer than 4 threads.')  # pyright: ignore[reportUnknownArgumentType]
 
-boxOfConcurrencyPackages: tuple[ParameterSet, ...] = (
+markParametrizeConcurrencyPackages: pytest.MarkDecorator = pytest.mark.parametrize('concurrencyPackage', (
 	pytest.param(None, id='None')
 	, pytest.param('multiprocessing', id='multiprocessing')
 	, pytest.param('numba', marks=markNumbaThreadsFewerThan4, id='numba')
 	, pytest.param('unknown-package', id='unknownPackage')
-)
+))
 
-# Reference: hand-derived, with a processor total of 4, from the rules in the `hunterMakesPy.parseParameters.defineConcurrencyLimit`
-# docstring, to which the `defineProcessorLimit` docstring delegates. Python `round` rounds ties to even. No count exceeds 4,
-# because `'numba'` cannot set more threads than Numba has.
-parametersDefineProcessorLimit: tuple[ParameterSet, ...] = (
+markParametrizeDefineProcessorLimit: pytest.MarkDecorator = pytest.mark.parametrize('CPUlimit, expected', (
 	pytest.param(None, 4, id='None')
 	, pytest.param(False, 4, id='False')
 	, pytest.param(0, 4, id='zero')
@@ -108,33 +106,35 @@ parametersDefineProcessorLimit: tuple[ParameterSet, ...] = (
 	, pytest.param(-1, 3, id='reserveCount1')
 	, pytest.param(-3, 1, id='reserveCount3')
 	, pytest.param(-21, 1, id='reserveCount21Minimum')
-)
+))
+"""Reference: hand-derived, with a processor total of 4, from the rules in the `hunterMakesPy.parseParameters.defineConcurrencyLimit`
+docstring, to which the `defineProcessorLimit` docstring delegates. Python `round` rounds ties to even. No count exceeds 4,
+because `'numba'` cannot set more threads than Numba has."""
 
 @pytest.mark.parametrize('cpuTotal', (4,), indirect=True)
-@pytest.mark.parametrize('concurrencyPackage', boxOfConcurrencyPackages)
-@pytest.mark.parametrize('CPUlimit, expected', parametersDefineProcessorLimit)
+@markParametrizeConcurrencyPackages
+@markParametrizeDefineProcessorLimit
 def test_defineProcessorLimit(cpuTotal: int, CPUlimit: ConcurrencyLimit, concurrencyPackage: str | None, expected: int) -> None:
 	assertEqualTo(defineProcessorLimit(CPUlimit, concurrencyPackage), expected, defineProcessorLimit.__name__, CPUlimit, concurrencyPackage)
 
 @markNumbaThreadsFewerThan4
 @pytest.mark.parametrize('cpuTotal', (4,), indirect=True)
-@pytest.mark.parametrize('CPUlimit, expected', parametersDefineProcessorLimit)
+@markParametrizeDefineProcessorLimit
 def test_defineProcessorLimitNumbaThreads(cpuTotal: int, CPUlimit: ConcurrencyLimit, expected: int) -> None:
 	"""The docstring: selecting `'numba'` sets the active Numba thread count to the result."""
 	defineProcessorLimit(CPUlimit, 'numba')
 	assertEqualTo(get_num_threads(), expected, defineProcessorLimit.__name__, CPUlimit, 'numba')
 
-# Reference: `ConcurrencyLimit` admits no container; `defineConcurrencyLimit` raises `TypeError` for one.
 @pytest.mark.parametrize('cpuTotal', (4,), indirect=True)
-@pytest.mark.parametrize('concurrencyPackage', boxOfConcurrencyPackages)
-@pytest.mark.parametrize('CPUlimit, expected', (
-	pytest.param([4], TypeError, id='list')
-	, pytest.param((2,), TypeError, id='tuple')
-	, pytest.param({2}, TypeError, id='set')
-	, pytest.param({'cores': 2}, TypeError, id='dict')
+@markParametrizeConcurrencyPackages
+@pytest.mark.parametrize('CPUlimit, expected, match', (
+	pytest.param([4], TypeError, "not supported between instances of 'int' and 'list'", id='list')
+	, pytest.param((2,), TypeError, "not supported between instances of 'int' and 'tuple'", id='tuple')
+	, pytest.param({2}, TypeError, "not supported between instances of 'int' and 'set'", id='set')
+	, pytest.param({'cores': 2}, TypeError, "not supported between instances of 'int' and 'dict'", id='dict')
 ))
-def test_defineProcessorLimitError(cpuTotal: int, CPUlimit: Any, concurrencyPackage: str | None, expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_defineProcessorLimitError(cpuTotal: int, CPUlimit: Any, concurrencyPackage: str | None, expected: type[Exception], match: str) -> None:
+	with pytest.raises(expected, match=match):
 		defineProcessorLimit(CPUlimit, concurrencyPackage)
 
 @pytest.mark.parametrize('computationDivisions, concurrencyLimit, totalLeaves, expected', (
@@ -153,11 +153,11 @@ def test_getTaskDivisions(computationDivisions: int | str | None, concurrencyLim
 	assertEqualTo(getTaskDivisions(computationDivisions, concurrencyLimit, totalLeaves), expected, getTaskDivisions.__name__
 		, computationDivisions, concurrencyLimit, totalLeaves)
 
-@pytest.mark.parametrize('computationDivisions, concurrencyLimit, totalLeaves, expected', (
-	pytest.param(['invalid'], 4, 437, ValueError, id='list')
-	, pytest.param('Fibonacci', 4, 437, ValueError, id='unsupportedString')
-	, pytest.param(20, 4, 15, ValueError, id='countAboveTotalLeaves')
+@pytest.mark.parametrize('computationDivisions, concurrencyLimit, totalLeaves, expected, match', (
+	pytest.param(['invalid'], 4, 437, ValueError, 'the type list is not supported', id='list')
+	, pytest.param('Fibonacci', 4, 437, ValueError, 'the string value is not supported', id='unsupportedString')
+	, pytest.param(20, 4, 15, ValueError, 'greater than `totalLeaves = 15`', id='countAboveTotalLeaves')
 ))
-def test_getTaskDivisionsError(computationDivisions: Any, concurrencyLimit: int, totalLeaves: int, expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_getTaskDivisionsError(computationDivisions: Any, concurrencyLimit: int, totalLeaves: int, expected: type[Exception], match: str) -> None:
+	with pytest.raises(expected, match=match):
 		getTaskDivisions(computationDivisions, concurrencyLimit, totalLeaves)

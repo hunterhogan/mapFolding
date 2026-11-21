@@ -26,23 +26,19 @@ from typing import Literal, LiteralString, TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-	from _pytest.mark.structures import ParameterSet
 	from collections.abc import Callable
 	from hunterMakesPy import ConcurrencyLimit
 	from mapFolding.theTypes import Folding, OEISid
 
-boxOfFlowsNumba: tuple[str, ...] = ('numba', 'theorem2Numba', 'daoOfMapFoldingNumba')
-boxOfFlowsPython: tuple[str, ...] = ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed')
-
-# Each sequence starts at its smallest index above the offset. The Python flows run about a hundred times slower, so they stop sooner.
 @pytest.mark.parametrize('oeisID, n, flow', tuple(chain(
-	CartesianProduct(('A000136',), (2, 3, 12), boxOfFlowsNumba)
+	CartesianProduct(('A000136',), (2, 3, 12), (boxOfFlowsNumba := ('numba', 'theorem2Numba', 'daoOfMapFoldingNumba')))
 	, CartesianProduct(('A001415',), (2, 3, 9), boxOfFlowsNumba)
 	, CartesianProduct(('A001416',), (2, 4, 6), boxOfFlowsNumba)
 	, CartesianProduct(('A001417',), (3, 5), boxOfFlowsNumba)
 	, CartesianProduct(('A001418',), (4,), boxOfFlowsNumba)
 	, CartesianProduct(('A195646',), (2,), boxOfFlowsNumba)
-	, CartesianProduct(('A000136',), (2, 3, 12), boxOfFlowsPython)
+	, CartesianProduct(('A001418',), (1, 2, 3, 5), ('pNxN',))
+	, CartesianProduct(('A000136',), (2, 3, 12), (boxOfFlowsPython := ('daoOfMapFolding', 'theorem2', 'theorem2Trimmed')))
 	, CartesianProduct(('A001415',), (2, 3, 6), boxOfFlowsPython)
 	, CartesianProduct(('A001416',), (2, 4), boxOfFlowsPython)
 	, CartesianProduct(('A001417',), (3,), boxOfFlowsPython)
@@ -50,6 +46,9 @@ boxOfFlowsPython: tuple[str, ...] = ('daoOfMapFolding', 'theorem2', 'theorem2Tri
 	, CartesianProduct(('A195646',), (1,), boxOfFlowsPython)
 )))
 def test_countFolds(oeisID: OEISid, n: int, flow: LiteralString, expected: int) -> None:
+	"""Each sequence starts at its smallest index above the offset. The Python flows run about a hundred times slower, so they stop
+	sooner. `'pNxN'` counts only the square maps of A001418.
+	"""
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 	assertEqualTo(countFolds(mapShape, flow), expected, countFolds.__name__, mapShape, flow)
 
@@ -60,27 +59,27 @@ def test_countFoldsDivided(oeisID: OEISid, n: int, computationDivisions: int | s
 	assertEqualTo(countFolds(mapShape, computationDivisions=computationDivisions), expected, countFolds.__name__, mapShape
 		, computationDivisions=computationDivisions)
 
-parametersFoldsWritten: tuple[tuple[str, int], ...] = (('A000136', 5), ('A001415', 3))
+markParametrizeFoldsWritten: pytest.MarkDecorator = pytest.mark.parametrize('oeisID, n', (('A000136', 5), ('A001415', 3)))
 
-boxOfPathLikeWrite: tuple[ParameterSet, ...] = (
-	pytest.param('.', id='directoryExisting'), pytest.param('nested/sequences.album', id='pathFilenameRelative'))
+markParametrizePathLikeWrite: pytest.MarkDecorator = pytest.mark.parametrize('pathLikeWrite', (
+	pytest.param('.', id='directoryExisting'), pytest.param('nested/sequences.album', id='pathFilenameRelative')), indirect=True)
 
-@pytest.mark.parametrize('pathLikeWrite', boxOfPathLikeWrite, indirect=True)
-@pytest.mark.parametrize('oeisID, n', parametersFoldsWritten)
+@markParametrizePathLikeWrite
+@markParametrizeFoldsWritten
 def test_countFoldsWrite(pathRootJobDEFAULT: Path, oeisID: OEISid, n: int, pathLikeWrite: Path, expected: int) -> None:
 	"""The only file in the job directory holds the count as decimal text."""
 	countFolds(makeMapShape(oeisID, n), None, pathLikeWrite)
 	assertEqualTo(tuple(map(readText, filter(Path.is_file, pathRootJobDEFAULT.rglob('*')))), (str(expected),), countFolds.__name__
 		, makeMapShape(oeisID, n), None, pathLikeWrite)
 
-@pytest.mark.parametrize('CPUlimit, computationDivisions, expected', (
-	pytest.param(None, {'wrong': 'value'}, ValueError, id='computationDivisionsMapping')
-	, pytest.param({'invalid': True}, 'cpu', TypeError, id='CPUlimitMapping')
-	, pytest.param(['weird'], 'cpu', TypeError, id='CPUlimitList')
+@pytest.mark.parametrize('CPUlimit, computationDivisions, expected, match', (
+	pytest.param(None, {'wrong': 'value'}, ValueError, 'the type dict is not supported', id='computationDivisionsMapping')
+	, pytest.param({'invalid': True}, 'cpu', TypeError, "not supported between instances of 'int' and 'dict'", id='CPUlimitMapping')
+	, pytest.param(['weird'], 'cpu', TypeError, "not supported between instances of 'int' and 'list'", id='CPUlimitList')
 ))
 @pytest.mark.parametrize('mapShape', (pytest.param((1, 3), id='p1x3'), pytest.param((2, 3), id='p2x3')))
-def test_countFoldsError(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit, computationDivisions: int | str | None, expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_countFoldsError(mapShape: tuple[int, ...], CPUlimit: ConcurrencyLimit, computationDivisions: int | str | None, expected: type[Exception], match: str) -> None:
+	with pytest.raises(expected, match=match):
 		countFolds(mapShape, CPUlimit=CPUlimit, computationDivisions=computationDivisions)
 
 @pytest.mark.filterwarnings('ignore::numba.core.errors.NumbaPendingDeprecationWarning')
@@ -140,30 +139,30 @@ def test_eliminateFolds(oeisID: OEISid, n: int, CPUlimit: ConcurrencyLimit, flow
 	mapShape: tuple[int, ...] = makeMapShape(oeisID, n)
 	assertEqualTo(eliminateFolds(mapShape, CPUlimit=CPUlimit, flow=flow), expected, eliminateFolds.__name__, mapShape, CPUlimit=CPUlimit, flow=flow)
 
-@pytest.mark.parametrize('pathLikeWrite', boxOfPathLikeWrite, indirect=True)
-@pytest.mark.parametrize('oeisID, n', parametersFoldsWritten)
+@markParametrizePathLikeWrite
+@markParametrizeFoldsWritten
 def test_eliminateFoldsWrite(pathRootJobDEFAULT: Path, oeisID: OEISid, n: int, pathLikeWrite: Path, expected: int) -> None:
 	"""The only file in the job directory holds the count as decimal text."""
 	eliminateFolds(makeMapShape(oeisID, n), None, pathLikeWrite, CPUlimit=1, flow='elimination')
 	assertEqualTo(tuple(map(readText, filter(Path.is_file, pathRootJobDEFAULT.rglob('*')))), (str(expected),), eliminateFolds.__name__
 		, makeMapShape(oeisID, n), None, pathLikeWrite, CPUlimit=1, flow='elimination')
 
-# `'crease'` requires `(2,) * n` for n >= 4.
-@pytest.mark.parametrize('oeisID, n, flow, CPUlimit, expected', (
-	pytest.param('A001415', 3, 'crease', 0.99, NotImplementedError, id='A001415-3-crease')
-	, pytest.param('A001417', 3, 'crease', 0.99, NotImplementedError, id='A001417-3-crease')
-	, pytest.param('A001417', 0, 'constraintPropagation', 1, ValueError, marks=markOrtoolsMissing, id='A001417-0-constraintPropagation')
-	, pytest.param('A195646', 0, 'constraintPropagation', 1, ValueError, marks=markOrtoolsMissing, id='A195646-0-constraintPropagation')
+@pytest.mark.parametrize('oeisID, n, flow, CPUlimit, expected, match', (
+	pytest.param('A001415', 3, 'crease', 0.99, NotImplementedError, 'restricted to `mapShape`', id='A001415-3-crease')
+	, pytest.param('A001417', 3, 'crease', 0.99, NotImplementedError, 'restricted to `mapShape`', id='A001417-3-crease')
+	, pytest.param('A001417', 0, 'constraintPropagation', 1, ValueError, 'unable to select a `mapShape`', marks=markOrtoolsMissing, id='A001417-0-constraintPropagation')
+	, pytest.param('A195646', 0, 'constraintPropagation', 1, ValueError, 'unable to select a `mapShape`', marks=markOrtoolsMissing, id='A195646-0-constraintPropagation')
 ))
-def test_eliminateFoldsError(oeisID: OEISid, n: int, CPUlimit: ConcurrencyLimit, flow: LiteralString, expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_eliminateFoldsError(oeisID: OEISid, n: int, CPUlimit: ConcurrencyLimit, flow: LiteralString, expected: type[Exception], match: str) -> None:
+	"""`'crease'` requires `(2,) * n` for n >= 4."""
+	with pytest.raises(expected, match=match):
 		eliminateFolds(makeMapShape(oeisID, n), CPUlimit=CPUlimit, flow=flow)
 
 @pytest.mark.parametrize('oeisID, n', (('A001417', 4),))
 @pytest.mark.parametrize('pin', (
 	pytest.param(pinPilesAtEnds, id='pinPilesAtEnds')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), id='pinPilesAtEnds-pileDepth2')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), id='pinPilesAtEnds-pileDepth3')
+	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), id='pinPilesAtEndsPileDepth2')
+	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), id='pinPilesAtEndsPileDepth3')
 	, pytest.param(pinPile零Ante首零, id='pinPile零Ante首零')
 	, pytest.param(pinLeavesDimension0, id='pinLeavesDimension0')
 	, pytest.param(pinLeaf首零Plus零, id='pinLeaf首零Plus零')
@@ -180,7 +179,7 @@ def test_eliminateFoldsPinned(pin: Callable[..., StateElimination], oeisID: OEIS
 	state: StateElimination = pin(StateElimination(makeMapShape(oeisID, n)), CPUlimit=0.99)
 	assertEqualTo(eliminateFolds(state.mapShape, state, CPUlimit=0.99, flow='crease'), expected, eliminateFolds.__name__, 'pin', state.mapShape)
 
-parametersEnumerateSequencesWritten: tuple[ParameterSet, ...] = (
+markParametrizeSequencesWritten: pytest.MarkDecorator = pytest.mark.parametrize('n, kind, oeisID', (
 	pytest.param(1, 'meanders', 'A005316', id='1-meanders')
 	, pytest.param(3, 'meanders', 'A005316', id='3-meanders')
 	, pytest.param(4, 'meanders', 'A005316', id='4-meanders')
@@ -199,13 +198,16 @@ parametersEnumerateSequencesWritten: tuple[ParameterSet, ...] = (
 	, pytest.param(4, 'stamps', 'A000136', id='4-stamps')
 	, pytest.param(1, 'stamps blank', 'A001011', id='1-stampsBlank')
 	, pytest.param(4, 'stamps blank', 'A001011', id='4-stampsBlank')
-)
+))
 
-# `readAlbum` skips empty records, so the album of zero meanders, which holds one empty folding, is not among the written albums.
 @pytest.mark.parametrize('flow', (None, 'permutations'))
-@pytest.mark.parametrize('n, kind, oeisID', (pytest.param(0, 'meanders', 'A005316', id='0-meanders'), *parametersEnumerateSequencesWritten))
+@pytest.mark.parametrize(markParametrizeSequencesWritten.args[0]
+	, (pytest.param(0, 'meanders', 'A005316', id='0-meanders'), *markParametrizeSequencesWritten.args[1]), **markParametrizeSequencesWritten.kwargs)
 def test_enumerateSequences(pathRootJobDEFAULT: Path, n: int, kind: LiteralString | None, flow: Literal['permutations'] | None, oeisID: OEISid, expected: int) -> None:
-	"""The album has a(n) distinct foldings, and `pathLikeWrite=None` writes no file."""
+	"""The album has a(n) distinct foldings, and `pathLikeWrite=None` writes no file.
+
+	`readAlbum` skips empty records, so the album of zero meanders, which holds one empty folding, is not among the written albums.
+	"""
 	album: list[Folding] | int = enumerateSequences(n, kind, flow)
 	assert isinstance(album, list), messageTestFailure(type(album), list, enumerateSequences.__name__, n, kind, flow)
 	assertEqualTo(len(album), expected, enumerateSequences.__name__, n, kind, flow)
@@ -231,8 +233,9 @@ def test_enumerateSequencesAlbum(n: int, kind: LiteralString, flow: Literal['per
 	assert isinstance(album, list), messageTestFailure(type(album), list, enumerateSequences.__name__, n, kind, flow)
 	assertEqualTo(Counter(album), Counter(expected), enumerateSequences.__name__, n, kind, flow)
 
-# The bilateral flows count only semi-meanders and symmetric semi-meanders.
-parametersEnumerateSequencesBilateral: tuple[ParameterSet, ...] = (
+markParametrizeSuffix: pytest.MarkDecorator = pytest.mark.parametrize('suffix', (pytest.param('.album', id='album'), pytest.param('.csv', id='csv')))
+
+markParametrizeSequencesBilateral: pytest.MarkDecorator = pytest.mark.parametrize('n, kind, oeisID', (
 	pytest.param(1, 'semi', 'A000682', id='1-semi')
 	, pytest.param(2, 'semi', 'A000682', id='2-semi')
 	, pytest.param(4, 'semi', 'A000682', id='4-semi')
@@ -240,23 +243,24 @@ parametersEnumerateSequencesBilateral: tuple[ParameterSet, ...] = (
 	, pytest.param(2, 'semi-meanders symmetric', 'A000560', id='2-semiMeandersSymmetric')
 	, pytest.param(4, 'semi-meanders symmetric', 'A000560', id='4-semiMeandersSymmetric')
 	, pytest.param(7, 'semi-meanders symmetric', 'A000560', id='7-semiMeandersSymmetric')
-)
+))
+"""The bilateral flows count only semi-meanders and symmetric semi-meanders."""
 
-boxOfFlowsBilateral: tuple[ParameterSet, ...] = (
+markParametrizeFlowsBilateral: pytest.MarkDecorator = pytest.mark.parametrize('flow, CPUlimit', (
 	pytest.param('bilateral', None, id='bilateral')
 	, pytest.param('bilateralConcurrent', 1, id='bilateralConcurrent-1')
 	, pytest.param('bilateralConcurrent', 2, id='bilateralConcurrent-2')
-)
+))
 
-@pytest.mark.parametrize('flow, CPUlimit', boxOfFlowsBilateral)
-@pytest.mark.parametrize('n, kind, oeisID', parametersEnumerateSequencesBilateral)
+@markParametrizeFlowsBilateral
+@markParametrizeSequencesBilateral
 def test_enumerateSequencesBilateral(n: int, kind: LiteralString, flow: Literal['bilateral', 'bilateralConcurrent'], CPUlimit: ConcurrencyLimit, oeisID: OEISid, expected: int) -> None:
 	assertEqualTo(enumerateSequences(n, kind, flow, CPUlimit=CPUlimit), expected, enumerateSequences.__name__, n, kind, flow, CPUlimit=CPUlimit)
 
-@pytest.mark.parametrize('suffix', ('.album', '.csv'))
-@pytest.mark.parametrize('pathLikeWrite', boxOfPathLikeWrite, indirect=True)
+@markParametrizeSuffix
+@markParametrizePathLikeWrite
 @pytest.mark.parametrize('flow', (None, 'permutations'))
-@pytest.mark.parametrize('n, kind, oeisID', parametersEnumerateSequencesWritten)
+@markParametrizeSequencesWritten
 def test_enumerateSequencesWriteAlbum(pathRootJobDEFAULT: Path, n: int, kind: LiteralString | None, flow: Literal['permutations'] | None, pathLikeWrite: Path, suffix: str, oeisID: OEISid) -> None:
 	"""Relation: the only file in the job directory holds the returned album."""
 	album: list[Folding] | int = enumerateSequences(n, kind, flow, pathLikeWrite, suffix=suffix)
@@ -264,10 +268,10 @@ def test_enumerateSequencesWriteAlbum(pathRootJobDEFAULT: Path, n: int, kind: Li
 	assertEqualTo(tuple(map(readAlbum, filter(Path.is_file, pathRootJobDEFAULT.rglob('*')))), (tuple(album),), enumerateSequences.__name__
 		, n, kind, flow, pathLikeWrite, suffix=suffix)
 
-@pytest.mark.parametrize('suffix', ('.album', '.csv'))
-@pytest.mark.parametrize('pathLikeWrite', boxOfPathLikeWrite, indirect=True)
-@pytest.mark.parametrize('flow, CPUlimit', boxOfFlowsBilateral)
-@pytest.mark.parametrize('n, kind, oeisID', parametersEnumerateSequencesBilateral)
+@markParametrizeSuffix
+@markParametrizePathLikeWrite
+@markParametrizeFlowsBilateral
+@markParametrizeSequencesBilateral
 def test_enumerateSequencesWriteCount(pathRootJobDEFAULT: Path, n: int, kind: LiteralString, flow: Literal['bilateral', 'bilateralConcurrent'], pathLikeWrite: Path, CPUlimit: ConcurrencyLimit, suffix: str
 	, oeisID: OEISid, expected: int) -> None:
 	"""The only file in the job directory holds the count as decimal text, whatever its suffix."""
@@ -275,23 +279,23 @@ def test_enumerateSequencesWriteCount(pathRootJobDEFAULT: Path, n: int, kind: Li
 	assertEqualTo(tuple(map(readText, filter(Path.is_file, pathRootJobDEFAULT.rglob('*')))), (str(expected),), enumerateSequences.__name__
 		, n, kind, flow, pathLikeWrite, CPUlimit=CPUlimit, suffix=suffix)
 
-@pytest.mark.parametrize('n, kind, flow, pathFilename, CPUlimit, expected', (
-	pytest.param(6, 'unknown', 'permutations', None, None, KeyError, id='kindUnknown-permutations')
-	, pytest.param(4, '', 'permutations', None, None, KeyError, id='kindEmpty-permutations')
-	, pytest.param(0, 'meander shapes', 'permutations', None, None, ArithmeticError, id='0-meanderShapes')
-	, pytest.param(1, 'semi-meanders symmetric', 'permutations', None, None, ArithmeticError, id='1-semiMeandersSymmetric')
-	, pytest.param(4, 'semi', 'permutations', contentsAlbumSemi4, None, FileExistsError, id='albumExists-permutations')
-	, pytest.param(4, 'semi', 'bilateral', contentsAlbumSemi4, None, FileExistsError, id='albumExists-bilateral')
-	, pytest.param(4, 'semi', 'bilateralConcurrent', contentsAlbumSemi4, 2, FileExistsError, id='albumExists-bilateralConcurrent')
-	, pytest.param(4, 'stamps', 'bilateral', None, None, KeyError, id='stamps-bilateral')
-	, pytest.param(4, 'stamps blank', 'bilateral', None, None, KeyError, id='stampsBlank-bilateral')
-	, pytest.param(4, 'meanders', 'bilateral', None, None, KeyError, id='meanders-bilateral')
-	, pytest.param(4, 'meander shapes', 'bilateral', None, None, KeyError, id='meanderShapes-bilateral')
-	, pytest.param(4, 'stamps', 'bilateralConcurrent', None, 2, KeyError, id='stamps-bilateralConcurrent')
-	, pytest.param(4, 'stamps blank', 'bilateralConcurrent', None, 2, KeyError, id='stampsBlank-bilateralConcurrent')
-	, pytest.param(4, 'meanders', 'bilateralConcurrent', None, 2, KeyError, id='meanders-bilateralConcurrent')
-	, pytest.param(4, 'meander shapes', 'bilateralConcurrent', None, 2, KeyError, id='meanderShapes-bilateralConcurrent')
+@pytest.mark.parametrize('n, kind, flow, pathFilename, CPUlimit, expected, match', (
+	pytest.param(6, 'unknown', 'permutations', None, None, KeyError, "'UNKNOWN'", id='kindUnknown-permutations')
+	, pytest.param(4, '', 'permutations', None, None, KeyError, "^''$", id='kindEmpty-permutations')
+	, pytest.param(0, 'meander shapes', 'permutations', None, None, ArithmeticError, 'not defined for values below `offset = 1`', id='0-meanderShapes')
+	, pytest.param(1, 'semi-meanders symmetric', 'permutations', None, None, ArithmeticError, 'not defined for values below `offset = 2`', id='1-semiMeandersSymmetric')
+	, pytest.param(4, 'semi', 'permutations', contentsAlbumSemi4, None, FileExistsError, 'exists', id='albumExists-permutations')
+	, pytest.param(4, 'semi', 'bilateral', contentsAlbumSemi4, None, FileExistsError, 'exists', id='albumExists-bilateral')
+	, pytest.param(4, 'semi', 'bilateralConcurrent', contentsAlbumSemi4, 2, FileExistsError, 'exists', id='albumExists-bilateralConcurrent')
+	, pytest.param(4, 'stamps', 'bilateral', None, None, KeyError, "'stamps'", id='stamps-bilateral')
+	, pytest.param(4, 'stamps blank', 'bilateral', None, None, KeyError, "'stamps blank'", id='stampsBlank-bilateral')
+	, pytest.param(4, 'meanders', 'bilateral', None, None, KeyError, "'meanders'", id='meanders-bilateral')
+	, pytest.param(4, 'meander shapes', 'bilateral', None, None, KeyError, "'meander shapes'", id='meanderShapes-bilateral')
+	, pytest.param(4, 'stamps', 'bilateralConcurrent', None, 2, KeyError, "'stamps'", id='stamps-bilateralConcurrent')
+	, pytest.param(4, 'stamps blank', 'bilateralConcurrent', None, 2, KeyError, "'stamps blank'", id='stampsBlank-bilateralConcurrent')
+	, pytest.param(4, 'meanders', 'bilateralConcurrent', None, 2, KeyError, "'meanders'", id='meanders-bilateralConcurrent')
+	, pytest.param(4, 'meander shapes', 'bilateralConcurrent', None, 2, KeyError, "'meander shapes'", id='meanderShapes-bilateralConcurrent')
 ), indirect=['pathFilename'])
-def test_enumerateSequencesError(n: int, kind: LiteralString, flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'], pathFilename: Path, CPUlimit: ConcurrencyLimit, expected: type[Exception]) -> None:
-	with pytest.raises(expected):
+def test_enumerateSequencesError(n: int, kind: LiteralString, flow: Literal['permutations', 'bilateral', 'bilateralConcurrent'], pathFilename: Path, CPUlimit: ConcurrencyLimit, expected: type[Exception], match: str) -> None:
+	with pytest.raises(expected, match=match):
 		enumerateSequences(n, kind, flow, pathFilename, CPUlimit=CPUlimit)

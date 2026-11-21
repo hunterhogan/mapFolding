@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import OEISid
 
 @pytest.mark.parametrize('useNumbaProgressBar', (False, True))
-@pytest.mark.parametrize('job, oeisID, n', (pytest.param((2, 4), 'A001415', 4, id='2x4'),), indirect=['job'])
+@pytest.mark.parametrize('job, oeisID, n', (pytest.param((2, 4), 'A001415', 4, id='p2x4-A001415-4'),), indirect=['job'])
 def test_makeJobNumba(job: RecipeJobTheorem2, useNumbaProgressBar: bool, oeisID: OEISid, n: int, expected: int) -> None:
 	"""Running the generated module writes the folding count to the count file of `job`."""
 	runpy.run_path(str(makeJobNumba(job, useNumbaProgressBar=useNumbaProgressBar, parametersNumba=parametersNumbaDefault)), run_name='__main__')

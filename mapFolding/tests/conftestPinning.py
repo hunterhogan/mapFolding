@@ -1,3 +1,8 @@
+"""Report, while developing a pinning function, how its permutation spaces cover the enumerated foldings of a 2^n-dimensional map.
+
+The reports are the diagnostic counterparts of `assertPermutationSpacesPartitionFoldings` in `conftestAnnex.py` and of the
+recorded comparisons in `test_leafDomains.py`: they print each surplus, overlapping, or missing object instead of failing.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass

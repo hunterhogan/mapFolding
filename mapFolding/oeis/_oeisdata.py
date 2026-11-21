@@ -26,6 +26,19 @@ def makeBoxOfPathFilename[形PurePath: PurePath](boxOfOEISid: Iterable[OEISid], 
 def filterEntryAbsent(boxOfOEISid: Iterable[OEISid], path_oeisdata: Path) -> tuple[OEISid, ...]:
 	return (*filterfalse(compose(Path.exists, partial(makePathFilenameEntry, path_oeisdata=path_oeisdata)), boxOfOEISid),)
 
+def directoryEmpty吗(pathDirectory: Path) -> bool:
+	return pathDirectory.is_dir() and next(pathDirectory.iterdir(), None) is None
+
+def removeDirectoriesEmpty(pathTerms: Path) -> Path:
+	"""Remove each empty directory, such as `files/A400`, that no b-file in `pathTerms` occupies any longer.
+
+	(AI generated docstring)
+
+	`Path.rmdir` removes only an empty directory, so a directory that holds any file stays.
+	"""
+	consume(map(Path.rmdir, filter(directoryEmpty吗, chain.from_iterable(map(Path.iterdir, filter(Path.is_dir, pathTerms.iterdir()))))))
+	return pathTerms
+
 def copy_oeisdata(boxOfRelativePath: Iterable[PurePosixPath], path_oeisdata: Path, pathSnapshot: Path) -> Path:
 	boxOfRelativePath = tuple(filter(compose(Path.exists, path_oeisdata.joinpath), boxOfRelativePath))
 	consume(map(writeText, map(compose(readText, path_oeisdata.joinpath), boxOfRelativePath), map(pathSnapshot.joinpath, boxOfRelativePath), strict=True))

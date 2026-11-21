@@ -31,15 +31,15 @@ if TYPE_CHECKING:
 def test_measure(measure: CallableFunction[[int], int | None], integerNonnegative: int, expected: int | None) -> None:
 	assertEqualTo(measure(integerNonnegative), expected, measure.__name__, integerNonnegative)
 
-# Integers reach 2**233, far beyond the tables, through the `gmpy2` operations the functions use.
 @given(strategies.integers(1, 2 ** 233))
 def test_leafInSubHyperplaneGenerated(notLeafOrigin: int) -> None:
-	"""Relation: the most significant set bit, at `工dimension首零`, plus the remaining bits, `leafInSubHyperplane`, is the integer."""
+	"""Relation: the most significant set bit, at `工dimension首零`, plus the remaining bits, `leafInSubHyperplane`, is the integer.
+
+	Integers reach 2**233, far beyond the tables, through the `gmpy2` operations the functions use.
+	"""
 	assertEqualTo(2 ** 工dimension首零(notLeafOrigin) + leafInSubHyperplane(notLeafOrigin), notLeafOrigin, leafInSubHyperplane.__name__, notLeafOrigin)
 	assertEqualTo(leafInSubHyperplane(notLeafOrigin) < 2 ** 工dimension首零(notLeafOrigin), True, leafInSubHyperplane.__name__, notLeafOrigin)
 
-# Reference: hand-derived from the docstring: the trailing set bits within the map width, except `0` for an even input or for an
-# input with every bit set.
 @pytest.mark.parametrize('mapShape, integerNonnegative, expected', (
 	pytest.param((2, 2, 2), 0, 0, id='p2x2x2-0')
 	, pytest.param((2, 2, 2), 1, 1, id='p2x2x2-1')
@@ -50,9 +50,12 @@ def test_leafInSubHyperplaneGenerated(notLeafOrigin: int) -> None:
 	, pytest.param((2, 2, 2, 2, 2), 27, 2, id='p2x2x2x2x2-27')
 ))
 def test_工totalDimensionsTail(mapShape: tuple[int, ...], integerNonnegative: int, expected: int) -> None:
+	"""Reference: hand-derived from the docstring: the trailing set bits within the map width, except `0` for an even input or for an input
+	with every bit set.
+	"""
 	assertEqualTo(工totalDimensionsTail(StateElimination(mapShape), integerNonnegative), expected, 工totalDimensionsTail.__name__, mapShape, integerNonnegative)
 
-# Reference: hand-derived from the docstring: the lowest `totalDimensions` bits are inverted.
 @pytest.mark.parametrize('totalDimensions, integerNonnegative, expected', ((0, 0, 0), (1, 0, 1), (1, 1, 0), (3, 5, 2), (4, 9, 6), (6, 42, 21)))
 def test_invertLeafIn2上nDimensions(totalDimensions: int, integerNonnegative: int, expected: int) -> None:
+	"""Reference: hand-derived from the docstring: the lowest `totalDimensions` bits are inverted."""
 	assertEqualTo(invertLeafIn2上nDimensions(totalDimensions, integerNonnegative), expected, invertLeafIn2上nDimensions.__name__, totalDimensions, integerNonnegative)

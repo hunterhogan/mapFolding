@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 ))
 @pytest.mark.parametrize('pin', (
 	pytest.param(pinPilesAtEnds, id='pinPilesAtEnds')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), id='pinPilesAtEnds-pileDepth2')
-	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), id='pinPilesAtEnds-pileDepth3')
+	, pytest.param(partial(pinPilesAtEnds, pileDepth=2), id='pinPilesAtEndsPileDepth2')
+	, pytest.param(partial(pinPilesAtEnds, pileDepth=3), id='pinPilesAtEndsPileDepth3')
 	, pytest.param(pinPile零Ante首零, id='pinPile零Ante首零')
 	, pytest.param(pinLeavesDimension0, id='pinLeavesDimension0')
 	, pytest.param(pinLeaf首零Plus零, id='pinLeaf首零Plus零')

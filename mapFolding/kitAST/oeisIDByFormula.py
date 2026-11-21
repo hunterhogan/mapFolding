@@ -25,6 +25,8 @@ Functions
 		Represent an integer-valued symbolic formula or condition as an AST expression.
 	make_ast_exprSymbolic
 		Represent a formula that uses stored sequence values as an AST expression.
+	make_astGetValuesKnown
+		Read one stored sequence value with `getValuesKnown`.
 	make_f
 		Describe the sequence dependencies used to select a formula.
 """
@@ -34,7 +36,7 @@ from __future__ import annotations
 from astToolkit import Be, IfThis, Make, NodeTourist, Then
 from functools import partial, reduce
 from humpy_cytoolz import compose, unique
-from itertools import compress, filterfalse
+from itertools import compress, filterfalse, repeat
 from mapFolding.kitAST import IngredientsFunction
 from mapFolding.oeis import getMetadata, settingsOEIS
 from mapFolding.oeis._metadata import dictionaryTriangle, getMetadataTriangle
@@ -47,13 +49,34 @@ from sympy.logic.boolalg import BooleanTrue
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
     from mapFolding.oeis._dataBaskets import MetadataOEISid
     from mapFolding.theTypes import OEISid
     from sympy import Basic, Expr
     from sympy.logic.boolalg import Boolean
     import ast
 
-def make_ast_exprSymbolic(expression: Expr) -> ast.expr:
+def make_astGetValuesKnown(oeisID: OEISid, ast_exprIndex: ast.expr) -> ast.Subscript:
+    """Read the stored value at `ast_exprIndex` of `oeisID` with `getValuesKnown`.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    oeisID : OEISid
+        The sequence whose stored values the expression reads.
+    ast_exprIndex : ast.expr
+        The index of the value.
+
+    Returns
+    -------
+    astSubscript : ast.Subscript
+        The expression `getValuesKnown(oeisID)[ast_exprIndex]`.
+    """
+    return Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=ast_exprIndex)
+
+def make_ast_exprSymbolic(expression: Expr
+    , make_astSequenceValue: Callable[[OEISid, ast.expr], ast.expr] = make_astGetValuesKnown) -> ast.expr:
     """Represent a formula over stored sequence values as a Python AST expression.
 
     (AI generated docstring)
@@ -64,11 +87,13 @@ def make_ast_exprSymbolic(expression: Expr) -> ast.expr:
         A formula composed of SymPy integers, rationals, sums, products, powers, and
         single-index sequence calls. Each sequence call must have an integer index and
         use its OEIS ID as the function name.
+    make_astSequenceValue : Callable[[OEISid, ast.expr], ast.expr] = make_astGetValuesKnown
+        Build the expression that reads one sequence value from the OEIS ID and the index.
 
     Returns
     -------
     ast_expr : ast.expr
-        An expression that reads sequence values with `getValuesKnown` and preserves
+        An expression that reads sequence values with `make_astSequenceValue` and preserves
         rational arithmetic with `Rational` and `Pow`. The evaluation namespace must
         supply these names. Constructing the AST does not read sequence values.
 
@@ -83,14 +108,13 @@ def make_ast_exprSymbolic(expression: Expr) -> ast.expr:
         case Rational():
             ast_expr = Make.Call(Make.Name('Rational'), listParameters=[Make.Constant(int(expression.p)), Make.Constant(int(expression.q))])
         case Add():
-            ast_expr = Make.Add.join(map(make_ast_exprSymbolic, expression.args))
+            ast_expr = Make.Add.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
         case Mul():
-            ast_expr = Make.Mult.join(map(make_ast_exprSymbolic, expression.args))
+            ast_expr = Make.Mult.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
         case Pow():
-            ast_expr = Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args)))
+            ast_expr = Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue))))
         case _:
-            ast_expr = Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(expression.func.__name__)]),
-                slice=make_ast_exprInteger(expression.args[0]))
+            ast_expr = make_astSequenceValue(expression.func.__name__, make_ast_exprInteger(expression.args[0]))
     return ast_expr
 
 def makeSymbolicFormula(oeisID: OEISid, expression: Expr) -> IngredientsFunction:

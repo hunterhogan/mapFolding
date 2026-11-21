@@ -35,6 +35,11 @@ def expected(oeisID: OEISid, n: int) -> int:
 	"""Reference: a(n) of `oeisID` in the OEIS b-file that `mapFolding.oeis` stores."""
 	return getValuesKnown(oeisID)[n]
 
+@pytest.fixture
+def cellsKnown(oeisID: OEISid, n: int) -> list[int]:
+	"""Reference: the cells T(n, k), for every k, of the triangle `oeisID` in the OEIS b-file that `mapFolding.oeis` stores."""
+	return getTriangle(oeisID)[n]
+
 @pytest.fixture(scope='session')
 def triangle() -> 形Triangle:
 	"""The A400429 triangle, each row followed by one zero cell.
