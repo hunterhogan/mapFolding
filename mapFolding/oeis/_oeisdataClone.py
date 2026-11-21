@@ -13,7 +13,7 @@ from humpy_cytoolz import compose_left
 from io import BytesIO
 from itertools import filterfalse, repeat
 from mapFolding.kitFilesystem import writeText
-from mapFolding.oeis._oeisdata import copy_oeisdata, makeBoxOfPathFilename
+from mapFolding.oeis._oeisdata import copy_oeisdata, makeBoxOfPathFilename, removeDirectoriesEmpty
 from mapFolding.oeis._theSSOT import settingsOEIS
 from more_itertools import consume
 from operator import attrgetter, itemgetter
@@ -87,4 +87,6 @@ def checkoutSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata:
 def updateSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
 	with 工repo(path_oeisdata) as repo:
 		update_oeisdata(repo)
-	return checkoutSnapshot(boxOfOEISid, path_oeisdata, pathSnapshot)
+	pathSnapshot = checkoutSnapshot(boxOfOEISid, path_oeisdata, pathSnapshot)
+	removeDirectoriesEmpty(settingsOEIS.pathTerms)
+	return pathSnapshot

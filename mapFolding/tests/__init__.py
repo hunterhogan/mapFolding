@@ -4,8 +4,6 @@ Test package organization (in mapFolding/tests/):
 - conftest.py: Fixtures: job directories, album directories, b-file directories, known values, the processor total, written
 	files, Numba jobs, enumerated foldings, and expected values and triangle cells from OEIS
 - conftestAnnex.py: Assertion helpers for mapFolding's own domain objects, re-exported here
-- conftestPinning.py: Reports, for developing a pinning function, of how its permutation spaces cover the enumerated foldings,
-	re-exported here
 - dataSamples/: Samples shared by several test modules, and facts about them
 - test_A400429.py: Diagonals of the semi-meander triangle, the A005315 anchors, and rational-series coefficients
 - test_basecamp.py: Counting and enumerating foldings and meanders with each algorithm
@@ -39,4 +37,3 @@ from hunterMakesPy.tests import (
 	assert_allclose as assert_allclose, assert_approx as assert_approx, assert_array_equal as assert_array_equal,
 	assertEqualTo as assertEqualTo, messageTestFailure as messageTestFailure, messageTestFailure_ndarray as messageTestFailure_ndarray)
 from mapFolding.tests.conftestAnnex import assertPermutationSpacesPartitionFoldings as assertPermutationSpacesPartitionFoldings
-from mapFolding.tests.conftestPinning import verifyDomainAgainstKnown as verifyDomainAgainstKnown, verifyPinning2Dn as verifyPinning2Dn

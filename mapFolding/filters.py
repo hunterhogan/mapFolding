@@ -18,6 +18,8 @@ Boolean antecedents
 		Test whether a leaf is already assigned in a pinned-leaf mapping.
 	leaf吗
 		Identify a leaf-index value and narrow the value's type.
+	makeAgreements
+		Make the agreements of each folding with each permutation space.
 	moreThanLeaf零吗
 		Test whether a numeric leaf-space value exceeds the first non-origin leaf.
 	notPileLast
@@ -35,13 +37,17 @@ from __future__ import annotations
 from gmpy2 import bit_test as isBit1吗
 from mapFolding import 一, 零, 首一, 首零一
 from mapFolding.theTypes import ChoicesLeaf, DimensionIndex, Leaf, LeafSpace
-from operator import attrgetter
+from operator import attrgetter, methodcaller
 from typing import TYPE_CHECKING, TypeIs
 from Z0Z_tools import DOTvalues
+import numpy
+import pandas
 
 if TYPE_CHECKING:
+	from collections.abc import Sequence
 	from mapFolding.dataBaskets import PermutationSpace, StateElimination
 	from mapFolding.theTypes import Pile, PinnedLeaves
+	from numpy.typing import NDArray
 
 #======== Boolean antecedents ================================================
 
@@ -214,6 +220,33 @@ def beansWithoutCornbread(state: StateElimination, permutationSpace: Permutation
 	"""
 	return any((beans in DOTvalues(permutationSpace)) ^ (cornbread in DOTvalues(permutationSpace))
 		for beans, cornbread in ((一 + 零, 一), (首一(state.totalDimensions), 首零一(state.totalDimensions))))
+
+def makeAgreements(boxOfPermutationSpace: Sequence[PermutationSpace], arrayFoldings: NDArray[numpy.uint8]) -> NDArray[numpy.bool_]:
+	"""Make the agreements of each folding with each permutation space.
+
+	A folding agrees with a permutation space when the folding has every leaf that the permutation space pins, at the pile
+	where the permutation space pins it. A permutation space that pins no leaf agrees with every folding.
+
+	Parameters
+	----------
+	boxOfPermutationSpace : Sequence[PermutationSpace]
+		Permutation spaces whose pinned leaves are compared with each folding.
+	arrayFoldings : NDArray[numpy.uint8]
+		One row per folding; column `pile` holds the leaf at `pile`.
+
+	Returns
+	-------
+	agreements : NDArray[numpy.bool_]
+		`agreements[folding, permutationSpace]` is `True` when that folding agrees with that permutation space.
+	"""
+	leavesPinned: pandas.DataFrame = (pandas.DataFrame(map(methodcaller('pinnedLeaves'), boxOfPermutationSpace))
+		.melt(ignore_index=False, var_name='pile', value_name='leaf').dropna().astype({'leaf': int}).reset_index(names='permutationSpace'))
+	foldings: pandas.DataFrame = (pandas.DataFrame(arrayFoldings)
+		.melt(ignore_index=False, var_name='pile', value_name='leaf').astype({'leaf': int}).reset_index(names='folding'))
+	leavesAgreeing: pandas.DataFrame = leavesPinned.merge(foldings, on=['pile', 'leaf'])
+	return (numpy.bincount(leavesAgreeing['folding'].to_numpy() * len(boxOfPermutationSpace) + leavesAgreeing['permutationSpace'].to_numpy()
+			, minlength=len(arrayFoldings) * len(boxOfPermutationSpace)).reshape(len(arrayFoldings), len(boxOfPermutationSpace))
+		== numpy.bincount(leavesPinned['permutationSpace'].to_numpy(), minlength=len(boxOfPermutationSpace)))
 
 #======== Filtering functions ================================================
 
