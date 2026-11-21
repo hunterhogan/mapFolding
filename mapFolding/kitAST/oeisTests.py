@@ -1,5 +1,4 @@
 # ruff: file-ignore[undocumented-public-function]  # ruff: ignore[undocumented-public-module]
-# TODO remake the entire module.
 from __future__ import annotations
 
 from astToolkit import Be, Make, NodeChanger
@@ -23,8 +22,8 @@ from typing import TYPE_CHECKING
 import re as regex
 
 if TYPE_CHECKING:
-	from pathlib import Path
 	from mapFolding.theTypes import OEISid
+	from pathlib import Path
 	from sympy.logic.boolalg import Boolean
 	import ast
 
