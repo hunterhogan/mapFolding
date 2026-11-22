@@ -41,6 +41,8 @@ kitFilesystem
 	Name, save, cache, and load computation data; open temporary binary files.
 kitGit
 	Clone, update, and check out selected files of a remote Git repository.
+kitTerminal
+	Print benchmark comparisons and labels with reproducible terminal colors.
 leafDomains
 	Compute possible pile ranges and joint pile assignments for leaves.
 measure

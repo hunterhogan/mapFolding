@@ -32,8 +32,6 @@ Functions
 		Calculate a term using a counting algorithm or a selected formula.
 	printEasyRunBenchmark
 		Print a comparison between a computed term and a known value.
-	printEasyRunHeader
-		Print benchmark labels with reproducible terminal colors.
 	printEasyRunTriangle
 		Compare a computed row with known cells and align differing rows.
 	updateTriangle
@@ -68,9 +66,8 @@ from mapFolding.oeis._metadata import (
 	updateTriangle as updateTriangle, updateValuesKnown as updateValuesKnown, Z0Z_oeisName as Z0Z_oeisName)
 
 # isort: split
-from mapFolding.oeis.__main__ import (
-	getTotalFoldsKnown as getTotalFoldsKnown, makeMapShape as makeMapShape, printEasyRunBenchmark as printEasyRunBenchmark,
-	printEasyRunHeader as printEasyRunHeader, printEasyRunTriangle as printEasyRunTriangle)
+from mapFolding.oeis._benchmark import printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunTriangle as printEasyRunTriangle
+from mapFolding.oeis._mapShape import getTotalFoldsKnown as getTotalFoldsKnown, makeMapShape as makeMapShape
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n

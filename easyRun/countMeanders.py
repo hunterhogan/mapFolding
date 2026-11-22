@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from mapFolding.basecamp import countMeanders
-from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader, Z0Z_oeisName
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import printEasyRunBenchmark, Z0Z_oeisName
 from mapFolding.theSSOT import settingsPackage
 from pathlib import Path
 from typing import TYPE_CHECKING

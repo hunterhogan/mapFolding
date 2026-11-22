@@ -5,7 +5,8 @@ from mapFolding.algorithms.elimination import theorem2b
 from mapFolding.basecamp import eliminateFolds
 from mapFolding.choicesLeaf import getLookupChoicesLeaf
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
-from mapFolding.oeis import getValuesKnown, makeMapShape, printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import getValuesKnown, makeMapShape, printEasyRunBenchmark
 from mapFolding.pinIt import atPileExcludeLeaf, excludeLeaf_rBeforeLeaf_k
 from typing import TYPE_CHECKING
 import time

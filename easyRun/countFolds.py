@@ -7,7 +7,8 @@ prints colorized output indicating whether computed values match expected values
 from __future__ import annotations
 
 from mapFolding.basecamp import countFolds
-from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import makeMapShape, printEasyRunBenchmark
 from typing import TYPE_CHECKING
 import time
 

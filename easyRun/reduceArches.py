@@ -4,7 +4,8 @@ from __future__ import annotations
 from itertools import chain
 from mapFolding.algorithms.catalanArch import doTheNeedful
 from mapFolding.kitFilesystem import makePathFilename, writeStringToHere, writeTriangle
-from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import printEasyRunBenchmark
 from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
