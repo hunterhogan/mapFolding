@@ -5,7 +5,7 @@
 - Keep pytest defaults from `pyproject.toml`; use only the test paths and options needed for the task.
 - Do not add pytest hooks or application wrappers to reconfigure standard streams.
 - A sandbox `EPERM` while a project command reads a tool installed outside the repository is not a broken project environment. Rerun the same command with sandbox escalation so the tool can read its installation.
-- In particular, `pyright` may need sandbox escalation to read `C:\Users\hunte\AppData\Roaming\uv\tools\pyright`. Do not replace it with a path-based invocation or report that Pyright could not run before retrying the activated-environment command with escalation.
+- Check types with `pyrefly check`, not `pyright`. `pyrefly` may need sandbox escalation to read `C:\Users\hunte\AppData\Roaming\uv\tools\pyrefly`. Do not replace it with a path-based invocation or report that Pyrefly could not run before retrying the activated-environment command with escalation.
 
 # AST generation in `mapFolding.kitAST`
 

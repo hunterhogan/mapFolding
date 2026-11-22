@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import partial
 from humpy_cytoolz import compose, juxt
 from itertools import chain, filterfalse, repeat
-from mapFolding.kitFilesystem import readText, writeText
+from mapFolding.kitFilesystem import makePathFilename, readText, writeText
 from more_itertools import consume
 from oeis_tools import oeis_bfile
 from pathlib import Path, PurePath
@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 	from pathlib import PurePosixPath
 
 def makePathFilename_bFile[形PurePath: PurePath](oeisID: OEISid, path_oeisdata: 形PurePath) -> 形PurePath:
-	return path_oeisdata / 'files' / oeisID[0:4] / oeis_bfile(oeisID)
+	return makePathFilename(path_oeisdata / 'files' / oeisID[0:4], oeis_bfile(oeisID))
 
 def makePathFilenameEntry[形PurePath: PurePath](oeisID: OEISid, path_oeisdata: 形PurePath) -> 形PurePath:
-	return path_oeisdata / 'seq' / oeisID[0:4] / f"{oeisID}.seq"
+	return makePathFilename(path_oeisdata / 'seq' / oeisID[0:4], oeisID, suffix='.seq')
 
 def makeBoxOfPathFilename[形PurePath: PurePath](boxOfOEISid: Iterable[OEISid], path_oeisdata: 形PurePath) -> Iterator[形PurePath]:
 	return chain.from_iterable(map(juxt(makePathFilenameEntry, makePathFilename_bFile), boxOfOEISid, repeat(path_oeisdata), strict=False))

@@ -28,8 +28,10 @@ from __future__ import annotations
 from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLeaves, mapShapeIs2上nDimensions, validateMapShape
 from mapFolding.dataBaskets import (
 	StateElimination, StateMapFolding, StateMapFoldingParallel, StateMapFoldingSymmetric, StateMeanders, StateMeandersAxis)
-from mapFolding.kitFilesystem import makePathFilenameCount, makePathFilenameFolds, saveTotal, saveTotalFAILearly, writeAlbum
+from mapFolding.kitFilesystem import (
+	makePathFilename, makePathFilenameFolds, resolvePathLikeWrite, saveTotal, saveTotalFAILearly, writeAlbum)
 from mapFolding.theSSOT import settingsPackage
+from pathlib import PurePath
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -135,7 +137,7 @@ def countFolds(mapShape: Sequence[int]
 	if pathLikeWrite is None:
 		pathFilenameTotalFolds: Path | None = None
 	else:
-		pathFilenameTotalFolds = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
+		pathFilenameTotalFolds = saveTotalFAILearly(resolvePathLikeWrite(pathLikeWrite, makePathFilenameFolds(mapShape, PurePath(), suffix=suffix)))
 
 	#================== Algorithm version =========================================================
 
@@ -249,7 +251,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 	if pathLikeWrite is None:
 		pathFilenameTotalFolds: Path | None = None
 	else:
-		pathFilenameTotalFolds = saveTotalFAILearly(makePathFilenameFolds(mapShape, pathLikeWrite, suffix=suffix))
+		pathFilenameTotalFolds = saveTotalFAILearly(resolvePathLikeWrite(pathLikeWrite, makePathFilenameFolds(mapShape, PurePath(), suffix=suffix)))
 
 	#================== Algorithm version -------------------------------------------------
 
@@ -401,7 +403,7 @@ def countMeanders(
 	if pathLikeWrite is None:
 		pathFilenameCountTotal: Path | None = None
 	else:
-		pathFilenameCountTotal = saveTotalFAILearly(makePathFilenameCount(pathLikeWrite, kind, str(n), suffix=suffix))
+		pathFilenameCountTotal = saveTotalFAILearly(resolvePathLikeWrite(pathLikeWrite, makePathFilename(PurePath(), kind, str(n), suffix=suffix)))
 
 	#================== Algorithm selection and execution =========================================
 
@@ -538,7 +540,7 @@ def eliminateFolds(
 	if pathLikeWrite is None:
 		pathFilenameTotalFolds: Path | None = None
 	else:
-		pathFilenameTotalFolds = makePathFilenameFolds(state.mapShape, pathLikeWrite, suffix=suffix)
+		pathFilenameTotalFolds = resolvePathLikeWrite(pathLikeWrite, makePathFilenameFolds(state.mapShape, PurePath(), suffix=suffix))
 		saveTotalFAILearly(pathFilenameTotalFolds)
 
 	#================== Algorithm version =========================================================
@@ -656,7 +658,7 @@ def enumerateSequences(
 	if pathLikeWrite is None:
 		pathFilenameAlbum: Path | None = None
 	else:
-		pathFilenameAlbum = saveTotalFAILearly(makePathFilenameCount(pathLikeWrite, kind, str(n), suffix=suffix))
+		pathFilenameAlbum = saveTotalFAILearly(resolvePathLikeWrite(pathLikeWrite, makePathFilename(PurePath(), kind, str(n), suffix=suffix)))
 
 	#================== Algorithm selection and execution =========================================
 

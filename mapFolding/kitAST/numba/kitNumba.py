@@ -28,7 +28,7 @@ from astToolkit import Be, Grab, IfThis, Make, NodeChanger, Then
 from collections.abc import Mapping
 from itertools import filterfalse, takewhile
 from mapFolding.kitAST import IngredientsModule
-from mapFolding.kitAST.paths import getPathFilename
+from mapFolding.kitAST.paths import makePathFilename
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 from typing_extensions import TypedDict
@@ -285,7 +285,7 @@ def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identi
 	pathRoot: PathLike[str] = override.get('pathRoot', identifiers['filesystem']['pathRoot'])
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix', identifiers['logicalPath']['synthetic'])
 	identifierModule: str = override.get('identifierModule', identifiers['module']['algorithmNumba'])
-	pathFilename: PurePath = override.get('pathFilename') or getPathFilename(pathRoot, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = override.get('pathFilename') or makePathFilename(pathRoot, logicalPathInfix, identifierModule)
 	identifierPackage: str = override.get('package', identifiers['module']['package'])
 	return ingredientsModule.write_astModule(pathFilename, identifierPackage)
 
@@ -364,6 +364,6 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 	pathRoot: PathLike[str] = override.get('pathRoot', identifiers['filesystem']['pathRoot'])
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix', identifiers['logicalPath']['synthetic'])
 	identifierModule: str = override.get('identifierModule', identifiers['module']['algorithmNumba'])
-	pathFilename: PurePath = override.get('pathFilename') or getPathFilename(pathRoot, logicalPathInfix, identifierModule)
+	pathFilename: PurePath = override.get('pathFilename') or makePathFilename(pathRoot, logicalPathInfix, identifierModule)
 	identifierPackage: str = override.get('package', identifiers['module']['package'])
 	return ingredientsModule.write_astModule(pathFilename, identifierPackage)

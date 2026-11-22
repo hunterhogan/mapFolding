@@ -23,6 +23,7 @@ from astToolkit.filesystem import parseLogicalPath2astModule
 from humpy_cytoolz import get_in
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST.theSSOT import default
+from mapFolding.kitFilesystem import makePathFilename
 from mapFolding.theSSOT import settingsPackage
 from pathlib import PurePath
 from typing import TYPE_CHECKING
@@ -119,7 +120,7 @@ def getModule(
 	identifierModule = identifierModule or get_in(('module', 'default'), identifiers or {}) or default['module']['default']
 	return parseLogicalPath2astModule(getLogicalPath(identifierPackage, logicalPathInfix, raiseIfNone(identifierModule)))
 
-def getPathFilename(
+def makePathFilenameModule(
 	pathRoot: PathLike[str] | None = settingsPackage.pathPackage
 	, logicalPathInfix: identifierDotAttribute | None = None
 	, identifierModule: str = ''
@@ -167,12 +168,7 @@ def getPathFilename(
 	Numba module is derived with the following call.
 
 		```python
-		pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, identifierModule)
+		pathFilename: PurePath = makePathFilenameModule(pathRoot, logicalPathInfix, identifierModule)
 		```
 	"""
-	pathFilename = PurePath(identifierModule + fileExtension)
-	if logicalPathInfix:
-		pathFilename = PurePath(*(str(logicalPathInfix).split('.')), pathFilename)
-	if pathRoot:
-		pathFilename = PurePath(pathRoot, pathFilename)
-	return pathFilename
+	return makePathFilename(PurePath(pathRoot or '', *(logicalPathInfix or '').split('.')), identifierModule, suffix=fileExtension)

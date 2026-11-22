@@ -13,7 +13,7 @@ from mapFolding.kitAST import IngredientsModule
 from mapFolding.kitAST.oeisIDByFormula import makeIngredientsOEISid
 from mapFolding.kitAST.oeisTests import (
 	makeFormulaParameters, makeReferences, makeRelationParameters, makeTestsByFormula, makeTestsTriangle, updateSamplesOEIS)
-from mapFolding.kitAST.paths import getPathFilename
+from mapFolding.kitAST.paths import makePathFilename
 from mapFolding.oeis import settingsOEIS
 from mapFolding.oeis._symbolic import makeSolutionsSymbolic
 from mapFolding.theSSOT import settingsPackage
@@ -65,11 +65,11 @@ def makeModulesOEIS(pathFilename: Path = settingsOEIS.pathPackage / 'byFormula.p
 	Existing destination files are overwritten with formatted generated source.
 	"""
 	if pathTests is None:
-		pathTests = Path(getPathFilename(logicalPathInfix='tests', identifierModule='test_byFormula'))
+		pathTests = Path(makePathFilename(logicalPathInfix='tests', identifierModule='test_byFormula'))
 	if pathSamples is None:
-		pathSamples = Path(getPathFilename(logicalPathInfix='tests.dataSamples', identifierModule='oeis'))
+		pathSamples = Path(makePathFilename(logicalPathInfix='tests.dataSamples', identifierModule='oeis'))
 	if pathTriangle is None:
-		pathTriangle = Path(getPathFilename(logicalPathInfix='tests', identifierModule='test_relationsTriangle'))
+		pathTriangle = Path(makePathFilename(logicalPathInfix='tests', identifierModule='test_relationsTriangle'))
 	lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
 	ingredientsModule = IngredientsModule(list(starmap(makeIngredientsOEISid, sorted(lookupSolutions.items()))))
 	docstringModule: str = ('Compute a(n) for an OEIS ID by computing other OEIS IDs.\n\nThis is a generated file; edit'

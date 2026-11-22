@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from itertools import chain
 from mapFolding.algorithms.catalanArch import doTheNeedful
-from mapFolding.kitFilesystem import writeStringToHere, writeTriangle
+from mapFolding.kitFilesystem import makePathFilename, writeStringToHere, writeTriangle
 from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
-from pathlib import Path
+from mapFolding.theSSOT import settingsPackage
 from tqdm.auto import tqdm
 from typing import TYPE_CHECKING
 import time
@@ -13,19 +13,20 @@ import time
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from os import PathLike
+	from pathlib import Path
 
 def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], list[int]] = doTheNeedful) -> Path:
 	triangle: dict[int, list[int]] = {}
-	pathFilename: Path = pathWrite / 'b287548ADDENDUM.txt'
+	pathFilename: Path = makePathFilename(pathWrite, 'b287548ADDENDUM', suffix='.txt')
 	for n in tqdm(range(nStart, nStop)):
 		triangle[n] = counter(n)
-		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
+		writeTriangle(triangle, makePathFilename(pathWrite, 'A287548ADDENDUM', suffix='.csv'))
 		writeStringToHere(''.join(map('{} {}\n'.format, range(1, sum(map(len, triangle.values())) + 1),
 			chain.from_iterable(triangle.values()), strict=True)), pathFilename)
 	return pathFilename
 
 if __name__ == '__main__':
-	pathLikeWrite: PathLike[str] | None = Path('/apps/mapFolding/research/archReduction')
+	pathLikeWrite: PathLike[str] | None = settingsPackage.pathPackage.parent / 'research' / 'archReduction'
 	oeisID = 'A000682'
 
 	flow = 'write'

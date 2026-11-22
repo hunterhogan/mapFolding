@@ -10,10 +10,9 @@ from astToolkit.filesystem import parsePathFilename2astModule
 from hunterMakesPy import raiseIfNone
 from itertools import filterfalse
 from mapFolding.kitAST import (
-	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, removeFunctionDef, renameFunctionDef,
-	toDisk)
+	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, removeFunctionDef, renameFunctionDef, toDisk)
 from mapFolding.kitAST.numba.kitNumba import makeNumbaCall
-from mapFolding.kitAST.paths import getLogicalPath, getPathFilename
+from mapFolding.kitAST.paths import getLogicalPath, makePathFilename
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from mapFolding.theTypes import 形ArcCode, 形ArrayArcCode
 from operator import methodcaller
@@ -222,7 +221,7 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 				, Grab.testAttribute(Then.replaceWith(testNew))
 	).visit(astModule)
 
-	astModuleShare: ast.Module = parsePathFilename2astModule(getPathFilename(
+	astModuleShare: ast.Module = parsePathFilename2astModule(makePathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
 	removeFunctionDef(名Callable, astModuleShare)
 	ingredientsModule = IngredientsModule(epilogue=astModuleShare)
@@ -274,7 +273,7 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	名DataclassInstance: str = override.get('名DataclassInstance', identifiers['variable']['stateInstance'])
 	名Module: str = override.get('名Module') or identifiers['module']['prune']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
-	astModuleShare: ast.Module = parsePathFilename2astModule(getPathFilename(
+	astModuleShare: ast.Module = parsePathFilename2astModule(makePathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
 	removeFunctionDef(override.get('名CallableDyck') or identifiers['function']['Dyck'], astModuleShare)
 	ingredientsModule = IngredientsModule(epilogue=astModuleShare)
@@ -384,7 +383,7 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 			, value=Make.Call(Make.Name(名CallablePrune), [Make.Name(名DataclassInstance)]))])).visit).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleCommon))), Then.removeIt).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleShare))), Then.removeIt).visit(astModule)
-	astModulePrune: ast.Module = parsePathFilename2astModule(getPathFilename(
+	astModulePrune: ast.Module = parsePathFilename2astModule(makePathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
 	removeFunctionDef(名CallableCounting, astModulePrune)
 	removeFunctionDef(名CallableDispatcher, astModulePrune)
@@ -483,7 +482,7 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleCommon))), Then.removeIt).visit(astModule)
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathInfix, 名ModuleShare))), Then.removeIt).visit(astModule)
-	astModulePrune: ast.Module = parsePathFilename2astModule(getPathFilename(
+	astModulePrune: ast.Module = parsePathFilename2astModule(makePathFilename(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
 	removeFunctionDef(名CallableCounting, astModulePrune)
 	removeFunctionDef(名CallableDispatcher, astModulePrune)
@@ -570,10 +569,10 @@ def makeModulesMeanders() -> None:
 	名ModuleShare: str = identifiers['module']['share']
 	pathRoot: PurePath = identifiers['filesystem']['sourcePackage']
 	logicalPathAlgorithm: identifierDotAttribute = identifiers['logicalPath']['algorithm']
-	pathFilenameCommon: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['common'])
-	pathFilenameDyck: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])
-	pathFilenameNumPy: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])
-	pathFilenamePandas: PurePath = getPathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['pandas'])
+	pathFilenameCommon: PurePath = makePathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['common'])
+	pathFilenameDyck: PurePath = makePathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])
+	pathFilenameNumPy: PurePath = makePathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])
+	pathFilenamePandas: PurePath = makePathFilename(pathRoot, logicalPathAlgorithm, identifiers['module']['pandas'])
 	astModule: ast.Module = parsePathFilename2astModule(pathFilenameCommon)
 	astModuleCommon: ast.Module = parsePathFilename2astModule(pathFilenameCommon)
 	expandDocstringTabs = NodeChanger(Be.FunctionDef, Grab.bodyAttribute(Grab.index(0,

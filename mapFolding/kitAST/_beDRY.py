@@ -23,7 +23,7 @@ from __future__ import annotations
 
 from astToolkit import Be, Grab, NodeChanger, Then
 from mapFolding.kitAST import IfThis
-from mapFolding.kitAST.paths import getPathFilename
+from mapFolding.kitAST.paths import makePathFilename
 from mapFolding.theSSOT import settingsPackage
 from typing import TYPE_CHECKING
 
@@ -195,5 +195,5 @@ def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords:
 	pathRoot: PathLike[str] = override.get('pathRoot') or keywords.get('pathRoot') or identifiers['filesystem']['pathRoot']
 	identifierPackage: str = override.get('package') or keywords.get('package') or identifiers['module']['package']
 	fileExtension: str = override.get('fileExtension') or settingsPackage.fileExtension
-	pathFilename: PurePath = override.get('pathFilename') or getPathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension)
+	pathFilename: PurePath = override.get('pathFilename') or makePathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension)
 	return ingredientsModule.write_astModule(pathFilename, identifierPackage)

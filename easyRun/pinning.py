@@ -12,7 +12,7 @@ from mapFolding.conditionalOrdering import getLeafPredecessors
 from mapFolding.creases import getLeavesCreaseAnte, getLeavesCreasePost
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.filters import beansWithoutCornbread, makeAgreements
-from mapFolding.kitFilesystem import getDataFrameFoldings, writeAlbum
+from mapFolding.kitFilesystem import getDataFrameFoldings, makePathFilename, writeAlbum
 from mapFolding.leafDomains import getDomainLeaf, getLookupDomainsLeaves
 from mapFolding.theSSOT import settingsPackage
 from math import prod
@@ -44,8 +44,8 @@ def verifyPinning2Dn(state: StateElimination) -> None:
 	sys.stdout.write(f"{len(boxOfDictionaryPinned)} surplus dictionaries.\n")
 	sys.stdout.write(ansiColorReset)
 
-	pathFilename = (settingsPackage.pathPackage.parent / 'research' / 'elimination' / 'excel'
-		/ f"p2d{state.totalDimensions}SurplusDictionaries.csv")
+	pathFilename = makePathFilename(settingsPackage.pathPackage.parent / 'research' / 'elimination' / 'excel'
+		, f'p2d{state.totalDimensions}SurplusDictionaries', suffix='.csv')
 
 	if boxOfDictionaryPinned:
 		surplusDictionaries: list[Folding] = [tuple(range(state.totalLeaves))]

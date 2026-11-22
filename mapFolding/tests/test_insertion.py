@@ -49,7 +49,7 @@ def test_insertion(pathAlbum: Path, albumKnown: tuple[Folding, ...], mapShape: t
 	fewer than three leaves has the leaves of `(1, 2)` that exist. The new album contains every folding of the stored album of
 	`mapShape` named by `albumKnown`.
 
-	Reference for `expected`: the docstring of `mapFolding.kitFilesystem.makeFilenameFolds`, with the suffix `.album`. Accepted
+	Reference for `expected`: the docstring of `mapFolding.kitFilesystem.makePathFilenameFolds`, with the suffix `.album`. Accepted
 	recording for `totalRepresentatives`, stored before the 2026-11 reorganization.
 	"""
 	pathFilenameAlbum: Path = insertion.doTheNeedful(mapShape, CPUlimit)

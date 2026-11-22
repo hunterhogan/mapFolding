@@ -19,7 +19,7 @@ from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import IfThis, LedgerOfImports
-from mapFolding.kitAST.paths import getModule, getPathFilename
+from mapFolding.kitAST.paths import getModule, makePathFilename
 from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
@@ -225,7 +225,7 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 
 	astModule.body = [*imports.makeList_ast(), *astModuleAsynchronousAnnex.body, *astModule.body]
 
-	pathFilename: PurePath = getPathFilename(pathRoot, logicalPathInfix, 名Module)
+	pathFilename: PurePath = makePathFilename(pathRoot, logicalPathInfix, 名Module)
 
 	write_astModule(astModule, pathFilename, identifierPackage=名Package)
 

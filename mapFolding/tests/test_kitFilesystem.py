@@ -7,12 +7,12 @@ from __future__ import annotations
 
 from mapFolding.dataBaskets import StateElimination
 from mapFolding.kitFilesystem import (
-	getDataFrameFoldings, makeFilenameArrayFoldings, makeFilenameFolds, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame,
-	readDiagonal, readText, readTriangle, saveTotal, writeDiagonal, writeTriangle)
+	getDataFrameFoldings, makePathFilenameArrayFoldings, makePathFilenameFolds, readDataFrame, readDiagonal, readText, readTriangle,
+	resolvePathLikeWrite, saveTotal, writeDiagonal, writeTriangle)
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.maps2上nDimensional import mapShape2上4Dimensional, mapShape2上6Dimensional
 from mapFolding.tests.dataSamples.triangles import lookupTriangles, triangleDense
-from pathlib import Path
+from pathlib import Path, PurePath, PurePosixPath
 from typing import TYPE_CHECKING
 import pandas
 import pytest
@@ -22,38 +22,32 @@ if TYPE_CHECKING:
 	from mapFolding.theTypes import 形Triangle
 	from os import PathLike
 
-@pytest.mark.parametrize('totalDimensions, suffix, expected', (
-	pytest.param(4, '.pkl', 'arrayFoldings2上4Dimensional.pkl', id='4-pkl')
-	, pytest.param(6, '.pkl.gz', 'arrayFoldings2上6Dimensional.pkl.gz', id='6-pklGz')
-))
-def test_makeFilenameArrayFoldings(totalDimensions: int, suffix: str, expected: str) -> None:
-	assertEqualTo(makeFilenameArrayFoldings(totalDimensions, suffix), expected, makeFilenameArrayFoldings.__name__, totalDimensions, suffix)
-
 @pytest.mark.parametrize('totalDimensions, pathRoot, suffix, expected', (
-	pytest.param(5, Path('foldingSamples'), '.pkl', Path('foldingSamples/arrayFoldings2上5Dimensional.pkl'), id='5-relativeRoot'),
+	pytest.param(4, Path('foldingSamples'), '.pkl', Path('foldingSamples/arrayFoldings2上4Dimensional.pkl'), id='4-pkl')
+	, pytest.param(5, Path('foldingSamples'), '.pkl', Path('foldingSamples/arrayFoldings2上5Dimensional.pkl'), id='5-relativeRoot')
+	, pytest.param(6, Path('foldingSamples'), '.pkl.gz', Path('foldingSamples/arrayFoldings2上6Dimensional.pkl.gz'), id='6-pklGz')
 ))
 def test_makePathFilenameArrayFoldings(totalDimensions: int, pathRoot: Path, suffix: str, expected: Path) -> None:
 	assertEqualTo(makePathFilenameArrayFoldings(totalDimensions, pathRoot, suffix=suffix), expected, makePathFilenameArrayFoldings.__name__
 		, totalDimensions, pathRoot, suffix=suffix)
 
-@pytest.mark.parametrize('mapShape, expected', (
-	pytest.param((11, 13), 'p11x13.totalFolds', id='p11x13')
-	, pytest.param((317, 313, 311), 'p317x313x311.totalFolds', id='p317x313x311')
+@pytest.mark.parametrize('mapShape, path, expected', (
+	pytest.param((11, 13), PurePosixPath(), PurePosixPath('p11x13.totalFolds'), id='p11x13-pathEmpty')
+	, pytest.param((317, 313, 311), PurePosixPath('jobs'), PurePosixPath('jobs/p317x313x311.totalFolds'), id='p317x313x311-pathJobs')
 ))
-def test_makeFilenameFolds(mapShape: tuple[int, ...], expected: str) -> None:
-	assertEqualTo(makeFilenameFolds(mapShape), expected, makeFilenameFolds.__name__, mapShape)
+def test_makePathFilenameFolds(mapShape: tuple[int, ...], path: PurePath, expected: PurePath) -> None:
+	pathFilenameFolds: PurePath = makePathFilenameFolds(mapShape, path)
+	assertEqualTo((pathFilenameFolds, type(pathFilenameFolds)), (expected, type(expected)), makePathFilenameFolds.__name__, mapShape, path)
 
-@pytest.mark.parametrize('mapShape, pathLikeWrite, expected', (
-	pytest.param((1, 3), None, Path('p1x3.totalFolds'), id='p1x3-None')
-	, pytest.param((2, 3), None, Path('p2x3.totalFolds'), id='p2x3-None')
-	, pytest.param((1, 3), Path('custom/path/test.totalFolds'), Path('custom/path/test.totalFolds'), id='p1x3-relative')
-	, pytest.param((2, 3), Path('deep/nested/totalFolds.txt'), Path('deep/nested/totalFolds.txt'), id='p2x3-relativeNested')
+@pytest.mark.parametrize('pathLikeWrite, relativePath, expected', (
+	pytest.param(Path('custom/path/test.totalFolds'), PurePath('p1x3.totalFolds'), Path('custom/path/test.totalFolds'), id='p1x3-relative')
+	, pytest.param(Path('deep/nested/totalFolds.txt'), PurePath('p2x3.totalFolds'), Path('deep/nested/totalFolds.txt'), id='p2x3-relativeNested')
 ))
-def test_makePathFilenameFolds(pathRootJobDEFAULT: Path, mapShape: tuple[int, ...], pathLikeWrite: PathLike[str] | None, expected: Path) -> None:
+def test_resolvePathLikeWrite(pathRootJobDEFAULT: Path, pathLikeWrite: PathLike[str], relativePath: PurePath, expected: Path) -> None:
 	"""The path resolves under the default job directory, which receives any missing parent directory."""
-	pathFilenameTotalFolds: Path = makePathFilenameFolds(mapShape, pathLikeWrite)
-	assertEqualTo(pathFilenameTotalFolds, pathRootJobDEFAULT / expected, makePathFilenameFolds.__name__, mapShape, pathLikeWrite)
-	assertEqualTo(pathFilenameTotalFolds.parent.is_dir(), True, makePathFilenameFolds.__name__, mapShape, pathLikeWrite)
+	pathFilename: Path = resolvePathLikeWrite(pathLikeWrite, relativePath)
+	assertEqualTo(pathFilename, pathRootJobDEFAULT / expected, resolvePathLikeWrite.__name__, pathLikeWrite, relativePath)
+	assertEqualTo(pathFilename.parent.is_dir(), True, resolvePathLikeWrite.__name__, pathLikeWrite, relativePath)
 
 @pytest.mark.parametrize('totalDimensions, expectedShape, expectedDtype, expectedCells', (
 	pytest.param(4, (12, 16), 'uint8', {(0, 2): 5, (11, 4): 15}, id='arrayFoldings2上4Dimensional'),

@@ -12,18 +12,14 @@ Functions
 	Create paths and filenames
 		getPathRootJobDEFAULT
 			Create the default job directory.
-		makeFilenameArrayFoldings
-			Build a filename for sampled array-folding data.
-		makeFilenameCount
-			Join positional and named filename components.
-		makeFilenameFolds
-			Encode map dimensions in their supplied order.
+		makePathFilename
+			Name a file in a directory from positional and named components.
 		makePathFilenameArrayFoldings
-			Combine a sample-data directory and filename.
-		makePathFilenameCount
-			Resolve an output path and create parent directories.
+			Name sampled array-folding data in a sample-data directory.
 		makePathFilenameFolds
-			Resolve an output path named from map dimensions.
+			Name a file in a directory from map dimensions.
+		resolvePathLikeWrite
+			Resolve a requested write destination against the default job directory.
 	Confirm write capability
 		saveTotalFAILearly
 			Leave a test value at a new output path before counting.
@@ -72,7 +68,7 @@ from hunterMakesPy.kitFilesystem import writeStringToHere
 from itertools import repeat, tee
 from mapFolding.theSSOT import settingsPackage
 from operator import itemgetter
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePath, PurePosixPath
 from platformdirs import user_data_dir
 from sys import modules as sysModules, stdout
 from tempfile import TemporaryFile
@@ -119,89 +115,56 @@ def getPathRootJobDEFAULT() -> Path:
 	pathJobDEFAULT.mkdir(parents=True, exist_ok=True)
 	return pathJobDEFAULT
 
-def makeFilenameArrayFoldings(totalDimensions: int, suffix: str = '.pkl') -> str:
-	"""Build the sampled-folding filename for `totalDimensions`.
+# TODO "Filenames built from kind break your naming rules. 'semi-meanders symmetric' becomes
+# semi-meanders symmetric_9.album. That name contains a space, and its - also reads as your
+# key-dash-value separator."
+def makePathFilename[形PurePath: PurePath](path: 形PurePath, /, *underscore: str, suffix: str = '', **dash: str) -> 形PurePath:
+	"""Name a file in `path` from positional and named components.
 
 	(AI generated docstring)
 
-	You can use this function to name sampled folding data for a map with length two in every
-	dimension. `makePathFilenameArrayFoldings` combines this filename with a sample-data directory.
+	You can use this function to construct the location of any file that the package names. Each kind
+	of object supplies its own components, such as the dimensions of a map or an OEIS ID, and its own
+	`suffix`. The result has the type of `path`, so a relative `PurePosixPath` remains a relative
+	`PurePosixPath`. This function does not read or change the filesystem.
 
 	Parameters
 	----------
-	totalDimensions : int
-		Dimension count encoded in the filename.
-	suffix : str = '.pkl'
-		Suffix appended to the filename stem.
+	path : 形PurePath
+		Directory that holds the file. `PurePath()` produces a relative path that is only the filename.
+	*underscore : str
+		Positional components of the filename, joined with underscores.
+	suffix : str = ''
+		Text appended after all components, such as `'.csv'`.
+	**dash : str
+		Named components added after the positional components. Each key and value is joined with a
+		dash, and successive components are joined with underscores.
 
 	Returns
 	-------
-	filenameArrayFoldings : str
-		`f'arrayFoldings2上{totalDimensions}Dimensional{suffix}'`.
+	pathFilename : 形PurePath
+		`path` joined with the filename. With no components and no `suffix`, the result is `path`.
+
+	Name Preservation
+	-----------------
+	Each component and `suffix` appears in the filename exactly as supplied. This function never
+	changes the case of a letter and never removes or replaces a character, so the same components
+	always produce the same filename.
 
 	See Also
 	--------
-	`makePathFilenameArrayFoldings`
-		Combine the filename with a sample-data directory.
-	"""
-	return makeFilenameCount(f'arrayFoldings2上{totalDimensions}Dimensional', suffix=suffix)
-
-def makeFilenameCount(*underscore: str, suffix: str = '.countTotal', **dash: str) -> str:
-	"""Build a count filename from positional and named components.
-
-	(AI generated docstring)
-
-	You can use this function to join computation labels into a filename and append `suffix`.
-	This function preserves the supplied component order and does not sanitize characters.
-
-	Parameters
-	----------
-	*underscore : str
-		Positional components joined with underscores.
-	suffix : str = '.countTotal'
-		Suffix appended after all filename components.
-	**dash : str
-		Named components added after the positional components. Each key and value is joined
-		with a dash, and successive components are joined with underscores.
-
-	Returns
-	-------
-	filename : str
-		Joined components followed by `suffix`. With no components, the result is `suffix`.
+	`resolvePathLikeWrite`
+		Place a filename at the write destination that a caller requested.
 
 	Examples
 	--------
-	The notebook `easyRun/notebookCount.ipynb` names output from the family, index, and algorithm.
+	The module `mapFolding.oeis._oeisdata` names the sequence entry of an OEIS ID in an oeisdata tree.
 
 		```python
-		pathLikeWrite = getPathRootJobDEFAULT() / makeFilenameCount(kind, str(n), flow)
+		makePathFilename(path_oeisdata / 'seq' / oeisID[0:4], oeisID, suffix='.seq')
 		```
 	"""
-	stem: str = '_'.join([*underscore, *map('-'.join, dash.items())])
-	return stem + suffix
-
-def makeFilenameFolds(mapShape: tuple[int, ...], suffix: str = '.totalFolds') -> str:
-	"""Encode the dimensions in `mapShape` in a folding-count filename.
-
-	(AI generated docstring)
-
-	You can use this function to name an output count from the dimension lengths. This function
-	preserves the supplied order; this function does not sort or validate dimensions.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...]
-		Dimensions to encode, in their supplied order.
-	suffix : str = '.totalFolds'
-		Suffix appended to the dimension-based stem.
-
-	Returns
-	-------
-	filenameTotalFolds : str
-		The letter `'p'` followed by dimension lengths joined with `'x'`, followed by `suffix`.
-		An empty `mapShape` produces `'p'` followed by `suffix`.
-	"""
-	return makeFilenameCount('p' + 'x'.join(map(str, mapShape)), suffix=suffix)
+	return path / ('_'.join([*underscore, *map('-'.join, dash.items())]) + suffix)
 
 def makePathFilenameArrayFoldings(
 	totalDimensions: int, pathRoot: PathLike[str] = settingsPackage.pathDataSamples, *, suffix: str = '.pkl'
@@ -210,8 +173,9 @@ def makePathFilenameArrayFoldings(
 
 	(AI generated docstring)
 
-	You can use this function to combine a sample-data directory with the filename produced by
-	`makeFilenameArrayFoldings`. This function returns a path without creating directories.
+	You can use this function to locate sampled folding data for a map with length two in every
+	dimension. The filename is `f'arrayFoldings2上{totalDimensions}Dimensional{suffix}'`. This function
+	returns a path without creating directories.
 
 	Parameters
 	----------
@@ -221,93 +185,100 @@ def makePathFilenameArrayFoldings(
 		Root directory for sampled-folding data. The default is captured from the shared package
 		settings when this module is imported.
 	suffix : str = '.pkl'
-		Suffix appended to the filename stem.
+		Suffix appended to the filename.
 
 	Returns
 	-------
 	pathFilenameArrayFoldings : Path
 		Sample-data path under `pathRoot`, preserving a relative root when supplied.
 	"""
-	return Path(pathRoot) / makeFilenameArrayFoldings(totalDimensions, suffix=suffix)
+	return makePathFilename(Path(pathRoot), f'arrayFoldings2上{totalDimensions}Dimensional', suffix=suffix)
 
-# TODO Create a truly generic, but useful, make path filename function.
-def makePathFilenameCount(pathLikeWrite: PathLike[str] | None = None, *underscore: str, suffix: str = '.countTotal', **dash: str) -> Path:
-	"""Resolve a count-output path and create missing parent directories.
+def makePathFilenameFolds[形PurePath: PurePath](mapShape: tuple[int, ...], path: 形PurePath, *, suffix: str = '.totalFolds') -> 形PurePath:
+	"""Name a file in `path` from the dimensions in `mapShape`.
 
 	(AI generated docstring)
 
-	You can use this function to choose an output filename from `pathLikeWrite` and computation
-	labels. Existing directories receive a filename from `makeFilenameCount`; `None` selects
-	the default directory from `getPathRootJobDEFAULT`.
-
-	Path Interpretation
-	-------------------
-	Only an existing directory is treated as a directory. A nonexistent directory-like path is
-	treated as a filename. An existing absolute file is returned at its existing location.
-	This function does not test file-write permissions.
+	You can use this function to locate the count or the album of a map. The filename is the letter
+	`'p'` followed by the dimension lengths joined with `'x'`, followed by `suffix`, such as
+	`'p2x3.totalFolds'`. This function preserves the supplied order of the dimensions; this function
+	does not sort or validate dimensions, and this function does not read or change the filesystem.
 
 	Parameters
 	----------
-	pathLikeWrite : PathLike[str] | None = None
-		Existing directory, filename, or file path. A relative non-directory path is placed under
-		the default job directory. An absolute file path keeps its location. An existing relative
-		directory receives the generated filename and remains relative.
-	*underscore : str
-		Positional filename components.
-	suffix : str = ".countTotal"
-		Suffix used by the generated filename.
-	**dash : str
-		Named filename components joined as key-value pairs.
+	mapShape : tuple[int, ...]
+		Dimensions to encode, in their supplied order. An empty `mapShape` produces `'p'` followed by
+		`suffix`.
+	path : 形PurePath
+		Directory that holds the file. `PurePath()` produces a relative path that is only the filename.
+	suffix : str = '.totalFolds'
+		Suffix appended to the filename, such as `'.album'`.
+
+	Returns
+	-------
+	pathFilenameFolds : 形PurePath
+		`path` joined with the filename, with the type of `path`.
+
+	See Also
+	--------
+	`resolvePathLikeWrite`
+		Place the filename at the write destination that a caller requested.
+
+	Examples
+	--------
+	The module `mapFolding.algorithms.insertion` locates the album of `mapShape`.
+
+		```python
+		pathFilenameAlbum: Path = makePathFilenameFolds(mapShape, settingsPackage.pathAlbum, suffix='.album')
+		```
+	"""
+	return makePathFilename(path, 'p' + 'x'.join(map(str, mapShape)), suffix=suffix)
+
+def resolvePathLikeWrite(pathLikeWrite: PathLike[str], relativePath: PurePath) -> Path:
+	"""Resolve the write destination `pathLikeWrite` against the default job directory.
+
+	(AI generated docstring)
+
+	You can use this function to convert the output location that a caller requested into a file
+	path. An existing directory receives `relativePath`. Any other relative path is placed under the
+	directory from `getPathRootJobDEFAULT`. An absolute path that is not an existing directory keeps
+	its location.
+
+	Parameters
+	----------
+	pathLikeWrite : PathLike[str]
+		Existing directory, filename, or file path requested by the caller.
+	relativePath : PurePath
+		Name of the object to write, used only when `pathLikeWrite` is an existing directory. A
+		filename from `makePathFilename` or `makePathFilenameFolds` with `PurePath()` is suitable.
 
 	Returns
 	-------
 	pathFilename : Path
-		Resolved output path. Missing parent directories are created.
-	"""
-	filename: str = makeFilenameCount(*underscore, suffix=suffix, **dash)
-	if pathLikeWrite is None:
-		pathFilename: Path = getPathRootJobDEFAULT() / filename
-	else:
-		pathLikeWrite = Path(pathLikeWrite)
-		if pathLikeWrite.is_dir():
-			pathFilename = pathLikeWrite / filename
-		elif pathLikeWrite.is_file() and pathLikeWrite.is_absolute():
-			pathFilename = pathLikeWrite
-		else:
-			pathFilename = getPathRootJobDEFAULT() / pathLikeWrite
-		pathFilename.parent.mkdir(parents=True, exist_ok=True)
-	return pathFilename
+		Resolved output path. An existing relative directory produces a relative result.
 
-def makePathFilenameFolds(mapShape: tuple[int, ...] = (), pathLikeWrite: PathLike[str] | None = None, *, suffix: str = '.totalFolds') -> Path:
-	"""Resolve a folding-count output path named from `mapShape`.
+	Directory Creation
+	------------------
+	This function creates missing parent directories of `pathFilename`. A `pathLikeWrite` that is not
+	an existing directory also causes `getPathRootJobDEFAULT` to create the default job directory.
+	This function does not test file-write permissions.
 
-	(AI generated docstring)
-
-	You can use this function to combine the filename from `makeFilenameFolds` with an output
-	location. Path interpretation and directory creation follow `makePathFilenameCount`.
-
-	Parameters
-	----------
-	mapShape : tuple[int, ...] = ()
-		Dimensions encoded in the generated filename, preserving their order.
-	pathLikeWrite : PathLike[str] | None = None
-		Output file or existing directory. `None` selects the default job directory.
-	suffix : str = '.totalFolds'
-		Suffix appended to the generated filename.
-
-	Returns
-	-------
-	pathFilenameTotalFolds : Path
-		Output path after creating missing parent directories. An existing relative directory can
-		produce a relative result.
-
-	See Also
+	Examples
 	--------
-	`makePathFilenameCount`
-		Resolve an output path using general positional and named filename components.
+	The function `mapFolding.basecamp.countFolds` names the count from the map dimensions.
+
+		```python
+		pathFilenameTotalFolds = saveTotalFAILearly(resolvePathLikeWrite(pathLikeWrite
+			, makePathFilenameFolds(mapShape, PurePath(), suffix=suffix)))
+		```
 	"""
-	filename: str = makeFilenameFolds(mapShape, suffix)
-	return makePathFilenameCount(pathLikeWrite, filename.removesuffix(suffix), suffix=suffix)
+	pathLikeWrite = Path(pathLikeWrite)
+	if pathLikeWrite.is_dir():
+		pathFilename: Path = pathLikeWrite / relativePath
+	else:
+		pathFilename = getPathRootJobDEFAULT() / pathLikeWrite
+	pathFilename.parent.mkdir(parents=True, exist_ok=True)
+	return pathFilename
 
 #======== Confirm persistence ======================================================================
 
@@ -542,21 +513,6 @@ def writeDiagonal(lookupDiagonal: Mapping[int, int], pathFilename: Path, 次diag
 	-------
 	pathFilenameWritten : Path
 		The supplied path after writing completes.
-
-	Examples
-	--------
-	The runner in `easyRun/triangleSemiMake.py` appends a completed count from
-	`mapFolding.dataBaskets.StateMeanders.totalMeanders` to a diagonal file.
-
-		```python
-		from mapFolding.oeis import settingsOEIS
-
-		writeDiagonal(
-			{n: state.totalMeanders},
-			makePathFilenameCount(settingsOEIS.pathPackage / 'A400429', 'diagonal', str(次diagonal), suffix='.csv'),
-			次diagonal, append=True
-		)
-		```
 	"""
 	keysGroups, keysContents = tee(sorted(lookupDiagonal))
 	return iterableToCSV(
@@ -631,9 +587,9 @@ def writeTriangle(triangle: 形Triangle, pathFilename: Path, *, append: bool = F
 	and destination directory `pathWrite`.
 
 		```python
-		from mapFolding.kitFilesystem import writeTriangle
+		from mapFolding.kitFilesystem import makePathFilename, writeTriangle
 
-		writeTriangle(triangle, pathWrite / 'A287548ADDENDUM.csv')
+		writeTriangle(triangle, makePathFilename(pathWrite, 'A287548ADDENDUM', suffix='.csv'))
 		```
 	"""
 	return iterableToCSV(map(lambda n: (n, *triangle[n]), sorted(triangle)), pathFilename, append=append)  # ruff: ignore[unnecessary-map]

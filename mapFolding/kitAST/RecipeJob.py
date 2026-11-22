@@ -35,9 +35,9 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import shatterDataclass
-from mapFolding.kitAST.paths import getPathFilename
+from mapFolding.kitAST.paths import makePathFilename
 from mapFolding.kitAST.theSSOT import defaultMapFolding, lookupMapFoldingEstimates
-from mapFolding.kitFilesystem import makePathFilenameFolds
+from mapFolding.kitFilesystem import getPathRootJobDEFAULT, makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
@@ -211,7 +211,7 @@ class RecipeJobTheorem2:
 		pathRoot = pathRoot or self.pathPackage or PurePosixPath(Path.cwd())
 		identifierModule = filenameStem or raiseIfNone(self.identifierModule)
 		fileExtension = fileExtension or self.fileExtension
-		return PurePosixPath(getPathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension))
+		return PurePosixPath(makePathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension))
 
 	@property
 	def pathFilenameModule(self) -> PurePosixPath:
@@ -238,14 +238,14 @@ class RecipeJobTheorem2:
 
 		(AI generated docstring)
 
-		This method derives a result filename from `self.state.mapShape` with
-		`mapFolding.kitFilesystem.makePathFilenameFolds`. Missing module identifiers use the
+		This method derives a result filename in the default job directory from `self.state.mapShape`
+		with `mapFolding.kitFilesystem.makePathFilenameFolds`. Missing module identifiers use the
 		result
 		filename stem. Missing field metadata uses `mapFolding.kitAST.dataclasses.shatterDataclass`
 		when the target identifiers are truthy. Missing source syntax loads the generated
 		`mapFolding.synthesized.theorem2Numba` module.
 		"""
-		pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(self.state.mapShape))
+		pathFilenameTotalFolds = makePathFilenameFolds(self.state.mapShape, PurePosixPath(getPathRootJobDEFAULT()))
 
 		if self.pathFilenameTotalFolds is None:
 			self.pathFilenameTotalFolds = pathFilenameTotalFolds
@@ -297,7 +297,7 @@ def fromMapShape(mapShape: tuple[形TotalLeaves, ...], **keywordArguments: Any) 
 	state: StateMapFolding = transitionOnGroupsOfFolds(StateMapFolding(mapShape))
 	totalFoldsEstimated: int = getTotalFoldsKnown(state.mapShape) or lookupMapFoldingEstimates.get(state.mapShape, 0)
 	pathModule = PurePosixPath(settingsPackage.pathPackage, 'jobs')
-	pathFilenameTotalFolds = PurePosixPath(makePathFilenameFolds(state.mapShape, pathModule))
+	pathFilenameTotalFolds = makePathFilenameFolds(state.mapShape, pathModule)
 	return RecipeJobTheorem2(state, pathModule=pathModule, pathFilenameTotalFolds=pathFilenameTotalFolds
 		, totalFoldsEstimated=totalFoldsEstimated, totalFoldsMultiplier=state.totalLeaves, **keywordArguments)
 
