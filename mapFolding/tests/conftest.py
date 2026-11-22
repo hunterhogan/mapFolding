@@ -11,7 +11,7 @@ from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
 from mapFolding.kitFilesystem import getDataFrameFoldings, makePathFilenameFolds, readAlbum, writeAlbum, writeText
 from mapFolding.oeis import getMetadata, getTriangle, getValuesKnown
 from mapFolding.oeis._beDRY import formatOEISid
-from mapFolding.oeis._oeisdata import makePathFilename_bFile
+from mapFolding.oeis._kitFilesystem import makePathFilename_bFile
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from numba import get_num_threads, set_num_threads
