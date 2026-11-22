@@ -35,7 +35,7 @@ from hunterMakesPy.dataStructures import autoDecodingRLE
 from mapFolding.dataBaskets import StateMapFolding
 from mapFolding.kitAST import IfThis
 from mapFolding.kitAST.dataclasses import shatterDataclass
-from mapFolding.kitAST.paths import makePathFilename
+from mapFolding.kitAST.paths import makePathFilenameModule
 from mapFolding.kitAST.theSSOT import defaultMapFolding, lookupMapFoldingEstimates
 from mapFolding.kitFilesystem import getPathRootJobDEFAULT, makePathFilenameFolds
 from mapFolding.oeis import getTotalFoldsKnown
@@ -188,7 +188,7 @@ class RecipeJobTheorem2:
 
 		(AI generated docstring)
 
-		This method builds a path using `mapFolding.kitAST.paths.getPathFilename`. Falsy explicit
+		This method builds a path using `mapFolding.kitAST.paths.makePathFilenameModule`. Falsy explicit
 		components fall back to recipe values. The root falls back to the current working directory
 		when `self.pathPackage` is also falsy.
 
@@ -211,7 +211,7 @@ class RecipeJobTheorem2:
 		pathRoot = pathRoot or self.pathPackage or PurePosixPath(Path.cwd())
 		identifierModule = filenameStem or raiseIfNone(self.identifierModule)
 		fileExtension = fileExtension or self.fileExtension
-		return PurePosixPath(makePathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension))
+		return PurePosixPath(makePathFilenameModule(pathRoot, logicalPathInfix, identifierModule, fileExtension))
 
 	@property
 	def pathFilenameModule(self) -> PurePosixPath:
