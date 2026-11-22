@@ -10,8 +10,8 @@ from astToolkit.filesystem import write_astModule
 from humpy_cytoolz import groupby as toolz_groupby
 from itertools import starmap
 from mapFolding.kitAST import IngredientsModule
-from mapFolding.kitAST.oeisIDByFormula import makeIngredientsOEISid
-from mapFolding.kitAST.oeisTests import (
+from mapFolding.kitAST.oeis.oeisIDByFormula import makeIngredientsOEISid
+from mapFolding.kitAST.oeis.oeisTests import (
 	makeFormulaParameters, makeReferences, makeRelationParameters, makeTestsByFormula, makeTestsTriangle, updateSamplesOEIS)
 from mapFolding.kitAST.paths import makePathFilenameModule
 from mapFolding.oeis import settingsOEIS
@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding.kitAST.oeisTests import 形ParameterFormula, 形ParameterRelation
+	from mapFolding.kitAST.oeis.oeisTests import 形ParameterFormula, 形ParameterRelation
 	from mapFolding.oeis import OEISid
 	from sympy import Expr
 	from sympy.logic.boolalg import Boolean

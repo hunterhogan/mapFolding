@@ -438,7 +438,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
 
     See Also
     --------
-    `mapFolding.kitAST.oeisModules.makeModulesOEIS`
+    `mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS`
         Write sequence functions, their tests, and reference samples.
     `makeSymbolicFormula`
         Build a function for a formula with sequence indices already resolved.

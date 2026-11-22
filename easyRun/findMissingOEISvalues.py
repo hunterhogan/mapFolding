@@ -3,7 +3,7 @@ from __future__ import annotations
 from ast import fix_missing_locations
 from astToolkit import Make
 from mapFolding.kitAST import IngredientsModule
-from mapFolding.kitAST.oeisIDByFormula import makeSymbolicFormula
+from mapFolding.kitAST.oeis.oeisIDByFormula import makeSymbolicFormula
 from mapFolding.oeis import getMetadata, updateValuesKnown
 from mapFolding.oeis._symbolic import getMissingFormulas
 from operator import itemgetter
