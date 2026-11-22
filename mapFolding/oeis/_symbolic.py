@@ -8,7 +8,7 @@ from mapFolding.dataStructures import locateIndex, locateRow
 from mapFolding.oeis._metadata import dictionaryTriangle, getMetadata, getMetadataTriangle, getTriangle, getValuesKnown
 from mapFolding.oeis._symbolicRelations import boxOfRelations
 from mapFolding.oeis._theSSOT import settingsOEIS
-from mapFolding.theTypes import OEISid
+from mapFolding.oeis._theTypes import OEISid
 from operator import attrgetter, is_not, itemgetter, methodcaller
 from sympy import (
 	And, Basic, ceiling, Dummy, Eq, Equality, Expr, FiniteSet, floor, fraction, Ge, Integer, Le, Mod, Piecewise, piecewise_fold, Poly, roots,

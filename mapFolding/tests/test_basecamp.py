@@ -28,7 +28,8 @@ import pytest
 if TYPE_CHECKING:
 	from collections.abc import Callable
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import Folding, OEISid
+	from mapFolding.oeis import OEISid
+	from mapFolding.theTypes import Folding
 
 @pytest.mark.parametrize('oeisID, n, flow', tuple(chain(
 	CartesianProduct(('A000136',), (2, 3, 12), (boxOfFlowsNumba := ('numba', 'theorem2Numba', 'daoOfMapFoldingNumba')))

@@ -28,7 +28,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from typing import Literal
 
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 
 type Side = Literal['left', 'right']
 

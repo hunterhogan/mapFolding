@@ -45,7 +45,7 @@ import time
 
 if TYPE_CHECKING:
 	from collections.abc import Sequence
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis._theTypes import OEISid
 	from typing import Literal, LiteralString
 
 def getTotalFoldsKnown(mapShape: tuple[int, ...]) -> int | None:

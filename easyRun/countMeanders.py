@@ -13,7 +13,7 @@ import warnings
 
 if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMeanders
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 	from os import PathLike
 	from typing import LiteralString
 

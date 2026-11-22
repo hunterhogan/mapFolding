@@ -49,8 +49,8 @@ import re as regex
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
+	from mapFolding.oeis import OEISid
 	from mapFolding.oeis._symbolicRelations import 形Relation
-	from mapFolding.theTypes import OEISid
 	from pathlib import Path
 	from sympy.logic.boolalg import Boolean
 	import ast
@@ -204,7 +204,7 @@ def makeTestsByFormula(pathFilename: Path, boxOfParameters: tuple[形ParameterFo
 	ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'byFormula')
 	ingredientsFunction.imports.addImportFrom_asStr('mapFolding.tests', 'assertEqualTo')
 	ingredientsFunction.imports.addImportFrom_asStr('mapFolding.tests.dataSamples.oeis', 'lookupValues')
-	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('mapFolding.theTypes', 'OEISid')
+	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('mapFolding.oeis', 'OEISid')
 	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('typing', 'LiteralString')
 	ingredientsFunction.imports.addImport_asStr('pytest')
 	with pathFilename.open('w', encoding='utf-8', newline='\n') as stream:

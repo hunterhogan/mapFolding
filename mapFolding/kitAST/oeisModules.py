@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding.kitAST.oeisTests import 形ParameterFormula, 形ParameterRelation
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 	from sympy import Expr
 	from sympy.logic.boolalg import Boolean
 

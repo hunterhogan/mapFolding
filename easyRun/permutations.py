@@ -9,7 +9,7 @@ import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 	from os import PathLike
 	from typing import LiteralString
 

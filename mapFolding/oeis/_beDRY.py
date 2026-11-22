@@ -9,7 +9,7 @@ from typing import cast as ILiterallyPromiseLiteralLiterallyMeansLiteral, Litera
 
 if TYPE_CHECKING:
 	from collections.abc import Mapping, Sequence
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis._theTypes import OEISid
 
 def format_bFile(sequence: Mapping[int, int]) -> str:
 	"""Format `sequence` as b-file records in ascending index order.

@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis._theTypes import OEISid
 	from pathlib import PurePosixPath
 
 def makePathFilename_bFile[形PurePath: PurePath](oeisID: OEISid, path_oeisdata: 形PurePath) -> 形PurePath:

@@ -13,7 +13,7 @@ import runpy
 
 if TYPE_CHECKING:
 	from mapFolding.kitAST.RecipeJob import RecipeJobTheorem2
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 
 @pytest.mark.parametrize('useNumbaProgressBar', (False, True))
 @pytest.mark.parametrize('job, oeisID, n', (pytest.param((2, 4), 'A001415', 4, id='p2x4-A001415-4'),), indirect=['job'])

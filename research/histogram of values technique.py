@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 	from typing import Literal
 
 from collections import Counter

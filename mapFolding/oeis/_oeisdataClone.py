@@ -23,7 +23,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Mapping, Sequence
 	from dulwich.objects import ObjectID
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis._theTypes import OEISid
 
 def 工repo(path_oeisdata: Path | None = None) -> Repo:
 	path_oeisdata = path_oeisdata or settingsOEIS.pathClone

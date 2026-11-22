@@ -15,7 +15,8 @@ import pytest
 
 if TYPE_CHECKING:
 	from hunterMakesPy import CallableFunction
-	from mapFolding.theTypes import OEISid, 形Triangle
+	from mapFolding.oeis import OEISid
+	from mapFolding.theTypes import 形Triangle
 
 @pytest.mark.parametrize('oeisID, 次A005315of, x, n', tuple(chain(
 	zip(repeat('A005315'), range(12), range(0, 24, 2), range(12))

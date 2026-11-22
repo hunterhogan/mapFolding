@@ -16,7 +16,8 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Mapping
-	from mapFolding.theTypes import OEISid, 形Triangle
+	from mapFolding.oeis._theTypes import OEISid
+	from mapFolding.theTypes import 形Triangle
 	from pathlib import Path
 	from typing import LiteralString
 

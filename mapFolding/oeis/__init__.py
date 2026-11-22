@@ -47,6 +47,10 @@ Variables
 	settingsOEIS
 		Access OEIS package settings, paths, sequence identifiers, and symbolic configuration.
 
+Types
+	OEISid
+		Identify an integer sequence with an OEIS label.
+
 Modules
 -------
 byFormula
@@ -56,6 +60,7 @@ from __future__ import annotations
 
 from mapFolding.oeis._beDRY import format_bFile as format_bFile
 from mapFolding.oeis._theSSOT import settingsOEIS as settingsOEIS
+from mapFolding.oeis._theTypes import OEISid as OEISid
 
 # isort: split
 from mapFolding.oeis._metadata import (

@@ -27,7 +27,8 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Iterator
-	from mapFolding.theTypes import Folding, OEISid, 形Triangle
+	from mapFolding.oeis import OEISid
+	from mapFolding.theTypes import Folding, 形Triangle
 	from numpy.typing import NDArray
 
 @pytest.fixture

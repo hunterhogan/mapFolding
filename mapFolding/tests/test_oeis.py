@@ -20,7 +20,8 @@ import re as regex
 if TYPE_CHECKING:
 	from _pytest.capture import CaptureResult
 	from collections.abc import Mapping
-	from mapFolding.theTypes import OEISid, 形Triangle
+	from mapFolding.oeis import OEISid
+	from mapFolding.theTypes import 形Triangle
 	from typing import LiteralString
 
 @pytest.mark.parametrize('oeisID, n, f', tuple(chain(
