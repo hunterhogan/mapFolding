@@ -11,7 +11,7 @@ import dataclasses
 import socket
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis._theTypes import OEISid
 	from sympy import Set
 	from sympy.core.function import AppliedUndef
 	from typing import LiteralString

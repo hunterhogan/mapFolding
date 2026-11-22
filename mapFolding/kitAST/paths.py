@@ -14,7 +14,7 @@ Functions
 		Assemble a dotted logical module path from package and module components.
 	getModule
 		Parse a resolved logical module path into an `ast.Module`.
-	getPathFilename
+	makePathFilenameModule
 		Construct a module filename from logical path components.
 """
 from __future__ import annotations

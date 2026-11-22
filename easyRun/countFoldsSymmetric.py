@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 from mapFolding.basecamp import countFoldsSymmetric
-from mapFolding.oeis import makeMapShape, printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import makeMapShape, printEasyRunBenchmark
 from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 	from os import PathLike
 
 if __name__ == '__main__':

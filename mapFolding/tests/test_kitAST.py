@@ -11,7 +11,7 @@ from collections import Counter
 from mapFolding.kitAST import (
 	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, LedgerOfImports, removeFunctionDef, renameFunctionDef,
 	renameName)
-from mapFolding.kitAST.paths import getLogicalPath, makePathFilename
+from mapFolding.kitAST.paths import getLogicalPath, makePathFilenameModule
 from mapFolding.tests import assertEqualTo
 from mapFolding.tests.dataSamples.sourcesPython import sourceFunctionsChicken, sourceImportsTopLevel
 from pathlib import PurePath
@@ -136,7 +136,7 @@ def test_getLogicalPath(identifierPackage: str | None, logicalPathInfix: str | N
 	pytest.param(PurePath('coop'), None, 'jobNumba', '.pyi', PurePath('coop/jobNumba.pyi'), id='rootStub'),
 ))
 def test_getPathFilename(pathRoot: PurePath | None, logicalPathInfix: str | None, identifierModule: str, fileExtension: str, expected: PurePath) -> None:
-	assertEqualTo(makePathFilename(pathRoot, logicalPathInfix, identifierModule, fileExtension), expected, makePathFilename.__name__
+	assertEqualTo(makePathFilenameModule(pathRoot, logicalPathInfix, identifierModule, fileExtension), expected, makePathFilenameModule.__name__
 		, pathRoot, logicalPathInfix, identifierModule, fileExtension)
 
 @pytest.mark.parametrize('predicate, source, expected', (

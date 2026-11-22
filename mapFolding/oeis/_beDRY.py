@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from functools import partial
 from humpy_cytoolz import compose, groupby as toolz_groupby, take, valmap
-from hunterMakesPy import ansiColor, ansiColorReset, errorL33T
+from hunterMakesPy import errorL33T
 from itertools import chain, filterfalse, repeat
 from operator import itemgetter, methodcaller
 from typing import cast as ILiterallyPromiseLiteralLiterallyMeansLiteral, LiteralString, TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Mapping, Sequence
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis._theTypes import OEISid
 
 def format_bFile(sequence: Mapping[int, int]) -> str:
 	"""Format `sequence` as b-file records in ascending index order.
@@ -30,15 +30,6 @@ def format_bFile(sequence: Mapping[int, int]) -> str:
 		Sorted b-file records, or an empty string when no terms are supplied.
 	"""
 	return ''.join(map(lambda term: f"{term[0]} {term[1]}\n", sorted(sequence.items())))  # ruff: ignore[unnecessary-map]
-
-def formatBenchmarkRatio(known: int, computed: int, ratio: int) -> str:
-	formatted: str = ''
-	if ratio:
-		formatted = '-'
-		if computed:
-			quotient: float = known / computed
-			formatted = f"{(ansiColor.YellowOnRed, ansiColor.GreenOnBlack)[quotient.is_integer()]}{quotient:.{ratio}f}{ansiColorReset}"
-	return formatted
 
 def parse_bFile(oeisData: str) -> dict[int, int]:
 	"""Parse OEIS b-file text into a dictionary of sequence indices and values.

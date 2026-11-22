@@ -50,8 +50,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from mapFolding.oeis import OEISid
     from mapFolding.oeis._dataBaskets import MetadataOEISid
-    from mapFolding.theTypes import OEISid
     from sympy import Basic, Expr
     from sympy.logic.boolalg import Boolean
     import ast
@@ -438,7 +438,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
 
     See Also
     --------
-    `mapFolding.kitAST.oeisModules.makeModulesOEIS`
+    `mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS`
         Write sequence functions, their tests, and reference samples.
     `makeSymbolicFormula`
         Build a function for a formula with sequence indices already resolved.

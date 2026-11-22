@@ -8,7 +8,7 @@ from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeT
 from mapFolding.kitFilesystem import readText, writeText
 from mapFolding.oeis._beDRY import format_bFile, formatOEISid, formatOEISname, makeValuesKnown, parse_bFile, parseEntry, parseOffset
 from mapFolding.oeis._dataBaskets import MetadataOEISid, MetadataOEISidTriangle
-from mapFolding.oeis._oeisdata import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
+from mapFolding.oeis._kitFilesystem import filterEntryAbsent, makePathFilename_bFile, makePathFilenameEntry
 from mapFolding.oeis._theSSOT import settingsOEIS
 from operator import add, methodcaller
 from typing import TYPE_CHECKING
@@ -16,7 +16,8 @@ import sys
 
 if TYPE_CHECKING:
 	from collections.abc import Mapping
-	from mapFolding.theTypes import OEISid, 形Triangle
+	from mapFolding.oeis._theTypes import OEISid
+	from mapFolding.theTypes import 形Triangle
 	from pathlib import Path
 	from typing import LiteralString
 

@@ -19,8 +19,6 @@ Domain labels
 		Identify a leaf.
 	LeafSpace
 		Represent a pinned leaf index or possible leaf choices.
-	OEISid
-		Identify an integer sequence.
 	Pile
 		Identify a pile position.
 	PinnedLeaves
@@ -117,16 +115,6 @@ the annotation does not restrict the integer range.
 
 type Pile = int
 """Location of a `Leaf` in a `Folding`."""
-
-type OEISid = LiteralString
-"""Identify an integer sequence with an OEIS label.
-
-(AI generated docstring)
-
-This alias uses `typing.LiteralString` for sequence identifiers such as `'A000682'`.
-The annotation does not validate identifier syntax or establish that a sequence is registered
-with the package.
-"""
 
 type 形Triangle = Mapping[int, Sequence[int]]
 """Describe integer groups indexed by group key.

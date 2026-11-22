@@ -2,14 +2,15 @@
 from __future__ import annotations
 
 from mapFolding.basecamp import enumerateSequences
-from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader, Z0Z_oeisName
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import printEasyRunBenchmark, Z0Z_oeisName
 from pprint import pprint
 from typing import TYPE_CHECKING
 import time
 
 if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 	from os import PathLike
 	from typing import LiteralString
 

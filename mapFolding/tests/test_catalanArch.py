@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import OEISid
+	from mapFolding.oeis import OEISid
 
 @pytest.mark.parametrize('oeisID', ('A287548',))
 @pytest.mark.parametrize('n', range(1, 16))

@@ -10,10 +10,10 @@ from astToolkit.filesystem import write_astModule
 from humpy_cytoolz import groupby as toolz_groupby
 from itertools import starmap
 from mapFolding.kitAST import IngredientsModule
-from mapFolding.kitAST.oeisIDByFormula import makeIngredientsOEISid
-from mapFolding.kitAST.oeisTests import (
+from mapFolding.kitAST.oeis.oeisIDByFormula import makeIngredientsOEISid
+from mapFolding.kitAST.oeis.oeisTests import (
 	makeFormulaParameters, makeReferences, makeRelationParameters, makeTestsByFormula, makeTestsTriangle, updateSamplesOEIS)
-from mapFolding.kitAST.paths import makePathFilename
+from mapFolding.kitAST.paths import makePathFilenameModule
 from mapFolding.oeis import settingsOEIS
 from mapFolding.oeis._symbolic import makeSolutionsSymbolic
 from mapFolding.theSSOT import settingsPackage
@@ -22,8 +22,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding.kitAST.oeisTests import 形ParameterFormula, 形ParameterRelation
-	from mapFolding.theTypes import OEISid
+	from mapFolding.kitAST.oeis.oeisTests import 形ParameterFormula, 形ParameterRelation
+	from mapFolding.oeis import OEISid
 	from sympy import Expr
 	from sympy.logic.boolalg import Boolean
 
@@ -65,11 +65,11 @@ def makeModulesOEIS(pathFilename: Path = settingsOEIS.pathPackage / 'byFormula.p
 	Existing destination files are overwritten with formatted generated source.
 	"""
 	if pathTests is None:
-		pathTests = Path(makePathFilename(logicalPathInfix='tests', identifierModule='test_byFormula'))
+		pathTests = Path(makePathFilenameModule(logicalPathInfix='tests', identifierModule='test_byFormula'))
 	if pathSamples is None:
-		pathSamples = Path(makePathFilename(logicalPathInfix='tests.dataSamples', identifierModule='oeis'))
+		pathSamples = Path(makePathFilenameModule(logicalPathInfix='tests.dataSamples', identifierModule='oeis'))
 	if pathTriangle is None:
-		pathTriangle = Path(makePathFilename(logicalPathInfix='tests', identifierModule='test_relationsTriangle'))
+		pathTriangle = Path(makePathFilenameModule(logicalPathInfix='tests', identifierModule='test_relationsTriangle'))
 	lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
 	ingredientsModule = IngredientsModule(list(starmap(makeIngredientsOEISid, sorted(lookupSolutions.items()))))
 	docstringModule: str = ('Compute a(n) for an OEIS ID by computing other OEIS IDs.\n\nThis is a generated file; edit'

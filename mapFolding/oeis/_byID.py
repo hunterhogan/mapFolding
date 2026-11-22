@@ -9,7 +9,8 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from mapFolding.oeis._dataBaskets import MetadataOEISid
-	from mapFolding.theTypes import OEISid, 形KeywordArgumentsCount
+	from mapFolding.oeis._theTypes import OEISid
+	from mapFolding.theTypes import 形KeywordArgumentsCount
 	from typing import LiteralString, Unpack
 
 def oeisIDfor_n(oeisID: OEISid, n: int, f: LiteralString | None = None, **keywordArguments: Unpack[形KeywordArgumentsCount]) -> int:

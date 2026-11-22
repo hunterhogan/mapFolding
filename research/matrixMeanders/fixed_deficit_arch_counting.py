@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from mapFolding.oeis import printEasyRunBenchmark, printEasyRunHeader
+from mapFolding.kitTerminal import printEasyRunHeader
+from mapFolding.oeis import printEasyRunBenchmark
 from tqdm import tqdm
 import time
 

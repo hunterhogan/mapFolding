@@ -13,8 +13,6 @@ dataclasses
 	Decompose state dataclasses and adapt field-based calls.
 linux
 	Prepare source, compile Linux jobs, and strip binaries.
-oeisIDByFormula
-	Generate sequence-formula source from the symbolic relations.
 paths
 	Resolve source module identifiers and output filenames.
 prefab
@@ -36,6 +34,8 @@ matrixMeanders
 	Generate matrix-meander counting variants.
 numba
 	Assemble compiler settings, decorators, and counting jobs.
+oeis
+	Generate sequence-formula modules, their tests, and their reference samples.
 
 Exports
 -------

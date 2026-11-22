@@ -27,8 +27,12 @@ Functions
 		openFileTemporary
 			Open a binary file with automatic cleanup.
 	Write
+		copyTexts
+			Copy existing text files to the same relative paths in another directory.
 		iterableToCSV
 			Write groups to CSV with optional appending.
+		removeDirectoriesEmpty
+			Remove each empty directory two levels below a root directory.
 		saveTotal
 			Save an integer with fallback output on failure.
 		writeAlbum
@@ -40,6 +44,10 @@ Functions
 		writeTriangle
 			Write sorted row numbers followed by row cells.
 	Read
+		directoryEmpty吗
+			Test whether a path is a directory that holds nothing.
+		filterPathAbsent
+			Select the items whose file is absent.
 		getDataFrameFoldings
 			Load bundled folding data for an elimination state.
 		readAlbum
@@ -63,10 +71,12 @@ Functions
 from __future__ import annotations
 
 from csv import reader as csv_reader, writer as csv_writer
+from humpy_cytoolz import compose
 from hunterMakesPy import errorL33T, oneIndexed
 from hunterMakesPy.kitFilesystem import writeStringToHere
-from itertools import repeat, tee
+from itertools import chain, filterfalse, repeat, tee
 from mapFolding.theSSOT import settingsPackage
+from more_itertools import consume
 from operator import itemgetter
 from pathlib import Path, PurePath, PurePosixPath
 from platformdirs import user_data_dir
@@ -77,7 +87,7 @@ import os
 
 if TYPE_CHECKING:
 	from _csv import Writer
-	from collections.abc import Iterable, Mapping
+	from collections.abc import Callable, Iterable, Mapping
 	from io import TextIOWrapper
 	from mapFolding.dataBaskets import StateElimination
 	from mapFolding.theTypes import Folding, 形Triangle
@@ -158,7 +168,7 @@ def makePathFilename[形PurePath: PurePath](path: 形PurePath, /, *underscore: s
 
 	Examples
 	--------
-	The module `mapFolding.oeis._oeisdata` names the sequence entry of an OEIS ID in an oeisdata tree.
+	The module `mapFolding.oeis._kitFilesystem` names the sequence entry of an OEIS ID in an oeisdata tree.
 
 		```python
 		makePathFilename(path_oeisdata / 'seq' / oeisID[0:4], oeisID, suffix='.seq')
@@ -366,6 +376,34 @@ def openFileTemporary() -> IO[bytes]:
 
 #======== Save =====================================================================================
 
+def copyTexts(boxOfRelativePath: Iterable[PurePath], pathSource: Path, pathDestination: Path) -> Path:
+	"""Copy each existing text file in `pathSource` to the same relative path in `pathDestination`.
+
+	(AI generated docstring)
+
+	You can use this function to copy a selection of files between two directory trees that share
+	one layout. A relative path whose file is absent from `pathSource` is skipped. `readText` and
+	`writeText` copy each file, so every file is UTF-8 text, missing parent directories are created
+	in `pathDestination`, and an existing file in `pathDestination` is replaced.
+
+	Parameters
+	----------
+	boxOfRelativePath : Iterable[PurePath]
+		Paths relative to both `pathSource` and `pathDestination`.
+	pathSource : Path
+		Directory that holds the files to copy.
+	pathDestination : Path
+		Directory that receives the copies.
+
+	Returns
+	-------
+	pathDestination : Path
+		The supplied directory after copying completes.
+	"""
+	boxOfRelativePath = tuple(filter(compose(Path.exists, pathSource.joinpath), boxOfRelativePath))
+	consume(map(writeText, map(compose(readText, pathSource.joinpath), boxOfRelativePath), map(pathDestination.joinpath, boxOfRelativePath), strict=True))
+	return pathDestination
+
 def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, append: bool = False) -> Path:
 	"""Write the records in `boxOfBoxes` to `pathFilename`.
 
@@ -402,6 +440,27 @@ def iterableToCSV(boxOfBoxes: Iterable[Iterable[Any]], pathFilename: Path, *, ap
 		csvWriter: Writer = csv_writer(streamWrite)
 		csvWriter.writerows(boxOfBoxes)
 	return pathFilename
+
+def removeDirectoriesEmpty(pathRoot: Path) -> Path:
+	"""Remove each empty directory that is two levels below `pathRoot`, such as `files/A400` in a tree of b-files.
+
+	(AI generated docstring)
+
+	`Path.rmdir` removes only an empty directory, so a directory that holds any file stays. The
+	directories directly inside `pathRoot` stay, even when they hold nothing after the removal.
+
+	Parameters
+	----------
+	pathRoot : Path
+		Existing directory whose subdirectories hold the directories to remove.
+
+	Returns
+	-------
+	pathRoot : Path
+		The supplied directory after removal completes.
+	"""
+	consume(map(Path.rmdir, filter(directoryEmpty吗, chain.from_iterable(map(Path.iterdir, filter(Path.is_dir, pathRoot.iterdir()))))))
+	return pathRoot
 
 def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	"""Save `countTotal` with fallback file output and printed recovery output.
@@ -595,6 +654,45 @@ def writeTriangle(triangle: 形Triangle, pathFilename: Path, *, append: bool = F
 	return iterableToCSV(map(lambda n: (n, *triangle[n]), sorted(triangle)), pathFilename, append=append)  # ruff: ignore[unnecessary-map]
 
 #======== Read =====================================================================================
+
+def directoryEmpty吗(pathDirectory: Path) -> bool:
+	"""Test whether `pathDirectory` is a directory that holds nothing.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	pathDirectory : Path
+		Path to test. An absent path, or a path that is not a directory, is not an empty directory.
+
+	Returns
+	-------
+	empty : bool
+		`True` when `pathDirectory` is a directory with no entries.
+	"""
+	return pathDirectory.is_dir() and next(pathDirectory.iterdir(), None) is None
+
+def filterPathAbsent[形Item](boxOfItem: Iterable[形Item], makePathFilenameOfItem: Callable[[形Item], Path]) -> tuple[形Item, ...]:
+	"""Select the items in `boxOfItem` whose file is absent.
+
+	(AI generated docstring)
+
+	You can use this function to find the work that remains when each item has a file that records
+	it. The caller owns the knowledge of where each file belongs; this function only tests existence.
+
+	Parameters
+	----------
+	boxOfItem : Iterable[形Item]
+		Items to test, in the order to preserve.
+	makePathFilenameOfItem : Callable[[形Item], Path]
+		Makes the path of the file that each item should have.
+
+	Returns
+	-------
+	boxOfItemAbsent : tuple[形Item, ...]
+		The items whose file does not exist, in the supplied order.
+	"""
+	return (*filterfalse(compose(Path.exists, makePathFilenameOfItem), boxOfItem),)
 
 def getDataFrameFoldings(state: StateElimination) -> DataFrame:
 	"""Load bundled array-folding data for the dimension count in `state`.

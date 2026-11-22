@@ -23,7 +23,7 @@ from mapFolding.kitAST import IfThis, LedgerOfImports
 from mapFolding.kitAST.mapFolding._count import makeTheorem2, makeTheorem2Numba, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
-from mapFolding.kitAST.paths import getModule, makePathFilename
+from mapFolding.kitAST.paths import getModule, makePathFilenameModule
 from mapFolding.kitAST.theSSOT import defaultMapFolding, defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
@@ -175,7 +175,7 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 		).visit(FunctionDef_filterAsymmetricFolds)
 	astModule.body = [*imports.makeList_ast(), FunctionDef_filterAsymmetricFolds, *astModule.body]
 
-	pathFilename: PurePath = makePathFilename(pathRoot, logicalPathInfix, 名Module)
+	pathFilename: PurePath = makePathFilenameModule(pathRoot, logicalPathInfix, 名Module)
 
 	write_astModule(astModule, pathFilename, identifierPackage=名Package)
 

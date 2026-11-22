@@ -37,7 +37,8 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy import ConcurrencyLimit
-	from mapFolding.theTypes import Folding, OEISid
+	from mapFolding.oeis import OEISid
+	from mapFolding.theTypes import Folding
 	from os import PathLike
 	from pathlib import Path
 	from typing import Literal, LiteralString
