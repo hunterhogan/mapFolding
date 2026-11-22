@@ -69,7 +69,7 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 		)
 		```
 	"""
-	return '.'.join(filter(None, [identifierPackage, logicalPathInfix, *identifierModule]))
+	return '.'.join(filter(None, [identifierPackage, logicalPathInfix, *identifierModule]))  # TODO pyrefly
 
 def getModule(
 	identifierModule: str | None = None
