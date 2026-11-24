@@ -55,31 +55,7 @@ dependencies = [
   "tqdm",
   "typing_extensions>=4.16.0",
 ]
-optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'"], development = [
-  "gmpy2-stubs",
-  "google-api-python-client-stubs>=1.35.0",
-  "google-auth-oauthlib-stubs>=1.2.0",
-  "ipykernel",
-  "ipywidgets",
-  "matplotlib",
-  "memray; sys_platform == 'linux'",
-  "networkx",
-  "py-spy",
-  "pyarrow-stubs",
-  "pytest-cov",
-  "setuptools",
-  "types-tqdm",
-], oeisdata = ["dulwich>=1.2.21"], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"], testing = [
-  "ortools; python_version < '3.15'",
-  "pandas",
-  "dulwich",
-  "hypothesis",
-  "polars>=1.44.2",
-  "pyarrow",
-  "pytest-env",
-  "pytest-xdist",
-  "pytest>=9.0",
-] }
+optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'"], oeisdata = ["dulwich>=1.2.21"], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"] }
 
 [project.urls]
 Context7 = "https://context7.com/hunterhogan/mapfolding"
@@ -89,6 +65,10 @@ Download = "https://pypi.org/project/mapFolding"
 Homepage = "https://github.com/hunterhogan/mapFolding"
 Issues = "https://github.com/hunterhogan/mapFolding/issues"
 Repository = "https://github.com/hunterhogan/mapFolding.git"
+
+[dependency-groups]
+development = ["gmpy2-stubs", "google-api-python-client-stubs>=1.35.0", "google-auth-oauthlib-stubs>=1.2.0", "ipykernel", "ipywidgets", "matplotlib", "memray; sys_platform == 'linux'", "networkx", "py-spy", "pyarrow-stubs", "pytest-cov", "setuptools", "types-tqdm"]
+testing = ["dulwich", "hypothesis", "ortools; python_version < '3.15'", "pandas", "polars>=1.44.2", "pyarrow", "pytest>=9.0", "pytest-env", "pytest-xdist"]
 
 [build-system]
 requires = ["setuptools"]
