@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import cache, partial
 from humpy_cytoolz import compose_left, cons, dissoc, get_in, merge
 from hunterMakesPy import errorL33T
-from itertools import count, filterfalse, takewhile
+from itertools import chain, count, filterfalse, islice, repeat, takewhile
 from mapFolding.dataStructures import flattenTriangle, makeLookupDiagonal, makeTriangle
 from mapFolding.kitFilesystem import readText, writeText
 from mapFolding.oeis._beDRY import format_bFile, formatOEISid, formatOEISname, makeValuesKnown, parse_bFile, parseEntry, parseOffset
@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Mapping
+	from collections.abc import Iterator, Mapping
 	from mapFolding.oeis._theTypes import OEISid
 	from mapFolding.theTypes import 形Triangle
 	from pathlib import Path
@@ -171,6 +171,38 @@ def getTriangleDiagonal(oeisID: OEISid, 次diagonal: int) -> dict[int, int]:
 	"""
 	return makeLookupDiagonal(getTriangle(oeisID), 次diagonal, getMetadataTriangle(oeisID)['rowLength'])
 
+def getTriangleCells(oeisID: OEISid) -> dict[tuple[int, int], int]:
+	"""Retrieve the known cells of the triangle `oeisID`, keyed by row and column.
+
+	(AI generated docstring)
+
+	You can use this function to read a cell T(n, k) with the row number and column number of the
+	OEIS entry, which are also the arguments of a symbolic triangle cell, such as `A400429(n, k)`.
+	A cell is absent when its value is unknown or when the cell lies outside the triangle.
+
+	Parameters
+	----------
+	oeisID : OEISid
+		Identifier of a triangle in the package metadata. Lookup ignores letter case and surrounding
+		whitespace.
+
+	Returns
+	-------
+	cells : dict[tuple[int, int], int]
+		Each known value keyed by `(row, column)`. The dictionary is newly allocated, so later updates
+		to the known values do not change it.
+
+	See Also
+	--------
+	`getTriangle`
+		Obtain the consecutive known values grouped into rows that start at the first column.
+	"""
+	metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+	lookupCoordinates: dict[int, tuple[int, int]] = dict(zip(count(metadata['offset'])
+		, islice(chain.from_iterable(map(partial(_makeCoordinatesRow, metadata), count(metadata['rowStart'])))
+			, max(metadata['valuesKnown']) + 1 - metadata['offset'])))
+	return dict(zip(map(lookupCoordinates.__getitem__, metadata['valuesKnown']), metadata['valuesKnown'].values(), strict=True))
+
 def updateValuesKnown(oeisID: OEISid, sequence: Mapping[int, int], pathTerms: Path = settingsOEIS.pathTerms) -> Path:
 	"""Add terms absent from the known values of `oeisID` to the terms b-file and update shared known values.
 
@@ -284,6 +316,9 @@ lookupCommonNames: dict[OEISid, tuple[LiteralString, ...]] = {
 	'A227167': ('meandering curves',),
 }
 
+def _makeCoordinatesRow(metadata: MetadataOEISidTriangle, row: int) -> Iterator[tuple[int, int]]:
+	return zip(repeat(row), range(metadata['columnStart'], metadata['columnStart'] + metadata['rowLength'](row)))
+
 def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
 	lookupField: dict[str, list[str]] = parseEntry(readText(makePathFilenameEntry(oeisID, settingsOEIS.pathSnapshot)))
 	contents: str = readText(makePathFilename_bFile(oeisID, settingsOEIS.pathSnapshot), default='')
@@ -333,6 +368,8 @@ dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
 }
 """Metadata, including the row layout, for every implemented triangle."""
 dictionaryOEIS.update(dictionaryTriangle)
+boxOfOEISidTriangle: tuple[OEISid, ...] = (*dictionaryTriangle,)
+"""Every implemented triangle: each OEIS ID whose values `getTriangleCells` keys by row and column."""
 
 def _makeLookupOEISid(oeisID: OEISid) -> dict[str, OEISid]:
 	return dict.fromkeys(map(formatOEISname, cons(oeisID, dictionaryOEIS[oeisID]['boxOfCommonNames'])), oeisID)

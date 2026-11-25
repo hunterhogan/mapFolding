@@ -5,7 +5,8 @@ from functools import cache, partial
 from humpy_cytoolz import compose_left, flip, juxt, pluck, unique
 from itertools import chain, compress, filterfalse
 from mapFolding.dataStructures import locateIndex, locateRow
-from mapFolding.oeis._metadata import dictionaryTriangle, getMetadata, getMetadataTriangle, getTriangle, getValuesKnown
+from mapFolding.oeis._metadata import (
+	dictionaryTriangle, getMetadata, getMetadataTriangle, getTriangle, getTriangleCells, getValuesKnown)
 from mapFolding.oeis._symbolicRelations import boxOfRelations
 from mapFolding.oeis._theSSOT import settingsOEIS
 from mapFolding.oeis._theTypes import OEISid
@@ -16,7 +17,7 @@ from sympy import (
 from sympy.core.function import AppliedUndef
 from sympy.utilities.misc import as_int
 from tqdm.auto import tqdm
-from typing import TYPE_CHECKING
+from typing import overload, TYPE_CHECKING
 import re as regex
 
 if TYPE_CHECKING:
@@ -66,21 +67,65 @@ def getFlatCall(ImaTriangleOrSomething: AppliedUndef) -> Expr:
 	return cell
 
 def getKnownValue(expression: AppliedUndef) -> Expr:
-	"""Substitute a known sequence value while retaining an unknown symbolic value.
+	"""Substitute a known sequence value or triangle cell while retaining an unknown symbolic value.
 
 	(AI generated docstring)
 	"""
 	match expression.args:
 		case (Integer(p=index),):
 			value: Expr = sympify(getValuesKnown(getOEISid(expression)).get(index, expression))
+		case (Integer(p=row), Integer(p=column)):
+			value = sympify(getTriangleCells(getOEISid(expression)).get((row, column), expression))
 		case _:
 			value = expression
 	return value
 
+@overload
+def substituteValuesKnown(expression: Boolean) -> Boolean: ...
+@overload
+def substituteValuesKnown(expression: Expr) -> Expr: ...
+@overload
+def substituteValuesKnown(expression: Basic) -> Basic: ...
+def substituteValuesKnown(expression: Basic) -> Basic:
+	"""Substitute the known value of each sequence value and triangle cell in `expression`.
+
+	(AI generated docstring)
+
+	You can use this function to evaluate a symbolic expression of the sequences in
+	`mapFolding.oeis.settingsOEIS.lookupSymbolic`, such as `A007822(6) - A223096(5)`. A sequence
+	value with an integer index and a triangle cell with an integer row and an integer column are
+	replaced when the value is known. Every other sequence value and triangle cell, including a cell
+	outside its triangle, remains symbolic.
+
+	Parameters
+	----------
+	expression : Basic
+		Symbolic expression or relation of sequence values and triangle cells.
+
+	Returns
+	-------
+	expressionKnown : Basic
+		`expression` with each known value substituted. The result contains no sequence value or
+		triangle cell when every value in `expression` is known.
+
+	See Also
+	--------
+	`mapFolding.oeis.getValuesKnown`
+		Obtain the known values of one sequence.
+	`mapFolding.oeis.getTriangleCells`
+		Obtain the known cells of one triangle.
+	"""
+	boxOfCalls: set[AppliedUndef] = expression.atoms(AppliedUndef)
+	return expression.xreplace(dict(zip(boxOfCalls, map(getKnownValue, boxOfCalls), strict=True)))
+
 def makeTermLast(summand: Expr, *limits: Tuple) -> Expr:
 	return summand.subs(dict(map(itemgetter(0, 2), limits)))
 
-def makeEquationFlat[形Basic: Basic](equation: 形Basic) -> 形Basic:
+@overload
+def makeEquationFlat(equation: Boolean) -> Boolean: ...
+@overload
+def makeEquationFlat(equation: Basic) -> Basic: ...
+def makeEquationFlat(equation: Basic) -> Basic:
 	boxOfCalls: set[AppliedUndef] = equation.atoms(AppliedUndef)
 	return equation.xreplace(dict(zip(boxOfCalls, map(getFlatCall, boxOfCalls), strict=True)))
 
@@ -222,8 +267,7 @@ def getMissingFormula(equation: Boolean) -> tuple[OEISid, int, Expr] | None:
 
 	(AI generated docstring)
 	"""
-	boxOfCalls: set[AppliedUndef] = equation.atoms(AppliedUndef)
-	boxOfUnknown: set[AppliedUndef] = equation.xreplace(dict(zip(boxOfCalls, map(getKnownValue, boxOfCalls), strict=True))).atoms(AppliedUndef)
+	boxOfUnknown: set[AppliedUndef] = substituteValuesKnown(equation).atoms(AppliedUndef)
 	missing: tuple[OEISid, int, Expr] | None = None
 	if len(boxOfUnknown) == 1:
 		(wanted,) = boxOfUnknown

@@ -38,8 +38,7 @@ from functools import partial, reduce
 from humpy_cytoolz import compose, unique
 from itertools import compress, filterfalse, repeat
 from mapFolding.kitAST import IngredientsFunction
-from mapFolding.oeis import getMetadata, settingsOEIS
-from mapFolding.oeis._metadata import dictionaryTriangle, getMetadataTriangle
+from mapFolding.oeis import boxOfOEISidTriangle, getMetadata, settingsOEIS
 from operator import attrgetter, itemgetter, methodcaller
 from sympy import (
 	Add, And, ceiling, Equality, factorial, floor, fraction, GreaterThan, Integer, LessThan, Mod, Mul, Piecewise, Pow, Rational,
@@ -50,8 +49,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from mapFolding.oeis import OEISid
-    from mapFolding.oeis._dataBaskets import MetadataOEISid
+    from mapFolding.oeis import MetadataOEISid, OEISid
     from sympy import Basic, Expr
     from sympy.logic.boolalg import Boolean
     import ast
@@ -85,8 +83,8 @@ def make_ast_exprSymbolic(expression: Expr
     ----------
     expression : Expr
         A formula composed of SymPy integers, rationals, sums, products, powers, and
-        single-index sequence calls. Each sequence call must have an integer index and
-        use its OEIS ID as the function name.
+        single-index sequence calls registered in `settingsOEIS.lookupID`. Each sequence
+        call must have an integer index. `make_ast_exprInteger` represents any other form.
     make_astSequenceValue : Callable[[OEISid, ast.expr], ast.expr] = make_astGetValuesKnown
         Build the expression that reads one sequence value from the OEIS ID and the index.
 
@@ -113,8 +111,10 @@ def make_ast_exprSymbolic(expression: Expr
             ast_expr = Make.Mult.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
         case Pow():
             ast_expr = Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue))))
+        case AppliedUndef():
+            ast_expr = make_astSequenceValue(settingsOEIS.lookupID[expression.func], make_ast_exprInteger(expression.args[0]))
         case _:
-            ast_expr = make_astSequenceValue(expression.func.__name__, make_ast_exprInteger(expression.args[0]))
+            ast_expr = make_ast_exprInteger(expression)
     return ast_expr
 
 def makeSymbolicFormula(oeisID: OEISid, expression: Expr) -> IngredientsFunction:
@@ -261,8 +261,8 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
             ast_expr = reduce(addTerm, boxOfTerms, make_ast_exprInteger(termFirst))
         case Mul() if expression.could_extract_minus_sign():
             ast_expr = Make.UnaryOp(Make.USub(), make_ast_exprInteger(-expression))
-        case Mul() if expression.has(Mod) and expression.has(*map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
-            coefficient: Expr = Mul(*filterfalse(methodcaller('has', *map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle))
+        case Mul() if expression.has(Mod) and expression.has(*map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle)):
+            coefficient: Expr = Mul(*filterfalse(methodcaller('has', *map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle))
                 , expression.args))
             ast_expr = Make.And.join([make_ast_exprInteger(coefficient)
                 , Make.Mult.join(list(map(make_ast_exprInteger, expression.as_ordered_factors())))])
@@ -301,52 +301,38 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
             ast_expr = Make.Compare(make_ast_exprInteger(expression.lhs), [Make.Lt()], [make_ast_exprInteger(expression.rhs)])
         case And():
             ast_expr = Make.And.join(list(map(make_ast_exprInteger, expression.args)))
-        case AppliedUndef() if len(expression.args) == 2 and expression.func in tuple(map(settingsOEIS.lookupSymbolic.__getitem__, dictionaryTriangle)):
-            oeisID: OEISid = settingsOEIS.lookupID[expression.func]
-            ast_expr = Make.Subscript(Make.Subscript(Make.Call(Make.Name('getTriangle'), [Make.Constant(oeisID)])
-                , make_ast_exprInteger(expression.args[0]))
-                , Make.Sub.join([make_ast_exprInteger(expression.args[1]), Make.Constant(getMetadataTriangle(oeisID)['columnStart'])]))
+        case AppliedUndef() if len(expression.args) == 2 and expression.func in tuple(map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle)):
+            ast_expr = Make.Subscript(Make.Call(Make.Name('getTriangleCells'), [Make.Constant(settingsOEIS.lookupID[expression.func])])
+                , Make.Tuple(list(map(make_ast_exprInteger, expression.args))))
         case _:
             ast_expr = Make.Call(Make.Name(expression.func.__name__), list(map(make_ast_exprInteger, expression.args)))
 
     return ast_expr
 
+lookupOperator: dict[str, str] = {
+    'Add': 'add', 'FloorDiv': 'floordiv', 'Mod': 'mod', 'Mult': 'mul', 'Pow': 'pow', 'Sub': 'sub', 'USub': 'neg',
+}
+
 def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> ast.Call:
-    if NodeTourist(IfThis.isNameIdentifier(k.name), Then.extractIt).captureLastMatch(ast_expr) is None:
-        astCall: ast.Call = Make.Call(Make.Name('repeat'), [ast_expr, Make.Call(Make.Name('len'), [astCallRange])])
-    elif Be.Name(ast_expr) and ast_expr.id == k.name:
-        astCall = astCallRange
+    if IfThis.isNameIdentifier(k.name)(ast_expr):
+        astCall: ast.Call = astCallRange
+    elif NodeTourist(IfThis.isNameIdentifier(k.name), Then.extractIt).captureLastMatch(ast_expr) is None:
+        astCall = Make.Call(Make.Name('repeat'), [ast_expr])
     elif Be.BinOp(ast_expr):
-        identifier: str = type(ast_expr.op).__name__.lower()
-        if Be.Mult(ast_expr.op):
-            identifier = 'mul'
-        astCallLeft: ast.Call = _makeMapInteger(ast_expr.left, k, astCallRange)
-        astCallRight: ast.Call = _makeMapInteger(ast_expr.right, k, astCallRange)
-        if Be.Name(astCallLeft.func) and astCallLeft.func.id == 'repeat':
-            if Be.Name(astCallRight.func) and astCallRight.func.id == 'repeat':
-                astCall = Make.Call(Make.Name('repeat'), [ast_expr, Make.Call(Make.Name('len'), [astCallRange])])
-            else:
-                astCall = Make.Call(Make.Name('map'), [Make.Attribute(astCallLeft.args[0], f'__{identifier}__'), astCallRight])
-        elif Be.Name(astCallRight.func) and astCallRight.func.id == 'repeat':
-            astCall = Make.Call(Make.Name('map'), [Make.Attribute(astCallRight.args[0], f'__r{identifier}__'), astCallLeft])
-        elif Be.FloorDiv(ast_expr.op):
-            astCall = Make.Call(Make.Name('map'), [Make.Attribute(Make.Name('int'), '__floordiv__'), astCallLeft, astCallRight]
-                , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
-        else:
-            astCall = Make.Call(Make.Name('map'), [Make.Name(identifier), astCallLeft, astCallRight]
-                , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
+        astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__])
+            , *map(_makeMapInteger, [ast_expr.left, ast_expr.right], repeat(k), repeat(astCallRange))])
     elif Be.UnaryOp(ast_expr):
-        astCall = Make.Call(Make.Name('map'), [Make.Name('neg'), _makeMapInteger(ast_expr.operand, k, astCallRange)])
+        astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__])
+            , _makeMapInteger(ast_expr.operand, k, astCallRange)])
     elif Be.Subscript(ast_expr):
         astCall = Make.Call(Make.Name('map'), [Make.Name('getitem')
-            , _makeMapInteger(ast_expr.value, k, astCallRange), _makeMapInteger(ast_expr.slice, k, astCallRange)]
-            , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
+            , *map(_makeMapInteger, [ast_expr.value, ast_expr.slice], repeat(k), repeat(astCallRange))])
     elif Be.Call(ast_expr):
-        astCall = Make.Call(Make.Name('map'), [ast_expr.func
-            , *map(partial(_makeMapInteger, k=k, astCallRange=astCallRange), ast_expr.args)]
-            , list_keyword=[Make.keyword('strict', Make.Constant(value=True))])
+        astCall = Make.Call(Make.Name('map'), [ast_expr.func, *map(_makeMapInteger, ast_expr.args, repeat(k), repeat(astCallRange))])
+    elif Be.Tuple(ast_expr):
+        astCall = Make.Call(Make.Name('zip'), list(map(_makeMapInteger, ast_expr.elts, repeat(k), repeat(astCallRange))))
     else:
-        astCall = Make.Call(Make.Name('repeat'), [ast_expr, Make.Call(Make.Name('len'), [astCallRange])])
+        astCall = Make.Call(Make.Name('map'), [Make.Lambda(Make.arguments(list_arg=[Make.arg(k.name)]), ast_expr), astCallRange])
     return astCall
 
 def make_f(expression: Expr) -> str:
@@ -500,7 +486,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
         , returns=Make.Name('int')))
     ingredientsFunction.imports.addImportFrom_asStr('__future__', 'annotations')
     ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'oeisIDfor_n')
-    ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'getTriangle')
+    ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'getTriangleCells')
     ingredientsFunction.imports.addImportFrom_asStr('itertools', 'repeat')
     ingredientsFunction.imports.addImportFrom_asStr('math', 'factorial')
     ingredientsFunction.imports.addImportFrom_asStr('math', 'isqrt')

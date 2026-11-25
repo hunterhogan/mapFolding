@@ -20,6 +20,8 @@ Functions
 		Retrieve a known folding total for an exact map shape.
 	getTriangle
 		Group the consecutive known values of a triangle into numbered rows.
+	getTriangleCells
+		Retrieve the known cells of a triangle keyed by row and column.
 	getTriangleDiagonal
 		Select a diagonal of a triangle using the metadata row layout.
 	getValuesKnown
@@ -34,6 +36,8 @@ Functions
 		Print a comparison between a computed term and a known value.
 	printEasyRunTriangle
 		Compare a computed row with known cells and align differing rows.
+	substituteValuesKnown
+		Substitute the known value of each sequence value and triangle cell in a symbolic expression.
 	updateTriangle
 		Add triangle rows to a local b-file.
 	updateValuesKnown
@@ -42,10 +46,14 @@ Functions
 		Look up the OEIS ID of an OEIS ID or common name, ignoring case, whitespace, and punctuation.
 
 Variables
+	boxOfOEISidTriangle
+		Identify every implemented triangle.
 	settingsOEIS
 		Access OEIS package settings, paths, sequence identifiers, and symbolic configuration.
 
 Types
+	MetadataOEISid
+		Describe the metadata that `getMetadata` returns.
 	OEISid
 		Identify an integer sequence with an OEIS label.
 
@@ -57,13 +65,15 @@ byFormula
 from __future__ import annotations
 
 from mapFolding.oeis._beDRY import format_bFile as format_bFile
+from mapFolding.oeis._dataBaskets import MetadataOEISid as MetadataOEISid
 from mapFolding.oeis._theSSOT import settingsOEIS as settingsOEIS
 from mapFolding.oeis._theTypes import OEISid as OEISid
 
 # isort: split
 from mapFolding.oeis._metadata import (
-	getMetadata as getMetadata, getTriangle as getTriangle, getTriangleDiagonal as getTriangleDiagonal, getValuesKnown as getValuesKnown,
-	updateTriangle as updateTriangle, updateValuesKnown as updateValuesKnown, Z0Z_oeisName as Z0Z_oeisName)
+	boxOfOEISidTriangle as boxOfOEISidTriangle, getMetadata as getMetadata, getTriangle as getTriangle, getTriangleCells as getTriangleCells,
+	getTriangleDiagonal as getTriangleDiagonal, getValuesKnown as getValuesKnown, updateTriangle as updateTriangle,
+	updateValuesKnown as updateValuesKnown, Z0Z_oeisName as Z0Z_oeisName)
 
 # isort: split
 from mapFolding.oeis._benchmark import printEasyRunBenchmark as printEasyRunBenchmark, printEasyRunTriangle as printEasyRunTriangle
@@ -71,6 +81,7 @@ from mapFolding.oeis._mapShape import getTotalFoldsKnown as getTotalFoldsKnown, 
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n
+from mapFolding.oeis._symbolic import substituteValuesKnown as substituteValuesKnown
 from mapFolding.oeis.A400429 import (
 	A005315of0 as A005315of0, A005315of1 as A005315of1, A005315of2 as A005315of2, A005315of3 as A005315of3, A005315of4 as A005315of4,
 	A005315of5 as A005315of5, A005315of6 as A005315of6, A005315of7 as A005315of7, A005315of8 as A005315of8, A005315of9 as A005315of9,

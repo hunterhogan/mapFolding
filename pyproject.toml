@@ -67,7 +67,7 @@ Issues = "https://github.com/hunterhogan/mapFolding/issues"
 Repository = "https://github.com/hunterhogan/mapFolding.git"
 
 [dependency-groups]
-development = ["gmpy2-stubs", "google-api-python-client-stubs>=1.35.0", "ipykernel", "ipywidgets", "matplotlib", "memray; sys_platform == 'linux'", "networkx", "pandas-stubs", "py-spy", "pyarrow-stubs", "pytest-cov", "setuptools", "types-tqdm"]
+development = ["gmpy2-stubs", "google-api-python-client-stubs>=1.35.0", "ipykernel", "ipywidgets", "matplotlib", "memray; sys_platform == 'linux'", "networkx", "pandas-stubs", "py-spy", "pyarrow-stubs", "pytest-cov", "setuptools", "types-networkx", "types-tqdm"]
 testing = ["dulwich", "hypothesis", "ortools; python_version < '3.15'", "pandas", "polars>=1.44.2", "pyarrow", "pytest>=9.0", "pytest-env", "pytest-xdist"]
 
 [build-system]

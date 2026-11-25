@@ -13,14 +13,13 @@ from __future__ import annotations
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 import hashlib
+from itertools import count, repeat
 import json
 from pathlib import Path
 import subprocess
 from time import perf_counter
 
-from mapFolding.dataStructures import flattenTriangle
-from mapFolding.oeis import getMetadata, getValuesKnown, updateTriangle, updateValuesKnown
-from mapFolding.oeis._metadata import getMetadataTriangle
+from mapFolding.oeis import getTriangle, getTriangleCells, getValuesKnown, updateTriangle, updateValuesKnown
 
 
 def main() -> None:
@@ -80,13 +79,10 @@ def main() -> None:
         for oeis_id, key in families.items():
             row = record[key]
             assert len(row) == n - 1 and all(isinstance(x, int) and x >= 0 for x in row)
-            metadata = getMetadataTriangle(oeis_id)
-            flattened = flattenTriangle({n: row}, metadata['rowLength'], metadata['rowStart'], metadata['offset'])
-            known = getValuesKnown(oeis_id)
-            assert all(known[index] == value for index, value in flattened.items() if index in known)
+            assert list(map(getTriangleCells(oeis_id).get, zip(repeat(n), count(1)), row)) == row
             # Each row must touch the existing prefix; never persist isolated future rows.
-            first_missing = next(i for i in range(getMetadata(oeis_id)['offset'], max(known) + 2) if i not in known)
-            assert min(flattened) <= first_missing
+            triangle = getTriangle(oeis_id)
+            assert n in triangle or len(triangle.get(n - 1, ())) == n - 2
         record['seconds'] = round(perf_counter() - start, 6)
         record['weighted_runs'] = weighted
         with Path(__file__).with_name('permutation_statistics.jsonl').open('a') as output:

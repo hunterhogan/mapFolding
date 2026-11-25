@@ -5,9 +5,9 @@ This is a generated file; edit `mapFolding.oeis._symbolicRelations.boxOfRelation
 from __future__ import annotations
 
 from itertools import repeat
-from mapFolding.oeis import getTriangle, oeisIDfor_n
+from mapFolding.oeis import getTriangleCells, oeisIDfor_n
 from math import factorial, isqrt
-from operator import getitem, mul
+from operator import floordiv, getitem, mul, pow, sub
 from typing import Literal, LiteralString
 
 def A000108(n: int, f: Literal['A000108', 'A001246', 'A001263', 'A053121', 'A014137', 'A014137 and A401693', 'A000108 and A401693', 'A001405', 'A287548', 'A331499', 'A008828', 'A000108 and A002057'] | LiteralString | None = None) -> int:
@@ -53,15 +53,15 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A001263', 'A053121', 'A014
             countTotal = isqrt(A001246(n))
         case 'A001263':
             if 1 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A001263')[n], len(range(1, n + 1))), map(1 .__rsub__, range(1, n + 1)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A001263')), zip(repeat(n), range(1, n + 1))))
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
                 countTotal = oeisIDfor_n('A000108', n)
         case 'A053121':
-            countTotal = getTriangle('A053121')[2 * n][0 - 0]
+            countTotal = getTriangleCells('A053121')[2 * n, 0]
         case 'A053121':
-            countTotal = sum(map(2 .__rpow__, map(getitem, repeat(getTriangle('A053121')[n], len(range(n + 1))), map(0 .__rsub__, range(n + 1)), strict=True)))
+            countTotal = sum(map(pow, map(getitem, repeat(getTriangleCells('A053121')), zip(repeat(n), range(n + 1))), repeat(2)))
         case 'A014137':
             if 1 <= n:
                 countTotal = A014137(n) - A014137(n - 1)
@@ -99,7 +99,7 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A001263', 'A053121', 'A014
                 countTotal = oeisIDfor_n('A000108', n)
         case 'A000108':
             if 1 <= n:
-                countTotal = sum(map(mul, map(A000108, range(n), strict=True), map(A000108, map(1 .__rsub__, map(n.__sub__, range(n))), strict=True), strict=True))
+                countTotal = sum(map(mul, map(A000108, range(n)), map(A000108, map(sub, map(sub, repeat(n), range(n)), repeat(1)))))
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
@@ -108,25 +108,25 @@ def A000108(n: int, f: Literal['A000108', 'A001246', 'A001263', 'A053121', 'A014
             countTotal = A001405(2 * n) // (n + 1)
         case 'A287548':
             if 1 <= n:
-                countTotal = getTriangle('A287548')[n][1 - 1]
+                countTotal = getTriangleCells('A287548')[n, 1]
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
                 countTotal = oeisIDfor_n('A000108', n)
         case 'A331499':
-            countTotal = getTriangle('A331499')[n + 1][n + 1 - 1]
+            countTotal = getTriangleCells('A331499')[n + 1, n + 1]
         case 'A331499':
-            countTotal = getTriangle('A331499')[n + 2][n + 1 - 1]
+            countTotal = getTriangleCells('A331499')[n + 2, n + 1]
         case 'A331499':
             if 1 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A331499')[n], len(range(1, n + 1))), map(1 .__rsub__, range(1, n + 1)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A331499')), zip(repeat(n), range(1, n + 1))))
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
                 countTotal = oeisIDfor_n('A000108', n)
         case 'A008828':
             if 1 <= n:
-                countTotal = getTriangle('A008828')[n][n - 1]
+                countTotal = getTriangleCells('A008828')[n, n]
             elif True:
                 countTotal = factorial(2 * n) // (factorial(n) * factorial(n + 1))
             else:
@@ -218,9 +218,9 @@ def A000560(n: int, f: Literal['A000682', 'A259701', 'A259703'] | LiteralString 
         case 'A000682':
             countTotal = A000682(n + 1) // 2
         case 'A259701':
-            countTotal = getTriangle('A259701')[n + 1][1 - 1]
+            countTotal = getTriangleCells('A259701')[n + 1, 1]
         case 'A259703':
-            countTotal = getTriangle('A259703')[n + 1][1 - 1]
+            countTotal = getTriangleCells('A259703')[n + 1, 1]
         case _:
             countTotal = oeisIDfor_n('A000560', n)
     return countTotal
@@ -305,7 +305,7 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
             countTotal = (2 - n % 2) * A227167(n) // n
         case 'A223094':
             if 4 <= n:
-                countTotal = factorial(n - 1) - sum(map(int.__floordiv__, map(factorial(n - 1).__rmul__, map(A223094, range(3, n), strict=True)), map(factorial, range(3, n), strict=True), strict=True))
+                countTotal = factorial(n - 1) - sum(map(floordiv, map(mul, map(A223094, range(3, n)), repeat(factorial(n - 1))), map(factorial, range(3, n))))
             elif n <= 2:
                 countTotal = 1
             else:
@@ -340,31 +340,31 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A301620':
             if 3 <= n:
-                countTotal = 2 ** (n - 2) + sum(map(mul, map(2 .__pow__, map(2 .__rsub__, map(n.__sub__, range(3, n - 1)))), map(A301620, range(3, n - 1), strict=True), strict=True))
+                countTotal = 2 ** (n - 2) + sum(map(mul, map(pow, repeat(2), map(sub, map(sub, repeat(n), range(3, n - 1)), repeat(2))), map(A301620, range(3, n - 1))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A339179':
-            countTotal = sum(map(getitem, repeat(getTriangle('A339179')[n + 1], len(range(2, (n + 1) // 2 + 2))), map(2 .__rsub__, range(2, (n + 1) // 2 + 2)), strict=True))
+            countTotal = sum(map(getitem, repeat(getTriangleCells('A339179')), zip(repeat(n + 1), range(2, (n + 1) // 2 + 2))))
         case 'A339179':
             if 2 <= n:
-                countTotal = getTriangle('A339179')[n + 2][2 - 2]
+                countTotal = getTriangleCells('A339179')[n + 2, 2]
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A339179':
             if 2 <= n:
-                countTotal = getTriangle('A339179')[n + 2][3 - 2]
+                countTotal = getTriangleCells('A339179')[n + 2, 3]
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A287548':
-            countTotal = getTriangle('A287548')[n][n - 1]
+            countTotal = getTriangleCells('A287548')[n, n]
         case 'A331499':
-            countTotal = getTriangle('A331499')[n][1 - 1]
+            countTotal = getTriangleCells('A331499')[n, 1]
         case 'A000682 and A259702':
             if 3 <= n:
                 countTotal = 2 * A000682(n - 1) + 2 * A259702(n)
@@ -374,35 +374,35 @@ def A000682(n: int, f: Literal['A060206', 'A000136', 'A000560', 'A001010', 'A001
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A259689':
             if 3 <= n:
-                countTotal = sum(map(mul, range(2, (n - 1) // 2 + 2), map(getitem, repeat(getTriangle('A259689')[n - 1], len(range(2, (n - 1) // 2 + 2))), map(2 .__rsub__, range(2, (n - 1) // 2 + 2)), strict=True), strict=True))
+                countTotal = sum(map(mul, range(2, (n - 1) // 2 + 2), map(getitem, repeat(getTriangleCells('A259689')), zip(repeat(n - 1), range(2, (n - 1) // 2 + 2)))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A259698':
             if 2 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A259698')[n], len(range(1, n))), map(1 .__rsub__, range(1, n)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A259698')), zip(repeat(n), range(1, n))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A259703':
             if 2 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A259703')[n], len(range(1, n))), map(1 .__rsub__, range(1, n)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A259703')), zip(repeat(n), range(1, n))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A259689':
             if 2 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A259689')[n], len(range(2, n // 2 + 2))), map(2 .__rsub__, range(2, n // 2 + 2)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A259689')), zip(repeat(n), range(2, n // 2 + 2))))
             elif n <= 2:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A000682', n)
         case 'A400429':
             if 2 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A400429')[n], len(range(1, n // 2 + 1))), map(1 .__rsub__, range(1, n // 2 + 1)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A400429')), zip(repeat(n), range(1, n // 2 + 1))))
             elif n <= 2:
                 countTotal = 1
             else:
@@ -557,7 +557,7 @@ def A001246(n: int, f: Literal['A000108', 'A001246', 'A008828'] | LiteralString 
                 countTotal = oeisIDfor_n('A001246', n)
         case 'A008828':
             if 1 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A008828')[n], len(range(1, n + 1))), map(1 .__rsub__, range(1, n + 1)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A008828')), zip(repeat(n), range(1, n + 1))))
             else:
                 countTotal = oeisIDfor_n('A001246', n)
         case _:
@@ -597,7 +597,7 @@ def A001405(n: int, f: Literal['A053121', 'A000108', 'A001405'] | LiteralString 
     countTotal: int
     match f:
         case 'A053121':
-            countTotal = sum(map(getitem, repeat(getTriangle('A053121')[n], len(range(n + 1))), map(0 .__rsub__, range(n + 1)), strict=True))
+            countTotal = sum(map(getitem, repeat(getTriangleCells('A053121')), zip(repeat(n), range(n + 1))))
         case 'A000108':
             if n % 2 == 0:
                 countTotal = (n + 2) * A000108(n // 2) // 2
@@ -703,21 +703,21 @@ def A002415(n: int, f: Literal['A001263', 'A060972'] | LiteralString | None = No
     match f:
         case 'A001263':
             if 2 <= n:
-                countTotal = getTriangle('A001263')[n + 1][3 - 1]
+                countTotal = getTriangleCells('A001263')[n + 1, 3]
             elif True:
                 countTotal = n ** 2 * (n ** 2 - 1) // 12
             else:
                 countTotal = oeisIDfor_n('A002415', n)
         case 'A060972':
             if 2 <= n:
-                countTotal = getTriangle('A060972')[n][2 - 1]
+                countTotal = getTriangleCells('A060972')[n, 2]
             elif True:
                 countTotal = n ** 2 * (n ** 2 - 1) // 12
             else:
                 countTotal = oeisIDfor_n('A002415', n)
         case 'A060972':
             if 2 <= n:
-                countTotal = getTriangle('A060972')[n][n - 1 - 1]
+                countTotal = getTriangleCells('A060972')[n, n - 1]
             elif True:
                 countTotal = n ** 2 * (n ** 2 - 1) // 12
             else:
@@ -804,18 +804,18 @@ def A004148(n: int, f: Literal['A004148', 'A001263'] | LiteralString | None = No
     match f:
         case 'A004148':
             if 2 <= n:
-                countTotal = A004148(n - 1) + sum(map(mul, map(A004148, range(1, n - 1), strict=True), map(A004148, map(2 .__rsub__, map(n.__sub__, range(1, n - 1))), strict=True), strict=True))
+                countTotal = A004148(n - 1) + sum(map(mul, map(A004148, range(1, n - 1)), map(A004148, map(sub, map(sub, repeat(n), range(1, n - 1)), repeat(2)))))
             elif 1 <= n:
-                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+                countTotal = sum(map(floordiv, map(pow, map(factorial, range(-((-n - 1) // 2), n + 1)), repeat(2)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(sub, repeat(n), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)))), map(factorial, map(sub, repeat(n + 1), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)), repeat(1))))))
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A004148', n)
         case 'A001263':
             if 1 <= n:
-                countTotal = sum(map(getitem, map(getitem, repeat(getTriangle('A001263'), len(range(-((-n - 1) // 2), n + 1))), range(-((-n - 1) // 2), n + 1), strict=True), map(1 .__rsub__, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1))), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A001263')), zip(range(-((-n - 1) // 2), n + 1), map(sub, repeat(n + 1), range(-((-n - 1) // 2), n + 1)))))
             elif 1 <= n:
-                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+                countTotal = sum(map(floordiv, map(pow, map(factorial, range(-((-n - 1) // 2), n + 1)), repeat(2)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(sub, repeat(n), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)))), map(factorial, map(sub, repeat(n + 1), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)), repeat(1))))))
             elif n <= 1:
                 countTotal = 1
             else:
@@ -824,14 +824,14 @@ def A004148(n: int, f: Literal['A004148', 'A001263'] | LiteralString | None = No
             if 4 <= n:
                 countTotal = ((n - 1) * A004148(n - 2) + (2 * n - 5) * A004148(n - 3) + (2 * n + 1) * A004148(n - 1) - (n - 4) * A004148(n - 4)) // (n + 2)
             elif 1 <= n:
-                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+                countTotal = sum(map(floordiv, map(pow, map(factorial, range(-((-n - 1) // 2), n + 1)), repeat(2)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(sub, repeat(n), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)))), map(factorial, map(sub, repeat(n + 1), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)), repeat(1))))))
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A004148', n)
         case _:
             if 1 <= n:
-                countTotal = sum(map(int.__floordiv__, map(2 .__rpow__, map(factorial, range(-((-n - 1) // 2), n + 1), strict=True)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(n.__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1))), strict=True), strict=True), map(factorial, map((n + 1).__sub__, range(-((-n - 1) // 2), n + 1)), strict=True), strict=True), map(factorial, map(1 .__rsub__, map(n.__rsub__, map(2 .__mul__, range(-((-n - 1) // 2), n + 1)))), strict=True), strict=True), strict=True))
+                countTotal = sum(map(floordiv, map(pow, map(factorial, range(-((-n - 1) // 2), n + 1)), repeat(2)), map(mul, map(mul, map(mul, map(mul, range(-((-n - 1) // 2), n + 1), map(factorial, map(sub, repeat(n), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)))), map(factorial, map(sub, repeat(n + 1), range(-((-n - 1) // 2), n + 1)))), map(factorial, map(sub, map(sub, map(mul, repeat(2), range(-((-n - 1) // 2), n + 1)), repeat(n)), repeat(1))))))
             elif n <= 1:
                 countTotal = 1
             else:
@@ -910,35 +910,35 @@ def A005315(n: int, f: Literal['A005316', 'A077054 and A085973', 'A005316, A0602
                 countTotal = oeisIDfor_n('A005315', n)
         case 'A400429':
             if 1 <= n:
-                countTotal = getTriangle('A400429')[2 * n][1 - 1]
+                countTotal = getTriangleCells('A400429')[2 * n, 1]
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005315', n)
         case 'A400429':
             if 2 <= n:
-                countTotal = getTriangle('A400429')[2 * n - 1][1 - 1]
+                countTotal = getTriangleCells('A400429')[2 * n - 1, 1]
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005315', n)
         case 'A005316 and A400429':
             if 3 <= n:
-                countTotal = 2 * A005316(2 * n - 2) + getTriangle('A400429')[2 * n - 2][2 - 1]
+                countTotal = 2 * A005316(2 * n - 2) + getTriangleCells('A400429')[2 * n - 2, 2]
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005315', n)
         case 'A008828':
             if 1 <= n:
-                countTotal = getTriangle('A008828')[n][1 - 1]
+                countTotal = getTriangleCells('A008828')[n, 1]
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005315', n)
         case 'A060972':
             if 1 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A060972')[n], len(range(1, n + 1))), map(1 .__rsub__, range(1, n + 1)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A060972')), zip(repeat(n), range(1, n + 1))))
             elif n <= 1:
                 countTotal = 1
             else:
@@ -1045,23 +1045,23 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
                 countTotal = oeisIDfor_n('A005316', n)
         case 'A005315 and A400429':
             if 4 <= n and n % 2 == 0:
-                countTotal = (A005315((n + 2) // 2) - getTriangle('A400429')[n][2 - 1]) // 2
+                countTotal = (A005315((n + 2) // 2) - getTriangleCells('A400429')[n, 2]) // 2
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005316', n)
         case 'A400429':
             if 6 <= n and n % 2 == 0:
-                countTotal = (2 * getTriangle('A400429')[n][1 - 1] + getTriangle('A400429')[n][2 - 1] - getTriangle('A400429')[n - 1][2 - 1]) // 2
+                countTotal = (2 * getTriangleCells('A400429')[n, 1] + getTriangleCells('A400429')[n, 2] - getTriangleCells('A400429')[n - 1, 2]) // 2
             elif n <= 1:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A005316', n)
         case 'A259974':
-            countTotal = getTriangle('A259974')[n + 1][1 - 1]
+            countTotal = getTriangleCells('A259974')[n + 1, 1]
         case 'A259974':
             if 1 <= n:
-                countTotal = sum(map(getitem, repeat(getTriangle('A259974')[n], len(range(1, -(-n // 2) + 1))), map(1 .__rsub__, range(1, -(-n // 2) + 1)), strict=True))
+                countTotal = sum(map(getitem, repeat(getTriangleCells('A259974')), zip(repeat(n), range(1, -(-n // 2) + 1))))
             elif n <= 1:
                 countTotal = 1
             else:
@@ -1074,7 +1074,7 @@ def A005316(n: int, f: Literal['A005315', 'A077054', 'A077014', 'A005315, A06020
             else:
                 countTotal = oeisIDfor_n('A005316', n)
         case 'A380367':
-            countTotal = getTriangle('A380367')[n][n - 0]
+            countTotal = getTriangleCells('A380367')[n, n]
         case _:
             if n <= 1:
                 countTotal = 1
@@ -1115,7 +1115,7 @@ def A006657(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A008828':
-            countTotal = getTriangle('A008828')[n][2 - 1]
+            countTotal = getTriangleCells('A008828')[n, 2]
         case _:
             countTotal = oeisIDfor_n('A006657', n)
     return countTotal
@@ -1153,7 +1153,7 @@ def A006658(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A008828':
-            countTotal = getTriangle('A008828')[n][3 - 1]
+            countTotal = getTriangleCells('A008828')[n, 3]
         case _:
             countTotal = oeisIDfor_n('A006658', n)
     return countTotal
@@ -1191,7 +1191,7 @@ def A006659(n: int, f: Literal['A008828', 'A002057', 'A002694'] | LiteralString 
     countTotal: int
     match f:
         case 'A008828':
-            countTotal = getTriangle('A008828')[n + 1][n - 1]
+            countTotal = getTriangleCells('A008828')[n + 1, n]
         case 'A002057':
             countTotal = (n + 1) * A002057(n - 1)
         case 'A002694':
@@ -1236,10 +1236,10 @@ def A006660(n: int, f: Literal['A259974', 'A380369'] | LiteralString | None = No
     countTotal: int
     match f:
         case 'A259974':
-            countTotal = getTriangle('A259974')[n][2 - 1]
+            countTotal = getTriangleCells('A259974')[n, 2]
         case 'A380369':
             if (n + 1) % 2 == 0:
-                countTotal = getTriangle('A380369')[(n - 1) // 2][1 - 0]
+                countTotal = getTriangleCells('A380369')[(n - 1) // 2, 1]
             else:
                 countTotal = oeisIDfor_n('A006660', n)
         case _:
@@ -1280,11 +1280,11 @@ def A006661(n: int, f: Literal['A400429', 'A259974', 'A005316 and A076876'] | Li
     match f:
         case 'A400429':
             if 10 <= n and n % 2 == 0:
-                countTotal = (getTriangle('A400429')[n - 4][3 - 1] + 2 * getTriangle('A400429')[n - 3][1 - 1] + getTriangle('A400429')[n - 2][2 - 1] - 2 * getTriangle('A400429')[n - 4][2 - 1] - 2 * getTriangle('A400429')[n - 3][2 - 1]) // 2
+                countTotal = (getTriangleCells('A400429')[n - 4, 3] + 2 * getTriangleCells('A400429')[n - 3, 1] + getTriangleCells('A400429')[n - 2, 2] - 2 * getTriangleCells('A400429')[n - 4, 2] - 2 * getTriangleCells('A400429')[n - 3, 2]) // 2
             else:
                 countTotal = oeisIDfor_n('A006661', n)
         case 'A259974':
-            countTotal = getTriangle('A259974')[n][3 - 1]
+            countTotal = getTriangleCells('A259974')[n, 3]
         case 'A005316 and A076876':
             if 6 <= n and n % 2 == 0:
                 countTotal = A005316(n - 4) + A076876(n - 4)
@@ -1327,7 +1327,7 @@ def A006662(n: int, f: Literal['A259974'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A259974':
-            countTotal = getTriangle('A259974')[n][4 - 1]
+            countTotal = getTriangleCells('A259974')[n, 4]
         case _:
             countTotal = oeisIDfor_n('A006662', n)
     return countTotal
@@ -1365,7 +1365,7 @@ def A007746(n: int, f: Literal['A008828'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A008828':
-            countTotal = getTriangle('A008828')[n][n - 3 - 1]
+            countTotal = getTriangleCells('A008828')[n, n - 3]
         case _:
             if True:
                 countTotal = 4 * (n ** 4 + 20 * n ** 3 + 107 * n ** 2 + 15 - 107 * n) * factorial(2 * n) // (3 * factorial(n - 4) * factorial(n + 6))
@@ -1452,7 +1452,7 @@ def A014137(n: int, f: Literal['A000108', 'A000108 and A014137', 'A014140', 'A00
     countTotal: int
     match f:
         case 'A000108':
-            countTotal = sum(map(A000108, range(n + 1), strict=True))
+            countTotal = sum(map(A000108, range(n + 1)))
         case 'A000108 and A014137':
             if 1 <= n:
                 countTotal = A000108(n) + A014137(n - 1)
@@ -1525,7 +1525,7 @@ def A014140(n: int, f: Literal['A000108', 'A014137 and A014140', 'A014140 and A4
     countTotal: int
     match f:
         case 'A000108':
-            countTotal = sum(map(mul, map((n + 1).__sub__, range(n + 1)), map(A000108, range(n + 1), strict=True), strict=True))
+            countTotal = sum(map(mul, map(sub, repeat(n + 1), range(n + 1)), map(A000108, range(n + 1))))
         case 'A014137 and A014140':
             if 1 <= n:
                 countTotal = A014137(n) + A014140(n - 1)
@@ -1672,7 +1672,7 @@ def A068253(n: int, f: Literal['A078099'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A078099':
-            countTotal = getTriangle('A078099')[2 * n - 1][n - 1]
+            countTotal = getTriangleCells('A078099')[2 * n - 1, n]
         case _:
             countTotal = oeisIDfor_n('A068253', n)
     return countTotal
@@ -1711,7 +1711,7 @@ def A076876(n: int, f: Literal['A400429', 'A005316 and A006661', 'A380367'] | Li
     match f:
         case 'A400429':
             if 6 <= n and n % 2 == 0:
-                countTotal = (getTriangle('A400429')[n][3 - 1] + getTriangle('A400429')[n + 1][1 - 1] + getTriangle('A400429')[n + 2][2 - 1] - getTriangle('A400429')[n][2 - 1] - 2 * getTriangle('A400429')[n + 1][2 - 1]) // 2
+                countTotal = (getTriangleCells('A400429')[n, 3] + getTriangleCells('A400429')[n + 1, 1] + getTriangleCells('A400429')[n + 2, 2] - getTriangleCells('A400429')[n, 2] - 2 * getTriangleCells('A400429')[n + 1, 2]) // 2
             else:
                 countTotal = oeisIDfor_n('A076876', n)
         case 'A005316 and A006661':
@@ -1720,7 +1720,7 @@ def A076876(n: int, f: Literal['A400429', 'A005316 and A006661', 'A380367'] | Li
             else:
                 countTotal = oeisIDfor_n('A076876', n)
         case 'A380367':
-            countTotal = getTriangle('A380367')[n + 1][n - 0]
+            countTotal = getTriangleCells('A380367')[n + 1, n]
         case _:
             countTotal = oeisIDfor_n('A076876', n)
     return countTotal
@@ -1804,11 +1804,11 @@ def A077054(n: int, f: Literal['A005316', 'A005315 and A085973', 'A400429', 'A38
                 countTotal = oeisIDfor_n('A077054', n)
         case 'A400429':
             if 2 <= n:
-                countTotal = (getTriangle('A400429')[2 * n + 1][1 - 1] - getTriangle('A400429')[2 * n][2 - 1]) // 2
+                countTotal = (getTriangleCells('A400429')[2 * n + 1, 1] - getTriangleCells('A400429')[2 * n, 2]) // 2
             else:
                 countTotal = oeisIDfor_n('A077054', n)
         case 'A380369':
-            countTotal = sum(map(getitem, repeat(getTriangle('A380369')[n], len(range(n + 1))), map(0 .__rsub__, range(n + 1)), strict=True))
+            countTotal = sum(map(getitem, repeat(getTriangleCells('A380369')), zip(repeat(n), range(n + 1))))
         case _:
             countTotal = oeisIDfor_n('A077054', n)
     return countTotal
@@ -1868,14 +1868,14 @@ def A077055(n: int, f: Literal['A078592', 'A005316', 'A005316 and A223096', 'A22
                 countTotal = oeisIDfor_n('A077055', n)
         case 'A223096 and A400429':
             if 3 <= n and (n + 1) % 2 == 0:
-                countTotal = (2 * A223096((n - 1) // 2) + getTriangle('A400429')[n][1 - 1]) // 4
+                countTotal = (2 * A223096((n - 1) // 2) + getTriangleCells('A400429')[n, 1]) // 4
             elif n <= 3:
                 countTotal = 1
             else:
                 countTotal = oeisIDfor_n('A077055', n)
         case 'A400429':
             if 6 <= n and n % 2 == 0:
-                countTotal = ((n // 2 % 2 + 1 and (n // 2 % 2 + 1) * getTriangle('A400429')[(n + 2) // 2][1 - 1]) + getTriangle('A400429')[n + 1][1 - 1] - (1 - n // 2 % 2 and (1 - n // 2 % 2) * getTriangle('A400429')[n // 2][2 - 1]) - getTriangle('A400429')[n][2 - 1]) // 4
+                countTotal = ((n // 2 % 2 + 1 and (n // 2 % 2 + 1) * getTriangleCells('A400429')[(n + 2) // 2, 1]) + getTriangleCells('A400429')[n + 1, 1] - (1 - n // 2 % 2 and (1 - n // 2 % 2) * getTriangleCells('A400429')[n // 2, 2]) - getTriangleCells('A400429')[n, 2]) // 4
             elif n <= 3:
                 countTotal = 1
             else:
@@ -1921,7 +1921,7 @@ def A077056(n: int, f: Literal['A380369'] | LiteralString | None = None) -> int:
     match f:
         case 'A380369':
             if 1 <= n:
-                countTotal = sum(map(mul, range(1, n + 1), map(getitem, repeat(getTriangle('A380369')[n], len(range(1, n + 1))), map(0 .__rsub__, range(1, n + 1)), strict=True), strict=True))
+                countTotal = sum(map(mul, range(1, n + 1), map(getitem, repeat(getTriangleCells('A380369')), zip(repeat(n), range(1, n + 1)))))
             elif n <= 0:
                 countTotal = 0
             else:
@@ -2150,7 +2150,7 @@ def A204352(n: int, f: Literal['A380367'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A380367':
-            countTotal = getTriangle('A380367')[n + 2][n - 0]
+            countTotal = getTriangleCells('A380367')[n + 2, n]
         case _:
             countTotal = oeisIDfor_n('A204352', n)
     return countTotal
@@ -2434,7 +2434,7 @@ def A223096(n: int, f: Literal['A005316 and A077055', 'A077055 and A400429'] | L
                 countTotal = oeisIDfor_n('A223096', n)
         case 'A077055 and A400429':
             if 1 <= n:
-                countTotal = (4 * A077055(2 * n + 1) - getTriangle('A400429')[2 * n + 1][1 - 1]) // 2
+                countTotal = (4 * A077055(2 * n + 1) - getTriangleCells('A400429')[2 * n + 1, 1]) // 2
             else:
                 countTotal = oeisIDfor_n('A223096', n)
         case _:
@@ -2514,7 +2514,7 @@ def A259700(n: int, f: Literal['A259698'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A259698':
-            countTotal = sum(map(mul, range(1, n), map(getitem, repeat(getTriangle('A259698')[n], len(range(1, n))), map(1 .__rsub__, range(1, n)), strict=True), strict=True))
+            countTotal = sum(map(mul, range(1, n), map(getitem, repeat(getTriangleCells('A259698')), zip(repeat(n), range(1, n)))))
         case _:
             countTotal = oeisIDfor_n('A259700', n)
     return countTotal
@@ -2566,7 +2566,7 @@ def A259702(n: int, f: Literal['A000682', 'A301620', 'A259701'] | LiteralString 
             else:
                 countTotal = oeisIDfor_n('A259702', n)
         case 'A259701':
-            countTotal = sum(map(getitem, repeat(getTriangle('A259701')[n], len(range(2, n))), map(1 .__rsub__, range(2, n)), strict=True))
+            countTotal = sum(map(getitem, repeat(getTriangleCells('A259701')), zip(repeat(n), range(2, n))))
         case _:
             if n <= 2:
                 countTotal = 0
@@ -2607,7 +2607,7 @@ def A260785(n: int, f: Literal['A259689'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A259689':
-            countTotal = getTriangle('A259689')[n][2 - 2]
+            countTotal = getTriangleCells('A259689')[n, 2]
         case _:
             countTotal = oeisIDfor_n('A260785', n)
     return countTotal
@@ -2652,14 +2652,14 @@ def A301620(n: int, f: Literal['A000682', 'A301620 and A334615', 'A339179', 'A25
             else:
                 countTotal = oeisIDfor_n('A301620', n)
         case 'A339179':
-            countTotal = sum(map(getitem, repeat(getTriangle('A339179')[n + 3], len(range(4, (n + 3) // 2 + 2))), map(2 .__rsub__, range(4, (n + 3) // 2 + 2)), strict=True))
+            countTotal = sum(map(getitem, repeat(getTriangleCells('A339179')), zip(repeat(n + 3), range(4, (n + 3) // 2 + 2))))
         case 'A259702':
             countTotal = 2 * A259702(n + 2)
         case 'A259689':
-            countTotal = sum(map(mul, map(2 .__rsub__, range(2, (n + 1) // 2 + 2)), map(getitem, repeat(getTriangle('A259689')[n + 1], len(range(2, (n + 1) // 2 + 2))), map(2 .__rsub__, range(2, (n + 1) // 2 + 2)), strict=True), strict=True))
+            countTotal = sum(map(mul, map(sub, range(2, (n + 1) // 2 + 2), repeat(2)), map(getitem, repeat(getTriangleCells('A259689')), zip(repeat(n + 1), range(2, (n + 1) // 2 + 2)))))
         case 'A259689 and A322507':
             if 3 <= n:
-                countTotal = A322507(n - 1) + sum(map(mul, map(mul, range(2, (n - 1) // 2 + 2), map(1 .__rsub__, range(2, (n - 1) // 2 + 2)), strict=True), map(getitem, repeat(getTriangle('A259689')[n - 1], len(range(2, (n - 1) // 2 + 2))), map(2 .__rsub__, range(2, (n - 1) // 2 + 2)), strict=True), strict=True))
+                countTotal = A322507(n - 1) + sum(map(mul, map(mul, range(2, (n - 1) // 2 + 2), map(sub, range(2, (n - 1) // 2 + 2), repeat(1))), map(getitem, repeat(getTriangleCells('A259689')), zip(repeat(n - 1), range(2, (n - 1) // 2 + 2)))))
             else:
                 countTotal = oeisIDfor_n('A301620', n)
         case _:
@@ -2700,7 +2700,7 @@ def A322507(n: int, f: Literal['A259689 and A301620'] | LiteralString | None = N
     match f:
         case 'A259689 and A301620':
             if 2 <= n:
-                countTotal = A301620(n + 1) - sum(map(mul, map(mul, range(2, n // 2 + 2), map(1 .__rsub__, range(2, n // 2 + 2)), strict=True), map(getitem, repeat(getTriangle('A259689')[n], len(range(2, n // 2 + 2))), map(2 .__rsub__, range(2, n // 2 + 2)), strict=True), strict=True))
+                countTotal = A301620(n + 1) - sum(map(mul, map(mul, range(2, n // 2 + 2), map(sub, range(2, n // 2 + 2), repeat(1))), map(getitem, repeat(getTriangleCells('A259689')), zip(repeat(n), range(2, n // 2 + 2)))))
             elif n <= 1:
                 countTotal = 0
             else:
@@ -2890,7 +2890,7 @@ def A400630(n: int, f: Literal['A400429', 'A400630'] | LiteralString | None = No
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 1 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 1]
         case 'A400630':
             if 6 <= n:
                 countTotal = 2 * n + A400630(n - 2)
@@ -2938,7 +2938,7 @@ def A400631(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 2 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 2]
         case _:
             if True:
                 countTotal = (13 * n ** 4 + 24 * n ** 3 + 9 * (2 * n ** 2 + 21 - 8 * n) * (n % 2) + 17920 - 284 * n ** 2 - 4560 * n - 64 * 0 ** (n % 3)) // 288
@@ -2979,7 +2979,7 @@ def A400632(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 3 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 3]
         case _:
             if True:
                 countTotal = (294 * n ** 6 + 16955410 * n + 20480 * 0 ** (n % 3) * (n - 2) + 25920 * 0 ** (n % 8) + 61440 * 0 ** ((n + 2) % 3) + 43200 * 0 ** ((n + 3) % 8) + 43200 * 0 ** ((n + 6) % 8) + 45 * (1 - 2 * (n % 2)) * (44 * n ** 3 + 358 * n + 4473 - 5 * n ** 4 - 289 * n ** 2) - 60 * n ** 5 - 3895 * n ** 4 - 232300 * n ** 3 - 326739 * n ** 2 - 20480 * 0 ** ((n + 1) % 3) * (n + 1) - 8640 * 0 ** ((n + 1) % 8) - 25920 * 0 ** ((n + 2) % 8) - 43200 * 0 ** ((n + 4) % 8) - 8640 * 0 ** ((n + 5) % 8) - 25920 * 0 ** ((n + 7) % 8) - 48570245) // 138240
@@ -3020,7 +3020,7 @@ def A400633(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 4 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 4]
         case _:
             if True:
                 countTotal = (5163390 * n ** 8 + 56558460 * n ** 6 + 600812982000 * n ** 3 + 5767984511820 * n ** 2 + 163296000 * n * (40 * 0 ** (n % 4) + 33 * 0 ** ((n + 1) % 4) - 40 * 0 ** ((n + 2) % 4) - 33 * 0 ** ((n + 3) % 4)) + 458752000 * 0 ** (n % 3) * (108 * n + 50 - 9 * n ** 2) + 18856191452 * 0 ** (n % 5) + 2612736000 * 0 ** (n % 8) * (-(17 * n) - 14) + 458752000 * 0 ** ((n + 1) % 3) * (18 * n ** 2 - 15 * n - 61) + 18856191452 * 0 ** ((n + 1) % 5) + 2612736000 * 0 ** ((n + 1) % 8) * (9 * n + 37) + 458752000 * 0 ** ((n + 2) % 3) * (11 - 9 * n ** 2 - 93 * n) + 117006080547 * 0 ** ((n + 2) % 5) + 7838208000 * 0 ** ((n + 3) % 8) * (11 - 3 * n) + 117006080547 * 0 ** ((n + 4) % 5) + 2612736000 * 0 ** ((n + 4) % 8) * (17 * n + 14) + 2612736000 * 0 ** ((n + 5) % 8) * (-(9 * n) - 37) + 156764160000 * 0 ** ((n + 6) % 8) + 7838208000 * 0 ** ((n + 7) % 8) * (3 * n - 11) + 8505 * (1 - 2 * (n % 2)) * (6992 * n ** 5 + 346000 * n ** 3 + 519600 * n + 17692977 - 476 * n ** 6 - 73490 * n ** 4 - 68012 * n ** 2) + 166068141699607 - 20844000 * n ** 7 - 6784359120 * n ** 5 - 31881482430 * n ** 4 - 68694275761200 * n - 156764160000 * 0 ** ((n + 2) % 8) - 41803776000 * 0 ** ((n + 3) % 5)) // 83607552000
@@ -3061,7 +3061,7 @@ def A400634(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 5 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 5]
         case _:
             countTotal = oeisIDfor_n('A400634', n)
     return countTotal
@@ -3099,7 +3099,7 @@ def A400635(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 6 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 6]
         case _:
             countTotal = oeisIDfor_n('A400635', n)
     return countTotal
@@ -3137,7 +3137,7 @@ def A400636(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 7 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 7]
         case _:
             countTotal = oeisIDfor_n('A400636', n)
     return countTotal
@@ -3175,7 +3175,7 @@ def A400637(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 8 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 8]
         case _:
             countTotal = oeisIDfor_n('A400637', n)
     return countTotal
@@ -3213,7 +3213,7 @@ def A400638(n: int, f: Literal['A400429'] | LiteralString | None = None) -> int:
     countTotal: int
     match f:
         case 'A400429':
-            countTotal = getTriangle('A400429')[n][n // 2 - 9 - 1]
+            countTotal = getTriangleCells('A400429')[n, n // 2 - 9]
         case _:
             countTotal = oeisIDfor_n('A400638', n)
     return countTotal
