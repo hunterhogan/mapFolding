@@ -67,7 +67,7 @@ Issues = "https://github.com/hunterhogan/mapFolding/issues"
 Repository = "https://github.com/hunterhogan/mapFolding.git"
 
 [dependency-groups]
-development = ["gmpy2-stubs", "google-api-python-client-stubs>=1.35.0", "google-auth-oauthlib-stubs>=1.2.0", "ipykernel", "ipywidgets", "matplotlib", "memray; sys_platform == 'linux'", "networkx", "py-spy", "pyarrow-stubs", "pytest-cov", "setuptools", "types-tqdm"]
+development = ["gmpy2-stubs", "google-api-python-client-stubs>=1.35.0", "ipykernel", "ipywidgets", "matplotlib", "memray; sys_platform == 'linux'", "networkx", "pandas-stubs", "py-spy", "pyarrow-stubs", "pytest-cov", "setuptools", "types-tqdm"]
 testing = ["dulwich", "hypothesis", "ortools; python_version < '3.15'", "pandas", "polars>=1.44.2", "pyarrow", "pytest>=9.0", "pytest-env", "pytest-xdist"]
 
 [build-system]
@@ -118,15 +118,7 @@ use_parentheses = true
 preset = "strict"
 enabled-ignores = ["pyrefly"]
 infer-with-first-use = false
-project-excludes = [
-  "typings",
-  "typings/**/*",
-  "**/node_modules",
-  "**/__pycache__",
-  "**/.*",
-  ".venv",
-  ".vAnalysis",
-]
+project-excludes = ["typings", "typings/**/*", "**/node_modules", "**/__pycache__", "**/.*", ".venv", ".vAnalysis"]
 site-packages-path = ["./typings"]
 # === OK_EDIT: path-sync hunterhogan ===
 
@@ -184,45 +176,7 @@ line-length = 140
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ruff.lint]
 preview = true
-allowed-confusables = [
-  "–",
-  "’",
-  "′",
-  "×",
-  "−",
-  "∖",
-  "∗",
-  "∣",
-  "∨",
-  "∪",
-  "∼",
-  "⊗",
-  "ℂ",
-  "ℋ",
-  "ℒ",
-  "ℓ",
-  "ℕ",
-  "ℙ",
-  "ℚ",
-  "ℝ",
-  "ℤ",
-  "ℰ",
-  "ℱ",
-  "𝒪",
-  "𝒮",
-  "𝔼",
-  "𝕀",
-  "𝟙",
-  "α",
-  "Β",
-  "γ",
-  "ι",
-  "Κ",
-  "ν",
-  "ο",
-  "ρ",
-  "σ",
-]
+allowed-confusables = ["–", "’", "′", "×", "−", "∖", "∗", "∣", "∨", "∪", "∼", "⊗", "ℂ", "ℋ", "ℒ", "ℓ", "ℕ", "ℙ", "ℚ", "ℝ", "ℤ", "ℰ", "ℱ", "𝒪", "𝒮", "𝔼", "𝕀", "𝟙", "α", "Β", "γ", "ι", "Κ", "ν", "ο", "ρ", "σ"]
 ignore = [
   "any-type",
   "bad-quotes-inline-string",
@@ -334,18 +288,7 @@ inline-quotes = "single"
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["useless-import-alias"]
-"*test*.py" = [
-  "ARG",
-  "assert",
-  "BLE",
-  "D",
-  "docstring-missing-returns",
-  "DTZ",
-  "FBT",
-  "PT",
-  "suspicious-non-cryptographic-random-usage",
-  "TRY",
-]
+"*test*.py" = ["ARG", "assert", "BLE", "D", "docstring-missing-returns", "DTZ", "FBT", "PT", "suspicious-non-cryptographic-random-usage", "TRY"]
 # === OK_EDIT: path-sync hunterhogan ===
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===

@@ -43,7 +43,6 @@ from mapFolding.oeis._symbolicRelations import boxOfRelations
 from operator import itemgetter, methodcaller
 from sympy import Equality, Expr, Integer, oo, Range, Sum, true
 from sympy.core.function import AppliedUndef
-from sympy.utilities.misc import as_int
 from typing import TYPE_CHECKING
 import re as regex
 
@@ -240,7 +239,13 @@ def makeTestsTriangle(pathFilename: Path, boxOfParameters: tuple[形ParameterRel
 	return pathFilename
 
 def getReference(call: AppliedUndef) -> tuple[OEISid, int]:
-	return (getOEISid(call), as_int(call.args[0]))
+	reference: tuple[OEISid, int] | None = None
+	match call.args:
+		case (Integer(p=index),):
+			reference = (getOEISid(call), index)
+		case _:
+			pass
+	return raiseIfNone(reference)
 
 def makeReferences(boxOfParametersFormula: tuple[形ParameterFormula, ...], boxOfParametersRelation: tuple[形ParameterRelation, ...]
 	) -> Iterator[tuple[OEISid, int]]:
