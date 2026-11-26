@@ -1,3 +1,4 @@
+<!-- path-sync copy -n hunterhogan -->
 # mapFolding
 
 `mapFolding` is a typed Python research package for exact enumeration of map foldings, stamp foldings, semi-meanders, and meanders. It provides counting algorithms, access to their computation states, and tools for transforming readable algorithm source into specialized implementations.
@@ -5,7 +6,6 @@
 [![PyPI](https://img.shields.io/pypi/v/mapFolding.svg)](https://pypi.org/project/mapFolding/)
 [![Python versions](https://img.shields.io/pypi/pyversions/mapFolding.svg)](https://pypi.org/project/mapFolding/)
 [![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml)
-[![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-blue.svg)](https://github.com/hunterhogan/mapFolding/blob/main/LICENSE)
 
 A map-folding problem asks how many ways the labeled panels of a map can be stacked while preserving their connections. A strip of stamps is the one-dimensional case. Related meander problems count configurations of non-self-intersecting curves crossing a line or ray.
 
@@ -330,14 +330,15 @@ This is my ongoing to-do list across this package and related projects. It recor
 
 Hunter, this list is incomplete: you quit writing after you got upset. Resume at mapFolding.kitAST.
 
+<!-- === DO_NOT_EDIT: path-sync hunterhogan === -->
 ## My recovery
 
 [![2011 August: Homeless since](https://img.shields.io/badge/2011_August-Homeless_since-blue?style=flat)](https://HunterThinks.com/support)
+![License: CC BY-NC 4.0](https://img.shields.io/badge/license-CC%20BY--NC%204.0-blue.svg)
 
-[![CC-BY-NC-4.0](https://raw.githubusercontent.com/hunterhogan/mapFolding/refs/heads/main/.github/CC-BY-NC-4.0.png)](https://creativecommons.org/licenses/by-nc/4.0/)
-
-By law, authors retain their copyrights unless they grant exceptions. The [Attribution-NonCommercial 4.0 International Deed](https://github.com/hunterhogan/mapFolding#License-1-ov-file) outlines how you may use this work.
+By law, authors retain their copyrights unless they grant exceptions. The Creative Commons Attribution-NonCommercial 4.0 International Deed outlines how you may use this work.
 
 The restriction on commercial use (without a license) limits advantage-taking, unjust enrichment, and exploitation. You would be morally wrong if you were to enrich yourself by using this work while I am denied healthcare, housing, security of property, and the safety of my person.
 
 To obtain and retain the right to use this work, you incur the cost of attributing the work to me. Your nominal cost might accrue as a benefit that mitigates my suffering or saves my life.
+<!-- === OK_EDIT: path-sync hunterhogan === -->
