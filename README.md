@@ -3,15 +3,18 @@
 
 `mapFolding` is a typed Python research package for exact enumeration of map foldings, stamp foldings, semi-meanders, and meanders. It provides counting algorithms, access to their computation states, and tools for transforming readable algorithm source into specialized implementations.
 
-[![PyPI](https://img.shields.io/pypi/v/mapFolding.svg)](https://pypi.org/project/mapFolding/)
-[![Python versions](https://img.shields.io/pypi/pyversions/mapFolding.svg)](https://pypi.org/project/mapFolding/)
-[![Python Tests](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml)
+[![PyPI version](https://img.shields.io/pypi/v/mapFolding.svg)](https://pypi.org/project/mapFolding/)
+[![PyPI development status](https://img.shields.io/pypi/status/mapFolding)](https://pypi.org/project/mapFolding/)
+[![PyPI typing classification](https://img.shields.io/pypi/types/mapFolding)](https://pypi.org/project/mapFolding/)
 
 A map-folding problem asks how many ways the labeled panels of a map can be stacked while preserving their connections. A strip of stamps is the one-dimensional case. Related meander problems count configurations of non-self-intersecting curves crossing a line or ray.
 
 ## Research results
 
 I use `mapFolding` to compute new sequence terms and develop exact relationships between folding and meander problems.
+
+[![OEIS A001415](https://img.shields.io/badge/OEIS-A001415-245D99)](https://oeis.org/A001415)
+[![OEIS A000682](https://img.shields.io/badge/OEIS-A000682-245D99)](https://oeis.org/A000682)
 
 - 2 × n maps: I computed the folding counts for `2 × 19` and `2 × 20` stamp strips, extending [OEIS A001415](https://oeis.org/A001415). OEIS published the terms in 2025 March.
 - Semi-meanders: I extended the semi-meander sequence [OEIS A000682](https://oeis.org/A000682) from `n = 45` through `n = 49` and added many formulas relating it to stamp foldings, meanders, and other sequences. The package's [`byFormula.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/oeis/byFormula.py) implements exact sequence relationships for further computation and comparison.
@@ -64,6 +67,9 @@ For A007822, `countFoldsSymmetric` uses an even-length computational strip to co
 
 ### Meanders and computation state
 
+[![OEIS A005316](https://img.shields.io/badge/OEIS-A005316-245D99)](https://oeis.org/A005316)
+[![OEIS A005315](https://img.shields.io/badge/OEIS-A005315-245D99)](https://oeis.org/A005315)
+
 `countMeanders('semi', n)` computes [A000682](https://oeis.org/A000682), and `countMeanders('meanders', n)` computes the open-meander sequence [A005316](https://oeis.org/A005316). The `'closed'` selector computes [A005315](https://oeis.org/A005315) using the corresponding odd-index open-meander term.
 
 The returned state retains the boundary position and transfer counts for inspection. Read the
@@ -108,6 +114,8 @@ complete row's expected length.
 
 For example, [A400429](https://oeis.org/A400429) organizes semi-meanders by crossings and winding number; each row sums to the corresponding A000682 term. [`oeis/A400429.py`](mapFolding/oeis/A400429.py) exposes the fixed-diagonal formulas, and its documentation distinguishes the proved first four diagonals from the conjectured formulas for diagonals five through eleven. The triangle-cell identities that relate A400429 to other sequences are in [`oeis/_symbolicRelations.py`](mapFolding/oeis/_symbolicRelations.py), from which `byFormula` is generated.
 
+[![OEIS A400429](https://img.shields.io/badge/OEIS-A400429-245D99)](https://oeis.org/A400429)
+
 | Task                        | Interface                                 | Result                                                                   |
 | --------------------------- | ----------------------------------------- | ------------------------------------------------------------------------ |
 | Read consecutive known rows | `getTriangle(oeisID)`                     | Rows, stopping at the first missing flat index                           |
@@ -149,6 +157,8 @@ Counting entry points accept a `flow` preference. Omit it to use the default rou
 
 The transformation pipeline in `kitAST` can inline functions, decompose state dataclasses, specialize initialized values for a map shape, and prepare Numba or Linux Codon jobs. [`RecipeJob.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/kitAST/RecipeJob.py) describes job configuration; [`easyRun/synthesizeModules.py`](https://github.com/hunterhogan/mapFolding/blob/main/easyRun/synthesizeModules.py) coordinates module regeneration. For changes that should survive regeneration, edit the source algorithm or its transformation.
 
+[![Numba JIT compilation](https://img.shields.io/badge/JIT-Numba-blue?logo=numba)](https://numba.pydata.org/)
+
 General-purpose transformation tools developed alongside this project live in [astToolkit](https://github.com/hunterhogan/astToolkit) and [astToolFactory](https://github.com/hunterhogan/astToolFactory). The transformations retained here serve `mapFolding` algorithms and jobs.
 
 ### Computation cost and saved results
@@ -179,6 +189,8 @@ remains available while the memory map or its views retain it.
 
 ## Citation and references
 
+[![Cite this software](https://img.shields.io/badge/cite-CITATION.cff-blue)](https://github.com/hunterhogan/mapFolding/blob/main/CITATION.cff)
+
 To cite this software, use [`CITATION.cff`](https://github.com/hunterhogan/mapFolding/blob/main/CITATION.cff). The mathematical and implementation references below have BibTeX entries in [`citations/`](https://github.com/hunterhogan/mapFolding/tree/main/citations/).
 
 ### Folding and meander algorithms
@@ -205,6 +217,9 @@ To cite this software, use [`CITATION.cff`](https://github.com/hunterhogan/mapFo
 
 ## Installation
 
+[![Python versions classified on PyPI](https://img.shields.io/pypi/pyversions/mapFolding.svg)](https://pypi.org/project/mapFolding/)
+[![Required Python version from source](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fhunterhogan%2FmapFolding%2Fmain%2Fpyproject.toml&label=Python%20%28source%29)](https://github.com/hunterhogan/mapFolding/blob/main/pyproject.toml)
+
 `mapFolding` requires Python 3.14 or newer. Install the published package from [PyPI](https://pypi.org/project/mapFolding/):
 
 ```console
@@ -228,6 +243,8 @@ pip install "mapFolding[pandas]"
 ```
 
 ### Development and supplemental materials
+
+[![Python Tests on main](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml/badge.svg?branch=main)](https://github.com/hunterhogan/mapFolding/actions/workflows/pythonTests.yml?query=branch%3Amain)
 
 Clone the repository to work on the algorithms or access its archives, notes, and research materials:
 
@@ -264,6 +281,8 @@ pytest mapFolding/tests/test_algorithms.py
 The tests compare algorithm variants with known OEIS values and exercise generated jobs. When adding a counting implementation, extend the relevant test cases in [`test_algorithms.py`](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/tests/test_algorithms.py). Triangle conversions, OEIS updates, and sequence formulas have dedicated checks in `test_dataStructures.py`, `test_oeis.py`, and `test_oeis_byFormula.py`; supporting behavior has its own tests in `mapFolding/tests`.
 
 ## The supplemental guides explain the notation and how to type it
+
+[![Documentation on Context7](https://img.shields.io/badge/documentation-Context7-blue)](https://context7.com/hunterhogan/mapfolding)
 
 - [Read spatial coordinates through the notation](https://github.com/hunterhogan/mapFolding/blob/main/mapFolding/_semiotics.md)
   explains the coordinate model for maps whose dimensions all have length two, including

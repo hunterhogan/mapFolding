@@ -292,7 +292,7 @@ skip-magic-trailing-comma = true
 
 [tool.setuptools]
 package-data = { "*" = ["py.typed"], mapFolding = ["_semiotics.md", "_symbols.md", "oeis/oeisdata/**/*", "oeis/terms/**/*"] }
-packages = { find = {} }
+packages = { find = { include = ["mapFolding*"] } }
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.tombi.format.rules]
