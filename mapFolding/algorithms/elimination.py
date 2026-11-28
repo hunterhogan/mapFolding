@@ -291,6 +291,8 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		state = theorem4(state)
 		state = theorem2b(state)
 
+	#=SIN= Type-checker suppression: with `python-platform = "all"`, Pyrefly keeps only the last overload of `get_context`, https://github.com/facebook/pyrefly/issues/5812.
+	# pyrefly: ignore[bad-assignment, missing-argument]
 	processManager: DefaultContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
 	queueStates: Queue[StateElimination] = processManager.Queue()

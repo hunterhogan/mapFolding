@@ -48,7 +48,8 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def _numbaTypeRepresentsPythonType(numbaType: numba_types.BaseNamedTuple, pythonType: type[tuple[Any, ...]]) -> bool:
-
+	#=SIN= Type-checker suppression: Numba's `BaseNamedTuple` does not declare the `instance_class` that each subclass sets, https://github.com/numba/numba/pull/11017.
+	# pyrefly: ignore[missing-attribute] # ty: ignore[missing-attribute]
 	return numbaType.instance_class is pythonType
 
 @overload(getitem, jit_options={'forceinline': True})

@@ -75,8 +75,12 @@ def printStatisticsPermutations(state: StateElimination) -> None:
 	def prodOfDOTvalues(boxOfChoicesLeaf: Iterable[ChoicesLeaf]) -> int:
 		return prod(map(lengthChoicesLeaf, boxOfChoicesLeaf))
 
+	#=SIN= Type-checker suppression: Pyrefly leaves the type variables of `map` unsolved inside `curry`, https://github.com/facebook/pyrefly/issues/5814.
+	# pyrefly: ignore[incompatible-overload-argument]
 	permutationsPermutationSpaceTotal: Callable[[Iterable[Any]], int] = compose(sum, toolz_map(compose(prodOfDOTvalues, DOTvalues, methodcaller('undeterminedPiles'))))
 	print(len(str(mm := fac(state.totalLeaves))), mm, "Maximum permutations of leaves")
+	#=SIN= Type-checker suppression: Pyrefly leaves the type variables of `map` unsolved inside `curry`, https://github.com/facebook/pyrefly/issues/5814.
+	# pyrefly: ignore[no-matching-overload]
 	print(len(str(rr := prod(toolz_map(lengthChoicesLeaf, filter(None, DOTvalues(getLookupChoicesLeaf(state))))))), rr, "dictionaryChoicesLeaf")
 	print(len(str(pp := permutationsPermutationSpaceTotal(state.boxOfPermutationSpace))), pp, "Pinning these leaves")
 

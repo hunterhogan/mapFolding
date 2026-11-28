@@ -69,6 +69,8 @@ def getLogicalPath(identifierPackage: str | None = None, logicalPathInfix: ident
 		)
 		```
 	"""
+	#=SIN= Type-checker suppression: Pyrefly solves the element type of a starred list literal containing `None` as a union with `None`, https://github.com/facebook/pyrefly/issues/5158.
+	# pyrefly: ignore[no-matching-overload]
 	return '.'.join(filter(None, [identifierPackage, logicalPathInfix, *identifierModule]))
 
 def getModule(

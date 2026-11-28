@@ -42,9 +42,9 @@ scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.
 dependencies = [
   "Z0Z_tools>=4.1.2",
   "anyascii",
-  "astToolkit>=0.14.2",
+  "astToolkit>=0.14.3",
   "gmpy2",
-  "hunterMakesPy>=0.10.1",
+  "hunterMakesPy>=0.10.2",
   "more_itertools",
   "numba",
   "numba_progress",

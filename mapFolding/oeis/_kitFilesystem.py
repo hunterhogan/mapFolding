@@ -20,6 +20,8 @@ def makePathFilenameEntry[形PurePath: PurePath](oeisID: OEISid, path_oeisdata: 
 	return makePathFilename(path_oeisdata / 'seq' / oeisID[0:4], oeisID, suffix='.seq')
 
 def makeBoxOfPathFilename[形PurePath: PurePath](boxOfOEISid: Iterable[OEISid], path_oeisdata: 形PurePath) -> Iterator[形PurePath]:
+	#=SIN= Type-checker suppression: ty joins the type variables of the functions in `juxt` with a union, https://github.com/astral-sh/ty/issues/2799.
+	# ty: ignore[invalid-explicit-return]
 	return chain.from_iterable(map(juxt(makePathFilenameEntry, makePathFilename_bFile), boxOfOEISid, repeat(path_oeisdata), strict=False))
 
 def filterEntryAbsent(boxOfOEISid: Iterable[OEISid], path_oeisdata: Path) -> tuple[OEISid, ...]:

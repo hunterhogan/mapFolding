@@ -144,6 +144,8 @@ def getTriangle(oeisID: OEISid) -> dict[int, list[int]]:
 		```
 	"""
 	metadata: MetadataOEISidTriangle = getMetadataTriangle(oeisID)
+	#=SIN= Type-checker suppression: Pyrefly solves `takewhile` as `takewhile[object]` because `__contains__` takes `object`, https://github.com/facebook/pyrefly/issues/5813.
+	# pyrefly: ignore[bad-argument-type]
 	return makeTriangle(map(metadata['valuesKnown'].__getitem__, takewhile(metadata['valuesKnown'].__contains__, count(metadata['offset'])))
 		, metadata['rowLength'], metadata['rowStart'])
 
