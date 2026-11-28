@@ -55,7 +55,7 @@ if TYPE_CHECKING:
     from mapFolding.theTypes import 形ArrayArcCode, 形ArrayArcCode1D, 形ArrayBoolean1D, 形ArraySelector1D, 形NumPyInteger
     from numpy import dtype, ndarray
     from numpy.lib._arraysetops_impl import UniqueInverseResult
-    from typing import Any
+    from typing import Any, Never
 indexesAnalyzed: int = 2
 次ArcCode, 次Meanders = range(indexesAnalyzed)
 slicerArcCode: ShapeSlicer = ShapeSlicer(length=..., at=次ArcCode)
@@ -133,7 +133,7 @@ def count(state: StateMeanders) -> StateMeanders:
     arrayMeanders[slicerArcCode] = array(list(state.lookupMeanders.keys()), dtype=形ArcCode)
     arrayMeanders[slicerMeanders] = array(list(state.lookupMeanders.values()), dtype=形ArcCode)
     state.lookupMeanders = {}
-    tqdmBoundary: tqdm = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=state.n < 28)
+    tqdmBoundary: tqdm[Never] = tqdm(total=state.n, initial=state.n - state.boundary, postfix={'boundary': state.boundary}, disable=state.n < 28)
     while 0 < state.boundary and (not integersWideNumPy吗(state, arrayMeanders)):
         state.bitWidthArcCode = int(arrayMeanders[slicerArcCode].max(initial=0)).bit_length()
         state.setBitsLocator()

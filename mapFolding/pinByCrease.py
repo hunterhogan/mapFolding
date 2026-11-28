@@ -93,7 +93,7 @@ def pinPile一ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	leafAt一Ante首: Leaf | None = state.permutationSpace.getLeaf(neg(一) + state.首)
 
-	if leafAt一Ante首 and (0 < 工dimensionTail(leafAt一Ante首)):
+	if leafAt一Ante首 is not None and (0 < 工dimensionTail(leafAt一Ante首)):
 		boxOfCreaseIndicesExcluded.extend([*range(工dimensionTail(leafAt一Ante首) - 零, state.totalDimensions - 一)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 
@@ -141,7 +141,7 @@ def pinPile一Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 
 	leafAt一: Leaf | None = state.permutationSpace.getLeaf(一)
 
-	if leafAt一 and (leafAt一.bit_length() < state.totalDimensions):
+	if leafAt一 is not None and (leafAt一.bit_length() < state.totalDimensions):
 		boxOfCreaseIndicesExcluded.extend([*range(零, 工dimension首零(leafAt一) + inclusive)])
 	return exclude(tupleLeavesCrease, boxOfCreaseIndicesExcluded)
 

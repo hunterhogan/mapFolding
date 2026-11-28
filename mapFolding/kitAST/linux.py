@@ -20,6 +20,8 @@ from hunterMakesPy import raiseIfNone
 from typing import TYPE_CHECKING
 import anyascii
 import lief
+#=SIN= `subprocess`: only the `codon` command line builds a native executable, and `subprocess` runs it.
+# ruff: ignore[suspicious-subprocess-import]
 import subprocess
 import sys
 

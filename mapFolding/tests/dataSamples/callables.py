@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 slicerValues: ShapeSlicer = ShapeSlicer(at=2, length=...)
 
-@jit(cache=False, error_model='numpy', fastmath=True, forceinline=True, locals={})
+@jit(cache=False, error_model='numpy', fastmath=True, forceinline=True)
 def assignShapeSlicersNumba(length: int, indexes: int, values: tuple[int, ...]) -> 形Array2Dint64:
 	"""Make an array of shape `(length, indexes)` from a keyword-constructed `ShapeArray`, then assign through `ShapeSlicer`s.
 

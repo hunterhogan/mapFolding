@@ -258,7 +258,7 @@ def count(state: StateElimination) -> StateElimination:
 			k1下aDimension: Leaf | None = leafCreasePost(leaf_k, aDimension)
 			r1下aDimension: Leaf | None = leafCreasePost(leaf_r, aDimension)
 
-			if k1下aDimension and r1下aDimension and ((k下indicesCartesian[aDimension] - r下indicesCartesian[aDimension]) % 2 == 0):
+			if k1下aDimension is not None and r1下aDimension is not None and ((k下indicesCartesian[aDimension] - r下indicesCartesian[aDimension]) % 2 == 0):
 				addForbiddenInequalityCycle(leaf_k, leaf_r, k1下aDimension, r1下aDimension)
 
 #======== Solver ================================

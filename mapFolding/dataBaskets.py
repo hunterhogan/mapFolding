@@ -52,7 +52,7 @@ from mapFolding.theTypes import (
 	形TotalLeaves)
 from math import prod
 from operator import attrgetter, methodcaller
-from typing import cast, get_args, overload, TYPE_CHECKING
+from typing import cast, get_args, overload, override, TYPE_CHECKING
 from Z0Z_tools import DOTitems, DOTkeys, DOTvalues
 import dataclasses
 import mapFolding.beDRY
@@ -101,6 +101,7 @@ class PermutationSpace(dict[Pile, LeafSpace]):
 	setdefault(key, default=None, /): remove the default of `default`.
 	"""
 
+	@override
 	def copy(self) -> PermutationSpace:
 		"""Copy pile assignments into a new permutation space.
 
@@ -960,9 +961,9 @@ class StateElimination:
 			boxOfPileCreaseByParity: list[list[tuple[Pile, Pile]]] = [[], []]
 			for pile, leaf in permutationSpace.pinnedLeaves().items():
 				crease: int | None = getCreasePost(self.mapShape, leaf, dimension)
-				if crease:
+				if crease is not None:
 					pileCrease: int | None = leafToPile.get(crease)
-					if pileCrease:
+					if pileCrease is not None:
 						boxOfPileCreaseByParity[oddLeaf吗(self.mapShape, leaf, dimension)].append((pile, pileCrease))
 			for groupedParity in boxOfPileCreaseByParity:
 				if any(creaseViolation吗(pile, pileComparand, pileCrease, pileComparandCrease)
@@ -1634,6 +1635,7 @@ class StateMeandersAxis(StateMeanders):
 	"""
 	kind: Literal['pile', 'pileDeadEnd', 'pileDeadEndOutward', 'strip', 'stripGap'] | LiteralString
 
+	@override
 	def set_arcCodeMaximum(self) -> None:
 		"""Set the fixed arch-code threshold for the axis-meander problem.
 

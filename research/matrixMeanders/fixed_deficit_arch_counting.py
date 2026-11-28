@@ -18,28 +18,28 @@ def successors(x: int, state: State) -> list[State | None]:
 		if a < x - dl:
 			if b < x - dr:
 				p: dict[int, int] = dict(enumerate(old))
-				l: int = a + b
-				r: int = a + b + 1
-				p[l] = r
-				p[r] = l
-				record(out, dl, dr, p, (*range(a), l, *range(a, a + b), r), a + 1)
+				labelLeft: int = a + b
+				labelRight: int = a + b + 1
+				p[labelLeft] = labelRight
+				p[labelRight] = labelLeft
+				record(out, dl, dr, p, (*range(a), labelLeft, *range(a, a + b), labelRight), a + 1)
 
 			if b:
 				p = dict(enumerate(old))
-				l = a + b
+				labelLeft = a + b
 				partner: int = p.pop(a + b - 1)
-				p[partner] = l
-				p[l] = partner
-				record(out, dl, dr + 1, p, (*range(a), l, *range(a, a + b - 1)), a + 1)
+				p[partner] = labelLeft
+				p[labelLeft] = partner
+				record(out, dl, dr + 1, p, (*range(a), labelLeft, *range(a, a + b - 1)), a + 1)
 
 		if a:
 			if b < x - dr:
 				p = dict(enumerate(old))
-				r = a + b + 1
+				labelRight = a + b + 1
 				partner = p.pop(a - 1)
-				p[partner] = r
-				p[r] = partner
-				record(out, dl + 1, dr, p, (*range(a - 1), *range(a, a + b), r), a - 1)
+				p[partner] = labelRight
+				p[labelRight] = partner
+				record(out, dl + 1, dr, p, (*range(a - 1), *range(a, a + b), labelRight), a - 1)
 
 			if b:
 				if old[a - 1] != a + b - 1:

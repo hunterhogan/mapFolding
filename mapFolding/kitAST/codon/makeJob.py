@@ -23,12 +23,12 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import (
 	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, setDatatypeViaImport, Settings形)
 from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, replaceStaticScalars
-from mapFolding.theTypes import 形TotalLeaves
 from pathlib import Path
 from typing import cast, TYPE_CHECKING
 import sys
 
 if TYPE_CHECKING:
+	from mapFolding.theTypes import 形TotalLeaves
 	from pathlib import PurePosixPath
 	import ast
 

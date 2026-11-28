@@ -1,29 +1,4 @@
-
 # DEVELOPMENT
-
-from __future__ import annotations
-
-from contextlib import ExitStack
-from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
-from mapFolding.dataStructures import ShapeArray, ShapeSlicer
-from numba import typeof, types as numba_types
-from numba.core import cgutils
-from numba.experimental import structref
-from numba.experimental.jitclass.base import imp_dtor
-from numba.extending import box, NativeValue, overload, reflect, typeof_impl, unbox
-from operator import getitem, setitem
-from typing import cast, NamedTuple, override, TYPE_CHECKING
-import dataclasses
-import numpy
-
-if TYPE_CHECKING:
-	from collections.abc import Callable, Sequence
-	from llvmlite.ir import AllocaInstr, IRBuilder, Type as ir_Type
-	from numba.core.base import BaseContext
-	from numba.core.datamodel.models import DataModel
-	from numba.core.pythonapi import EnvironmentManager, PythonAPI
-	from typing import Any
-
 """Teaching Numba to understand `ShapeArray` and `ShapeSlicer`.
 
 - Supports `ShapeSlicer` for array reads, writes, views, and augmented assignment.
@@ -48,6 +23,30 @@ References
 [1] Numba, High-level extension API: Implementing functions.
 	https://numba.readthedocs.io/en/stable/extending/high-level.html#implementing-functions
 """
+from __future__ import annotations
+
+from contextlib import ExitStack
+from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
+from mapFolding.dataStructures import ShapeArray, ShapeSlicer
+from numba import typeof, types as numba_types
+from numba.core import cgutils
+from numba.experimental import structref
+from numba.experimental.jitclass.base import imp_dtor
+from numba.extending import box, NativeValue, overload, reflect, typeof_impl, unbox
+from operator import getitem, setitem
+from typing import cast, NamedTuple, override, TYPE_CHECKING
+import dataclasses
+import numpy
+
+if TYPE_CHECKING:
+	from collections.abc import Callable, Sequence
+	from llvmlite.ir import AllocaInstr, IRBuilder, Type as ir_Type
+	from llvmlite.ir.values import Value
+	from numba.core.base import BaseContext
+	from numba.core.datamodel.models import DataModel
+	from numba.core.pythonapi import EnvironmentManager, PythonAPI
+	from typing import Any
+
 def _numbaTypeRepresentsPythonType(numbaType: numba_types.BaseNamedTuple, pythonType: type[tuple[Any, ...]]) -> bool:
 
 	return numbaType.instance_class is pythonType
@@ -91,7 +90,6 @@ class _BoxContext(NamedTuple):
 	pyapi: PythonAPI
 	env_manager: EnvironmentManager
 
-# box attribute
 class _ReflectContext(NamedTuple):
 	context: BaseContext
 	builder: IRBuilder
@@ -99,11 +97,16 @@ class _ReflectContext(NamedTuple):
 	env_manager: EnvironmentManager
 	is_error: AllocaInstr
 
-# unbox attribute
+	def box(self, typ: numba_types.Type, val: Value) -> Value:
+		return self.pyapi.from_native_value(typ, val, self.env_manager)
+
 class _UnboxContext(NamedTuple):
 	context: BaseContext
 	builder: IRBuilder
 	pyapi: PythonAPI
+
+	def unbox(self, typ: numba_types.Type, obj: Value) -> NativeValue:
+		return self.pyapi.to_native_value(typ, obj)
 
 @structref.register
 class 形DataclassNumba(numba_types.StructRef):

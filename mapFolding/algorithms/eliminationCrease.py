@@ -22,6 +22,7 @@ Functions
 from __future__ import annotations
 
 from functools import partial
+from hunterMakesPy import raiseIfNone
 from itertools import chain, repeat, starmap
 from mapFolding.beDRY import mapShapeIs2上nDimensions
 from mapFolding.dataBaskets import PermutationSpace, StateElimination
@@ -34,7 +35,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from multiprocessing.context import BaseContext
+	from multiprocessing.context import DefaultContext
 	from multiprocessing.process import BaseProcess
 	from multiprocessing.queues import Queue
 
@@ -115,7 +116,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 	if not state.boxOfPermutationSpace:
 		state = pinPilesAtEnds(state, 1, CPUlimit=workersMaximum)
 
-	processManager: BaseContext = get_context()
+	processManager: DefaultContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
 	queueStates: Queue[StateElimination] = processManager.Queue()
 
@@ -140,7 +141,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		state.boxOfFolding.extend(sherpa.boxOfFolding)
 		boxOfPermutationSpace = list(deconstructPermutationSpaces(sherpa.boxOfPermutationSpace))
 		queuePermutationSpacesLength += -1 + len(boxOfPermutationSpace)
-		tqdmQueue.total += len(boxOfPermutationSpace)
+		tqdmQueue.total = raiseIfNone(tqdmQueue.total) + len(boxOfPermutationSpace)
 		tqdmQueue.update(1)
 	tqdmQueue.close()
 

@@ -130,6 +130,7 @@ project-excludes = ["archive/**"]
 bad-return = "warn"
 invalid-yield = "warn"
 # === OK_EDIT: path-sync hunterhogan ===
+unnecessary-type-conversion = false
 
 [tool.pytest]
 addopts = ["--color=yes", "-n", "3"]

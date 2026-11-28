@@ -7,7 +7,7 @@ from __future__ import annotations
 from itertools import repeat
 from mapFolding.oeis import getTriangleCells, oeisIDfor_n
 from math import factorial, isqrt
-from operator import floordiv, getitem, mul, pow, sub
+from operator import floordiv, getitem, mul, sub
 from typing import Literal, LiteralString
 
 def A000108(n: int, f: Literal['A000108', 'A001246', 'A001263', 'A053121', 'A053121_2', 'A014137', 'A014137 and A401693', 'A014137 and A401693_2', 'A000108 and A401693', 'A000108 and A401693_2', 'A000108_2', 'A001405', 'A287548', 'A331499', 'A331499_2', 'A331499_3', 'A008828', 'A000108 and A002057'] | LiteralString | None = None) -> int:

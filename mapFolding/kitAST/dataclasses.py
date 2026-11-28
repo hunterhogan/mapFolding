@@ -35,7 +35,7 @@ import ast
 import dataclasses
 
 if TYPE_CHECKING:
-	from _typeshed import AnnotationForm
+	from _typeshed import AnnotationForm, DataclassInstance
 	from collections.abc import Callable, Iterable
 	from hunterMakesPy import identifierDotAttribute
 	from typing import Any, Literal
@@ -370,9 +370,9 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	Official_fieldOrder: list[str] = []
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
-	dataclass: type = importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)
+	dataclass: type[DataclassInstance] = importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)
 	boxOfFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(dataclass)
-	matryoshkas: Iterable[type] = filter(dataclasses.is_dataclass, dataclass.__mro__)
+	matryoshkas: Iterable[type[DataclassInstance]] = filter(dataclasses.is_dataclass, dataclass.__mro__)
 	for dataclass in matryoshkas:
 		astClassDef: ast.ClassDef = raiseIfNone(extractClassDef(parseLogicalPath2astModule(dataclass.__module__), dataclass.__name__))
 		annotations: dict[str, AnnotationForm] = get_annotations(dataclass)

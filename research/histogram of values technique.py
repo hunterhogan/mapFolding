@@ -8,12 +8,12 @@ In this case, I used the information to choose a value for the "sentinel", `empt
 from __future__ import annotations
 
 from itertools import repeat, starmap
-from typing import TYPE_CHECKING
+from typing import override, TYPE_CHECKING
 import dataclasses
 
 if TYPE_CHECKING:
 	from mapFolding.oeis import OEISid
-	from typing import Literal
+	from typing import ClassVar, Literal
 
 from collections import Counter
 from pathlib import Path
@@ -22,15 +22,15 @@ from pprint import pformat
 #================== Histogram of values code =========================================================
 
 valuesHistogram: Counter[tuple[str, int | bool]] = Counter()
-collectValues: bool = False
-
 class HistogramAssignments:
 	__slots__ = ()
+	collectValues: ClassVar[bool] = False
 
+	@override
 	def __setattr__(self, name: str, value: object) -> None:
 		object.__setattr__(self, name, value)
 
-		if collectValues and isinstance(value, (int, bool)):
+		if HistogramAssignments.collectValues and isinstance(value, (int, bool)):
 			valuesHistogram[name, value] += 1
 
 empty: int = 0
@@ -38,6 +38,7 @@ empty: int = 0
 type Side = Literal[0, 1]
 sideLeft: Side = 0
 sideRight: Side = 1
+lookupSideComplement: tuple[Side, Side] = (sideRight, sideLeft)
 
 @dataclasses.dataclass(slots=True)
 class Gap(HistogramAssignments):  # ========= Subclass the appropriate dataclasses ==================
@@ -179,11 +180,11 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 		if mode.folds and (wind == 0) and (次gap == node.gaps[state.side].stop):
 			if nodeAfter.gaps[state.side].首 != empty:
 				setGapEnds(nodeAfter, empty, empty, nodeAfter.gaps[state.side].stop, nodeAfter.gaps[state.side].Ω)
-			state.次gap = node.gaps[state.side ^ 1].stop
-			state.gapsSource = node.gaps[state.side ^ 1]
-			state.gapsTarget = nodeAfter.gaps[state.side ^ 1]
+			state.次gap = node.gaps[lookupSideComplement[state.side]].stop
+			state.gapsSource = node.gaps[lookupSideComplement[state.side]]
+			state.gapsTarget = nodeAfter.gaps[lookupSideComplement[state.side]]
 
-			state.次gapPrior = nodeAfter.gaps[state.side ^ 1].stop
+			state.次gapPrior = nodeAfter.gaps[lookupSideComplement[state.side]].stop
 			state.次gapAfter = empty
 
 			state.次nodeAfter = 次gapLeft
@@ -192,16 +193,16 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 			if (mode.meanders or mode.semiMeanders) and wind == 0:
 				nodeAfter.gapWindStop = 次gapLeft
 				nodeAfter.sideWindStop = state.side
-		elif state.gapWindStopVisited or node.sideWindStop == state.side ^ 1:
+		elif state.gapWindStopVisited or node.sideWindStop == lookupSideComplement[state.side]:
 			nodeAfter.gapWindStop = 次gapLeft
 			nodeAfter.sideWindStop = sideLeft
 			nodeLeft.gapWindStop = node.gapWindStop
-			nodeLeft.sideWindStop = state.side ^ 1
+			nodeLeft.sideWindStop = lookupSideComplement[state.side]
 		else:
 			nodeAfter.gapWindStop = 次gapRight
 			nodeAfter.sideWindStop = sideRight
 			nodeRight.gapWindStop = node.gapWindStop
-			nodeRight.sideWindStop = state.side ^ 1
+			nodeRight.sideWindStop = lookupSideComplement[state.side]
 
 		setGapEnds(nodeLeft, node.gapsLeft.stop, 次gapPrior, node.gapsRight.首, node.gapsRight.stop)
 		setGapEnds(nodeRight, empty, empty, 次gapAfter, node.gapsLeft.Ω)
@@ -209,12 +210,12 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 		if mode.folds and (wind == 0) and (次gap == node.gaps[state.side].stop):
 			if nodeAfter.gaps[state.side].首 != empty:
 				setGapEnds(nodeAfter, nodeAfter.gaps[state.side].首, nodeAfter.gaps[state.side].stop, empty, empty)
-			state.次gap = node.gaps[state.side ^ 1].stop
-			state.gapsSource = node.gaps[state.side ^ 1]
-			state.gapsTarget = nodeAfter.gaps[state.side ^ 1]
+			state.次gap = node.gaps[lookupSideComplement[state.side]].stop
+			state.gapsSource = node.gaps[lookupSideComplement[state.side]]
+			state.gapsTarget = nodeAfter.gaps[lookupSideComplement[state.side]]
 
 			state.次gapPrior = empty
-			state.次gapAfter = nodeAfter.gaps[state.side ^ 1].stop
+			state.次gapAfter = nodeAfter.gaps[lookupSideComplement[state.side]].stop
 
 			state.次nodeAfter = 次gapRight
 			move(state)
@@ -226,7 +227,7 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 			nodeAfter.gapWindStop = 次gapLeft
 			nodeAfter.sideWindStop = sideLeft
 			nodeLeft.gapWindStop = node.gapWindStop
-			nodeLeft.sideWindStop = state.side ^ 1
+			nodeLeft.sideWindStop = lookupSideComplement[state.side]
 		else:
 			nodeAfter.gapWindStop = 次gapRight
 			nodeAfter.sideWindStop = sideRight
@@ -473,10 +474,8 @@ lookupSettings: dict[OEISid, tuple[SettingsGeneration, SettingsMode]] = {
 }
 
 def doTheNeedful(oeisID: OEISid, n: int) -> int:
-	global collectValues
-
 	valuesHistogram.clear()
-	collectValues = True
+	HistogramAssignments.collectValues = True
 
 	try:
 		generationMode, mode = lookupSettings[oeisID]
@@ -492,7 +491,7 @@ def doTheNeedful(oeisID: OEISid, n: int) -> int:
 #================== Histogram of values output =========================================================
 	finally:
 
-		collectValues = False
+		HistogramAssignments.collectValues = False
 		Path(f'values{oeisID}.log').write_text(pformat(valuesHistogram.most_common()), encoding='utf-8')
 
 	return state.total

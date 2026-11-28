@@ -43,7 +43,7 @@ from Z0Z_tools import DOTitems
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
-	from multiprocessing.context import BaseContext
+	from multiprocessing.context import DefaultContext
 	from multiprocessing.process import BaseProcess
 	from multiprocessing.queues import Queue
 
@@ -73,7 +73,7 @@ def countPermutationSpace(permutationSpace: PermutationSpace, mapShape: tuple[in
 	Parameters
 	----------
 	permutationSpace : PermutationSpace
-
+		Pinned leaves and, at each undetermined pile, the leaves that can occupy that pile.
 	mapShape : tuple[int, ...]
 		Dimension lengths.
 
@@ -291,7 +291,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		state = theorem4(state)
 		state = theorem2b(state)
 
-	processManager: BaseContext = get_context()
+	processManager: DefaultContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
 	queueStates: Queue[StateElimination] = processManager.Queue()
 

@@ -983,7 +983,7 @@ def excludeLeaf_rBeforeLeaf_kAtPile_k(
 	state.boxOfPermutationSpace = []
 
 	boxOfPermutationSpaceUnchanged: list[PermutationSpace] = []
-	boxOfExcludeLeaf_r: Iterable[PermutationSpace] = []
+	boxOfExcludeLeaf_r: list[PermutationSpace] = []
 
 	for permutationSpace in boxOfPermutationSpace:
 		if permutationSpace.leafPinnedAtPile吗(leaf_k, pile_k):

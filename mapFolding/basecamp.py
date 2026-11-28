@@ -101,6 +101,8 @@ def countFolds(mapShape: Sequence[int]
 	flow : Literal['daoOfMapFolding', 'numba', 'theorem2', 'theorem2Numba', 'theorem2Trimmed'] | LiteralString | None = None
 		My stupid way of selecting the version of the algorithm to use in the computation. There are
 		certainly better ways to do this, but I have not yet solved this issue.
+	suffix : str = ".totalFolds"
+		Filename suffix when saving is enabled.
 
 	Returns
 	-------

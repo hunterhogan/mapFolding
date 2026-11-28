@@ -13,7 +13,6 @@ import time
 
 if TYPE_CHECKING:
 	from collections.abc import Callable
-	from os import PathLike
 	from pathlib import Path
 
 def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], list[int]] = doTheNeedful) -> Path:
@@ -27,7 +26,7 @@ def write(nStart: int, nStop: int, pathWrite: Path, counter: Callable[[int], lis
 	return pathFilename
 
 if __name__ == '__main__':
-	pathLikeWrite: PathLike[str] | None = settingsPackage.pathPackage.parent / 'research' / 'archReduction'
+	pathLikeWrite: Path = settingsPackage.pathPackage.parent / 'research' / 'archReduction'
 	oeisID = 'A000682'
 
 	flow = 'write'

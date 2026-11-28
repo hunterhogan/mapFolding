@@ -29,31 +29,31 @@ def successors(j: int, state: tuple[int, int, int, tuple[int, ...]]) -> list[tup
 			p: dict[int, int] = dict(enumerate(old))
 			left: list[int] = list(range(a))
 			right: list[int] = list(range(a, a + b))
-			l: int = left.pop() if cl else a + b
-			r: int = right.pop() if cr else a + b + 1
+			labelLeft: int = left.pop() if cl else a + b
+			labelRight: int = right.pop() if cr else a + b + 1
 			cycles = 0
 			if not cl and not cr:
-				p[l] = r
-				p[r] = l
+				p[labelLeft] = labelRight
+				p[labelRight] = labelLeft
 			elif cl and cr:
-				lp, rp = p.pop(l), p.pop(r)
-				if lp == r:
+				lp, rp = p.pop(labelLeft), p.pop(labelRight)
+				if lp == labelRight:
 					cycles += 1
 				else:
 					p[lp] = rp
 					p[rp] = lp
 			elif cl:
-				partner: int = p.pop(l)
-				p[partner] = r
-				p[r] = partner
+				partner: int = p.pop(labelLeft)
+				p[partner] = labelRight
+				p[labelRight] = partner
 			else:
-				partner = p.pop(r)
-				p[partner] = l
-				p[l] = partner
+				partner = p.pop(labelRight)
+				p[partner] = labelLeft
+				p[labelLeft] = partner
 			if not cl:
-				left.append(l)
+				left.append(labelLeft)
 			if not cr:
-				right.append(r)
+				right.append(labelRight)
 			nl, nr = dl + cl, dr + cr
 			safe: int = max(0, min(len(left) - (j - nl), len(right) - (j - nr)))
 			for s, t in zip(left[0:safe], right[0:safe], strict=False):
@@ -79,9 +79,9 @@ def automaton(j: int) -> tuple[list[tuple[int, int, int, tuple[int, ...]]], list
 	states: list[tuple[int, int, int, tuple[int, ...]]] = [initial]
 	ids: dict[tuple[int, int, int, tuple[int, ...]], int] = {initial: 0}
 	edges: list[list[tuple[tuple[int, int], int]]] = []
-	for s in states:
+	while len(edges) < len(states):
 		row: list[tuple[tuple[int, int], int]] = []
-		for label, t in successors(j, s):
+		for label, t in successors(j, states[len(edges)]):
 			if t is not None and t not in ids:
 				ids[t] = len(states)
 				states.append(t)

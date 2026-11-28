@@ -71,7 +71,7 @@ def makeDescendants(folding: Folding, state: StateElimination, position: int) ->
 		descendants.
 	"""
 	leaf一: Leaf = folding[-1]
-	domain一: Iterable[Pile] = getDomainLeaf(state, leaf一)
+	domain一: range = getDomainLeaf(state, leaf一)
 	leaves: tuple[Leaf, ...] = tuple(reversed(folding[2:-1]))
 	antiChoicesLeaf: ChoicesLeaf = makeAntiChoicesLeaf(state.totalLeaves, leaves)
 	boxOfPermutationSpace: list[PermutationSpace] = []

@@ -215,6 +215,8 @@ class LedgerOfImports:
 		----------
 		dotModule : identifierDotAttribute
 			The module name to import (e.g., "ast", "collections.abc", "os.path").
+		asName : str | None, optional
+			Alias for the imported module (e.g., "np" in `import numpy as np`).
 		type_ignores : list[ast.TypeIgnore] | None
 			Additional type ignore directives associated with this import.
 		"""

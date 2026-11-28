@@ -46,8 +46,6 @@ lookupOperator: dict[str, str] = {
     'Add': 'add', 'FloorDiv': 'floordiv', 'Mod': 'mod', 'Mult': 'mul', 'Pow': 'pow', 'Sub': 'sub', 'USub': 'neg',
 }
 
-# Private functions
-
 def _addTerm(ast_expr: ast.expr, term: Expr) -> ast.expr:
     """Append a symbolic term to an AST expression with its sign made explicit.
 
@@ -110,19 +108,27 @@ def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> as
     elif NodeTourist(IfThis.isNameIdentifier(k.name), Then.extractIt).captureLastMatch(ast_expr) is None:
         astCall = Make.Call(Make.Name('repeat'), [ast_expr])
     elif Be.BinOp(ast_expr):
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         boxOfIterables: list[ast.Call] = list(map(_makeMapInteger, [ast_expr.left, ast_expr.right], repeat(k), repeat(astCallRange)))
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__]), *boxOfIterables]
             , _makeKeywordStrict(boxOfIterables))
     elif Be.UnaryOp(ast_expr):
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__])
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
             , _makeMapInteger(ast_expr.operand, k, astCallRange)])
     elif Be.Subscript(ast_expr):
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         boxOfIterables = list(map(_makeMapInteger, [ast_expr.value, ast_expr.slice], repeat(k), repeat(astCallRange)))
         astCall = Make.Call(Make.Name('map'), [Make.Name('getitem'), *boxOfIterables], _makeKeywordStrict(boxOfIterables))
     elif Be.Call(ast_expr):
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         boxOfIterables = list(map(_makeMapInteger, ast_expr.args, repeat(k), repeat(astCallRange)))
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         astCall = Make.Call(Make.Name('map'), [ast_expr.func, *boxOfIterables], _makeKeywordStrict(boxOfIterables))
     elif Be.Tuple(ast_expr):
+        # pyrefly: ignore[missing-attribute] https://github.com/pyrefly-org/pyrefly/issues/5809
         boxOfIterables = list(map(_makeMapInteger, ast_expr.elts, repeat(k), repeat(astCallRange)))
         astCall = Make.Call(Make.Name('zip'), boxOfIterables, _makeKeywordStrict(boxOfIterables))
     else:
@@ -295,8 +301,6 @@ def _make_ast_exprInteger(expression: Basic) -> ast.expr:
 
     return ast_expr
 
-# Public functions
-
 def makeBoxOf_f(boxOfSolutions: Sequence[tuple[OEISid, Expr, Boolean]]) -> tuple[str, ...]:
     """Make a distinct selector for each formula that depends on other sequences.
 
@@ -425,7 +429,6 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'mod')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'mul')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'neg')
-    ingredientsFunction.imports.addImportFrom_asStr('operator', 'pow')
     ingredientsFunction.imports.addImportFrom_asStr('operator', 'sub')
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'Literal')
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'LiteralString')

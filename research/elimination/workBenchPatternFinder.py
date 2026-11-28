@@ -19,7 +19,7 @@ from mapFolding.measure import invertLeafIn2上nDimensions, 工dimension首零
 from more_itertools import flatten
 from operator import add, iadd, isub, mul
 from pprint import pformat, pprint
-from typing import TYPE_CHECKING
+from typing import Any, overload, TYPE_CHECKING
 import sys
 
 if TYPE_CHECKING:
@@ -32,7 +32,11 @@ def _getGroupedBy(state: StateElimination, pileTarget: Pile, groupByLeavesAtPile
 	groupedBy: dict[Leaf | tuple[Leaf, ...], list[Leaf]] = dataframeFoldings.groupby(list(groupByLeavesAtPiles))[pileTarget].apply(list).to_dict()
 	return {leaves: sorted(set(boxOfLeaves)) for leaves, boxOfLeaves in groupedBy.items()}
 
-def getExcludedLeaves(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Leaf | tuple[Leaf, ...], list[Leaf]]:
+@overload
+def getExcludedLeaves(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile]) -> dict[Leaf, list[Leaf]]: ...
+@overload
+def getExcludedLeaves(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, Pile, *tuple[Pile, ...]]) -> dict[tuple[Leaf, ...], list[Leaf]]: ...
+def getExcludedLeaves(state: StateElimination, pileTarget: Pile, groupByLeavesAtPiles: tuple[Pile, ...]) -> dict[Any, list[Leaf]]:
 	return {leaves: sorted(set(getIteratorOfLeaves(getLookupChoicesLeaf(state)[pileTarget])).difference(set(boxOfLeaves))) for leaves, boxOfLeaves in _getGroupedBy(state, pileTarget, groupByLeavesAtPiles).items()}
 
 def verifyDomainAgainstKnown(domainComputed: Sequence[tuple[int, ...]], domainKnown: Sequence[tuple[int, ...]], *, printResults: bool = True) -> dict[str, list[tuple[int, ...]]]:
