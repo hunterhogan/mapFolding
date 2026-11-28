@@ -1,3 +1,34 @@
+"""Share the functions of the meander transfer modules, and count meanders with integers of any width.
+
+(AI generated docstring)
+
+`mapFolding.kitAST.matrixMeanders.makeModules.makeModulesMeanders` generates this module.
+Regenerate the module instead of editing it.
+
+Contents
+--------
+Functions
+    countBigInt
+        Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
+    getTotalBuckets
+        Estimate the output allocation length for one transfer-matrix step.
+    integersWideNumPy吗
+        Determine whether the next transfer step exceeds the fixed-width integer capacity.
+    integersWidePandas吗
+        Determine whether the next transfer step exceeds the fixed-width integer capacity.
+    integersWide吗
+        Determine whether the next transfer step exceeds the fixed-width integer capacity.
+    makeLookupMeanders
+        Create the starting `lookupMeanders` for a matrix meander count.
+    makeLookupMeandersDiagonal
+        Prepare a semi-meander state for counting diagonal `次diagonal` at row `n`.
+    prune
+        Accumulate final contributions for dictionary states with known completion counts.
+    pruneDataFrame
+        Accumulate known diagonal contributions and retain the remaining dataframe rows.
+    walkDyckPath
+        Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
+"""
 from __future__ import annotations
 
 from functools import cache
@@ -11,7 +42,6 @@ if TYPE_CHECKING:
     from numpy import ufunc
     from typing import Literal, LiteralString
     import pandas
-'Matrix Meanders Goals:\n- Extreme abstraction.\n- Find operations with latent intermediate arrays and make the intermediate array explicit.\n- Reduce or eliminate intermediate arrays and selector arrays.\n- Write formulas in prefix notation.\n- For each formula, find an equivalent prefix notation formula that never uses the same variable as input more than once: that\n\twould allow the evaluation of the expression with only a single stack, which saves memory.\n- Standardize code as much as possible to create duplicate code.\n- Convert duplicate code to procedures.\n'
 
 def integersWide吗(state: StateMeanders) -> bool:
     """Determine whether the next transfer step exceeds the fixed-width integer capacity.
@@ -31,7 +61,7 @@ def integersWide吗(state: StateMeanders) -> bool:
     bitWidthMeanders: int = (4 * sum(state.lookupMeanders.values())).bit_length()
     return state.bitWidthLimit < max(bitWidthArcCode, bitWidthMeanders)
 
-def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int=0) -> dict[int, int]:
+def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
     """Create the starting `lookupMeanders` for a matrix meander count.
 
     (AI generated docstring)
@@ -186,7 +216,7 @@ def prune[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateM
     return state
 totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
 
-def getTotalBuckets(state: StateMeanders, totalArcCodes: int=0) -> int:
+def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
     """Estimate the output allocation length for one transfer-matrix step.
 
     (AI generated docstring)
@@ -331,7 +361,25 @@ def countBigInt[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形
     """
     while 0 < state.boundary and integersWide吗(state):
 
-        def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders=state) -> None:
+        def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders = state) -> None:
+            """Accumulate the allowed successors of one packed meander arch state.
+
+            (AI generated docstring)
+
+            Input Mutation
+            --------------
+            `state.lookupMeanders` receives `meanders` for each allowed successor below
+            `state.arcCodeMaximum`. Existing successor counts increase by that amount.
+
+            Parameters
+            ----------
+            arcCode : int
+                Packed arch state before the transfer step.
+            meanders : int
+                Number of partial meanders represented by `arcCode`.
+            state : StateMeanders
+                Enclosing transfer state by default, with the boundary already reduced.
+            """
             bitsAlfa: int = arcCode & state.bitsLocator
             bitsAlfaHasArcs: bool = 1 < bitsAlfa
             bitsAlfaIsEven: int = bitsAlfa & 1 ^ 1

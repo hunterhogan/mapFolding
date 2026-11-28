@@ -3,10 +3,10 @@ from __future__ import annotations
 
 from functools import cache, partial
 from humpy_cytoolz import compose_left, flip, juxt, pluck, unique
-from itertools import chain, compress, filterfalse
+from itertools import chain, compress, filterfalse, starmap
 from mapFolding.dataStructures import locateIndex, locateRow
 from mapFolding.oeis._metadata import (
-	dictionaryTriangle, getMetadata, getMetadataTriangle, getTriangle, getTriangleCells, getValuesKnown)
+	dictionaryTriangle, getMetadata, getMetadataTriangle, getTriangle, getTriangleCells, getValuesKnown, updateValuesKnown)
 from mapFolding.oeis._symbolicRelations import boxOfRelations
 from mapFolding.oeis._theSSOT import settingsOEIS
 from mapFolding.oeis._theTypes import OEISid
@@ -24,7 +24,8 @@ if TYPE_CHECKING:
 	from collections.abc import Callable, Iterator
 	from mapFolding.oeis._dataBaskets import MetadataOEISidTriangle
 	from mapFolding.oeis._symbolicRelations import 形Relation
-	from sympy import Range, Set, Symbol
+	from pathlib import Path
+	from sympy import Range, Symbol
 	from sympy.functions.elementary.piecewise import ExprCondPair
 	from sympy.logic.boolalg import Boolean
 	from typing import LiteralString
@@ -122,6 +123,8 @@ def makeTermLast(summand: Expr, *limits: Tuple) -> Expr:
 	return summand.subs(dict(map(itemgetter(0, 2), limits)))
 
 @overload
+def makeEquationFlat(equation: Expr) -> Expr: ...
+@overload
 def makeEquationFlat(equation: Boolean) -> Boolean: ...
 @overload
 def makeEquationFlat(equation: Basic) -> Basic: ...
@@ -159,25 +162,20 @@ def countCallsOutside(boxOfOEISid: frozenset[OEISid], wanted: AppliedUndef, equa
 	boxOfOEISidCalls: Iterator[OEISid] = map(getOEISid, boxOfCalls)
 	return len(tuple(filterfalse(boxOfOEISid.__contains__, boxOfOEISidCalls)))
 
-def solveRelation(wanted: AppliedUndef, DeadOrAlive: Boolean) -> Expr | None:
-	"""Solve a relation when known prerequisites determine one nonnegative integer.
+def solveValue(wanted: AppliedUndef, equationKnown: Boolean) -> int | None:
+	"""Solve an equation whose only sequence value is `wanted` when it determines one nonnegative integer.
 
 	(AI generated docstring)
 
-	The result retains sequence lookups for AST synthesis. An underdetermined relation or a
-	relation with several admissible answers produces `None`.
+	An underdetermined equation or an equation with several admissible answers produces `None`.
 	"""
-	boxOfCalls: set[AppliedUndef] = DeadOrAlive.atoms(AppliedUndef) - {wanted}
-	lookupKnown: dict[AppliedUndef, Expr] = dict(zip(boxOfCalls, map(getKnownValue, boxOfCalls), strict=True))
-	equationKnown: Boolean = DeadOrAlive.xreplace(lookupKnown)
-	formula: Expr | None = None
-	if equationKnown.atoms(AppliedUndef) == {wanted}:
-		boxOfValues: Set = solveset(equationKnown, wanted, domain=settingsOEIS.domain)
-		if isinstance(boxOfValues, FiniteSet) and len(boxOfValues) == 1:
-			boxOfFormulas: list[Expr] = list(roots(Poly(DeadOrAlive, wanted)))
-			boxOfFormulasKnown: Iterator[Basic] = map(flip(Basic.xreplace, lookupKnown), boxOfFormulas)
-			formula = next(compress(boxOfFormulas, map(boxOfValues.__contains__, boxOfFormulasKnown)), None)
-	return formula
+	value: int | None = None
+	match solveset(equationKnown, wanted, domain=settingsOEIS.domain):
+		case FiniteSet(args=(Integer() as solution,)):
+			value = as_int(solution)
+		case _:
+			pass
+	return value
 
 def evaluateCall(boxOfOEISidBasis: frozenset[OEISid], boxOfOEISidDeriving: frozenset[OEISid], oeisIDfor_n: Callable[[OEISid, int], int]
 	, expression: AppliedUndef) -> int | None:
@@ -219,13 +217,7 @@ def solveRelationValue(wanted: AppliedUndef, boxOfOEISidBasis: frozenset[OEISid]
 		lookupKnown[expression] = Integer(valueKnown)
 	value: int | None = None
 	if expression is None:
-		equationKnown: Boolean = equation.xreplace(lookupKnown)
-		boxOfSolutions: Set = solveset(equationKnown, wanted, domain=settingsOEIS.domain)
-		match boxOfSolutions:
-			case FiniteSet(args=(Integer() as solution,)):
-				value = as_int(solution)
-			case _:
-				pass
+		value = solveValue(wanted, equation.xreplace(lookupKnown))
 	return value
 
 def deriveValue(boxOfOEISidBasis: frozenset[OEISid], boxOfOEISidDeriving: frozenset[OEISid], oeisIDfor_n: Callable[[OEISid, int], int]
@@ -262,23 +254,22 @@ def getValueSymbolic(oeisID: OEISid, n: int, f: LiteralString | None, oeisIDfor_
 		boxOfOEISidBasis = frozenset(settingsOEIS.boxOfIDsCounting)
 	return deriveValue(boxOfOEISidBasis, frozenset(), oeisIDfor_n, settingsOEIS.lookupSymbolic[oeisID](n))
 
-def getMissingFormula(equation: Boolean) -> tuple[OEISid, int, Expr] | None:
-	"""Derive the one missing sequence value in an instantiated equation.
+def solveValueUnknown(equation: Boolean) -> tuple[OEISid, int, int] | None:
+	"""Solve an instantiated equation for its one unknown sequence value.
 
 	(AI generated docstring)
 	"""
-	boxOfUnknown: set[AppliedUndef] = substituteValuesKnown(equation).atoms(AppliedUndef)
-	missing: tuple[OEISid, int, Expr] | None = None
+	equationKnown: Boolean = substituteValuesKnown(equation)
+	boxOfUnknown: set[AppliedUndef] = equationKnown.atoms(AppliedUndef)
+	term: tuple[OEISid, int, int] | None = None
 	if len(boxOfUnknown) == 1:
 		(wanted,) = boxOfUnknown
-		match wanted.args:
-			case (Integer(p=index),):
-				formula: Expr | None = solveRelation(wanted, equation)
-				if formula is not None:
-					missing = (getOEISid(wanted), index, formula)
+		match wanted.args, solveValue(wanted, equationKnown):
+			case (Integer(p=index),), int() as value:
+				term = (getOEISid(wanted), index, value)
 			case _:
 				pass
-	return missing
+	return term
 
 def bindValueUnknown(sequence: type[AppliedUndef]) -> Iterator[Boolean]:
 	"""Instantiate every relation at the first unknown value of a sequence.
@@ -290,17 +281,48 @@ def bindValueUnknown(sequence: type[AppliedUndef]) -> Iterator[Boolean]:
 	return filter(flip(Basic.has, sequence(valueUnknown))
 		, chain.from_iterable(map(partial(bindRelation, getSequenceCall(oeisID, valueUnknown)), boxOfRelations)))
 
-def getMissingFormulas() -> tuple[tuple[OEISid, int, Expr], ...]:
-	"""Find missing values implied by relations anchored at the first unknown value of each sequence.
+def solveValuesUnknown() -> tuple[tuple[OEISid, int, int], ...]:
+	"""Solve the unknown values determined by relations anchored at the first unknown value of each sequence.
 
 	(AI generated docstring)
 
-	Relations with several unknown values remain undetermined. Sequences in `makeOEISidCalculable` have no missing values.
+	Relations with several unknown values remain undetermined. Sequences in `makeOEISidCalculable` have no unknown values to solve.
 	"""
 	boxOfSequences: tuple[type[AppliedUndef], ...] = tuple(filter(Tuple(*pluck(0, boxOfRelations)).has
 		, filterfalse(compose_left(settingsOEIS.lookupID.__getitem__, makeOEISidCalculable().__contains__), settingsOEIS.lookupSymbolic.values())))
 	boxOfEquations: dict[Boolean, None] = dict.fromkeys(chain.from_iterable(map(bindValueUnknown, tqdm(boxOfSequences, leave=False, unit='sequence'))))
-	return tuple(unique(filter(None, map(getMissingFormula, tqdm(boxOfEquations, leave=False, unit='equation'))), key=itemgetter(0, 1)))
+	return tuple(unique(filter(None, map(solveValueUnknown, tqdm(boxOfEquations, leave=False, unit='equation'))), key=itemgetter(0, 1)))
+
+def valueNext吗(term: tuple[OEISid, int, int]) -> bool:
+	oeisID, index, _value = term
+	return index == getMetadata(oeisID)['valueUnknown']
+
+def updateValueSolved(oeisID: OEISid, index: int, value: int, pathTerms: Path) -> Path:
+	return updateValuesKnown(oeisID, {index: value}, pathTerms)
+
+def updateValuesSolved(pathTerms: Path = settingsOEIS.pathTerms) -> None:
+	"""Add each term that the symbolic relations determine to the terms b-files.
+
+	(AI generated docstring)
+
+	You can use this function to compute terms from the relations in `mapFolding.oeis._symbolicRelations`
+	and the known values, without a counting algorithm. Each pass solves the relations at the first unknown
+	value of each sequence and adds the solved terms that extend the known values of their sequence without
+	a gap. Passes repeat until a pass adds no term, so each added term can determine further terms. This
+	function does not submit data to OEIS.
+
+	Parameters
+	----------
+	pathTerms : Path = `mapFolding.oeis.settingsOEIS.pathTerms`
+		Directory in the oeisdata directory layout that receives the terms b-files.
+
+	See Also
+	--------
+	`mapFolding.oeis.updateValuesKnown`
+		Add computed terms of one sequence to its terms b-file.
+	"""
+	while tuple(starmap(partial(updateValueSolved, pathTerms=pathTerms), filter(valueNext吗, sorted(solveValuesUnknown(), key=itemgetter(1))))):
+		pass
 
 def solveDifference(wanted: Expr, difference: Expr) -> Expr:
 	"""Solve `difference = 0` for one nonnegative expression of the requested value.

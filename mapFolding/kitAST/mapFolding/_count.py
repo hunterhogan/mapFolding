@@ -38,11 +38,11 @@ import operator
 if TYPE_CHECKING:
 	from collections.abc import Sequence
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding.theTypes import Default
+	from mapFolding.theTypes import Default, DefaultOverride
 	from pathlib import PurePath
-	from typing import Any
+	from typing import Unpack
 
-def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a sequential counting module with field parameters and Numba compilation.
 
 	(AI generated docstring)
@@ -59,7 +59,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for source and target callable identifiers, dispatcher source, dataclass module,
 		class and instance identifiers, compiler options, module name, and writer settings.
 
@@ -89,9 +89,9 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 		override.get('logicalPathDataclass')
 		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
 	)
-	identifierDataclass: str = override.get('identifierDataclass') or identifiers['variable']['stateDataclass']
-	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
-	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
+	名Dataclass: str = override.get('名Dataclass') or identifiers['variable']['stateDataclass']
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
+	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名Dataclass, 名DataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
@@ -100,7 +100,10 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 		, logicalPathNumba=override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
 		, 名CallableDecorator=override.get('名CallableDecorator', identifiers['function']['numbaDecorator']))
 
-	ingredientsModule = IngredientsModule(ingredientsFunction)
+	ingredientsModule = IngredientsModule(ingredientsFunction, docstring=(
+		'Count with a Numba-compiled counting function whose parameters are the fields of the state.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.mapFolding._count.makeInlineNumba` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 
 	if 名CallableDispatcherSource is not None:
 
@@ -127,7 +130,7 @@ def makeInlineNumba(astModule: ast.Module, identifiers: Default | None = None, *
 	名Module: str = override.get('名Module') or identifiers['module']['inlineNumba']
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a counting module restricted to the initial fold-group search.
 
 	(AI generated docstring)
@@ -150,7 +153,7 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for callable and counting identifiers, dispatcher, initializer names, module name,
 		package, and writer settings.
 
@@ -223,11 +226,14 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 	doThat = NodeChanger(Be.Compare.opsIs(Be.at(0, Be.LtE)), Then.removeIt).visit
 	NodeChanger(findThis, doThat).visit(ingredientsFunction.astFunctionDef)
 
-	ingredientsModule = IngredientsModule(ingredientsFunction)
+	ingredientsModule = IngredientsModule(ingredientsFunction, docstring=(
+		'Count with the counting function specialized by Theorem 2.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.mapFolding._count.makeTheorem2` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 	del ingredientsFunction
 
 	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	名Package: str = override.get('名Package') or identifiers['module']['package']
 
 	名CallableDispatcherSource: str | None = override.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcher')
 	# DEVELOPMENT When `名CallableDispatcherSource` was a parameter, passing it signalled to modify the dispatcher.
@@ -243,8 +249,8 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 		名CallableInitializeState: str = override.get('名CallableInitializeState') or identifiers['function']['initializeState']
 		AssignInitializedDataclass: ast.Assign = Make.Assign([Make.Name(名dataclassInstance)], value=Make.Call(Make.Name(名CallableInitializeState), [Make.Name(名dataclassInstance)]))
 
-		#Insert the transitionOnGroupsOfFolds call at the beginning of the function
-		ingredientsFunction.astFunctionDef.body.insert(0, AssignInitializedDataclass)
+		#Insert the transitionOnGroupsOfFolds call before the counting call
+		NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(名Callable)), Then.insertThisAbove([AssignInitializedDataclass])).visit(ingredientsFunction.astFunctionDef)
 
 		名ModuleInitializeState: str = override.get('名ModuleInitializeState') or identifiers['module']['initializeState']
 		dotModule: identifierDotAttribute = getLogicalPath(名Package, logicalPathInfix, 名ModuleInitializeState)
@@ -256,7 +262,7 @@ def makeTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a Numba counting module from a Theorem 2 source variant.
 
 	(AI generated docstring)
@@ -273,7 +279,7 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for source and target callable identifiers, dispatcher source, dataclass module,
 		class and instance identifiers, compiler options, module name, and writer settings.
 
@@ -303,10 +309,10 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 		override.get('logicalPathDataclass')
 		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
 	)
-	identifierDataclass: str = override.get('identifierDataclass') or identifiers['variable']['stateDataclass']
-	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
+	名Dataclass: str = override.get('名Dataclass') or identifiers['variable']['stateDataclass']
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
 
-	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, identifierDataclass, identifierDataclassInstance)
+	shatteredDataclass: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名Dataclass, 名DataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclass.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclass)
@@ -315,7 +321,10 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 		, logicalPathNumba=override.get('logicalPathNumba', identifiers['logicalPath']['numba'])
 		, 名CallableDecorator=override.get('名CallableDecorator', identifiers['function']['numbaDecorator']))
 
-	ingredientsModule = IngredientsModule(ingredientsFunction)
+	ingredientsModule = IngredientsModule(ingredientsFunction, docstring=(
+		'Count with a Numba-compiled Theorem 2 counting function that takes the state fields as parameters.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.mapFolding._count.makeTheorem2Numba` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 	ingredientsModule.removeImportFromModule('numpy')
 
 	if 名CallableDispatcherSource is not None:
@@ -343,7 +352,7 @@ def makeTheorem2Numba(astModule: ast.Module, identifiers: Default | None = None,
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a Theorem 2 variant with unconstrained-dimension branches removed.
 
 	(AI generated docstring)
@@ -360,7 +369,7 @@ def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for source and target callable identifiers, dispatcher source, module name, and
 		writer settings.
 
@@ -385,14 +394,17 @@ def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
 
-	identifierDataclassInstance: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
+	名DataclassInstance: str = raiseIfNone(NodeTourist[ast.arg, str](Be.arg, Then.extractIt(DOT.arg)).captureLastMatch(ingredientsFunction.astFunctionDef))
 
 	NodeChanger(
-		findThis=IfThis.isIfUnaryNotAttributeNamespaceIdentifier(identifierDataclassInstance, 'dimensionsUnconstrained')
+		findThis=IfThis.isIfUnaryNotAttributeNamespaceIdentifier(名DataclassInstance, 'dimensionsUnconstrained')
 		, doThat=Then.removeIt
 	).visit(ingredientsFunction.astFunctionDef)
 
-	ingredientsModule = IngredientsModule(ingredientsFunction)
+	ingredientsModule = IngredientsModule(ingredientsFunction, docstring=(
+		'Count with the Theorem 2 counting function without the branches for unconstrained dimensions.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.mapFolding._count.trimTheorem2` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 	ingredientsModule.removeImportFromModule('numpy')
 
 	if 名CallableDispatcherSource is not None:
@@ -411,7 +423,7 @@ def trimTheorem2(astModule: ast.Module, identifiers: Default | None = None, **ov
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a counting module with compiled workers and a process dispatcher.
 
 	(AI generated docstring)
@@ -436,7 +448,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects the defaults used by this
 		generator.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for source and target counting and dispatcher identifiers, dataclass module and
 		parallel class, state instance, counting field, compiler options, module name, and writer settings.
 
@@ -465,17 +477,17 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 		override.get('logicalPathDataclass')
 		or getLogicalPath(identifiers['module']['package'], None, identifiers['module']['dataBasket'])
 	)
-	identifierDataclass: str = override.get('identifierDataclass') or identifiers['variable']['stateDataclass']
-	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
-	名dataclassParallel: identifierDotAttribute = override.get('名dataclassParallel') or identifiers['variable']['stateDataclassParallel']
+	名Dataclass: str = override.get('名Dataclass') or identifiers['variable']['stateDataclass']
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
+	名DataclassParallel: identifierDotAttribute = override.get('名DataclassParallel') or identifiers['variable']['stateDataclassParallel']
 
-	renameName(identifierDataclass, 名dataclassParallel, astModule)
-	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(identifierDataclass))
-		, Grab.nameAttribute(Then.replaceWith(名dataclassParallel))).visit(astModule)
+	renameName(名Dataclass, 名DataclassParallel, astModule)
+	NodeChanger(Be.alias.nameIs(IfThis.isIdentifier(名Dataclass))
+		, Grab.nameAttribute(Then.replaceWith(名DataclassParallel))).visit(astModule)
 
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
 	ingredientsFunction.astFunctionDef.name = 名Callable
-	shatteredDataclassParallel: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名dataclassParallel, identifierDataclassInstance)
+	shatteredDataclassParallel: ShatteredDataclass = shatterDataclass(logicalPathDataclass, 名DataclassParallel, 名DataclassInstance)
 
 	ingredientsFunction.imports.update(shatteredDataclassParallel.imports)
 	ingredientsFunction: IngredientsFunction = removeDataclass(ingredientsFunction, shatteredDataclassParallel)
@@ -503,7 +515,7 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 #-START unpack/repack the dataclass function ------------------------------------------------
 	unRepackDataclass: IngredientsFunction = astModuleToIngredientsFunction(astModule, 名CallableDispatcherSource)
-	unRepackDataclass.astFunctionDef.name = 'unRepack' + 名dataclassParallel
+	unRepackDataclass.astFunctionDef.name = 'unRepack' + 名DataclassParallel
 	unRepackDataclass.imports.update(shatteredDataclassParallel.imports)
 	名CallableTarget: identifierDotAttribute = ingredientsFunction.astFunctionDef.name
 	NodeChanger(
@@ -522,25 +534,34 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 
 	ingredientsDoTheNeedful: IngredientsFunction = IngredientsFunction(
 		astFunctionDef=Make.FunctionDef(名CallableDispatcher
-			, argumentSpecification=Make.arguments(list_arg=[Make.arg(identifierDataclassInstance, annotation=Make.Name(名dataclassParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
-			, body=[Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name(identifierDataclassInstance)]))
-				, Make.AnnAssign(Make.Name('boxOfStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(名dataclassParallel))
+			, argumentSpecification=Make.arguments(list_arg=[Make.arg(名DataclassInstance, annotation=Make.Name(名DataclassParallel)), Make.arg('concurrencyLimit', annotation=Make.Name('int'))])
+			, body=[Make.Expr(Make.Constant(f'Count the foldings of the map in `{名DataclassInstance}` in concurrent processes.\n\n'
+					'\t(AI generated docstring)\n\n'
+					f'\tEach of the `{名DataclassInstance}.taskDivisions` tasks counts part of the groups of foldings in its own process.\n\n'
+					'\tParameters\n\t----------\n'
+					f'\t{名DataclassInstance} : {名DataclassParallel}\n\t\tAn initialized insertion search.\n'
+					'\tconcurrencyLimit : int\n\t\tMaximum number of worker processes.\n\n'
+					'\tReturns\n\t-------\n'
+					'\ttotalFolds : int\n\t\tNumber of foldings of the map.\n'
+					f'\tboxOfStatesParallel : list[{名DataclassParallel}]\n\t\tCompleted insertion search of each task.\n\t'))
+				, Make.Assign([Make.Name('stateParallel', Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name(名DataclassInstance)]))
+				, Make.AnnAssign(Make.Name('boxOfStatesParallel', Make.Store()), annotation=Make.Subscript(value=Make.Name('list'), slice=Make.Name(名DataclassParallel))
 					, value=Make.Mult.join([Make.List([Make.Name('stateParallel')]), Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')]))
 				, Make.AnnAssign(Make.Name('groupsOfTotalFolds', Make.Store()), annotation=Make.Name('int'), value=Make.Constant(value=0))
 
-				, Make.AnnAssign(Make.Name('dictionaryConcurrency', Make.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(名dataclassParallel))])), value=Make.Dict())
+				, Make.AnnAssign(Make.Name('dictionaryConcurrency', Make.Store()), annotation=Make.Subscript(value=Make.Name('dict'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(value=Make.Name('ConcurrentFuture'), slice=Make.Name(名DataclassParallel))])), value=Make.Dict())
 				, Make.With(items=[Make.withitem(context_expr=Make.Call(Make.Name('ProcessPoolExecutor'), listParameters=[Make.Name('concurrencyLimit')]), optional_vars=Make.Name('concurrencyManager', Make.Store()))]
 					, body=[Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
-							, body=[Make.Assign([Make.Name(identifierDataclassInstance, Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
-								, Make.Assign([Make.Attribute(Make.Name(identifierDataclassInstance), 'task次', context=Make.Store())], value=Make.Name('indexSherpa'))
-								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name(identifierDataclassInstance)]))])
+							, body=[Make.Assign([Make.Name(名DataclassInstance, Make.Store())], value=Make.Call(Make.Name('deepcopy'), listParameters=[Make.Name('stateParallel')]))
+								, Make.Assign([Make.Attribute(Make.Name(名DataclassInstance), 'task次', context=Make.Store())], value=Make.Name('indexSherpa'))
+								, Make.Assign([Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Name('concurrencyManager'), 'submit'), listParameters=[Make.Name(unRepackDataclass.astFunctionDef.name), Make.Name(名DataclassInstance)]))])
 						, Make.For(Make.Name('indexSherpa', Make.Store()), iter=Make.Call(Make.Name('range'), listParameters=[Make.Attribute(Make.Name('stateParallel'), 'taskDivisions')])
 							, body=[Make.Assign([Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa'), context=Make.Store())], value=Make.Call(Make.Attribute(Make.Subscript(Make.Name('dictionaryConcurrency'), slice=Make.Name('indexSherpa')), 'result')))
 								, Make.AugAssign(Make.Name('groupsOfTotalFolds', Make.Store()), op=Make.Add(), value=Make.Attribute(Make.Subscript(Make.Name('boxOfStatesParallel'), slice=Make.Name('indexSherpa')), 名Counting))])])
 
 				, Make.AnnAssign(Make.Name('totalFolds', Make.Store()), annotation=Make.Name('int'), value=Make.Mult.join([Make.Name('groupsOfTotalFolds'), Make.Attribute(Make.Name('stateParallel'), 'totalLeaves')]))
 				, Make.Return(Make.Tuple([Make.Name('totalFolds'), Make.Name('boxOfStatesParallel')]))]
-			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(名dataclassParallel))])))
+			, returns=Make.Subscript(Make.Name('tuple'), slice=Make.Tuple([Make.Name('int'), Make.Subscript(Make.Name('list'), slice=Make.Name(名DataclassParallel))])))
 		, imports=LedgerOfImports(Make.Module([Make.ImportFrom('concurrent.futures', list_alias=[Make.alias('Future', asName='ConcurrentFuture'), Make.alias('ProcessPoolExecutor')]),
 			Make.ImportFrom('copy', list_alias=[Make.alias('deepcopy')]),
 			Make.ImportFrom('multiprocessing', list_alias=[Make.alias('set_start_method', asName='multiprocessing_set_start_method')])])
@@ -548,6 +569,10 @@ def makeInlineParallelNumba(astModule: ast.Module, identifiers: Default | None =
 	)
 
 	ingredientsModule = IngredientsModule([ingredientsFunction, unRepackDataclass, ingredientsDoTheNeedful]
+						, docstring=('Count map foldings in concurrent processes with a Numba-compiled counting function.\n\n'
+							'(AI generated docstring)\n\n'
+							'`mapFolding.kitAST.mapFolding._count.makeInlineParallelNumba` generates this module.\n'
+							'Regenerate the module instead of editing it.\n')
 						, prologue=Make.Module([Make.If(test=Make.Compare(left=Make.Name('__name__'), ops=[Make.Eq()], comparators=[Make.Constant('__main__')]), body=[Make.Expr(Make.Call(Make.Name('multiprocessing_set_start_method'), listParameters=[Make.Constant('spawn')]))])])
 	)
 	ingredientsModule.removeImportFromModule('numpy')

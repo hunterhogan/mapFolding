@@ -32,18 +32,84 @@ if TYPE_CHECKING:
 	from pathlib import Path
 
 def _makeDescendants(diagram: Folding, mapShape: tuple[int, ...]) -> tuple[Folding, ...]:
+	"""I use this operation to retain valid diagrams after inserting the next leaf.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	diagram : Folding
+		Valid partial leaf order with the origin leaf fixed at pile zero.
+	mapShape : tuple[int, ...]
+		Dimension lengths defining the leaf connections.
+
+	Returns
+	-------
+	descendants : tuple[Folding, ...]
+		Valid insertions of leaf `len(diagram)` at piles from `len(diagram)` down to one.
+	"""
 	inserting: Iterable[Folding] = map(partial(_insertLeaf, diagram, len(diagram)), range(len(diagram), pileOrigin, decreasing))
 	return tuple(filter(partial(_archDiagramValid吗, mapShape=mapShape), inserting))
 
 def _insertLeaf(diagram: Folding, leaf: Leaf, pile: Pile) -> Folding:
+	"""I use this operation to insert a leaf at a pile in a new diagram.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	diagram : Folding
+		Leaf order before insertion.
+	leaf : Leaf
+		Label of the leaf to insert.
+	pile : Pile
+		Insertion position, interpreted as a Python slice boundary.
+
+	Returns
+	-------
+	diagramInserted : Folding
+		New leaf order with `leaf` between the two slices of `diagram`.
+	"""
 	return (*diagram[:pile], leaf, *diagram[pile:])
 
 def _archDiagramValid吗(diagram: Folding, mapShape: tuple[int, ...]) -> bool:
+	"""I use this test to reject crossings introduced by the last inserted leaf.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	diagram : Folding
+		Partial leaf order containing consecutive labels from zero through `len(diagram) - 1`.
+		The diagram before insertion must already be valid.
+	mapShape : tuple[int, ...]
+		Dimension lengths defining the leaf connections and arch parity.
+
+	Returns
+	-------
+	isValid : bool
+		`True` when every new arch avoids existing arches of the same parity in its dimension.
+	"""
 	lookupPile: dict[Leaf, Pile] = dict(zip(diagram, range(len(diagram)), strict=True))
 	leafInserted: Leaf = len(diagram) - 1
 	mapShapeProducts: tuple[int, ...] = getMapShapeProducts(mapShape)
 
 	def dimensionValid吗(dimension: int) -> bool:
+		"""Check the newly inserted leaf's arch in one dimension for crossings.
+
+		(AI generated docstring)
+
+		Parameters
+		----------
+		dimension : int
+			Zero-based dimension in the enclosing map shape.
+
+		Returns
+		-------
+		isValid : bool
+			`True` when no arch ends at the inserted leaf in this dimension, or its arch
+			crosses no existing arch of the same parity.
+		"""
 		leafAnte: Leaf = leafInserted - mapShapeProducts[dimension]
 		if leafAnte < leafOrigin or getArchPost(mapShape, leafAnte, dimension) != leafInserted:
 			return True
@@ -52,6 +118,20 @@ def _archDiagramValid吗(diagram: Folding, mapShape: tuple[int, ...]) -> bool:
 		archParity: int = oddLeaf吗(mapShape, leafAnte, dimension)
 
 		def comparandViolates吗(leafComparand: Leaf) -> bool:
+			"""Check whether an existing arch crosses the newly inserted leaf's arch.
+
+			(AI generated docstring)
+
+			Parameters
+			----------
+			leafComparand : Leaf
+				Initial leaf of a possible existing arch in the enclosing dimension.
+
+			Returns
+			-------
+			isViolation : bool
+				`True` when the arch is complete, has the new arch's parity, and crosses it.
+			"""
 			leafPost: Leaf | None = getArchPost(mapShape, leafComparand, dimension)
 			if leafPost is None or leafPost >= leafInserted:
 				return False
@@ -65,6 +145,22 @@ def _archDiagramValid吗(diagram: Folding, mapShape: tuple[int, ...]) -> bool:
 	return all(map(dimensionValid吗, range(len(mapShape))))
 
 def _archesCross吗(pilesArch: tuple[Pile, Pile], pilesComparand: tuple[Pile, Pile]) -> bool:
+	"""I use this test to detect alternating endpoints of two arches.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	pilesArch : tuple[Pile, Pile]
+		Pile positions of the first arch's endpoints, in leaf-label order.
+	pilesComparand : tuple[Pile, Pile]
+		Pile positions of the second arch's endpoints, in leaf-label order.
+
+	Returns
+	-------
+	isCrossing : bool
+		`True` when the arches have interleaving endpoints and therefore cross on the same side.
+	"""
 	archesSorted: list[tuple[Pile, Pile]] = sorted((pilesArch, pilesComparand))
 	return archesCross吗(archesSorted[0][0], archesSorted[1][0], archesSorted[0][1], archesSorted[1][1])
 

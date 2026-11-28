@@ -21,12 +21,12 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.kitAST.numba.kitNumba import ParametersNumba
-	from mapFolding.theTypes import Default
+	from mapFolding.theTypes import Default, DefaultOverride
 	from pathlib import PurePath
-	from typing import Any
+	from typing import Unpack
 	import ast
 
-def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
+def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> IngredientsModule:
 	"""Generate array width checks and the vectorized Dyck-endpoint operation.
 
 	(AI generated docstring)
@@ -90,7 +90,7 @@ def makeCommonNumPy(astModule: ast.Module, astModuleDyck: ast.Module, identifier
 	]))
 	return ingredientsModule
 
-def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Any) -> IngredientsModule:
+def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> IngredientsModule:
 	"""Generate dataframe width checks and pruning from existing algorithm functions.
 
 	(AI generated docstring)
@@ -155,7 +155,7 @@ def makeCommonPandas(astModule: ast.Module, astModuleNumPy: ast.Module, identifi
 	ingredientsModule.appendIngredientsFunction(ingredients)
 	return ingredientsModule
 
-def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a meander counting variant guarded by the configured integer-width test.
 
 	(AI generated docstring)
@@ -178,7 +178,7 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 		nodes.
 	identifiers : Default | None = None
 		Identifier and output defaults; a falsy value selects matrix-meander defaults.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for source counting and dispatcher identifiers, target callable, width test, state,
 		modules, logical paths, and package.
 
@@ -227,9 +227,9 @@ def makeCountBigInt(astModule: ast.Module, identifiers: Default | None = None, *
 	ingredientsModule = IngredientsModule(epilogue=astModuleShare)
 	ingredientsModule.appendEpilogue(astModule)
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
-	return toDisk(ingredientsModule, identifiers, override, 名Module, logicalPathInfix=logicalPathInfix)
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makePrune(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a meander counting variant with state-pruning assignments.
 
 	(AI generated docstring)
@@ -247,7 +247,7 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 		nodes.
 	identifiers : Default | None = None
 		Identifier and output defaults; `None` selects matrix-meander defaults.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for counting, pruning, state and module identifiers, algorithm path, package, and
 		writer settings.
 
@@ -276,7 +276,10 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 	astModuleShare: ast.Module = parsePathFilename2astModule(makePathFilenameModule(
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModuleShare))
 	removeFunctionDef(override.get('名CallableDyck') or identifiers['function']['Dyck'], astModuleShare)
-	ingredientsModule = IngredientsModule(epilogue=astModuleShare)
+	ingredientsModule = IngredientsModule(epilogue=astModuleShare, docstring=(
+		'Count meanders by the dictionary transfer, removing states whose counts have a known formula.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModules.makePrune` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 	ingredientsModule.appendEpilogue(astModule)
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 
@@ -294,7 +297,7 @@ def makePrune(astModule: ast.Module, identifiers: Default | None = None, **overr
 
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Generate an array meander module with formula pruning.
 
 	(AI generated docstring)
@@ -311,7 +314,7 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	identifiers : Default | None = None
 		Mapping of source names, generated names, and paths. `None` selects
 		`defaultMatrixMeanders`.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Replacements for the counting, dispatcher, pruning, array, state, progress, and
 		module identifiers. Package and logical-path settings also control generated imports
 		and the destination resolved by `toDisk`.
@@ -367,7 +370,7 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 	名ModulePrune: str = override.get('名ModulePrune') or identifiers['module']['prune']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
 	名ModuleCommon: str = override.get('名ModuleCommon') or identifiers['module']['common']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	名Package: str = override.get('名Package') or identifiers['module']['package']
 
 	astAssign_shortcutNumPy: ast.Assign = Make.Assign([
 		Make.Tuple([Make.Name(名DataclassInstance, Make.Store()), Make.Name(名ArrayMeanders, Make.Store())], Make.Store())]
@@ -387,12 +390,15 @@ def makePruneNumPy(astModule: ast.Module, identifiers: Default | None = None, **
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
 	removeFunctionDef(名CallableCounting, astModulePrune)
 	removeFunctionDef(名CallableDispatcher, astModulePrune)
-	ingredientsModule = IngredientsModule(epilogue=astModulePrune)
+	ingredientsModule = IngredientsModule(epilogue=astModulePrune, docstring=(
+		'Count meanders by the NumPy transfer, removing states whose counts have a known formula.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModules.makePruneNumPy` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 	ingredientsModule.appendEpilogue(astModule)
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Generate a dataframe meander module with formula pruning.
 
 	(AI generated docstring)
@@ -409,7 +415,7 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	identifiers : Default | None = None
 		Mapping of source names, generated names, and paths. `None` selects
 		`defaultMatrixMeanders`.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Replacements for the aggregation, dispatcher, pruning, dataframe, state, and module
 		identifiers. Package and logical-path settings also control generated imports and
 		the destination resolved by `toDisk`.
@@ -466,7 +472,7 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 	名ModulePrune: str = override.get('名ModulePrune') or identifiers['module']['prune']
 	名ModuleShare: str = override.get('名ModuleShare') or identifiers['module']['share']
 	名ModuleCommon: str = override.get('名ModuleCommon') or identifiers['module']['common']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	名Package: str = override.get('名Package') or identifiers['module']['package']
 
 	astAssign_shortcutPandas: ast.Assign = Make.Assign([
 		Make.Tuple([Make.Name(名DataclassInstance, Make.Store()), Make.Name(名DataframeAnalyzed, Make.Store())], Make.Store())]
@@ -486,12 +492,15 @@ def makePrunePandas(astModule: ast.Module, identifiers: Default | None = None, *
 		override.get('pathRoot') or identifiers['filesystem']['pathRoot'], logicalPathInfix, 名ModulePrune))
 	removeFunctionDef(名CallableCounting, astModulePrune)
 	removeFunctionDef(名CallableDispatcher, astModulePrune)
-	ingredientsModule = IngredientsModule(epilogue=astModulePrune)
+	ingredientsModule = IngredientsModule(epilogue=astModulePrune, docstring=(
+		'Count meanders by the pandas transfer, removing states whose counts have a known formula.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModules.makePrunePandas` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 	ingredientsModule.appendEpilogue(astModule)
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
 	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a NumPy counting variant with selected control flow removed.
 
 	(AI generated docstring)
@@ -507,7 +516,7 @@ def makeNumPyChopItUp(astModule: ast.Module, identifiers: Default | None = None,
 		nodes.
 	identifiers : Default | None = None
 		Identifier and output defaults; a falsy value selects matrix-meander defaults.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for counting, dispatcher, state, and module identifiers plus writer settings.
 
 	Returns
@@ -591,6 +600,11 @@ def makeModulesMeanders() -> None:
 		, parsePathFilename2astModule(pathFilenameShare), identifiers)
 	ingredientsModule.appendPrologue(parsePathFilename2astModule(pathFilenameShare))
 	ingredientsModule.imports.extractImports(ingredientsModule.prologue)
+	ingredientsModule.docstring = (
+		'Share the functions of the meander transfer modules, and count meanders with integers of any width.'
+		'\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModules.makeModulesMeanders` generates this module.\n'
+		'Regenerate the module instead of editing it.\n')
 	toDisk(ingredientsModule, identifiers, {}, 名ModuleShare)
 	makePrune(parsePathFilename2astModule(pathFilenameDyck), identifiers)
 	makePruneNumPy(parsePathFilename2astModule(pathFilenameNumPy), identifiers)

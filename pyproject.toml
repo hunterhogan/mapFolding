@@ -40,9 +40,9 @@ classifiers = [
 ]
 scripts = { OEIS_for_n = "mapFolding.oeis:OEIS_for_n", getOEISids = "mapFolding.oeis:getOEISids" }
 dependencies = [
-  "Z0Z_tools>=4.1.1",
+  "Z0Z_tools>=4.1.2",
   "anyascii",
-  "astToolkit>=0.14.1",
+  "astToolkit>=0.14.2",
   "gmpy2",
   "hunterMakesPy>=0.10.1",
   "more_itertools",
@@ -55,7 +55,7 @@ dependencies = [
   "tqdm",
   "typing_extensions>=4.16.0",
 ]
-optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'"], oeisdata = ["dulwich>=1.2.21"], ortools = ["ortools; python_version < '3.15'"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"] }
+optional-dependencies = { codon = ["codon-jit>=0.4.6; sys_platform == 'linux'", "lief; sys_platform == 'linux'"], oeisdata = ["dulwich>=1.2.21"], ortools = ["ortools"], pandas = ["pandas", "pyarrow"], polars = ["polars>=1.44.2"] }
 
 [project.urls]
 Context7 = "https://context7.com/hunterhogan/mapfolding"
@@ -68,7 +68,7 @@ Repository = "https://github.com/hunterhogan/mapFolding.git"
 
 [dependency-groups]
 development = ["gmpy2-stubs", "google-api-python-client-stubs>=1.35.0", "ipykernel", "ipywidgets", "matplotlib", "memray; sys_platform == 'linux'", "mpmath>=1.4.0", "networkx", "pandas-stubs", "py-spy", "pyarrow-stubs", "pytest-cov", "setuptools", "types-networkx", "types-tqdm"]
-testing = ["dulwich", "hypothesis", "ortools; python_version < '3.15'", "pandas", "polars>=1.44.2", "pyarrow", "pytest>=9.0", "pytest-env", "pytest-xdist"]
+testing = ["dulwich", "hypothesis", "ortools", "pandas", "polars>=1.44.2", "pyarrow", "pytest>=9.0", "pytest-env", "pytest-xdist"]
 
 [build-system]
 requires = ["setuptools"]
@@ -96,8 +96,10 @@ run = { branch = true, concurrency = ["multiprocessing"], data_file = "mapFoldin
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.isort]
 add_imports = ["from __future__ import annotations"]
+append_only = true
+atomic = true
 combine_as_imports = true
-extend_skip_glob = ["*.ipynb", "*.pyi"]
+extend_skip_glob = ["*.pyi"]
 filter_files = true
 force_alphabetical_sort_within_sections = true
 from_first = true
@@ -108,26 +110,25 @@ lines_after_imports = 1
 lines_between_types = 0
 multi_line_output = 4
 no_sections = true
-overwrite_in_place = true
+skip_gitignore = true
 use_parentheses = true
 # === OK_EDIT: path-sync hunterhogan ===
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.pyrefly]
-preset = "strict"
 enabled-ignores = ["pyrefly"]
+# ignore-errors-in-generated-code = true
 infer-with-first-use = false
-project-excludes = ["typings", "typings/**/*", "**/node_modules", "**/__pycache__", "**/.*", ".v*"]
-site-packages-path = ["./typings"]
+preset = "strict"
+python-platform = "all"
 # === OK_EDIT: path-sync hunterhogan ===
+
+project-excludes = ["archive/**"]
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.pyrefly.errors]
 bad-return = "warn"
-invalid-type-var = "warn"
 invalid-yield = "warn"
-protected-access = "warn"
-redundant-condition = "warn"
 # === OK_EDIT: path-sync hunterhogan ===
 
 [tool.pytest]
@@ -148,6 +149,8 @@ NUMBA_JIT_COVERAGE = "1"  # This does not work, whether it is 0 or 1.
 [tool.ruff]
 line-length = 140
 # === OK_EDIT: path-sync hunterhogan ===
+
+extend-exclude = ["archive"]
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ruff.lint]
@@ -274,8 +277,16 @@ inline-quotes = "single"
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ruff.lint.per-file-ignores]
-"*test*.py" = ["ARG", "assert", "BLE", "D", "DTZ", "FBT", "PT", "suspicious-non-cryptographic-random-usage", "TRY"]
+"**/*_test.py" = ["ARG", "assert", "BLE", "D", "DTZ", "FBT", "PT", "suspicious-non-cryptographic-random-usage", "TRY"]
+"**/conftest*.py" = ["ARG", "assert", "BLE", "D", "DTZ", "FBT", "PT", "suspicious-non-cryptographic-random-usage", "TRY"]
+"**/test_*.py" = ["ARG", "assert", "BLE", "D", "DTZ", "FBT", "PT", "suspicious-non-cryptographic-random-usage", "TRY"]
+"**/tests/**" = ["ARG", "assert", "BLE", "D", "DTZ", "FBT", "PT", "suspicious-non-cryptographic-random-usage", "TRY"]
 # === OK_EDIT: path-sync hunterhogan ===
+"easyRun/**" = ["commented-out-code", "D1", "T20"]
+"mapFolding/basecamp.py" = ["import-outside-top-level"]
+"mapFolding/synthesized/**" = ["unnecessary-assign"]
+"mapFolding/synthesized/matrixMeanders/pruneNumPy.py" = ["pandas-use-of-dot-values"]
+"research/**" = ["assert", "commented-out-code", "D1", "T20"]
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ruff.lint.pydocstyle]
@@ -285,8 +296,10 @@ convention = "numpy"
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ruff.format]
 docstring-code-format = true
-quote-style = "single"
 indent-style = "tab"
+line-ending = "lf"
+nested-string-quote-style = "preferred"
+quote-style = "single"
 skip-magic-trailing-comma = true
 # === OK_EDIT: path-sync hunterhogan ===
 
@@ -302,6 +315,7 @@ line-ending = "lf"
 # === DO_NOT_EDIT: path-sync hunterhogan ===
 [tool.ty.analysis]
 respect-type-ignore-comments = false
+return-type-inference = "always"
 # === OK_EDIT: path-sync hunterhogan ===
 
 # === DO_NOT_EDIT: path-sync hunterhogan ===
@@ -309,6 +323,19 @@ respect-type-ignore-comments = false
 extra-paths = ["./typings"]
 python-platform = "all"
 # === OK_EDIT: path-sync hunterhogan ===
+
+# === DO_NOT_EDIT: path-sync hunterhogan ===
+[tool.ty.rules]
+blanket-ignore-comment = "error"
+missing-override-decorator = "error"
+missing-type-argument = "error"
+possibly-missing-attribute = "warn"  # Might annoy you: ty's docs say this rule produces many false positives.
+possibly-unresolved-reference = "warn"  # Might annoy you: ty's docs say this rule produces many false positives.
+truthiness-test-of-none-union = "warn"  # Might annoy you: flags `if value:` on `int | None` or `str | None` even when treating 0 or '' like None is deliberate.
+# === OK_EDIT: path-sync hunterhogan ===
+
+[tool.ty.src]
+exclude = ["archive"]
 
 [tool.updateCitation]
 filenameCitationDOTcff = "CITATION.cff"

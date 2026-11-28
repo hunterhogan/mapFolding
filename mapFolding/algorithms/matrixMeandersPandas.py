@@ -1,3 +1,19 @@
+"""Count meanders with pandas tables of packed arch states and their multiplicities.
+
+(AI generated docstring)
+
+You can combine counts for identical successor states in a table and resume with Python
+integers when fixed-width integers cannot hold the next step. The entry point accepts and
+returns a dictionary-backed `mapFolding.dataBaskets.StateMeanders`.
+
+Contents
+--------
+Functions
+	count
+		Advance transfers while the pandas integer capacity permits.
+	doTheNeedful
+		Complete a count with pandas transfers and Python-integer transfers as needed.
+"""
 from __future__ import annotations
 
 from gc import collect as goByeBye
@@ -34,6 +50,16 @@ def count(state: StateMeanders) -> StateMeanders:
     while 0 < state.boundary and not integersWidePandas吗(state, dataframeAnalyzed):
 
         def aggregateArcCodes()  -> None:
+            """Combine recorded successor counts for each distinct arch code.
+
+            (AI generated docstring)
+
+            Transfer Table
+            --------------
+            The enclosing `dataframeAnalyzed` is replaced with one row per arch code and
+            its summed count. Only the first `state.次Target` records participate, and
+            arch codes retain their order of first appearance.
+            """
             nonlocal dataframeAnalyzed
             dataframeAnalyzed = dataframeAnalyzed.iloc[0:state.次Target].groupby('arcCodeAnalysis', sort=False)['meanders'].aggregate('sum').reset_index()
 

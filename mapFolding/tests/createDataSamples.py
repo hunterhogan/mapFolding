@@ -43,7 +43,7 @@ def makeVerificationDataLeavesDomain(sequenceTotalDimensions: Sequence[int], box
 
 	"""
 	def resolveLeaf(leafSpec: int | Callable[[int], int], totalDimensions: int) -> int:
-		return leafSpec(totalDimensions) if callable(leafSpec) else leafSpec  # ty: ignore[invalid-return-type]
+		return leafSpec(totalDimensions) if callable(leafSpec) else leafSpec
 
 	def getLeafName(leafSpec: int | Callable[[int], int]) -> str:
 		leafSpecName: str = str(leafSpec)
@@ -83,7 +83,7 @@ def makeVerificationDataLeavesDomain(sequenceTotalDimensions: Sequence[int], box
 		'This module contains empirically extracted combined domain data for leaves',
 		f'{boxOfLeafNames} across multiple map-shape configurations.',
 		'',
-		'Each list is named `boxOfDomain2上{totalDimensions}Dimensional` where `totalDimensions`',  # ruff: ignore[missing-f-string-syntax]
+		'Each list is named `boxOfDomain2上{totalDimensions}Dimensional` where `totalDimensions`',
 		'is the exponent in the 2^n-dimensional mapShape, and it contains tuples representing',
 		'valid pile indices for the specified leaves. The tuple element sequence follows the original',
 		'leaf argument order.',

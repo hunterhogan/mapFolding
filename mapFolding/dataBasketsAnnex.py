@@ -1,16 +1,16 @@
-#ruff: ignore[undocumented-public-module]
+
 # DEVELOPMENT
-#ruff: file-ignore[private-member-access]
+
 from __future__ import annotations
 
 from contextlib import ExitStack
 from mapFolding.dataBaskets import StateMapFolding, StateMapFoldingSymmetric
 from mapFolding.dataStructures import ShapeArray, ShapeSlicer
-from numba import typeof, types as numba_types  # pyright: ignore[reportUnknownVariableType]
+from numba import typeof, types as numba_types
 from numba.core import cgutils
 from numba.experimental import structref
-from numba.experimental.jitclass.base import imp_dtor  # pyright: ignore[reportUnknownVariableType]
-from numba.extending import box, NativeValue, overload, reflect, typeof_impl, unbox  # pyright: ignore[reportUnknownVariableType]
+from numba.experimental.jitclass.base import imp_dtor
+from numba.extending import box, NativeValue, overload, reflect, typeof_impl, unbox
 from operator import getitem, setitem
 from typing import cast, NamedTuple, override, TYPE_CHECKING
 import dataclasses
@@ -49,8 +49,8 @@ References
 	https://numba.readthedocs.io/en/stable/extending/high-level.html#implementing-functions
 """
 def _numbaTypeRepresentsPythonType(numbaType: numba_types.BaseNamedTuple, pythonType: type[tuple[Any, ...]]) -> bool:
-	#=SIN= Pyright suppression: Numba's `BaseNamedTuple` stub omits its runtime `instance_class` attribute.
-	return numbaType.instance_class is pythonType  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[missing-attribute]
+
+	return numbaType.instance_class is pythonType
 
 @overload(getitem, jit_options={'forceinline': True})
 def _overloadGetitemShapeSlicer(arrayTarget: Any, slicer: Any) -> Callable[..., Any] | None:
@@ -105,7 +105,7 @@ class _UnboxContext(NamedTuple):
 	builder: IRBuilder
 	pyapi: PythonAPI
 
-@structref.register  # pyright: ignore[reportUnknownMemberType]
+@structref.register
 class 形DataclassNumba(numba_types.StructRef):
 	"""Represent Python dataclass structures in Numba-compiled code.
 
@@ -136,8 +136,8 @@ class 形DataclassNumba(numba_types.StructRef):
 
 形StateMapFoldingNumba = 形DataclassNumba
 
-@typeof_impl.register(StateMapFoldingSymmetric)  # pyright: ignore[reportFunctionMemberAccess]
-@typeof_impl.register(StateMapFolding)  # pyright: ignore[reportFunctionMemberAccess]
+@typeof_impl.register(StateMapFoldingSymmetric)
+@typeof_impl.register(StateMapFolding)
 def _typeofDataclass(value: StateMapFolding | StateMapFoldingSymmetric, _context: Any) -> 形DataclassNumba:
 	def typeofField(field: dataclasses.Field[Any]) -> tuple[str, numba_types.Type]:
 		return field.name, typeof(getattr(value, field.name))
@@ -151,9 +151,9 @@ def _unbox(numbaType: 形DataclassNumba, value: Any, context: _UnboxContext) -> 
 	memoryInformationSlot: AllocaInstr = cgutils.alloca_once_value(context.builder, cgutils.get_null_value(cgutils.voidptr_t))
 	isErrorSlot: AllocaInstr = cgutils.alloca_once_value(context.builder, cgutils.false_bit)
 
-# pyright: reportUnknownMemberType=false
-# pyright: reportUnknownVariableType=false
-# pyright: reportUnknownArgumentType=false
+
+
+
 	context.pyapi.incref(value)
 	memoryInformation = numbaContext.nrt.meminfo_alloc_dtor_unchecked(
 		context.builder
@@ -162,7 +162,7 @@ def _unbox(numbaType: 形DataclassNumba, value: Any, context: _UnboxContext) -> 
 	)
 	context.builder.store(memoryInformation, memoryInformationSlot)
 
-	with context.builder.if_else(cgutils.is_null(context.builder, memoryInformation), likely=False) as (allocationFailed, allocationSucceeded):  # pyright: ignore[reportGeneralTypeIssues] # ty: ignore[invalid-context-manager]
+	with context.builder.if_else(cgutils.is_null(context.builder, memoryInformation), likely=False) as (allocationFailed, allocationSucceeded):
 		with allocationFailed:
 			context.pyapi.err_set_none('PyExc_MemoryError')
 			context.builder.store(cgutils.true_bit, isErrorSlot)
@@ -184,7 +184,7 @@ def _unbox(numbaType: 形DataclassNumba, value: Any, context: _UnboxContext) -> 
 					fieldObject = context.pyapi.object_getattr_string(value, fieldName)
 					with cgutils.early_exit_if_null(context.builder, stack, fieldObject):
 						context.builder.store(cgutils.true_bit, isErrorSlot)
-					fieldNative = context.unbox(fieldType, fieldObject)  # pyright: ignore[reportAttributeAccessIssue]  # ty: ignore[missing-attribute]
+					fieldNative = context.unbox(fieldType, fieldObject)
 					context.pyapi.decref(fieldObject)
 					with cgutils.early_exit_if(context.builder, stack, fieldNative.is_error):
 						context.builder.store(cgutils.true_bit, isErrorSlot)
@@ -194,9 +194,9 @@ def _unbox(numbaType: 形DataclassNumba, value: Any, context: _UnboxContext) -> 
 
 	stateValue = context.builder.load(stateSlot)
 	isError = context.builder.load(isErrorSlot)
-	with context.builder.if_then(isError, likely=False):  # pyright: ignore[reportGeneralTypeIssues]  # ty: ignore[invalid-context-manager]
+	with context.builder.if_then(isError, likely=False):
 		context.pyapi.decref(value)
-		with context.builder.if_then(cgutils.is_not_null(context.builder, context.builder.load(memoryInformationSlot))):  # pyright: ignore[reportGeneralTypeIssues]  # ty: ignore[invalid-context-manager]
+		with context.builder.if_then(cgutils.is_not_null(context.builder, context.builder.load(memoryInformationSlot))):
 			numbaContext.nrt.decref(context.builder, numbaType, stateValue)
 
 	def cleanUp() -> None:
@@ -213,7 +213,7 @@ def _reflect(numbaType: 形DataclassNumba, value: Any, context: _ReflectContext)
 		fieldType: numba_types.Type = numbaType.field_dict[fieldName]
 		fieldValue = getattr(payload, fieldName)
 		context.context.nrt.incref(context.builder, fieldType, fieldValue)
-		fieldObject = context.box(fieldType, fieldValue)  # pyright: ignore[reportAttributeAccessIssue] # ty: ignore[missing-attribute]
+		fieldObject = context.box(fieldType, fieldValue)
 		context.pyapi.object_setattr_string(parent, fieldName, fieldObject)
 		context.pyapi.decref(fieldObject)
 

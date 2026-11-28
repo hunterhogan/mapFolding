@@ -1,5 +1,5 @@
 # The real module is generated from this incomplete module. Comments are not preserved. Docstrings corrupt the file.
-# ruff: file-ignore[global-statement]
+
 from __future__ import annotations
 
 from copy import deepcopy

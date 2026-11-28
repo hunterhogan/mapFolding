@@ -16,24 +16,22 @@ Functions
 from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
-from astToolkit.filesystem import write_astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, LedgerOfImports
-from mapFolding.kitAST.paths import getModule, makePathFilenameModule
+from mapFolding.kitAST import IfThis, IngredientsModule, LedgerOfImports, toDisk
+from mapFolding.kitAST.paths import getModule
 from mapFolding.kitAST.theSSOT import defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding.theTypes import Default
-	from os import PathLike
+	from mapFolding.theTypes import Default, DefaultOverride
 	from pathlib import PurePath
-	from typing import Any
+	from typing import Unpack
 	import ast
 
 # TODO figure out asynchronous + numba.
 
-def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Make the check for symmetry in each folding pattern in a group of folds asynchronous to the rest of the symmetric map folding algorithm.
 
 	To do asynchronous filtering, a few things must happen.
@@ -49,39 +47,36 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	Each `leafBelow` array will be 28 * 8-bits, so if the queue has only 0.3% of the total calls in it, that is 28 GiB of data.
 	"""
 	identifiers = identifiers or defaultMapFoldingSymmetric
-	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
-	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('asynchronous') or 名CallableSource
-	名CallableDispatcherSource: str = keywordArguments.get('名CallableDispatcherSource') or identifiers['function']['dispatcher']
-	名CallableDispatcher: str = keywordArguments.get('名CallableDispatcher') or identifiers['function'].get('asynchronousDispatcher') or 名CallableDispatcherSource
-	名FilterAsymmetricFoldsSource: str = keywordArguments.get('名FilterAsymmetricFoldsSource') or identifiers['function']['filterAsymmetricFolds']
-	名FilterAsymmetricFolds: str = keywordArguments.get('名FilterAsymmetricFolds') or identifiers['function'].get('filterAsymmetricFoldsAsynchronous') or 名FilterAsymmetricFoldsSource
-	名FilterAsymmetricFoldsPrivate: str = keywordArguments.get('名FilterAsymmetricFoldsPrivate') or f'_{名FilterAsymmetricFolds}'
-	名InitializeConcurrencyManager: str = keywordArguments.get('名InitializeConcurrencyManager') or identifiers['function']['initializeConcurrencyManager']
-	名GetSymmetricTotalFolds: str = keywordArguments.get('名GetSymmetricTotalFolds') or identifiers['function']['getSymmetricTotalFolds']
-	名ActiveLeafGreaterThan0Source: str = keywordArguments.get('名ActiveLeafGreaterThan0Source') or identifiers['function']['activeLeafGreaterThan0']
-	名ActiveLeafGreaterThan0: str = keywordArguments.get('名ActiveLeafGreaterThan0') or identifiers['function'].get('activeLeafGreaterThan0Asynchronous') or 名ActiveLeafGreaterThan0Source
-	名DataclassSource: str = keywordArguments.get('名DataclassSource') or identifiers['variable']['stateDataclass']
-	名Dataclass: str = keywordArguments.get('名Dataclass') or identifiers['variable'].get('stateDataclassAsynchronous') or 名DataclassSource
-	名DataclassInstanceSource: str = keywordArguments.get('名DataclassInstanceSource') or identifiers['variable']['stateInstance']
-	名DataclassInstance: str = keywordArguments.get('名DataclassInstance') or identifiers['variable'].get('stateInstanceAsynchronous') or 名DataclassInstanceSource
-	名CountingSource: str = keywordArguments.get('名CountingSource') or identifiers['variable']['counting']
-	名Counting: str = keywordArguments.get('名Counting') or identifiers['variable'].get('countingAsynchronous') or 名CountingSource
-	名MaximumWorkers: str = keywordArguments.get('名MaximumWorkers') or identifiers['variable']['maxWorkers']
-	logicalPathAssembly: identifierDotAttribute = keywordArguments.get('logicalPathAssembly') or identifiers['logicalPath']['assembly']
-	名ModuleAsynchronousAnnex: str = keywordArguments.get('名ModuleAsynchronousAnnex') or identifiers['module']['asynchronousAnnex']
-	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
-	名DataclassAnnexSource: str = keywordArguments.get('名DataclassAnnexSource') or identifiers['variable'].get('stateDataclassAnnexSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
-	名DataclassInstanceAnnexSource: str = keywordArguments.get('名DataclassInstanceAnnexSource') or identifiers['variable'].get('stateInstanceAnnexSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
-	名CountingAnnexSource: str = keywordArguments.get('名CountingAnnexSource') or identifiers['variable'].get('countingAnnexSource') or defaultMapFoldingSymmetric['variable']['counting']
-	名MaximumWorkersAnnexSource: str = keywordArguments.get('名MaximumWorkersAnnexSource') or identifiers['variable'].get('maxWorkersAnnexSource') or defaultMapFoldingSymmetric['variable']['maxWorkers']
-	名InitializeConcurrencyManagerAnnexSource: str = keywordArguments.get('名InitializeConcurrencyManagerAnnexSource') or identifiers['function'].get('initializeConcurrencyManagerAnnexSource') or defaultMapFoldingSymmetric['function']['initializeConcurrencyManager']
-	名GetSymmetricTotalFoldsAnnexSource: str = keywordArguments.get('名GetSymmetricTotalFoldsAnnexSource') or identifiers['function'].get('getSymmetricTotalFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['getSymmetricTotalFolds']
-	名FilterAsymmetricFoldsAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
-	名FilterAsymmetricFoldsPrivateAnnexSource: str = keywordArguments.get('名FilterAsymmetricFoldsPrivateAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsPrivateAnnexSource') or f'_{名FilterAsymmetricFoldsAnnexSource}'
-	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
-	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
-	名Module: str = keywordArguments.get('名Module') or identifiers['module']['asynchronous']
-	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
+	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
+	名Callable: str = override.get('名Callable') or identifiers['function'].get('asynchronous') or 名CallableSource
+	名CallableDispatcherSource: str = override.get('名CallableDispatcherSource') or identifiers['function']['dispatcher']
+	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function'].get('asynchronousDispatcher') or 名CallableDispatcherSource
+	名CallableFilterAsymmetricFoldsSource: str = override.get('名CallableFilterAsymmetricFoldsSource') or identifiers['function']['filterAsymmetricFolds']
+	名CallableFilterAsymmetricFolds: str = override.get('名CallableFilterAsymmetricFolds') or identifiers['function'].get('filterAsymmetricFoldsAsynchronous') or 名CallableFilterAsymmetricFoldsSource
+	名CallableFilterAsymmetricFoldsPrivate: str = override.get('名CallableFilterAsymmetricFoldsPrivate') or f'_{名CallableFilterAsymmetricFolds}'
+	名CallableInitializeConcurrencyManager: str = override.get('名CallableInitializeConcurrencyManager') or identifiers['function']['initializeConcurrencyManager']
+	名CallableGetSymmetricTotalFolds: str = override.get('名CallableGetSymmetricTotalFolds') or identifiers['function']['getSymmetricTotalFolds']
+	名CallableActiveLeafGreaterThan0Source: str = override.get('名CallableActiveLeafGreaterThan0Source') or identifiers['function']['activeLeafGreaterThan0']
+	名CallableActiveLeafGreaterThan0: str = override.get('名CallableActiveLeafGreaterThan0') or identifiers['function'].get('activeLeafGreaterThan0Asynchronous') or 名CallableActiveLeafGreaterThan0Source
+	名DataclassSource: str = override.get('名DataclassSource') or identifiers['variable']['stateDataclass']
+	名Dataclass: str = override.get('名Dataclass') or identifiers['variable'].get('stateDataclassAsynchronous') or 名DataclassSource
+	名DataclassInstanceSource: str = override.get('名DataclassInstanceSource') or identifiers['variable']['stateInstance']
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable'].get('stateInstanceAsynchronous') or 名DataclassInstanceSource
+	名CountingSource: str = override.get('名CountingSource') or identifiers['variable']['counting']
+	名Counting: str = override.get('名Counting') or identifiers['variable'].get('countingAsynchronous') or 名CountingSource
+	名MaximumWorkers: str = override.get('名MaximumWorkers') or identifiers['variable']['maxWorkers']
+	logicalPathAssembly: identifierDotAttribute = override.get('logicalPathAssembly') or identifiers['logicalPath']['assembly']
+	名ModuleAsynchronousAnnex: str = override.get('名ModuleAsynchronousAnnex') or identifiers['module']['asynchronousAnnex']
+	名PackageSource: str = override.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
+	名DataclassAnnexSource: str = override.get('名DataclassAnnexSource') or identifiers['variable'].get('stateDataclassAnnexSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
+	名DataclassInstanceAnnexSource: str = override.get('名DataclassInstanceAnnexSource') or identifiers['variable'].get('stateInstanceAnnexSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
+	名CountingAnnexSource: str = override.get('名CountingAnnexSource') or identifiers['variable'].get('countingAnnexSource') or defaultMapFoldingSymmetric['variable']['counting']
+	名MaximumWorkersAnnexSource: str = override.get('名MaximumWorkersAnnexSource') or identifiers['variable'].get('maxWorkersAnnexSource') or defaultMapFoldingSymmetric['variable']['maxWorkers']
+	名CallableInitializeConcurrencyManagerAnnexSource: str = override.get('名CallableInitializeConcurrencyManagerAnnexSource') or identifiers['function'].get('initializeConcurrencyManagerAnnexSource') or defaultMapFoldingSymmetric['function']['initializeConcurrencyManager']
+	名CallableGetSymmetricTotalFoldsAnnexSource: str = override.get('名CallableGetSymmetricTotalFoldsAnnexSource') or identifiers['function'].get('getSymmetricTotalFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['getSymmetricTotalFolds']
+	名CallableFilterAsymmetricFoldsAnnexSource: str = override.get('名CallableFilterAsymmetricFoldsAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsAnnexSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
+	名CallableFilterAsymmetricFoldsPrivateAnnexSource: str = override.get('名CallableFilterAsymmetricFoldsPrivateAnnexSource') or identifiers['function'].get('filterAsymmetricFoldsPrivateAnnexSource') or f'_{名CallableFilterAsymmetricFoldsAnnexSource}'
+	名Module: str = override.get('名Module') or identifiers['module']['asynchronous']
 
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名DataclassSource))
 			, Grab.idAttribute(Then.replaceWith(名Dataclass))
@@ -98,17 +93,17 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier(名CountingSource))
 			, Grab.attrAttribute(Then.replaceWith(名Counting))
 		).visit(astModule)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsSource))
-			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFolds))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsSource))
+			, Grab.nameAttribute(Then.replaceWith(名CallableFilterAsymmetricFolds))
 		).visit(astModule)
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名FilterAsymmetricFoldsSource))
-			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFolds))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsSource))
+			, Grab.idAttribute(Then.replaceWith(名CallableFilterAsymmetricFolds))
 		).visit(astModule)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名ActiveLeafGreaterThan0Source))
-			, Grab.nameAttribute(Then.replaceWith(名ActiveLeafGreaterThan0))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableActiveLeafGreaterThan0Source))
+			, Grab.nameAttribute(Then.replaceWith(名CallableActiveLeafGreaterThan0))
 		).visit(astModule)
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名ActiveLeafGreaterThan0Source))
-			, Grab.idAttribute(Then.replaceWith(名ActiveLeafGreaterThan0))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名CallableActiveLeafGreaterThan0Source))
+			, Grab.idAttribute(Then.replaceWith(名CallableActiveLeafGreaterThan0))
 		).visit(astModule)
 
 	astFunctionDef_count: ast.FunctionDef = raiseIfNone(NodeTourist(
@@ -118,18 +113,18 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	astFunctionDef_count.name = 名Callable
 
 	exprCallFilterAsymmetricFoldsState: ast.Expr = Make.Expr(Make.Call(
-		Make.Name(名FilterAsymmetricFolds)
+		Make.Name(名CallableFilterAsymmetricFolds)
 		, listParameters=[Make.Name(名DataclassInstance)]))
 
 	NodeChanger(
-		Be.Assign.valueIs(IfThis.isCallIdentifier(名FilterAsymmetricFolds))
+		Be.Assign.valueIs(IfThis.isCallIdentifier(名CallableFilterAsymmetricFolds))
 		, Then.replaceWith(exprCallFilterAsymmetricFoldsState)).visit(astFunctionDef_count)
 
 	assignTotalToCountingIdentifier: ast.Assign = Make.Assign(
 		[Make.Attribute(Make.Name(名DataclassInstance), 名Counting, context=Make.Store())]
-		, value=Make.Call(Make.Name(名GetSymmetricTotalFolds)))
+		, value=Make.Call(Make.Name(名CallableGetSymmetricTotalFolds)))
 	NodeChanger(
-		findThis=Be.While.testIs(IfThis.isCallIdentifier(名ActiveLeafGreaterThan0))
+		findThis=Be.While.testIs(IfThis.isCallIdentifier(名CallableActiveLeafGreaterThan0))
 		, doThat=Grab.orelseAttribute(Then.replaceWith([assignTotalToCountingIdentifier]))
 	).visit(astFunctionDef_count)
 
@@ -145,15 +140,22 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 		).captureLastMatch(astModule))
 
 	exprCallInitializeConcurrencyManager: ast.Expr = Make.Expr(Make.Call(
-		Make.Name(名InitializeConcurrencyManager)
+		Make.Name(名CallableInitializeConcurrencyManager)
 		, listParameters=[Make.Name(名MaximumWorkers)]))
-	astFunctionDefDispatcher.body.insert(0, exprCallInitializeConcurrencyManager)
+	NodeChanger(Be.Assign.valueIs(IfThis.isCallIdentifier(名CallableSource)), Then.insertThisAbove([exprCallInitializeConcurrencyManager])).visit(astFunctionDefDispatcher)
 	astFunctionDefDispatcher.args.args.append(Make.arg(名MaximumWorkers, Make.Name('int')))
 	NodeChanger(
 		findThis=Be.Call.funcIs(Be.Name.idIs(IfThis.isIdentifier(名CallableSource)))
 		, doThat=Grab.funcAttribute(Grab.idAttribute(Then.replaceWith(名Callable)))
 	).visit(astFunctionDefDispatcher)
 	astFunctionDefDispatcher.name = 名CallableDispatcher
+	astFunctionDefDispatcher.body[0] = Make.Expr(Make.Constant(f'Count the symmetric foldings of the map in `{名DataclassInstance}`.\n\n'
+		'\t(AI generated docstring)\n\n'
+		'\tParameters\n\t----------\n'
+		f'\t{名DataclassInstance} : {名Dataclass}\n\t\tAn initialized insertion search.\n'
+		f'\t{名MaximumWorkers} : int\n\t\tMaximum number of concurrent workers that test the groups of foldings for symmetry.\n\n'
+		'\tReturns\n\t-------\n'
+		f'\t{名DataclassInstance} : {名Dataclass}\n\t\tThe same insertion search with `{名Counting}` complete.\n\t'))
 
 	NodeChanger(
 		findThis=Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher))
@@ -187,49 +189,50 @@ def addSymmetryCheckAsynchronous(astModule: ast.Module, identifiers: Default | N
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名MaximumWorkersAnnexSource))
 			, Grab.idAttribute(Then.replaceWith(名MaximumWorkers))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名InitializeConcurrencyManagerAnnexSource))
-			, Grab.nameAttribute(Then.replaceWith(名InitializeConcurrencyManager))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableInitializeConcurrencyManagerAnnexSource))
+			, Grab.nameAttribute(Then.replaceWith(名CallableInitializeConcurrencyManager))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名InitializeConcurrencyManagerAnnexSource))
-			, Grab.idAttribute(Then.replaceWith(名InitializeConcurrencyManager))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名CallableInitializeConcurrencyManagerAnnexSource))
+			, Grab.idAttribute(Then.replaceWith(名CallableInitializeConcurrencyManager))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名GetSymmetricTotalFoldsAnnexSource))
-			, Grab.nameAttribute(Then.replaceWith(名GetSymmetricTotalFolds))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableGetSymmetricTotalFoldsAnnexSource))
+			, Grab.nameAttribute(Then.replaceWith(名CallableGetSymmetricTotalFolds))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名GetSymmetricTotalFoldsAnnexSource))
-			, Grab.idAttribute(Then.replaceWith(名GetSymmetricTotalFolds))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名CallableGetSymmetricTotalFoldsAnnexSource))
+			, Grab.idAttribute(Then.replaceWith(名CallableGetSymmetricTotalFolds))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsAnnexSource))
-			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFolds))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsAnnexSource))
+			, Grab.nameAttribute(Then.replaceWith(名CallableFilterAsymmetricFolds))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名FilterAsymmetricFoldsAnnexSource))
-			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFolds))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsAnnexSource))
+			, Grab.idAttribute(Then.replaceWith(名CallableFilterAsymmetricFolds))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsPrivateAnnexSource))
-			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsPrivateAnnexSource))
+			, Grab.nameAttribute(Then.replaceWith(名CallableFilterAsymmetricFoldsPrivate))
 		).visit(astModuleAsynchronousAnnex)
-	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名FilterAsymmetricFoldsPrivateAnnexSource))
-			, Grab.idAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
+	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsPrivateAnnexSource))
+			, Grab.idAttribute(Then.replaceWith(名CallableFilterAsymmetricFoldsPrivate))
 		).visit(astModuleAsynchronousAnnex)
 	imports.walkThis(astModuleAsynchronousAnnex)
 	imports.removeTYPE_CHECKING(astModuleAsynchronousAnnex)
 	NodeChanger(IfThis.isAllOf(IfThis.isAnyOf(Be.ImportFrom, Be.Import), astModuleAsynchronousAnnex.body.__contains__), Then.removeIt).visit(astModuleAsynchronousAnnex)
 
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFolds))
-			, Grab.nameAttribute(Then.replaceWith(名FilterAsymmetricFoldsPrivate))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableFilterAsymmetricFolds))
+			, Grab.nameAttribute(Then.replaceWith(名CallableFilterAsymmetricFoldsPrivate))
 		).visit(astModule)
 
-	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名FilterAsymmetricFoldsPrivate))
+	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableFilterAsymmetricFoldsPrivate))
 			, Then.removeIt
 		).visit(astModuleAsynchronousAnnex)
 
-	astModule.body = [*imports.makeList_ast(), *astModuleAsynchronousAnnex.body, *astModule.body]
+	ingredientsModule = IngredientsModule(imports=imports, docstring=(
+		'Count symmetric foldings while concurrent workers test each group of foldings for symmetry.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.mapFoldingSymmetric.makeModulesAsynchronous.addSymmetryCheckAsynchronous`\n'
+		'generates this module. Regenerate the module instead of editing it.\n'))
+	ingredientsModule.appendPrologue(astModuleAsynchronousAnnex)
+	ingredientsModule.appendPrologue(astModule)
 
-	pathFilename: PurePath = makePathFilenameModule(pathRoot, logicalPathInfix, 名Module)
-
-	write_astModule(astModule, pathFilename, identifierPackage=名Package)
-
-	return pathFilename
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeModulesFoldsSymmetricAsynchronous() -> PurePath:
 	"""Regenerate the configured asynchronous symmetric counting module.

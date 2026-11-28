@@ -17,8 +17,9 @@ Functions
 		Write the state's collected folding representatives to an album.
 """
 
+from __future__ import annotations
+
 # DEVELOPMENT module.
-# pyright: reportUnusedVariable=false
 from __future__ import annotations
 
 from concurrent.futures import as_completed, ProcessPoolExecutor

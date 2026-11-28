@@ -1,3 +1,51 @@
+"""Count meanders with NumPy arrays of packed arch states and their multiplicities.
+
+(AI generated docstring)
+
+You can run transfers in file-backed arrays and resume with Python integers when fixed-width
+integers cannot hold the next step. The entry point accepts and returns a dictionary-backed
+`mapFolding.dataBaskets.StateMeanders`.
+
+Contents
+--------
+Functions
+	count
+		Advance transfers while the NumPy integer capacity permits.
+	doTheNeedful
+		Complete a count with NumPy transfers and Python-integer transfers as needed.
+	makeDataContainer
+		Allocate a file-backed array for transfer records.
+	pruneArray
+		Replace selected array records with their known completion counts.
+	recordAnalysis
+		Append allowed successor records to an output array.
+
+Array Layout
+	indexesAnalyzed
+		Number of columns in an array of arch codes and counts.
+	indexesWorkbench
+		Number of columns in the transfer workbench.
+	slicerAlfa
+		Select the workbench column for one side of the road.
+	slicerArcCode
+		Select the arch-code column of transfer records.
+	slicerMeanders
+		Select the count column of transfer records.
+	slicerPrepArea
+		Select the workbench column for intermediate results.
+	slicerZulu
+		Select the workbench column for the other side of the road.
+	次Alfa
+		Column index for one side of the road in the workbench.
+	次ArcCode
+		Column index for arch codes in transfer records.
+	次Meanders
+		Column index for counts in transfer records.
+	次PrepArea
+		Column index for intermediate results in the workbench.
+	次Zulu
+		Column index for the other side of the road in the workbench.
+"""
 from __future__ import annotations
 
 from gc import collect as goByeBye
@@ -32,6 +80,29 @@ slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., at=次Alfa)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., at=次Zulu)
 
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
+    """Move the counts of arc codes with a known formula into `state.countAddend`.
+
+    (AI generated docstring)
+
+    With b = `state.boundary + 1`, for each diagonal d ≤ b / 2 with a formula in
+    `mapFolding.oeis.boxOfDiagonals`, the arc code 2^(2(b − 2d) + 2) − 1 contributes the formula at b
+    times its count. The function then removes every arc code with count zero.
+
+    Parameters
+    ----------
+    state : StateMeanders
+        Transfer state. `state.boundary` selects the diagonals.
+    arrayMeanders : 形ArrayArcCode
+        Arc codes in ascending order with their counts.
+
+    Returns
+    -------
+    state : StateMeanders
+        The same state with the contributions in `state.countAddend`. `state.boundary` is 0 when no
+        arc code remains.
+    arrayMeanders : 形ArrayArcCode
+        The arc codes that remain, with their counts.
+    """
     boundary: int = state.boundary + 1
     次diagonal: int = 1
     while 次diagonal <= min(boundary // 2, len(boxOfDiagonals)):
@@ -106,7 +177,7 @@ def count(state: StateMeanders) -> StateMeanders:
         state.次Target = 0
 
         state.boundary -= 1
-        tqdmBoundary.set_postfix(boundary=state.boundary)  # pyright: ignore[reportUnknownMemberType]
+        tqdmBoundary.set_postfix(boundary=state.boundary)
         state.set_arcCodeMaximum()
 
 #================ analyze aligned ===== if 1 < bitsAlfa and 1 < bitsZulu =============================================

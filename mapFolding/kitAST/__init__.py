@@ -53,8 +53,9 @@ from mapFolding.kitAST._toolIfThis import IfThis as IfThis
 
 # isort: split
 from mapFolding.kitAST._containers import (
-	astModuleToIngredientsFunction as astModuleToIngredientsFunction, IngredientsFunction as IngredientsFunction,
-	IngredientsModule as IngredientsModule, LedgerOfImports as LedgerOfImports, Settings形 as Settings形)
+	astModuleToIngredientsFunction as astModuleToIngredientsFunction, getBodySansDocstring as getBodySansDocstring,
+	IngredientsFunction as IngredientsFunction, IngredientsModule as IngredientsModule, LedgerOfImports as LedgerOfImports,
+	Settings形 as Settings形)
 
 # isort: split
 from mapFolding.kitAST._beDRY import (

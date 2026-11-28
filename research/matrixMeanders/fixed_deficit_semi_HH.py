@@ -1,4 +1,4 @@
-# ruff: file-ignore[undocumented-public-function, print]
+
 """Semi-meanders with n crossings and winding number n - 2h, for a FIXED h.
 
 Contributed by Alper Ferudun (https://oeis.org/wiki/User:Alper_Ferudun), October 2026.

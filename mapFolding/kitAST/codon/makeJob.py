@@ -23,7 +23,7 @@ from hunterMakesPy import raiseIfNone
 from mapFolding.kitAST import (
 	astModuleToIngredientsFunction, IfThis, IngredientsFunction, IngredientsModule, setDatatypeViaImport, Settings形)
 from mapFolding.kitAST.RecipeJob import addLauncher, fromMapShape, move_argToBody, RecipeJobTheorem2, replaceStaticScalars
-from mapFolding.theTypes import 形TotalLeaves  # ruff: ignore[typing-only-first-party-import]
+from mapFolding.theTypes import 形TotalLeaves
 from pathlib import Path
 from typing import cast, TYPE_CHECKING
 import sys
@@ -94,7 +94,7 @@ def makeJob(job: RecipeJobTheorem2) -> PurePosixPath:
 	ingredientsModule.write_astModule(job.pathFilenameModule, identifierPackage=job.identifierPackage or '')
 
 	if sys.platform == 'linux':
-		from mapFolding.kitAST.linux import toCodon  # ruff: ignore[import-outside-top-level]
+		from mapFolding.kitAST.linux import toCodon
 		toCodon(Path(job.pathFilenameModule))
 
 	return job.pathFilenameModule
@@ -148,7 +148,7 @@ def variableCompatibility(ingredientsFunction: IngredientsFunction, job: RecipeJ
 			, IfThis.isAllOf(Be.Assign.targetsIs(Be.at(0, IfThis.isNestedNameIdentifier(identifier)))
 							, Be.Assign.valueIs(Be.Constant))
 			)
-			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)  # pyright: ignore[reportArgumentType, reportUnknownArgumentType, reportAttributeAccessIssue, reportUnknownMemberType]  # ty: ignore[missing-attribute]
+			, doThat=lambda node, annotation=annotation: Grab.valueAttribute(Then.replaceWith(Make.Call(annotation, listParameters=[node.value])))(node)
 		).visit(ingredientsFunction.astFunctionDef)
 
 	#-------- `identifier` - 1. ----------------------------------------------

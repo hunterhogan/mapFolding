@@ -1,3 +1,18 @@
+"""Count with the counting function specialized by Theorem 2.
+
+(AI generated docstring)
+
+`mapFolding.kitAST.mapFolding._count.makeTheorem2` generates this module.
+Regenerate the module instead of editing it.
+
+Contents
+--------
+Functions
+    count
+        Count the groups of foldings by inserting and removing leaves.
+    doTheNeedful
+        Count the groups of foldings of the map in `state`.
+"""
 from __future__ import annotations
 
 from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
@@ -7,6 +22,16 @@ if TYPE_CHECKING:
     from mapFolding.dataBaskets import StateMapFolding
 
 def count(state: StateMapFolding) -> StateMapFolding:
+    """Count the groups of foldings by inserting and removing leaves.
+
+    (AI generated docstring)
+
+    You can count the foldings of the map that `connectionGraph` describes. Each leaf goes into each
+    gap that every constraining dimension admits. When every leaf is in the folding,
+    `groupsOfFolds` increases by 1. Each group contains `totalLeaves` foldings. The generators in
+    `mapFolding.kitAST` replace the `StateMapFolding` parameter of this function with its fields, so
+    this description names the fields directly.
+    """
     while state.leaf1ndex > 4:
         if state.leafBelow[0] == 1:
             if state.leaf1ndex > state.totalLeaves:
@@ -56,6 +81,20 @@ def count(state: StateMapFolding) -> StateMapFolding:
     return state
 
 def doTheNeedful(state: StateMapFolding) -> StateMapFolding:
+    """Count the groups of foldings of the map in `state`.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    state : StateMapFolding
+        An initialized insertion search.
+
+    Returns
+    -------
+    state : StateMapFolding
+        The same insertion search with `groupsOfFolds` complete.
+    """
     state = transitionOnGroupsOfFolds(state)
     state = count(state)
     return state

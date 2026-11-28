@@ -47,7 +47,7 @@ from hunterMakesPy.dataStructures import updateExtendPolishDictionaryLists
 from hunterMakesPy.kitFilesystem import settings_autoflakeDEFAULT, settings_isortDEFAULT
 from itertools import chain, filterfalse, starmap
 from more_itertools import consume, partition
-from operator import attrgetter, itemgetter, ne, not_
+from operator import attrgetter, itemgetter, methodcaller, ne, not_
 from typing import NamedTuple, overload, TYPE_CHECKING
 import ast
 import dataclasses
@@ -152,7 +152,7 @@ class LedgerOfImports:
 		def lazy(self) -> LedgerOfImports:
 			if self._lazy is None:
 				self._lazy = LedgerOfImports()
-				self._lazy._isLazy吗 = True  # ruff: ignore[private-member-access]
+				self._lazy._isLazy吗 = True
 			return self._lazy
 
 	def _subtractImportFrom(self, dotModule: identifierDotAttribute, list_nameTuples: list[tuple[str, str | None]]) -> None:
@@ -191,14 +191,14 @@ class LedgerOfImports:
 		match astImport____:
 			case ast.Import():
 				for alias in astImport____.names:
-					ledger._listImport.append((alias.name, alias.asname))  # ruff: ignore[private-member-access]
+					ledger._listImport.append((alias.name, alias.asname))
 			case ast.ImportFrom():
 				if astImport____.module is None:
 					astImport____.module = '.'
 				elif 0 < astImport____.level:
 					astImport____.module = f"{'.' * astImport____.level}{astImport____.module}"
 				for alias in astImport____.names:
-					ledger._dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))  # ruff: ignore[private-member-access]
+					ledger._dictionaryImportFrom[astImport____.module].append((alias.name, alias.asname))
 			case _:
 				pass
 		if type_ignores:
@@ -388,12 +388,12 @@ class LedgerOfImports:
 		self._dictionaryImportFrom = defaultdict(list, updateExtendPolishDictionaryLists(self._dictionaryImportFrom, *map(attrgetter('_dictionaryImportFrom'), fromLedger)
 					, destroyDuplicates=True))
 		for ledger in fromLedger:
-			self._listImport.extend(ledger._listImport)  # ruff:ignore[private-member-access]
+			self._listImport.extend(ledger._listImport)
 			self.type_ignores.extend(ledger.type_ignores)
-			if ledger._typeChecking is not None:  # ruff: ignore[private-member-access]
-				self.typeChecking.update(ledger._typeChecking)  # ruff: ignore[private-member-access]
-			if sys.version_info >= (3, 15) and ledger._lazy is not None:  # ruff: ignore[private-member-access]
-				self.lazy.update(ledger._lazy)  # ruff: ignore[private-member-access]
+			if ledger._typeChecking is not None:
+				self.typeChecking.update(ledger._typeChecking)
+			if sys.version_info >= (3, 15) and ledger._lazy is not None:
+				self.lazy.update(ledger._lazy)
 
 	def walkThis(self, walkThis: ast.AST, type_ignores: list[ast.TypeIgnore] | None = None) -> None:
 		"""
@@ -576,6 +576,13 @@ class IngredientsModule:
 
 	Add statements using appendLauncher().
 	"""
+	docstring: str | None = None
+	"""
+	Summary and description of the generated module.
+
+	The generated module opens with this text and a `Contents` section. The `Contents` section lists each public
+	function of the generated module with the summary line of the docstring of that function.
+	"""
 
 	settings_autoflake: dict[str, Any] | None = dataclasses.field(default_factory=settings_autoflakeDEFAULT.copy)
 	settings_isort: dict[str, Any] | None = dataclasses.field(default_factory=settings_isortDEFAULT.copy)
@@ -591,11 +598,11 @@ class IngredientsModule:
 			else:
 				self.appendIngredientsFunction(*ingredientsFunction)
 
-	def _append_astModule(self, self_astModule: ast.Module, astModule: ast.Module | None, statement: Iterable[ast.stmt] | ast.stmt | None, type_ignores: list[ast.TypeIgnore] | None) -> None:  # ruff: ignore[no-self-use]
+	def _append_astModule(self, self_astModule: ast.Module, astModule: ast.Module | None, statement: Iterable[ast.stmt] | ast.stmt | None, type_ignores: list[ast.TypeIgnore] | None) -> None:
 		list_body: list[ast.stmt] = []
 		listTypeIgnore: list[ast.TypeIgnore] = []
 		if astModule is not None and isinstance(astModule, ast.Module):
-			list_body.extend(astModule.body)
+			list_body.extend(getBodySansDocstring(astModule))
 			listTypeIgnore.extend(astModule.type_ignores)
 		if type_ignores is not None:
 			listTypeIgnore.extend(type_ignores)
@@ -768,15 +775,24 @@ class IngredientsModule:
 		"""
 		list_stmt: list[ast.stmt] = []
 		list_stmt.extend(self._list_astImportImportFrom)
-		list_stmt.extend(self.prologue.body)
+		list_stmt.extend(getBodySansDocstring(self.prologue))
 		list_stmt.extend(ingredientsFunction.astFunctionDef for ingredientsFunction in self.listIngredientsFunctions)
-		list_stmt.extend(self.epilogue.body)
+		list_stmt.extend(getBodySansDocstring(self.epilogue))
 		if self.launcher.body:
 			astCompare: ast.Compare = Make.Compare(Make.Name('__name__'), [Make.Eq()], [Make.Constant('__main__')])
 			astModule: ast.Module = Make.Module(self.launcher.body)
 			NodeChanger(IfThis.isAllOf(Be.If.testIs(IfThis.astIs(astCompare)), self.launcher.body.__contains__), DOT.body).visit(astModule)
 			list_stmt.append(Make.If(astCompare, astModule.body))
+		if self.docstring:
+			list_stmt.insert(0, Make.Expr(Make.Constant(self._makeDocstringModule(list_stmt))))
 		return list_stmt
+
+	def _makeDocstringModule(self, list_stmt: list[ast.stmt]) -> str:
+		"""I use this method to append the `Contents` section to `docstring` from the public functions in `list_stmt`."""
+		boxOfFunctionDefPublic: list[ast.FunctionDef] = sorted(filterfalse(Be.FunctionDef.nameIs(methodcaller('startswith', '_'))
+			, filter(Be.FunctionDef, list_stmt)), key=attrgetter('name'))
+		return '\n'.join([raiseIfNone(self.docstring).rstrip(), '', 'Contents', '--------', 'Functions'
+			, *map(_makeEntryContents, boxOfFunctionDefPublic), ''])
 
 	@property
 	def type_ignores(self) -> list[ast.TypeIgnore]:
@@ -836,7 +852,10 @@ class IngredientsModule:
 		settings: dict[str, dict[str, Any]] = {'autoflake': self.settings_autoflake or {}, 'isort': self.settings_isort or {}}
 		if identifierPackage:
 			settings['autoflake']['additional_imports'].append(identifierPackage)
-		return write_astModule(Make.Module(self.body, self.type_ignores), pathFilename, settings)
+		astModule: ast.Module = Make.Module(self.body, self.type_ignores)
+		NodeChanger(Be.Expr.valueIs(Be.Constant.valueIs(str.__instancecheck__))
+			, NodeChanger(Be.Constant, Grab.valueAttribute(methodcaller('expandtabs', 4))).visit).visit(astModule)
+		return write_astModule(astModule, pathFilename, settings)
 
 def astModuleToIngredientsFunction(astAST: ast.AST, identifier: str) -> IngredientsFunction:
 	"""
@@ -860,3 +879,30 @@ def astModuleToIngredientsFunction(astAST: ast.AST, identifier: str) -> Ingredie
 	"""
 	astFunctionDef: ast.FunctionDef = raiseIfNone(extractFunctionDef(astAST, identifier))
 	return IngredientsFunction(astFunctionDef, LedgerOfImports(astAST))
+
+def _makeEntryContents(astFunctionDef: ast.FunctionDef) -> str:
+	"""I use this function to list `astFunctionDef` in the `Contents` section of a generated module docstring."""
+	return f'\t{astFunctionDef.name}\n\t\t{(ast.get_docstring(astFunctionDef) or "").partition("\n")[0]}'
+
+def getBodySansDocstring(astModule: ast.Module) -> list[ast.stmt]:
+	"""Get the statements of `astModule` without its module docstring.
+
+	(AI generated docstring)
+
+	You can use this function to place the statements of a source module in a generated module. The docstring of a
+	source module describes the source module, not the generated module.
+
+	Parameters
+	----------
+	astModule : ast.Module
+		Source module.
+
+	Returns
+	-------
+	body : list[ast.stmt]
+		Statements of `astModule` after its docstring, or every statement when `astModule` has no docstring.
+	"""
+	body: list[ast.stmt] = astModule.body
+	if ast.get_docstring(astModule, clean=False) is not None:
+		body = body[1:]
+	return body

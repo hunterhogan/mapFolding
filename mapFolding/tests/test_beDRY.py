@@ -9,7 +9,7 @@ from mapFolding.beDRY import defineProcessorLimit, getTaskDivisions, getTotalLea
 from mapFolding.tests import assertEqualTo
 from numba import get_num_threads
 #=SIN= Type-checker suppression: `numba.core.config` creates `NUMBA_NUM_THREADS` at runtime through `globals()`, which no static checker can see.
-from numba.core.config import NUMBA_NUM_THREADS  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]  # ty: ignore[import-not-found]
+from numba.core.config import NUMBA_NUM_THREADS
 from typing import Any, TYPE_CHECKING
 import pytest
 import sys
@@ -81,7 +81,7 @@ def test_validateMapShapeError(mapShape: Sequence[Any], expected: type[Exception
 		validateMapShape(mapShape)
 
 #=SIN= Type-checker suppression: `numba.core.config` creates `NUMBA_NUM_THREADS` at runtime through `globals()`, so its type is unknown.
-markNumbaThreadsFewerThan4: pytest.MarkDecorator = pytest.mark.skipif(NUMBA_NUM_THREADS < 4, reason='Numba has fewer than 4 threads.')  # pyright: ignore[reportUnknownArgumentType]
+markNumbaThreadsFewerThan4: pytest.MarkDecorator = pytest.mark.skipif(NUMBA_NUM_THREADS < 4, reason='Numba has fewer than 4 threads.')
 
 markParametrizeConcurrencyPackages: pytest.MarkDecorator = pytest.mark.parametrize('concurrencyPackage', (
 	pytest.param(None, id='None')

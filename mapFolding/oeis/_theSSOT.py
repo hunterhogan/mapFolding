@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 	from typing import LiteralString
 
 # TODO Dynamic, but authoritative, discovery of OEIS IDs implemented in mapFolding.
-# TODO Dynamic, but authoritative, discovery of valid parameter values for `f` and `flow`: primarily for testing.
+# TODO Dynamic, but authoritative, discovery of valid parameter values for `f` and `flow`: including for testing.
 
 # TODO This is a good first draft, but it needs refining.
 

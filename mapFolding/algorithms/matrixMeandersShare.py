@@ -1,3 +1,28 @@
+"""Prepare meander transfer states, check integer capacity, and evaluate known completions.
+
+(AI generated docstring)
+
+You can initialize packed arch states for different meander families, replace selected
+semi-meander states with known diagonal counts, and estimate transfer-buffer allocations.
+
+Contents
+--------
+Functions
+	integersWide吗
+		Determine whether a transfer requires more than the configured integer capacity.
+	makeLookupMeanders
+		Create starting arch codes and counts for a meander family.
+	makeLookupMeandersDiagonal
+		Prepare a semi-meander state for one diagonal term.
+	prune
+		Accumulate known completions and remove their dictionary entries.
+
+Buckets
+	getTotalBuckets
+		Estimate the output-buffer length for a transfer step.
+	totalBucketsMaximumBy_boundary
+		Stored allocation sizes indexed by transfer boundary.
+"""
 from __future__ import annotations
 
 from mapFolding.dataBaskets import StateMeanders

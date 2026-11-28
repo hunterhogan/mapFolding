@@ -29,7 +29,7 @@ def format_bFile(sequence: Mapping[int, int]) -> str:
 	contents : str
 		Sorted b-file records, or an empty string when no terms are supplied.
 	"""
-	return ''.join(map(lambda term: f"{term[0]} {term[1]}\n", sorted(sequence.items())))  # ruff: ignore[unnecessary-map]
+	return ''.join(map(lambda term: f"{term[0]} {term[1]}\n", sorted(sequence.items())))
 
 def parse_bFile(oeisData: str) -> dict[int, int]:
 	"""Parse OEIS b-file text into a dictionary of sequence indices and values.

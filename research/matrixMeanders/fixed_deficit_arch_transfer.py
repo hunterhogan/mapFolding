@@ -1,4 +1,4 @@
-# ruff: file-ignore[print,undocumented-public-function,ambiguous-variable-name,loop-iterator-mutation,assert]
+
 """Exact fixed-deficit arch transfer, using safe premature rainbow closure.
 
 State: (left closes used, right closes used, left stack size, pairing).

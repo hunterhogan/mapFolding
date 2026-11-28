@@ -1,6 +1,75 @@
 #=SIN=
 # DEVELOPMENT module.
-# ruff: file-ignore[undocumented-magic-method, undocumented-public-method]
+
+"""Generate stamp-folding and meander permutations with linked interval search.
+
+(AI generated docstring)
+
+You can obtain leaf orders for the canonical families accepted by `doTheNeedful`.
+The search retains every generated permutation in memory and supports representative
+selection through `SettingsMode`.
+
+Contents
+--------
+Search Functions
+	count
+		Explore completions of a prepared search state.
+	cross
+		Explore one crossing and restore the interval links afterward.
+	insert
+		Insert a configured interval into a node's interval list.
+	remove
+		Remove a boundary interval from a node's accessible intervals.
+	savePermutation
+		Append completed leaf orders under the selected family rules.
+	setIntervalEnds
+		Assign a node's interval endpoints from the state.
+	visitIntervals
+		Explore the available intervals on one side of a node.
+
+Mode-Specific Functions
+	move
+		Transfer an interval between nodes during stamp-folding search.
+	restorePermutation
+		Restore an interval's place in the permutation order after a crossing.
+	updatePermutation
+		Replace one interval with two in the permutation order.
+
+Initialization Functions
+	doTheNeedful
+		Prepare and run a search for a canonical family.
+	initializeState
+		Set the initial intervals and permutation links.
+
+Classes
+	Interval
+		Store crossing endpoints, neighboring intervals, and permutation links.
+	IntervalEnds
+		Store the first and last indices of an interval list.
+	IntervalEndsLeft
+		Interpret interval endpoints for the left side.
+	IntervalEndsRight
+		Interpret interval endpoints for the right side.
+	Node
+		Store the interval lists and winding stop at a search node.
+	SettingsMode
+		Select the family and equivalence-class rules for a search.
+	StateStampMeander
+		Store the search graph, scratch fields, and generated leaf orders.
+
+Indices
+	Side
+		Type restricting a side index to zero or one.
+	empty
+		Sentinel index for an absent interval.
+	here
+		Index of the selected interval in `state.次interval`.
+	left
+		Index of the left side in interval records.
+	right
+		Index of the right side in interval records.
+"""
+
 from __future__ import annotations
 
 from itertools import repeat, starmap
@@ -38,6 +107,15 @@ class Interval:
 	nodeAfter: int = empty
 
 	def __post_init__(self) -> None:
+		"""Initialize empty endpoint and link lists with two absent-interval entries.
+
+		(AI generated docstring)
+
+		Interval Initialization
+		-----------------------
+		Empty `end`, `to`, and `permutation` lists receive entries for both side indices.
+		Supplied nonempty lists retain their contents.
+		"""
 		# DEVELOPMENT The following statements are self-verifying and self-documenting, so don't mess
 		# with them unless you make something self-verifying and self-documenting as well.
 		if not self.end:
@@ -62,20 +140,56 @@ class IntervalEnds:
 class IntervalEndsLeft(IntervalEnds):
 	@property
 	def inside(self) -> int:
+		"""Obtain the inner endpoint index of a left-side interval list.
+
+		(AI generated docstring)
+
+		Returns
+		-------
+		intervalInside : int
+			The stored endpoint `self.Ω`.
+		"""
 		return self.Ω
 
 	@property
 	def stop(self) -> int:
+		"""Obtain the stopping endpoint index of a left-side interval list.
+
+		(AI generated docstring)
+
+		Returns
+		-------
+		intervalStop : int
+			The stored endpoint `self.首`.
+		"""
 		return self.首
 
 @dataclasses.dataclass(slots=True)
 class IntervalEndsRight(IntervalEnds):
 	@property
 	def inside(self) -> int:
+		"""Obtain the inner endpoint index of a right-side interval list.
+
+		(AI generated docstring)
+
+		Returns
+		-------
+		intervalInside : int
+			The stored endpoint `self.首`.
+		"""
 		return self.首
 
 	@property
 	def stop(self) -> int:
+		"""Obtain the stopping endpoint index of a right-side interval list.
+
+		(AI generated docstring)
+
+		Returns
+		-------
+		intervalStop : int
+			The stored endpoint `self.Ω`.
+		"""
 		return self.Ω
 
 @dataclasses.dataclass(slots=True)
@@ -87,6 +201,15 @@ class Node:
 	sideWindStop: Side = left
 
 	def __post_init__(self) -> None:
+		"""Expose both interval endpoint records through their side indices.
+
+		(AI generated docstring)
+
+		Node Initialization
+		-------------------
+		`self.intervals` references `self.intervalsLeft` and `self.intervalsRight` at the
+		corresponding side keys. The endpoint records are shared with those attributes.
+		"""
 		self.intervals = {left: self.intervalsLeft, right: self.intervalsRight}
 
 @dataclasses.dataclass(slots=True)
@@ -116,9 +239,28 @@ class StateStampMeander:
 
 	@property
 	def total(self) -> int:
+		"""Obtain the number of permutations collected by the search.
+
+		(AI generated docstring)
+
+		Returns
+		-------
+		totalPermutations : int
+			Current length of `self.boxOfPermutations`.
+		"""
 		return len(self.boxOfPermutations)
 
 	def __post_init__(self) -> None:
+		"""Allocate interval and node records for the requested number of crossings.
+
+		(AI generated docstring)
+
+		State Initialization
+		--------------------
+		`self.boxOfIntervals` and `self.boxOfNodes` each receive `2 * self.n + 1` fresh records.
+		Empty scratch lists receive entries for the required side and selection indices.
+		The initial crossing links are prepared separately by `initializeState`.
+		"""
 		totalDataStructures: int = 2 * self.n + 1
 		self.boxOfIntervals = tuple(starmap(Interval, repeat((), totalDataStructures)))
 		self.boxOfNodes = tuple(starmap(Node, repeat((), totalDataStructures)))
@@ -137,6 +279,23 @@ class StateStampMeander:
 			self.次interval[here] = empty
 
 def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
+	"""Explore completions of a prepared stamp-folding or meander search state.
+
+	(AI generated docstring)
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Initialized search graph and the crossing from which to continue.
+	mode : SettingsMode
+		Family, winding restrictions, and representative-selection rules.
+
+	Returns
+	-------
+	state : StateStampMeander
+		The same state with completed leaf orders appended to `state.boxOfPermutations`.
+		Search scratch fields are updated in place.
+	"""
 	if state.n < state.crossingAfter:
 		savePermutation(state, mode)
 	elif mode.meanders and ((state.n - state.crossingAfter) <= state.wind):
@@ -164,6 +323,22 @@ def count(state: StateStampMeander, mode: SettingsMode)  -> StateStampMeander:
 	return state
 
 def visitIntervals(state: StateStampMeander, mode: SettingsMode) -> None:
+	"""Explore each available interval on the selected side of a search node.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	`state` receives each branch's crossing selection and winding-stop status. Completed
+	leaf orders accumulate in `state.boxOfPermutations` during the search.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state with `state.次node` and `state.side` selecting an interval list.
+	mode : SettingsMode
+		Family and representative-selection rules applied to each branch.
+	"""
 	crossingAfter: int = state.crossingAfter
 	次node: int = state.次node
 	wind: int = state.wind
@@ -188,6 +363,22 @@ def visitIntervals(state: StateStampMeander, mode: SettingsMode) -> None:
 		次interval = 次intervalRight
 
 def cross(state: StateStampMeander, mode: SettingsMode) -> None:
+	"""Explore a crossing through the selected interval and undo its graph changes.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	Interval and permutation links change during the branch and are restored afterward.
+	Completed leaf orders remain in `state.boxOfPermutations`, and scratch fields remain changed.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state with the node, side, selected interval, and winding status prepared.
+	mode : SettingsMode
+		Family rules governing the crossing and subsequent search.
+	"""
 	wind: int = state.wind
 	次interval: int = state.次interval[here]
 
@@ -355,14 +546,28 @@ def cross(state: StateStampMeander, mode: SettingsMode) -> None:
 		state.次nodeAfter = 次nodeAfter
 		for side in (left, right):
 			if 次interval == node.intervals[side].stop:
-				state.次interval[here] = nodeAfter.intervals[side ^ 1].stop  # pyright: ignore[reportArgumentType]
-				state.intervalsSource = nodeAfter.intervals[side ^ 1]  # pyright: ignore[reportArgumentType]
-				state.intervalsTarget = node.intervals[side ^ 1]  # pyright: ignore[reportArgumentType]
-				state.次interval[side] = node.intervals[side ^ 1].stop  # pyright: ignore[reportArgumentType]
+				state.次interval[here] = nodeAfter.intervals[side ^ 1].stop
+				state.intervalsSource = nodeAfter.intervals[side ^ 1]
+				state.intervalsTarget = node.intervals[side ^ 1]
+				state.次interval[side] = node.intervals[side ^ 1].stop
 				state.次interval[side ^ 1] = empty
 				move(state)
 
 def insert(state: StateStampMeander) -> None:
+	"""Insert a configured interval into a node's interval list.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	The selected interval receives `state.end`, its neighboring links, and `state.次nodeAfter`.
+	Neighboring intervals or `state.intervalEnds` receive the links to the inserted interval.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state with `state.次interval[here]`, both neighbors, and endpoint data prepared.
+	"""
 	side = left
 	if state.次interval[side]:
 		state.boxOfIntervals[state.次interval[side]].to[side ^ 1] = state.次interval[here]
@@ -382,6 +587,21 @@ def insert(state: StateStampMeander) -> None:
 	state.boxOfIntervals[state.次interval[here]].nodeAfter = state.次nodeAfter
 
 def remove(state: StateStampMeander) -> None:
+	"""Remove a boundary interval from a node's accessible intervals.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	Neighboring links and `state.intervalEnds` are updated to exclude the selected interval.
+	The selected interval's stored data remains available for later restoration.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state selecting an interval with `state.次interval[here]` and its node's
+		endpoint record with `state.intervalEnds`.
+	"""
 	side = left
 	if state.boxOfIntervals[state.次interval[here]].to[side]:
 		state.boxOfIntervals[state.boxOfIntervals[state.次interval[here]].to[side]].to[side ^ 1] = empty
@@ -395,6 +615,22 @@ def remove(state: StateStampMeander) -> None:
 		state.intervalEnds.Ω = state.boxOfIntervals[state.次interval[here]].to[side ^ 1]
 
 def setIntervalEnds(state: StateStampMeander, node: Node) -> None:
+	"""Assign a node's interval endpoints from the prepared search state.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	Both endpoint pairs in `node.intervals` are replaced. A pair becomes empty when either
+	prepared endpoint is empty.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state containing prepared endpoint pairs in `state.interval`.
+	node : Node
+		Node whose interval endpoint records receive the prepared values.
+	"""
 	for side in (left, right):
 		if not state.interval[side].首 or not state.interval[side].Ω:
 			node.intervals[side].首 = empty
@@ -404,6 +640,23 @@ def setIntervalEnds(state: StateStampMeander, node: Node) -> None:
 			node.intervals[side].Ω = state.interval[side].Ω
 
 def savePermutation(state: StateStampMeander, mode: SettingsMode) -> None:
+	"""Append completed leaf orders under the selected family and symmetry rules.
+
+	(AI generated docstring)
+
+	Permutation Collection
+	----------------------
+	`state.boxOfPermutations` receives the completed leaf order and any required reversal.
+	Semi-meanders gain a fixed initial leaf and shifted labels. Equivalence-class modes
+	can reject a leaf order rather than append it.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Completed search state whose interval links encode a permutation of `state.n` labels.
+	mode : SettingsMode
+		Family and representative-selection rules for the saved leaf orders.
+	"""
 	permutation: Sequence[int] = [0] * state.n
 	次interval: int = state.interval首Permutation
 	次permutation: int = 0
@@ -446,6 +699,21 @@ def savePermutation(state: StateStampMeander, mode: SettingsMode) -> None:
 
 # Only `folds`.
 def move(state: StateStampMeander) -> None:
+	"""Transfer the selected interval between nodes during stamp-folding search.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	The interval is removed from `state.intervalsSource` and inserted into
+	`state.intervalsTarget` with the prepared neighbors and following node.
+	The interval's crossing endpoints retain their values.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state with source, target, selected interval, and insertion links prepared.
+	"""
 	state.intervalEnds = state.intervalsSource
 	remove(state)
 	state.intervalEnds = state.intervalsTarget
@@ -454,6 +722,20 @@ def move(state: StateStampMeander) -> None:
 	insert(state)
 
 def restorePermutation(state: StateStampMeander) -> None:
+	"""Restore the selected interval's place in the permutation order after a crossing.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	Neighboring permutation links point to the selected interval again. When it has no
+	predecessor, `state.interval首Permutation` becomes the selected interval.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state selecting the original interval with its saved permutation links.
+	"""
 	次intervalLeft: int = state.boxOfIntervals[state.次interval[here]].permutation[left]
 	次intervalRight: int = state.boxOfIntervals[state.次interval[here]].permutation[right]
 
@@ -466,6 +748,21 @@ def restorePermutation(state: StateStampMeander) -> None:
 		state.boxOfIntervals[次intervalRight].permutation[left] = state.次interval[here]
 
 def updatePermutation(state: StateStampMeander) -> None:
+	"""Replace the selected interval with two intervals in the permutation order.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	Permutation links include intervals `2 * state.crossingAfter - 1` and
+	`2 * state.crossingAfter` in place of the selected interval. The original interval's
+	links remain available to `restorePermutation`.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Search state with the selected interval and next crossing number prepared.
+	"""
 	次permutationLeft: int = state.boxOfIntervals[state.次interval[here]].permutation[left]
 	次permutationRight: int = state.boxOfIntervals[state.次interval[here]].permutation[right]
 	次intervalLeft: int = 2 * state.crossingAfter - 1
@@ -487,6 +784,20 @@ def updatePermutation(state: StateStampMeander) -> None:
 #================== Initialize ====================================================================
 
 def initializeState(state: StateStampMeander) -> None:
+	"""Prepare the initial crossing, interval lists, and permutation links.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	`state` receives two linked intervals around leaf one, boundary labels zero and
+	`state.n + 1`, and the initial winding stop. Existing search data is overwritten.
+
+	Parameters
+	----------
+	state : StateStampMeander
+		Freshly allocated search state for at least one crossing.
+	"""
 	state.boxOfNodes[0].intervalWindStop = 2
 	state.boxOfNodes[0].sideWindStop = right
 

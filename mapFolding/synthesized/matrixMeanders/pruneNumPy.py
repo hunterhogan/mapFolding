@@ -1,3 +1,44 @@
+"""Count meanders by the NumPy transfer, removing states whose counts have a known formula.
+
+(AI generated docstring)
+
+`mapFolding.kitAST.matrixMeanders.makeModules.makePruneNumPy` generates this module.
+Regenerate the module instead of editing it.
+
+Contents
+--------
+Functions
+    count
+        Count meanders with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
+    countBigInt
+        Advance one meander transfer-matrix computation until `state.boundary` reaches zero.
+    doTheNeedful
+        Compute `meanders` with a transfer matrix algorithm implemented in NumPy.
+    getTotalBuckets
+        Estimate the output allocation length for one transfer-matrix step.
+    integersWideNumPy吗
+        Determine whether the next transfer step exceeds the fixed-width integer capacity.
+    integersWidePandas吗
+        Determine whether the next transfer step exceeds the fixed-width integer capacity.
+    integersWide吗
+        Determine whether the next transfer step exceeds the fixed-width integer capacity.
+    makeDataContainer
+        Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
+    makeLookupMeanders
+        Create the starting `lookupMeanders` for a matrix meander count.
+    makeLookupMeandersDiagonal
+        Prepare a semi-meander state for counting diagonal `次diagonal` at row `n`.
+    prune
+        Accumulate final contributions for dictionary states with known completion counts.
+    pruneArray
+        Move the counts of arc codes with a known formula into `state.countAddend`.
+    pruneDataFrame
+        Accumulate known diagonal contributions and retain the remaining dataframe rows.
+    recordAnalysis
+        Record retained `arcCodeAnalysis` values and their counts in a possibly extended `arrayAnalyzed`.
+    walkDyckPath
+        Locate the first Dyck-balance failure bit in `intWithExtra_0b1`.
+"""
 from __future__ import annotations
 
 from functools import cache
@@ -20,7 +61,6 @@ if TYPE_CHECKING:
     from numpy.lib._arraysetops_impl import UniqueInverseResult
     from typing import Any, Literal, LiteralString
     import pandas
-'Matrix Meanders Goals:\n- Extreme abstraction.\n- Find operations with latent intermediate arrays and make the intermediate array explicit.\n- Reduce or eliminate intermediate arrays and selector arrays.\n- Write formulas in prefix notation.\n- For each formula, find an equivalent prefix notation formula that never uses the same variable as input more than once: that\n\twould allow the evaluation of the expression with only a single stack, which saves memory.\n- Standardize code as much as possible to create duplicate code.\n- Convert duplicate code to procedures.\n'
 
 def integersWide吗(state: StateMeanders) -> bool:
     """Determine whether the next transfer step exceeds the fixed-width integer capacity.
@@ -40,7 +80,7 @@ def integersWide吗(state: StateMeanders) -> bool:
     bitWidthMeanders: int = (4 * sum(state.lookupMeanders.values())).bit_length()
     return state.bitWidthLimit < max(bitWidthArcCode, bitWidthMeanders)
 
-def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int=0) -> dict[int, int]:
+def makeLookupMeanders(kind: Literal['closed', 'meanders', 'semi'] | LiteralString, n: int, boundary: int = 0) -> dict[int, int]:
     """Create the starting `lookupMeanders` for a matrix meander count.
 
     (AI generated docstring)
@@ -195,7 +235,7 @@ def prune[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateM
     return state
 totalBucketsMaximumBy_boundary: dict[int, int] = {1: 3, 2: 12, 3: 40, 4: 125, 5: 392, 6: 1254, 7: 4087, 8: 13623, 9: 46181, 10: 159137, 11: 555469, 12: 1961369, 13: 6991893, 14: 25134208}
 
-def getTotalBuckets(state: StateMeanders, totalArcCodes: int=0) -> int:
+def getTotalBuckets(state: StateMeanders, totalArcCodes: int = 0) -> int:
     """Estimate the output allocation length for one transfer-matrix step.
 
     (AI generated docstring)
@@ -289,7 +329,25 @@ def countBigInt[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形
     state = prune(state)
     while 0 < state.boundary and integersWide吗(state):
 
-        def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders=state) -> None:
+        def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders = state) -> None:
+            """Accumulate the allowed successors of one packed meander arch state.
+
+            (AI generated docstring)
+
+            Input Mutation
+            --------------
+            `state.lookupMeanders` receives `meanders` for each allowed successor below
+            `state.arcCodeMaximum`. Existing successor counts increase by that amount.
+
+            Parameters
+            ----------
+            arcCode : int
+                Packed arch state before the transfer step.
+            meanders : int
+                Number of partial meanders represented by `arcCode`.
+            state : StateMeanders
+                Enclosing transfer state by default, with the boundary already reduced.
+            """
             bitsAlfa: int = arcCode & state.bitsLocator
             bitsAlfaHasArcs: bool = 1 < bitsAlfa
             bitsAlfaIsEven: int = bitsAlfa & 1 ^ 1
@@ -424,6 +482,29 @@ slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., at=次Alfa)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., at=次Zulu)
 
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
+    """Move the counts of arc codes with a known formula into `state.countAddend`.
+
+    (AI generated docstring)
+
+    With b = `state.boundary + 1`, for each diagonal d ≤ b / 2 with a formula in
+    `mapFolding.oeis.boxOfDiagonals`, the arc code 2^(2(b − 2d) + 2) − 1 contributes the formula at b
+    times its count. The function then removes every arc code with count zero.
+
+    Parameters
+    ----------
+    state : StateMeanders
+        Transfer state. `state.boundary` selects the diagonals.
+    arrayMeanders : 形ArrayArcCode
+        Arc codes in ascending order with their counts.
+
+    Returns
+    -------
+    state : StateMeanders
+        The same state with the contributions in `state.countAddend`. `state.boundary` is 0 when no
+        arc code remains.
+    arrayMeanders : 形ArrayArcCode
+        The arc codes that remain, with their counts.
+    """
     boundary: int = state.boundary + 1
     次diagonal: int = 1
     while 次diagonal <= min(boundary // 2, len(boxOfDiagonals)):

@@ -144,12 +144,53 @@ def count(state: StateElimination) -> StateElimination:
 
 #======== Forbidden inequalities ============================
 	def addLessThan(comparatorLeft: Leaf, comparatorRight: Leaf) -> cp_model.IntVar:
+		"""Represent the pile ordering of two leaves with a solver Boolean.
+
+		(AI generated docstring)
+
+		Model Mutation
+		--------------
+		The enclosing model gains a Boolean variable and constraints equating its truth value
+		with the strict pile ordering.
+
+		Parameters
+		----------
+		comparatorLeft : Leaf
+			Leaf whose pile is tested as the smaller pile.
+		comparatorRight : Leaf
+			Leaf whose pile is tested as the larger pile.
+
+		Returns
+		-------
+		ruleΩ : cp_model.IntVar
+			Boolean that is true exactly when `comparatorLeft` precedes `comparatorRight`.
+		"""
 		ruleΩ: cp_model.IntVar = model.new_bool_var(f"this_{comparatorLeft}_lessThan_{comparatorRight}")
 		model.add(boxOfPilingsInLeafOrder[comparatorLeft] < boxOfPilingsInLeafOrder[comparatorRight]).only_enforce_if(ruleΩ)
 		model.add(boxOfPilingsInLeafOrder[comparatorRight] <= boxOfPilingsInLeafOrder[comparatorLeft]).only_enforce_if(ruleΩ.Not())
 		return ruleΩ
 
 	def addForbiddenInequalityCycle(leaf_k: Leaf, leaf_r: Leaf, leaf_kCrease: Leaf, leaf_rCrease: Leaf) -> None:
+		"""Forbid interleaving pile orders for two crease pairs.
+
+		(AI generated docstring)
+
+		Model Mutation
+		--------------
+		The enclosing model gains ordering variables and clauses excluding the four alternating
+		orders of the supplied crease endpoints.
+
+		Parameters
+		----------
+		leaf_k : Leaf
+			Initial leaf of the first crease pair.
+		leaf_r : Leaf
+			Initial leaf of the second crease pair.
+		leaf_kCrease : Leaf
+			Leaf joined to `leaf_k` by the first crease.
+		leaf_rCrease : Leaf
+			Leaf joined to `leaf_r` by the second crease.
+		"""
 		#=Meaning= 小, xiǎo: small, less; as in 李小龍, Lǐ Xiǎolóng, Lǐ little dragon, aka Bruce Lee
 		k__小于__r: cp_model.IntVar = addLessThan(leaf_k, leaf_r)
 		r1_小于__k: cp_model.IntVar = addLessThan(leaf_rCrease, leaf_k)
@@ -167,9 +208,39 @@ def count(state: StateElimination) -> StateElimination:
 		model.add_bool_or([k__小于_r1.Not(), r1_小于_k1.Not(), k1_小于__r.Not()])  # [k < r+1 < k+1 < r]
 
 	def leaf2IndicesCartesian(leaf: Leaf) -> tuple[int, ...]:
+		"""Obtain a leaf's Cartesian indices in the enclosing map shape.
+
+		(AI generated docstring)
+
+		Parameters
+		----------
+		leaf : Leaf
+			Zero-based leaf label in `state.mapShape`.
+
+		Returns
+		-------
+		indicesCartesian : tuple[int, ...]
+			Zero-based index in each dimension, in map-shape order.
+		"""
 		return tuple((leaf // prod(state.mapShape[0:dimension])) % state.mapShape[dimension] for dimension in range(state.totalDimensions))
 
 	def leafCreasePost(leaf: Leaf, dimension: int) -> Leaf | None:
+		"""Obtain the adjacent leaf at the next index of one map dimension.
+
+		(AI generated docstring)
+
+		Parameters
+		----------
+		leaf : Leaf
+			Leaf in the enclosing map shape.
+		dimension : int
+			Zero-based dimension whose index increases by one.
+
+		Returns
+		-------
+		leafCrease : Leaf | None
+			Adjacent leaf, or `None` when `leaf` is already at that dimension's last index.
+		"""
 		leafCrease: Leaf | None = None
 		if leaf2IndicesCartesian(leaf)[dimension] + 1 < state.mapShape[dimension]:
 			leafCrease = leaf + prod(state.mapShape[0:dimension])
@@ -198,11 +269,28 @@ def count(state: StateElimination) -> StateElimination:
 
 	class FoldingCollector(cp_model.CpSolverSolutionCallback):
 		def __init__(self, _listOfIndicesLeafInPilingsOrder: list[cp_model.IntVar]) -> None:
+			"""Initialize an empty collection of solver folding solutions.
+
+			(AI generated docstring)
+
+			Parameters
+			----------
+			_listOfIndicesLeafInPilingsOrder : list[cp_model.IntVar]
+				Solver variables giving leaf labels in pile order, retained for each callback.
+			"""
 			super().__init__()
 			self._listOfIndicesLeafInPilingsOrder: list[cp_model.IntVar] = _listOfIndicesLeafInPilingsOrder
 			self.boxOfFolding: list[list[Leaf]] = []
 
 		def on_solution_callback(self) -> None:
+			"""Append the solver's current leaf order to `self.boxOfFolding`.
+
+			(AI generated docstring)
+
+			Solution Collection
+			-------------------
+			Each callback appends one list of leaf labels in the supplied pile order.
+			"""
 			self.boxOfFolding.append([self.value(leaf) for leaf in self._listOfIndicesLeafInPilingsOrder])
 
 	foldingCollector = FoldingCollector(boxOfLeavesInPileOrder)
@@ -267,7 +355,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 			if (sherpa.totalDimensions == 7) and (sherpa.boxOfFolding):
 				pathFilename: Path = (settingsPackage.pathPackage.parent / 'research' / 'elimination' / "dataRaw"
 					/ f"p2d7_{uuid.uuid4()}.csv")
-				# ruff: ignore[import-outside-top-level]
+
 				from mapFolding.kitFilesystem import writeAlbum
 				writeAlbum(sherpa.boxOfFolding, pathFilename)
 

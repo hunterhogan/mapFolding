@@ -1030,7 +1030,7 @@ class StateElimination:
 			The same state with active spaces replaced by the valid reduced results.
 
 		"""
-		from mapFolding.reduceIt import boxOfFunctionsReductionDEFAULT  # ruff: ignore[import-outside-top-level]
+		from mapFolding.reduceIt import boxOfFunctionsReductionDEFAULT
 		boxOfFunctionsReduction = boxOfFunctionsReduction or self.boxOfFunctionsReduction or boxOfFunctionsReductionDEFAULT
 		boxOfPermutationSpace: list[PermutationSpace] = 是valid(self.boxOfPermutationSpace)
 		self.boxOfPermutationSpace = []
@@ -1596,7 +1596,7 @@ class StateMeanders:
 
 		if not self.lookupMeanders:
 			#=SIN= Avoid "circular import".
-			#ruff: ignore[import-outside-top-level]
+
 			from mapFolding.algorithms.matrixMeandersShare import makeLookupMeanders
 			self.lookupMeanders = makeLookupMeanders(self.kind, self.n, self.boundary)
 
@@ -1668,5 +1668,4 @@ class StateMeandersAxis(StateMeanders):
 #================== `numba` types =================================================================
 
 # DEVELOPMENT
-from mapFolding.dataBasketsAnnex import (  # ruff: ignore[module-import-not-at-top-of-file]
-	形DataclassNumba as 形DataclassNumba, 形StateMapFoldingNumba as 形StateMapFoldingNumba)
+from mapFolding.dataBasketsAnnex import 形DataclassNumba as 形DataclassNumba, 形StateMapFoldingNumba as 形StateMapFoldingNumba

@@ -1,4 +1,4 @@
-# pyright: reportUnnecessaryComparison=false
+#ruff: file-ignore[repeated-append]
 from __future__ import annotations
 
 from mapFolding.basecamp import enumerateSequences

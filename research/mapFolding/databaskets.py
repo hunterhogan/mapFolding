@@ -1,8 +1,8 @@
-#ruff: ignore[undocumented-public-module]
+
 # Effectively abandoned module.
-# TODO https://github.com/python/typing/discussions/2092
-# pyright: reportAttributeAccessIssue=false, reportUnknownMemberType=false
-# ty: ignore[missing-attribute,redundant-condition]
+# Improvement https://github.com/python/typing/discussions/2092
+
+
 from __future__ import annotations
 
 from mapFolding import leafOrigin

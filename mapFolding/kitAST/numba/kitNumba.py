@@ -27,8 +27,8 @@ from __future__ import annotations
 from astToolkit import Be, Grab, IfThis, Make, NodeChanger, Then
 from collections.abc import Mapping
 from itertools import filterfalse, takewhile
-from mapFolding.kitAST import IngredientsModule
-from mapFolding.kitAST.paths import makePathFilenameModule
+from mapFolding.kitAST import IngredientsModule, toDisk
+from mapFolding.kitAST.paths import getLogicalPath
 from mapFolding.kitAST.theSSOT import default
 from typing import TYPE_CHECKING
 from typing_extensions import TypedDict
@@ -38,10 +38,10 @@ if TYPE_CHECKING:
 	from collections.abc import Container, Sequence
 	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.kitAST import IngredientsFunction
-	from mapFolding.theTypes import Default
+	from mapFolding.theTypes import Default, DefaultOverride
 	from os import PathLike
 	from pathlib import PurePath
-	from typing import Any, Final
+	from typing import Final, Unpack
 
 	# TODO what?
 	type NumbaOption = bool | str | ast.expr | Mapping[str, ast.expr] | Sequence[str]
@@ -151,7 +151,7 @@ def makeNumbaCall(名Callable: str, parametersNumba: ParametersNumba) -> ast.Cal
 		parametersNumba, map(_numbaExpression, parametersNumba.values()), strict=True))
 	return Make.Call(Make.Name(名Callable), listParameters, list_keyword)
 
-def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifiers: Default | None = None, **override: Any) -> IngredientsFunction:
+def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> IngredientsFunction:
 	"""Attach a configured compiler decorator to a function container.
 
 	(AI generated docstring)
@@ -167,7 +167,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifi
 		Function definition and its import dependencies.
 	identifiers : Default = mapFolding.kitAST.theSSOT.default
 		Compiler identifiers. Omitted values, `None`, and an empty mapping use the shared defaults.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Override compiler settings listed in Other Parameters.
 
 	Returns
@@ -204,7 +204,7 @@ def decorateCallableWithNumba(ingredientsFunction: IngredientsFunction, identifi
 
 	return ingredientsFunction
 
-def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a source module with compiler decorators on selected functions.
 
 	(AI generated docstring)
@@ -225,7 +225,7 @@ def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identi
 	identifiers : Default = mapFolding.kitAST.theSSOT.default
 		Compiler and destination identifiers. Omitted values, `None`, and an empty mapping use
 		the shared defaults.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Override compiler and destination settings listed in Other Parameters.
 
 	Returns
@@ -245,12 +245,12 @@ def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identi
 		Root directory for the generated module.
 	logicalPathInfix : identifierDotAttribute = identifiers['logicalPath']['synthetic']
 		Dotted path beneath `pathRoot`. An empty string adds no directories.
-	identifierModule : str = identifiers['module']['algorithmNumba']
+	名Module : str = identifiers['module']['algorithmNumba']
 		Generated module filename without its extension.
-	pathFilename : PathLike[str] | PurePath
+	pathFilename : PurePath
 		Explicit destination. An omitted or falsy value uses the destination assembled from
-		`pathRoot`, `logicalPathInfix`, and `identifierModule`.
-	package : str = identifiers['module']['package']
+		`pathRoot`, `logicalPathInfix`, and `名Module`.
+	名Package : str = identifiers['module']['package']
 		Package identifier used by the module writer for import cleanup.
 
 	See Also
@@ -280,16 +280,16 @@ def makeNumbaModule(astModule: ast.Module, boxOfCallable: Container[str], identi
 	astImport: ast.ImportFrom = Make.ImportFrom(logicalPathNumba, [Make.alias(名CallableDecorator)])
 	ingredientsModule = IngredientsModule(epilogue=Make.Module([
 		*astModule.body[:次Import], astImport, *astModule.body[次Import:]
-	], astModule.type_ignores))
+	], astModule.type_ignores), docstring=(
+		f'Count with `{getLogicalPath(identifiers['module']['package'], identifiers['logicalPath']['default'], identifiers['module']['default'])}`'
+		' and Numba compilation of selected functions.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.numba.kitNumba.makeNumbaModule` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 
-	pathRoot: PathLike[str] = override.get('pathRoot', identifiers['filesystem']['pathRoot'])
-	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix', identifiers['logicalPath']['synthetic'])
-	identifierModule: str = override.get('identifierModule', identifiers['module']['algorithmNumba'])
-	pathFilename: PurePath = override.get('pathFilename') or makePathFilenameModule(pathRoot, logicalPathInfix, identifierModule)
-	identifierPackage: str = override.get('package', identifiers['module']['package'])
-	return ingredientsModule.write_astModule(pathFilename, identifierPackage)
+	名Module: str = override.get('名Module') or identifiers['module']['algorithmNumba']
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
-def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a complete source module with module compilation.
 
 	(AI generated docstring)
@@ -306,7 +306,7 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 	identifiers : Default = mapFolding.kitAST.theSSOT.default
 		Compiler and destination identifiers. Omitted values, `None`, and an empty mapping use
 		the shared defaults.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Override compiler and destination settings listed in Other Parameters.
 
 	Returns
@@ -327,12 +327,12 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 		Root directory for the generated module.
 	logicalPathInfix : identifierDotAttribute = identifiers['logicalPath']['synthetic']
 		Dotted path beneath `pathRoot`. An empty string adds no directories.
-	identifierModule : str = identifiers['module']['algorithmNumba']
+	名Module : str = identifiers['module']['algorithmNumba']
 		Generated module filename without its extension.
-	pathFilename : PathLike[str] | PurePath
+	pathFilename : PurePath
 		Explicit destination. An omitted or falsy value uses the destination assembled from
-		`pathRoot`, `logicalPathInfix`, and `identifierModule`.
-	package : str = identifiers['module']['package']
+		`pathRoot`, `logicalPathInfix`, and `名Module`.
+	名Package : str = identifiers['module']['package']
 		Package identifier used by the module writer for import cleanup.
 
 	See Also
@@ -359,11 +359,11 @@ def make_jit_module(astModule: ast.Module, identifiers: Default | None = None, *
 	ingredientsModule = IngredientsModule(epilogue=Make.Module([
 		*astModule.body[:次Import], astImport, *astModule.body[次Import:]
 		, Make.Expr(makeNumbaCall(名CallableModule, parametersNumba))
-	], astModule.type_ignores))
+	], astModule.type_ignores), docstring=(
+		f'Count with `{getLogicalPath(identifiers['module']['package'], identifiers['logicalPath']['default'], identifiers['module']['default'])}`'
+		' compiled as one module by Numba.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.numba.kitNumba.make_jit_module` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 
-	pathRoot: PathLike[str] = override.get('pathRoot', identifiers['filesystem']['pathRoot'])
-	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix', identifiers['logicalPath']['synthetic'])
-	identifierModule: str = override.get('identifierModule', identifiers['module']['algorithmNumba'])
-	pathFilename: PurePath = override.get('pathFilename') or makePathFilenameModule(pathRoot, logicalPathInfix, identifierModule)
-	identifierPackage: str = override.get('package', identifiers['module']['package'])
-	return ingredientsModule.write_astModule(pathFilename, identifierPackage)
+	名Module: str = override.get('名Module') or identifiers['module']['algorithmNumba']
+	return toDisk(ingredientsModule, identifiers, override, 名Module)

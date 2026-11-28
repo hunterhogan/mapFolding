@@ -113,7 +113,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		return state
 
 	if not state.boxOfPermutationSpace:
-		state = pinPilesAtEnds(state, 1)
+		state = pinPilesAtEnds(state, 1, CPUlimit=workersMaximum)
 
 	processManager: BaseContext = get_context()
 	queuePermutationSpace: Queue[PermutationSpace] = processManager.Queue(maxsize=workersMaximum * 2)
@@ -140,7 +140,7 @@ def doTheNeedful(state: StateElimination, workersMaximum: int) -> StateEliminati
 		state.boxOfFolding.extend(sherpa.boxOfFolding)
 		boxOfPermutationSpace = list(deconstructPermutationSpaces(sherpa.boxOfPermutationSpace))
 		queuePermutationSpacesLength += -1 + len(boxOfPermutationSpace)
-		tqdmQueue.total += len(boxOfPermutationSpace)  # pyright: ignore[reportOperatorIssue] # ty: ignore[unsupported-operator]
+		tqdmQueue.total += len(boxOfPermutationSpace)
 		tqdmQueue.update(1)
 	tqdmQueue.close()
 

@@ -16,7 +16,7 @@ from mapFolding.synthesized.initializeState import transitionOnGroupsOfFolds
 from mapFolding.theSSOT import settingsPackage
 from numba import get_num_threads, set_num_threads
 #=SIN= Type-checker suppression: `numba.core.config` creates `NUMBA_NUM_THREADS` at runtime through `globals()`, which no static checker can see.
-from numba.core.config import NUMBA_NUM_THREADS  # pyright: ignore[reportAttributeAccessIssue, reportUnknownVariableType]  # ty: ignore[import-not-found]
+from numba.core.config import NUMBA_NUM_THREADS
 from operator import add
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
@@ -140,6 +140,6 @@ def cpuTotal(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) ->
 	threadsNumba: int = get_num_threads()
 	monkeypatch.setitem(raiseIfNone(defineConcurrencyLimit.__kwdefaults__), 'cpuTotal', request.param)
 	#=SIN= Type-checker suppression: `numba.core.config` creates `NUMBA_NUM_THREADS` at runtime through `globals()`, so its type is unknown.
-	set_num_threads(min(request.param, NUMBA_NUM_THREADS))  # pyright: ignore[reportUnknownArgumentType]
+	set_num_threads(min(request.param, NUMBA_NUM_THREADS))
 	yield request.param
 	set_num_threads(threadsNumba)

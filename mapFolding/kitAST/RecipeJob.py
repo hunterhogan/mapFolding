@@ -52,8 +52,8 @@ if TYPE_CHECKING:
 	from mapFolding.dataBaskets import StateMapFoldingSymmetric
 	from mapFolding.kitAST import IngredientsFunction, IngredientsModule
 	from mapFolding.kitAST.dataclasses import ShatteredDataclass
-	from mapFolding.theTypes import Default, 形TotalLeaves
-	from typing import Any, TypeIs
+	from mapFolding.theTypes import Default, DefaultOverride, 形TotalLeaves
+	from typing import Any, TypeIs, Unpack
 
 @dataclasses.dataclass(slots=True)
 class RecipeJobTheorem2:
@@ -463,12 +463,12 @@ def replaceStaticScalars(job: RecipeJobTheorem2, ingredientsCount: IngredientsFu
 	"""
 	for identifier in raiseIfNone(job.shatteredDataclass).boxOfStaticScalars:
 		NodeChanger(IfThis.isNameIdentifier(identifier)
-			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))  # ruff: ignore[suspicious-eval-usage]
+			, Then.replaceWith(Make.Constant(int(eval(f"job.state.{identifier}"))))
 		).visit(ingredientsCount.astFunctionDef)
 
 #================== Launchers =======================================================================
 
-def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, identifiers: Default | None = None, **override: Any) -> None:
+def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: IngredientsFunction, job: RecipeJobTheorem2, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> None:
 	"""Append a standalone counting launcher and result-file writer.
 
 	(AI generated docstring)
@@ -495,7 +495,7 @@ def addLauncher(ingredientsModule: IngredientsModule, ingredientsFunction: Ingre
 		Recipe supplying state, counting metadata, estimate, multiplier, and result path.
 	identifiers : Default | None = None
 		Identifier defaults from `mapFolding.kitAST.theSSOT.defaultMapFolding` when omitted.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		`useNumbaProgressBar` enables progress counting and defaults to `False`.
 		`名ProgressBar` overrides the configured progress argument identifier.
 

@@ -42,6 +42,8 @@ Functions
 		Add triangle rows to a local b-file.
 	updateValuesKnown
 		Add missing terms to a local b-file and refresh shared known values.
+	updateValuesSolved
+		Add each term that the symbolic relations determine to the terms b-files.
 	Z0Z_oeisName
 		Look up the OEIS ID of an OEIS ID or common name, ignoring case, whitespace, and punctuation.
 
@@ -81,7 +83,7 @@ from mapFolding.oeis._mapShape import getTotalFoldsKnown as getTotalFoldsKnown, 
 
 # isort: split
 from mapFolding.oeis._byID import oeisIDfor_n as oeisIDfor_n
-from mapFolding.oeis._symbolic import substituteValuesKnown as substituteValuesKnown
+from mapFolding.oeis._symbolic import substituteValuesKnown as substituteValuesKnown, updateValuesSolved as updateValuesSolved
 from mapFolding.oeis.A400429 import (
 	A005315of0 as A005315of0, A005315of1 as A005315of1, A005315of2 as A005315of2, A005315of3 as A005315of3, A005315of4 as A005315of4,
 	A005315of5 as A005315of5, A005315of6 as A005315of6, A005315of7 as A005315of7, A005315of8 as A005315of8, A005315of9 as A005315of9,
@@ -89,6 +91,9 @@ from mapFolding.oeis.A400429 import (
 	diagonal1 as diagonal1, diagonal2 as diagonal2, diagonal3 as diagonal3, diagonal4 as diagonal4, diagonal5 as diagonal5,
 	diagonal6 as diagonal6, diagonal7 as diagonal7, diagonal8 as diagonal8, diagonal9 as diagonal9, diagonal10 as diagonal10,
 	diagonal11 as diagonal11)
+
+# isort: split
+from mapFolding.oeis._oeisdataClone import update_oeisdata as update_oeisdata
 
 # isort: split
 from mapFolding.oeis._commandLine import getOEISids as getOEISids, OEIS_for_n as OEIS_for_n

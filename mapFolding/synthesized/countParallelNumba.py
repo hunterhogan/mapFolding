@@ -1,3 +1,20 @@
+"""Count map foldings in concurrent processes with a Numba-compiled counting function.
+
+(AI generated docstring)
+
+`mapFolding.kitAST.mapFolding._count.makeInlineParallelNumba` generates this module.
+Regenerate the module instead of editing it.
+
+Contents
+--------
+Functions
+    count
+        Count the groups of foldings by inserting and removing leaves.
+    doTheNeedful
+        Count the foldings of the map in `state` in concurrent processes.
+    unRepackStateMapFoldingParallel
+        Count the groups of foldings of the map in `state`.
+"""
 from __future__ import annotations
 
 from concurrent.futures import Future as ConcurrentFuture, ProcessPoolExecutor
@@ -12,6 +29,16 @@ if __name__ == '__main__':
 
 @jit(boundscheck=False, cache=True, error_model='numpy', forceinline=True, inline='always', nopython=True, parallel=False)
 def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 形Elephino, 次Dimension: 形TotalLeaves, 次Leaf: 形TotalLeaves, 次MiniGap: 形Elephino, leaf1ndex: 形TotalLeaves, leafConnectee: 形TotalLeaves, dimensionsUnconstrained: 形TotalLeaves, countDimensionsGapped: 形ArrayTotalLeaves1D, gapRangeStart: 形ArrayElephino1D, gapsWhere: 形ArrayTotalLeaves1D, leafAbove: 形ArrayTotalLeaves1D, leafBelow: 形ArrayTotalLeaves1D, connectionGraph: 形ArrayTotalLeaves3D, totalDimensions: 形TotalLeaves, totalLeaves: 形TotalLeaves, taskDivisions: 形TotalLeaves, task次: 形TotalLeaves) -> tuple[形TotalFolds, 形Elephino, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形Elephino, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形ArrayTotalLeaves1D, 形ArrayElephino1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves1D, 形ArrayTotalLeaves3D, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves, 形TotalLeaves]:
+    """Count the groups of foldings by inserting and removing leaves.
+
+    (AI generated docstring)
+
+    You can count the foldings of the map that `connectionGraph` describes. Each leaf goes into each
+    gap that every constraining dimension admits. When every leaf is in the folding,
+    `groupsOfFolds` increases by 1. Each group contains `totalLeaves` foldings. The generators in
+    `mapFolding.kitAST` replace the `StateMapFolding` parameter of this function with its fields, so
+    this description names the fields directly.
+    """
     while leaf1ndex > 0:
         if leaf1ndex <= 1 or leafBelow[0] == 1:
             if leaf1ndex > totalLeaves:
@@ -61,6 +88,20 @@ def count(groupsOfFolds: 形TotalFolds, gap1ndex: 形Elephino, gap1ndexCeiling: 
     return (groupsOfFolds, gap1ndex, gap1ndexCeiling, 次Dimension, 次Leaf, 次MiniGap, leaf1ndex, leafConnectee, dimensionsUnconstrained, countDimensionsGapped, gapRangeStart, gapsWhere, leafAbove, leafBelow, connectionGraph, totalDimensions, totalLeaves, taskDivisions, task次)
 
 def unRepackStateMapFoldingParallel(state: StateMapFoldingParallel) -> StateMapFoldingParallel:
+    """Count the groups of foldings of the map in `state`.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    state : StateMapFolding
+        An initialized insertion search.
+
+    Returns
+    -------
+    state : StateMapFolding
+        The same insertion search with `groupsOfFolds` complete.
+    """
     mapShape: tuple[形TotalLeaves, ...] = state.mapShape
     groupsOfFolds: 形TotalFolds = state.groupsOfFolds
     gap1ndex: 形Elephino = state.gap1ndex
@@ -86,6 +127,26 @@ def unRepackStateMapFoldingParallel(state: StateMapFoldingParallel) -> StateMapF
     return state
 
 def doTheNeedful(state: StateMapFoldingParallel, concurrencyLimit: int) -> tuple[int, list[StateMapFoldingParallel]]:
+    """Count the foldings of the map in `state` in concurrent processes.
+
+    (AI generated docstring)
+
+    Each of the `state.taskDivisions` tasks counts part of the groups of foldings in its own process.
+
+    Parameters
+    ----------
+    state : StateMapFoldingParallel
+        An initialized insertion search.
+    concurrencyLimit : int
+        Maximum number of worker processes.
+
+    Returns
+    -------
+    totalFolds : int
+        Number of foldings of the map.
+    boxOfStatesParallel : list[StateMapFoldingParallel]
+        Completed insertion search of each task.
+    """
     stateParallel = deepcopy(state)
     boxOfStatesParallel: list[StateMapFoldingParallel] = [stateParallel] * stateParallel.taskDivisions
     groupsOfTotalFolds: int = 0

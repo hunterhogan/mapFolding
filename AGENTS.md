@@ -1,11 +1,39 @@
 # Tool execution
 
-- Run project commands from the repository root after activating `.venv` or another existing virtual environment.
-- Run `pytest` with `sandbox_permissions="require_escalated"` on the first invocation. The Windows sandbox cannot access the existing pytest temporary directory or `.pytest_cache`. Do not repeat a sandboxed attempt to rediscover this known access failure.
-- Keep pytest defaults from `pyproject.toml`; use only the test paths and options needed for the task.
+- Run project commands from the repository root after activating `.venv`.
+- Inside a sandbox, run the first `pytest` invocation, and anything that imports `mapFolding.oeis`, with escalation (Codex: `sandbox_permissions="require_escalated"`; Claude Code: `dangerouslyDisableSandbox`). The Windows sandbox cannot access the existing pytest temporary directory or `.pytest_cache`. Do not repeat a sandboxed attempt to rediscover this known access failure.
+- Keep pytest defaults from `pyproject.toml`; use only the test paths and options needed for the task. The exception is the worker count on Hunter's current PC, which `windows-dev-environment` limits because of that machine's hardware problems; on other machines the `pyproject.toml` default stands.
 - Do not add pytest hooks or application wrappers to reconfigure standard streams.
-- A sandbox `EPERM` while a project command reads a tool installed outside the repository is not a broken project environment. Rerun the same command with sandbox escalation so the tool can read its installation.
-- Check types with `pyrefly check`, not `pyright`. `pyrefly` may need sandbox escalation to read `C:\Users\hunte\AppData\Roaming\uv\tools\pyrefly`. Do not replace it with a path-based invocation or report that Pyrefly could not run before retrying the activated-environment command with escalation.
+- A sandbox `EPERM` while a project command reads a tool installed outside the repository is not a broken project environment. Rerun the same command with escalation so the tool can read its installation.
+- Check types with `pyrefly check`, not `pyright`. `pyrefly` may need escalation to read `C:\Users\hunte\AppData\Roaming\uv\tools\pyrefly`. Do not replace it with a path-based invocation or report that Pyrefly could not run before retrying the activated-environment command with escalation.
+- `.venv` is Python 3.15. PyPI has no OR-Tools wheel for 3.15, so `.venv` editable-installs a local build of Hunter's OR-Tools annotation fork (`C:\clones\ortools`). Fix CP-SAT annotations in the fork, following its `.local-notes/README.md`.
+
+# Scope of these instructions
+
+These instructions cover the mapFolding package. Top-level `Z0Z_*` folders are a local workspace outside version control (`.git/info/exclude`), so tracked files, commit messages, and pull requests leave them out. Code that graduates from there into the package is written to stand on its own as package code.
+
+# Computing terms
+
+- mapFolding computes OEIS terms. A new term comes from a counter in `mapFolding/algorithms/` reached through `basecamp` and `oeisIDfor_n`, or from a relation in `mapFolding/oeis/_symbolicRelations.py` that `mapFolding.oeis.updateValuesSolved` solves. Terms from papers or other literature are never stored. New term-finding machinery belongs in the package; propose a new generalized algorithm to Hunter first.
+- Counts, not enumeration: leave `permutations.py` and the bilateral permutation algorithms alone.
+- Terms first: b-files, OEIS drafts, tests, and README work wait until the terms exist. Never submit anything to OEIS.
+- Correctness is the output. A relation, domain, or algorithm is right when it gives the known values, so check it instead of asking. A relation's domain covers every index where it gives the right value.
+- Variants are cheap. When several approaches might work, build all of them with astToolkit and `mapFolding.kitAST` and measure. Package working variants even when they count nothing new; many modules are fine, one huge file is not.
+- Within the task's scope, make typing and structural improvements without asking. Questions for Hunter are decisions about identifiers, design, and scope.
+
+# The `mapFolding.oeis` package
+
+- Everything about OEIS goes in `mapFolding/oeis`, and nothing else does.
+- `mapFolding.oeis` is a meta-dictionary for the rest of the package: a caller passes an OEIS ID and gets what it needs without knowing file formats, paths, or row layouts. Its lookups take fewer parameters than their main-package counterparts (`getTriangle(oeisID)` versus `makeTriangle(values, rowLength, rowStart)`). Outside tests, modules import only the public API; when a caller needs a private `mapFolding.oeis._*` object, improve the public API, as `getTriangleCells`, `substituteValuesKnown`, and `boxOfOEISidTriangle` were added. `settingsOEIS` holds settings of the oeis package; a setting for one consumer lives beside that consumer.
+- OEIS data comes from git: a read-only sparse clone of oeis/oeisdata (`settingsOEIS.pathClone`), the tracked snapshot `mapFolding/oeis/oeisdata/` that imports and CI read, and `mapFolding/oeis/terms/` for computed terms that OEIS lacks. `settingsOEIS.boxOfIDs` is the registry; `_oeisdataClone.updateSnapshot` refreshes the snapshot.
+- With the git command line on the clone, `git lfs pull` hangs, because each LFS pointer fetches a blob lazily. Set `lfs.fetchexclude=` in the clone's local config; then `git sparse-checkout add` downloads only the added b-files.
+- Many sequences have no uploaded b-file; their terms come from the entry's `%S`, `%T`, and `%U` lines, numbered from the first `%O` offset.
+- "oeisdata" is a proper noun and keeps its lowercase in identifiers (`path_oeisdata`). The "b" of b-file stays lowercase (`contents_bFile`).
+
+# Generated modules
+
+- `mapFolding/oeis/byFormula.py`, `tests/test_byFormula.py`, `tests/test_relationsTriangle.py`, and `tests/dataSamples/oeis.py` are generated by `mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS`. Tests and test data for `_symbolicRelations.py` come only from these generators: when a kind of relation has no test, extend the generator. Derive limits from stored terms and metadata, and propose to Hunter any limit that cannot be derived.
+- After regenerating, run `easyRun\synthesizeModules.cmd`. It runs Ruff on `byFormula.py` to restore the formatting that regeneration changes, and it is safe to run at any time.
 
 # AST generation in `mapFolding.kitAST`
 
@@ -14,3 +42,5 @@
 - For a whole-module transformation, preserve the full transformed body, definition order, and import scope. Append the complete module to the appropriate section. Use the ledger for imports that can be consolidated without changing behavior. Leave other imports in the source body, and place new imports after any `__future__` imports. Extract individual functions only when required by the transformation.
 - Use `LedgerOfImports.extractImports` to move eligible top-level imports out of an assembled section. It mutates the module body and consolidates imports from top-level, import-only `TYPE_CHECKING` blocks into the typing ledger. Preserve other conditional imports and imports inside definitions in place. Check ordering and namespace collisions after assembly, and replace or alias only conflicting bindings. Unused-import cleanup does not resolve collisions.
 - Use `setDatatypeViaImport` for configured datatype import substitutions while preserving the abstract datatype names used by the generated code. Capture both returned containers. Use `toDisk` in generators that resolve their output paths from project defaults and caller overrides.
+- A generator takes `identifiers: Default | None` and `**override: Unpack[DefaultOverride]` (`mapFolding.theTypes`). One concept has one key in every generator: `名Callable…` for a function, `名Module…` for a module, other `名…` keys for a class, variable, or package, `logicalPath…` for a dotted path. A new key goes in `DefaultOverride`.
+- A generated module gets its own docstring through `IngredientsModule.docstring`, which also writes a `Contents` section from the summaries of its public functions; the docstring of a source module never carries over (`getBodySansDocstring`). Function docstrings carry over from the source functions, so document the source.

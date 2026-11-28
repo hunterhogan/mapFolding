@@ -371,12 +371,12 @@ def shatterDataclass(logicalPathDataclass: identifierDotAttribute, identifierDat
 	dictionaryDeReConstruction: dict[str, DeReConstructField2ast] = {}
 
 	dataclass: type = importLogicalPath2Identifier(logicalPathDataclass, identifierDataclass)
-	boxOfFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(dataclass)  # ty: ignore[invalid-argument-type]
-	matryoshkas: Iterable[type] = filter(dataclasses.is_dataclass, dataclass.__mro__)  # ty: ignore[invalid-assignment]
+	boxOfFields: tuple[dataclasses.Field[Any], ...] = dataclasses.fields(dataclass)
+	matryoshkas: Iterable[type] = filter(dataclasses.is_dataclass, dataclass.__mro__)
 	for dataclass in matryoshkas:
 		astClassDef: ast.ClassDef = raiseIfNone(extractClassDef(parseLogicalPath2astModule(dataclass.__module__), dataclass.__name__))
 		annotations: dict[str, AnnotationForm] = get_annotations(dataclass)
-		for aField in dataclasses.fields(dataclass):  # ty: ignore[invalid-argument-type]
+		for aField in dataclasses.fields(dataclass):
 			if aField.name in annotations and aField in boxOfFields:
 				dictionaryDeReConstruction[aField.name] = DeReConstructField2ast(dataclass.__module__, astClassDef, identifierDataclassInstance, aField)
 

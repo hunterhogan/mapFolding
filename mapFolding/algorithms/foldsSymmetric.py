@@ -18,6 +18,26 @@ if TYPE_CHECKING:
 
 # IMPROVEMENT this algorithm is slow.
 def filterAsymmetricFolds(state: StateMapFoldingSymmetric) -> StateMapFoldingSymmetric:
+    """Add the symmetric foldings in the group of `state.leafBelow` to `state.symmetricFolds`.
+
+    (AI generated docstring)
+
+    `state.leafComparison` receives, for each position in the stack, the difference modulo
+    `state.totalLeaves` between successive leaves. Each array of index pairs in `state.indices`
+    describes one candidate symmetry, and a folding of the group has that symmetry when every pair of
+    `state.leafComparison` entries is equal.
+
+    Parameters
+    ----------
+    state : StateMapFoldingSymmetric
+        Insertion search with a complete folding in `state.leafBelow`.
+
+    Returns
+    -------
+    state : StateMapFoldingSymmetric
+        The same state with `state.symmetricFolds` increased by the number of candidate symmetries
+        that hold.
+    """
     state.次Leaf = 1
     state.leafComparison[0] = 1
     state.leafConnectee = 1

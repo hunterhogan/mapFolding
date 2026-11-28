@@ -1,4 +1,4 @@
-#ruff: file-ignore[suspicious-pickle-usage] #=Sin= Centralize all pickle usage here.
+
 """Manage folding computation data and temporary binary files.
 
 (AI generated docstring)
@@ -493,21 +493,21 @@ def saveTotal(pathFilename: PathLike[str], countTotal: int) -> PurePosixPath:
 	"""
 	try:
 		pathFilenameWritten: Path | str = writeStringToHere(str(countTotal), pathFilename)
-	#ruff: ignore[blind-except] #=Sin= The total must print.
+
 	except BaseException as ERRORmessage:
-		#ruff: ignore[too-many-statements-in-try-clause] #=Sin= Is it a sin to ignore a pretentious rule?
+
 		try:
 			stdout.write((banner := '\n' + ' '.join(['countTotal'] * 5) + '\n') + f"\n{countTotal = }\n" + banner)
 			stdout.writelines(str(ERRORmessage))
 			stdout.write(banner + f"\n{countTotal = }\n" + banner)
-			#ruff: ignore[os-getcwd, os-path-join] #=Sin= `try` used pathlib, so I'm using builtin here.
+
 			pathFilenameWritten = os.path.join(os.getcwd(), 'countTotal' + ''.join(((countTotal % 3) + 2) * ['YO_']) + '.txt')
-			#ruff: ignore[builtin-open, open-file-with-context-handler] #=Sin= `try` used pathlib and context handler.
-			streamWriteFallback: TextIOWrapper = open(pathFilenameWritten, 'w', encoding='utf-8')
+
+			streamWriteFallback: TextIOWrapper = Path(pathFilenameWritten).open('w', encoding='utf-8')
 			streamWriteFallback.write(str(countTotal))
 			streamWriteFallback.close()
 			stdout.write(pathFilenameWritten)
-		#ruff: ignore[bare-except] #=Sin= The total must print.
+
 		except:
 			stdout.write(str(countTotal))
 			pathFilenameWritten = ''
@@ -651,7 +651,7 @@ def writeTriangle(triangle: 形Triangle, pathFilename: Path, *, append: bool = F
 		writeTriangle(triangle, makePathFilename(pathWrite, 'A287548ADDENDUM', suffix='.csv'))
 		```
 	"""
-	return iterableToCSV(map(lambda n: (n, *triangle[n]), sorted(triangle)), pathFilename, append=append)  # ruff: ignore[unnecessary-map]
+	return iterableToCSV(map(lambda n: (n, *triangle[n]), sorted(triangle)), pathFilename, append=append)
 
 #======== Read =====================================================================================
 
@@ -770,7 +770,7 @@ def readDataFrame(pathFilename: PathLike[str]) -> DataFrame:
 		Load sample data using the dimension count in an elimination state.
 	"""
 	#=Sin= `pandas` is optional.
-	#ruff: ignore[import-outside-top-level]
+
 	import pandas
 	return pandas.DataFrame(pandas.read_pickle(pathFilename))
 
@@ -808,7 +808,7 @@ def readDiagonal(pathFilename: Path, 次diagonal: int) -> dict[int, int]:
 	"""
 	#=SIN= Intermediate tuple: duplicate-row validation needs the selected record count after dictionary construction.
 	boxOfBoxes: tuple[tuple[int, ...], ...] = tuple(streamCSVintegers(pathFilename))
-	if not all(map(lambda boxOfIntegers: len(boxOfIntegers) == 3, boxOfBoxes)):  # ruff: ignore[unnecessary-map]
+	if not all(map(lambda boxOfIntegers: len(boxOfIntegers) == 3, boxOfBoxes)):
 		message: str = 'I received a diagonal CSV entry without exactly three integers: a group key, a diagonal offset, and an integer.'
 		raise ValueError(message)
 	boxOfBoxes = tuple(filter(lambda boxOfIntegers: boxOfIntegers[1] == 次diagonal, boxOfBoxes))
@@ -978,4 +978,4 @@ def streamCSVintegers(pathFilename: Path) -> Iterable[tuple[int, ...]]:
 	`streamCSV`
 		Read parsed field strings without converting the fields to integers.
 	"""
-	yield from map(lambda boxOfStrings: tuple(map(int, boxOfStrings)), streamCSV(pathFilename))  # ruff: ignore[unnecessary-map]
+	yield from map(lambda boxOfStrings: tuple(map(int, boxOfStrings)), streamCSV(pathFilename))

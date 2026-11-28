@@ -30,7 +30,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
 	from mapFolding.kitAST import IngredientsFunction, IngredientsModule, Settings形
-	from mapFolding.theTypes import Any, Default
+	from mapFolding.theTypes import Default, DefaultOverride
 	from os import PathLike
 	from pathlib import PurePath
 	import ast
@@ -149,19 +149,18 @@ def setDatatypeViaImport(ingredientsFunction: IngredientsFunction, ingredientsMo
 
 	return ingredientsFunction, ingredientsModule
 
-def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords: dict[str, Any], identifierModule: str, **override: Any) -> PurePath:
+def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, override: DefaultOverride, 名Module: str) -> PurePath:
 	"""Write a generated module to the resolved output filename.
 
 	(AI generated docstring)
 
 	You can use this function to resolve an output path for `ingredientsModule` and write the
-	assembled source. Truthy values in `override` precede values in `keywords`, which precede
-	`identifiers` for the logical path, root, and package. The function returns the writer path.
+	assembled source. Truthy values in `override` precede `identifiers` for the logical path,
+	root, and package. The function returns the writer path.
 
 	Filename Overrides
 	------------------
-	`fileExtension` and `pathFilename` are read only from `override`, not from `keywords`.
-	An explicit truthy `pathFilename` bypasses filename construction. Otherwise,
+	An explicit truthy `pathFilename` in `override` bypasses filename construction. Otherwise,
 	`mapFolding.kitAST.paths.makePathFilenameModule` constructs the destination.
 
 	Parameters
@@ -170,13 +169,11 @@ def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords:
 		Assembled source container to write.
 	identifiers : Default
 		Default package, physical root, and generated logical path.
-	keywords : dict[str, Any]
-		Caller-supplied root, logical path, and package values used before defaults.
-	identifierModule : str
+	override : DefaultOverride
+		The caller's `**override`: `logicalPathInfix`, `pathRoot`, `名Package`, `fileExtension`, and
+		`pathFilename` precede the defaults.
+	名Module : str
 		Module filename stem used unless an explicit destination path is supplied.
-	**override : Any
-		Explicit `logicalPathInfix`, `pathRoot`, `package`, `fileExtension`, and `pathFilename`
-		values.
 
 	Returns
 	-------
@@ -191,9 +188,9 @@ def toDisk(ingredientsModule: IngredientsModule, identifiers: Default, keywords:
 		toDisk(ingredientsModule, identifiers, override, 名Module)
 		```
 	"""
-	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or keywords.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
-	pathRoot: PathLike[str] = override.get('pathRoot') or keywords.get('pathRoot') or identifiers['filesystem']['pathRoot']
-	identifierPackage: str = override.get('package') or keywords.get('package') or identifiers['module']['package']
+	logicalPathInfix: identifierDotAttribute = override.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
+	pathRoot: PathLike[str] = override.get('pathRoot') or identifiers['filesystem']['pathRoot']
+	名Package: str = override.get('名Package') or identifiers['module']['package']
 	fileExtension: str = override.get('fileExtension') or settingsPackage.fileExtension
-	pathFilename: PurePath = override.get('pathFilename') or makePathFilenameModule(pathRoot, logicalPathInfix, identifierModule, fileExtension)
-	return ingredientsModule.write_astModule(pathFilename, identifierPackage)
+	pathFilename: PurePath = override.get('pathFilename') or makePathFilenameModule(pathRoot, logicalPathInfix, 名Module, fileExtension)
+	return ingredientsModule.write_astModule(pathFilename, 名Package)

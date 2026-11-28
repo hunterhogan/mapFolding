@@ -1,3 +1,37 @@
+"""Count symmetric meander shapes by the pile cut with the NumPy transfer.
+
+(AI generated docstring)
+
+The module adapts `mapFolding.algorithms.matrixAxisPile`.
+`mapFolding.kitAST.matrixMeanders.makeModulesAxis.makeAxisPileNumPy` generates this module.
+Regenerate the module instead of editing it.
+
+Contents
+--------
+Functions
+    count
+        Count meanders with transfer matrix algorithm implemented in NumPy (*Num*erical *Py*thon).
+    doTheNeedful
+        Compute `meanders` with a transfer matrix algorithm implemented in NumPy.
+    getBitsLocator
+        Make the mask that selects the bits of one side of the road in an `arcCode`.
+    isAxisMirrored吗
+        Decide whether the symmetry axis can match the strands of the two sides of an `arcCode`.
+    isHalfJoined吗
+        Decide whether the half that an `arcCode` describes joins with its half-turn image.
+    makeDataContainer
+        Create a `numpy.ndarray` of `shape` with `datatype` for matrix-meander computation.
+    makeLookupPartner
+        Pair each terminal on the cut with the other end of its arc, in circle order.
+    pairTerminals
+        Pair the terminals of one side that share an arc, and collect the crossing terminals.
+    pruneArray
+        Move the counts of arc codes with a known formula into `state.countAddend`.
+    recordAnalysis
+        Record retained `arcCodeAnalysis` values and their counts in a possibly extended `arrayAnalyzed`.
+    reflectArcCode
+        Reflect an `arcCode` across the road.
+"""
 from __future__ import annotations
 
 from gc import collect as goByeBye
@@ -33,6 +67,29 @@ slicerAlfa: ShapeSlicer = ShapeSlicer(length=..., at=次Alfa)
 slicerZulu: ShapeSlicer = ShapeSlicer(length=..., at=次Zulu)
 
 def pruneArray(state: StateMeanders, arrayMeanders: 形ArrayArcCode) -> tuple[StateMeanders, 形ArrayArcCode]:
+    """Move the counts of arc codes with a known formula into `state.countAddend`.
+
+    (AI generated docstring)
+
+    With b = `state.boundary + 1`, for each diagonal d ≤ b / 2 with a formula in
+    `mapFolding.oeis.boxOfDiagonals`, the arc code 2^(2(b − 2d) + 2) − 1 contributes the formula at b
+    times its count. The function then removes every arc code with count zero.
+
+    Parameters
+    ----------
+    state : StateMeanders
+        Transfer state. `state.boundary` selects the diagonals.
+    arrayMeanders : 形ArrayArcCode
+        Arc codes in ascending order with their counts.
+
+    Returns
+    -------
+    state : StateMeanders
+        The same state with the contributions in `state.countAddend`. `state.boundary` is 0 when no
+        arc code remains.
+    arrayMeanders : 形ArrayArcCode
+        The arc codes that remain, with their counts.
+    """
     boundary: int = state.boundary + 1
     次diagonal: int = 1
     while 次diagonal <= min(boundary // 2, len(boxOfDiagonals)):
@@ -286,13 +343,71 @@ def doTheNeedful(state: StateMeanders) -> StateMeanders:
     return state
 
 def getBitsLocator(arcCode: int) -> int:
+    """Make the mask that selects the bits of one side of the road in an `arcCode`.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    arcCode : int
+        State of the pile-cut transfer.
+
+    Returns
+    -------
+    bitsLocator : int
+        Mask `0b…010101` with a set bit at each even position up to the length of `arcCode`. `arcCode
+        & bitsLocator` is `bitsAlfa`, and `arcCode >> 1 & bitsLocator` is `bitsZulu`.
+    """
     return (1 << (arcCode.bit_length() | 1) + 1) // 3
 
 def reflectArcCode(arcCode: int) -> int:
+    """Reflect an `arcCode` across the road.
+
+    (AI generated docstring)
+
+    The reflection σ exchanges `bitsAlfa` and `bitsZulu`.
+
+    Parameters
+    ----------
+    arcCode : int
+        State of the pile-cut transfer.
+
+    Returns
+    -------
+    arcCodeReflected : int
+        State of the reflected half.
+    """
     bitsLocator: int = getBitsLocator(arcCode)
     return (arcCode & bitsLocator) << 1 | arcCode >> 1 & bitsLocator
 
 def pairTerminals(bitsSide: int, boxOfTerminals: Iterator[int], lookupPartner: list[int]) -> list[int]:
+    """Pair the terminals of one side that share an arc, and collect the crossing terminals.
+
+    (AI generated docstring)
+
+    Each terminal of the side takes the next circle position from `boxOfTerminals`. A `0` bit is the
+    inner end of an arc on the same side. A `1` bit is the outer end of that arc when an inner end is
+    unmatched, and otherwise the end of an arc that crosses the road.
+
+    Input Mutation
+    --------------
+    This function records each pair of the side in `lookupPartner`.
+
+    Parameters
+    ----------
+    bitsSide : int
+        `bitsAlfa` or `bitsZulu` of an `arcCode`, read from the road outward in steps of two bits.
+    boxOfTerminals : Iterator[int]
+        Circle position of each terminal of the side, in the order of `bitsSide`.
+    lookupPartner : list[int]
+        Partner of each circle position.
+
+    Returns
+    -------
+    boxOfCross : list[int]
+        Circle positions of the terminals of the side whose arcs cross the road, in the order of
+        `bitsSide`.
+    """
     boxOfOpen: list[int] = []
     boxOfCross: list[int] = []
     while 1 < bitsSide:
@@ -308,6 +423,25 @@ def pairTerminals(bitsSide: int, boxOfTerminals: Iterator[int], lookupPartner: l
     return boxOfCross
 
 def makeLookupPartner(arcCode: int) -> list[int]:
+    """Pair each terminal on the cut with the other end of its arc, in circle order.
+
+    (AI generated docstring)
+
+    The circle order lists the terminals of `bitsAlfa` from the road outward and then the terminals of
+    `bitsZulu` from the outside to the road. The k-th crossing terminal of `bitsAlfa` pairs with the
+    k-th crossing terminal of `bitsZulu`.
+
+    Parameters
+    ----------
+    arcCode : int
+        State of the pile-cut transfer at the symmetry axis.
+
+    Returns
+    -------
+    lookupPartner : list[int]
+        List of N circle positions. `lookupPartner[terminal]` is the position of the terminal that
+        shares an arc with `terminal`.
+    """
     bitsLocator: int = getBitsLocator(arcCode)
     bitsAlfa: int = arcCode & bitsLocator
     bitsZulu: int = arcCode >> 1 & bitsLocator
@@ -319,8 +453,43 @@ def makeLookupPartner(arcCode: int) -> list[int]:
     return lookupPartner
 
 def isAxisMirrored吗(arcCode: int) -> bool:
+    """Decide whether the symmetry axis can match the strands of the two sides of an `arcCode`.
+
+    (AI generated docstring)
+
+    With L_alfa strands on the side of `bitsAlfa` and L_zulu strands on the side of `bitsZulu`, the
+    symmetry axis can match the sides when L_alfa − L_zulu ∈ {0, 2}.
+
+    Parameters
+    ----------
+    arcCode : int
+        State of the pile-cut transfer at the symmetry axis.
+
+    Returns
+    -------
+    isAxisMirrored : bool
+        `True` when L_alfa − L_zulu ∈ {0, 2}.
+    """
     bitsLocator: int = getBitsLocator(arcCode)
     return (arcCode >> 1 & bitsLocator).bit_length() <= (arcCode & bitsLocator).bit_length() <= (arcCode >> 1 & bitsLocator).bit_length() + 4
 
 def isHalfJoined吗(arcCode: int) -> bool:
+    """Decide whether the half that an `arcCode` describes joins with its half-turn image.
+
+    (AI generated docstring)
+
+    The test takes the center terminal on the side of `bitsAlfa`. The half joins when
+    `isAxisMirrored吗` accepts the numbers of strands and
+    `mapFolding.algorithms.matrixAxisStrip.isJoined吗` accepts the circle order.
+
+    Parameters
+    ----------
+    arcCode : int
+        State of the pile-cut transfer at the symmetry axis.
+
+    Returns
+    -------
+    isHalfJoined : bool
+        `True` when the half and its half-turn image form one symmetric meander shape.
+    """
     return isAxisMirrored吗(arcCode) and isJoined吗(makeLookupPartner(arcCode))

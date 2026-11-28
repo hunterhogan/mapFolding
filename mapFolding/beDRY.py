@@ -597,7 +597,6 @@ def getTaskDivisions(computationDivisions: int | str | None, concurrencyLimit: i
 			"total leaves because that would count folds more than once."
 		)
 		raise ValueError(message)
-	#pyrefly: ignore[unnecessary-type-conversion]  #=SIN= Insurance.
 	return int(max(0, taskDivisions))
 
 def validateMapShape(mapShape: Sequence[int]) -> tuple[int, ...]:

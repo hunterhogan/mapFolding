@@ -1,6 +1,6 @@
-# pyright: reportMissingParameterType=false, reportUnknownParameterType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false, reportUnknownMemberType=false
-# ruff: file-ignore[missing-return-type-undocumented-public-function, undocumented-public-function, multiple-statements-on-one-line-semicolon, collection-literal-concatenation, print]
-# ruff: file-ignore[missing-type-function-argument]
+
+
+
 """Semi-meanders with n crossings and winding number n - 2h, for a FIXED h.
 
 Contributed by Alper Ferudun (https://oeis.org/wiki/User:Alper_Ferudun), October 2026.

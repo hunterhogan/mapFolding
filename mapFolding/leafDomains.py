@@ -960,7 +960,7 @@ def _getDomain首零一二and首一二(domain零: tuple[int, ...], domain0: tupl
 @cache
 def _getDomainLeaf(leaf: Leaf, totalDimensions: int, mapShape: tuple[int, ...], totalLeaves: int) -> range:
 	"""I use this cache to restrict pile ranges for supported length-two maps and retain every pile otherwise."""
-	from mapFolding.dataBaskets import StateElimination  # ruff: ignore[import-outside-top-level]
+	from mapFolding.dataBaskets import StateElimination
 	state: StateElimination = StateElimination(mapShape)
 	if mapShapeIs2上nDimensions(state.mapShape):
 		originPinned: bool = leaf == leafOrigin

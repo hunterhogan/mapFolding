@@ -6,13 +6,14 @@
 from __future__ import annotations
 
 from astToolkit import Make
-from astToolkit.filesystem import write_astModule
+from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
 from humpy_cytoolz import groupby as toolz_groupby
+from hunterMakesPy.kitFilesystem import settings_autoflakeDEFAULT
 from itertools import starmap
 from mapFolding.kitAST import IngredientsModule
 from mapFolding.kitAST.oeis.oeisIDByFormula import makeIngredientsOEISid
 from mapFolding.kitAST.oeis.oeisTests import (
-	makeFormulaParameters, makeReferences, makeRelationParameters, makeTestsByFormula, makeTestsTriangle, updateSamplesOEIS)
+	makeFormulaParameters, makeReferences, makeRelationParameters, makeSamplesOEIS, makeTestsByFormula, makeTestsTriangle, updateSamplesOEIS)
 from mapFolding.kitAST.paths import makePathFilenameModule
 from mapFolding.oeis import settingsOEIS
 from mapFolding.oeis._symbolic import makeSolutionsSymbolic
@@ -22,10 +23,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-	from mapFolding.kitAST.oeis.oeisTests import 形ParameterFormula, 形ParameterRelation
 	from mapFolding.oeis import OEISid
 	from sympy import Expr
 	from sympy.logic.boolalg import Boolean
+	import ast
 
 def makeModulesOEIS(pathFilename: Path = settingsOEIS.pathPackage / 'byFormula.py'
 	, *, pathTests: Path | None = None, pathSamples: Path | None = None, pathTriangle: Path | None = None) -> Path:
@@ -70,15 +71,19 @@ def makeModulesOEIS(pathFilename: Path = settingsOEIS.pathPackage / 'byFormula.p
 		pathSamples = Path(makePathFilenameModule(logicalPathInfix='tests.dataSamples', identifierModule='oeis'))
 	if pathTriangle is None:
 		pathTriangle = Path(makePathFilenameModule(logicalPathInfix='tests', identifierModule='test_relationsTriangle'))
+	settingsWrite: dict[str, dict[str, object]] = {'autoflake': {**settings_autoflakeDEFAULT
+		, 'additional_imports': [settingsPackage.identifierPackage], 'ignore_pass_statements': True}}
 	lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]] = toolz_groupby(itemgetter(0), makeSolutionsSymbolic())
 	ingredientsModule = IngredientsModule(list(starmap(makeIngredientsOEISid, sorted(lookupSolutions.items()))))
 	docstringModule: str = ('Compute a(n) for an OEIS ID by computing other OEIS IDs.\n\nThis is a generated file; edit'
 		' `mapFolding.oeis._symbolicRelations.boxOfRelations` and run `easyRun/synthesizeModules.py`.\n')
-	write_astModule(Make.Module([Make.Expr(Make.Constant(docstringModule)), *ingredientsModule.body]), pathFilename
-		, identifierPackage=settingsPackage.identifierPackage)
-	boxOfParametersFormula: tuple[形ParameterFormula, ...] = makeFormulaParameters(lookupSolutions)
-	boxOfParametersRelation: tuple[形ParameterRelation, ...] = makeRelationParameters()
-	updateSamplesOEIS(pathSamples, makeReferences(boxOfParametersFormula, boxOfParametersRelation))
-	makeTestsByFormula(pathTests, boxOfParametersFormula)
-	makeTestsTriangle(pathTriangle, boxOfParametersRelation)
+	write_astModule(Make.Module([Make.Expr(Make.Constant(docstringModule)), *ingredientsModule.body]), pathFilename, settingsWrite)
+	boxOfParametersFormula: tuple[tuple[OEISid, int, str | None], ...] = makeFormulaParameters(lookupSolutions)
+	boxOfParametersRelation: tuple[tuple[str, int, Expr, Expr], ...] = makeRelationParameters()
+	astModuleSamples: ast.Module = makeSamplesOEIS()
+	if pathSamples.exists():
+		astModuleSamples = parsePathFilename2astModule(pathSamples)
+	write_astModule(updateSamplesOEIS(astModuleSamples, makeReferences(boxOfParametersFormula, boxOfParametersRelation)), pathSamples, settingsWrite)
+	write_astModule(makeTestsByFormula(boxOfParametersFormula), pathTests, settingsWrite)
+	write_astModule(makeTestsTriangle(boxOfParametersRelation), pathTriangle, settingsWrite)
 	return pathFilename

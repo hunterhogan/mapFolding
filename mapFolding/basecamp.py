@@ -1,4 +1,4 @@
-#ruff: file-ignore[import-outside-top-level] #=Sin= Import `doTheNeedful` from the selected algorithm: a flow control technique.
+
 """Select and run map-folding, stamp-folding, and meander algorithms.
 
 (AI generated docstring)
@@ -299,7 +299,7 @@ def countFoldsSymmetric(mapShape: tuple[int, ...], flow: LiteralString | Literal
 
 # TODO some algorithms have some concurrency in numba. And, I think some use stdlib. Some might use
 # both! At the very least, I have plans for viable implementations that use both.
-#ruff: ignore[unused-function-argument] #=Sin= `CPUlimit` is in the signature due to `KeywordArgumentsCount`.
+
 def countMeanders(
 	kind: Literal['closed', 'meander shapes', 'meanders', 'semi', 'symmetric'] | LiteralString | None = None
 	, n: int | None = None

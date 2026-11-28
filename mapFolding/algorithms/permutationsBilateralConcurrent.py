@@ -1,3 +1,16 @@
+"""Count semi-meanders with independent bilateral search tasks in worker processes.
+
+(AI generated docstring)
+
+You can divide a prepared bilateral search into independent tasks and combine their counts
+for ordinary or symmetric semi-meanders.
+
+Contents
+--------
+Functions
+	doTheNeedful
+		Prepare search tasks, collect worker counts, and apply the family multiplier.
+"""
 from __future__ import annotations
 
 from mapFolding.algorithms.permutationsBilateral import (
@@ -13,6 +26,24 @@ if TYPE_CHECKING:
 	from typing import Any
 
 def _countTask(qq: tuple[int, Interval, Milepost, int]) -> int:
+	"""I use this task to count completions of an independent bilateral search branch.
+
+	(AI generated docstring)
+
+	Input Mutation
+	--------------
+	The task's linked interval structure changes as crossings are added and undone.
+
+	Parameters
+	----------
+	qq : tuple[int, Interval, Milepost, int]
+		Crossing number, first interval to explore, prepared milepost, and final crossing number.
+
+	Returns
+	-------
+	totalPermutations : int
+		Number of completed branches in the task, before the family multiplier.
+	"""
 	n下i, interval, milepost, n = qq
 	totalPermutations: int = 0
 	toDoUndoLIFO: list[tuple[int, Interval, Milepost] | Undo] = [(n下i, interval, milepost)]
@@ -20,7 +51,7 @@ def _countTask(qq: tuple[int, Interval, Milepost, int]) -> int:
 	while toDoUndoLIFO:
 		work: tuple[int, Interval, Milepost] | Undo = toDoUndoLIFO.pop()
 		if len(work) == 3:
-			n下i, interval, milepost = work  # pyright: ignore[reportAssignmentType]
+			n下i, interval, milepost = work
 
 			if interval is not milepost.interval:
 				interval, milepost, *undo = crossRoadDiagonally(interval, milepost)
@@ -38,6 +69,22 @@ def _countTask(qq: tuple[int, Interval, Milepost, int]) -> int:
 	return totalPermutations
 
 def _workerLoop(queueIn: Queue[Any], queueOut: Queue[Any]) -> None:
+	"""I use this worker to return task counts until the input queue supplies `None`.
+
+	(AI generated docstring)
+
+	Queue Consumption
+	-----------------
+	Each search task is removed from `queueIn`, and its completed count is put on `queueOut`.
+	A `None` item ends the worker without producing a result for that item.
+
+	Parameters
+	----------
+	queueIn : Queue[Any]
+		Queue supplying bilateral search tasks or the stopping value `None`.
+	queueOut : Queue[Any]
+		Queue receiving one integer count for each completed task.
+	"""
 	while True:
 		task = queueIn.get()
 		if task is None:
@@ -65,7 +112,7 @@ def _gatherFrontier(n下i: int, milepost: Milepost, n: int, splitDepth: int, *, 
 			toDoUndoLIFO.append(uncrossRoadLaterally(work))
 			continue
 
-		n下i, interval, milepost = work  # pyright: ignore[reportAssignmentType]
+		n下i, interval, milepost = work
 
 		if interval is not milepost.interval:
 			interval, milepost, *undo = crossRoadDiagonally(interval, milepost)
@@ -93,6 +140,31 @@ def _gatherFrontier(n下i: int, milepost: Milepost, n: int, splitDepth: int, *, 
 	return listQQ, totalFU
 
 def doTheNeedful(n: int, *, symmetric: bool, concurrencyLimit: int | None = None) -> int:
+	"""Count ordinary or symmetric semi-meanders across worker processes.
+
+	(AI generated docstring)
+
+	Worker Processes
+	----------------
+	The search creates independent tasks, starts the selected number of processes, and waits
+	for every task result and process before returning the combined count.
+
+	Parameters
+	----------
+	n : int
+		For ordinary semi-meanders, one less than the number of crossings. For symmetric
+		semi-meanders, the number of crossings.
+	symmetric : bool
+		`True` selects symmetric semi-meanders at index `n`. `False` selects ordinary
+		semi-meanders at index `n + 1` and doubles the representative count when `n` exceeds one.
+	concurrencyLimit : int | None = None
+		Positive worker count. `None` uses the reported CPU count, or one when unavailable.
+
+	Returns
+	-------
+	totalPermutations : int
+		Combined count for the selected family. Indices at most one return one without workers.
+	"""
 	totalPermutations: int = 1
 	milepost: Milepost = makeMilepost()
 	n下i: int = 1
@@ -122,6 +194,15 @@ def doTheNeedful(n: int, *, symmetric: bool, concurrencyLimit: int | None = None
 		process.start()
 
 	def howManyLayersOfFunctionsAreThere() -> None:
+		"""Supply every search task and one stopping value per worker to the input queue.
+
+		(AI generated docstring)
+
+		Queue Population
+		----------------
+		The enclosing `queueIn` receives the prepared tasks followed by `cpuCount` values
+		of `None`. The feeder waits when the queue is full so workers can consume the tasks.
+		"""
 		for task in tasks:
 			queueIn.put(task)
 		for _cpu in range(cpuCount):

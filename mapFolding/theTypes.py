@@ -84,19 +84,24 @@ Function signatures
 Managing values with defaults
 	Default
 		Group default configuration values by role.
+	DefaultOverride
+		Replace individual `Default` values for one generator call.
 """
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 from gmpy2 import mpz
 from numpy import dtype, int64 as numpy_int64, integer, ndarray, uint8 as numpy_uint8, uint16 as numpy_uint16, uint64 as numpy_uint64
-from typing import TYPE_CHECKING, TypedDict, TypeVar
+from typing import TYPE_CHECKING, TypeVar
+from typing_extensions import TypedDict
 
 if TYPE_CHECKING:
 	from hunterMakesPy import ConcurrencyLimit, identifierDotAttribute
+	from mapFolding.kitAST import Settings形
+	from mapFolding.kitAST.numba.kitNumba import ParametersNumba
 	from numpy import bool as numpy_bool, intp as numpy_intp
 	from os import PathLike
-	from pathlib import PurePosixPath
+	from pathlib import PurePath, PurePosixPath
 	from typing import Any, LiteralString, TypeAlias
 
 type Folding = tuple[Leaf, ...]
@@ -287,7 +292,7 @@ different data type.
 
 #================== Function signatures ===========================================================
 
-class 形KeywordArgumentsCount(TypedDict, total=False):
+class 形KeywordArgumentsCount(TypedDict, total=False, closed=True):
 	"""Describe optional keyword arguments shared by counting entry points.
 
 	(AI generated docstring)
@@ -342,6 +347,94 @@ class Default(TypedDict):
 	logicalPath: dict[str, identifierDotAttribute]
 	module: dict[str, str]
 	variable: dict[str, str]
+
+class DefaultOverride(TypedDict, total=False, closed=True):
+	"""Replace individual `Default` values for one generator call.
+
+	A generator in `mapFolding.kitAST` reads each key it uses from its `**override` before it reads `Default`. Every
+	generator uses the same key for the same concept, so a caller can pass one `DefaultOverride` to several generators.
+
+	Keys that begin with `名` replace an identifier: `名Callable...` a function, `名Module...` a module, and the other
+	`名...` keys a class, variable, or package. Keys that begin with `logicalPath` replace a dotted import path, and
+	`pathRoot` and `pathFilename` replace a filesystem location. `fileExtension`, `parametersNumba`,
+	`useNumbaProgressBar`, and `boxOfSettings形` replace generation settings that have no `Default` category.
+	"""
+
+	名ArcCodeAnalysis: str
+	名ArrayMeanders: str
+	名Callable: str
+	名CallableActiveLeafGreaterThan0: str
+	名CallableActiveLeafGreaterThan0Source: str
+	名CallableAggregateArcCodes: str
+	名CallableBigInt: str
+	名CallableBigIntTest: str
+	名CallableCounting: str
+	名CallableDecorator: str
+	名CallableDispatcher: str
+	名CallableDispatcherSource: str
+	名CallableDyck: str
+	名CallableFilterAsymmetricFolds: str
+	名CallableFilterAsymmetricFoldsAnnexSource: str
+	名CallableFilterAsymmetricFoldsPrivate: str
+	名CallableFilterAsymmetricFoldsPrivateAnnexSource: str
+	名CallableFilterAsymmetricFoldsSource: str
+	名CallableFlip: str
+	名CallableGetSymmetricTotalFolds: str
+	名CallableGetSymmetricTotalFoldsAnnexSource: str
+	名CallableInitializeConcurrencyManager: str
+	名CallableInitializeConcurrencyManagerAnnexSource: str
+	名CallableInitializeState: str
+	名CallableModule: str
+	名CallablePrune: str
+	名CallablePruneArray: str
+	名CallablePruneDataFrame: str
+	名CallablePruneSource: str
+	名CallableReflect: str
+	名CallableSource: str
+	名CallableWide: str
+	名Counting: str
+	名CountingAnnexSource: str
+	名CountingFilterSource: str
+	名CountingSource: str
+	名Dataclass: str
+	名DataclassAnnexSource: str
+	名DataclassFilterSource: str
+	名DataclassInstance: str
+	名DataclassInstanceAnnexSource: str
+	名DataclassInstanceFilterSource: str
+	名DataclassInstanceSource: str
+	名DataclassParallel: str
+	名DataclassSource: str
+	名DataframeAnalyzed: str
+	名Indices: str
+	名IndicesFilterSource: str
+	名IntWithExtra_0b1: str
+	名MaximumWorkers: str
+	名MaximumWorkersAnnexSource: str
+	名Module: str
+	名ModuleAlgorithm: str
+	名ModuleAsynchronousAnnex: str
+	名ModuleCommon: str
+	名ModuleInitializeState: str
+	名ModulePrune: str
+	名ModuleShare: str
+	名ModuleSource: str
+	名Package: str
+	名PackageSource: str
+	名ProgressBar: str
+	名TqdmBoundary: str
+	logicalPathAlgorithm: identifierDotAttribute
+	logicalPathAssembly: identifierDotAttribute
+	logicalPathDataclass: identifierDotAttribute
+	logicalPathInfix: identifierDotAttribute
+	logicalPathNumba: identifierDotAttribute
+	logicalPathSource: identifierDotAttribute
+	pathFilename: PurePath
+	pathRoot: PathLike[str]
+	fileExtension: str
+	parametersNumba: ParametersNumba
+	useNumbaProgressBar: bool
+	boxOfSettings形: list[Settings形]
 
 #=EndNotes##TypeAlias=
 #======== Scalars ================================

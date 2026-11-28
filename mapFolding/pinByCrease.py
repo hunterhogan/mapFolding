@@ -24,7 +24,7 @@ Functions
 		pinPile二ByCrease
 			Iterate over crease neighbors for pile four.
 """
-# ruff: file-ignore[collapsible-if, too-many-boolean-expressions]
+
 from __future__ import annotations
 
 from gmpy2 import bit_flip, is_even as isEven吗, is_odd as isOdd吗
@@ -391,9 +391,8 @@ def pinPile二Ante首ByCrease(state: StateElimination) -> Iterator[Leaf]:
 		if addendDimension首零 == 四:
 			if addendDimension零 == 三:
 				boxOfCreaseIndicesExcluded.extend([*range(dimensionIndex(一), dimensionIndex(二) + inclusive)])
-			if addendDimension一 == 一:
-				if addendDimension一零 == 三:
-					boxOfCreaseIndicesExcluded.append(dimensionIndex(二))
+			if addendDimension一 == 一 and addendDimension一零 == 三:
+				boxOfCreaseIndicesExcluded.append(dimensionIndex(二))
 
 		if addendDimension零 == 一:
 			boxOfCreaseIndicesExcluded.append(dimensionIndex(一))

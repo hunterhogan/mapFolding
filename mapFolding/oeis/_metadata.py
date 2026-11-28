@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING
 import sys
 
 if TYPE_CHECKING:
-	from collections.abc import Iterator, Mapping
+	from collections.abc import Callable, Iterator, Mapping
 	from mapFolding.oeis._theTypes import OEISid
 	from mapFolding.theTypes import 形Triangle
 	from pathlib import Path
@@ -331,6 +331,11 @@ def _getMetadataOEISid(oeisID: OEISid) -> MetadataOEISid:
 		valuesKnown.update(dissoc(parse_bFile(contents), *valuesKnown))
 	return MetadataOEISid(boxOfCommonNames=lookupCommonNames.get(oeisID, ()), description=' '.join(lookupField['%N']), offset=parseOffset(lookupField), valuesKnown=valuesKnown, valueUnknown=max(valuesKnown) + 1)
 
+def _makeMetadataOEISidTriangle(oeisID: OEISid, rowLength: Callable[[int], int], rowStart: int, columnStart: int) -> MetadataOEISidTriangle:
+	metadata: MetadataOEISid = dictionaryOEIS[oeisID]
+	return MetadataOEISidTriangle(boxOfCommonNames=metadata['boxOfCommonNames'], description=metadata['description'], offset=metadata['offset']
+		, valuesKnown=metadata['valuesKnown'], valueUnknown=metadata['valueUnknown'], rowLength=rowLength, rowStart=rowStart, columnStart=columnStart)
+
 boxOfOEISidAbsent: tuple[OEISid, ...] = filterEntryAbsent(settingsOEIS.boxOfIDs, settingsOEIS.pathSnapshot)
 """Implemented OEIS IDs without an entry in `settingsOEIS.pathSnapshot`."""
 if boxOfOEISidAbsent:
@@ -346,25 +351,25 @@ boxOfOEISid: tuple[OEISid, ...] = (*filterfalse(boxOfOEISidAbsent.__contains__, 
 dictionaryOEIS: dict[OEISid, MetadataOEISid] = dict(zip(boxOfOEISid, map(_getMetadataOEISid, boxOfOEISid), strict=True))
 """Metadata loaded for implemented OEIS sequences with snapshot entries."""
 dictionaryTriangle: dict[OEISid, MetadataOEISidTriangle] = {
-	'A001263': MetadataOEISidTriangle(**dictionaryOEIS['A001263'], rowLength=int, rowStart=1, columnStart=1),
-	'A008828': MetadataOEISidTriangle(**dictionaryOEIS['A008828'], rowLength=int, rowStart=1, columnStart=1),
-	'A053121': MetadataOEISidTriangle(**dictionaryOEIS['A053121'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
-	'A060972': MetadataOEISidTriangle(**dictionaryOEIS['A060972'], rowLength=int, rowStart=1, columnStart=1),
+	'A001263': _makeMetadataOEISidTriangle('A001263', rowLength=int, rowStart=1, columnStart=1),
+	'A008828': _makeMetadataOEISidTriangle('A008828', rowLength=int, rowStart=1, columnStart=1),
+	'A053121': _makeMetadataOEISidTriangle('A053121', rowLength=partial(add, 1), rowStart=0, columnStart=0),
+	'A060972': _makeMetadataOEISidTriangle('A060972', rowLength=int, rowStart=1, columnStart=1),
 	# Antidiagonal cell (n, k) represents the source array entry T(n - k + 1, k).
-	'A078099': MetadataOEISidTriangle(**dictionaryOEIS['A078099'], rowLength=int, rowStart=1, columnStart=1),
-	'A259689': MetadataOEISidTriangle(**dictionaryOEIS['A259689'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
-	'A259698': MetadataOEISidTriangle(**dictionaryOEIS['A259698'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
-	'A259701': MetadataOEISidTriangle(**dictionaryOEIS['A259701'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
-	'A259703': MetadataOEISidTriangle(**dictionaryOEIS['A259703'], rowLength=partial(add, -1), rowStart=2, columnStart=1),
-	'A259974': MetadataOEISidTriangle(**dictionaryOEIS['A259974']
+	'A078099': _makeMetadataOEISidTriangle('A078099', rowLength=int, rowStart=1, columnStart=1),
+	'A259689': _makeMetadataOEISidTriangle('A259689', rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
+	'A259698': _makeMetadataOEISidTriangle('A259698', rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A259701': _makeMetadataOEISidTriangle('A259701', rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A259703': _makeMetadataOEISidTriangle('A259703', rowLength=partial(add, -1), rowStart=2, columnStart=1),
+	'A259974': _makeMetadataOEISidTriangle('A259974'
 		, rowLength=compose_left(partial(add, 1), methodcaller('__floordiv__', 2)), rowStart=1, columnStart=1),
-	'A287548': MetadataOEISidTriangle(**dictionaryOEIS['A287548'], rowLength=int, rowStart=1, columnStart=1),
-	'A331499': MetadataOEISidTriangle(**dictionaryOEIS['A331499'], rowLength=int, rowStart=1, columnStart=1),
-	'A339179': MetadataOEISidTriangle(**dictionaryOEIS['A339179'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
+	'A287548': _makeMetadataOEISidTriangle('A287548', rowLength=int, rowStart=1, columnStart=1),
+	'A331499': _makeMetadataOEISidTriangle('A331499', rowLength=int, rowStart=1, columnStart=1),
+	'A339179': _makeMetadataOEISidTriangle('A339179', rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=2),
 	# Antidiagonal cell (n, k) represents the source array entry T(k, n - k + 1).
-	'A380367': MetadataOEISidTriangle(**dictionaryOEIS['A380367'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
-	'A380369': MetadataOEISidTriangle(**dictionaryOEIS['A380369'], rowLength=partial(add, 1), rowStart=0, columnStart=0),
-	'A400429': MetadataOEISidTriangle(**dictionaryOEIS['A400429'], rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=1),
+	'A380367': _makeMetadataOEISidTriangle('A380367', rowLength=partial(add, 1), rowStart=0, columnStart=0),
+	'A380369': _makeMetadataOEISidTriangle('A380369', rowLength=partial(add, 1), rowStart=0, columnStart=0),
+	'A400429': _makeMetadataOEISidTriangle('A400429', rowLength=lambda nRow: nRow // 2, rowStart=2, columnStart=1),
 }
 """Metadata, including the row layout, for every implemented triangle."""
 dictionaryOEIS.update(dictionaryTriangle)

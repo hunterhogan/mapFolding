@@ -17,25 +17,24 @@ from __future__ import annotations
 
 from astToolkit import Be, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.changeDef import extractFunctionDef
-from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
+from astToolkit.filesystem import parsePathFilename2astModule
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, LedgerOfImports
+from mapFolding.kitAST import IfThis, IngredientsModule, LedgerOfImports, toDisk
 from mapFolding.kitAST.mapFolding._count import makeTheorem2, makeTheorem2Numba, trimTheorem2
 from mapFolding.kitAST.mapFolding._doTheNeedful import makeInitializeState
 from mapFolding.kitAST.numba.kitNumba import make_jit_module
-from mapFolding.kitAST.paths import getModule, makePathFilenameModule
+from mapFolding.kitAST.paths import getModule
 from mapFolding.kitAST.theSSOT import defaultMapFolding, defaultMapFoldingSymmetric
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding.theTypes import Default
-	from os import PathLike
+	from mapFolding.theTypes import Default, DefaultOverride
 	from pathlib import PurePath
-	from typing import Any
+	from typing import Unpack
 	import ast
 
-def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, **keywordArguments: Any) -> PurePath:
+def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a counting module that filters discovered fold groups for symmetry.
 
 	(AI generated docstring)
@@ -52,7 +51,7 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 		nodes.
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects symmetric-fold defaults.
-	**keywordArguments : Any
+	**override : Unpack[DefaultOverride]
 		Source and target identifiers for state, counting, dispatching, filtering, indices, modules,
 		package, and output path.
 
@@ -70,30 +69,27 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 		```
 	"""
 	identifiers = identifiers or defaultMapFoldingSymmetric
-	名DataclassSource: str = keywordArguments.get('名DataclassSource') or identifiers['variable'].get('stateDataclassSource') or defaultMapFolding['variable']['stateDataclass']
-	名Dataclass: str = keywordArguments.get('名Dataclass') or identifiers['variable']['stateDataclass']
-	名DataclassInstanceSource: str = keywordArguments.get('名DataclassInstanceSource') or identifiers['variable'].get('stateInstanceSource') or defaultMapFolding['variable']['stateInstance']
-	名DataclassInstance: str = keywordArguments.get('名DataclassInstance') or identifiers['variable']['stateInstance']
-	名CallableSource: str = keywordArguments.get('名CallableSource') or identifiers['function'].get('countingSource') or defaultMapFolding['function']['counting']
-	名Callable: str = keywordArguments.get('名Callable') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
-	名CallableDispatcherSource: str = keywordArguments.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcherSource') or defaultMapFolding['function']['dispatcher']
-	名CallableDispatcher: str = keywordArguments.get('名CallableDispatcher') or identifiers['function']['dispatcher']
-	名CountingSource: str = keywordArguments.get('名CountingSource') or identifiers['variable'].get('countingSource') or defaultMapFolding['variable']['counting']
-	名Counting: str = keywordArguments.get('名Counting') or identifiers['variable']['counting']
-	名Indices: str = keywordArguments.get('名Indices') or identifiers['variable']['indices']
-	名FilterAsymmetricFoldsSource: str = keywordArguments.get('名FilterAsymmetricFoldsSource') or identifiers['function'].get('filterAsymmetricFoldsSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
-	名FilterAsymmetricFolds: str = keywordArguments.get('名FilterAsymmetricFolds') or identifiers['function']['filterAsymmetricFolds']
-	名DataclassFilterSource: str = keywordArguments.get('名DataclassFilterSource') or identifiers['variable'].get('stateDataclassFilterSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
-	名DataclassInstanceFilterSource: str = keywordArguments.get('名DataclassInstanceFilterSource') or identifiers['variable'].get('stateInstanceFilterSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
-	名CountingFilterSource: str = keywordArguments.get('名CountingFilterSource') or identifiers['variable'].get('countingFilterSource') or defaultMapFoldingSymmetric['variable']['counting']
-	名IndicesFilterSource: str = keywordArguments.get('名IndicesFilterSource') or identifiers['variable'].get('indicesFilterSource') or defaultMapFoldingSymmetric['variable']['indices']
-	名PackageSource: str = keywordArguments.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
-	名Package: str = keywordArguments.get('package') or identifiers['module']['package']
-	logicalPathSource: identifierDotAttribute = keywordArguments.get('logicalPathSource') or identifiers['logicalPath']['algorithm']
-	名ModuleSource: str = keywordArguments.get('名ModuleSource') or identifiers['module']['algorithmSource']
-	pathRoot: PathLike[str] = keywordArguments.get('pathRoot') or identifiers['filesystem']['pathRoot']
-	logicalPathInfix: identifierDotAttribute = keywordArguments.get('logicalPathInfix') or identifiers['logicalPath']['synthetic']
-	名Module: str = keywordArguments.get('名Module') or identifiers['module']['algorithm']
+	名DataclassSource: str = override.get('名DataclassSource') or identifiers['variable'].get('stateDataclassSource') or defaultMapFolding['variable']['stateDataclass']
+	名Dataclass: str = override.get('名Dataclass') or identifiers['variable']['stateDataclass']
+	名DataclassInstanceSource: str = override.get('名DataclassInstanceSource') or identifiers['variable'].get('stateInstanceSource') or defaultMapFolding['variable']['stateInstance']
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
+	名CallableSource: str = override.get('名CallableSource') or identifiers['function'].get('countingSource') or defaultMapFolding['function']['counting']
+	名Callable: str = override.get('名Callable') or identifiers['function'].get('algorithm') or identifiers['function']['counting']
+	名CallableDispatcherSource: str = override.get('名CallableDispatcherSource') or identifiers['function'].get('dispatcherSource') or defaultMapFolding['function']['dispatcher']
+	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
+	名CountingSource: str = override.get('名CountingSource') or identifiers['variable'].get('countingSource') or defaultMapFolding['variable']['counting']
+	名Counting: str = override.get('名Counting') or identifiers['variable']['counting']
+	名Indices: str = override.get('名Indices') or identifiers['variable']['indices']
+	名CallableFilterAsymmetricFoldsSource: str = override.get('名CallableFilterAsymmetricFoldsSource') or identifiers['function'].get('filterAsymmetricFoldsSource') or defaultMapFoldingSymmetric['function']['filterAsymmetricFolds']
+	名CallableFilterAsymmetricFolds: str = override.get('名CallableFilterAsymmetricFolds') or identifiers['function']['filterAsymmetricFolds']
+	名DataclassFilterSource: str = override.get('名DataclassFilterSource') or identifiers['variable'].get('stateDataclassFilterSource') or defaultMapFoldingSymmetric['variable']['stateDataclass']
+	名DataclassInstanceFilterSource: str = override.get('名DataclassInstanceFilterSource') or identifiers['variable'].get('stateInstanceFilterSource') or defaultMapFoldingSymmetric['variable']['stateInstance']
+	名CountingFilterSource: str = override.get('名CountingFilterSource') or identifiers['variable'].get('countingFilterSource') or defaultMapFoldingSymmetric['variable']['counting']
+	名IndicesFilterSource: str = override.get('名IndicesFilterSource') or identifiers['variable'].get('indicesFilterSource') or defaultMapFoldingSymmetric['variable']['indices']
+	名PackageSource: str = override.get('名PackageSource') or identifiers['module'].get('名PackageSource') or defaultMapFoldingSymmetric['module']['package']
+	logicalPathSource: identifierDotAttribute = override.get('logicalPathSource') or identifiers['logicalPath']['algorithm']
+	名ModuleSource: str = override.get('名ModuleSource') or identifiers['module']['algorithmSource']
+	名Module: str = override.get('名Module') or identifiers['module']['algorithm']
 
 	NodeChanger(Be.Name.idIs(IfThis.isIdentifier(名DataclassSource))
 			, Grab.idAttribute(Then.replaceWith(名Dataclass))
@@ -138,7 +134,7 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 
 	foldsSymmetricIncrementCount: ast.Assign = Make.Assign(
 		[Make.Name(名DataclassInstance, Make.Store())]
-		, value=Make.Call(Make.Name(名FilterAsymmetricFolds), [Make.Name(名DataclassInstance)]))
+		, value=Make.Call(Make.Name(名CallableFilterAsymmetricFolds), [Make.Name(名DataclassInstance)]))
 	NodeChanger(
 		findThis=Be.AugAssign.targetIs(IfThis.isAttributeNamespaceIdentifier(名DataclassInstance, 名CountingSource))
 		, doThat=Then.replaceWith(foldsSymmetricIncrementCount)
@@ -159,8 +155,8 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 	imports.walkThis(astModuleFilterSource)
 	FunctionDef_filterAsymmetricFolds: ast.FunctionDef = raiseIfNone(extractFunctionDef(
 		astModuleFilterSource
-		, 名FilterAsymmetricFoldsSource))
-	FunctionDef_filterAsymmetricFolds.name = 名FilterAsymmetricFolds
+		, 名CallableFilterAsymmetricFoldsSource))
+	FunctionDef_filterAsymmetricFolds.name = 名CallableFilterAsymmetricFolds
 	FunctionDef_filterAsymmetricFolds.args.args[0].arg = 名DataclassInstance
 	FunctionDef_filterAsymmetricFolds.args.args[0].annotation = Make.Name(名Dataclass)
 	FunctionDef_filterAsymmetricFolds.returns = Make.Name(名Dataclass)
@@ -173,13 +169,13 @@ def addSymmetryCheck(astModule: ast.Module, identifiers: Default | None = None, 
 	NodeChanger(Be.Attribute.attrIs(IfThis.isIdentifier(名IndicesFilterSource))
 			, Grab.attrAttribute(Then.replaceWith(名Indices))
 		).visit(FunctionDef_filterAsymmetricFolds)
-	astModule.body = [*imports.makeList_ast(), FunctionDef_filterAsymmetricFolds, *astModule.body]
+	ingredientsModule = IngredientsModule(imports=imports, prologue=Make.Module([FunctionDef_filterAsymmetricFolds]), docstring=(
+		'Count symmetric foldings by testing each group of foldings for symmetry.\n\n(AI generated docstring)\n\n'
+		'`mapFolding.kitAST.mapFoldingSymmetric.makeModules.addSymmetryCheck` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
+	ingredientsModule.appendPrologue(astModule)
 
-	pathFilename: PurePath = makePathFilenameModule(pathRoot, logicalPathInfix, 名Module)
-
-	write_astModule(astModule, pathFilename, identifierPackage=名Package)
-
-	return pathFilename
+	return toDisk(ingredientsModule, identifiers, override, 名Module)
 
 def makeModulesFoldsSymmetric() -> None:
 	"""Regenerate synchronous symmetric counting and Theorem 2 modules.

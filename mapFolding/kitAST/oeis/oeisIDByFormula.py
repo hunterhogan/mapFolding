@@ -9,24 +9,12 @@ offer formula selectors and use `oeisIDfor_n` when a selected formula does not a
 Contents
 --------
 Functions
-	addTerm
-		Append a symbolic term to an AST expression with its sign made explicit.
-	makeFraction
-		Combine a symbolic expression into a numerator and denominator.
+	makeBoxOf_f
+		Make a distinct selector for each formula that depends on other sequences.
 	makeIngredientsOEISid
 		Build a sequence function with formula selectors and its import dependencies.
-	makeMatch_case
-		Build one formula selector case with conditional assignments.
-	makeSymbolicFormula
-		Build a function that evaluates a formula from stored sequence values.
-	make_astIf
-		Build a conditional assignment to the generated result `countTotal`.
-	make_ast_exprInteger
-		Represent an integer-valued symbolic formula or condition as an AST expression.
 	make_ast_exprSymbolic
 		Represent a formula that uses stored sequence values as an AST expression.
-	make_astGetValuesKnown
-		Read one stored sequence value with `getValuesKnown`.
 	make_f
 		Describe the sequence dependencies used to select a formula.
 """
@@ -48,108 +36,43 @@ from sympy.logic.boolalg import BooleanTrue
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
     from mapFolding.oeis import MetadataOEISid, OEISid
     from sympy import Basic, Expr
     from sympy.logic.boolalg import Boolean
     import ast
 
-def make_astGetValuesKnown(oeisID: OEISid, ast_exprIndex: ast.expr) -> ast.Subscript:
-    """Read the stored value at `ast_exprIndex` of `oeisID` with `getValuesKnown`.
+lookupOperator: dict[str, str] = {
+    'Add': 'add', 'FloorDiv': 'floordiv', 'Mod': 'mod', 'Mult': 'mul', 'Pow': 'pow', 'Sub': 'sub', 'USub': 'neg',
+}
+
+# Private functions
+
+def _addTerm(ast_expr: ast.expr, term: Expr) -> ast.expr:
+    """Append a symbolic term to an AST expression with its sign made explicit.
 
     (AI generated docstring)
 
     Parameters
     ----------
-    oeisID : OEISid
-        The sequence whose stored values the expression reads.
-    ast_exprIndex : ast.expr
-        The index of the value.
-
-    Returns
-    -------
-    astSubscript : ast.Subscript
-        The expression `getValuesKnown(oeisID)[ast_exprIndex]`.
-    """
-    return Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=ast_exprIndex)
-
-def make_ast_exprSymbolic(expression: Expr
-    , make_astSequenceValue: Callable[[OEISid, ast.expr], ast.expr] = make_astGetValuesKnown) -> ast.expr:
-    """Represent a formula over stored sequence values as a Python AST expression.
-
-    (AI generated docstring)
-
-    Parameters
-    ----------
-    expression : Expr
-        A formula composed of SymPy integers, rationals, sums, products, powers, and
-        single-index sequence calls registered in `settingsOEIS.lookupID`. Each sequence
-        call must have an integer index. `make_ast_exprInteger` represents any other form.
-    make_astSequenceValue : Callable[[OEISid, ast.expr], ast.expr] = make_astGetValuesKnown
-        Build the expression that reads one sequence value from the OEIS ID and the index.
+    ast_expr : ast.expr
+        The expression representing the accumulated sum.
+    term : Expr
+        The next term, accepted by `_make_ast_exprInteger`. A term with an extractable
+        minus sign is represented as subtraction of the negated term.
 
     Returns
     -------
     ast_expr : ast.expr
-        An expression that reads sequence values with `make_astSequenceValue` and preserves
-        rational arithmetic with `Rational` and `Pow`. The evaluation namespace must
-        supply these names. Constructing the AST does not read sequence values.
-
-    See Also
-    --------
-    `makeSymbolicFormula`
-        Package the expression in a function with its import dependencies.
+        A new addition or subtraction expression containing the supplied `ast_expr`.
     """
-    match expression:
-        case Integer():
-            ast_expr: ast.expr = Make.Constant(int(expression))
-        case Rational():
-            ast_expr = Make.Call(Make.Name('Rational'), listParameters=[Make.Constant(int(expression.p)), Make.Constant(int(expression.q))])
-        case Add():
-            ast_expr = Make.Add.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
-        case Mul():
-            ast_expr = Make.Mult.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
-        case Pow():
-            ast_expr = Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue))))
-        case AppliedUndef():
-            ast_expr = make_astSequenceValue(settingsOEIS.lookupID[expression.func], make_ast_exprInteger(expression.args[0]))
-        case _:
-            ast_expr = make_ast_exprInteger(expression)
+    if term.could_extract_minus_sign():
+        ast_expr = Make.Sub.join([ast_expr, _make_ast_exprInteger(-term)])
+    else:
+        ast_expr = Make.Add.join([ast_expr, _make_ast_exprInteger(term)])
     return ast_expr
 
-def makeSymbolicFormula(oeisID: OEISid, expression: Expr) -> IngredientsFunction:
-    """Build a function that computes one sequence value from a symbolic formula.
-
-    (AI generated docstring)
-
-    Parameters
-    ----------
-    oeisID : OEISid
-        OEIS ID to use as the generated function name.
-    expression : Expr
-        A formula accepted by `make_ast_exprSymbolic`, with sequence indices already
-        resolved to integers. The formula is expected to evaluate to an integer.
-
-    Returns
-    -------
-    ingredientsFunction : IngredientsFunction
-        A function definition named `oeisID`, with no parameters, and its import
-        dependencies. The generated function returns `int(expression)` after obtaining
-        sequence values from `getValuesKnown`. The definition is not executed here.
-
-    See Also
-    --------
-    `makeIngredientsOEISid`
-        Build a function of `n` with selectable formulas instead.
-    """
-    ingredientsFunction: IngredientsFunction = IngredientsFunction(Make.FunctionDef(str(oeisID), Make.arguments(),
-        body=[Make.Return(Make.Call(Make.Name('int'), listParameters=[make_ast_exprSymbolic(expression)]))], returns=Make.Name('int')))
-    ingredientsFunction.imports.addImportFrom_asStr('mapFolding.oeis', 'getValuesKnown')
-    ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Rational')
-    ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Pow')
-    return ingredientsFunction
-
-def makeFraction(expression: Expr) -> tuple[Expr, Expr]:
+def _makeFraction(expression: Expr) -> tuple[Expr, Expr]:
     """Combine a symbolic expression into a numerator and denominator.
 
     (AI generated docstring)
@@ -171,31 +94,94 @@ def makeFraction(expression: Expr) -> tuple[Expr, Expr]:
         numerator, denominator = -numerator, -denominator
     return numerator, denominator
 
-def addTerm(ast_expr: ast.expr, term: Expr) -> ast.expr:
-    """Append a symbolic term to an AST expression with its sign made explicit.
+def _makeKeywordStrict(boxOfIterables: list[ast.Call]) -> list[ast.keyword]:
+    """I use this function to declare whether the iterables of a generated `map` or `zip` must have equal lengths.
+
+    Every iterable from `_makeMapInteger` is finite, with the length of the range of `k`, except `repeat(...)`.
+    """
+    listKeyword: list[ast.keyword] = []
+    if 1 < len(boxOfIterables):
+        listKeyword.append(Make.keyword('strict', Make.Constant(not any(map(IfThis.isCallIdentifier('repeat'), boxOfIterables)))))
+    return listKeyword
+
+def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> ast.Call:
+    if IfThis.isNameIdentifier(k.name)(ast_expr):
+        astCall: ast.Call = astCallRange
+    elif NodeTourist(IfThis.isNameIdentifier(k.name), Then.extractIt).captureLastMatch(ast_expr) is None:
+        astCall = Make.Call(Make.Name('repeat'), [ast_expr])
+    elif Be.BinOp(ast_expr):
+        boxOfIterables: list[ast.Call] = list(map(_makeMapInteger, [ast_expr.left, ast_expr.right], repeat(k), repeat(astCallRange)))
+        astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__]), *boxOfIterables]
+            , _makeKeywordStrict(boxOfIterables))
+    elif Be.UnaryOp(ast_expr):
+        astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__])
+            , _makeMapInteger(ast_expr.operand, k, astCallRange)])
+    elif Be.Subscript(ast_expr):
+        boxOfIterables = list(map(_makeMapInteger, [ast_expr.value, ast_expr.slice], repeat(k), repeat(astCallRange)))
+        astCall = Make.Call(Make.Name('map'), [Make.Name('getitem'), *boxOfIterables], _makeKeywordStrict(boxOfIterables))
+    elif Be.Call(ast_expr):
+        boxOfIterables = list(map(_makeMapInteger, ast_expr.args, repeat(k), repeat(astCallRange)))
+        astCall = Make.Call(Make.Name('map'), [ast_expr.func, *boxOfIterables], _makeKeywordStrict(boxOfIterables))
+    elif Be.Tuple(ast_expr):
+        boxOfIterables = list(map(_makeMapInteger, ast_expr.elts, repeat(k), repeat(astCallRange)))
+        astCall = Make.Call(Make.Name('zip'), boxOfIterables, _makeKeywordStrict(boxOfIterables))
+    else:
+        astCall = Make.Call(Make.Name('map'), [Make.Lambda(Make.arguments(list_arg=[Make.arg(k.name)]), ast_expr), astCallRange])
+    return astCall
+
+def _makeMatch_case(f: str, condition: Boolean, expression: Expr, ast_stmt: ast.stmt) -> ast.match_case:
+    """Build a formula selector case with conditional assignments to `countTotal`.
 
     (AI generated docstring)
 
     Parameters
     ----------
-    ast_expr : ast.expr
-        The expression representing the accumulated sum.
-    term : Expr
-        The next term, accepted by `make_ast_exprInteger`. A term with an extractable
-        minus sign is represented as subtraction of the negated term.
+    f : str
+        The selector text to match, normally produced by `makeBoxOf_f`.
+    condition : Boolean
+        The condition under which the formula applies. `true` applies unconditionally.
+    expression : Expr
+        The formula, optionally a `Piecewise`. For a `Piecewise`, earlier branches retain
+        their conditions, and the last expression supplies the default result.
+    ast_stmt : ast.stmt
+        The statement to execute when `condition` is false.
 
     Returns
     -------
-    ast_expr : ast.expr
-        A new addition or subtraction expression containing the supplied `ast_expr`.
+    astMatch_case : ast.match_case
+        A case matching `f` without a guard. Formula conditions appear inside the case
+        body, so a matching selector whose formula does not apply executes `ast_stmt`.
     """
-    if term.could_extract_minus_sign():
-        ast_expr = Make.Sub.join([ast_expr, make_ast_exprInteger(-term)])
-    else:
-        ast_expr = Make.Add.join([ast_expr, make_ast_exprInteger(term)])
-    return ast_expr
+    boxOfBranches: list[tuple[Expr, Boolean]] = []
+    if isinstance(expression, Piecewise):
+        *boxOfBranches, branchLast = map(attrgetter('expr', 'cond'), expression.args)
+        expression = branchLast[0]
+    ast_stmtFormula: ast.stmt = Make.Assign([Make.Name('countTotal', Make.Store())], _make_ast_exprInteger(expression))
+    ast_stmtFormula = reduce(_make_astIf, reversed(boxOfBranches), ast_stmtFormula)
+    if condition != true:
+        ast_stmtFormula = Make.If(_make_ast_exprInteger(condition), [ast_stmtFormula], [ast_stmt])
+    return Make.match_case(Make.MatchValue(Make.Constant(f)), body=[ast_stmtFormula])
 
-def make_astIf(ast_stmt: ast.stmt, branch: tuple[Expr, Boolean]) -> ast.If:
+def _make_astGetValuesKnown(oeisID: OEISid, ast_exprIndex: ast.expr) -> ast.Subscript:
+    """Read the stored value at `ast_exprIndex` of `oeisID` with `getValuesKnown`.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    oeisID : OEISid
+        The sequence whose stored values the expression reads.
+    ast_exprIndex : ast.expr
+        The index of the value.
+
+    Returns
+    -------
+    astSubscript : ast.Subscript
+        The expression `getValuesKnown(oeisID)[ast_exprIndex]`.
+    """
+    return Make.Subscript(Make.Call(Make.Name('getValuesKnown'), listParameters=[Make.Constant(oeisID)]), slice=ast_exprIndex)
+
+def _make_astIf(ast_stmt: ast.stmt, branch: tuple[Expr, Boolean]) -> ast.If:
     """Build a conditional assignment to the generated result `countTotal`.
 
     (AI generated docstring)
@@ -206,7 +192,7 @@ def make_astIf(ast_stmt: ast.stmt, branch: tuple[Expr, Boolean]) -> ast.If:
         The statement to execute when the branch condition is false.
     branch : tuple[Expr, Boolean]
         A formula and its applicability condition, both accepted by
-        `make_ast_exprInteger`.
+        `_make_ast_exprInteger`.
 
     Returns
     -------
@@ -215,11 +201,11 @@ def make_astIf(ast_stmt: ast.stmt, branch: tuple[Expr, Boolean]) -> ast.If:
         holds and otherwise executes `ast_stmt`.
     """
     expression, condition = branch
-    return Make.If(make_ast_exprInteger(condition)
-        , [Make.Assign([Make.Name('countTotal', Make.Store())], make_ast_exprInteger(expression))]
+    return Make.If(_make_ast_exprInteger(condition)
+        , [Make.Assign([Make.Name('countTotal', Make.Store())], _make_ast_exprInteger(expression))]
         , [ast_stmt])
 
-def make_ast_exprInteger(expression: Basic) -> ast.expr:
+def _make_ast_exprInteger(expression: Basic) -> ast.expr:
     """Represent an integer-valued formula or condition as a Python AST expression.
 
     (AI generated docstring)
@@ -254,149 +240,94 @@ def make_ast_exprInteger(expression: Basic) -> ast.expr:
             ast_expr = Make.Constant(int(expression))
         case Symbol():
             ast_expr = Make.Name(expression.name)
-        case Add() | Mul() if (quotient := makeFraction(expression))[1] != 1:
-            ast_expr = Make.FloorDiv.join(list(map(make_ast_exprInteger, quotient)))
+        case Add() | Mul() if (quotient := _makeFraction(expression))[1] != 1:
+            ast_expr = Make.FloorDiv.join(list(map(_make_ast_exprInteger, quotient)))
         case Add():
             termFirst, *boxOfTerms = sorted(expression.as_ordered_terms(), key=methodcaller('could_extract_minus_sign'))
-            ast_expr = reduce(addTerm, boxOfTerms, make_ast_exprInteger(termFirst))
+            ast_expr = reduce(_addTerm, boxOfTerms, _make_ast_exprInteger(termFirst))
         case Mul() if expression.could_extract_minus_sign():
-            ast_expr = Make.UnaryOp(Make.USub(), make_ast_exprInteger(-expression))
+            ast_expr = Make.UnaryOp(Make.USub(), _make_ast_exprInteger(-expression))
         case Mul() if expression.has(Mod) and expression.has(*map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle)):
             coefficient: Expr = Mul(*filterfalse(methodcaller('has', *map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle))
                 , expression.args))
-            ast_expr = Make.And.join([make_ast_exprInteger(coefficient)
-                , Make.Mult.join(list(map(make_ast_exprInteger, expression.as_ordered_factors())))])
+            ast_expr = Make.And.join([_make_ast_exprInteger(coefficient)
+                , Make.Mult.join(list(map(_make_ast_exprInteger, expression.as_ordered_factors())))])
         case Mul():
-            ast_expr = Make.Mult.join(list(map(make_ast_exprInteger, expression.as_ordered_factors())))
+            ast_expr = Make.Mult.join(list(map(_make_ast_exprInteger, expression.as_ordered_factors())))
         case Pow() if expression.exp == Rational(1, 2):
-            ast_expr = Make.Call(Make.Name('isqrt'), [make_ast_exprInteger(expression.base)])
+            ast_expr = Make.Call(Make.Name('isqrt'), [_make_ast_exprInteger(expression.base)])
         case Pow():
-            ast_expr = Make.Pow.join([make_ast_exprInteger(expression.base), make_ast_exprInteger(expression.exp)])
+            ast_expr = Make.Pow.join([_make_ast_exprInteger(expression.base), _make_ast_exprInteger(expression.exp)])
         case Mod():
-            ast_expr = Make.Mod.join(list(map(make_ast_exprInteger, expression.args)))
+            ast_expr = Make.Mod.join(list(map(_make_ast_exprInteger, expression.args)))
         case factorial():
-            ast_expr = Make.Call(Make.Name('factorial'), [make_ast_exprInteger(expression.args[0])])
+            ast_expr = Make.Call(Make.Name('factorial'), [_make_ast_exprInteger(expression.args[0])])
         case floor():
-            ast_expr = Make.FloorDiv.join(list(map(make_ast_exprInteger, makeFraction(expression.args[0]))))
+            ast_expr = Make.FloorDiv.join(list(map(_make_ast_exprInteger, _makeFraction(expression.args[0]))))
         case ceiling():
-            numerator, denominator = makeFraction(expression.args[0])
+            numerator, denominator = _makeFraction(expression.args[0])
             ast_expr = Make.UnaryOp(Make.USub(), Make.FloorDiv.join([
-                make_ast_exprInteger(-numerator), make_ast_exprInteger(denominator)]))
+                _make_ast_exprInteger(-numerator), _make_ast_exprInteger(denominator)]))
         case Sum():
             k, lowerBound, upperBound = expression.limits[0]
-            boxOfBounds: list[ast.expr] = [make_ast_exprInteger(upperBound + 1)]
+            boxOfBounds: list[ast.expr] = [_make_ast_exprInteger(upperBound + 1)]
             if lowerBound != 0:
-                boxOfBounds.insert(0, make_ast_exprInteger(lowerBound))
-            ast_expr = Make.Call(Make.Name('sum'), [_makeMapInteger(make_ast_exprInteger(expression.function), k
+                boxOfBounds.insert(0, _make_ast_exprInteger(lowerBound))
+            ast_expr = Make.Call(Make.Name('sum'), [_makeMapInteger(_make_ast_exprInteger(expression.function), k
                 , Make.Call(Make.Name('range'), boxOfBounds))])
         case Equality():
-            ast_expr = Make.Compare(make_ast_exprInteger(expression.lhs), [Make.Eq()], [make_ast_exprInteger(expression.rhs)])
+            ast_expr = Make.Compare(_make_ast_exprInteger(expression.lhs), [Make.Eq()], [_make_ast_exprInteger(expression.rhs)])
         case GreaterThan():
-            ast_expr = Make.Compare(make_ast_exprInteger(expression.rhs), [Make.LtE()], [make_ast_exprInteger(expression.lhs)])
+            ast_expr = Make.Compare(_make_ast_exprInteger(expression.rhs), [Make.LtE()], [_make_ast_exprInteger(expression.lhs)])
         case LessThan():
-            ast_expr = Make.Compare(make_ast_exprInteger(expression.lhs), [Make.LtE()], [make_ast_exprInteger(expression.rhs)])
+            ast_expr = Make.Compare(_make_ast_exprInteger(expression.lhs), [Make.LtE()], [_make_ast_exprInteger(expression.rhs)])
         case StrictGreaterThan():
-            ast_expr = Make.Compare(make_ast_exprInteger(expression.rhs), [Make.Lt()], [make_ast_exprInteger(expression.lhs)])
+            ast_expr = Make.Compare(_make_ast_exprInteger(expression.rhs), [Make.Lt()], [_make_ast_exprInteger(expression.lhs)])
         case StrictLessThan():
-            ast_expr = Make.Compare(make_ast_exprInteger(expression.lhs), [Make.Lt()], [make_ast_exprInteger(expression.rhs)])
+            ast_expr = Make.Compare(_make_ast_exprInteger(expression.lhs), [Make.Lt()], [_make_ast_exprInteger(expression.rhs)])
         case And():
-            ast_expr = Make.And.join(list(map(make_ast_exprInteger, expression.args)))
+            ast_expr = Make.And.join(list(map(_make_ast_exprInteger, expression.args)))
         case AppliedUndef() if len(expression.args) == 2 and expression.func in tuple(map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle)):
             ast_expr = Make.Subscript(Make.Call(Make.Name('getTriangleCells'), [Make.Constant(settingsOEIS.lookupID[expression.func])])
-                , Make.Tuple(list(map(make_ast_exprInteger, expression.args))))
+                , Make.Tuple(list(map(_make_ast_exprInteger, expression.args))))
         case _:
-            ast_expr = Make.Call(Make.Name(expression.func.__name__), list(map(make_ast_exprInteger, expression.args)))
+            ast_expr = Make.Call(Make.Name(expression.func.__name__), list(map(_make_ast_exprInteger, expression.args)))
 
     return ast_expr
 
-lookupOperator: dict[str, str] = {
-    'Add': 'add', 'FloorDiv': 'floordiv', 'Mod': 'mod', 'Mult': 'mul', 'Pow': 'pow', 'Sub': 'sub', 'USub': 'neg',
-}
+# Public functions
 
-def _makeMapInteger(ast_expr: ast.expr, k: Symbol, astCallRange: ast.Call) -> ast.Call:
-    if IfThis.isNameIdentifier(k.name)(ast_expr):
-        astCall: ast.Call = astCallRange
-    elif NodeTourist(IfThis.isNameIdentifier(k.name), Then.extractIt).captureLastMatch(ast_expr) is None:
-        astCall = Make.Call(Make.Name('repeat'), [ast_expr])
-    elif Be.BinOp(ast_expr):
-        astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__])
-            , *map(_makeMapInteger, [ast_expr.left, ast_expr.right], repeat(k), repeat(astCallRange))])
-    elif Be.UnaryOp(ast_expr):
-        astCall = Make.Call(Make.Name('map'), [Make.Name(lookupOperator[type(ast_expr.op).__name__])
-            , _makeMapInteger(ast_expr.operand, k, astCallRange)])
-    elif Be.Subscript(ast_expr):
-        astCall = Make.Call(Make.Name('map'), [Make.Name('getitem')
-            , *map(_makeMapInteger, [ast_expr.value, ast_expr.slice], repeat(k), repeat(astCallRange))])
-    elif Be.Call(ast_expr):
-        astCall = Make.Call(Make.Name('map'), [ast_expr.func, *map(_makeMapInteger, ast_expr.args, repeat(k), repeat(astCallRange))])
-    elif Be.Tuple(ast_expr):
-        astCall = Make.Call(Make.Name('zip'), list(map(_makeMapInteger, ast_expr.elts, repeat(k), repeat(astCallRange))))
-    else:
-        astCall = Make.Call(Make.Name('map'), [Make.Lambda(Make.arguments(list_arg=[Make.arg(k.name)]), ast_expr), astCallRange])
-    return astCall
-
-def make_f(expression: Expr) -> str:
-    """Describe a formula's sequence dependencies for use as a selector.
+def makeBoxOf_f(boxOfSolutions: Sequence[tuple[OEISid, Expr, Boolean]]) -> tuple[str, ...]:
+    """Make a distinct selector for each formula that depends on other sequences.
 
     (AI generated docstring)
 
-    Parameters
-    ----------
-    expression : Expr
-        A formula whose undefined function calls represent sequences registered in
-        `settingsOEIS.lookupID`.
-
-    Returns
-    -------
-    f : str
-        The distinct OEIS IDs in sorted order, joined with commas and a final `and`.
-        A single dependency produces its OEIS ID alone. A formula without sequence
-        dependencies produces an empty string.
-    """
-    boxOfOEISid: list[str] = sorted(set(map(settingsOEIS.lookupID.__getitem__, map(attrgetter('func'), expression.atoms(AppliedUndef)))))
-    match boxOfOEISid:
-        case []:
-            f: str = ''
-        case [oeisID]:
-            f = oeisID
-        case [oeisID, oeisIDLast]:
-            f = f'{oeisID} and {oeisIDLast}'
-        case _:
-            f = f"{', '.join(boxOfOEISid[:-1])}, and {boxOfOEISid[-1]}"
-    return f
-
-def makeMatch_case(f: str, condition: Boolean, expression: Expr, ast_stmt: ast.stmt) -> ast.match_case:
-    """Build a formula selector case with conditional assignments to `countTotal`.
-
-    (AI generated docstring)
+    The selector of a formula is `make_f` of the formula. When several formulas of one sequence have the same
+    dependencies, the first formula keeps the selector, and each later formula appends its ordinal, as in
+    `'A331499'`, `'A331499_2'`, and `'A331499_3'`. Each formula is therefore selectable and testable.
 
     Parameters
     ----------
-    f : str
-        The selector text to match, normally produced by `make_f`.
-    condition : Boolean
-        The condition under which the formula applies. `true` applies unconditionally.
-    expression : Expr
-        The formula, optionally a `Piecewise`. For a `Piecewise`, earlier branches retain
-        their conditions, and the last expression supplies the default result.
-    ast_stmt : ast.stmt
-        The statement to execute when `condition` is false.
+    boxOfSolutions : Sequence[tuple[OEISid, Expr, Boolean]]
+        Solutions for one sequence, in order of precedence.
 
     Returns
     -------
-    astMatch_case : ast.match_case
-        A case matching `f` without a guard. Formula conditions appear inside the case
-        body, so a matching selector whose formula does not apply executes `ast_stmt`.
+    boxOf_f : tuple[str, ...]
+        Selector of each solution, in the order of `boxOfSolutions`. A formula without sequence dependencies has
+        the empty selector.
     """
-    boxOfBranches: list[tuple[Expr, Boolean]] = []
-    if isinstance(expression, Piecewise):
-        *boxOfBranches, branchLast = map(attrgetter('expr', 'cond'), expression.args)
-        expression = branchLast[0]
-    ast_stmtFormula: ast.stmt = Make.Assign([Make.Name('countTotal', Make.Store())], make_ast_exprInteger(expression))
-    ast_stmtFormula = reduce(make_astIf, reversed(boxOfBranches), ast_stmtFormula)
-    if condition != true:
-        ast_stmtFormula = Make.If(make_ast_exprInteger(condition), [ast_stmtFormula], [ast_stmt])
-    return Make.match_case(Make.MatchValue(Make.Constant(f)), body=[ast_stmtFormula])
+    boxOf_fShared: tuple[str, ...] = tuple(map(compose(make_f, itemgetter(1)), boxOfSolutions))
+    boxOf_f: list[str] = []
+    次Solution: int = 0
+    while 次Solution < len(boxOf_fShared):
+        f: str = boxOf_fShared[次Solution]
+        ordinal: int = boxOf_fShared[:次Solution].count(f) + 1
+        if f and 1 < ordinal:
+            f = f'{f}_{ordinal}'
+        boxOf_f.append(f)
+        次Solution += 1
+    return tuple(boxOf_f)
 
 def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Expr, Boolean]]) -> IngredientsFunction:
     """Build a sequence function with selectable formulas and its import dependencies.
@@ -411,14 +342,14 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     boxOfSolutions : list[tuple[OEISid, Expr, Boolean]]
         Solutions for `oeisID`, each containing the sequence ID, a formula, and its
         applicability condition. Order determines precedence when selectors or
-        conditions overlap. Formulas must be accepted by `make_ast_exprInteger`.
+        conditions overlap. Formulas must be accepted by `_make_ast_exprInteger`.
 
     Returns
     -------
     ingredientsFunction : IngredientsFunction
         A function definition with parameters `n` and `f=None`, an integer return
         annotation, generated documentation, and its import dependencies. Selectors
-        describe the sequence dependencies with `make_f`. An unrecognized selector or
+        come from `makeBoxOf_f`, one for each formula. An unrecognized selector or
         an inapplicable selected formula tries dependency-free formulas in order, then
         calls `oeisIDfor_n(oeisID, n)`. Constructing the definition does not compute terms.
 
@@ -426,10 +357,8 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     --------
     `mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS`
         Write sequence functions, their tests, and reference samples.
-    `makeSymbolicFormula`
-        Build a function for a formula with sequence indices already resolved.
     """
-    boxOf_f: tuple[str, ...] = tuple(map(compose(make_f, itemgetter(1)), boxOfSolutions))
+    boxOf_f: tuple[str, ...] = makeBoxOf_f(boxOfSolutions)
     boxOf_fFormula: tuple[str, ...] = tuple(unique(filter(None, boxOf_f)))
     ast_exprAnnotation: ast.expr = Make.Name('LiteralString')
     if boxOf_fFormula:
@@ -442,7 +371,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     metadata: MetadataOEISid = getMetadata(oeisID)
     boxOfBranches: tuple[tuple[Expr, Boolean], ...] = tuple(map(itemgetter(1, 2)
         , filterfalse(compose(make_f, itemgetter(1)), boxOfSolutions)))
-    ast_stmt: ast.stmt = reduce(make_astIf, reversed(boxOfBranches)
+    ast_stmt: ast.stmt = reduce(_make_astIf, reversed(boxOfBranches)
         , Make.Assign([Make.Name('countTotal', Make.Store())], Make.Call(Make.Name('oeisIDfor_n'), [Make.Constant(oeisID), Make.Name('n')])))
 
     docstring: str = f"""
@@ -479,7 +408,7 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
         , Make.arguments(list_arg=[Make.arg('n', Make.Name('int'))
             , Make.arg('f', Make.BitOr.join([ast_exprAnnotation, Make.Constant(None)]))], defaults=[Make.Constant(None)])
         , body=[Make.Expr(Make.Constant(docstring)), Make.AnnAssign(Make.Name('countTotal', Make.Store()), Make.Name('int'))
-            , Make.Match(Make.Name('f'), [*map(partial(makeMatch_case, ast_stmt=ast_stmt), filter(None, boxOf_f)
+            , Make.Match(Make.Name('f'), [*map(partial(_makeMatch_case, ast_stmt=ast_stmt), filter(None, boxOf_f)
                 , compress(map(itemgetter(2), boxOfSolutions), boxOf_f), compress(map(itemgetter(1), boxOfSolutions), boxOf_f), strict=True)
                 , Make.match_case(Make.MatchAs(), body=[ast_stmt])])
             , Make.Return(Make.Name('countTotal'))]
@@ -501,3 +430,72 @@ def makeIngredientsOEISid(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Exp
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'Literal')
     ingredientsFunction.imports.addImportFrom_asStr('typing', 'LiteralString')
     return ingredientsFunction
+
+def make_ast_exprSymbolic(expression: Expr
+    , make_astSequenceValue: Callable[[OEISid, ast.expr], ast.expr] = _make_astGetValuesKnown) -> ast.expr:
+    """Represent a formula over stored sequence values as a Python AST expression.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    expression : Expr
+        A formula composed of SymPy integers, rationals, sums, products, powers, and
+        single-index sequence calls registered in `settingsOEIS.lookupID`. Each sequence
+        call must have an integer index. `_make_ast_exprInteger` represents any other form.
+    make_astSequenceValue : Callable[[OEISid, ast.expr], ast.expr] = _make_astGetValuesKnown
+        Build the expression that reads one sequence value from the OEIS ID and the index.
+
+    Returns
+    -------
+    ast_expr : ast.expr
+        An expression that reads sequence values with `make_astSequenceValue` and preserves
+        rational arithmetic with `Rational` and `Pow`. The evaluation namespace must
+        supply these names. Constructing the AST does not read sequence values.
+    """
+    match expression:
+        case Integer():
+            ast_expr: ast.expr = Make.Constant(int(expression))
+        case Rational():
+            ast_expr = Make.Call(Make.Name('Rational'), listParameters=[Make.Constant(int(expression.p)), Make.Constant(int(expression.q))])
+        case Add():
+            ast_expr = Make.Add.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
+        case Mul():
+            ast_expr = Make.Mult.join(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue)))
+        case Pow():
+            ast_expr = Make.Call(Make.Name('Pow'), listParameters=list(map(make_ast_exprSymbolic, expression.args, repeat(make_astSequenceValue))))
+        case AppliedUndef():
+            ast_expr = make_astSequenceValue(settingsOEIS.lookupID[expression.func], _make_ast_exprInteger(expression.args[0]))
+        case _:
+            ast_expr = _make_ast_exprInteger(expression)
+    return ast_expr
+
+def make_f(expression: Basic) -> str:
+    """Describe a formula's sequence dependencies for use as a selector.
+
+    (AI generated docstring)
+
+    Parameters
+    ----------
+    expression : Basic
+        A formula whose undefined function calls represent sequences registered in
+        `settingsOEIS.lookupID`.
+
+    Returns
+    -------
+    f : str
+        The distinct OEIS IDs in sorted order, joined with commas and a final `and`.
+        A single dependency produces its OEIS ID alone. A formula without sequence
+        dependencies produces an empty string.
+    """
+    boxOfOEISid: list[str] = sorted(set(map(settingsOEIS.lookupID.__getitem__, map(attrgetter('func'), expression.atoms(AppliedUndef)))))
+    match boxOfOEISid:
+        case []:
+            f: str = ''
+        case [oeisID]:
+            f = oeisID
+        case [oeisID, oeisIDLast]:
+            f = f'{oeisID} and {oeisIDLast}'
+        case _:
+            f = f"{', '.join(boxOfOEISid[:-1])}, and {boxOfOEISid[-1]}"
+    return f

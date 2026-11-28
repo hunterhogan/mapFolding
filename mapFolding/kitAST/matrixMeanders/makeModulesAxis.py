@@ -28,16 +28,16 @@ from astToolkit import Be, DOT, Grab, Make, NodeChanger, NodeTourist, Then
 from astToolkit.filesystem import parsePathFilename2astModule
 from copy import deepcopy
 from hunterMakesPy import raiseIfNone
-from mapFolding.kitAST import IfThis, IngredientsModule, removeFunctionDef, toDisk
+from mapFolding.kitAST import getBodySansDocstring, IfThis, IngredientsModule, removeFunctionDef, toDisk
 from mapFolding.kitAST.paths import getLogicalPath, makePathFilenameModule
 from mapFolding.kitAST.theSSOT import defaultMatrixMeanders
 from typing import TYPE_CHECKING
 import ast
 
 if TYPE_CHECKING:
-	from mapFolding.theTypes import Default
+	from mapFolding.theTypes import Default, DefaultOverride
 	from pathlib import PurePath
-	from typing import Any
+	from typing import Unpack
 
 defaultMatrixAxis: Default = deepcopy(defaultMatrixMeanders)
 """Access identifier and filesystem defaults for axis-meander generation.
@@ -61,7 +61,7 @@ defaultMatrixAxis['module'].update({
 })
 defaultMatrixAxis['variable'].update({'arcCodeAnalysis': 'arcCodeAnalysis'})
 
-def makeOrbit(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> ast.Module:
+def makeOrbit(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> ast.Module:
 	"""Combine reflected arch codes under one representative in a counting module.
 
 	(AI generated docstring)
@@ -77,7 +77,7 @@ def makeOrbit(astModule: ast.Module, identifiers: Default | None = None, **overr
 		Counting module to transform.
 	identifiers : Default = defaultMatrixAxis
 		Identifier mapping. `None` or an empty mapping uses `defaultMatrixAxis`.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Nonempty `名Callable`, `名CallableReflect`, and `名ArcCodeAnalysis` values replace the
 		mapping's counting-function, reflection-function, and analyzed-arch-code identifiers.
 		Other entries have no effect.
@@ -109,7 +109,7 @@ def makeOrbit(astModule: ast.Module, identifiers: Default | None = None, **overr
 			, Grab.bodyAttribute(Grab.index(0, Then.insertThisAbove([astAssignOrbit])))).visit).visit(astModule)
 	return astModule
 
-def makeAxisPileOrbit(astModuleAxisPile: ast.Module, astModuleCounting: ast.Module, identifiers: Default | None = None, **override: Any
+def makeAxisPileOrbit(astModuleAxisPile: ast.Module, astModuleCounting: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]
 	) -> ast.Module:
 	"""Combine reflection-orbit counting with pile-axis completion.
 
@@ -127,7 +127,7 @@ def makeAxisPileOrbit(astModuleAxisPile: ast.Module, astModuleCounting: ast.Modu
 		Counting module whose dispatcher will be removed.
 	identifiers : Default = defaultMatrixAxis
 		Identifier mapping. `None` or an empty mapping uses `defaultMatrixAxis`.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Nonempty `名CallableDispatcher`, `package`, `logicalPathAlgorithm`, and `名ModuleAlgorithm`
 		values select the dispatcher and counting import to remove. The identifier overrides
 		accepted by `makeOrbit` also apply.
@@ -145,16 +145,16 @@ def makeAxisPileOrbit(astModuleAxisPile: ast.Module, astModuleCounting: ast.Modu
 	"""
 	identifiers = identifiers or defaultMatrixAxis
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	名Package: str = override.get('名Package') or identifiers['module']['package']
 	logicalPathAlgorithm: str = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	名ModuleAlgorithm: str = override.get('名ModuleAlgorithm') or identifiers['module']['algorithm']
 
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleAlgorithm)))
 		, Then.removeIt).visit(astModuleAxisPile)
 	removeFunctionDef(名CallableDispatcher, astModuleCounting)
-	return Make.Module([*makeOrbit(astModuleCounting, identifiers, **override).body, *astModuleAxisPile.body])
+	return Make.Module([*makeOrbit(astModuleCounting, identifiers, **override).body, *getBodySansDocstring(astModuleAxisPile)])
 
-def makeAxisPileNumPy(astModuleAxisPile: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Any
+def makeAxisPileNumPy(astModuleAxisPile: ast.Module, astModuleNumPy: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]
 	) -> ast.Module:
 	"""Combine NumPy meander counting with pile-axis completion.
 
@@ -173,7 +173,7 @@ def makeAxisPileNumPy(astModuleAxisPile: ast.Module, astModuleNumPy: ast.Module,
 		NumPy counting module with a dispatcher that returns the completed state.
 	identifiers : Default = defaultMatrixAxis
 		Identifier mapping. `None` or an empty mapping uses `defaultMatrixAxis`.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Nonempty `名CallableDispatcher`, `package`, `logicalPathAlgorithm`, and `名ModuleAlgorithm`
 		values select the dispatcher and counting import. Nonempty `名DataclassInstance` and
 		`名TqdmBoundary` values select the state and progress-display identifiers.
@@ -192,14 +192,14 @@ def makeAxisPileNumPy(astModuleAxisPile: ast.Module, astModuleNumPy: ast.Module,
 	"""
 	identifiers = identifiers or defaultMatrixAxis
 	名CallableDispatcher: str = override.get('名CallableDispatcher') or identifiers['function']['dispatcher']
-	名Package: str = override.get('package') or identifiers['module']['package']
+	名Package: str = override.get('名Package') or identifiers['module']['package']
 	logicalPathAlgorithm: str = override.get('logicalPathAlgorithm') or identifiers['logicalPath']['algorithm']
 	名ModuleAlgorithm: str = override.get('名ModuleAlgorithm') or identifiers['module']['algorithm']
 
 	NodeChanger(Be.ImportFrom.moduleIs(IfThis.isIdentifier(getLogicalPath(名Package, logicalPathAlgorithm, 名ModuleAlgorithm)))
 		, Then.removeIt).visit(astModuleAxisPile)
-	boxOfStatementsJoined: list[ast.stmt] = raiseIfNone(NodeTourist[ast.FunctionDef, list[ast.stmt]](
-		Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher)), Then.extractIt(DOT.body)).captureLastMatch(astModuleAxisPile))[1:-1]
+	boxOfStatementsJoined: list[ast.stmt] = getBodySansDocstring(Make.Module(raiseIfNone(NodeTourist[ast.FunctionDef, list[ast.stmt]](
+		Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher)), Then.extractIt(DOT.body)).captureLastMatch(astModuleAxisPile))))[1:-1]
 	removeFunctionDef(名CallableDispatcher, astModuleAxisPile)
 
 	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
@@ -214,7 +214,7 @@ def makeAxisPileNumPy(astModuleAxisPile: ast.Module, astModuleNumPy: ast.Module,
 			, Make.Call(Make.Attribute(astAttributeLookup, 'items'))])]))
 	NodeChanger(Be.FunctionDef.nameIs(IfThis.isIdentifier(名CallableDispatcher))
 		, NodeChanger(Be.Return, Then.insertThisAbove([astAssignStates, *boxOfStatementsJoined])).visit).visit(astModuleNumPy)
-	return Make.Module([Make.ImportFrom('operator', [Make.alias('itemgetter')]), *astModuleNumPy.body, *astModuleAxisPile.body])
+	return Make.Module([Make.ImportFrom('operator', [Make.alias('itemgetter')]), *getBodySansDocstring(astModuleNumPy), *getBodySansDocstring(astModuleAxisPile)])
 
 def makeModulesAxis() -> None:
 	"""Write the axis-meander orbit modules and the pile-axis NumPy module.
@@ -249,26 +249,51 @@ def makeModulesAxis() -> None:
 
 	ingredientsModule = IngredientsModule(epilogue=makeOrbit(parsePathFilename2astModule(pathFilenameAxisStrip), identifiers))
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	ingredientsModule.docstring = (
+		'Count symmetric foldings of a stamp strip by the strip cut, with one key per reflection orbit.\n\n(AI generated docstring)\n\n'
+		'The module adapts `mapFolding.algorithms.matrixAxisStrip`.\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModulesAxis.makeOrbit` generates this module.\n'
+		'Regenerate the module instead of editing it.\n')
 	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisStripOrbit'])
 
 	ingredientsModule = IngredientsModule(epilogue=makeOrbit(parsePathFilename2astModule(makePathFilenameModule(
 		pathRoot, logicalPathAlgorithm, identifiers['module']['axisStripGap'])), identifiers))
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	ingredientsModule.docstring = (
+		'Count symmetric meander shapes by the strip cut with the gap mark and one key per reflection orbit.\n\n(AI generated docstring)\n\n'
+		'The module adapts `mapFolding.algorithms.matrixAxisStripGap`.\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModulesAxis.makeOrbit` generates this module.\n'
+		'Regenerate the module instead of editing it.\n')
 	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisStripGapOrbit'])
 
 	ingredientsModule = IngredientsModule(epilogue=makeOrbit(parsePathFilename2astModule(makePathFilenameModule(
 		pathRoot, logicalPathAlgorithm, identifiers['module']['axisPileDeadEnd'])), identifiers))
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	ingredientsModule.docstring = (
+		'Count by the pile cut with the dead-end start, with one key for each reflection orbit.\n\n(AI generated docstring)\n\n'
+		'The module adapts `mapFolding.algorithms.matrixAxisPileDeadEnd`.\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModulesAxis.makeOrbit` generates this module.\n'
+		'Regenerate the module instead of editing it.\n')
 	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisPileDeadEndOrbit'])
 
 	ingredientsModule = IngredientsModule(epilogue=makeAxisPileOrbit(parsePathFilename2astModule(pathFilenameAxisPile)
 		, parsePathFilename2astModule(makePathFilenameModule(pathRoot, logicalPathAlgorithm, identifiers['module']['algorithm'])), identifiers))
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	ingredientsModule.docstring = (
+		'Count symmetric meander shapes by the pile cut, with one key for each reflection orbit.\n\n(AI generated docstring)\n\n'
+		'The module adapts `mapFolding.algorithms.matrixAxisPile`.\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModulesAxis.makeAxisPileOrbit` generates this module.\n'
+		'Regenerate the module instead of editing it.\n')
 	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisPileOrbit'])
 
 	ingredientsModule = IngredientsModule(epilogue=makeAxisPileNumPy(parsePathFilename2astModule(pathFilenameAxisPile)
 		, parsePathFilename2astModule(makePathFilenameModule(pathRoot, logicalPathAlgorithm, identifiers['module']['numpy'])), identifiers))
 	ingredientsModule.imports.extractImports(ingredientsModule.epilogue)
+	ingredientsModule.docstring = (
+		'Count symmetric meander shapes by the pile cut with the NumPy transfer.\n\n(AI generated docstring)\n\n'
+		'The module adapts `mapFolding.algorithms.matrixAxisPile`.\n'
+		'`mapFolding.kitAST.matrixMeanders.makeModulesAxis.makeAxisPileNumPy` generates this module.\n'
+		'Regenerate the module instead of editing it.\n')
 	toDisk(ingredientsModule, identifiers, {}, identifiers['module']['axisPileNumPy'])
 
 if __name__ == '__main__':

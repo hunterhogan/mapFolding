@@ -1,8 +1,8 @@
-# DEVELOPMENT module.  # ruff: ignore[undocumented-public-module]
-# pyright: reportUnknownArgumentType=false, reportUnknownVariableType=false, reportAssignmentType=false
-# ruff: file-ignore[commented-out-code, print, p-print]
-# ruff: file-ignore[undocumented-public-function]
-# ty: ignore[invalid-assignment]
+# DEVELOPMENT module.
+
+
+
+
 from __future__ import annotations
 
 from bisect import bisect_left

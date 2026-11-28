@@ -21,7 +21,7 @@ def checkoutSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata:
 	return copyTexts(makeBoxOfPathFilename(boxOfOEISid, PurePosixPath()), path_oeisdata, pathSnapshot)
 
 # SEMIOTICS
-def updateSnapshot(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
+def update_oeisdata(boxOfOEISid: Sequence[OEISid] | None = None, path_oeisdata: Path | None = None, pathSnapshot: Path | None = None) -> Path:
 	with 工repo(path_oeisdata or settingsOEIS.pathClone, settingsOEIS.urlRepository) as repo:
 		updateRepo(repo)
 	pathSnapshot = checkoutSnapshot(boxOfOEISid, path_oeisdata, pathSnapshot)

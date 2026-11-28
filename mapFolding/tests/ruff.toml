@@ -1,4 +1,0 @@
-extend = "../../pyproject.toml"
-
-line-length = 200
-

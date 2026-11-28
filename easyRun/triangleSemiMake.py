@@ -1,4 +1,4 @@
-# pyright: reportUnnecessaryComparison=false
+
 from __future__ import annotations
 
 from mapFolding.oeis._termsA400429 import writeTriangleRows

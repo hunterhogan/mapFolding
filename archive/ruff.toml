@@ -1,7 +1,0 @@
-extend = "../pyproject.toml"
-
-[lint]
-exclude = ["**/*"]
-
-[format]
-exclude = ["**/*"]

@@ -20,7 +20,7 @@ from hunterMakesPy import raiseIfNone
 from typing import TYPE_CHECKING
 import anyascii
 import lief
-import subprocess  # ruff: ignore[suspicious-subprocess-import]
+import subprocess
 import sys
 
 if TYPE_CHECKING:

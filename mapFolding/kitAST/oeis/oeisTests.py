@@ -14,49 +14,43 @@ Functions
 		Collect the sequence values that the generated tests read.
 	makeRelationParameters
 		Instantiate each triangle relation at every index whose sequence values are stored.
+	makeSamplesOEIS
+		Make the samples module without reference values.
 	makeTestsByFormula
-		Write the test of each function in `mapFolding.oeis.byFormula`.
+		Make the module that tests each function in `mapFolding.oeis.byFormula`.
 	makeTestsTriangle
-		Write the test of each triangle relation.
+		Make the module that tests each triangle relation.
 	updateSamplesOEIS
-		Add the missing reference values to the static samples.
+		Add the missing reference values to the samples module.
 """
-# ruff: file-ignore[undocumented-public-function]
+
 from __future__ import annotations
 
 from ast import literal_eval
 from astToolkit import Be, Grab, IfThis, Make, NodeChanger, NodeTourist, Then
-from astToolkit.filesystem import parsePathFilename2astModule, write_astModule
 from collections import deque
 from functools import partial
-from humpy_cytoolz import compose, compose_left, groupby as toolz_groupby, unique
+from humpy_cytoolz import compose_left, first, groupby as toolz_groupby, unique
 from hunterMakesPy import raiseIfNone
-from hunterMakesPy.kitFilesystem import settings_autoflakeDEFAULT
 from itertools import chain, compress, count, filterfalse, product as CartesianProduct, repeat, starmap
 from mapFolding.kitAST import IngredientsFunction, IngredientsModule
-from mapFolding.kitAST.oeis.oeisIDByFormula import make_ast_exprSymbolic, make_f
+from mapFolding.kitAST.oeis.oeisIDByFormula import make_ast_exprSymbolic, make_f, makeBoxOf_f
 from mapFolding.oeis import boxOfOEISidTriangle, getMetadata, getValuesKnown, settingsOEIS
-from mapFolding.oeis._symbolic import (
-	callStored吗, expressionStored吗, getOEISid, makeEquationFlat, makeIndicesCall, makeIndicesRelation, makeTermLast)
+from mapFolding.oeis._symbolic import callStored吗, getOEISid, makeEquationFlat, makeIndicesCall, makeIndicesRelation, makeTermLast
 from mapFolding.oeis._symbolicRelations import boxOfRelations
-from operator import itemgetter, methodcaller
+from operator import eq, itemgetter
 from sympy import Equality, Expr, Integer, oo, Range, Sum, true
 from sympy.core.function import AppliedUndef
-from typing import cast, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import re as regex
 
 if TYPE_CHECKING:
 	from collections.abc import Iterable, Iterator
 	from mapFolding.oeis import OEISid
 	from mapFolding.oeis._symbolicRelations import 形Relation
-	from pathlib import Path
+	from sympy import Basic
 	from sympy.logic.boolalg import Boolean
 	import ast
-
-type 形ParameterFormula = tuple[OEISid, int, str | None]
-type 形ParameterRelation = tuple[str, int, Expr, Expr]
-
-settingsWrite: dict[str, dict[str, object]] = {'autoflake': {**settings_autoflakeDEFAULT, 'ignore_pass_statements': True}}
 
 countIndicesFirst: int = 8
 boxOfIndicesLarge: tuple[int, ...] = (31, 129, 300)
@@ -65,20 +59,41 @@ lengthSumMaximum: int = 32
 nCountedMaximum: int = 7
 nDerivedMaximum: int = 4
 
+def getFormula(solution: tuple[OEISid, Expr, Boolean]) -> Expr:
+	_oeisID, formula, _condition = solution
+	return formula
+
+def formulaApplies吗(n: int, solution: tuple[OEISid, Expr, Boolean]) -> bool:
+	_oeisID, _formula, condition = solution
+	return condition.subs(settingsOEIS.n, n) == true
+
+def formulaTriangle吗(formula: Basic) -> bool:
+	return formula.has(*map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle))
+
+def callTriangle吗(call: AppliedUndef) -> bool:
+	return getOEISid(call) in boxOfOEISidTriangle
+
+def callIndexInteger吗(call: AppliedUndef) -> bool:
+	return isinstance(call.args[0], Integer)
+
+def sumBounded吗(summation: Sum) -> bool:
+	_k, lower, upper = summation.limits[0]
+	length = upper - lower + 1
+	return length.is_Integer is True and bool(length <= lengthSumMaximum)
+
 def selectFormula(n: int, f: str | None, boxOfSolutions: list[tuple[OEISid, Expr, Boolean]]) -> Expr | None:
-	solution: tuple[OEISid, Expr, Boolean] | None = None
-	if f:
-		solution = next(filter(compose(f.__eq__, make_f, itemgetter(1)), boxOfSolutions), None)
-	if solution is None or solution[2].subs(settingsOEIS.n, n) != true:
-		boxOfClosed: tuple[tuple[OEISid, Expr, Boolean], ...] = tuple(filterfalse(compose(make_f, itemgetter(1)), boxOfSolutions))
-		solution = next(compress(boxOfClosed, map(methodcaller('subs', settingsOEIS.n, n), map(itemgetter(2), boxOfClosed))), None)
+	boxOf_f: tuple[str, ...] = makeBoxOf_f(boxOfSolutions)
+	boxOfCandidates: Iterator[tuple[OEISid, Expr, Boolean]] = chain(compress(boxOfSolutions, map(partial(eq, f), boxOf_f))
+		, compress(boxOfSolutions, map(partial(eq, ''), boxOf_f)))
+	solution: tuple[OEISid, Expr, Boolean] | None = next(filter(partial(formulaApplies吗, n), boxOfCandidates), None)
 	expression: Expr | None = None
 	if solution is not None:
-		expression = solution[1].subs(settingsOEIS.n, n)
+		_oeisID, formula, _condition = solution
+		expression = formula.subs(settingsOEIS.n, n)
 	return expression
 
-def formulaBounded吗(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]], parameter: 形ParameterFormula) -> bool:
-	boxOfPending: deque[形ParameterFormula] = deque((parameter,))
+def formulaBounded吗(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]], parameter: tuple[OEISid, int, str | None]) -> bool:
+	boxOfPending: deque[tuple[OEISid, int, str | None]] = deque((parameter,))
 	countCalls: int = 0
 	bounded: bool = True
 	while bounded and boxOfPending and countCalls < countCallsMaximum:
@@ -93,44 +108,39 @@ def formulaBounded吗(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boo
 					limit = nCountedMaximum
 				bounded = n <= limit or n == getMetadata(oeisID)['offset']
 			else:
-				boxOfSums = iter(expression.atoms(Sum))
-				while bounded and (summation := next(boxOfSums, None)) is not None:
-					_k, lower, upper = summation.limits[0]
-					length = upper - lower + 1
-					bounded = length.is_Integer is True and bool(length <= lengthSumMaximum)
-				if bounded and expression.has(*map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle)):
-					bounded = expressionStored吗(expression)
+				bounded = all(map(sumBounded吗, expression.atoms(Sum)))
 				if bounded:
-					boxOfCalls = iter(expression.doit().atoms(AppliedUndef))
-					while bounded and (call := next(boxOfCalls, None)) is not None:
-						if getOEISid(call) in boxOfOEISidTriangle:
-							bounded = callStored吗(call)
-						elif isinstance(index := call.args[0], Integer):
-							boxOfPending.append((settingsOEIS.lookupID[call.func], int(index), None))
-						else:
-							bounded = False
+					boxOfCalls: set[AppliedUndef] = expression.doit().atoms(AppliedUndef)
+					if formulaTriangle吗(expression):
+						bounded = all(map(callStored吗, boxOfCalls))
+					else:
+						bounded = all(map(callIndexInteger吗, boxOfCalls))
+					if bounded:
+						boxOfPending.extend(map(makeParameterFormula, filterfalse(callTriangle吗, boxOfCalls)))
 	return bounded and not boxOfPending
 
-def makeParametersFormulaTriangle(oeisID: OEISid, offset: int, solution: tuple[OEISid, Expr, Boolean]) -> Iterator[形ParameterFormula]:
-	_oeisID, formula, condition = solution
-	boxOfCalls: tuple[AppliedUndef, ...] = tuple(filter(compose_left(getOEISid, boxOfOEISidTriangle.__contains__)
-		, formula.replace(Sum, makeTermLast).atoms(AppliedUndef)))
-	boxOfIndices: tuple[int, ...] = tuple(sorted(frozenset[int]().union(*map(partial(makeIndicesCall, Range(offset, oo)), boxOfCalls))))
-	boxOfStored: tuple[int, ...] = tuple(filter(compose_left(partial(condition.subs, settingsOEIS.n), bool)
-		, filter(getValuesKnown(oeisID).__contains__, boxOfIndices)))
-	return CartesianProduct((oeisID,), boxOfStored, (make_f(formula),))
+def makeParameterFormula(call: AppliedUndef) -> tuple[OEISid, int, str | None]:
+	return (*getReference(call), None)
 
-def makeParametersFormulaSequence(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Expr, Boolean]]) -> Iterator[形ParameterFormula]:
+def makeParametersFormulaTriangle(f: str, solution: tuple[OEISid, Expr, Boolean]) -> Iterator[tuple[OEISid, int, str | None]]:
+	oeisID, formula, _condition = solution
+	boxOfIndices: frozenset[int] = frozenset[int]().union(*map(partial(makeIndicesCall, Range(getMetadata(oeisID)['offset'], oo))
+		, filter(callTriangle吗, formula.replace(Sum, makeTermLast).atoms(AppliedUndef))))
+	boxOfStored: Iterator[int] = filter(partial(formulaApplies吗, solution=solution), sorted(boxOfIndices.intersection(getValuesKnown(oeisID))))
+	return CartesianProduct((oeisID,), boxOfStored, (f,))
+
+def makeParametersFormulaSequence(oeisID: OEISid, boxOfSolutions: list[tuple[OEISid, Expr, Boolean]]) -> Iterator[tuple[OEISid, int, str | None]]:
 	offset: int = getMetadata(oeisID)['offset']
 	boxOfIndices: tuple[int, ...] = tuple(filter(getValuesKnown(oeisID).__contains__
 		, unique((*range(offset, offset + countIndicesFirst), *boxOfIndicesLarge))))
-	boxOfSelectors: tuple[str | None, ...] = (*unique(filter(None, map(compose(make_f, itemgetter(1)), boxOfSolutions))), None)
-	boxOfSolutionsTriangle: Iterator[tuple[OEISid, Expr, Boolean]] = filter(
-		compose(methodcaller('has', *map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle)), itemgetter(1)), boxOfSolutions)
+	boxOf_f: tuple[str, ...] = makeBoxOf_f(boxOfSolutions)
+	boxOfSelectors: tuple[str | None, ...] = (*filter(None, boxOf_f), None)
+	boxOfSolutionsTriangle: Iterator[tuple[str, tuple[OEISid, Expr, Boolean]]] = filter(
+		compose_left(itemgetter(1), getFormula, formulaTriangle吗), zip(boxOf_f, boxOfSolutions, strict=True))
 	return chain(CartesianProduct((oeisID,), boxOfIndices, boxOfSelectors)
-		, chain.from_iterable(map(partial(makeParametersFormulaTriangle, oeisID, offset), boxOfSolutionsTriangle)))
+		, chain.from_iterable(starmap(makeParametersFormulaTriangle, boxOfSolutionsTriangle)))
 
-def makeFormulaParameters(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]]) -> tuple[形ParameterFormula, ...]:
+def makeFormulaParameters(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr, Boolean]]]) -> tuple[tuple[OEISid, int, str | None], ...]:
 	"""Select, for each sequence, the indices and formula selectors whose evaluation the bounds in this module limit.
 
 	(AI generated docstring)
@@ -138,39 +148,40 @@ def makeFormulaParameters(lookupSolutions: dict[OEISid, list[tuple[OEISid, Expr,
 	Each sequence contributes its first `countIndicesFirst` indices and `boxOfIndicesLarge`, crossed with every selector and `None`,
 	and each formula that reads a triangle contributes every stored index at which the formula applies.
 	"""
-	return tuple(unique(filter(partial(formulaBounded吗, lookupSolutions)
-		, chain.from_iterable(starmap(makeParametersFormulaSequence, sorted(lookupSolutions.items()))))))
+	boxOfParameters: Iterator[tuple[OEISid, int, str | None]] = chain.from_iterable(
+		starmap(makeParametersFormulaSequence, sorted(lookupSolutions.items())))
+	return tuple(filter(partial(formulaBounded吗, lookupSolutions), unique(boxOfParameters)))
 
 def makeIdentifier_f(f: str | None) -> str:
 	return regex.sub(r'\W+', '_', f or 'default')
 
-def make_astParameterFormula(parameter: 形ParameterFormula) -> ast.Call:
+def make_astParameterFormula(parameter: tuple[OEISid, int, str | None]) -> ast.Call:
 	oeisID, n, f = parameter
 	return Make.Call(Make.Attribute(Make.Name('pytest'), 'param'), [*map(Make.Constant, parameter), make_astLookupValues(oeisID, Make.Constant(n))]
 		, list_keyword=[Make.keyword('id', Make.Constant(f'{oeisID}-{n}-{makeIdentifier_f(f)}'))])
 
 def relationTriangle吗(relation: 形Relation) -> bool:
 	equation, _domain = relation
-	return isinstance(equation, Equality) and equation.has(*map(settingsOEIS.lookupSymbolic.__getitem__, boxOfOEISidTriangle))
+	return isinstance(equation, Equality) and formulaTriangle吗(equation)
 
 def identifyRelations(f: str, boxOfRelationsSequences: list[形Relation]) -> Iterator[tuple[str, 形Relation]]:
 	return zip(map('{}_{}'.format, repeat(makeIdentifier_f(f)), count(1)), boxOfRelationsSequences, strict=False)
 
-def instantiateRelation(identifierRelation: str, relation: 形Relation) -> Iterator[形ParameterRelation]:
+def instantiateSide(side: Expr, n: int) -> Expr:
+	return makeEquationFlat(side.subs(settingsOEIS.n, n).doit())
+
+def instantiateRelation(identifierRelation: str, relation: 形Relation) -> Iterator[tuple[str, int, Expr, Expr]]:
 	equation, _domain = relation
-	boxOfParameters: Iterator[形ParameterRelation] = iter(())
+	boxOfParameters: Iterator[tuple[str, int, Expr, Expr]] = iter(())
 	match equation:
 		case Equality(lhs=Expr() as lhs, rhs=Expr() as rhs):
 			boxOf_n: tuple[int, ...] = makeIndicesRelation(relation)
-			#=SIN= cast: the registered arithmetic relation sides remain Expr after index substitution and flattening.
-			boxOfParameters = cast('Iterator[形ParameterRelation]', zip(repeat(identifierRelation), boxOf_n
-				, map(makeEquationFlat, map(methodcaller('doit'), map(partial(rhs.subs, settingsOEIS.n), boxOf_n)))
-				, map(makeEquationFlat, map(methodcaller('doit'), map(partial(lhs.subs, settingsOEIS.n), boxOf_n)))))
+			boxOfParameters = zip(repeat(identifierRelation), boxOf_n, map(partial(instantiateSide, rhs), boxOf_n), map(partial(instantiateSide, lhs), boxOf_n))
 		case _:
 			pass
 	return boxOfParameters
 
-def makeRelationParameters() -> tuple[形ParameterRelation, ...]:
+def makeRelationParameters() -> tuple[tuple[str, int, Expr, Expr], ...]:
 	"""Instantiate each triangle relation in `boxOfRelations` at every index whose sequence values are stored.
 
 	(AI generated docstring)
@@ -180,13 +191,14 @@ def makeRelationParameters() -> tuple[形ParameterRelation, ...]:
 	with the ordinal of the relation among the relations of those sequences, so that adding a relation of other sequences changes
 	no identifier.
 	"""
-	lookupRelations: dict[str, list[形Relation]] = toolz_groupby(compose(make_f, itemgetter(0)), filter(relationTriangle吗, boxOfRelations))
-	return tuple(chain.from_iterable(starmap(instantiateRelation, chain.from_iterable(starmap(identifyRelations, lookupRelations.items())))))
+	lookupRelations: dict[str, list[形Relation]] = toolz_groupby(compose_left(first, make_f), filter(relationTriangle吗, boxOfRelations))
+	boxOfRelationsIdentified: Iterator[tuple[str, 形Relation]] = chain.from_iterable(starmap(identifyRelations, lookupRelations.items()))
+	return tuple(chain.from_iterable(starmap(instantiateRelation, boxOfRelationsIdentified)))
 
 def make_astLookupValues(oeisID: OEISid, ast_exprIndex: ast.expr) -> ast.Subscript:
 	return Make.Subscript(Make.Name('lookupValues'), Make.Tuple([Make.Constant(oeisID), ast_exprIndex]))
 
-def make_astParameterRelation(parameter: 形ParameterRelation) -> ast.Call:
+def make_astParameterRelation(parameter: tuple[str, int, Expr, Expr]) -> ast.Call:
 	identifierRelation, n, actual, expected = parameter
 	return Make.Call(Make.Attribute(Make.Name('pytest'), 'param')
 		, [Make.Constant(identifierRelation), Make.Constant(n)
@@ -196,7 +208,7 @@ def make_astParameterRelation(parameter: 形ParameterRelation) -> ast.Call:
 def make_astModuleTests(docstring: str, ingredientsFunction: IngredientsFunction) -> ast.Module:
 	return Make.Module([Make.Expr(Make.Constant(docstring)), *IngredientsModule(ingredientsFunction).body])
 
-def makeTestsByFormula(pathFilename: Path, boxOfParameters: tuple[形ParameterFormula, ...]) -> Path:
+def makeTestsByFormula(boxOfParameters: tuple[tuple[OEISid, int, str | None], ...]) -> ast.Module:
 	ingredientsFunction = IngredientsFunction(Make.FunctionDef('test_byFormula'
 		, Make.arguments(list_arg=[Make.arg('oeisID', Make.Name('OEISid')), Make.arg('n', Make.Name('int'))
 			, Make.arg('f', Make.BitOr.join([Make.Name('LiteralString'), Make.Constant(None)])), Make.arg('expected', Make.Name('int'))])
@@ -213,14 +225,12 @@ def makeTestsByFormula(pathFilename: Path, boxOfParameters: tuple[形ParameterFo
 	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('mapFolding.oeis', 'OEISid')
 	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('typing', 'LiteralString')
 	ingredientsFunction.imports.addImport_asStr('pytest')
-	with pathFilename.open('w', encoding='utf-8', newline='\n') as stream:
-		write_astModule(make_astModuleTests('Generated by mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS from the symbolic relations.\n'
-			'Reference: static OEIS b-file values in dataSamples.oeis.\n'
-			'Counting indices, symbolic fallbacks, expanded calls, and finite sums are bounded by mapFolding.kitAST.oeis.oeisTests.', ingredientsFunction)
-			, stream, settings=settingsWrite)
-	return pathFilename
+	return make_astModuleTests('Generated by mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS from the symbolic relations.\n'
+		'Reference: static OEIS b-file values in dataSamples.oeis.\n'
+		'Counting indices, symbolic fallbacks, expanded calls, and finite sums are bounded by mapFolding.kitAST.oeis.oeisTests.'
+		, ingredientsFunction)
 
-def makeTestsTriangle(pathFilename: Path, boxOfParameters: tuple[形ParameterRelation, ...]) -> Path:
+def makeTestsTriangle(boxOfParameters: tuple[tuple[str, int, Expr, Expr], ...]) -> ast.Module:
 	ingredientsFunction = IngredientsFunction(Make.FunctionDef('test_relationsTriangle'
 		, Make.arguments(list_arg=[Make.arg('relation', Make.Name('str')), Make.arg('n', Make.Name('int'))
 			, Make.arg('actual', Make.BitOr.join([Make.Name('Expr'), Make.Name('int')]))
@@ -237,13 +247,11 @@ def makeTestsTriangle(pathFilename: Path, boxOfParameters: tuple[形ParameterRel
 	ingredientsFunction.imports.addImportFrom_asStr('sympy', 'Pow')
 	ingredientsFunction.imports.typeChecking.addImportFrom_asStr('sympy', 'Expr')
 	ingredientsFunction.imports.addImport_asStr('pytest')
-	with pathFilename.open('w', encoding='utf-8', newline='\n') as stream:
-		write_astModule(make_astModuleTests('Generated by mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS from the symbolic relations.\n'
-			'Relation: each triangle relation in `boxOfRelations` at every index whose sequence values are stored.\n'
-			'Reference: static OEIS b-file values in dataSamples.oeis.\n'
-			'An id joins the sequences of a relation and its ordinal among the relations of those sequences, then n.', ingredientsFunction)
-			, stream, settings=settingsWrite)
-	return pathFilename
+	return make_astModuleTests('Generated by mapFolding.kitAST.oeis.oeisModules.makeModulesOEIS from the symbolic relations.\n'
+		'Relation: each triangle relation in `boxOfRelations` at every index whose sequence values are stored.\n'
+		'Reference: static OEIS b-file values in dataSamples.oeis.\n'
+		'An id joins the sequences of a relation and its ordinal among the relations of those sequences, then n.'
+		, ingredientsFunction)
 
 def getReference(call: AppliedUndef) -> tuple[OEISid, int]:
 	reference: tuple[OEISid, int] | None = None
@@ -254,32 +262,37 @@ def getReference(call: AppliedUndef) -> tuple[OEISid, int]:
 			pass
 	return raiseIfNone(reference)
 
-def makeReferences(boxOfParametersFormula: tuple[形ParameterFormula, ...], boxOfParametersRelation: tuple[形ParameterRelation, ...]
+def getReferenceFormula(parameter: tuple[OEISid, int, str | None]) -> tuple[OEISid, int]:
+	oeisID, n, _f = parameter
+	return (oeisID, n)
+
+def makeReferencesRelation(parameter: tuple[str, int, Expr, Expr]) -> Iterator[tuple[OEISid, int]]:
+	_identifierRelation, _n, actual, expected = parameter
+	return map(getReference, actual.atoms(AppliedUndef).union(expected.atoms(AppliedUndef)))
+
+def makeReferences(boxOfParametersFormula: tuple[tuple[OEISid, int, str | None], ...], boxOfParametersRelation: tuple[tuple[str, int, Expr, Expr], ...]
 	) -> Iterator[tuple[OEISid, int]]:
-	boxOfCalls: frozenset[AppliedUndef] = frozenset[AppliedUndef]().union(*map(methodcaller('atoms', AppliedUndef)
-		, chain.from_iterable(map(itemgetter(2, 3), boxOfParametersRelation))))
-	return chain(map(itemgetter(0, 1), boxOfParametersFormula), map(getReference, boxOfCalls))
+	return chain(map(getReferenceFormula, boxOfParametersFormula), chain.from_iterable(map(makeReferencesRelation, boxOfParametersRelation)))
 
 def getValueKnown(oeisID: OEISid, n: int) -> int:
 	return getValuesKnown(oeisID)[n]
 
-def updateSamplesOEIS(pathFilename: Path, boxOfReferences: Iterable[tuple[OEISid, int]]) -> Path:
-	astModule: ast.Module = Make.Module([Make.Expr(Make.Constant(
+def make_astReference(reference: tuple[OEISid, int]) -> ast.Tuple:
+	return Make.Tuple(list(map(Make.Constant, reference)))
+
+def makeSamplesOEIS() -> ast.Module:
+	return Make.Module([Make.Expr(Make.Constant(
 		'Reference: values copied from the stored OEIS b-files by makeModulesOEIS.\n'
 		'Existing values are preserved; only missing sequence indices are added.'))
 		, Make.ImportFrom('__future__', [Make.alias('annotations')])
 		, Make.AnnAssign(Make.Name('lookupValues', Make.Store())
 			, Make.Subscript(Make.Name('dict'), Make.Tuple([
 				Make.Subscript(Make.Name('tuple'), Make.Tuple([Make.Name('str'), Make.Name('int')])), Make.Name('int')])), Make.Dict())])
-	if pathFilename.exists():
-		astModule = parsePathFilename2astModule(pathFilename)
-	# TODO pyrefly
+
+def updateSamplesOEIS(astModule: ast.Module, boxOfReferences: Iterable[tuple[OEISid, int]]) -> ast.Module:
 	astDict: ast.Dict = raiseIfNone(NodeTourist(Be.Dict, Then.extractIt).captureLastMatch(astModule))
 	boxOfMissing: tuple[tuple[OEISid, int], ...] = tuple(unique(filterfalse(literal_eval(astDict).__contains__, boxOfReferences)))
 	NodeChanger(Be.AnnAssign.targetIs(IfThis.isNameIdentifier('lookupValues')), Grab.valueAttribute(Then.replaceWith(Make.Dict(
-		[*astDict.keys, *map(Make.Tuple, map(list, map(partial(map, Make.Constant), boxOfMissing)))]
+		[*astDict.keys, *map(make_astReference, boxOfMissing)]
 		, [*astDict.values, *map(Make.Constant, starmap(getValueKnown, boxOfMissing))])))).visit(astModule)
-	with pathFilename.open('w', encoding='utf-8', newline='\n') as stream:
-		write_astModule(astModule, stream, settings=settingsWrite)
-		stream.truncate(stream.tell() - 1)
-	return pathFilename
+	return astModule

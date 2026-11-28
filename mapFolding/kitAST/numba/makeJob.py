@@ -28,9 +28,9 @@ import ast
 
 if TYPE_CHECKING:
 	from mapFolding.kitAST import IngredientsFunction
-	from mapFolding.theTypes import Default, 形TotalLeaves
+	from mapFolding.theTypes import Default, DefaultOverride, 形TotalLeaves
 	from pathlib import Path
-	from typing import Any
+	from typing import Unpack
 
 # TODO Dynamically calculate the bitwidth of each datatype. I delayed dynamic calculation because I
 # didn't know how to calculate what 'elephino' needs. I now have a safe upper bound for that in a
@@ -51,7 +51,7 @@ This list records imported scalar types and array element types while preserving
 aliases used by the source algorithm.
 """
 
-def makeJobNumba(job: RecipeJobTheorem2, identifiers: Default | None = None, **override: Any) -> Path:
+def makeJobNumba(job: RecipeJobTheorem2, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> Path:
 	"""Write a specialized Numba counting job for an initialized map shape.
 
 	(AI generated docstring)
@@ -73,7 +73,7 @@ def makeJobNumba(job: RecipeJobTheorem2, identifiers: Default | None = None, **o
 		Initialized recipe with source syntax, decomposed fields, and output paths.
 	identifiers : Default | None = None
 		Identifier defaults from `mapFolding.kitAST.theSSOT.defaultMapFolding` when omitted.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		`useNumbaProgressBar` defaults to `True`; `parametersNumba` defaults to
 		`parametersNumbaDefault`. `名ProgressBar` selects the progress argument identifier.
 		Compiler import overrides and `boxOfSettings形` are also accepted.

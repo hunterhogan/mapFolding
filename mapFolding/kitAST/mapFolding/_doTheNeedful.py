@@ -22,11 +22,11 @@ import ast
 
 if TYPE_CHECKING:
 	from hunterMakesPy import identifierDotAttribute
-	from mapFolding.theTypes import Default
+	from mapFolding.theTypes import Default, DefaultOverride
 	from pathlib import PurePath
-	from typing import Any
+	from typing import Unpack
 
-def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **override: Any) -> PurePath:
+def makeInitializeState(astModule: ast.Module, identifiers: Default | None = None, **override: Unpack[DefaultOverride]) -> PurePath:
 	"""Write a state initializer that stops after the first counted fold group.
 
 	(AI generated docstring)
@@ -47,7 +47,7 @@ def makeInitializeState(astModule: ast.Module, identifiers: Default | None = Non
 		nodes.
 	identifiers : Default | None = None
 		Identifier and destination defaults; a falsy value selects the base default mapping.
-	**override : Any
+	**override : Unpack[DefaultOverride]
 		Overrides for source callable, target `identifierCallable`, counting field, module name, and
 		writer settings.
 
@@ -67,18 +67,22 @@ def makeInitializeState(astModule: ast.Module, identifiers: Default | None = Non
 	identifiers = identifiers or default
 	名CallableSource: identifierDotAttribute = override.get('名CallableSource') or identifiers['function']['counting']
 	ingredientsFunction = IngredientsFunction(inlineFunctionDef(名CallableSource, astModule), LedgerOfImports(astModule))
-	ingredientsFunction.astFunctionDef.name = override.get('identifierCallable') or identifiers['function'].get('initializeState') or 名CallableSource
+	ingredientsFunction.astFunctionDef.name = override.get('名Callable') or identifiers['function'].get('initializeState') or 名CallableSource
 
-	identifierDataclassInstance: str = override.get('identifierDataclassInstance') or identifiers['variable']['stateInstance']
+	名DataclassInstance: str = override.get('名DataclassInstance') or identifiers['variable']['stateInstance']
 	名Counting: identifierDotAttribute = override.get('名Counting') or identifiers['variable']['counting']
 
-	NodeChanger(findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(identifierDataclassInstance, 'leaf1ndex')
+	NodeChanger(findThis=IfThis.isWhileAttributeNamespaceIdentifierGreaterThan0(名DataclassInstance, 'leaf1ndex')
 		, doThat=Grab.testAttribute(Grab.andDoAllOf([
 			Grab.opsAttribute(Then.replaceWith([ast.Eq()]))
 			, Grab.leftAttribute(Grab.attrAttribute(Then.replaceWith(名Counting)))]))
-	).visit(ingredientsFunction.astFunctionDef.body[0])
+	).visit(ingredientsFunction.astFunctionDef)
 
-	ingredientsModule = IngredientsModule(ingredientsFunction)
+	ingredientsModule = IngredientsModule(ingredientsFunction, docstring=(
+		'Advance a new insertion search to its first counted group of foldings.\n\n(AI generated docstring)\n\n'
+		'The Theorem 2 counting functions start from the state that this module returns.\n\n'
+		'`mapFolding.kitAST.mapFolding._doTheNeedful.makeInitializeState` generates this module.\n'
+		'Regenerate the module instead of editing it.\n'))
 
 	名Module: str = override.get('名Module') or identifiers['module']['initializeState']
 

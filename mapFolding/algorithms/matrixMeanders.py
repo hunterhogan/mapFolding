@@ -1,3 +1,20 @@
+"""Count meanders with a dictionary of packed arch states and their multiplicities.
+
+(AI generated docstring)
+
+You can advance a prepared `mapFolding.dataBaskets.StateMeanders` through its remaining
+crossings. Each transfer combines counts for identical arch states in `state.lookupMeanders`.
+
+Contents
+--------
+Functions
+	count
+		Advance the transfer until no boundary crossings remain.
+	doTheNeedful
+		Run the dictionary transfer for a prepared meander state.
+	walkDyckPath
+		Locate the endpoint bit needed to join two arches.
+"""
 from __future__ import annotations
 
 from functools import cache
@@ -84,6 +101,24 @@ def count[形StateMeanders: StateMeanders](state: 形StateMeanders) -> 形StateM
     """
     while 0 < state.boundary:
         def analyzeArcCode(arcCode: int, meanders: int, state: StateMeanders = state) -> None:
+            """Accumulate the allowed successors of one packed meander arch state.
+
+            (AI generated docstring)
+
+            Input Mutation
+            --------------
+            `state.lookupMeanders` receives `meanders` for each allowed successor below
+            `state.arcCodeMaximum`. Existing successor counts increase by that amount.
+
+            Parameters
+            ----------
+            arcCode : int
+                Packed arch state before the transfer step.
+            meanders : int
+                Number of partial meanders represented by `arcCode`.
+            state : StateMeanders
+                Enclosing transfer state by default, with the boundary already reduced.
+            """
             bitsAlfa: int = arcCode & state.bitsLocator
             bitsAlfaHasArcs: bool = 1 < bitsAlfa
             bitsAlfaIsEven: int = bitsAlfa & 1 ^ 1
